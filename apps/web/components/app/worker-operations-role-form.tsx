@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 
+import { Button } from "@/components/ui/Button";
 import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   ASSIGNABLE_OPERATIONS_ROLES,
@@ -322,14 +323,17 @@ export function WorkerOperationsRoleForm({
           />
         </label>
 
-        <button
+        {/* The shared primary button: the hand-rolled one was 2.9:1 text on
+            the light theme and 24 px tall (design audit 2026-11-22). */}
+        <Button
           type="submit"
-          disabled={isPending}
-          className="self-start rounded-md bg-brand-blue px-3 py-1 text-meta font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+          size="sm"
+          loading={isPending}
+          className="self-start"
           data-testid={`worker-ops-save-${workerId}`}
         >
           {isPending ? labels.saving : labels.save}
-        </button>
+        </Button>
 
         {outcomeMessage ? (
           <p

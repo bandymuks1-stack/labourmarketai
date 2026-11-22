@@ -259,6 +259,18 @@ async function attachActors(
   }
 }
 
+/**
+ * A publisher shown as undisclosed stays undisclosed in the data too
+ * (decision 0033): another person's listing carries no owner or organisation
+ * id, which would tie their listings together and identify them. The caller's
+ * own rows keep both (the edit form and "published as" need them). Applied
+ * after attachActors, which reads organizationId only to tell a person from an
+ * organisation.
+ */
+function withoutForeignIds(rows: MarketplaceDiscoveryRow[]): MarketplaceDiscoveryRow[] {
+  return rows.map((r) => (r.isMine ? r : { ...r, ownerId: null, organizationId: null }));
+}
+
 async function discoverIndexRows(filters?: {
   domain?: string;
   category?: string;
@@ -329,7 +341,7 @@ async function discoverIndexRows(filters?: {
     await attachActors(supabase, rows);
     return {
       kind: "ok",
-      rows: hideQaMarked(rows, isQaViewer(user), (r) => [r.title, r.description]),
+      rows: hideQaMarked(withoutForeignIds(rows), isQaViewer(user), (r) => [r.title, r.description]),
       extended: true,
     };
   }
@@ -399,7 +411,7 @@ async function discoverIndexRows(filters?: {
   // still sees them.
   return {
     kind: "ok",
-    rows: hideQaMarked(rows, isQaViewer(user), (r) => [r.title, r.description]),
+    rows: hideQaMarked(withoutForeignIds(rows), isQaViewer(user), (r) => [r.title, r.description]),
     extended: false,
   };
 }

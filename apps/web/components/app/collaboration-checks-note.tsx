@@ -35,7 +35,7 @@ export async function CollaborationChecksNote({
       className="rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2 text-sm text-text-secondary"
       data-testid={testId}
     >
-      <summary className="cursor-pointer font-medium text-text-primary">{t("title")}</summary>
+      <summary className="-mx-3 -my-2 cursor-pointer px-3 py-3 font-medium text-text-primary">{t("title")}</summary>
       <div className="mt-2 flex flex-col gap-2">
         <p className="leading-relaxed" data-testid={`${testId}-lead`}>
           {t("lead")}
