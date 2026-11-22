@@ -130,11 +130,13 @@ describe("message.send — draft, human confirm, the one core", () => {
 
   it("an existing thread is reused, and a new message in it since the draft voids the token", async () => {
     plan.mockResolvedValue({ kind: "existing", conversationId: "conv-old", permission: "allowed_existing_conversation" });
-    const tables: Record<string, unknown> = { conversation_messages: [{ id: "m-before" }] };
+    // The staleness token reads the thread's last message through the masking
+    // view (20261122160000), the same read the thread page makes.
+    const tables: Record<string, unknown> = { conversation_messages_visible_v1: [{ id: "m-before" }] };
     const c = caller(tables);
     const d = await cap("message.send_draft").run(c, { recipientProfileId: RAMUNAS, body: BODY });
     const token = d.ok ? (d.data as { confirmationToken: string }).confirmationToken : "";
-    tables.conversation_messages = [{ id: "m-newer" }];
+    tables.conversation_messages_visible_v1 = [{ id: "m-newer" }];
     const stale = await cap("message.send_confirm").run(c, { recipientProfileId: RAMUNAS, body: BODY, confirmationToken: token });
     expect(stale.ok === false && stale.code).toBe("confirmation_rejected");
     expect(send).not.toHaveBeenCalled();
