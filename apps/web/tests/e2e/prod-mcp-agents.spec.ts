@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 
 import { bearerOf, qaMcp } from "./prod-qa-api";
 
@@ -583,4 +584,12 @@ test("A-9. JOURNAL: the worker records an entry and corrects it — one live ver
   const stale = await tool(tok.worker, "journal_correct_draft", { entryId, notes: `${correctedWords} vėl` });
   refused(stale, "correcting a version that was already replaced");
   console.info(`[agents] journal: entry ${entryId.slice(0, 8)} corrected → ${newId.slice(0, 8)}, stale draft → ${stale.code}`);
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("mcp-agents");
 });
