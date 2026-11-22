@@ -81,6 +81,8 @@ const WORD_NUMBERS: Record<string, number> = {
   dwa: 2, dwoch: 2, trzy: 3, trzech: 3, cztery: 4, czterech: 4,
   piec: 5, pieciu: 5, szesc: 6, szesciu: 6, siedem: 7, siedmiu: 7,
   osiem: 8, osmiu: 8, dziewiec: 9, dziewieciu: 9, dziesiec: 10, dziesieciu: 10,
+  // Tens, so "dwadzieścia pięć" is 25 and never a bare 5.
+  dwadziescia: 20, trzydziesci: 30, czterdziesci: 40, piecdziesiat: 50,
 };
 
 /**
@@ -118,11 +120,43 @@ export interface FoundWordNumber {
  * The text with every written number turned into digits ("мне нужны пять
  * рабочих" → "мне нужны 5 рабочих"), everything else untouched. Lets a
  * digit-only reader (the headcount) read the number words it never knew.
+ *
+ * A RUN of number words is one quantity: "twenty five" / "twenty-five" /
+ * "двадцать пять" / "dvidešimt penki" become 25 (tens + unit). Any other run
+ * ("one hundred", "two three") is left as words — unknown, never a part of
+ * the quantity: "20 5 workers" would read as five.
  */
 export function digitizeWordNumbers(text: string, swedish: boolean = looksSwedish(text)): string {
-  return (text ?? "").replace(/\p{L}+/gu, (tok) => {
-    const n = parseWordNumber(tok, swedish);
-    return n === null ? tok : String(n);
+  const src = text ?? "";
+  const re = /\p{L}+(?:[\s-]+\p{L}+)*/gu;
+  return src.replace(re, (phrase) => {
+    const parts = phrase.split(/([\s-]+)/u);
+    const out: string[] = [];
+    let i = 0;
+    while (i < parts.length) {
+      const n = parseWordNumber(parts[i], swedish);
+      if (n === null) {
+        out.push(parts[i]);
+        i += 1;
+        continue;
+      }
+      // Collect the run of number words joined by spaces or hyphens.
+      const run: number[] = [n];
+      let j = i + 2;
+      while (j < parts.length) {
+        const m = parseWordNumber(parts[j], swedish);
+        if (m === null) break;
+        run.push(m);
+        j += 2;
+      }
+      const tensAndUnit = run.length === 2 && run[0] >= 20 && run[0] <= 90 && run[0] % 10 === 0 && run[1] >= 1 && run[1] <= 9;
+      if (run.length === 1) out.push(String(n));
+      else if (tensAndUnit) out.push(String(run[0] + run[1]));
+      else out.push(parts.slice(i, j - 1).join(""));
+      if (j - 1 < parts.length) out.push(parts[j - 1] ?? "");
+      i = j;
+    }
+    return out.join("");
   });
 }
 

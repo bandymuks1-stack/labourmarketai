@@ -40,9 +40,28 @@ describe("a headcount written in words is the same headcount", () => {
     expect(classifyIntent("I need work for five days").intent).not.toBe("need-workers");
   });
 
+  it("a compound number is one quantity, never its last part (review P2)", () => {
+    expect(structureNeed({ description: "We need twenty five workers" }).teamSize).toBe(25);
+    expect(structureNeed({ description: "We need twenty-five workers" }).teamSize).toBe(25);
+    expect(structureNeed({ description: "Нужны двадцать пять рабочих" }).teamSize).toBe(25);
+    expect(structureNeed({ description: "Potrzebuję dwadzieścia pięć osób" }).teamSize).toBe(25);
+    expect(structureNeed({ description: "Need twenty five years experience" }).teamSize).toBeNull();
+    // A run the reader cannot add up stays unknown.
+    expect(structureNeed({ description: "We need one hundred workers" }).teamSize).toBeNull();
+  });
+
+  it("working days are a duration, not workers (review P2)", () => {
+    for (const text of ["Срок выполнения 5 рабочих дней", "Срок выполнения пять рабочих дней", "нужно 5 рабочих дней", "We need 5 working days"]) {
+      expect(structureNeed({ description: text }).teamSize, text).toBeNull();
+      expect(countPeopleInNeed({ description: text }), text).toBeNull();
+    }
+  });
+
   it("only whole number words change; every other word is kept", () => {
     expect(digitizeWordNumbers("мне нужны пять рабочих")).toBe("мне нужны 5 рабочих");
     expect(digitizeWordNumbers("someone needs nineteen tones")).toBe("someone needs 19 tones");
     expect(digitizeWordNumbers("Potrzebuję pięciu pracowników")).toBe("Potrzebuję 5 pracowników");
+    expect(digitizeWordNumbers("twenty-five, then three")).toBe("25, then 3");
+    expect(digitizeWordNumbers("one hundred")).toBe("one hundred");
   });
 });
