@@ -655,9 +655,17 @@ export function WorkerWorkLogFlow({
       return;
     }
     start(async () => {
-      const prep = await prepareConfirmationAction("worker.log-work", input());
-      if (!prep.ok) {
+      // A thrown action (network gone) is an error phase, never the page's
+      // error boundary: the readback and everything typed stay on screen.
+      let prep: Awaited<ReturnType<typeof prepareConfirmationAction>>;
+      try {
+        prep = await prepareConfirmationAction("worker.log-work", input());
+      } catch {
         setPhase({ kind: "error", message: labels.errorGeneric });
+        return;
+      }
+      if (!prep.ok) {
+        setPhase({ kind: "error", message: failureCode(prep) === "auth" ? labels.notAuthed : labels.errorGeneric });
         return;
       }
       setPhase({ kind: "confirm", token: prep.token });
@@ -668,14 +676,21 @@ export function WorkerWorkLogFlow({
     if (phase.kind !== "confirm") return;
     const token = phase.token;
     start(async () => {
-      const res = await dispatchWorkerAction("worker.log-work", input(), {
-        locale,
-        confirmationToken: token,
-      });
+      let res: Awaited<ReturnType<typeof dispatchWorkerAction>>;
+      try {
+        res = await dispatchWorkerAction("worker.log-work", input(), {
+          locale,
+          confirmationToken: token,
+        });
+      } catch {
+        // Nothing was confirmed as saved: the entry stays on screen to retry.
+        setPhase({ kind: "error", message: labels.errorGeneric });
+        return;
+      }
       if (!res.ok) {
         setPhase({
           kind: "error",
-          message: res.message || labels.errorGeneric,
+          message: failureCode(res) === "auth" ? labels.notAuthed : res.message || labels.errorGeneric,
         });
         return;
       }
@@ -1521,4 +1536,11 @@ function Field({
       <dd>{children}</dd>
     </>
   );
+}
+
+/** The failure code a refused action carries, when it carries one. */
+function failureCode(r: unknown): string | null {
+  return r && typeof r === "object" && "code" in r && typeof (r as { code: unknown }).code === "string"
+    ? (r as { code: string }).code
+    : null;
 }

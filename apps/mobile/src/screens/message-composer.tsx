@@ -14,6 +14,7 @@ import { traceTestId, useRequestTrace } from "../request-trace";
 import { Button, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
 import { CapabilityFailureNotice } from "./capability-failure";
+import { useKeptDraft } from "../use-kept-draft";
 
 /**
  * REPLYING IN ONE OF MY CONVERSATIONS — `message.send_draft` →
@@ -63,6 +64,11 @@ export function MessageComposer({
   const { accessToken } = useAuth();
   const trace = useRequestTrace();
   const [body, setBody] = useState("");
+  // UNSENT WORDS SURVIVE A SIGN-IN AGAIN (owner P0 2026-11-22); per
+  // conversation, kept in memory only.
+  const kept = useKeptDraft(`message:${conversationId}`, { body }, (d) =>
+    setBody((now) => (now.trim() === "" ? d.body ?? "" : now)),
+  );
   const [state, setState] = useState<ComposerState>({
     kind: "writing",
     localError: null,
@@ -147,6 +153,7 @@ export function MessageComposer({
         return;
       }
       setBody("");
+      kept.clear();
       setState({ kind: "sent", result: result.data });
       reloadThread();
     },
