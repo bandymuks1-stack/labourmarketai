@@ -541,8 +541,11 @@ export function MarketplaceListingsSection({
                 }`}
               >
                 <div className="flex flex-wrap items-center gap-2">
+                  {/* No stated title: the row's own kind is its headline
+                      ("Available workforce"), not "Title not stated" (design
+                      audit 2026-11-22); the kind is then not repeated below. */}
                   <span className="font-medium text-text-primary">
-                    {row.title || t("titleNotStated")}
+                    {row.title || subjectLabel(row.subject, row.domain) || t("titleNotStated")}
                   </span>
                   <span className="rounded-full border border-ink-500 bg-ink-800/40 px-2 py-0.5 text-meta text-text-muted">
                     {t(`directions.${row.direction}`)}
@@ -575,16 +578,19 @@ export function MarketplaceListingsSection({
                   <p className="text-xs text-text-secondary">{row.publisherName}</p>
                 )}
                 <p className="text-xs text-text-muted">
-                  {subjectLabel(row.subject, row.domain)}
-                  {row.locationLabel ? ` · ${row.locationLabel}` : ""}
-                  {row.locationCountry ? ` (${row.locationCountry})` : ""}
-                  {row.priceAmount != null
-                    ? ` · ${formatAmount(row.priceAmount, row.currency, locale)}`
-                    : row.priceText
-                      ? ` · ${row.priceText}`
-                      : ""}
-                  {row.quantity != null ? ` · ${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : ""}
-                  {row.expiresAt ? ` · ${t("expiresOn", { date: formatDate(row.expiresAt) })}` : ""}
+                  {[
+                    row.title ? subjectLabel(row.subject, row.domain) : null,
+                    row.locationLabel || row.locationCountry
+                      ? `${row.locationLabel ?? ""}${row.locationCountry ? `${row.locationLabel ? " " : ""}(${row.locationCountry})` : ""}`
+                      : null,
+                    row.priceAmount != null
+                      ? formatAmount(row.priceAmount, row.currency, locale)
+                      : row.priceText || null,
+                    row.quantity != null ? `${row.quantity}${row.unit ? ` ${row.unit}` : ""}` : null,
+                    row.expiresAt ? t("expiresOn", { date: formatDate(row.expiresAt) }) : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" · ")}
                 </p>
                 {row.description && (
                   <p className="line-clamp-3 text-sm text-text-secondary">{row.description}</p>

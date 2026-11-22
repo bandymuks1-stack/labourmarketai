@@ -58,6 +58,7 @@ export async function WorkPlanSection({
   outcome: string | undefined;
 }) {
   const t = await getTranslations("workPlan");
+  const tChat = await getTranslations("conversation.chat");
   const tPlanning = await getTranslations("planning");
   const org = await getActiveOrganizationContext();
   const organizationId = org.activeOrganizationId;
@@ -141,7 +142,15 @@ export async function WorkPlanSection({
             <WorkPlanForm
               locale={locale}
               organizationId={organizationId}
-              workers={workers}
+              workers={(() => {
+                // A picker needs every option to read differently: people with
+                // no name on record are numbered in the list's own order.
+                let n = 0;
+                return workers.map((w) => ({
+                  workerId: w.workerId,
+                  name: w.name ?? `${tChat("unnamedPerson")} ${++n}`,
+                }));
+              })()}
               projects={projects
                 .filter((p) => p.organizationId === organizationId && p.title)
                 .map((p) => ({ id: p.id, title: p.title as string }))}
