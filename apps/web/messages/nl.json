@@ -19687,7 +19687,13 @@
       "not_an_organization_offer": "Alleen een bedrijfsaanbod noemt een ploeg.",
       "invalid_title": "De projectnaam moet 2 tot 120 tekens hebben.",
       "no_company": "Open eerst de werkruimte van het bedrijf.",
-      "project_not_created": "Het project kon niet worden aangemaakt."
+      "project_not_created": "Het project kon niet worden aangemaakt.",
+      "not_an_agency_offer": "Alleen het aanbod van een uitzendbureau kan kandidaten noemen.",
+      "worker_not_on_roster": "Die persoon staat niet in uw actieve bestand.",
+      "candidate_limit_reached": "Op één aanbod kunnen hoogstens 10 kandidaten worden voorgesteld.",
+      "candidate_not_open": "Deze kandidaat kan niet meer worden gekozen.",
+      "candidate_already_selected": "De klant heeft deze kandidaat al gekozen.",
+      "client_company_unknown": "Het bedrijf van de behoefte kon niet worden bepaald."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
@@ -19822,6 +19828,48 @@
       "titleInvalid": "De projectnaam moet 2 tot 120 tekens hebben.",
       "startedReceiver": "Het werk is gestart: de ploeg staat op uw project.",
       "startedSupplier": "Het werk is gestart: uw ploeg staat op het project van de klant."
+    },
+    "candidates": {
+      "heading": "Voorgestelde kandidaten",
+      "introSupplier": "Stel specifieke mensen uit uw bestand voor. De klant ziet elk van hen zonder naam: ervaring, land, beschikbaarheid, talen en vaardigheden. De naam wordt pas getoond nadat de klant de persoon kiest en die akkoord gaat.",
+      "introReceiver": "Mensen die dit bureau voorstelt, zonder naam of contactgegevens. Als u er een kiest, gaat er een boekingsverzoek naar die persoon; de naam wordt getoond zodra die akkoord gaat. U handelt met het bureau.",
+      "experience": "Ervaring",
+      "years": "{count, plural, one {# jaar} other {# jaar}}",
+      "country": "Werkt in",
+      "availability": "Beschikbaarheid",
+      "availableFrom": "vanaf {date}",
+      "availabilityValue": {
+        "available": "beschikbaar",
+        "busy": "bezet",
+        "unavailable": "niet beschikbaar",
+        "unknown": "niet opgegeven"
+      },
+      "languages": "Talen",
+      "skills": "Vaardigheden",
+      "confirmed": "bevestigd",
+      "status": {
+        "offered": "Voorgesteld",
+        "withdrawn": "Ingetrokken",
+        "selected": "Gekozen door de klant"
+      },
+      "booking": {
+        "proposed": "Boekingsverzoek verzonden, wacht op de persoon",
+        "accepted": "De persoon heeft geaccepteerd",
+        "declined": "De persoon heeft geweigerd",
+        "withdrawn": "Boeking ingetrokken",
+        "expired": "Boeking verlopen"
+      },
+      "withdraw": "Intrekken",
+      "withdrawn": "Kandidaat ingetrokken.",
+      "selectNote": "Kiezen stuurt een boekingsverzoek naar deze persoon. Het is geen contract.",
+      "noteLabel": "Bericht aan de persoon (optioneel)",
+      "select": "Deze kandidaat kiezen",
+      "selected": "Boekingsverzoek verzonden. De persoon beslist.",
+      "noRoster": "Er staat nog niemand in uw bestand.",
+      "addLabel": "Persoon uit uw bestand",
+      "addPlaceholder": "Kies een persoon",
+      "add": "Deze persoon voorstellen",
+      "added": "Kandidaat voorgesteld."
     }
   },
   "teamAssignment": {

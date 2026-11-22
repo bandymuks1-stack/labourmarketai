@@ -19687,7 +19687,13 @@
       "not_an_organization_offer": "Endast ett företagserbjudande anger ett arbetslag.",
       "invalid_title": "Projektnamnet behöver 2 till 120 tecken.",
       "no_company": "Öppna företagets arbetsyta först.",
-      "project_not_created": "Projektet kunde inte skapas."
+      "project_not_created": "Projektet kunde inte skapas.",
+      "not_an_agency_offer": "Endast en bemanningsbyrås erbjudande kan ange kandidater.",
+      "worker_not_on_roster": "Den personen finns inte på er aktiva lista.",
+      "candidate_limit_reached": "Högst 10 kandidater kan föreslås på ett erbjudande.",
+      "candidate_not_open": "Den här kandidaten kan inte längre väljas.",
+      "candidate_already_selected": "Kunden har redan valt den här kandidaten.",
+      "client_company_unknown": "Behovets företag kunde inte fastställas."
     },
     "received": {
       "title": "Team som erbjudits för det här behovet",
@@ -19822,6 +19828,48 @@
       "titleInvalid": "Projektnamnet behöver 2 till 120 tecken.",
       "startedReceiver": "Arbetet har börjat: arbetslaget finns i ert projekt.",
       "startedSupplier": "Arbetet har börjat: ert arbetslag finns i kundens projekt."
+    },
+    "candidates": {
+      "heading": "Föreslagna kandidater",
+      "introSupplier": "Föreslå specifika personer från er lista. Kunden ser var och en utan namn: erfarenhet, land, tillgänglighet, språk och färdigheter. Namnet visas först när kunden väljer personen och personen tackar ja.",
+      "introReceiver": "Personer som byrån föreslår, utan namn eller kontaktuppgifter. Väljer ni en går en bokningsförfrågan till den personen; namnet visas när personen tackar ja. Ni har kontakt med byrån.",
+      "experience": "Erfarenhet",
+      "years": "{count, plural, one {# år} other {# år}}",
+      "country": "Arbetar i",
+      "availability": "Tillgänglighet",
+      "availableFrom": "från {date}",
+      "availabilityValue": {
+        "available": "tillgänglig",
+        "busy": "upptagen",
+        "unavailable": "inte tillgänglig",
+        "unknown": "inte angivet"
+      },
+      "languages": "Språk",
+      "skills": "Färdigheter",
+      "confirmed": "bekräftad",
+      "status": {
+        "offered": "Föreslagen",
+        "withdrawn": "Återkallad",
+        "selected": "Vald av kunden"
+      },
+      "booking": {
+        "proposed": "Bokningsförfrågan skickad, väntar på personen",
+        "accepted": "Personen tackade ja",
+        "declined": "Personen tackade nej",
+        "withdrawn": "Bokningen återkallad",
+        "expired": "Bokningen har gått ut"
+      },
+      "withdraw": "Återkalla",
+      "withdrawn": "Kandidaten återkallad.",
+      "selectNote": "Valet skickar en bokningsförfrågan till personen. Det är inget avtal.",
+      "noteLabel": "Meddelande till personen (valfritt)",
+      "select": "Välj denna kandidat",
+      "selected": "Bokningsförfrågan skickad. Personen bestämmer.",
+      "noRoster": "Ingen finns på er lista ännu.",
+      "addLabel": "Person från er lista",
+      "addPlaceholder": "Välj en person",
+      "add": "Föreslå denna person",
+      "added": "Kandidaten föreslagen."
     }
   },
   "teamAssignment": {

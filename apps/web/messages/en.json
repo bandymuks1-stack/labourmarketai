@@ -19687,7 +19687,13 @@
       "not_an_organization_offer": "Only a company offer names a crew.",
       "invalid_title": "The project name needs 2 to 120 characters.",
       "no_company": "Open the company workspace first.",
-      "project_not_created": "The project could not be created."
+      "project_not_created": "The project could not be created.",
+      "not_an_agency_offer": "Only a staffing agency's offer can name candidates.",
+      "worker_not_on_roster": "That person is not on your active roster.",
+      "candidate_limit_reached": "At most 10 candidates can be proposed on one offer.",
+      "candidate_not_open": "This candidate can no longer be chosen.",
+      "candidate_already_selected": "The client has already chosen this candidate.",
+      "client_company_unknown": "The need's company could not be identified."
     },
     "received": {
       "title": "Teams offered for this need",
@@ -19822,6 +19828,48 @@
       "titleInvalid": "The project name needs 2 to 120 characters.",
       "startedReceiver": "The work has started: the crew is on your project.",
       "startedSupplier": "The work has started: your crew is on the client's project."
+    },
+    "candidates": {
+      "heading": "Named candidates",
+      "introSupplier": "Propose specific people from your roster. The client sees each one without a name: experience, country, availability, languages and skills. The name is shown only after the client chooses the person and the person accepts.",
+      "introReceiver": "People this agency proposes, shown without a name or contact. Choosing one sends a booking request to that person; the name is shown once they accept. You deal with the agency.",
+      "experience": "Experience",
+      "years": "{count, plural, one {# year} other {# years}}",
+      "country": "Works in",
+      "availability": "Availability",
+      "availableFrom": "from {date}",
+      "availabilityValue": {
+        "available": "available",
+        "busy": "busy",
+        "unavailable": "not available",
+        "unknown": "not stated"
+      },
+      "languages": "Languages",
+      "skills": "Skills",
+      "confirmed": "confirmed",
+      "status": {
+        "offered": "Proposed",
+        "withdrawn": "Withdrawn",
+        "selected": "Chosen by the client"
+      },
+      "booking": {
+        "proposed": "Booking request sent, waiting for the person",
+        "accepted": "The person accepted",
+        "declined": "The person declined",
+        "withdrawn": "Booking withdrawn",
+        "expired": "Booking expired"
+      },
+      "withdraw": "Withdraw",
+      "withdrawn": "Candidate withdrawn.",
+      "selectNote": "Choosing sends a booking request to this person. It is not a contract.",
+      "noteLabel": "Note to the person (optional)",
+      "select": "Choose this candidate",
+      "selected": "Booking request sent. The person decides.",
+      "noRoster": "No one is on your roster yet.",
+      "addLabel": "Person from your roster",
+      "addPlaceholder": "Choose a person",
+      "add": "Propose this person",
+      "added": "Candidate proposed."
     }
   },
   "teamAssignment": {

@@ -12,6 +12,7 @@ import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conver
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 import { TeamOfferTerms } from "@/components/app/team-offer-terms";
 import { OfferProgressPanel } from "@/components/app/offer-progress-panel";
+import { OfferCandidatesPanel } from "@/components/app/offer-candidates-panel";
 import type { OfferMatchView, ReceivedTeamOffer, TeamOfferRefusal } from "@/lib/market/team-offer-model";
 
 /**
@@ -270,6 +271,12 @@ export function TeamOffersReceived({
                     {t("received.decline")}
                   </Button>
                 </div>
+              ) : null}
+
+              {offer.offerKind === "organization" && (offer.status === "offered" || offer.status === "accepted") ? (
+                // Candidates the agency named: a pseudonym and facts; the
+                // client's choice proposes a booking to the worker.
+                <OfferCandidatesPanel offerId={offer.offerId} side="receiver" />
               ) : null}
 
               {(offer.status === "accepted" || offer.status === "assigned") && offer.offerKind === "organization" ? (

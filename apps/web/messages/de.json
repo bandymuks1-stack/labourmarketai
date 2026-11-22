@@ -19687,7 +19687,13 @@
       "not_an_organization_offer": "Nur ein Unternehmensangebot benennt eine Kolonne.",
       "invalid_title": "Der Projektname braucht 2 bis 120 Zeichen.",
       "no_company": "Öffnen Sie zuerst den Unternehmensbereich.",
-      "project_not_created": "Das Projekt konnte nicht angelegt werden."
+      "project_not_created": "Das Projekt konnte nicht angelegt werden.",
+      "not_an_agency_offer": "Nur das Angebot einer Personalagentur kann Kandidaten nennen.",
+      "worker_not_on_roster": "Diese Person ist nicht in Ihrem aktiven Bestand.",
+      "candidate_limit_reached": "Auf einem Angebot können höchstens 10 Kandidaten vorgeschlagen werden.",
+      "candidate_not_open": "Dieser Kandidat kann nicht mehr gewählt werden.",
+      "candidate_already_selected": "Der Kunde hat diesen Kandidaten bereits gewählt.",
+      "client_company_unknown": "Das Unternehmen des Bedarfs konnte nicht bestimmt werden."
     },
     "received": {
       "title": "Für diesen Bedarf angebotene Teams",
@@ -19822,6 +19828,48 @@
       "titleInvalid": "Der Projektname braucht 2 bis 120 Zeichen.",
       "startedReceiver": "Die Arbeit hat begonnen: die Kolonne ist in Ihrem Projekt.",
       "startedSupplier": "Die Arbeit hat begonnen: Ihre Kolonne ist im Projekt des Kunden."
+    },
+    "candidates": {
+      "heading": "Vorgeschlagene Kandidaten",
+      "introSupplier": "Schlagen Sie bestimmte Personen aus Ihrem Bestand vor. Der Kunde sieht jede ohne Namen: Erfahrung, Land, Verfügbarkeit, Sprachen und Fähigkeiten. Der Name wird erst gezeigt, wenn der Kunde die Person wählt und sie zustimmt.",
+      "introReceiver": "Personen, die diese Agentur vorschlägt, ohne Namen oder Kontaktdaten. Wenn Sie eine wählen, geht eine Buchungsanfrage an diese Person; der Name wird gezeigt, sobald sie zustimmt. Sie verhandeln mit der Agentur.",
+      "experience": "Erfahrung",
+      "years": "{count, plural, one {# Jahr} other {# Jahre}}",
+      "country": "Arbeitet in",
+      "availability": "Verfügbarkeit",
+      "availableFrom": "ab {date}",
+      "availabilityValue": {
+        "available": "verfügbar",
+        "busy": "ausgelastet",
+        "unavailable": "nicht verfügbar",
+        "unknown": "nicht angegeben"
+      },
+      "languages": "Sprachen",
+      "skills": "Fähigkeiten",
+      "confirmed": "bestätigt",
+      "status": {
+        "offered": "Vorgeschlagen",
+        "withdrawn": "Zurückgezogen",
+        "selected": "Vom Kunden gewählt"
+      },
+      "booking": {
+        "proposed": "Buchungsanfrage gesendet, wartet auf die Person",
+        "accepted": "Die Person hat zugestimmt",
+        "declined": "Die Person hat abgelehnt",
+        "withdrawn": "Buchung zurückgezogen",
+        "expired": "Buchung abgelaufen"
+      },
+      "withdraw": "Zurückziehen",
+      "withdrawn": "Kandidat zurückgezogen.",
+      "selectNote": "Die Wahl sendet eine Buchungsanfrage an diese Person. Es ist kein Vertrag.",
+      "noteLabel": "Nachricht an die Person (optional)",
+      "select": "Diesen Kandidaten wählen",
+      "selected": "Buchungsanfrage gesendet. Die Person entscheidet.",
+      "noRoster": "In Ihrem Bestand ist noch niemand.",
+      "addLabel": "Person aus Ihrem Bestand",
+      "addPlaceholder": "Person wählen",
+      "add": "Diese Person vorschlagen",
+      "added": "Kandidat vorgeschlagen."
     }
   },
   "teamAssignment": {

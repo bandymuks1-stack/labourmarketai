@@ -19687,7 +19687,13 @@
       "not_an_organization_offer": "Brigadą nurodo tik įmonės pasiūlymas.",
       "invalid_title": "Projekto pavadinimas turi būti nuo 2 iki 120 simbolių.",
       "no_company": "Pirmiausia atidarykite įmonės darbo erdvę.",
-      "project_not_created": "Projekto sukurti nepavyko."
+      "project_not_created": "Projekto sukurti nepavyko.",
+      "not_an_agency_offer": "Kandidatus gali nurodyti tik įdarbinimo agentūros pasiūlymas.",
+      "worker_not_on_roster": "Šio žmogaus nėra Jūsų aktyviame sąraše.",
+      "candidate_limit_reached": "Viename pasiūlyme galima pasiūlyti ne daugiau kaip 10 kandidatų.",
+      "candidate_not_open": "Šio kandidato pasirinkti nebegalima.",
+      "candidate_already_selected": "Užsakovas šį kandidatą jau pasirinko.",
+      "client_company_unknown": "Nepavyko nustatyti poreikio įmonės."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
@@ -19822,6 +19828,48 @@
       "titleInvalid": "Projekto pavadinimas turi būti nuo 2 iki 120 simbolių.",
       "startedReceiver": "Darbai pradėti: brigada įtraukta į Jūsų projektą.",
       "startedSupplier": "Darbai pradėti: Jūsų brigada įtraukta į užsakovo projektą."
+    },
+    "candidates": {
+      "heading": "Siūlomi kandidatai",
+      "introSupplier": "Pasiūlykite konkrečius žmones iš savo sąrašo. Užsakovas kiekvieną mato be vardo: patirtis, šalis, prieinamumas, kalbos ir įgūdžiai. Vardas parodomas tik užsakovui pasirinkus žmogų ir šiam sutikus.",
+      "introReceiver": "Agentūros siūlomi žmonės, rodomi be vardo ir kontaktų. Pasirinkus kandidatą, jam siunčiamas užimtumo prašymas; vardas parodomas, kai jis sutinka. Bendraujate su agentūra.",
+      "experience": "Patirtis",
+      "years": "{count, plural, one {# metai} few {# metai} other {# metų}}",
+      "country": "Dirba",
+      "availability": "Prieinamumas",
+      "availableFrom": "nuo {date}",
+      "availabilityValue": {
+        "available": "laisvas",
+        "busy": "užimtas",
+        "unavailable": "neprieinamas",
+        "unknown": "nenurodyta"
+      },
+      "languages": "Kalbos",
+      "skills": "Įgūdžiai",
+      "confirmed": "patvirtinta",
+      "status": {
+        "offered": "Pasiūlytas",
+        "withdrawn": "Atšauktas",
+        "selected": "Užsakovo pasirinktas"
+      },
+      "booking": {
+        "proposed": "Užimtumo prašymas išsiųstas, laukiama žmogaus atsakymo",
+        "accepted": "Žmogus sutiko",
+        "declined": "Žmogus atsisakė",
+        "withdrawn": "Prašymas atšauktas",
+        "expired": "Prašymas nebegalioja"
+      },
+      "withdraw": "Atšaukti",
+      "withdrawn": "Kandidatas atšauktas.",
+      "selectNote": "Pasirinkus šiam žmogui siunčiamas užimtumo prašymas. Tai nėra sutartis.",
+      "noteLabel": "Žinutė žmogui (neprivaloma)",
+      "select": "Pasirinkti šį kandidatą",
+      "selected": "Užimtumo prašymas išsiųstas. Sprendžia pats žmogus.",
+      "noRoster": "Jūsų sąraše dar nėra žmonių.",
+      "addLabel": "Žmogus iš Jūsų sąrašo",
+      "addPlaceholder": "Pasirinkite žmogų",
+      "add": "Pasiūlyti šį žmogų",
+      "added": "Kandidatas pasiūlytas."
     }
   },
   "teamAssignment": {

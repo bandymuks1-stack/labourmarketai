@@ -19687,7 +19687,13 @@
       "not_an_organization_offer": "Brygadę wskazuje tylko oferta firmy.",
       "invalid_title": "Nazwa projektu musi mieć od 2 do 120 znaków.",
       "no_company": "Proszę najpierw otworzyć przestrzeń firmy.",
-      "project_not_created": "Nie udało się utworzyć projektu."
+      "project_not_created": "Nie udało się utworzyć projektu.",
+      "not_an_agency_offer": "Kandydatów może wskazać tylko oferta agencji pracy.",
+      "worker_not_on_roster": "Tej osoby nie ma na Państwa aktywnej liście.",
+      "candidate_limit_reached": "W jednej ofercie można zaproponować najwyżej 10 kandydatów.",
+      "candidate_not_open": "Tego kandydata nie można już wybrać.",
+      "candidate_already_selected": "Klient już wybrał tego kandydata.",
+      "client_company_unknown": "Nie udało się ustalić firmy potrzeby."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
@@ -19822,6 +19828,48 @@
       "titleInvalid": "Nazwa projektu musi mieć od 2 do 120 znaków.",
       "startedReceiver": "Praca rozpoczęta: brygada jest w Państwa projekcie.",
       "startedSupplier": "Praca rozpoczęta: Państwa brygada jest w projekcie klienta."
+    },
+    "candidates": {
+      "heading": "Proponowani kandydaci",
+      "introSupplier": "Proszę zaproponować konkretne osoby ze swojej listy. Klient widzi każdą bez nazwiska: doświadczenie, kraj, dostępność, języki i umiejętności. Nazwisko jest pokazywane dopiero, gdy klient wybierze osobę, a ona się zgodzi.",
+      "introReceiver": "Osoby proponowane przez agencję, bez nazwiska i kontaktów. Wybór wysyła prośbę o zatrudnienie do tej osoby; nazwisko pojawia się, gdy się zgodzi. Kontakt prowadzą Państwo z agencją.",
+      "experience": "Doświadczenie",
+      "years": "{count, plural, one {# rok} few {# lata} many {# lat} other {# roku}}",
+      "country": "Pracuje w",
+      "availability": "Dostępność",
+      "availableFrom": "od {date}",
+      "availabilityValue": {
+        "available": "dostępny",
+        "busy": "zajęty",
+        "unavailable": "niedostępny",
+        "unknown": "nie podano"
+      },
+      "languages": "Języki",
+      "skills": "Umiejętności",
+      "confirmed": "potwierdzone",
+      "status": {
+        "offered": "Zaproponowany",
+        "withdrawn": "Wycofany",
+        "selected": "Wybrany przez klienta"
+      },
+      "booking": {
+        "proposed": "Prośba wysłana, czeka na odpowiedź osoby",
+        "accepted": "Osoba się zgodziła",
+        "declined": "Osoba odmówiła",
+        "withdrawn": "Prośba wycofana",
+        "expired": "Prośba wygasła"
+      },
+      "withdraw": "Wycofaj",
+      "withdrawn": "Kandydat wycofany.",
+      "selectNote": "Wybór wysyła tej osobie prośbę o zatrudnienie. To nie jest umowa.",
+      "noteLabel": "Wiadomość do osoby (opcjonalnie)",
+      "select": "Wybierz tego kandydata",
+      "selected": "Prośba wysłana. Decyduje sama osoba.",
+      "noRoster": "Na Państwa liście nie ma jeszcze nikogo.",
+      "addLabel": "Osoba z Państwa listy",
+      "addPlaceholder": "Wybierz osobę",
+      "add": "Zaproponuj tę osobę",
+      "added": "Kandydat zaproponowany."
     }
   },
   "teamAssignment": {

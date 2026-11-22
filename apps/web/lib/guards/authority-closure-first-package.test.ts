@@ -252,6 +252,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-22 owner decision (company offer to work): terms confirmed by both, the supplier's named crew,
       // hand-off v2. Additive columns + six new SECURITY DEFINER functions; draft, NOT applied.
       "20261122200000_",
+      // 2026-11-22 owner decision (agency named candidates on an open need): a candidates table + five
+      // SECURITY DEFINER functions; the client's choice uses the existing connection, share, offer and booking. Draft, NOT applied.
+      "20261122210000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

@@ -241,6 +241,13 @@ export type TeamOfferRefusal =
   | "unit_not_yours"
   | "unit_has_no_members"
   | "not_an_organization_offer"
+  /** Agency candidates on an open need (20261122210000). */
+  | "not_an_agency_offer"
+  | "worker_not_on_roster"
+  | "candidate_limit_reached"
+  | "candidate_not_open"
+  | "candidate_already_selected"
+  | "client_company_unknown"
   | "needs_migration"
   | "error";
 
@@ -272,6 +279,12 @@ const STABLE_WORDS: readonly TeamOfferRefusal[] = [
   "unit_not_yours",
   "unit_has_no_members",
   "not_an_organization_offer",
+  "not_an_agency_offer",
+  "worker_not_on_roster",
+  "candidate_limit_reached",
+  "candidate_not_open",
+  "candidate_already_selected",
+  "client_company_unknown",
 ];
 
 const MISSING_CODES = new Set(["42P01", "42703", "42883", "PGRST202", "PGRST205"]);
@@ -479,4 +492,44 @@ export function startWorkBlockers(p: OfferProgress): readonly ("terms_not_agreed
   if (!p.agreed) out.push("terms_not_agreed");
   if (!p.unitNamed) out.push("unit_not_named");
   return out;
+}
+
+// ── Agency candidates on an open need (20261122210000) ────────────────────
+
+/** One worker an agency attached to its company offer. The client's read is
+ *  a pseudonym and professional facts only; the agency's read names its own
+ *  roster worker. Never a contact, document, photo or worker id. */
+export interface OfferCandidate {
+  readonly candidateId: string;
+  readonly label: string;
+  readonly status: "offered" | "withdrawn" | "selected";
+  readonly experienceYears: number | null;
+  readonly workCountry: string | null;
+  readonly availability: string | null;
+  readonly availableFrom: string | null;
+  readonly languages: readonly { readonly lang: string; readonly level: string | null }[];
+  readonly skills: readonly { readonly slug: string; readonly confirmed: boolean }[];
+  /** The booking the client's choice proposed to the worker, once chosen. */
+  readonly bookingStatus: string | null;
+}
+
+const CANDIDATE_STATUSES = new Set(["offered", "withdrawn", "selected"]);
+
+export function parseOfferCandidate(raw: unknown): OfferCandidate | null {
+  if (!isRow(raw)) return null;
+  const candidateId = str(raw.candidate_id);
+  if (!candidateId || typeof raw.status !== "string" || !CANDIDATE_STATUSES.has(raw.status)) return null;
+  const arr = (v: unknown): Row[] => (Array.isArray(v) ? v.filter(isRow) : []);
+  return {
+    candidateId,
+    label: str(raw.label) ?? "-",
+    status: raw.status as OfferCandidate["status"],
+    experienceYears: num(raw.experience_years),
+    workCountry: str(raw.work_country),
+    availability: str(raw.availability),
+    availableFrom: str(raw.available_from),
+    languages: arr(raw.languages).flatMap((l) => (str(l.lang) ? [{ lang: str(l.lang)!, level: str(l.level) }] : [])),
+    skills: arr(raw.skills).flatMap((k) => (str(k.slug) ? [{ slug: str(k.slug)!, confirmed: k.confirmed === true }] : [])),
+    bookingStatus: str(raw.booking_status),
+  };
 }

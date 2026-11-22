@@ -19,6 +19,8 @@ import {
   parseSentOffer,
   parseTermsVersion,
   parseOfferProgress,
+  parseOfferCandidate,
+  type OfferCandidate,
   type OfferProgress,
   type OfferTermsInput,
   type OfferTermsVersion,
@@ -358,4 +360,54 @@ export async function proposeOfferTerms(
   if (error) return { status: offerRefusalOf(error) };
   const version = data && typeof data === "object" ? (data as { version?: unknown }).version : null;
   return typeof version === "number" ? { status: "ok", version } : { status: "error" };
+}
+
+// ── Agency candidates on an open need (20261122210000) ────────────────────
+
+/** Either party: the candidates on one offer (a pseudonym and facts for the client). */
+export function listOfferCandidates(offerId: string): Promise<ReadResult<OfferCandidate>> {
+  return readRows("list_offer_candidates_v1", { p_offer_id: offerId }, parseOfferCandidate);
+}
+
+/** The agency attaches one worker of its own active roster to its company offer. */
+export async function addOfferCandidate(
+  offerId: string,
+  workerId: string,
+): Promise<TeamOfferWriteResult<{ outcome: "added" | "already_added" }>> {
+  const ctx = await authed();
+  if (!ctx) return { status: "not_authed" };
+  const { data, error } = await asAny(ctx.supabase).rpc("add_offer_candidate_v1", {
+    p_offer_id: offerId,
+    p_worker_id: workerId,
+  });
+  if (error) return { status: offerRefusalOf(error) };
+  const outcome = (data as { outcome?: unknown } | null)?.outcome;
+  return outcome === "added" || outcome === "already_added" ? { status: "ok", outcome } : { status: "error" };
+}
+
+export async function withdrawOfferCandidate(
+  candidateId: string,
+): Promise<TeamOfferWriteResult<{ outcome: "withdrawn" | "already_withdrawn" }>> {
+  const ctx = await authed();
+  if (!ctx) return { status: "not_authed" };
+  const { data, error } = await asAny(ctx.supabase).rpc("withdraw_offer_candidate_v1", { p_candidate_id: candidateId });
+  if (error) return { status: offerRefusalOf(error) };
+  return { status: "ok", outcome: data === "already_withdrawn" ? "already_withdrawn" : "withdrawn" };
+}
+
+/** The CLIENT chooses a candidate: the existing connection / share / candidate
+ *  offer, and the existing accept path proposes the booking to the worker. */
+export async function selectOfferCandidate(
+  candidateId: string,
+  note: string | null,
+): Promise<TeamOfferWriteResult<{ outcome: "selected" | "already_selected" }>> {
+  const ctx = await authed();
+  if (!ctx) return { status: "not_authed" };
+  const { data, error } = await asAny(ctx.supabase).rpc("select_offer_candidate_v1", {
+    p_candidate_id: candidateId,
+    p_note: note,
+  });
+  if (error) return { status: offerRefusalOf(error) };
+  const outcome = (data as { outcome?: unknown } | null)?.outcome;
+  return outcome === "selected" || outcome === "already_selected" ? { status: "ok", outcome } : { status: "error" };
 }
