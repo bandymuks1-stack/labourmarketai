@@ -1001,8 +1001,8 @@ for (const phone of PHONES) {
     });
 
     for (const c of [
-      { key: "c", name: "education", hash: "cv-education", prefix: "worker-education", field: "institution", table: "worker_education", column: "institution_name", type: "Vocational" },
-      { key: "d", name: "achievement", hash: "cv-achievements", prefix: "worker-achievements", field: "title", table: "worker_achievements", column: "title", type: null },
+      { key: "c", name: "education", hash: "cv-education", prefix: "worker-education", field: "institution", table: "worker_education", column: "institution_name", type: "Vocational", remove: '[data-testid^="worker-education-remove-"]' },
+      { key: "d", name: "achievement", hash: "cv-achievements", prefix: "worker-achievements", field: "title", table: "worker_achievements", column: "title", type: null, remove: '[data-testid^="worker-achievements-remove-"]' },
     ] as const) {
       test(`M-11${c.key} (${phone.name}). ${c.name}: added, stored, back after a reload, edited, removed`, async ({ browser }) => {
         const { page, done } = await signedInOnPhone(browser, phone, worker);
@@ -1042,7 +1042,7 @@ for (const phone of PHONES) {
         await expect(rowOf(sec, edited), "the edit is back after a reload, once").toHaveCount(1, { timeout: 30_000 });
         proof(c.name, "edited: answered, stored in place, back after a reload");
 
-        await rowOf(sec, edited).locator(`[data-testid^="${c.prefix}-remove-"]`).first().tap();
+        await rowOf(sec, edited).locator(c.remove).first().tap();
         await expect(rowOf(sec, edited), "the removed row is gone").toHaveCount(0, { timeout: 30_000 });
         await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
         await expect(rowOf(await section(), edited), "stays removed after a reload").toHaveCount(0);
