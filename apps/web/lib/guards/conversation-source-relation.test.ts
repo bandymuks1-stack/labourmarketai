@@ -54,7 +54,7 @@ const ROLLBACK =
 /** The one later migration that widened the closed set (owner decision A,
  *  2026-11-22: 'open_need'); it recreates the CHECK, so it is the live list. */
 const OPEN_NEED_MIGRATION =
-  "../../supabase/migrations/20261122160000_open_need_messaging_v1.sql";
+  "../../supabase/migrations/20261122214700_open_need_messaging_v1.sql";
 
 /** The sanctioned context callers and the ONE type each may stamp
  *  (review pack §1.3 rows 2-5; canonical-journey P1 added the worker-side

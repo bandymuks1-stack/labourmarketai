@@ -132,7 +132,7 @@ export default async function ConversationDetailPage({
 
   // Table is `conversation_messages`, NOT `messages` — see 0021's header
   // for why (legacy public.messages chain pre-exists in prod).
-  // Read through conversation_messages_visible_v1 (20261122160000): the same
+  // Read through conversation_messages_visible_v1 (20261122214700): the same
   // participant gate; in an undisclosed open-need thread the provider gets
   // the client's messages with a pseudonymous author, never its profile id.
   const messagesRes = await asAny(supabase)

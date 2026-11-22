@@ -262,7 +262,7 @@ describe("§8.2 demand context in conversations (read-only real data)", () => {
     // …the brigade-offer negotiation derives it from the REAL team row and
     // passes its grant only after evaluateTeamOfferContact held…
     const offer = read("lib/company/team-offer-conversation.ts");
-    // Since 20261122160000 the offer's one thread is resolved by the database
+    // Since 20261122214700 the offer's one thread is resolved by the database
     // (team_offer_thread_v1) after the party-gated read and the live-offer
     // decision; the subject is written in the database, never a form field.
     expect(offer).toMatch(/rpc\("team_offer_thread_party_v1"/);

@@ -21,7 +21,7 @@ const strip = (sql: string): string => sql.replace(/--[^\n]*/g, "");
 /** Doctrine §2.4: the eleven full-UI locales. */
 const FULL_UI = ["en", "lt", "lv", "et", "nl", "de", "da", "no", "sv", "pl", "ru"] as const;
 
-const N = "20261122160000_open_need_messaging_v1";
+const N = "20261122214700_open_need_messaging_v1";
 const UP = strip(repo(`supabase/migrations/${N}.sql`)).toLowerCase();
 const DOWN = strip(repo(`supabase/rollbacks/${N}.down.sql`)).toLowerCase();
 const ACTION = read("lib/company/open-need-conversation.ts");

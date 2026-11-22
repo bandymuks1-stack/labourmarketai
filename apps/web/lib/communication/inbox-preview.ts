@@ -45,7 +45,7 @@ export async function getConversationPreviews(
   try {
     const supabase = await createClient();
     const { data, error } = await asAny(supabase)
-      .from("conversation_messages_visible_v1") // masks a hidden open-need client (20261122160000)
+      .from("conversation_messages_visible_v1") // masks a hidden open-need client (20261122214700)
       .select("conversation_id, author_id, body, is_instruction, original_language, created_at")
       .in("conversation_id", [...conversationIds])
       .order("created_at", { ascending: false })

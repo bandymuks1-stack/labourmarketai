@@ -14,7 +14,7 @@ export function pseudonymToken(name: string): string | null {
   return m ? m[1]! : null;
 }
 
-/** Open-need threads (20261122160000) name an undisclosed client
+/** Open-need threads (20261122214700) name an undisclosed client
  *  `Client ` + six characters of the need id. */
 const CLIENT_PSEUDONYM_RE = /^Client ([A-Z0-9]{1,6})$/;
 

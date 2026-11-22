@@ -710,11 +710,11 @@ export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
  * them names a subject, the table must be exported or withheld instead.
  */
 export const ACTOR_ONLY_RELATIONS: readonly string[] = [
-  // Open-need threads (20261122160000): `disclosed_by` is who pressed "Show my
+  // Open-need threads (20261122214700): `disclosed_by` is who pressed "Show my
   // name" in a conversation; the row's subject is that conversation (its
   // messages are exported through the conversation relations).
   "open_need_identity_disclosures",
-  // Open-need threads ledger (20261122160000): `opened_by` is the
+  // Open-need threads ledger (20261122214700): `opened_by` is the
   // provider who opened the thread; the row's subject is that conversation.
   "open_need_threads",
   // Spent confirmation tokens: `spent_by` is who confirmed; a digest, no

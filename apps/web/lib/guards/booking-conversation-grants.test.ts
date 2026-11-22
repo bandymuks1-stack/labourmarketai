@@ -84,7 +84,7 @@ const GRANT_ONLY_CALLERS: ReadonlyArray<
   // the two consenting people. No stamp: the closed source-relation set has
   // no bridge member and widening it is owner-gated SQL (residue).
   ["lib/agency/bridge-conversation.ts", "allowed_agency_connection"],
-  // Brigade offer negotiation: since 20261122160000 the offer's ONE thread is
+  // Brigade offer negotiation: since 20261122214700 the offer's ONE thread is
   // resolved by the database (team_offer_thread_v1, both parties, only an id)
   // — lib/company/team-offer-conversation.ts no longer calls this path.
 ];

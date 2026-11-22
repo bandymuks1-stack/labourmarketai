@@ -28,7 +28,7 @@ export const CONVERSATION_SOURCE_TYPES = [
   "demand_interest",
   "accepted_booking",
   // Owner decision A (2026-11-22): a provider writes about an open need; the
-  // client stays unnamed until it discloses (20261122160000).
+  // client stays unnamed until it discloses (20261122214700).
   "open_need",
 ] as const;
 

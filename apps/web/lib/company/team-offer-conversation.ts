@@ -30,7 +30,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  *   - receiver: the offer is listed by list_team_offers_for_request_v1, which
  *     answers rows only to the demand's owner / org demand-access holders.
  * Only AFTER that proof does the database resolve the offer's ONE thread
- * (team_offer_thread_v1, 20261122160000): the open-need thread of the offering
+ * (team_offer_thread_v1, 20261122214700): the open-need thread of the offering
  * person, the offering organization and the need, for both parties and before
  * and after acceptance. Only its id comes back; no profile id reaches this
  * server. The offer must be live (offered / accepted / assigned).
@@ -88,7 +88,7 @@ async function resolveTeamOfferThread(offerId: string, requestId: string, locale
   if (evaluateTeamOfferContact({ offerStatus, side }) !== "allowed") return null;
 
   // ONE negotiation thread per offer, for BOTH parties and across acceptance
-  // (decision A, 20261122160000; Codex P2 on #3647): the database resolves the
+  // (decision A, 20261122214700; Codex P2 on #3647): the database resolves the
   // open-need thread of the offering person, the offering organization and
   // the need — creating it when missing — and returns only its id. The client
   // stays unnamed to the supplier there until it chooses to show its name.

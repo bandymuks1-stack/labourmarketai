@@ -244,7 +244,7 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
     // (RLS: participants only), and the read precedes the resolver call
     expect(page).toContain("const supabase = await createClient();");
     expect(page).not.toContain("createAdminClient");
-    // The participant-gated masking view (20261122160000) is the page's read.
+    // The participant-gated masking view (20261122214700) is the page's read.
     const rlsRead = page.indexOf('.from("conversation_messages_visible_v1")');
     // Started, not awaited, since 2026-09-28 (each message streams behind its
     // own Suspense boundary) — the call still follows the RLS read.

@@ -251,7 +251,7 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261118143000_",
       // 2026-11-22 (RED, needs-human-gate, NOT applied): owner decision A — messaging about an open
       // need; the client unnamed until it discloses.
-      "20261122160000_",
+      "20261122214700_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),
@@ -350,7 +350,7 @@ describe("F-1 - conversation creation: the server decides, the database refuses 
     const core = strip(rd("lib/communication/communication-core.ts", APP));
     const uses = core.match(/createAdminClient\(\)/g) ?? [];
     // Two uses, each pinned: the participant insert after the authority gate,
-    // and (20261122160000) the server-only read of a hidden open-need
+    // and (20261122214700) the server-only read of a hidden open-need
     // client's recipients — a service_role-only function, read nothing else.
     expect(uses).toHaveLength(2);
     expect(core.indexOf("isContactAuthority(authority)")).toBeGreaterThan(-1);

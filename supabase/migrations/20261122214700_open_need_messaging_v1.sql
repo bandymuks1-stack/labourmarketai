@@ -1,4 +1,4 @@
--- 20261122160000_open_need_messaging_v1
+-- 20261122214700_open_need_messaging_v1
 --
 -- RED tier (needs-human-gate). NOT applied to any shared database. Production
 -- apply only via Supabase MCP apply_migration after the owner approves THIS
@@ -79,7 +79,7 @@
 -- offer_team_to_demand_v1. The need's own free-text title is the client's
 -- words and is shown as it is on the board.
 --
--- Rollback: supabase/rollbacks/20261122160000_open_need_messaging_v1.down.sql
+-- Rollback: supabase/rollbacks/20261122214700_open_need_messaging_v1.down.sql
 -- Apply via Supabase MCP apply_migration only.
 
 begin;
@@ -367,7 +367,7 @@ set search_path = public
 as $$
   select cp.conversation_id,
          case
-           -- OPEN NEED (20261122160000): the need's owner is not named to the
+           -- OPEN NEED (20261122214700): the need's owner is not named to the
            -- provider until the owner discloses in THIS thread.
            when c.source_type = 'open_need'
                 and cp.profile_id is distinct from c.created_by
@@ -448,7 +448,7 @@ language sql security definer set search_path = public stable as $$
     where c.source_type in ('scouting', 'demand_interest')
       and cr.id = c.source_id
     union all
-    -- open_need (20261122160000) → the need's role or title; the need owner
+    -- open_need (20261122214700) → the need's role or title; the need owner
     -- gets the route to its needs, the provider gets no route.
     select
       coalesce(nullif(btrim(cr.role_or_work_type), ''), cr.title) as source_title,
@@ -518,7 +518,7 @@ begin
          cr.country,
          cr.team_size,
          cr.start_period,
-         -- OPEN NEED (20261122160000): the client is not named on the board.
+         -- OPEN NEED (20261122214700): the client is not named on the board.
          null::text,
          cr.created_at,
          o.id,
@@ -703,7 +703,7 @@ begin
   if v_creator <> uid and not public.is_admin() then
     raise exception 'not_authorized';
   end if;
-  -- OPEN NEED (20261122160000): nobody but an admin removes anyone from an
+  -- OPEN NEED (20261122214700): nobody but an admin removes anyone from an
   -- open-need thread. The one constant answer, before any lookup, so the
   -- provider cannot test a guessed profile id against it.
   if exists (select 1 from public.conversations c
@@ -766,7 +766,7 @@ begin
     join public.conversations c on c.id = mine.conversation_id and c.kind = 'direct'
    where auth.uid() is not null
      and w.id = any (p_worker_ids)
-     -- OPEN NEED (20261122160000): a blinded caller learns nothing about who
+     -- OPEN NEED (20261122214700): a blinded caller learns nothing about who
      -- the other side of an undisclosed open-need thread is.
      and not public.open_need_viewer_blinded_v1(mine.conversation_id);
 end;
@@ -799,7 +799,7 @@ begin
   return query
   select v_side,
          o.status,
-         -- OPEN NEED (20261122160000): the supplier learns who the client is
+         -- OPEN NEED (20261122214700): the supplier learns who the client is
          -- only once the client ACCEPTED the offer (the approved cooperation
          -- step); before that the app talks through the open-need thread.
          case when v_side = 'supplier'
@@ -837,7 +837,7 @@ begin
   select o.id, o.request_id,
          coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')),
          cr.country,
-         -- OPEN NEED (20261122160000): named only once the client accepted.
+         -- OPEN NEED (20261122214700): named only once the client accepted.
          case when o.status in ('accepted', 'assigned')
               then coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), ''))
          end,
@@ -910,7 +910,7 @@ begin
     join public.conversation_participants p2
       on p2.conversation_id = c.id and p2.profile_id = worker_pid
    where c.kind = 'direct'
-     -- OPEN NEED (20261122160000): an instruction never lands in, or tests,
+     -- OPEN NEED (20261122214700): an instruction never lands in, or tests,
      -- an anonymous open-need thread.
      and c.source_type is distinct from 'open_need'
    order by c.created_at asc
@@ -994,7 +994,7 @@ begin
     join public.conversation_participants p2
       on p2.conversation_id = c.id and p2.profile_id = worker_pid
    where c.kind = 'direct'
-     -- OPEN NEED (20261122160000): an instruction never lands in, or tests,
+     -- OPEN NEED (20261122214700): an instruction never lands in, or tests,
      -- an anonymous open-need thread.
      and c.source_type is distinct from 'open_need'
    order by c.created_at asc

@@ -20,7 +20,7 @@
 # ============================================================================
 set -euo pipefail
 cd "$(dirname "$0")/../.."
-N=20261122160000_open_need_messaging_v1
+N=20261122214700_open_need_messaging_v1
 UP="supabase/migrations/${N}.sql"; DOWN="supabase/rollbacks/${N}.down.sql"
 PSQL=${PSQL:-"docker exec -i supabase_db_labourmarketai psql -U postgres -X -q -tA"}
 case "$PSQL" in *supabase_db_labourmarketai*|*127.0.0.1*|*localhost*) ;; *) echo "refusing a non-local target"; exit 2;; esac

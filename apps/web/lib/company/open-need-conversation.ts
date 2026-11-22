@@ -22,7 +22,7 @@ const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
  * A provider organization's manager (agency, subcontractor, brigade) writes to
  * the client about an OPEN need the organization may already see on its board,
  * without the client being named. The database does all of it in ONE call,
- * open_need_conversation_open_v1 (20261122160000): the board's own gate
+ * open_need_conversation_open_v1 (20261122214700): the board's own gate
  * (list_open_demand_for_team_offer_v1 for this organization), then the
  * caller's existing open-need thread for that need or a new one with both
  * participants, stamped 'open_need', under the same new-conversation cap. It

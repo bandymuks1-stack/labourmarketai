@@ -81,7 +81,7 @@ on:
       - "apps/web/tests/e2e/journal-day-choice-isolated.spec.ts"
       - "apps/web/tests/e2e/journal-reach-isolated.spec.ts"
       - "apps/web/tests/e2e/open-need-messaging-isolated.spec.ts"
-      - "supabase/migrations/20261122160000_open_need_messaging_v1.sql"
+      - "supabase/migrations/20261122214700_open_need_messaging_v1.sql"
       - "apps/web/tests/e2e/pay-placeholder-isolated.spec.ts"
       - "apps/web/app/*/dashboard/journal/**"
       - "apps/web/lib/journal/day-choice.ts"

@@ -1,4 +1,4 @@
--- Rollback for 20261122160000_open_need_messaging_v1
+-- Rollback for 20261122214700_open_need_messaging_v1
 --
 -- Restores the participants / messages SELECT policies (0021) and the
 -- attachments storage INSERT policy (20260712130000) to their earlier text,

@@ -363,7 +363,7 @@ async function notifyOtherParticipants(
   conversationId: string,
 ): Promise<void> {
   try {
-    // Open-need thread (20261122160000): a blinded sender (the provider) is
+    // Open-need thread (20261122214700): a blinded sender (the provider) is
     // not given the hidden client's participant row, so the recipients come
     // from the server-only conversation_live_recipients_v1 (service_role; it
     // re-checks the author is a live participant). The ids stay on the server.

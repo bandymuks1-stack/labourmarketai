@@ -74,7 +74,7 @@ export async function findExistingDirectConversation(
     .select("id, created_at")
     .in("id", sharedIds)
     .eq("kind", "direct")
-    // An open-need thread (20261122160000) is the anonymous conversation about
+    // An open-need thread (20261122214700) is the anonymous conversation about
     // one need, opened by the provider's door: a person's other direct
     // contact never reuses it (R2 N2 — no mixed contexts).
     .or("source_type.is.null,source_type.neq.open_need")
