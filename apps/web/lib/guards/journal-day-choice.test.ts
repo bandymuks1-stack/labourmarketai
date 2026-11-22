@@ -5,7 +5,9 @@ import { describe, expect, it } from "vitest";
 import { journalDayChoice, journalDayHref, shiftIsoDay } from "@/lib/journal/day-choice";
 import {
   QUICK_RECORD_DRAFT_KEY,
+  QUICK_RECORD_DRAFT_TTL_MS,
   clearQuickRecordDraft,
+  quickRecordDraftOwner,
   readQuickRecordDraft,
   writeQuickRecordDraft,
 } from "@/lib/journal/quick-record-draft";
@@ -99,30 +101,72 @@ describe("journal date choice", () => {
       setItem: (k: string, v: string) => void m.set(k, v),
       removeItem: (k: string) => void m.delete(k),
     };
-    expect(readQuickRecordDraft(s)).toBeNull();
-    writeQuickRecordDraft({ text: "tiled 4 hours", understood: false }, s);
-    expect(readQuickRecordDraft(s)).toEqual({ text: "tiled 4 hours", understood: false });
-    writeQuickRecordDraft({ text: "tiled 4 hours", understood: true }, s);
-    expect(readQuickRecordDraft(s)?.understood).toBe(true);
+    const me = quickRecordDraftOwner("user-a", "org-1");
+    expect(readQuickRecordDraft(me, s)).toBeNull();
+    writeQuickRecordDraft(me, { text: "tiled 4 hours", understood: false }, s);
+    expect(readQuickRecordDraft(me, s)).toEqual({ text: "tiled 4 hours", understood: false });
+    writeQuickRecordDraft(me, { text: "tiled 4 hours", understood: true }, s);
+    expect(readQuickRecordDraft(me, s)?.understood).toBe(true);
     // Emptying the field drops the draft; a foreign or broken value is ignored.
-    writeQuickRecordDraft({ text: "  ", understood: false }, s);
+    writeQuickRecordDraft(me, { text: "  ", understood: false }, s);
     expect(m.has(QUICK_RECORD_DRAFT_KEY)).toBe(false);
     m.set(QUICK_RECORD_DRAFT_KEY, "{not json");
-    expect(readQuickRecordDraft(s)).toBeNull();
-    m.set(QUICK_RECORD_DRAFT_KEY, JSON.stringify({ v: 2, text: "x" }));
-    expect(readQuickRecordDraft(s)).toBeNull();
-    writeQuickRecordDraft({ text: "kept", understood: false }, s);
+    expect(readQuickRecordDraft(me, s)).toBeNull();
+    writeQuickRecordDraft(me, { text: "kept", understood: false }, s);
     clearQuickRecordDraft(s);
-    expect(readQuickRecordDraft(s)).toBeNull();
+    expect(readQuickRecordDraft(me, s)).toBeNull();
     // Refused storage keeps nothing and throws nothing.
     const refusing = { getItem: () => { throw new Error("no"); }, setItem: () => { throw new Error("no"); }, removeItem: () => { throw new Error("no"); } };
-    expect(() => writeQuickRecordDraft({ text: "a", understood: false }, refusing)).not.toThrow();
-    expect(readQuickRecordDraft(refusing)).toBeNull();
+    expect(() => writeQuickRecordDraft(me, { text: "a", understood: false }, refusing)).not.toThrow();
+    expect(readQuickRecordDraft(me, refusing)).toBeNull();
+  });
+
+  it("a draft is the person's in their workspace only, for 30 minutes (decision 0024)", () => {
+    const m = new Map<string, string>();
+    const s = {
+      getItem: (k: string) => m.get(k) ?? null,
+      setItem: (k: string, v: string) => void m.set(k, v),
+      removeItem: (k: string) => void m.delete(k),
+    };
+    const t0 = 1_700_000_000_000;
+    const a1 = quickRecordDraftOwner("user-a", "org-1");
+    expect(a1).toBe("user-a:org-1");
+    expect(quickRecordDraftOwner("user-a", null)).toBe("user-a:personal");
+
+    // Another person on the same device never sees it, and it is gone after.
+    writeQuickRecordDraft(a1, { text: "A's words", understood: true }, s, t0);
+    expect(readQuickRecordDraft(quickRecordDraftOwner("user-b", "org-1"), s, t0)).toBeNull();
+    expect(m.has(QUICK_RECORD_DRAFT_KEY)).toBe(false);
+    expect(readQuickRecordDraft(a1, s, t0)).toBeNull();
+
+    // The same person in another workspace does not get it either.
+    writeQuickRecordDraft(a1, { text: "A's words", understood: false }, s, t0);
+    expect(readQuickRecordDraft(quickRecordDraftOwner("user-a", "org-2"), s, t0)).toBeNull();
+    expect(readQuickRecordDraft(a1, s, t0)).toBeNull();
+
+    // Fresh for 30 minutes, then dropped.
+    writeQuickRecordDraft(a1, { text: "A's words", understood: false }, s, t0);
+    expect(readQuickRecordDraft(a1, s, t0 + QUICK_RECORD_DRAFT_TTL_MS)?.text).toBe("A's words");
+    expect(readQuickRecordDraft(a1, s, t0 + QUICK_RECORD_DRAFT_TTL_MS + 1)).toBeNull();
+    expect(m.has(QUICK_RECORD_DRAFT_KEY)).toBe(false);
+
+    // The unbound first version is never restored, and is removed.
+    m.set("lmai:journal-quick-record-draft:v1", JSON.stringify({ v: 1, text: "old", understood: false }));
+    expect(readQuickRecordDraft(a1, s, t0)).toBeNull();
+    expect(m.has("lmai:journal-quick-record-draft:v1")).toBe(false);
+  });
+
+  it("the page binds the draft to the signed-in person and workspace; every sign-out clears it", () => {
+    const page = readFileSync(resolve(JOURNAL, "page.tsx"), "utf8");
+    expect(page).toMatch(/draftOwner=\{quickRecordDraftOwner\(user\.id, activeOrganizationId\)\}/);
+    const signOut = readFileSync(resolve(__dirname, "../../components/app/intake-draft-sign-out-clear.tsx"), "utf8");
+    expect(signOut.match(/clearQuickRecordDraft\(\)/g)).toHaveLength(2);
+    expect(readFileSync(resolve(__dirname, "../../app/[locale]/layout.tsx"), "utf8")).toContain("<IntakeDraftSignOutClear />");
   });
 
   it("the recorder restores the draft on mount and clears it once saved", () => {
     const src = readFileSync(resolve(JOURNAL, "quick-record.tsx"), "utf8");
-    expect(src).toMatch(/readQuickRecordDraft\(\)/);
+    expect(src).toMatch(/readQuickRecordDraft\(draftOwner\)/);
     expect(src).toMatch(/onSaved=\{\(\) => clearQuickRecordDraft\(\)\}/);
   });
 });

@@ -142,6 +142,7 @@ import {
 import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
 import { JournalQuickRecord } from "./quick-record";
 import { JournalDayChoice } from "./day-choice";
+import { quickRecordDraftOwner } from "@/lib/journal/quick-record-draft";
 import { JournalCalendar } from "@/components/app/journal/journal-calendar";
 import { JournalDayObject } from "@/components/app/journal/journal-day-object";
 import { buildDayObject } from "@/lib/journal/day-object";
@@ -1502,6 +1503,7 @@ export default async function JournalPage({
             locale={locale}
             labels={workLogLabels}
             selectedDay={selectedDate}
+            draftOwner={quickRecordDraftOwner(user.id, activeOrganizationId)}
             selectedDayLabel={
               selectedDate && selectedDate !== todayIsoKey
                 ? formatUtcDate(selectedDate, locale)

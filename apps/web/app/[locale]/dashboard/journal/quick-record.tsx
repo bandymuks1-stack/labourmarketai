@@ -43,6 +43,7 @@ export function JournalQuickRecord({
   labels,
   selectedDay = null,
   selectedDayLabel = null,
+  draftOwner,
   otherDoors,
 }: {
   locale: string;
@@ -54,6 +55,9 @@ export function JournalQuickRecord({
   /** The same day, formatted by the page for display — passed only when it
    *  is not today, so the question can name it. */
   selectedDayLabel?: string | null;
+  /** Who the kept draft belongs to (`quickRecordDraftOwner`): the signed-in
+   *  person in the workspace they act for. A draft of anyone else is dropped. */
+  draftOwner: string;
   /** The other ways to record (conversation, voice, the full form) — text
    *  links the page composes, rendered under the recorder so every existing
    *  door stays one tap away without competing with the one primary action. */
@@ -80,7 +84,7 @@ export function JournalQuickRecord({
       setText((current) => current || early);
       return;
     }
-    const kept = readQuickRecordDraft();
+    const kept = readQuickRecordDraft(draftOwner);
     if (!kept) return;
     setText(kept.text);
     if (kept.understood) {
@@ -124,7 +128,7 @@ export function JournalQuickRecord({
             value={text}
             onChange={(e) => {
               setText(e.target.value);
-              writeQuickRecordDraft({ text: e.target.value, understood: false });
+              writeQuickRecordDraft(draftOwner, { text: e.target.value, understood: false });
             }}
             placeholder={t("placeholder")}
             data-testid="journal-quick-record-text"
@@ -144,7 +148,7 @@ export function JournalQuickRecord({
                   startedRef.current = true;
                   trackFunnel(FUNNEL_EVENTS.journalEntryStarted, { surface: "journal" });
                 }
-                writeQuickRecordDraft({ text, understood: true });
+                writeQuickRecordDraft(draftOwner, { text, understood: true });
                 setDraft(extractWorkLog(text, today, selectedDay ?? today));
               }}
             >
@@ -168,7 +172,7 @@ export function JournalQuickRecord({
           <button
             type="button"
             onClick={() => {
-              writeQuickRecordDraft({ text, understood: false });
+              writeQuickRecordDraft(draftOwner, { text, understood: false });
               setDraft(null);
             }}
             className="inline-flex min-h-11 items-center self-start text-support font-medium text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
