@@ -373,7 +373,6 @@ export function WorkCardEditor({
                   name="salary_min"
                   min={0}
                   inputMode="numeric"
-                  placeholder="1500"
                   defaultValue={values.salaryMin ?? ""}
                 />
               </label>
@@ -384,7 +383,6 @@ export function WorkCardEditor({
                   name="salary_max"
                   min={0}
                   inputMode="numeric"
-                  placeholder="2500"
                   defaultValue={values.salaryMax ?? ""}
                 />
               </label>
