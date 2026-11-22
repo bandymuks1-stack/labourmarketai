@@ -513,7 +513,6 @@
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
-      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
       "divider": "[EN] or",
       "email_label": "[EN] Work email",
       "email_placeholder": "[EN] name@company.com",

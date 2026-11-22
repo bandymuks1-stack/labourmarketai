@@ -139,7 +139,9 @@ describe("5. empty profile gets honest next actions (never a percentage)", () =>
     // `#cv-availability` since 2026-09-19, so the pillar names that anchor.
     expect(hub).toMatch(/workCard: "#cv-availability",/);
     expect(hub).not.toContain("/dashboard?result=player-card");
-    expect(hub).toMatch(/profile-hub-opportunities-link/);
+    // The page header's "Man tinkamos galimybės" is the one opportunities link;
+    // the hub's repeat of it was removed (coordinator decision 2026-11-22).
+    expect(hub).not.toMatch(/profile-hub-opportunities-link/);
     // The deep-link target is real: the profile page renders the one work
     // editor at that anchor, and the player-card result renders the same
     // component (one editor, two mounts of it — not two editors).

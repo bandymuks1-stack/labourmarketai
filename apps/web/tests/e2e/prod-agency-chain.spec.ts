@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
 import { collectPageErrors, expectRenderedOnce } from "./render-once";
 
@@ -602,4 +603,12 @@ test.afterAll(async ({ browser }) => {
   } finally {
     await close();
   }
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("agency-chain");
 });
