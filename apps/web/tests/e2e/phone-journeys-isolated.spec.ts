@@ -1,12 +1,15 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 
 import {
+  accessToken,
   BASE,
   isolatedStack,
   lit,
   onboard,
   PASSWORD,
   publishNeed,
+  SB_ANON,
+  SB_URL,
   setUpCompany,
   signIn,
   signUp,
@@ -521,6 +524,97 @@ for (const phone of PHONES) {
       await card.getByTestId("booking-accept-confirm").tap();
       await expect.poll(() => rows().map((r) => r.status), { message: "the booking is accepted", timeout: 30_000 }).toEqual(["accepted"]);
       await w2.done();
+    });
+    test(`M-6b (${phone.name}). the booked hire is visible to both sides after a reload, and to nobody else`, async ({ browser }) => {
+      // Chain link L5/L6a: the accept (respond_booking_request_v4) makes ONE active engagement
+      // between the company and the worker. The company finds the person on its people page, and
+      // both sides read the engagement in the engagements result ("who works for us" / "who do I
+      // work for"), at a desktop and on the phone, after a reload. A company that booked nobody
+      // sees neither. Twin of production orders-bookings O-9..O-11.
+      const engagements = sql<{ id: string; status: string }>(
+        `select id, status from public.company_worker_engagements where company_id = ${lit(shared.companyId)} and worker_id = ${lit(s.workerId)}`,
+      );
+      expect(engagements.map((e) => e.status), "the accept made exactly one active engagement").toEqual(["active"]);
+      const engagementId = engagements[0]!.id;
+      const desktop = async (address: string) => {
+        const saved = sessions.get(address);
+        const ctx = await browser.newContext({ ...(saved ? { storageState: saved } : {}), viewport: { width: 1440, height: 900 }, timezoneId: "UTC" });
+        const page = await ctx.newPage();
+        watch(page);
+        if (!saved) await signIn(page, BASE, address);
+        return {
+          page,
+          done: async () => {
+            sessions.set(address, await ctx.storageState());
+            await ctx.close();
+          },
+        };
+      };
+      /** The company's people page lists the booked person, also after a reload. */
+      const bookedOnPeople = async (page: Page, where: string) => {
+        await page.goto(`${BASE}/en/dashboard/company/people`);
+        for (const pass of ["first load", "reload"]) {
+          if (pass === "reload") await page.reload();
+          const row = page.getByRole("main").getByTestId(`booked-person-${engagementId}`);
+          await expect(row, `${where}, ${pass}: the booked person is on the company's people page`).toBeVisible({ timeout: 60_000 });
+          await expect(row).toContainText(workerName);
+        }
+      };
+      /** The engagements result, opened by its address, shows this engagement active after a reload. */
+      const engagementActive = async (page: Page, where: string, counterparty: string) => {
+        await page.goto(`${BASE}/en/dashboard?result=engagements`);
+        for (const pass of ["first load", "reload"]) {
+          if (pass === "reload") await page.reload();
+          const status = page.getByTestId(`engagement-status-${engagementId}`).filter({ visible: true }).first();
+          await expect(status, `${where}, ${pass}: the engagement is listed`).toBeVisible({ timeout: 60_000 });
+          await expect(status).toHaveAttribute("data-status", "active");
+          await expect(page.getByTestId(`engagement-${engagementId}`).filter({ visible: true }).first()).toContainText(counterparty);
+        }
+      };
+
+      const cd = await desktop(COMPANY);
+      await bookedOnPeople(cd.page, "company at a desktop");
+      await engagementActive(cd.page, "company at a desktop", workerName);
+      await cd.done();
+      const cp = await signedInOnPhone(browser, phone, COMPANY);
+      await bookedOnPeople(cp.page, "company on the phone");
+      await fitsTheScreen(cp.page, "the company's people page");
+      await engagementActive(cp.page, "company on the phone", workerName);
+      await cp.done();
+
+      const wp = await signedInOnPhone(browser, phone, worker);
+      await engagementActive(wp.page, "worker on the phone", COMPANY_ORG);
+      await fitsTheScreen(wp.page, "the worker's engagements");
+      await wp.done();
+      const wd = await desktop(worker);
+      await engagementActive(wd.page, "worker at a desktop", COMPANY_ORG);
+      await wd.done();
+
+      // Another company: its people page and its engagements carry neither this person nor this
+      // engagement, and its own session reads no row of it.
+      const outsider = email(`outsider${phone.name}`);
+      await newOrganisation(browser, outsider, "hire", `Synthetic Outsider ${phone.name} ${RUN}`, `Synthetic Outsider Org ${phone.name} ${RUN}`);
+      const od = await desktop(outsider);
+      await od.page.goto(`${BASE}/en/dashboard/company/people`);
+      await expect(od.page.getByRole("main").getByRole("heading").first()).toBeVisible({ timeout: 60_000 });
+      await od.page.reload();
+      await expect(od.page.getByRole("main").getByRole("heading").first()).toBeVisible({ timeout: 60_000 });
+      await expect(od.page.getByTestId(`booked-person-${engagementId}`), "another company's people page").toHaveCount(0);
+      await expect(od.page.getByRole("main")).not.toContainText(workerName);
+      await od.page.goto(`${BASE}/en/dashboard?result=engagements`);
+      await expect(
+        od.page.getByTestId("engagements-empty").or(od.page.getByTestId("engagements-list")).filter({ visible: true }).first(),
+        "another company's engagements answer",
+      ).toBeVisible({ timeout: 60_000 });
+      await expect(od.page.getByTestId(`engagement-${engagementId}`), "another company's engagements").toHaveCount(0);
+      await od.done();
+      const own = await fetch(`${SB_URL}/rest/v1/company_worker_engagements?id=eq.${engagementId}&select=id`, {
+        headers: { apikey: SB_ANON, Authorization: `Bearer ${await accessToken(outsider)}` },
+      });
+      expect(own.ok, "another company's own read answers").toBe(true);
+      expect(await own.json(), "another company's own session reads no row of this engagement").toEqual([]);
+      const heardHere = [...(heard.get(od.page) ?? [])].filter((n) => n.startsWith("pageerror"));
+      expect(heardHere, "no page error for the outsider").toEqual([]);
     });
     test(`M-7 (${phone.name}). the worker's work journal fits the phone`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);

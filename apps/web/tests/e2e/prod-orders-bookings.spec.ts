@@ -17,6 +17,12 @@ import { chooseDemandCountryIfEmpty } from "./demand-country";
  *                    worker accepts on the phone; both see it accepted, the
  *                    company opens the conversation, the worker sees it in the
  *                    plan. The need is closed at the end.
+ *   5.13 Hire      — the accept's engagement is visible to both sides after a
+ *                    reload: Gama finds the booked person on its people page
+ *                    and in its engagements; the worker, in Personal space,
+ *                    sees the engagement with Gama; Alfa sees neither (O-9..O-11).
+ *                    Gama↔Vytas has been active since the first run (no walk
+ *                    ends it), so the step proves it EXISTS, not that it is new.
  *   6.9  Finance   — the owner records an expense for the workspace company,
  *                    finds it in the CSV export, then cancels it.
  *   6.7  Procurement — the owner files an inquiry for the ACTIVE workspace,
@@ -385,6 +391,86 @@ test("O-7 (5.13). the accepted booking is in the worker's plan on its date", asy
   await page.goto(`/lt/dashboard/planning?view=agenda&source=booking&date=${dayFromToday(28)}`);
   await expect(page.getByTestId("planning-agenda")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId(`planning-item-booking:${bookingId}`)).toBeVisible({ timeout: 30_000 });
+  await ctx.close();
+});
+
+let engagementId = "";
+
+/** The engagements result, opened by its address: this engagement, active, after a reload. */
+async function engagementActive(page: Page, who: string, counterparty: string): Promise<void> {
+  await page.goto("/lt/dashboard?result=engagements");
+  for (const pass of ["first load", "reload"]) {
+    if (pass === "reload") await page.reload();
+    const status = page.getByTestId(`engagement-status-${engagementId}`).filter({ visible: true }).first();
+    await expect(status, `${who}, ${pass}: the engagement is listed`).toBeVisible({ timeout: 60_000 });
+    await expect(status).toHaveAttribute("data-status", "active");
+    await expect(page.getByTestId(`engagement-${engagementId}`).filter({ visible: true }).first()).toContainText(counterparty);
+  }
+}
+
+test("O-9 (5.13). Gama finds the booked worker on its people page and in its engagements", async ({ browser }) => {
+  // The accept (respond_booking_request_v4) makes or keeps ONE active engagement for the pair.
+  // Read with the manager's own token: RLS lets the owning company read only its own rows.
+  const res = await qaApi(
+    `/rest/v1/company_worker_engagements?select=id,status,companies(display_name,legal_name)&worker_id=eq.${encodeURIComponent(workerId)}&status=eq.active`,
+    bearerOf("manager"),
+  );
+  expect(res.status, "the company's own engagements answered").toBe(200);
+  const rows = (await res.json()) as { id: string; companies: { display_name: string | null; legal_name: string | null } | null }[];
+  const gama = rows.filter((r) => [r.companies?.display_name, r.companies?.legal_name].some((n) => (n ?? "").includes(GAMA)));
+  expect(gama.length, "exactly one active Gama engagement with the booked worker").toBe(1);
+  engagementId = gama[0]!.id;
+
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  for (const pass of ["first load", "reload"]) {
+    if (pass === "reload") await page.reload();
+    const row = page.getByRole("main").getByTestId(`booked-person-${engagementId}`);
+    await expect(row, `${pass}: the booked worker is on Gama's people page`).toBeVisible({ timeout: 60_000 });
+  }
+  const name = (
+    await page.getByRole("main").getByTestId(`booked-person-${engagementId}`).getByTestId("identity-card-name").first().innerText()
+  ).trim();
+  expect(name.length, "the booked person is named").toBeGreaterThan(0);
+  await engagementActive(page, "Gama", name);
+  await ctx.close();
+});
+
+test("O-10 (5.13). the worker, in Personal space on the phone, sees the engagement with Gama", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker", true);
+  // "Who do I work for" is read in Personal space: in an organization workspace the result is
+  // that organization's engagements (lib/engagements/engagements-result.ts).
+  await page.goto("/lt/dashboard");
+  const chip = page.getByTestId("workspace-chip").first();
+  if (await chip.isVisible({ timeout: 15_000 }).catch(() => false)) {
+    const personal = page.getByTestId("workspace-option-personal");
+    await chip.getByRole("button").first().click();
+    if ((await personal.getAttribute("aria-current")) !== "true") {
+      await personal.click();
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+    } else {
+      await page.keyboard.press("Escape");
+    }
+  }
+  await engagementActive(page, "the worker", GAMA);
+  await ctx.close();
+});
+
+test("O-11 (5.13). Alfa sees neither the booked person nor the engagement", async ({ browser }) => {
+  const own = await qaApi(`/rest/v1/company_worker_engagements?select=id&id=eq.${encodeURIComponent(engagementId)}`, bearerOf("owner"));
+  expect(own.status, "Alfa's own read answered").toBe(200);
+  expect(await own.json(), "Alfa's own session reads no row of Gama's engagement").toEqual([]);
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.reload();
+  await expect(page.getByRole("main").getByRole("heading").first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId(`booked-person-${engagementId}`), "Alfa's people page").toHaveCount(0);
+  await page.goto("/lt/dashboard?result=engagements");
+  await expect(
+    page.getByTestId("engagements-empty").or(page.getByTestId("engagements-list")).filter({ visible: true }).first(),
+    "Alfa's engagements answer",
+  ).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId(`engagement-${engagementId}`), "Alfa's engagements").toHaveCount(0);
   await ctx.close();
 });
 
