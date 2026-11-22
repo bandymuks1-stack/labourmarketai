@@ -125,6 +125,25 @@ describe("every door opens the ONE existing consent — nothing else grants", ()
     expect(HUB.indexOf("<DiscoverabilityConsent")).toBeLessThan(HUB.indexOf("{/* ── WHAT IS MISSING"));
   });
 
+  it("profile and onboarding fold the consent into its status line (owner decision 2026-11-22)", () => {
+    // The status line and one "read the terms and turn on" action; the FULL
+    // versioned text and the preview open in place BEFORE the grant button
+    // exists (the component's `compact` mode). OFF stays the default and only
+    // the person's explicit tap after reading turns it on. The privacy page
+    // (the canonical home) and the conversation keep the full form.
+    const HUB = read("components/app/profile-hub-overview.tsx");
+    expect(HUB).toMatch(/<DiscoverabilityConsent\s+compact\s+locale=\{locale\}\s+source="profile"/);
+    const ONBOARDING = read("app/[locale]/onboarding/page.tsx");
+    expect(ONBOARDING).toContain('<DiscoverabilityConsent compact locale={locale} source="onboarding"');
+    const PRIVACY = read("app/[locale]/dashboard/privacy/page.tsx");
+    expect(PRIVACY).not.toMatch(/<DiscoverabilityConsent\s+compact/);
+    // In compact mode the grant button exists only after the terms are open.
+    const C = read("components/app/discoverability-consent.tsx");
+    expect(C).toContain("const showTerms = !compact || opened;");
+    expect(C.indexOf("!showTerms ?")).toBeLessThan(C.indexOf('data-testid="discoverability-grant"'));
+    expect(C.indexOf("{legalBlock}", C.indexOf("!showTerms ?"))).toBeLessThan(C.indexOf('data-testid="discoverability-grant"'));
+  });
+
   it("the worker home shows the status and its one action on EVERY visit (not a once-only ask)", () => {
     const HOME = read("components/app/today/today-screen.tsx");
     expect(HOME).toContain("<HomeEmployerVisibility locale={locale} />");
