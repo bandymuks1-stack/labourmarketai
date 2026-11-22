@@ -1,8 +1,10 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { BookOpen } from "lucide-react";
 
 import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
 import { learnerInviteHref } from "@/lib/navigation/work-areas";
 import { Card } from "@/components/ui/Card";
+import { SectionHead } from "@/components/app/premium/section-head";
 import { Link } from "@/lib/i18n/navigation";
 import { readInstitutionPrograms } from "@/lib/education/programs";
 import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
@@ -77,12 +79,7 @@ export async function InstitutionProgramsSection({ organizationId }: { readonly 
   return (
     <Card compact>
       <section className="flex flex-col gap-4" data-testid="institution-programs" aria-labelledby="institution-programs-title">
-        <header className="flex flex-col gap-1">
-          <h2 id="institution-programs-title" className="font-display text-base font-semibold text-text-primary">
-            {t("title")}
-          </h2>
-          <p className="text-xs leading-relaxed text-text-secondary">{t("subtitle")}</p>
-        </header>
+        <SectionHead id="institution-programs-title" icon={BookOpen} title={t("title")} />
 
         {read.status === "unavailable" ? (
           <p className="text-xs leading-relaxed text-text-muted" data-testid="institution-programs-unavailable">{t("unavailable")}</p>
