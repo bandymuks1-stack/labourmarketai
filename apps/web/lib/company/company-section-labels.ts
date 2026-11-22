@@ -22,7 +22,9 @@ export async function readDemandReadbackLabels() {
   const tReqStatus = await getTranslations(
     "roleDashboards.buyer.requests.understanding.requestStatus",
   );
+  const tDisclosure = await getTranslations("common.disclosure");
   return {
+    showAll: (count: number) => tDisclosure("showAll", { count }),
     syntheticTitle: {
       hiringWorkers: tReadback("syntheticTitle.hiringWorkers"),
       agencyPartnership: tReadback("syntheticTitle.agencyPartnership"),
