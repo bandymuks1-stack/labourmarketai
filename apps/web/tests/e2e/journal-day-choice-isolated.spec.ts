@@ -10,11 +10,11 @@ import { BASE, isolatedStack, lit, onboard, signIn, signUp, sql, userId } from "
  * of .github/workflows/signup-isolated.yml. Synthetic person only.
  *
  *   D-1 the journal opens with the day choice: Today is chosen, Yesterday,
- *       A week ago, Another date and Earlier entries are offered;
+ *       A week ago, Calendar and Earlier entries are offered;
  *   D-2 Yesterday: the recorder asks about that day, and the saved entry's
  *       work date is yesterday while it was created today (one history,
  *       decision 0025: the real work day and the creation time stay apart);
- *   D-3 Another date: the native date picker takes a past day and the
+ *   D-3 Calendar: the native date picker takes a past day and the
  *       recorder follows it; a future day is not offered;
  *   D-4 Earlier entries leads to the entry list, where yesterday's entry is;
  *   D-5 screenshots at 375 and 1280 px (artifact `journal-day-choice`).
@@ -31,7 +31,7 @@ const OUT = join(process.cwd(), "test-results", "journal-day-choice");
 
 const dateOf = (href: string | null): string | null => href?.match(/[?&]date=(\d{4}-\d{2}-\d{2})/)?.[1] ?? null;
 
-test("D-1..D-4. the journal opens with the day; yesterday's entry keeps its work date; another date; earlier entries", async ({ page }) => {
+test("D-1..D-4. the journal opens with the day; yesterday's entry keeps its work date; calendar; earlier entries", async ({ page }) => {
   await signUp(page, BASE, W);
   await onboard(page, "work", "Synthetic Day Worker");
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
@@ -85,7 +85,7 @@ test("D-1..D-4. the journal opens with the day; yesterday's entry keeps its work
     )
     .toEqual([{ work_date: yesterday, fresh: true }]);
 
-  // D-3 Another date: ten days back through the native picker.
+  // D-3 Calendar: ten days back through the native picker.
   const tenBack = new Date(Date.parse(`${today}T00:00:00Z`) - 10 * 86_400_000).toISOString().slice(0, 10);
   await page.goto(`${BASE}/en/dashboard/journal`);
   await main.getByTestId("journal-day-choice-input").fill(tenBack);
@@ -100,6 +100,29 @@ test("D-1..D-4. the journal opens with the day; yesterday's entry keeps its work
   await main.getByTestId("journal-day-choice-earlier").click();
   await expect(main.getByTestId("journal-entries"), "D-4: the entry list").toBeInViewport({ timeout: 30_000 });
   await expect(main.getByTestId("journal-entries"), "D-4: yesterday's entry is in it").toContainText(RUN, { timeout: 30_000 });
+});
+
+test("D-6. the started entry survives a day change and the readback", async ({ page }) => {
+  await signIn(page, BASE, W);
+  await page.goto(`${BASE}/en/dashboard/journal`);
+  const main = page.getByRole("main");
+  const DRAFT = `QA-SYNTHETIC draft ${RUN}: painted the hall for 3 hours`;
+  await main.getByTestId("journal-quick-record-text").fill(DRAFT);
+  // A day change remounts the recorder; the words stay.
+  await main.getByTestId("journal-day-choice-yesterday").click();
+  await expect(main.getByTestId("journal-day-choice")).toHaveAttribute("data-choice", "yesterday", { timeout: 30_000 });
+  await expect(main.getByTestId("journal-quick-record-text"), "D-6: the words survive the day change").toHaveValue(DRAFT);
+  // The readback is open; another page and back reopens it, for the day now chosen.
+  await main.getByTestId("journal-quick-record-understand").click();
+  await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
+  await page.goto(`${BASE}/en/dashboard`);
+  await page.goto(`${BASE}/en/dashboard/journal`);
+  await main.getByTestId("journal-day-choice-weekAgo").click();
+  await expect(main.getByTestId("journal-day-choice")).toHaveAttribute("data-choice", "weekAgo", { timeout: 30_000 });
+  await expect(main.getByTestId("worklog-flow"), "D-6: the readback comes back after another page").toBeVisible({ timeout: 30_000 });
+  // Starting over keeps the words in the field.
+  await main.getByTestId("journal-quick-record-restart").click();
+  await expect(main.getByTestId("journal-quick-record-text")).toHaveValue(DRAFT);
 });
 
 test("D-5. screenshots at 375 and 1280 px", async ({ browser }) => {

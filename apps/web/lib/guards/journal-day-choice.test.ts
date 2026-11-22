@@ -3,12 +3,18 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { journalDayChoice, journalDayHref, shiftIsoDay } from "@/lib/journal/day-choice";
+import {
+  QUICK_RECORD_DRAFT_KEY,
+  clearQuickRecordDraft,
+  readQuickRecordDraft,
+  writeQuickRecordDraft,
+} from "@/lib/journal/quick-record-draft";
 
 const JOURNAL = resolve(__dirname, "../../app/[locale]/dashboard/journal");
 
 /**
  * WORK JOURNAL DATE CHOICE (owner P1, 2026-11-21). The journal opens with the
- * day the work happened: today, yesterday, a week ago, another date, or the
+ * day the work happened: today, yesterday, a week ago, the calendar, or the
  * earlier entries. It is the calendar's own `?date=`, so every recording door
  * on the page takes that day, and an edit keeps its saved date.
  */
@@ -62,12 +68,61 @@ describe("journal date choice", () => {
     expect(src).toMatch(/v <= today/);
   });
 
+  it("the five options read exactly as the owner named them (2026-11-22)", () => {
+    const en = JSON.parse(readFileSync(resolve(__dirname, "../../messages/en/journal.json"), "utf8")).dayChoice;
+    expect(en).toEqual({
+      today: "Today",
+      yesterday: "Yesterday",
+      weekAgo: "A week ago",
+      calendar: "Calendar",
+      earlier: "Earlier entries",
+    });
+    const src = readFileSync(resolve(JOURNAL, "day-choice.tsx"), "utf8");
+    // The labels are the words alone: no date in place of "Calendar", no arrow.
+    expect(src).toMatch(/\{t\("dayChoice\.calendar"\)\}/);
+    expect(src).toMatch(/\{t\("dayChoice\.earlier"\)\}\n/);
+  });
+
   it("every active locale names the five options", () => {
     for (const l of ["lt", "en", "ru", "pl", "de", "nl", "sv"]) {
       const j = JSON.parse(readFileSync(resolve(__dirname, `../../messages/${l}/journal.json`), "utf8"));
-      for (const k of ["today", "yesterday", "weekAgo", "otherDate", "earlier"]) {
+      for (const k of ["today", "yesterday", "weekAgo", "calendar", "earlier"]) {
         expect(typeof j.dayChoice?.[k], `${l} ${k}`).toBe("string");
       }
     }
+  });
+
+  it("the started entry is kept for the tab until it is saved", () => {
+    const m = new Map<string, string>();
+    const s = {
+      getItem: (k: string) => m.get(k) ?? null,
+      setItem: (k: string, v: string) => void m.set(k, v),
+      removeItem: (k: string) => void m.delete(k),
+    };
+    expect(readQuickRecordDraft(s)).toBeNull();
+    writeQuickRecordDraft({ text: "tiled 4 hours", understood: false }, s);
+    expect(readQuickRecordDraft(s)).toEqual({ text: "tiled 4 hours", understood: false });
+    writeQuickRecordDraft({ text: "tiled 4 hours", understood: true }, s);
+    expect(readQuickRecordDraft(s)?.understood).toBe(true);
+    // Emptying the field drops the draft; a foreign or broken value is ignored.
+    writeQuickRecordDraft({ text: "  ", understood: false }, s);
+    expect(m.has(QUICK_RECORD_DRAFT_KEY)).toBe(false);
+    m.set(QUICK_RECORD_DRAFT_KEY, "{not json");
+    expect(readQuickRecordDraft(s)).toBeNull();
+    m.set(QUICK_RECORD_DRAFT_KEY, JSON.stringify({ v: 2, text: "x" }));
+    expect(readQuickRecordDraft(s)).toBeNull();
+    writeQuickRecordDraft({ text: "kept", understood: false }, s);
+    clearQuickRecordDraft(s);
+    expect(readQuickRecordDraft(s)).toBeNull();
+    // Refused storage keeps nothing and throws nothing.
+    const refusing = { getItem: () => { throw new Error("no"); }, setItem: () => { throw new Error("no"); }, removeItem: () => { throw new Error("no"); } };
+    expect(() => writeQuickRecordDraft({ text: "a", understood: false }, refusing)).not.toThrow();
+    expect(readQuickRecordDraft(refusing)).toBeNull();
+  });
+
+  it("the recorder restores the draft on mount and clears it once saved", () => {
+    const src = readFileSync(resolve(JOURNAL, "quick-record.tsx"), "utf8");
+    expect(src).toMatch(/readQuickRecordDraft\(\)/);
+    expect(src).toMatch(/onSaved=\{\(\) => clearQuickRecordDraft\(\)\}/);
   });
 });

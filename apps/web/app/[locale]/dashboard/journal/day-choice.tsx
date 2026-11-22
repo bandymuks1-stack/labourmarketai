@@ -11,7 +11,7 @@ import { journalDayChoice, journalDayHref, shiftIsoDay, type JournalDayChoiceKey
 /**
  * THE WORK DAY, CHOSEN FIRST (owner P1, 2026-11-21). Opening the journal, the
  * person picks the day the work happened: today, yesterday, a week ago,
- * another date, or goes to the earlier entries.
+ * the calendar, or goes to the earlier entries.
  *
  * It is the SAME `?date=` the journal calendar already sets — no second
  * source of "which day": the quick recorder, the detailed form and the
@@ -24,7 +24,6 @@ export function JournalDayChoice({
   today,
   selected,
   full,
-  selectedLabel = null,
 }: {
   /** The person's own calendar day (`viewerWorkToday`), `YYYY-MM-DD`. */
   today: string;
@@ -32,8 +31,6 @@ export function JournalDayChoice({
   selected: string | null;
   /** Keep the detailed form open when the day changes. */
   full: boolean;
-  /** The chosen day as the page formats it, shown on "another date". */
-  selectedLabel?: string | null;
 }) {
   const t = useTranslations("journal");
   const router = useRouter();
@@ -82,7 +79,7 @@ export function JournalDayChoice({
           data-testid="journal-day-choice-other"
         >
           {chosen === "other" && <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />}
-          {chosen === "other" && selectedLabel ? selectedLabel : t("dayChoice.otherDate")}
+          {t("dayChoice.calendar")}
         </button>
         <input
           ref={inputRef}
@@ -106,7 +103,7 @@ export function JournalDayChoice({
         className="inline-flex min-h-11 items-center px-1 text-sm font-medium text-brand-blue underline-offset-4 hover:underline"
         data-testid="journal-day-choice-earlier"
       >
-        {t("dayChoice.earlier")} →
+        {t("dayChoice.earlier")}
       </Link>
     </nav>
   );
