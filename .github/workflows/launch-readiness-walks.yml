@@ -130,7 +130,7 @@ jobs:
           }
           # Plan walks whose walk job ran today (UTC) count against the daily cap.
           today=$(date -u +%F); ran_today=0
-          while IFS=$'\t' read -r t c id; do
+          while IFS=$'\t' read -r t c id _created; do
             [ -n "${id:-}" ] || continue
             case "$t" in "prod-qa-walk "*) ;; *) continue ;; esac
             pair_ok=0; for pair in $PLAN; do [ "$t" = "prod-qa-walk ${pair%%:*} ${pair##*:}" ] && pair_ok=1; done
