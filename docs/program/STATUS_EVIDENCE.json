@@ -12,10 +12,10 @@
   "profile-cv-history|phone-375": {
    "spec": "profile-cv-history",
    "device": "phone-375",
-   "run": 44856987867,
-   "result": "success",
-   "build": "d447a639",
-   "at": "2026-11-21T02:54:46Z"
+   "run": 45051053618,
+   "result": "failure",
+   "build": "ed4ecf85",
+   "at": "2026-11-22T17:54:43Z"
   },
   "company-chain|phone": {
    "spec": "company-chain",
@@ -252,10 +252,10 @@
   "buyer-workspace|desktop": {
    "spec": "buyer-workspace",
    "device": "desktop",
-   "run": 44971584269,
+   "run": 45003241107,
    "result": "failure",
-   "build": "eed72052",
-   "at": "2026-11-22T01:31:38Z"
+   "build": "9f587dd6",
+   "at": "2026-11-22T08:32:19Z"
   },
   "marketplace|desktop": {
    "spec": "marketplace",
@@ -268,18 +268,18 @@
   "orders-bookings|phone": {
    "spec": "orders-bookings",
    "device": "phone",
-   "run": 44970101854,
+   "run": 45052181467,
    "result": "success",
-   "build": "eed72052",
-   "at": "2026-11-22T01:20:58Z"
+   "build": "ed4ecf85",
+   "at": "2026-11-22T18:12:17Z"
   },
   "orders-bookings|desktop": {
    "spec": "orders-bookings",
    "device": "desktop",
-   "run": 44968869530,
+   "run": 45049554634,
    "result": "success",
-   "build": "eed72052",
-   "at": "2026-11-22T01:07:36Z"
+   "build": "ed4ecf85",
+   "at": "2026-11-22T17:42:39Z"
   },
   "marketplace-goods-services|phone": {
    "spec": "marketplace-goods-services",
@@ -412,10 +412,10 @@
   "invited-worker|phone": {
    "spec": "invited-worker",
    "device": "phone",
-   "run": 44901750489,
+   "run": 45001807853,
    "result": "failure",
-   "build": "eed72052",
-   "at": "2026-11-21T12:03:23Z"
+   "build": "397710f1",
+   "at": "2026-11-22T08:14:34Z"
   },
   "fresh-activation|desktop": {
    "spec": "fresh-activation",

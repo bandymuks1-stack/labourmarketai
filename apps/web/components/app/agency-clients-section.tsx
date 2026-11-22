@@ -16,6 +16,7 @@ import {
   saveAgencyClientAction,
   type AgencyClientActionState,
 } from "@/lib/agency/clients-actions";
+import { FoldedRows } from "@/components/app/folded-rows";
 import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -40,6 +41,8 @@ export interface AgencyClientsLabels {
   readonly notLinkable: string;
   readonly clientsEmpty: string;
   readonly demandsHeading: string;
+  /** "Show all ({count})" with `{count}` left for the list to fill. */
+  readonly showAll: string;
   readonly demandsEmpty: string;
   readonly demandsEmptyCta: string;
   readonly unassignedHeading: string;
@@ -128,6 +131,7 @@ export function AgencyClientsSection({
   locale: string;
   labels: AgencyClientsLabels;
 }) {
+  const showAll = (count: number) => labels.showAll.replace("{count}", String(count));
   const [saveState, saveAction, savePending] = useActionState(
     saveAgencyClientAction,
     IDLE,
@@ -253,8 +257,12 @@ export function AgencyClientsSection({
                   ? labels.unassignedHeading
                   : labels.demandsHeading}
               </h3>
-              <ul className="flex flex-col gap-1.5">
-                {unassigned.map((d) => (
+              <FoldedRows
+                rows={unassigned}
+                showAll={showAll}
+                testId="agency-clients-unassigned-rest"
+                listClassName="flex flex-col gap-1.5"
+                render={(d) => (
                   <DemandRow key={d.id} demand={d} locale={locale} labels={labels}>
                     {clientRows.length > 0 && (
                       <form
@@ -288,8 +296,8 @@ export function AgencyClientsSection({
                       </form>
                     )}
                   </DemandRow>
-                ))}
-              </ul>
+                )}
+              />
             </div>
           )}
 
@@ -402,11 +410,13 @@ export function AgencyClientsSection({
               </a>
             </p>
           ) : (
-            <ul className="flex flex-col gap-1.5">
-              {demandRows.map((d) => (
-                <DemandRow key={d.id} demand={d} locale={locale} labels={labels} />
-              ))}
-            </ul>
+            <FoldedRows
+              rows={demandRows}
+              showAll={showAll}
+              testId="agency-clients-demands-rest"
+              listClassName="flex flex-col gap-1.5"
+              render={(d) => <DemandRow key={d.id} demand={d} locale={locale} labels={labels} />}
+            />
           )}
         </div>
       )}

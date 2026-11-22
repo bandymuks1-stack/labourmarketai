@@ -9,6 +9,7 @@ import {
   PASSWORD,
   publishNeed,
   SB_ANON,
+  SB_SERVICE,
   SB_URL,
   setUpCompany,
   signIn,
@@ -1819,6 +1820,92 @@ test.describe("popups on a short phone screen", () => {
       return el.getBoundingClientRect().bottom;
     });
     expect(bottom).toBeLessThanOrEqual(320);
+  });
+});
+
+// ── THE ORGANISATION DOORS ARE ONE ROW ON A PHONE (2026-11-22) ──────────────
+// Coordinator decision on the owner's orders of 2026-11-21/22: horizontal
+// card rows with the next card peeking. Wrapped, 8–9 doors took three or four
+// rows (150–200 px) above every organisation page (UX gap SH-6).
+test.describe("organisation doors on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("doors-agency");
+
+  test("one row that scrolls sideways, the next door peeking, every door reachable", async ({ browser }) => {
+    await newOrganisation(browser, OWNER, "agency", `Synthetic Doors Owner ${RUN}`, `Synthetic Doors Staffing ${RUN}`);
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company`);
+    const nav = page.getByTestId("organization-doors");
+    await expect(nav).toBeVisible({ timeout: 60_000 });
+    const row = await nav.evaluate((el) => {
+      const doors = [...el.querySelectorAll<HTMLElement>('[data-testid^="organization-door-"]')];
+      const r = el.getBoundingClientRect();
+      return {
+        count: doors.length,
+        tops: new Set(doors.map((d) => Math.round(d.getBoundingClientRect().top))).size,
+        height: r.height,
+        scrolls: el.scrollWidth > el.clientWidth,
+        peek: doors.some((d) => { const b = d.getBoundingClientRect(); return b.left < r.right - 8 && b.right > r.right + 2; }),
+        minHeight: Math.min(...doors.map((d) => d.getBoundingClientRect().height)),
+      };
+    });
+    expect(row.count, "the doors render").toBeGreaterThan(5);
+    expect(row.tops, "all doors sit in one row").toBe(1);
+    expect(row.height, "the row is one door high").toBeLessThanOrEqual(60);
+    expect(row.scrolls, "the row scrolls sideways inside itself").toBe(true);
+    expect(row.peek, "the next door shows at the edge").toBe(true);
+    expect(row.minHeight, "doors keep the 44 px floor").toBeGreaterThanOrEqual(43.5);
+    await fitsTheScreen(page, "the organisation doors row");
+    const last = nav.locator('[data-testid^="organization-door-"]').last();
+    const href = await last.getAttribute("href");
+    await last.scrollIntoViewIfNeeded();
+    await last.tap();
+    await page.waitForURL((u) => !!href && u.pathname === href, { timeout: 30_000 });
+    await done();
+  });
+});
+
+// ── THE PEOPLE PAGE'S READINESS TABLE FOLDS AND FITS (2026-11-22) ────────────
+// Coordinator decision 2026-11-22, item 3: the readiness table repeated the
+// people listed just above (a second 600 px list at 390 px) and its third
+// column was cut. It now folds behind its title and fits the phone when open.
+test.describe("the people page's readiness signals on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("readiness-company");
+
+  test("folded behind its title; opened, no column runs past the card", async ({ browser }) => {
+    const org = await newOrganisation(browser, OWNER, "hire", `Synthetic Readiness Owner ${RUN}`, `Synthetic Readiness Co ${RUN}`);
+    // Three synthetic people on the roster (local stack only): the table shows when the roster has people.
+    for (let i = 1; i <= 3; i += 1) {
+      const res = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+        method: "POST",
+        headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email(`readiness-person${i}`), password: PASSWORD, email_confirm: true }),
+      });
+      expect(res.ok, "the synthetic person is created on the local stack").toBe(true);
+    }
+    const company = sql<{ id: string }>(`select legacy_company_id as id from public.organizations where id = ${lit(org.orgId)}`)[0]!.id;
+    sqlExec(
+      `insert into public.company_workers (company_id, worker_id, status)
+       select ${lit(company)}, w.id, 'active' from public.workers w join auth.users u on u.id = w.profile_id
+       where u.email like ${lit(`phone.readiness-person%.${RUN}@local.test`)}`,
+    );
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company/people`);
+    const card = page.getByTestId("worker-readiness-summary");
+    await expect(card).toBeVisible({ timeout: 60_000 });
+    await expect(card.getByTestId("worker-readiness-row").first()).toBeHidden();
+    await card.getByTestId("worker-readiness-fold").locator(":scope > summary").tap();
+    await expect(card.getByTestId("worker-readiness-row").first()).toBeVisible();
+    const fit = await card.evaluate((el) => {
+      const table = el.querySelector("table")!;
+      return { table: table.getBoundingClientRect().right, card: el.getBoundingClientRect().right };
+    });
+    expect(fit.table, "the table ends inside the card on a 390 px phone").toBeLessThanOrEqual(fit.card + 1);
+    await fitsTheScreen(page, "the people page with the readiness signals open");
+    await done();
   });
 });
 

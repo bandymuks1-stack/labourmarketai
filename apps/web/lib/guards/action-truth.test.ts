@@ -75,7 +75,10 @@ describe("info-only cards do not look clickable", () => {
     "components/app/worker-readiness-summary.tsx",
   ]) {
     it(`${rel} has no pointer cursor / hover-button on the card`, () => {
-      const src = read(rel);
+      // The card itself must not look clickable. A disclosure's own <summary>
+      // row is a real control (worker-readiness-summary folds, coordinator
+      // decision 2026-11-22 item 3), so it is left out of the check.
+      const src = read(rel).replace(/<summary\b[^>]*>/g, "");
       expect(src).not.toMatch(/cursor-pointer|hover:border-brand|hover:bg-brand/);
     });
   }

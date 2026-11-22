@@ -121,12 +121,12 @@ export default async function ForCompaniesPage({
       {/* The B2B intent versions, linked from the page they belong to (not only
           the sitemap): a crew or subcontractor, or a staffing partner. */}
       <section className="mx-auto max-w-container px-6 pb-12 sm:px-12" data-testid="companies-need-links">
-        <Card compact className="flex flex-col gap-2">
+        <Card compact className="flex flex-col">
           {EMPLOYER_INTENT_KEYS.map((intent) => (
             <Link
               key={intent}
               href={employerIntentPath(intent)}
-              className="w-fit text-sm font-semibold text-text-primary hover:text-brand-cyan"
+              className="inline-flex min-h-11 w-fit items-center text-sm font-semibold text-text-primary hover:text-brand-cyan"
             >
               {t(`needs.${intent}.metaTitle`)} →
             </Link>

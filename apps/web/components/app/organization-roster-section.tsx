@@ -1,4 +1,5 @@
 import { getTranslations } from "next-intl/server";
+import { Explain } from "@/components/app/premium/grammar";
 
 import { Link } from "@/lib/i18n/navigation";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
@@ -69,6 +70,7 @@ export async function OrganizationRosterSection({
   readonly linkCandidates?: readonly RosterLinkCandidate[];
 }) {
   const t = await getTranslations("organizationRoster");
+  const tDisclosure = await getTranslations("common.disclosure");
   // The relationship vocabulary has ONE home. Reusing it here means the roster
   // and the evidence importer can never disagree about what a word means.
   const tRel = await getTranslations("evidenceImport.relationship");
@@ -86,7 +88,10 @@ export async function OrganizationRosterSection({
     >
       <header className="flex flex-col gap-1">
         <h2 className={HEADING}>{t("title")}</h2>
-        <p className="text-sm leading-relaxed text-text-secondary">{t("intro")}</p>
+        {/* One row, the detail one tap away (coordinator decision 2026-11-22, item 5). */}
+        <Explain summary={tDisclosure("details")} testId="organization-roster-explain">
+          <p>{t("intro")}</p>
+        </Explain>
       </header>
       {children}
     </div>
