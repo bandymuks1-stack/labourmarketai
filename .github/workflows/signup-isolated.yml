@@ -212,7 +212,10 @@ concurrency:
 jobs:
   signup-isolated:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # 45 stopped the walk at test 442 of 452 (2026-11-22, one worker, ~7 min of
+    # setup before it): the job was cancelled by its own limit, not by a
+    # failure. Room for the whole walk; no test is skipped or shortened.
+    timeout-minutes: 60
     env:
       APP_ORIGIN: http://127.0.0.1:3000
       # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
