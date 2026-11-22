@@ -62,6 +62,9 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("about");
+  // Each section keeps its heading and lead in view; its body folds behind
+  // one label (coordinator decision 2026-11-22).
+  const moreLabel = (await getTranslations({ locale, namespace: "common.disclosure" }))("details");
   const legal = await getTranslations("legal");
   const audiences = t.raw("loops") as Audience[];
   const tones = ["cyan", "blue", "violet"] as const;
@@ -118,6 +121,7 @@ export default async function AboutPage({
       <div className="flex flex-col gap-14" data-testid="about-loops">
         {audiences.map((a, i) => (
           <AboutAudience
+            moreLabel={moreLabel}
             key={a.id}
             id={a.id}
             heading={a.heading}
@@ -132,6 +136,7 @@ export default async function AboutPage({
       </div>
 
       <AboutEvidenceGraph
+        moreLabel={moreLabel}
         heading={t("evidence.heading")}
         lead={t("evidence.lead")}
         chainLabel={t("evidence.chainLabel")}
@@ -142,6 +147,7 @@ export default async function AboutPage({
       />
 
       <AboutBeforeAfter
+        moreLabel={moreLabel}
         heading={t("afterHire.heading")}
         lead={t("afterHire.lead")}
         stages={t.raw("afterHire.stages") as string[]}
@@ -154,6 +160,7 @@ export default async function AboutPage({
       />
 
       <AboutTrustTiers
+        moreLabel={moreLabel}
         heading={t("trust.heading")}
         lead={t("trust.lead")}
         tiers={tiers}
@@ -162,6 +169,7 @@ export default async function AboutPage({
       />
 
       <AboutPrivacySplit
+        moreLabel={moreLabel}
         heading={t("privacy.heading")}
         lead={t("privacy.lead")}
         privateLabel={t("privacy.privateLabel")}

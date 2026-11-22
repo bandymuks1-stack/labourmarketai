@@ -209,7 +209,6 @@
     "formLabelLabel": "Location",
     "formLabelPlaceholder": "City or region",
     "formPriceLabel": "Price",
-    "formPricePlaceholder": "e.g. €450/month or by agreement",
     "priceHint": "Price is optional and descriptive. No payment is taken here.",
     "save": "Save",
     "saving": "Saving…",
@@ -2976,8 +2975,7 @@
           "label": "How many workers needed"
         },
         "salary": {
-          "label": "Salary (€)",
-          "placeholder": "E.g., 2200"
+          "label": "Salary (€)"
         },
         "countries": {
           "label": "Preferred countries (ISO codes)",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Hours per worker",
               "totalHours": "Total hours (optional override)",
               "rate": "Hourly / day rate",
-              "ratePlaceholder": "e.g. 20",
               "country": "Country / location",
               "materials": "Materials",
               "equipment": "Equipment / tools",
@@ -7168,7 +7165,6 @@
       "countryPlaceholder": "e.g. LT",
       "remoteLabel": "Can be done remotely",
       "rateLabel": "Rate (optional)",
-      "ratePlaceholder": "e.g. approx. 25 EUR/h, negotiable",
       "rateHint": "Free text only — for example an indicative hourly rate."
     },
     "save": "Save",
@@ -13088,6 +13084,7 @@
     },
     "goToRoster": "Go to the roster",
     "invalidLabel": "Check the e-mail address — the invitation was not sent.",
+    "offerLimitLabel": "Too many offers for now. Try again later.",
     "deliveryHeading": "Invitation link",
     "deliveryCreated": "Not e-mailed — e-mail delivery is not configured. Copy the link and send it to the client yourself.",
     "deliverySent": "The invitation e-mail was sent. You can still copy the link.",
@@ -19762,7 +19759,6 @@
       },
       "capacity": "People",
       "rate": "Rate",
-      "ratePlaceholder": "e.g. 32 €/h, or fixed price",
       "period": "Period",
       "start": "Start",
       "end": "End",
