@@ -122,8 +122,11 @@ export async function readCompanyGalleryLabels() {
 
 export async function readAgencyClientsLabels() {
   const tAgencyClients = await getTranslations("agencyClients");
+  const tFold = await getTranslations("common.disclosure");
   return {
     title: tAgencyClients("title"),
+    // The list fills in its own count (client component: labels are strings).
+    showAll: tFold("showAll", { count: "{count}" }),
     subtitle: tAgencyClients("subtitle"),
     gatedHeading: tAgencyClients("gatedHeading"),
     gatedBody: tAgencyClients("gatedBody"),
