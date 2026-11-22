@@ -130,6 +130,12 @@ async function workspaceSwitch(page: Page, optionId: string): Promise<void> {
   await expect(page.getByTestId("workspace-switch-failed")).toHaveCount(0);
 }
 
+const messagesIn = (conversationId: string) =>
+  sql<{ n: number }>(`select count(*)::int as n from public.conversation_messages where conversation_id = ${lit(conversationId)}`)[0]?.n ?? 0;
+
+const teamOffers = (orgId: string) =>
+  sql<{ n: number }>(`select count(*)::int as n from public.team_demand_offers where team_org_id = ${lit(orgId)}`)[0]?.n ?? 0;
+
 const activeOrg = (profileId: string) =>
   sql<{ org: string | null }>(`select active_organization_id as org from public.profiles where id = ${lit(profileId)}`)[0]?.org ?? null;
 
@@ -154,6 +160,26 @@ const YESTERDAY = [
   ["EN", "Fill in yesterday's work journal"],
   ["RU", "Заполни вчерашний рабочий журнал"],
 ] as const;
+const SUBCONTRACTORS = [
+  ["LT", "Ieškau subrangovų"],
+  ["EN", "I'm looking for subcontractors"],
+  ["RU", "Ищу субподрядчиков"],
+] as const;
+const TEAM = [
+  ["LT", "Noriu pasiūlyti savo komandą"],
+  ["EN", "I want to offer my team"],
+  ["RU", "Хочу предложить свою команду"],
+] as const;
+const CANDIDATES = [
+  ["LT", "Surask kandidatus"],
+  ["EN", "Find candidates"],
+  ["RU", "Найди кандидатов"],
+] as const;
+const CONTACT = [
+  ["LT", "Padėk susisiekti"],
+  ["EN", "Help me get in touch"],
+  ["RU", "Помоги связаться"],
+] as const;
 const REPORTS = [
   ["LT", "noriu užpildyti darbo ataskaitas"],
   ["EN", "I want to fill in work reports"],
@@ -168,11 +194,16 @@ for (const device of DEVICES) {
   const ORG = `Synthetic Assistant Builders ${device.name} ${RUN}`;
   const NEED_ROLE = `Assistant walk tiler ${device.name} ${RUN}`;
   const NOTE = `QA-SYNTHETIC ${device.name} ${RUN}: installed bathroom tiles for 6 hours`;
-  const s: { owner?: Session; worker?: Session; ownerId: string; workerId: string; orgId: string } = {
-    ownerId: "",
-    workerId: "",
-    orgId: "",
-  };
+  const SERVICE = `Bathroom tiling crew ${device.name} ${RUN}`;
+  const s: {
+    owner?: Session;
+    worker?: Session;
+    ownerId: string;
+    workerId: string;
+    orgId: string;
+    needId: string;
+    conversationId: string;
+  } = { ownerId: "", workerId: "", orgId: "", needId: "", conversationId: "" };
 
   /** Stand in the company's workspace (the header's own switch), then reopen the chat. */
   const inCompany = async (page: Page) => {
@@ -208,6 +239,29 @@ for (const device of DEVICES) {
       }
       s.workerId = await userId(WORKER);
       expect(entries(s.workerId), "the worker starts with an empty journal").toEqual([]);
+      s.needId = sql<{ id: string }>(`select id from public.customer_requests where profile_id = ${lit(s.ownerId)} order by created_at limit 1`)[0]!.id;
+      // Test data on this throwaway stack: the worker also runs a small
+      // tiling service, ACTIVE, so another business can find it (the
+      // marketplace publish flow itself is walked elsewhere).
+      sqlExec(
+        `insert into public.service_offerings (provider_id, title, location_country, rate_text, status)
+         values (${lit(s.workerId)}, ${lit(SERVICE)}, 'LT', 'by agreement', 'active')`,
+      );
+      // The worker's interest in the need, and the thread to the employer it
+      // opens — the existing application door, walked in the product.
+      const { ctx, page } = await open(browser, DEVICES[0], s.worker);
+      await page.goto(`${BASE}/en/dashboard/opportunities?view=all`);
+      const box = page.getByRole("main").locator(`li[id="opp-${s.needId}"]`).first().getByTestId(`interest-${s.needId}`);
+      await expect(async () => {
+        const sent = box.getByTestId("interest-sent");
+        if (!(await sent.isVisible().catch(() => false))) await box.getByTestId("interest-express").click({ timeout: 5_000 });
+        await expect(sent).toBeVisible({ timeout: 5_000 });
+      }).toPass({ timeout: 90_000 });
+      await box.getByTestId("interest-contact-employer").click();
+      await page.waitForURL(/\/en\/dashboard\/communication\/[0-9a-f-]{36}/, { timeout: 60_000 });
+      s.conversationId = /\/communication\/([0-9a-f-]{36})/.exec(page.url())![1]!;
+      await ctx.close();
+      expect(messagesIn(s.conversationId), "the thread starts empty").toBe(0);
     });
 
     test(`J-LT (${device.name}). "Užpildyk vakarykštį darbo žurnalą": a draft dated yesterday, confirmed, saved once, readable`, async ({ browser }) => {
@@ -344,6 +398,103 @@ for (const device of DEVICES) {
       await expect(page.getByTestId("composer-input"), "it opens the assistant").toBeVisible({ timeout: 60_000 });
       await ctx.close();
     });
+
+    test(`PG (${device.name}). the goal survives a page switch: the journal day said before is kept`, async ({ browser }) => {
+      const { ctx, page } = await open(browser, device, s.worker);
+      await home(page);
+      await say(page, YESTERDAY[0][1]);
+      await lastFlow(page);
+      // Away to another page, and back through the header's way home.
+      await page.goto(`${BASE}/en/dashboard/opportunities`);
+      await page.getByTestId("shell-logo-home").filter({ visible: true }).first().click();
+      await page.waitForURL(/\/en\/dashboard$/, { timeout: 60_000 });
+      await home(page);
+      await say(page, "6 valandas");
+      const flow = await lastFlow(page);
+      await expect(flow.getByTestId("worklog-date"), "the day said before the switch is kept: yesterday").toHaveValue(await day(page, -1));
+      expect(entries(s.workerId), "nothing is saved by the switch").toHaveLength(1);
+      await ctx.close();
+    });
+
+    for (const [lang, phrase] of SUBCONTRACTORS) {
+      test(`P-${lang} (${device.name}). "${phrase}" finds real service providers`, async ({ browser }) => {
+        const { ctx, page } = await open(browser, device, s.owner);
+        await home(page);
+        await inCompany(page);
+        await say(page, phrase);
+        await expect(
+          page.locator('[data-testid="msg-assistant"]').filter({ hasText: SERVICE }).last(),
+          "the provider's active service is in the answer",
+        ).toBeVisible({ timeout: 60_000 });
+        await expect(page.getByTestId("chat-chip-link:/dashboard/service-requests").last(), "the marketplace door follows").toBeVisible();
+        await fits(page, `subcontractors ${lang}`);
+        await ctx.close();
+      });
+    }
+
+    for (const [lang, phrase] of TEAM) {
+      test(`T-${lang} (${device.name}). "${phrase}" opens the team-offer flow; nothing is offered by the sentence`, async ({ browser }) => {
+        const { ctx, page } = await open(browser, device, s.owner);
+        await home(page);
+        await inCompany(page);
+        const before = teamOffers(s.orgId);
+        await say(page, phrase);
+        const section = page.getByTestId(`team-demand-offer-section-${s.orgId}`).last();
+        await expect(section, "the team-offer form opens in the chat").toBeVisible({ timeout: 60_000 });
+        await expect(section).toHaveAttribute("open", "");
+        await expect(
+          section
+            .getByTestId(`team-offer-demand-${s.orgId}`)
+            .or(section.getByTestId(`team-offer-no-demand-${s.orgId}`))
+            .or(section.getByTestId(`team-offer-org-not-yet-${s.orgId}`)),
+          "it reads the needs this organisation may offer itself to",
+        ).toBeVisible({ timeout: 60_000 });
+        expect(teamOffers(s.orgId), "nothing is offered before the person presses the form's button").toBe(before);
+        await fits(page, `team offer ${lang}`);
+        await ctx.close();
+      });
+    }
+
+    for (const [lang, phrase] of CANDIDATES) {
+      test(`C-${lang} (${device.name}). "${phrase}" opens the candidates of the company's own need`, async ({ browser }) => {
+        const { ctx, page } = await open(browser, device, s.owner);
+        await home(page);
+        await inCompany(page);
+        await say(page, phrase);
+        await expect(
+          page
+            .getByTestId("candidates-view")
+            .or(page.getByTestId("candidates-not-structured"))
+            .or(page.getByTestId("candidates-demand-header"))
+            .filter({ visible: true })
+            .first(),
+          "the candidate search opens over the company's own need",
+        ).toBeVisible({ timeout: 60_000 });
+        await fits(page, `candidates ${lang}`);
+        await ctx.close();
+      });
+    }
+
+    for (const [lang, phrase] of CONTACT) {
+      test(`M-${lang} (${device.name}). "${phrase}" asks whom, opens the thread, and nothing is sent before Send`, async ({ browser }) => {
+        const { ctx, page } = await open(browser, device, s.worker);
+        await home(page);
+        const before = messagesIn(s.conversationId);
+        await say(page, phrase);
+        const chip = page.getByTestId(`chat-chip-oc:c:${s.conversationId}`).last();
+        await expect(chip, "the person's own counterpart is offered — the chat asks, it does not guess").toBeVisible({ timeout: 60_000 });
+        expect(messagesIn(s.conversationId), "nothing is sent by the sentence").toBe(before);
+        await chip.click();
+        await page.waitForURL(new RegExp(`/communication/${s.conversationId}`), { timeout: 60_000 });
+        const draft = `Hello, ${lang} ${device.name} ${RUN}`;
+        await page.getByTestId("communication-composer-input").fill(draft);
+        expect(messagesIn(s.conversationId), "the draft is not sent until Send").toBe(before);
+        await page.getByRole("button", { name: "Send", exact: true }).click();
+        await expect(page.locator('[data-testid^="message-text-"]', { hasText: draft })).toBeVisible({ timeout: 30_000 });
+        await expect.poll(() => messagesIn(s.conversationId), { message: "sent once, after Send", timeout: 30_000 }).toBe(before + 1);
+        await ctx.close();
+      });
+    }
 
     // Last in the group: a job-search defect must not hide the journal,
     // need and switch walks (serial groups stop at the first failure).

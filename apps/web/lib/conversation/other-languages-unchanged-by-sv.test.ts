@@ -228,7 +228,18 @@ const FILL_IS_THE_JOURNAL: readonly Intended[] = [
   ]),
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL];
+/**
+ * (f) OFFERING A TEAM IS THE TEAM-OFFER FLOW (owner P1 2026-11-22). Two
+ * catalog lines about offering a team reached the incoming-`offers` list on
+ * the bare "offer"; an OFFER verb bound to a TEAM noun now opens the ONE
+ * team-offer form (`offer-team`).
+ */
+const OFFERING_A_TEAM: readonly Intended[] = [
+  { sentence: "Not authorized to offer this team", reader: "route", now: ["offer-team", 12] },
+  { sentence: "received offer parsing - team-level facts only", reader: "route", now: ["offer-team", 12] },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).

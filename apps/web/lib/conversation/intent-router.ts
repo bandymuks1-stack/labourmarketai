@@ -189,6 +189,14 @@ export type ConversationIntent =
   //
   //    MAN REIKIA ↔ AŠ TURIU / GALIU. This is the second side.
   | "offer-capacity" // "turime 20 suvirintojų, ieškome jiems darbo" — capacity offered to the market
+  /**
+   * "Noriu pasiūlyti savo komandą" — the organisation offers ITS OWN team
+   * against an open need (owner P1 2026-11-22). Measured before this id: the
+   * sentence went to `offer-value` (6) in LT and RU and to `my-team` (6) in EN
+   * — a roster read. The answer is the existing team-offer flow
+   * (`TeamDemandOfferForm`, `offer_team_to_demand_v1`), never a second one.
+   */
+  | "offer-team"
   | "invite-client" // "noriu pakviesti klientą" — agency ↔ client connection
   | "invite-candidate" // "pakviesk darbuotoją į komandą" — roster invitation
   | "client-demand" // "ką klientas pasidalino?" — the requests clients shared
@@ -476,6 +484,25 @@ const FILL_WORK_RECORD_SOURCES = [
   `\\bf[uü]ll\\w*\\s+[^?.!]{0,40}?(${WORK_RECORD_NOUN_SOURCE})[^?.!]{0,20}?\\baus\\b`,
   `\\bvul\\s+[^?.!]{0,40}?(${WORK_RECORD_NOUN_SOURCE})[^?.!]{0,20}?\\bin\\b`,
 ] as const;
+/** A request to get in touch that names nobody — "Padėk susisiekti", "Help
+ *  me get in touch", "Помоги связаться". Read by the `open-conversation` rule
+ *  and by `isBareContactRequest` (the handler then asks WHOM). */
+const BARE_CONTACT_SOURCES = [
+  "\\bpadek\\w*\\s+(?:man\\s+)?(?:susisiekt|susisiek|parasyt|pasikalbet)",
+  "\\bhelp\\s+me\\s+(?:to\\s+)?(?:get\\s+in\\s+touch|contact|reach\\s+out|message)",
+  "помог[^\\s]*\\s+(?:мне\\s+)?(?:связаться|написать|выйти\\s+на\\s+связь)",
+  "\\bhilf\\s+mir\\b[^?.!]{0,20}(?:kontakt|schreiben|erreichen)",
+  "\\bhelp\\s+me\\b[^?.!]{0,20}(?:contact\\s+opnemen|in\\s+contact|bereiken)",
+  "\\bpom[oó][zż]\\s+(?:mi\\s+)?(?:si[eę]\\s+)?(?:skontaktowa|napisa|dotrze)",
+] as const;
+const SV_BARE_CONTACT_SOURCE = "\\bhjalp\\s+mig\\b[^?.!]{0,20}(?:kontakt|skriva|na\\s+)";
+
+/** Up to three words between an OFFER verb and the TEAM noun — never a word
+ *  for a candidate or a worker ("pasiūlyk kandidatą komandai" proposes a
+ *  person, not the team). See the `offer-team` rule. */
+const OFFER_TEAM_GAP =
+  "(?:(?!kandidat|darbuotoj|candidat|worker|кандидат|работник|kandydat|pracownik|bewerber|mitarbeiter|medewerker|kandidaat)[^\\s]+\\s+){0,3}?";
+
 /** sv — "fyll i tidrapporten / dagboken". Swedish sentences only (see `sv()`). */
 const SV_FILL_WORK_RECORD_SOURCE =
   "\\bfyll(?:a|er|de)?\\s+i\\b[^?.!]{0,40}?(tidrapport|rapport|dagbok|arbetslogg|journal)";
@@ -3303,6 +3330,27 @@ const RULES: IntentRule[] = [
     ],
   },
   {
+    /**
+     * OFFER OUR TEAM (owner P1 2026-11-22). An OFFER verb bound to a TEAM noun,
+     * by stem and in either order (de/nl put the verb last). Weight 12: above
+     * `offer-value` and `my-team` (6), which these sentences reached before.
+     * The words between may not name a candidate or a worker — "pasiūlyk
+     * kandidatą komandai" proposes a PERSON (`propose-candidate`).
+     */
+    intent: "offer-team",
+    patterns: [
+      p(`(pasiul|siul)\\w*\\s+${OFFER_TEAM_GAP}(komand|brigad|ekip)`, 12),
+      p(`\\boffer(?:ing|s|ed)?\\b\\s+${OFFER_TEAM_GAP}(team|crew|brigade|squad)s?\\b`, 12),
+      p(`предлож[^\\s]*\\s+${OFFER_TEAM_GAP}(команд|бригад)`, 12), // `\w` is ASCII-only, so Cyrillic endings need `[^\s]`
+      p(`\\bbiete\\w*\\s+${OFFER_TEAM_GAP}(team|brigade|kolonne)`, 12),
+      p(`\\b(team|brigade|kolonne)\\w*\\s+(?:[^\\s]+\\s+){0,2}?(anbieten|anzubieten)`, 12),
+      p(`\\bbied\\w*\\s+${OFFER_TEAM_GAP}(team|ploeg)`, 12),
+      p(`\\b(team|ploeg)\\w*\\s+(?:[^\\s]+\\s+){0,2}?aan\\s*(te\\s+)?bied`, 12),
+      p(`(zaoferow|oferow|zaproponow)\\w*\\s+${OFFER_TEAM_GAP}(zesp[oó][lł]|zespo|brygad|ekip)`, 12),
+      sv(`\\berbjud\\w*\\s+${OFFER_TEAM_GAP}(team|arbetslag|lag)\\b`, 12),
+    ],
+  },
+  {
     // FIND BUSINESS PARTNERS (owner 2026-10-01). Direction rule, not a
     // deny-list: a seek verb (any launch language) bound, within three
     // words, to the PARTNER noun. The words between may never be a WORK noun
@@ -3326,7 +3374,8 @@ const RULES: IntentRule[] = [
           // a job.
           "tiekej[^\\s]*|supplier[^\\s]*|subrangov[^\\s]*|subcontractor[^\\s]*|paslaug[^\\s]*\\s+teikej[^\\s]*|" +
           "service\\s+provider[^\\s]*|lieferant[^\\s]*|subunternehmer[^\\s]*|leverancier[^\\s]*|onderaannemer[^\\s]*|" +
-          "поставщик[^\\s]*|подрядчик[^\\s]*|dostawc[^\\s]*|podwykonawc[^\\s]*|uslugodawc[^\\s]*)",
+          // "субподрядчиков" carries its prefix: the token starts with "суб".
+          "поставщик[^\\s]*|(?:суб)?подрядчик[^\\s]*|dostawc[^\\s]*|podwykonawc[^\\s]*|uslugodawc[^\\s]*)",
         15,
       ),
       // sv (2026-11-12) — "Jag vill hitta affärspartner", "vi söker
@@ -3778,6 +3827,12 @@ const RULES: IntentRule[] = [
     patterns: [
       p("\\b(?:parasyk|parasykite|rasyk)\\s+(?:(?:jam|jai|zinute|zinutes)\\s+)?(?!siai\\b|sitam\\b|siam\\b|tam\\b|tai\\b|visiems\\b|imonei|imonej|darbdav|man\\b|kam\\b|laisk|cv\\b|ataskait|santrauk|pranesim|aprasym|tekst|atsakym|pasiulym|skelbim|zinut)[^\\s]{3,}", 9),
       p("(?:pokalb\\w*|pasikalb\\w*)\\s+su\\s+[^\\s]{3,}", 12),
+      // A CONTACT REQUEST WITH NOBODY NAMED (owner P1 2026-11-22): "Padėk
+      // susisiekti", "Help me get in touch", "Помоги связаться" scored 0. The
+      // handler asks WHICH of the person's own counterparts they mean; nothing
+      // is created or sent until a person is picked and the message is sent.
+      ...BARE_CONTACT_SOURCES.map((source) => p(source, 10)),
+      sv(SV_BARE_CONTACT_SOURCE, 10),
       p("\\bsusisiek\\s+su\\s+(?!siuo\\b|sia\\b|siai\\b|imone)[^\\s]{3,}", 12),
       p("\\b(?:message|chat\\s+with|talk\\s+to|open\\s+(?:a\\s+)?(?:conversation|chat)\\s+with)\\s+(?!the\\b|this\\b|my\\b|them\\b|an?\\b|company\\b|employer\\b|us\\b|me\\b|support\\b)[^\\s]{2,}", 10),
       p("(?:напиши|написать|свяжись\\s+с|открой\\s+(?:чат|диалог)\\s+с)\\s+(?!этой\\b|этому\\b|компании|работодател)[^\\s]{3,}", 10),
@@ -4316,6 +4371,20 @@ export function isExplicitJournalRequest(text: string): boolean {
   if (!q.trim()) return false;
   if (JOURNAL_REQUEST_PATTERNS.some((re) => re.test(q))) return true;
   return looksSwedish(text) && (SV_JOURNAL_REQUEST.re.test(q) || SV_FILL_WORK_RECORD.re.test(q));
+}
+
+/**
+ * A request to get in touch that names NOBODY ("Padėk susisiekti", "Help me
+ * get in touch", "Помоги связаться") — the `open-conversation` patterns for
+ * it, read on their own so the handler knows to ASK whom rather than search
+ * for a name the sentence does not contain.
+ */
+const BARE_CONTACT_REQUEST: readonly RegExp[] = BARE_CONTACT_SOURCES.map((source) => p(source).re);
+const SV_BARE_CONTACT = p(SV_BARE_CONTACT_SOURCE);
+export function isBareContactRequest(text: string): boolean {
+  const q = fold(text ?? "");
+  if (BARE_CONTACT_REQUEST.some((re) => re.test(q))) return true;
+  return looksSwedish(text ?? "") && SV_BARE_CONTACT.re.test(q);
 }
 
 /**

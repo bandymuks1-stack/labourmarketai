@@ -173,6 +173,9 @@ on:
       - "apps/web/lib/conversation/worklog-extract.ts"
       - "apps/web/components/app/conversation/worker-worklog-flow.tsx"
       - "apps/web/components/app/conversation/chat/conversation-chat.tsx"
+      - "apps/web/components/app/team-demand-offer-form.tsx"
+      - "apps/web/lib/communication/chat-open-conversation.ts"
+      - "apps/web/lib/marketplace/service-requests.ts"
 
 permissions:
   contents: read

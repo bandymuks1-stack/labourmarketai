@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { classifyIntent, isExplicitJournalRequest, withoutJournalRequest } from "./intent-router";
+import { classifyIntent, isBareContactRequest, isExplicitJournalRequest, withoutJournalRequest } from "./intent-router";
 import { INTENT_REGISTRY } from "./intent-registry";
 import { extractWorkLog, journalDraftReadiness } from "./worklog-extract";
 import { logWorkNotesRefusal } from "./worker-schemas";
@@ -182,4 +182,50 @@ describe("reads stay reads: the report and statistics questions keep their own d
       expect(classifyIntent(phrase).intent).not.toBe("log-work");
     },
   );
+});
+
+/**
+ * THE SECOND OWNER LIST (2026-11-22): four more goals with AI off. Each
+ * reaches an existing door; none of them writes or sends from the sentence.
+ *   find-partners     → the services others publish (service_offering.discover's read), then the doors
+ *   offer-team        → the ONE team-offer form (TeamDemandOfferForm, kind "organization")
+ *   candidates        → the candidates of the company's own needs (server-scoped)
+ *   open-conversation → asks WHICH of the person's own counterparts; the thread's
+ *                       Send is the only thing that sends
+ */
+const SECOND: ReadonlyArray<{ intent: string; phrases: readonly string[] }> = [
+  { intent: "find-partners", phrases: ["Ieškau subrangovų", "I'm looking for subcontractors", "Ищу субподрядчиков"] },
+  { intent: "offer-team", phrases: ["Noriu pasiūlyti savo komandą", "I want to offer my team", "Хочу предложить свою команду"] },
+  { intent: "candidates", phrases: ["Surask kandidatus", "Find candidates", "Найди кандидатов"] },
+  { intent: "open-conversation", phrases: ["Padėk susisiekti", "Help me get in touch", "Помоги связаться"] },
+];
+
+describe("the second owner list reaches its real action, in LT, EN and RU", () => {
+  for (const { intent, phrases } of SECOND) {
+    for (const phrase of phrases) {
+      it(`"${phrase}" → ${intent}`, () => {
+        expect(classifyIntent(phrase).intent).toBe(intent);
+      });
+    }
+  }
+
+  it("a contact request naming nobody is read as such, so the chat asks whom", () => {
+    for (const phrase of SECOND[3].phrases) expect(isBareContactRequest(phrase)).toBe(true);
+    // A named person is searched for by name, never listed as a choice.
+    expect(isBareContactRequest("Susisiek su Jonu")).toBe(false);
+    expect(classifyIntent("Susisiek su Jonu").intent).toBe("open-conversation");
+  });
+
+  it("offer-team writes only through its form; the registry says so", () => {
+    expect(INTENT_REGISTRY["offer-team"]).toMatchObject({ handler: "offerTeam", access: "write", domain: "company" });
+    expect(INTENT_REGISTRY["find-partners"].access).toBe("route");
+    expect(INTENT_REGISTRY.candidates.access).not.toBe("write");
+  });
+
+  it("an offer of a PERSON, a roster read and a job search keep their doors", () => {
+    expect(classifyIntent("pasiūlyk kandidatą komandai").intent).toBe("propose-candidate");
+    expect(classifyIntent("parodyk mano komandą").intent).toBe("my-team");
+    expect(classifyIntent("Show my team").intent).toBe("my-team");
+    expect(classifyIntent("Ищу работу").intent).toBe("find-work");
+  });
 });

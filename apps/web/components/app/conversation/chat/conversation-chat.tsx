@@ -61,6 +61,8 @@ import { readStatedProgress } from "@/lib/conversation/progress-status-phrase";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
+import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
+import { listDiscoverableOfferings } from "@/lib/marketplace/service-requests";
 import { loadClientBridgeForChat } from "@/lib/conversation/client-bridge";
 import { loadDocumentFormOptionsForChat } from "@/lib/conversation/documents-form";
 import { guessDocumentType } from "@/lib/conversation/document-type-guess";
@@ -145,6 +147,7 @@ import {
   fold,
   isAvailabilityChangeRequest,
   isExplicitJournalRequest,
+  isBareContactRequest,
   prewarmIntentRouter,
 } from "@/lib/conversation/intent-router";
 import {
@@ -853,6 +856,18 @@ function daysUntil(iso: string): number {
  */
 /** Session-storage slot carrying the sentence that needed another workspace. */
 const CONTINUE_AFTER_SWITCH_KEY = "lm.chat.continueAfterSwitch";
+/** Where a goal waits while the chat is unmounted by a page switch, and for how long. */
+const GOAL_ACROSS_PAGES_KEY = "lm.chat.goalAcrossPages";
+const GOAL_ACROSS_PAGES_TTL_MS = 30 * 60_000;
+/** Requests only an organisation can answer, carried across a workspace
+ *  switch even when no goal is running (see `goalContinuation`). */
+const CONTINUES_ACROSS_SWITCH: ReadonlySet<ConversationIntent> = new Set<ConversationIntent>([
+  "candidates",
+  "find-workers",
+  "offer-team",
+  "offer-capacity",
+  "find-partners",
+]);
 
 function referrerIsOurOwnDoor(): boolean {
   try {
@@ -1083,6 +1098,7 @@ export function ConversationChat({
   const tAi = useTranslations("workspace.ai");
   const tRelationships = useTranslations("relationshipTypes");
   const tInvitePage = useTranslations("network.invitePage");
+  const tMarket = useTranslations("marketplace");
   /** The AI's hand on World State, published by the bridge inside the provider. */
   const worldRef = useRef<AiWorldStateHandle | null>(null);
   const auth = useAuthOptional();
@@ -1340,6 +1356,54 @@ export function ConversationChat({
    * visual action must not destroy the goal a sentence set.
    */
   const goalRef = useRef<ConversationGoal | null>(null);
+  /** The last sentence the router dispatched, with its intent (see `goalContinuation`). */
+  const lastRoutedRef = useRef<{ intent: ConversationIntent; text: string } | null>(null);
+
+  /**
+   * THE GOAL SURVIVES A PAGE SWITCH (owner P1 2026-11-22). Leaving home for
+   * the journal or the board unmounts this chat, and the goal lived only in
+   * `goalRef`: "Užpildyk vakarykštį darbo žurnalą", a look at the journal,
+   * back, "6 valandas" — and the six hours were filed today. The goal is kept
+   * in this TAB's session storage when the chat unmounts and taken back by the
+   * next chat of the SAME person in the SAME workspace within 30 minutes. It
+   * is the short-term conversation state only (decision 0024): the person's
+   * own words for the goal, never a fact, never sent anywhere; a different
+   * person, workspace or a stale entry is dropped, never replayed.
+   */
+  const goalOwnerKey = `${auth0?.user?.id ?? ""}:${auth0?.activeWorkspaceId ?? ""}`;
+  useEffect(() => {
+    if (!auth0?.user?.id) return;
+    try {
+      const raw = window.sessionStorage.getItem(GOAL_ACROSS_PAGES_KEY);
+      if (raw) {
+        window.sessionStorage.removeItem(GOAL_ACROSS_PAGES_KEY);
+        const kept = JSON.parse(raw) as { owner?: unknown; at?: unknown; goal?: ConversationGoal | null };
+        if (
+          kept.owner === goalOwnerKey &&
+          typeof kept.at === "number" &&
+          Date.now() - kept.at < GOAL_ACROSS_PAGES_TTL_MS &&
+          kept.goal &&
+          goalRef.current === null
+        ) {
+          goalRef.current = kept.goal;
+        }
+      }
+    } catch {
+      /* storage unavailable or malformed: start without the goal */
+    }
+    return () => {
+      try {
+        if (goalRef.current) {
+          window.sessionStorage.setItem(
+            GOAL_ACROSS_PAGES_KEY,
+            JSON.stringify({ owner: goalOwnerKey, at: Date.now(), goal: goalRef.current }),
+          );
+        }
+      } catch {
+        /* storage unavailable: the goal is simply not kept */
+      }
+    };
+  }, [auth0?.user?.id, goalOwnerKey]);
 
   const assistant = useCallback(
     (text: string, chips?: ChoiceChip[]) => {
@@ -2266,7 +2330,9 @@ export function ConversationChat({
       .then((res) => {
         setTyping(false);
         if (res.kind === "no-company-context") {
-          assistant(labels.candidatesNoCompany);
+          // The organisations as `ws:` chips: picking one switches and the
+          // same request continues there (`goalContinuation`).
+          assistant(labels.candidatesNoCompany, workspaceChipsRef.current);
           return;
         }
         if (res.kind === "blocked") {
@@ -2454,8 +2520,15 @@ export function ConversationChat({
    */
   const goalContinuation = useCallback((): string | undefined => {
     const goal = goalRef.current;
-    if (!goal || !GOAL_BEARING_INTENTS.has(goal.intent) || goal.said.length === 0) return undefined;
-    return goalSentence(goal, "") || undefined;
+    if (goal && GOAL_BEARING_INTENTS.has(goal.intent) && goal.said.length > 0) {
+      return goalSentence(goal, "") || undefined;
+    }
+    // A request that only an organisation can answer, said just before the
+    // switch ("Surask kandidatus", "Noriu pasiūlyti savo komandą"): it is
+    // no running goal, but it IS what the switch is for.
+    const last = lastRoutedRef.current;
+    if (last && CONTINUES_ACROSS_SWITCH.has(last.intent)) return last.text;
+    return undefined;
   }, []);
 
   /**
@@ -2465,13 +2538,41 @@ export function ConversationChat({
    * hands over those doors and builds nothing of its own.
    */
   const pendingPartnersSentenceRef = useRef("");
-  const showPartnerDoors = useCallback(() => {
+  const showPartnerDoorsOnly = useCallback(() => {
     assistant(t("findPartnersDoors"), [
       { id: "link:/dashboard/service-requests", label: t("chipPartnersServices") },
       { id: "link:/dashboard/listings", label: t("chipPartnersListings") },
       { id: "link:/dashboard/company/partners", label: t("chipPartnersRelations") },
     ]);
   }, [assistant, t]);
+  const showPartnerDoors = useCallback(() => {
+    // REAL RESULTS FIRST (owner P1 2026-11-22): "Ieškau subrangovų" answered
+    // with three doors and no provider. The active services other providers
+    // publish are read through the SAME read `service_offering.discover` and
+    // the marketplace page use (RLS: active rows of others only, QA rows
+    // hidden) and listed in their own words; the doors follow. A failed or
+    // unavailable read says nothing it does not know — the doors still come.
+    setTyping(true);
+    listDiscoverableOfferings()
+      .then((res) => {
+        setTyping(false);
+        if (res.kind !== "ok") return;
+        if (res.rows.length === 0) {
+          assistant(tMarket("discoverEmpty"));
+          return;
+        }
+        assistant(
+          [
+            tMarket("discoverHeading"),
+            ...res.rows
+              .slice(0, 5)
+              .map((r) => [`• ${r.title}`, r.locationCountry, r.rateText].filter(Boolean).join(" · ")),
+          ].join("\n"),
+        );
+      })
+      .catch(() => setTyping(false))
+      .finally(() => showPartnerDoorsOnly());
+  }, [assistant, tMarket, showPartnerDoorsOnly]);
 
   /**
    * "Noriu rasti partnerių savo verslui" — a BUSINESS request, never a job
@@ -2545,7 +2646,9 @@ export function ConversationChat({
   const startOpenConversation = useCallback(
     (sentence: string) => {
       setTyping(true);
-      findConversationPeople(sentence)
+      // Nobody named ("Padėk susisiekti"): ASK which of the person's own
+      // counterparts they mean — never open or send anything on a guess.
+      findConversationPeople(sentence, { listWhenUnnamed: isBareContactRequest(sentence) })
         .then((res) => {
           setTyping(false);
           if (res.status === "none") {
@@ -3863,6 +3966,9 @@ export function ConversationChat({
         .map((w) => ({ id: `ws:${w.id}`, label: workspaceLabelOf(w) })),
     [auth?.workspaces, workspaceLabelOf],
   );
+  /** Late-bound copy for callbacks declared above this point. */
+  const workspaceChipsRef = useRef<ChoiceChip[]>([]);
+  workspaceChipsRef.current = workspaceChips;
 
   const openProposeForm = useCallback(
     (shareId: string) => {
@@ -7345,6 +7451,30 @@ export function ConversationChat({
          * `kind = 'agency_offer'`. One intake, one schema, one confirmation
          * token, one executor — the door was the only thing missing.
          */
+        /**
+         * "NORIU PASIŪLYTI SAVO KOMANDĄ" (owner P1 2026-11-22) — the ONE
+         * team-offer flow, in the conversation: the organisation offers itself
+         * against an open need (`TeamDemandOfferForm`, kind "organization", the
+         * form the people page carries). It writes nothing until its own
+         * button; `offer_team_to_demand_v1` re-checks who may offer.
+         */
+        offerTeam: () => {
+          const orgId = auth?.activeOrganizationId;
+          if (identity === "company" && orgId) {
+            pushEmbed(<TeamDemandOfferForm teamId={orgId} memberCount={0} kind="organization" defaultOpen />);
+            return;
+          }
+          if (canActAsEmployer && workspaceChips.length > 0) {
+            withTyping(() => assistant(t("offerCapacity.needsCompany"), workspaceChips));
+            return;
+          }
+          withTyping(() =>
+            assistant(t("offerCapacity.personalSpace"), [
+              { id: "f:company.create-organization", label: labels.chipCreateOrganization },
+              { id: "link:/dashboard/services", label: t("valueIntent.chipServices") },
+            ]),
+          );
+        },
         offerCapacity: () => {
           if (identity === "company") {
             openForm(
@@ -7887,6 +8017,7 @@ export function ConversationChat({
       }
 
       if (intent !== "unknown") {
+        lastRoutedRef.current = { intent, text };
         routedTextRef.current = text;
         dispatchIntent(intent, handlers, withTyping, fallback);
         // THE DAY'S WORK INSIDE A LONGER MESSAGE (2026-09-29): "Esu
