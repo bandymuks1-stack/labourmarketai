@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
 
+import { Explain } from "@/components/app/premium/grammar";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
@@ -62,6 +63,7 @@ export function TeamBrigadesPanel({
   const router = useRouter();
   const expectedWorkspaceId = useDisplayedWorkspaceId();
   const t = useTranslations("teamBrigades");
+  const tDisclosure = useTranslations("common.disclosure");
   const tAssign = useTranslations("teamAssignment");
   const tSkill = useTranslations("skillNames");
   const [pending, startTransition] = useTransition();
@@ -167,10 +169,12 @@ export function TeamBrigadesPanel({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {t("title")}
         </h2>
-        <p className="text-sm text-text-secondary">{t("intro")}</p>
-        <p className="text-meta leading-relaxed text-text-muted">
-          {t("honestNote")}
-        </p>
+        {/* The explanation and its honest limits, one tap away (coordinator
+            decision 2026-11-22, item 5): every fact stays, behind ONE row. */}
+        <Explain summary={tDisclosure("details")} testId="team-brigades-explain">
+          <p>{t("intro")}</p>
+          <p>{t("honestNote")}</p>
+        </Explain>
       </header>
 
       {shownTeams.length === 0 ? (
