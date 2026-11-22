@@ -79,7 +79,12 @@ for (const size of SIZES) {
     await send.click();
     const salary = page.getByLabel("Salary from (€)").filter({ visible: true }).last();
     await expect(salary, "P-2: the chat opens the work-card form").toBeVisible({ timeout: 60_000 });
-    const form = page.locator("form").filter({ has: salary }).last();
+    // The chat form is the inline action card (components/app/conversation/inline-action-form.tsx), not a <form>.
+    const form = page
+      .locator('[data-testid^="inline-action-form-"]')
+      .filter({ has: page.getByTestId("field-salaryMin") })
+      .filter({ visible: true })
+      .last();
     await salary.scrollIntoViewIfNeeded();
     await noExampleFigures(page, form, `${size.label} chat work-card form`);
     await page.screenshot({ path: join(OUT, `pay-chat-form-${size.label}.png`) });
