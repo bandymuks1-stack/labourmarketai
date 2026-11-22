@@ -57,7 +57,7 @@ describe("R-2 GREEN — the section on the people page", () => {
   it("names the honest evidence state and exits to the canonical employee invitation", () => {
     expect(section).toMatch(/data-testid="booked-person-not-reviewable"/);
     expect(section).toMatch(/data-testid="booked-person-member"/);
-    expect(section).toMatch(/href=\{"\/dashboard\/network\?type=join_as_employee"/);
+    expect(section).toMatch(/href=\{WORKER_INVITE_HREF as "\/dashboard"\}/);
     expect(section).toMatch(/data-testid="booked-person-invite-link"/);
   });
 
@@ -136,7 +136,7 @@ describe("R-2 GREEN — the section renders each truth as its own state", () => 
     expect(html).toContain('data-testid="booked-person-e-booked-only"');
     expect(html).toContain('data-member="false"');
     expect(html).toContain('data-testid="booked-person-not-reviewable"');
-    expect(html).toContain('href="/dashboard/network?type=join_as_employee"');
+    expect(html).toContain('href="/dashboard/network?invite=1&amp;type=join_as_employee"');
     expect(html).toContain("since:2026-09-04");
     expect(html).toContain("Jonas");
     // The member row: no invitation exit anywhere near it.

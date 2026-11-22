@@ -67,7 +67,8 @@ describe("staffing-agency mode is a typed view on the company room", () => {
     // detour is unnecessary here.
     // The three actions are the organization's doors (IA 2026-09-16).
     expect(companyPage).toMatch(/\/dashboard\/company\/people#company-team/);
-    expect(companyPage).toMatch(/\/dashboard\/company\/needs#demand-intake/);
+    // "Offer workers" opens the needs page in OFFER mode (button = action).
+    expect(companyPage).toMatch(/\/dashboard\/company\/needs\?audience=offer#demand-intake/);
     expect(companyPage).toMatch(/\/dashboard\/company\/scouting/);
   });
 

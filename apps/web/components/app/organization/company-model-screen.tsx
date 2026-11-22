@@ -51,7 +51,10 @@ export async function CompanyModelScreen({
     <section
       aria-label={t("title")}
       data-testid="company-model"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-2 pt-4"
+      // Phones: the conversation thread already insets its content by 16px;
+      // a second px-4 here left the company home 32px in from each edge
+      // (owner phone report 2026-11-20). Desktop keeps its inset.
+      className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-2 pt-4 max-sm:px-0 max-sm:pt-2"
     >
       <h2 className="font-display text-card-title font-semibold text-text-primary">
         {t("title")}
