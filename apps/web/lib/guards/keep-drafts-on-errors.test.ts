@@ -98,6 +98,9 @@ describe("surfaces keep what was typed", () => {
     expect(src).toContain("readTabDraft(PUBLIC_SUMMARY_DRAFT, draftOwner)");
     expect(src).toMatch(/keptHeadline\.trim\(\) === initialHeadline && keptBio\.trim\(\) === initialBio\) \{\n\s+setState\("saved"\);/);
     expect(src).toMatch(/setHeadline\(keptHeadline\);\n\s+setBio\(keptBio\);\n\s+setState\("error"\);/);
+    // while it is on its way it says so, with the existing "Saving…" (no new key)
+    expect(src).toMatch(/\{pending \? \(\n\s+<span role="status"[^\n]+data-testid="profile-public-summary-saving">\n\s+\{labels\.saving\}/);
+    expect(read("app/[locale]/dashboard/profile/page.tsx")).toContain('saving: tCapability("expSaving"),');
     expect(read("app/[locale]/dashboard/profile/page.tsx")).toContain("draftOwner={user.id}");
     // the reload it survives is the one StaleBuildRecovery makes on a deploy's answer
     expect(read("components/app/stale-build-recovery.tsx")).toContain('const HEADER = "x-nextjs-action-not-found";');

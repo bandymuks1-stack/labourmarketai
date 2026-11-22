@@ -20,6 +20,7 @@ export const PUBLIC_SUMMARY_DRAFT = "profile-public-summary";
  * The text being saved is kept in the tab draft until the server answers; the
  * reloaded page reads it back: the server holds it → "saved", otherwise the
  * text is put back with the error answer. A thrown action answers "error" too.
+ * While a save is on its way, "Saving…" shows: every save shows one answer.
  */
 export function WorkerPublicSummaryEditor({
   initialHeadline,
@@ -39,6 +40,8 @@ export function WorkerPublicSummaryEditor({
     bio: string;
     bioPlaceholder: string;
     save: string;
+    /** shown while the save is on its way */
+    saving: string;
     saved: string;
     tooLong: string;
     error: string;
@@ -137,12 +140,17 @@ export function WorkerPublicSummaryEditor({
           >
             {labels.save}
           </button>
-          {state === "saved" && !dirty ? (
+          {pending ? (
+            <span role="status" className="text-xs text-text-muted" data-testid="profile-public-summary-saving">
+              {labels.saving}
+            </span>
+          ) : null}
+          {!pending && state === "saved" && !dirty ? (
             <span role="status" className="text-xs text-state-success" data-testid="profile-public-summary-saved">
               {labels.saved}
             </span>
           ) : null}
-          {state === "too-long" || state === "error" ? (
+          {!pending && (state === "too-long" || state === "error") ? (
             <span role="alert" className="text-xs text-state-warning" data-testid="profile-public-summary-error">
               {state === "too-long" ? labels.tooLong : labels.error}
             </span>

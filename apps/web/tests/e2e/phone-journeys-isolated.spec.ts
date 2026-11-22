@@ -851,19 +851,35 @@ for (const phone of PHONES) {
       const first = `Summary save one ${phone.name} ${RUN}`;
       const second = `Summary save two ${phone.name} ${RUN}`;
       const values = [first, second, first, second];
+      const saving = section.getByTestId("profile-public-summary-saving");
+      const isAction = (r: { method(): string; headers(): Record<string, string> }) => r.method() === "POST" && Boolean(r.headers()["next-action"]);
       for (const [i, value] of values.entries()) {
         const where = `save ${i + 1}`;
         await type(value, where);
+        // The second save is held for 3 s on its way, so its "Saving…" is seen, not guessed.
+        const slow = i === 1;
+        if (slow) {
+          await page.route(/\/en\/dashboard\/profile/, async (route) => {
+            if (isAction(route.request())) await new Promise((r) => setTimeout(r, 3_000));
+            await route.fallback();
+          });
+        }
         await save.tap();
+        if (slow) await expect(saving, `${where}: "Saving…" shows while the save is on its way`).toBeVisible({ timeout: 3_000 });
         await expect(saved, `${where}: the save answers "saved" on screen`).toBeVisible({ timeout: 30_000 });
+        await expect(saving, `${where}: "Saving…" is gone once answered`).toHaveCount(0);
+        if (slow) await page.unroute(/\/en\/dashboard\/profile/);
         await expect.poll(stored, { message: `${where}: the headline is stored`, timeout: 30_000 }).toBe(value);
+        await page.reload();
+        await expect(input, `${where}: a reload shows the saved text`).toHaveValue(value, { timeout: 30_000 });
+        console.info(`[summary-save] ${phone.name} px ${where}: answered saved, stored, back after a reload`);
       }
 
       // A save cut off by a deploy: the server no longer knows the page's action.
       const cutOff = `Summary save cut off ${phone.name} ${RUN}`;
       let answered = 0;
       await page.route(/\/en\/dashboard\/profile/, async (route) => {
-        if (route.request().method() === "POST" && route.request().headers()["next-action"] && answered === 0) {
+        if (isAction(route.request()) && answered === 0) {
           answered += 1;
           await route.fulfill({ status: 404, headers: { "x-nextjs-action-not-found": "1", "content-type": "text/plain" }, body: "" });
           return;
@@ -882,6 +898,9 @@ for (const phone of PHONES) {
       await save.tap();
       await expect(saved, "the save after it answers \"saved\"").toBeVisible({ timeout: 30_000 });
       await expect.poll(stored, { message: "the save after it is stored", timeout: 30_000 }).toBe(cutOff);
+      await page.reload();
+      await expect(input, "the save after it: a reload shows the saved text").toHaveValue(cutOff, { timeout: 30_000 });
+      console.info(`[summary-save] ${phone.name} px cut-off save: answered error, stored nothing, text kept; the save after it stored`);
       await fitsTheScreen(page, "the profile after repeated summary saves");
       await done();
     });
