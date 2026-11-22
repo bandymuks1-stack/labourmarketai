@@ -11435,9 +11435,9 @@
     },
     "status": {
       "hidden": "Profil niewidoczny dla pracodawców",
-      "hiddenBody": "Tylko Ty widzisz swój profil, CV i dane kontaktowe. Wybierz, czy firmy mogą Cię znaleźć.",
+      "hiddenBody": "Tylko Państwo widzą swój profil, CV i dane kontaktowe. Proszę wybrać, czy firmy mogą Państwa znaleźć.",
       "visible": "Profil zawodowy widoczny dla firm",
-      "visibleBody": "Firmy mogą znaleźć ograniczony profil zawodowy. Dane kontaktowe i CV są udostępniane tylko po Twoim osobnym potwierdzeniu.",
+      "visibleBody": "Firmy mogą znaleźć ograniczony profil zawodowy. Dane kontaktowe i CV są udostępniane tylko po Państwa osobnym potwierdzeniu.",
       "withdrawn": "Widoczność wyłączona",
       "stale": "Treść zgody została zaktualizowana — potrzebny jest nowy wybór"
     },
@@ -11449,8 +11449,8 @@
       "review": "Przejrzyj ustawienia widoczności"
     },
     "preview": {
-      "title": "Tak firmy zobaczyłyby Twój profil",
-      "empty": "Twój profil jest jeszcze pusty — firmy zobaczyłyby tylko pustą kartę.",
+      "title": "Tak firmy zobaczyłyby Państwa profil",
+      "empty": "Państwa profil jest jeszcze pusty — firmy zobaczyłyby tylko pustą kartę.",
       "displayName": "Imię i nazwisko",
       "professions": "Zawód",
       "experienceYears": "Doświadczenie (lata)",
@@ -11458,7 +11458,7 @@
       "availability": "Dostępność",
       "salaryExpectation": "Oczekiwane wynagrodzenie",
       "skillsCount": "Umiejętności",
-      "anonymousLabel": "Firmy widzą Cię jako",
+      "anonymousLabel": "Firmy widzą Państwa jako",
       "anonymousValue": "Kandydat {token}",
       "currentCountry": "Obecny kraj",
       "availableFrom": "Dostępny od",
@@ -11476,15 +11476,15 @@
     "labels": {
       "decidedAt": "Wybrano",
       "version": "Wersja",
-      "needsMigration": "Ta funkcja nie jest jeszcze włączona na serwerze. Twój profil pozostaje prywatny.",
-      "error": "Nie udało się zapisać. Spróbuj ponownie.",
-      "declinedNote": "W porządku — Twój profil pozostaje prywatny. Ten wybór znajdziesz tutaj w każdej chwili.",
-      "readFailed": "Nie udało się sprawdzić, czy pracodawcy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — spróbuj ponownie później.",
-      "legalTextInEnglish": "Ten tekst prawny jest wyświetlany po angielsku: jego wersja w Twoim języku nie została jeszcze zatwierdzona. Obowiązuje tekst angielski."
+      "needsMigration": "Ta funkcja nie jest jeszcze włączona na serwerze. Państwa profil pozostaje prywatny.",
+      "error": "Nie udało się zapisać. Proszę spróbować ponownie.",
+      "declinedNote": "W porządku — Państwa profil pozostaje prywatny. Ten wybór znajdą Państwo tutaj w każdej chwili.",
+      "readFailed": "Nie udało się sprawdzić, czy pracodawcy widzą Państwa profil. To nie znaczy, że widoczność jest wyłączona — proszę spróbować ponownie później.",
+      "legalTextInEnglish": "Ten tekst prawny jest wyświetlany po angielsku: jego wersja w Państwa języku nie została jeszcze zatwierdzona. Obowiązuje tekst angielski."
     },
     "disclosures": {
-      "intro": "Każde przekazanie Twojego CV, danych kontaktowych lub innych danych konkretnej firmie następuje dopiero po Twoim osobnym potwierdzeniu.",
-      "empty": "Na razie brak przekazań. Nic nie trafia do firm bez Twojego potwierdzenia."
+      "intro": "Każde przekazanie Państwa CV, danych kontaktowych lub innych danych konkretnej firmie następuje dopiero po Państwa osobnym potwierdzeniu.",
+      "empty": "Na razie brak przekazań. Nic nie trafia do firm bez Państwa potwierdzenia."
     },
     "history": {
       "empty": "Na razie brak zapisów. Każda zgoda i każde wycofanie będą tu wymienione.",
@@ -11496,7 +11496,7 @@
         "profile_discoverability": "Widoczność dla pracodawców",
         "employer_data_disclosure": "Przekazanie danych firmie"
       },
-      "unavailable": "Nie udało się odczytać historii Twoich zgód. To nie znaczy, że nie ma wpisów — spróbuj ponownie później."
+      "unavailable": "Nie udało się odczytać historii Państwa zgód. To nie znaczy, że nie ma wpisów — proszę spróbować ponownie później."
     },
     "fields": {
       "full_name": "Imię i nazwisko",
@@ -11508,12 +11508,12 @@
       "salary_expectation": "Oczekiwane wynagrodzenie"
     },
     "rights": {
-      "notice": "Więcej o Twoich prawach i o tym, jak przetwarzane są dane:",
+      "notice": "Więcej o Państwa prawach i o tym, jak przetwarzane są dane:",
       "noticeLink": "informacja o prywatności"
     },
     "contactRequests": {
       "section": "Prośby o dane kontaktowe",
-      "intro": "Tutaj firmy proszą o wgląd w Twoje dane kontaktowe do jednego konkretnego zapotrzebowania. Decydujesz za każdym razem. Jeśli nic nie zrobisz, nic nie zostanie udostępnione.",
+      "intro": "Tutaj firmy proszą o wgląd w Państwa dane kontaktowe do jednego konkretnego zapotrzebowania. Decydują Państwo za każdym razem. Jeśli nic Państwo nie zrobią, nic nie zostanie udostępnione.",
       "empty": "Na razie brak próśb.",
       "unknownCompany": "Firma",
       "unknownNeed": "Zapotrzebowanie na pracowników",
@@ -11526,48 +11526,48 @@
         "declined": "Odrzucone",
         "withdrawn": "Wycofane przez firmę",
         "expired": "Wygasłe",
-        "created": "Czeka na Ciebie",
+        "created": "Czeka na Państwa",
         "accepted": "Zaakceptowane"
       },
       "withdrawGrant": "Wycofaj dane kontaktowe",
-      "withdrawGrantNote": "Możesz to wycofać w każdej chwili. Firma traci wtedy dostęp do udostępnionych danych; tego, co już odczytała, nie da się cofnąć.",
-      "withdrawnNote": "Wycofane. Ta firma nie ma już dostępu do Twoich danych kontaktowych.",
-      "grantedNote": "Zezwolono. To pozwolenie jest zapisane w Twojej historii zgód poniżej.",
+      "withdrawGrantNote": "Mogą to Państwo wycofać w każdej chwili. Firma traci wtedy dostęp do udostępnionych danych; tego, co już odczytała, nie da się cofnąć.",
+      "withdrawnNote": "Wycofane. Ta firma nie ma już dostępu do Państwa danych kontaktowych.",
+      "grantedNote": "Zezwolono. To pozwolenie jest zapisane w Państwa historii zgód poniżej.",
       "declinedNote": "Odrzucone. Nic nie zostało udostępnione.",
-      "error": "Nie udało się zapisać Twojej odpowiedzi. Spróbuj ponownie.",
-      "acceptNote": "Akceptacja mówi firmie tylko tyle, że jesteś na to otwarty. Akceptacja NIE udostępnia Twoich danych kontaktowych — to osobny wybór, którego możesz dokonać po akceptacji.",
+      "error": "Nie udało się zapisać Państwa odpowiedzi. Proszę spróbować ponownie.",
+      "acceptNote": "Akceptacja mówi firmie tylko tyle, że są Państwo na to otwarci. Akceptacja NIE udostępnia Państwa danych kontaktowych — to osobny wybór, którego mogą Państwo dokonać po akceptacji.",
       "accept": "Akceptuj",
       "acceptedNote": "Zaakceptowano. Nic jeszcze nie zostało udostępnione — zgoda na dane kontaktowe to osobny wybór poniżej.",
       "grantTitle": "Udostępnić dane kontaktowe?",
       "grantIntro": "To osobna decyzja. Tej firmie zostałyby przekazane wyłącznie dane wymienione poniżej i tylko do tego zapotrzebowania."
     },
     "partnerSupply": {
-      "sectionIntro": "Porównanie z ofertą pracy i wskazanie Twojego nazwiska to nie to samo. To pozwolenie umożliwia LabourMarket.ai szukanie dla Ciebie odpowiedniej pracy u pracodawców i w projektach poza tą platformą, przez zatwierdzoną infrastrukturę partnerską. Przekazywane jest wyłącznie podsumowanie zawodowe pozbawione bezpośrednich danych identyfikujących — nigdy Twoje imię i nazwisko ani dane kontaktowe.",
-      "noWorkerProfile": "Nie masz jeszcze profilu pracownika, więc nie byłoby czego reprezentować. Najpierw utwórz swój profil zawodowy — te odpowiedzi zostaną zachowane i zaczną obowiązywać, gdy profil powstanie.",
-      "statusNotRepresented": "Nie jesteś reprezentowany poza LabourMarket.ai",
-      "statusNotRepresentedBody": "Nic na Twój temat nie jest wysyłane poza tę platformę. Twoje konto, CV i dziennik pracy działają dokładnie tak samo bez tego.",
-      "statusRepresented": "Jesteś reprezentowany poza LabourMarket.ai",
-      "statusConsentOnly": "Pozwolenie udzielone — teraz powiedz, czego szukasz",
-      "statusWithdrawn": "Wycofałeś to pozwolenie",
-      "statusStale": "Treść tego pozwolenia się zmieniła — przeczytaj ją ponownie",
-      "statusAgeing": "Twoja odpowiedź się starzeje — potwierdź, że nadal jest aktualna",
-      "statusExpired": "Twoja odpowiedź wygasła i nie jest już nigdzie wysyłana",
+      "sectionIntro": "Porównanie z ofertą pracy i wskazanie Państwa nazwiska to nie to samo. To pozwolenie umożliwia LabourMarket.ai szukanie dla Państwa odpowiedniej pracy u pracodawców i w projektach poza tą platformą, przez zatwierdzoną infrastrukturę partnerską. Przekazywane jest wyłącznie podsumowanie zawodowe pozbawione bezpośrednich danych identyfikujących — nigdy Państwa imię i nazwisko ani dane kontaktowe.",
+      "noWorkerProfile": "Nie mają Państwo jeszcze profilu pracownika, więc nie byłoby czego reprezentować. Proszę najpierw utworzyć profil zawodowy — te odpowiedzi zostaną zachowane i zaczną obowiązywać, gdy profil powstanie.",
+      "statusNotRepresented": "Nie są Państwo reprezentowani poza LabourMarket.ai",
+      "statusNotRepresentedBody": "Nic na Państwa temat nie jest wysyłane poza tę platformę. Państwa konto, CV i dziennik pracy działają dokładnie tak samo bez tego.",
+      "statusRepresented": "Są Państwo reprezentowani poza LabourMarket.ai",
+      "statusConsentOnly": "Pozwolenie udzielone — proszę teraz podać, czego Państwo szukają",
+      "statusWithdrawn": "Wycofali Państwo to pozwolenie",
+      "statusStale": "Treść tego pozwolenia się zmieniła — proszę przeczytać ją ponownie",
+      "statusAgeing": "Państwa odpowiedź się starzeje — proszę potwierdzić, że nadal jest aktualna",
+      "statusExpired": "Państwa odpowiedź wygasła i nie jest już nigdzie wysyłana",
       "authoritiesTitle": "Co daje każde pozwolenie",
       "authorityMatch": "Dopasowanie",
-      "authorityMatchBody": "Możesz być liczony i porównywany z odpowiednią pracą. Pracodawca widzi liczbę i anonimowy identyfikator.",
+      "authorityMatchBody": "Mogą Państwo być liczeni i porównywani z odpowiednią pracą. Pracodawca widzi liczbę i anonimowy identyfikator.",
       "authorityContact": "Kontakt",
-      "authorityContactBody": "Pracodawca może zostać z Tobą skontaktowany, za pośrednictwem LabourMarket.ai.",
+      "authorityContactBody": "Pracodawca może zostać skontaktowany z Państwem za pośrednictwem LabourMarket.ai.",
       "authorityPresentation": "Prezentacja",
-      "authorityPresentationBody": "Twoja dostępność może być pokazana odbiorcom — jako liczba zbiorcza, na przykład „3 cieśli dostępnych od października”.",
+      "authorityPresentationBody": "Państwa dostępność może być pokazana odbiorcom — jako liczba zbiorcza, na przykład „3 cieśli dostępnych od października”.",
       "authorityIdentity": "Ujawnienie tożsamości",
-      "authorityIdentityBody": "Możesz zostać wskazany z imienia i nazwiska. Bez tego zawsze jesteś prezentowany anonimowo.",
-      "matchNeverReveals": "Samo dopasowanie nigdy nie ujawnia Twojego imienia i nazwiska, adresu e-mail, numeru telefonu ani adresu. Kontakt i ujawnienie tożsamości to osobne pozwolenia, których udzielasz poniżej — oba są na początku wyłączone.",
+      "authorityIdentityBody": "Mogą Państwo zostać wskazani z imienia i nazwiska. Bez tego zawsze są Państwo prezentowani anonimowo.",
+      "matchNeverReveals": "Samo dopasowanie nigdy nie ujawnia Państwa imienia i nazwiska, adresu e-mail, numeru telefonu ani adresu. Kontakt i ujawnienie tożsamości to osobne pozwolenia, których udzielają Państwo poniżej — oba są na początku wyłączone.",
       "grant": "Zgadzam się — reprezentujcie mnie",
       "decline": "Nie teraz",
-      "declinedNote": "Nic nie zostało zapisane. Twój profil, CV i dziennik pracy pozostają bez zmian.",
+      "declinedNote": "Nic nie zostało zapisane. Państwa profil, CV i dziennik pracy pozostają bez zmian.",
       "manage": "Zarządzaj",
       "withdrawConsent": "Wycofaj to pozwolenie",
-      "formTitle": "Czego szukasz w tej chwili?",
+      "formTitle": "Czego Państwo szukają w tej chwili?",
       "intentLabel": "Obecna sytuacja",
       "intentAvailableNow": "Mogę zacząć od zaraz",
       "intentAvailableFrom": "Mogę zacząć od określonej daty",
@@ -11576,9 +11576,9 @@
       "intentLookingForProjects": "Szukam projektów",
       "availableFromLabel": "Mogę zacząć od",
       "workCountriesLabel": "Kraje, w których mogę legalnie pracować",
-      "workCountriesHelp": "Dwuliterowe kody krajów, oddzielone przecinkami. Chodzi o Twoje prawo do pracy, a nie o preferencje.",
+      "workCountriesHelp": "Dwuliterowe kody krajów, oddzielone przecinkami. Chodzi o Państwa prawo do pracy, a nie o preferencje.",
       "marketsLabel": "Kraje, w których zgadzam się otrzymywać oferty pracy",
-      "marketsHelp": "To osobne pytanie. Możesz zostać zaproponowany tylko pracodawcom z tych krajów, a kraje te muszą znajdować się wśród krajów powyżej.",
+      "marketsHelp": "To osobne pytanie. Mogą Państwo zostać zaproponowani tylko pracodawcom z tych krajów, a kraje te muszą znajdować się wśród krajów powyżej.",
       "validDaysLabel": "Przez ile dni ta odpowiedź pozostaje aktualna",
       "validDaysHelp": "Potem zapytamy ponownie. Jeśli nie zapytamy, odpowiedź przestaje być wysyłana, zamiast się zdezaktualizować.",
       "save": "Zapisz",
@@ -11586,7 +11586,7 @@
       "saved": "Zapisano.",
       "edit": "Zmień moje odpowiedzi",
       "cancel": "Anuluj",
-      "currentTitle": "Twoje obecne odpowiedzi",
+      "currentTitle": "Państwa obecne odpowiedzi",
       "currentIntent": "Obecna sytuacja",
       "currentAvailableFrom": "Mogę zacząć od",
       "currentWorkCountries": "Mogę legalnie pracować w",
@@ -11600,15 +11600,15 @@
       "reconfirm": "Tak, nadal aktualne",
       "reconfirmed": "Dziękujemy — potwierdzone.",
       "withdrawDeclaration": "Przestańcie mnie reprezentować",
-      "withdrawnDeclarationNote": "Nie jesteś już reprezentowany poza LabourMarket.ai.",
+      "withdrawnDeclarationNote": "Nie są Państwo już reprezentowani poza LabourMarket.ai.",
       "needsMigration": "Chwilowo niedostępne.",
       "errorGeneric": "Coś poszło nie tak. Nic nie zostało zmienione.",
-      "errorUnknownIntent": "Wybierz swoją obecną sytuację.",
-      "errorAvailableFromRequired": "Podaj datę, od której możesz zacząć.",
-      "errorCountriesRequired": "Wskaż co najmniej jeden kraj, w którym możesz legalnie pracować.",
-      "errorNotIso2": "Użyj dwuliterowych kodów krajów, na przykład LT, DE, NL.",
-      "errorMarketOutside": "Pracę można Ci zaproponować tylko tam, gdzie możesz legalnie pracować. Najpierw dodaj ten kraj powyżej.",
-      "errorValidity": "Wybierz 30, 60 lub 90 dni."
+      "errorUnknownIntent": "Proszę wybrać swoją obecną sytuację.",
+      "errorAvailableFromRequired": "Proszę podać datę, od której mogą Państwo zacząć.",
+      "errorCountriesRequired": "Proszę wskazać co najmniej jeden kraj, w którym mogą Państwo legalnie pracować.",
+      "errorNotIso2": "Proszę użyć dwuliterowych kodów krajów, na przykład LT, DE, NL.",
+      "errorMarketOutside": "Pracę można Państwu zaproponować tylko tam, gdzie mogą Państwo legalnie pracować. Proszę najpierw dodać ten kraj powyżej.",
+      "errorValidity": "Proszę wybrać 30, 60 lub 90 dni."
     },
     "employerVisibility": {
       "title": "Widoczność dla pracodawców",
@@ -11618,23 +11618,23 @@
         "unknown": "Nieznana"
       },
       "hint": {
-        "on": "Firmy mogą znaleźć Twój profil zawodowy. Dane kontaktowe i CV tylko po Twoim osobnym potwierdzeniu. Możesz to wyłączyć w każdej chwili.",
-        "off": "Firmy nie znajdują Twojego profilu. Włączyć możesz tylko Ty, po przeczytaniu warunków; wycofanie to jedno kliknięcie.",
-        "unknown": "Nie udało się sprawdzić. To nie znaczy, że jest wyłączona — otwórz i zobacz."
+        "on": "Firmy mogą znaleźć Państwa profil zawodowy. Dane kontaktowe i CV tylko po Państwa osobnym potwierdzeniu. Mogą to Państwo wyłączyć w każdej chwili.",
+        "off": "Firmy nie znajdują Państwa profilu. Włączyć mogą to tylko Państwo, po przeczytaniu warunków; wycofanie to jedno kliknięcie.",
+        "unknown": "Nie udało się sprawdzić. To nie znaczy, że jest wyłączona — proszę otworzyć i sprawdzić."
       },
       "chat": {
-        "on": "Obecnie Twój profil zawodowy jest widoczny dla firm. Poniżej: co widzą i jak to wyłączyć.",
-        "off": "Obecnie firmy nie widzą Twojego profilu i nie znajdują go w wyszukiwaniu. Jeśli chcesz, żeby Cię znajdowały, przeczytaj poniżej warunki i zdecyduj — zgodę możesz wycofać w każdej chwili.",
-        "unknown": "Nie udało się sprawdzić, czy firmy widzą Twój profil. To nie znaczy, że widoczność jest wyłączona — otwórz ustawienia prywatności.",
+        "on": "Obecnie Państwa profil zawodowy jest widoczny dla firm. Poniżej: co widzą i jak to wyłączyć.",
+        "off": "Obecnie firmy nie widzą Państwa profilu i nie znajdują go w wyszukiwaniu. Jeśli chcą Państwo, żeby firmy Państwa znajdowały, proszę przeczytać poniżej warunki i zdecydować — zgodę mogą Państwo wycofać w każdej chwili.",
+        "unknown": "Nie udało się sprawdzić, czy firmy widzą Państwa profil. To nie znaczy, że widoczność jest wyłączona — proszę otworzyć ustawienia prywatności.",
         "noWorker": "Widoczność dla pracodawców dotyczy profilu pracownika, a to konto jeszcze go nie ma."
       }
     },
     "switch": {
-      "privateLine": "To ustawienie nigdy nie pokazuje: Twojego imienia i nazwiska, numeru telefonu, e-maila, wpisów w Dzienniku pracy ani linków do profili zewnętrznych.",
+      "privateLine": "To ustawienie nigdy nie pokazuje: Państwa imienia i nazwiska, numeru telefonu, e-maila, wpisów w Dzienniku pracy ani linków do profili zewnętrznych.",
       "turnOn": "Przeczytaj warunki i włącz",
       "details": "Co widzą firmy i pełne warunki",
-      "grantedNote": "Gotowe — firmy mogą teraz znaleźć Twój profil zawodowy pod anonimowym oznaczeniem.",
-      "withdrawnNote": "Gotowe — Twój profil nie pojawia się już w nowych wyszukiwaniach firm."
+      "grantedNote": "Gotowe — firmy mogą teraz znaleźć Państwa profil zawodowy pod anonimowym oznaczeniem.",
+      "withdrawnNote": "Gotowe — Państwa profil nie pojawia się już w nowych wyszukiwaniach firm."
     }
   },
   "planning": {

@@ -11435,9 +11435,9 @@
     },
     "status": {
       "hidden": "Profiel niet zichtbaar voor werkgevers",
-      "hiddenBody": "Alleen jij ziet je profiel, cv en contactgegevens. Kies of bedrijven je mogen vinden.",
+      "hiddenBody": "Alleen u ziet uw profiel, cv en contactgegevens. Kies of bedrijven u mogen vinden.",
       "visible": "Professioneel profiel zichtbaar voor bedrijven",
-      "visibleBody": "Bedrijven kunnen een beperkt professioneel profiel vinden. Contactgegevens en cv worden alleen gedeeld met je afzonderlijke bevestiging.",
+      "visibleBody": "Bedrijven kunnen een beperkt professioneel profiel vinden. Contactgegevens en cv worden alleen gedeeld met uw afzonderlijke bevestiging.",
       "withdrawn": "Zichtbaarheid uitgeschakeld",
       "stale": "De toestemmingstekst is bijgewerkt — een nieuwe keuze is nodig"
     },
@@ -11449,8 +11449,8 @@
       "review": "Zichtbaarheidsinstellingen bekijken"
     },
     "preview": {
-      "title": "Zo zien bedrijven je profiel",
-      "empty": "Je profiel is nog leeg — bedrijven zouden alleen een lege kaart zien.",
+      "title": "Zo zien bedrijven uw profiel",
+      "empty": "Uw profiel is nog leeg — bedrijven zouden alleen een lege kaart zien.",
       "displayName": "Naam",
       "professions": "Beroep",
       "experienceYears": "Ervaring (jr)",
@@ -11476,15 +11476,15 @@
     "labels": {
       "decidedAt": "Gekozen",
       "version": "Versie",
-      "needsMigration": "Deze functie is nog niet ingeschakeld op de server. Je profiel blijft privé.",
+      "needsMigration": "Deze functie is nog niet ingeschakeld op de server. Uw profiel blijft privé.",
       "error": "Opslaan is niet gelukt. Probeer het opnieuw.",
-      "declinedNote": "Prima — je profiel blijft privé. Je vindt deze keuze hier op elk moment.",
-      "readFailed": "Kon niet controleren of werkgevers je profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — probeer het later opnieuw.",
-      "legalTextInEnglish": "Deze juridische tekst wordt in het Engels getoond: de versie in jouw taal is nog niet goedgekeurd. De Engelse tekst is de tekst die geldt."
+      "declinedNote": "Prima — uw profiel blijft privé. U vindt deze keuze hier op elk moment.",
+      "readFailed": "Kon niet controleren of werkgevers uw profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — probeer het later opnieuw.",
+      "legalTextInEnglish": "Deze juridische tekst wordt in het Engels getoond: de versie in uw taal is nog niet goedgekeurd. De Engelse tekst is de tekst die geldt."
     },
     "disclosures": {
-      "intro": "Elke overdracht van je cv, contactgegevens of andere gegevens aan een specifiek bedrijf gebeurt pas na je afzonderlijke bevestiging.",
-      "empty": "Nog geen overdrachten. Zonder jouw bevestiging wordt niets aan bedrijven doorgegeven."
+      "intro": "Elke overdracht van uw cv, contactgegevens of andere gegevens aan een specifiek bedrijf gebeurt pas na uw afzonderlijke bevestiging.",
+      "empty": "Nog geen overdrachten. Zonder uw bevestiging wordt niets aan bedrijven doorgegeven."
     },
     "history": {
       "empty": "Nog geen registraties. Elke toestemming en intrekking verschijnt hier.",
@@ -11496,7 +11496,7 @@
         "profile_discoverability": "Zichtbaarheid voor werkgevers",
         "employer_data_disclosure": "Gegevensoverdracht aan een bedrijf"
       },
-      "unavailable": "Je toestemmingsgeschiedenis kon niet worden gelezen. Dat betekent niet dat er geen gegevens zijn — probeer het later opnieuw."
+      "unavailable": "Uw toestemmingsgeschiedenis kon niet worden gelezen. Dat betekent niet dat er geen gegevens zijn — probeer het later opnieuw."
     },
     "fields": {
       "full_name": "Volledige naam",
@@ -11508,12 +11508,12 @@
       "salary_expectation": "Loonverwachting"
     },
     "rights": {
-      "notice": "Meer over je rechten en gegevensverwerking:",
+      "notice": "Meer over uw rechten en gegevensverwerking:",
       "noticeLink": "privacyverklaring"
     },
     "contactRequests": {
       "section": "Verzoeken om contactgegevens",
-      "intro": "Hier vragen bedrijven om je contactgegevens voor één specifieke behoefte. Jij beslist elke keer. Doe je niets, dan wordt er niets gedeeld.",
+      "intro": "Hier vragen bedrijven om uw contactgegevens voor één specifieke behoefte. U beslist elke keer. Doet u niets, dan wordt er niets gedeeld.",
       "empty": "Op dit moment geen verzoeken.",
       "unknownCompany": "Bedrijf",
       "unknownNeed": "Werkbehoefte",
@@ -11526,48 +11526,48 @@
         "declined": "Afgewezen",
         "withdrawn": "Ingetrokken door het bedrijf",
         "expired": "Verlopen",
-        "created": "Wacht op jou",
+        "created": "Wacht op u",
         "accepted": "Geaccepteerd"
       },
       "withdrawGrant": "Contactgegevens intrekken",
-      "withdrawGrantNote": "Je kunt dit op elk moment intrekken. Het bedrijf verliest dan de toegang tot de gegevens die je deelde; wat het al gelezen heeft, wordt niet ongedaan gemaakt.",
-      "withdrawnNote": "Ingetrokken. Dit bedrijf heeft geen toegang meer tot je contactgegevens.",
-      "grantedNote": "Toegestaan. Deze toestemming staat in je toestemmingsgeschiedenis hieronder.",
+      "withdrawGrantNote": "U kunt dit op elk moment intrekken. Het bedrijf verliest dan de toegang tot de gegevens die u deelde; wat het al gelezen heeft, wordt niet ongedaan gemaakt.",
+      "withdrawnNote": "Ingetrokken. Dit bedrijf heeft geen toegang meer tot uw contactgegevens.",
+      "grantedNote": "Toegestaan. Deze toestemming staat in uw toestemmingsgeschiedenis hieronder.",
       "declinedNote": "Afgewezen. Er is niets gedeeld.",
-      "error": "Je antwoord kon niet worden opgeslagen. Probeer het opnieuw.",
-      "acceptNote": "Accepteren laat het bedrijf alleen weten dat je ervoor openstaat. Je contactgegevens worden NIET gedeeld door te accepteren — dat is een aparte keuze die je daarna kunt maken.",
+      "error": "Uw antwoord kon niet worden opgeslagen. Probeer het opnieuw.",
+      "acceptNote": "Accepteren laat het bedrijf alleen weten dat u ervoor openstaat. Uw contactgegevens worden NIET gedeeld door te accepteren — dat is een aparte keuze die u daarna kunt maken.",
       "accept": "Accepteren",
       "acceptedNote": "Geaccepteerd. Er is nog niets gedeeld — contactgegevens toestaan is een aparte keuze hieronder.",
       "grantTitle": "Contactgegevens delen?",
       "grantIntro": "Dit is een aparte beslissing. Alleen de hieronder vermelde gegevens zouden aan dit bedrijf worden doorgegeven, en alleen voor deze behoefte."
     },
     "partnerSupply": {
-      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor je zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een professionele samenvatting zonder directe identificerende gegevens wordt doorgegeven — nooit je naam of contactgegevens.",
-      "noWorkerProfile": "Je hebt nog geen werknemersprofiel, dus er zou niets vertegenwoordigd worden. Maak eerst je professionele profiel aan — deze antwoorden blijven bewaard en gaan gelden zodra het bestaat.",
-      "statusNotRepresented": "Je wordt niet vertegenwoordigd buiten LabourMarket.ai",
-      "statusNotRepresentedBody": "Er wordt niets over jou buiten dit platform verstuurd. Je account, cv en werkjournaal werken hier precies hetzelfde zonder.",
-      "statusRepresented": "Je wordt ook buiten LabourMarket.ai vertegenwoordigd",
-      "statusConsentOnly": "Toestemming gegeven — geef nu aan wat je zoekt",
-      "statusWithdrawn": "Je hebt deze toestemming ingetrokken",
+      "sectionIntro": "Vergeleken worden met een vacature en bij naam genoemd worden zijn twee verschillende dingen. Met deze toestemming mag LabourMarket.ai passend werk voor u zoeken bij werkgevers en projecten buiten dit platform, via goedgekeurde partnerinfrastructuur. Alleen een professionele samenvatting zonder directe identificerende gegevens wordt doorgegeven — nooit uw naam of contactgegevens.",
+      "noWorkerProfile": "U hebt nog geen werknemersprofiel, dus er zou niets vertegenwoordigd worden. Maak eerst uw professionele profiel aan — deze antwoorden blijven bewaard en gaan gelden zodra het bestaat.",
+      "statusNotRepresented": "U wordt niet vertegenwoordigd buiten LabourMarket.ai",
+      "statusNotRepresentedBody": "Er wordt niets over u buiten dit platform verstuurd. Uw account, cv en werkjournaal werken hier precies hetzelfde zonder.",
+      "statusRepresented": "U wordt ook buiten LabourMarket.ai vertegenwoordigd",
+      "statusConsentOnly": "Toestemming gegeven — geef nu aan wat u zoekt",
+      "statusWithdrawn": "U hebt deze toestemming ingetrokken",
       "statusStale": "De tekst van deze toestemming is gewijzigd — lees hem opnieuw",
-      "statusAgeing": "Je antwoord wordt oud — bevestig of het nog klopt",
-      "statusExpired": "Je antwoord is verlopen en wordt niet meer verstuurd",
+      "statusAgeing": "Uw antwoord wordt oud — bevestig of het nog klopt",
+      "statusExpired": "Uw antwoord is verlopen en wordt niet meer verstuurd",
       "authoritiesTitle": "Wat elke toestemming betekent",
       "authorityMatch": "Matchen",
-      "authorityMatchBody": "Je mag worden meegeteld en vergeleken met passend werk. Een werkgever ziet een aantal en een anonieme referentie.",
+      "authorityMatchBody": "U mag worden meegeteld en vergeleken met passend werk. Een werkgever ziet een aantal en een anonieme referentie.",
       "authorityContact": "Contact opnemen",
-      "authorityContactBody": "Een werkgever mag via LabourMarket.ai met jou in contact worden gebracht.",
+      "authorityContactBody": "Een werkgever mag via LabourMarket.ai met u in contact worden gebracht.",
       "authorityPresentation": "Presentatie",
-      "authorityPresentationBody": "Je beschikbaarheid mag aan een publiek worden getoond — als groepscijfer, bijvoorbeeld “3 timmerlieden beschikbaar vanaf oktober”.",
+      "authorityPresentationBody": "Uw beschikbaarheid mag aan een publiek worden getoond — als groepscijfer, bijvoorbeeld “3 timmerlieden beschikbaar vanaf oktober”.",
       "authorityIdentity": "Naamsvermelding",
-      "authorityIdentityBody": "Je mag bij naam genoemd worden. Zonder dit word je uitsluitend anoniem gepresenteerd.",
-      "matchNeverReveals": "Matchen alleen onthult nooit je naam, e-mailadres, telefoonnummer of adres. Contact en naamsvermelding zijn aparte toestemmingen die je hieronder geeft, en beide staan standaard uit.",
+      "authorityIdentityBody": "U mag bij naam genoemd worden. Zonder dit wordt u uitsluitend anoniem gepresenteerd.",
+      "matchNeverReveals": "Matchen alleen onthult nooit uw naam, e-mailadres, telefoonnummer of adres. Contact en naamsvermelding zijn aparte toestemmingen die u hieronder geeft, en beide staan standaard uit.",
       "grant": "Akkoord — vertegenwoordig mij",
       "decline": "Nu niet",
-      "declinedNote": "Er is niets opgeslagen. Je profiel, cv en werkjournaal blijven ongewijzigd.",
+      "declinedNote": "Er is niets opgeslagen. Uw profiel, cv en werkjournaal blijven ongewijzigd.",
       "manage": "Beheren",
       "withdrawConsent": "Deze toestemming intrekken",
-      "formTitle": "Wat zoek je op dit moment?",
+      "formTitle": "Wat zoekt u op dit moment?",
       "intentLabel": "Huidige situatie",
       "intentAvailableNow": "Ik kan nu beginnen",
       "intentAvailableFrom": "Ik kan vanaf een datum beginnen",
@@ -11576,9 +11576,9 @@
       "intentLookingForProjects": "Ik zoek projecten",
       "availableFromLabel": "Ik kan beginnen vanaf",
       "workCountriesLabel": "Landen waar ik wettelijk mag werken",
-      "workCountriesHelp": "Landcodes van twee letters, gescheiden door komma’s. Dit gaat over je recht om te werken, niet over een voorkeur.",
+      "workCountriesHelp": "Landcodes van twee letters, gescheiden door komma’s. Dit gaat over uw recht om te werken, niet over een voorkeur.",
       "marketsLabel": "Landen waar ik aangeboden wil worden",
-      "marketsHelp": "Een aparte vraag. Alleen werkgevers in deze landen mogen je aangeboden krijgen, en ze moeten bij de landen hierboven horen.",
+      "marketsHelp": "Een aparte vraag. Alleen werkgevers in deze landen mogen u aangeboden krijgen, en ze moeten bij de landen hierboven horen.",
       "validDaysLabel": "Hoeveel dagen dit antwoord geldig blijft",
       "validDaysHelp": "Daarna vragen we het opnieuw. Vragen we niet, dan stopt het antwoord met verstuurd worden in plaats van te verouderen.",
       "save": "Opslaan",
@@ -11586,7 +11586,7 @@
       "saved": "Opgeslagen.",
       "edit": "Antwoorden wijzigen",
       "cancel": "Annuleren",
-      "currentTitle": "Je huidige antwoorden",
+      "currentTitle": "Uw huidige antwoorden",
       "currentIntent": "Huidige situatie",
       "currentAvailableFrom": "Kan beginnen vanaf",
       "currentWorkCountries": "Mag wettelijk werken in",
@@ -11598,16 +11598,16 @@
       "denied": "nee",
       "unknown": "niet opgegeven",
       "reconfirm": "Ja, klopt nog steeds",
-      "reconfirmed": "Dank je — bevestigd.",
+      "reconfirmed": "Dank u — bevestigd.",
       "withdrawDeclaration": "Vertegenwoordig mij niet meer",
-      "withdrawnDeclarationNote": "Je wordt niet langer vertegenwoordigd buiten LabourMarket.ai.",
+      "withdrawnDeclarationNote": "U wordt niet langer vertegenwoordigd buiten LabourMarket.ai.",
       "needsMigration": "Momenteel niet beschikbaar.",
       "errorGeneric": "Er ging iets mis. Er is niets gewijzigd.",
-      "errorUnknownIntent": "Kies je huidige situatie.",
-      "errorAvailableFromRequired": "Geef de datum waarop je kunt beginnen.",
-      "errorCountriesRequired": "Noem minstens één land waar je wettelijk mag werken.",
+      "errorUnknownIntent": "Kies uw huidige situatie.",
+      "errorAvailableFromRequired": "Geef de datum waarop u kunt beginnen.",
+      "errorCountriesRequired": "Noem minstens één land waar u wettelijk mag werken.",
       "errorNotIso2": "Gebruik landcodes van twee letters, bijvoorbeeld LT, DE, NL.",
-      "errorMarketOutside": "Je kunt alleen worden aangeboden waar je wettelijk mag werken. Voeg dat land hierboven eerst toe.",
+      "errorMarketOutside": "U kunt alleen worden aangeboden waar u wettelijk mag werken. Voeg dat land hierboven eerst toe.",
       "errorValidity": "Kies 30, 60 of 90 dagen."
     },
     "employerVisibility": {
@@ -11618,23 +11618,23 @@
         "unknown": "Onbekend"
       },
       "hint": {
-        "on": "Bedrijven kunnen je beroepsprofiel vinden. Contactgegevens en cv alleen na je aparte bevestiging. Je kunt het op elk moment uitzetten.",
-        "off": "Bedrijven kunnen je profiel niet vinden. Alleen jij kunt het aanzetten, na het lezen van de voorwaarden; intrekken kost één klik.",
+        "on": "Bedrijven kunnen uw beroepsprofiel vinden. Contactgegevens en cv alleen na uw aparte bevestiging. U kunt het op elk moment uitzetten.",
+        "off": "Bedrijven kunnen uw profiel niet vinden. Alleen u kunt het aanzetten, na het lezen van de voorwaarden; intrekken kost één klik.",
         "unknown": "Kon niet controleren. Dat betekent niet dat het uit staat — open het om te kijken."
       },
       "chat": {
-        "on": "Op dit moment is je beroepsprofiel zichtbaar voor bedrijven. Hieronder: wat zij zien en hoe je het uitzet.",
-        "off": "Op dit moment kunnen bedrijven je profiel niet zien of vinden bij het zoeken. Wil je dat wel, lees dan hieronder de voorwaarden en beslis — intrekken kan altijd.",
-        "unknown": "Kon niet controleren of bedrijven je profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — open je privacyinstellingen.",
+        "on": "Op dit moment is uw beroepsprofiel zichtbaar voor bedrijven. Hieronder: wat zij zien en hoe u het uitzet.",
+        "off": "Op dit moment kunnen bedrijven uw profiel niet zien of vinden bij het zoeken. Wilt u dat wel, lees dan hieronder de voorwaarden en beslis — intrekken kan altijd.",
+        "unknown": "Kon niet controleren of bedrijven uw profiel kunnen zien. Dat betekent niet dat zichtbaarheid uit staat — open uw privacyinstellingen.",
         "noWorker": "Zichtbaarheid voor werkgevers geldt voor een werknemersprofiel, en dit account heeft er nog geen."
       }
     },
     "switch": {
-      "privateLine": "Deze instelling toont nooit: je naam, telefoonnummer, e-mailadres, je Werklogboek-items en links naar externe profielen.",
+      "privateLine": "Deze instelling toont nooit: uw naam, telefoonnummer, e-mailadres, uw Werklogboek-items en links naar externe profielen.",
       "turnOn": "Voorwaarden lezen en inschakelen",
       "details": "Wat bedrijven zien en de volledige voorwaarden",
-      "grantedNote": "Klaar — bedrijven kunnen je beroepsprofiel nu vinden, onder een anoniem label.",
-      "withdrawnNote": "Klaar — je profiel verschijnt niet meer in nieuwe zoekopdrachten van bedrijven."
+      "grantedNote": "Klaar — bedrijven kunnen uw beroepsprofiel nu vinden, onder een anoniem label.",
+      "withdrawnNote": "Klaar — uw profiel verschijnt niet meer in nieuwe zoekopdrachten van bedrijven."
     }
   },
   "planning": {
