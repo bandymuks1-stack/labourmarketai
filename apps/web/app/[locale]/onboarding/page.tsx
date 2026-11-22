@@ -17,6 +17,7 @@ import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import {
   inviteTokenFromNextPath,
   invitationImpliesWorkerContext,
+  invitationJoinsExistingOrganization,
 } from "@/lib/invitations/model";
 import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
@@ -72,12 +73,19 @@ export default async function OnboardingPage({
   let invitationReviewNotice: string | null = null;
   if (inviteToken) {
     const preview = await readPublicInvitationPreview(inviteToken, { emitOpened: false });
+    // The SAME rule completeOnboarding enforces (resolveInvitedWorkerContext):
+    // a person joining an existing organization sets up no organization of
+    // their own here (owner P0 2026-11-22).
     impliedWorker =
       preview.kind === "ok" &&
-      invitationImpliesWorkerContext({
+      (invitationImpliesWorkerContext({
         invitationType: preview.preview.invitationType,
         externalSourceSlug: preview.preview.externalSourceSlug,
-      });
+      }) ||
+        invitationJoinsExistingOrganization({
+          invitationType: preview.preview.invitationType,
+          organizationName: preview.preview.organizationName,
+        }));
     if (
       preview.kind === "ok" &&
       preview.preview.status === "pending" &&

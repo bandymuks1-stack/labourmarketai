@@ -4276,6 +4276,9 @@
         "admin": "Admin"
       },
       "subcopy": "One profile for your work experience and opportunities — in the next step you say what you came for.",
+      "inviteFrom": "{inviter} invited you to {organization}.",
+      "inviteTo": "You are invited to {organization}.",
+      "inviteNext": "Your profile keeps the work you do there. After sign-up you join {organization}.",
       "google_label": "Continue with Google",
       "google_redirecting": "Redirecting...",
       "divider": "or",

@@ -4276,6 +4276,9 @@
         "admin": "Administratorius"
       },
       "subcopy": "Vienas profilis jūsų darbo patirčiai ir galimybėms — kitame žingsnyje patikslinsite, ko atėjote.",
+      "inviteFrom": "{inviter} pakvietė jus į {organization}.",
+      "inviteTo": "Esate pakviesti į {organization}.",
+      "inviteNext": "Profilyje kaupsis ten atliekamas jūsų darbas. Užsiregistravę prisijungsite prie {organization}.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",

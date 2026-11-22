@@ -4276,6 +4276,9 @@
         "admin": "Administrator"
       },
       "subcopy": "Ein Profil für Ihre Berufserfahrung und Chancen — im nächsten Schritt sagen Sie, wofür Sie hier sind.",
+      "inviteFrom": "{inviter} hat Sie zu {organization} eingeladen.",
+      "inviteTo": "Sie sind zu {organization} eingeladen.",
+      "inviteNext": "Ihr Profil hält die Arbeit fest, die Sie dort leisten. Nach der Registrierung treten Sie {organization} bei.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",

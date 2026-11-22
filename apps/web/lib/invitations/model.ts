@@ -464,6 +464,28 @@ export function invitationImpliesWorkerContext(input: {
 }
 
 /**
+ * Does this invitation bring the person INTO an existing, named organization
+ * (owner P0 2026-11-22: a person who should join an organization must not set
+ * up a second one by accident)? Then onboarding asks no "what did you come
+ * for" question and never creates a company for them; they join the inviting
+ * organization as the person they are. A partner, client-company, platform or
+ * demand invitation is not this: those people may run their own organization.
+ */
+export const JOINS_EXISTING_ORGANIZATION_TYPES: readonly InvitationType[] = [
+  "join_organization",
+  "join_team",
+  "join_as_employee",
+  "join_project",
+];
+export function invitationJoinsExistingOrganization(input: {
+  invitationType: string | null | undefined;
+  organizationName: string | null | undefined;
+}): boolean {
+  if (!input.organizationName || !input.organizationName.trim()) return false;
+  return (JOINS_EXISTING_ORGANIZATION_TYPES as readonly string[]).includes(input.invitationType ?? "");
+}
+
+/**
  * May onboarding skip the role question for an invitation found WITHOUT its
  * link? Stricter than `invitationImpliesWorkerContext` (the token path, which
  * stays as it is): only a `join_platform` referral from a REGISTERED partner

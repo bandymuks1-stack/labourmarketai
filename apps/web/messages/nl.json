@@ -4276,6 +4276,9 @@
         "admin": "Beheerder"
       },
       "subcopy": "Eén profiel voor uw werkervaring en kansen — in de volgende stap geeft u aan waarvoor u komt.",
+      "inviteFrom": "{inviter} heeft u uitgenodigd bij {organization}.",
+      "inviteTo": "U bent uitgenodigd bij {organization}.",
+      "inviteNext": "Uw profiel bewaart het werk dat u daar doet. Na het aanmelden wordt u lid van {organization}.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",

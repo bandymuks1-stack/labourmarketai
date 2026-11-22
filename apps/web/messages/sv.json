@@ -4276,6 +4276,9 @@
         "admin": "Administratör"
       },
       "subcopy": "En profil för din arbetslivserfarenhet och dina möjligheter — i nästa steg berättar du vad du har kommit hit för.",
+      "inviteFrom": "{inviter} har bjudit in dig till {organization}.",
+      "inviteTo": "Du är inbjuden till {organization}.",
+      "inviteNext": "Din profil sparar arbetet du gör där. Efter registreringen går du med i {organization}.",
       "google_label": "Fortsätt med Google",
       "google_redirecting": "Omdirigerar...",
       "divider": "eller",
