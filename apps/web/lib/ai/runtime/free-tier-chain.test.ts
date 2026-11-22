@@ -324,7 +324,6 @@ describe("egress: free tiers receive PUBLIC payloads only", () => {
     // key in the request is only a label here.
     { task: "draft_follow_up", agentKey: "draft_follow_up" },
     { task: "translate_message", agentKey: "translation_copy" },
-    { task: "propose_conversation_intent", agentKey: "conversation_intent" },
     { task: "translate_vacancy", agentKey: "vacancy_translation" },
     // LOW_RISK company data is refused too: no grant names a free tier.
     { task: "structure_future_work", agentKey: "company_need" },
@@ -342,11 +341,29 @@ describe("egress: free tiers receive PUBLIC payloads only", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("the free-tier ceiling caps any grant at LOW_RISK_PROJECT_DATA, and no shipped grant names a free tier", () => {
+  it("propose_conversation_intent reaches Cloudflare ONLY (owner decision 2026-11-22), never Mistral or Groq", () => {
+    const task = "propose_conversation_intent";
+    const p = (id: string) => AI_PROVIDER_PROFILES.find((x) => x.id === id)!;
+    expect(egressPermitted(p("cloudflare"), "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, task).permitted).toBe(true);
+    expect(egressPermitted(p("mistral"), "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, task).permitted).toBe(false);
+    expect(egressPermitted(p("groq"), "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, task).permitted).toBe(false);
+    // The grant is by task: every other private task stays refused for Cloudflare.
+    for (const other of ["extract_cv", "normalize_work_scope", "translate_message", "explain_match", "draft_follow_up"]) {
+      expect(egressPermitted(p("cloudflare"), "PERSONAL", AI_EGRESS_GRANTS, other).permitted, other).toBe(false);
+    }
+    // Revocable: without the row the free-tier cap applies again.
+    const revoked = AI_EGRESS_GRANTS.filter((g) => g.provider !== "cloudflare");
+    expect(egressPermitted(p("cloudflare"), "SENSITIVE_FREE_TEXT", revoked, task).permitted).toBe(false);
+  });
+
+  it("the free-tier ceiling caps any grant at LOW_RISK_PROJECT_DATA, and no shipped grant names a free tier beyond the one intent row", () => {
     for (const id of ["cloudflare", "mistral", "groq"]) {
       const p = AI_PROVIDER_PROFILES.find((x) => x.id === id)!;
       expect(maxPermittedSensitivity(p), id).toBe("PUBLIC");
-      expect(AI_EGRESS_GRANTS.some((g) => g.provider === id), id).toBe(false);
+      expect(
+        AI_EGRESS_GRANTS.filter((g) => g.provider === id).map((g) => g.tasks),
+        id,
+      ).toEqual(id === "cloudflare" ? [["propose_conversation_intent"]] : []);
       const generous = [{ provider: id, maxSensitivity: "SENSITIVE_FREE_TEXT" as const, basis: "t", grantedOn: "2026-10-25" }];
       // Free-tier cap LOW_RISK; Mistral's free mode trains by default, so its
       // own terms cap it lower still (provider-catalogue.ts).
