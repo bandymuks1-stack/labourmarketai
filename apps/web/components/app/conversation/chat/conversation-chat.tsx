@@ -250,6 +250,7 @@ import { PersonalWorkspaceIntro } from "@/components/app/workspace/personal-work
 import type { PersonalWorkspaceIntro as PersonalWorkspaceIntroModel } from "@/lib/workspace/personal-workspace-intro";
 import type { PersonalWorkspaceLabels } from "@/lib/workspace/personal-workspace-labels";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { assistantJournalDay, GOAL_ACROSS_PAGES_KEY, GOAL_ACROSS_PAGES_TTL_MS } from "@/lib/journal/assistant-day";
 
 /* The work-log card opens only after a log-work sentence. It is the one path
  * on Home into the browser Supabase client (photo upload) and its zod schemas
@@ -857,8 +858,8 @@ function daysUntil(iso: string): number {
 /** Session-storage slot carrying the sentence that needed another workspace. */
 const CONTINUE_AFTER_SWITCH_KEY = "lm.chat.continueAfterSwitch";
 /** Where a goal waits while the chat is unmounted by a page switch, and for how long. */
-const GOAL_ACROSS_PAGES_KEY = "lm.chat.goalAcrossPages";
-const GOAL_ACROSS_PAGES_TTL_MS = 30 * 60_000;
+// GOAL_ACROSS_PAGES_KEY / _TTL_MS live in lib/journal/assistant-day.ts: the
+// header's journal button reads the same kept goal (one-tap journal).
 /** Requests only an organisation can answer, carried across a workspace
  *  switch even when no goal is running (see `goalContinuation`). */
 const CONTINUES_ACROSS_SWITCH: ReadonlySet<ConversationIntent> = new Set<ConversationIntent>([
@@ -8441,7 +8442,12 @@ export function ConversationChat({
         className={`flex flex-col bg-ink-900 ${mobile ? "h-full" : "h-[100dvh]"}`}
         data-testid="conversation-chat"
       >
-        <ConversationHeader title={labels.headerTitle} nav={nav} mobile={mobile} />
+        <ConversationHeader
+          title={labels.headerTitle}
+          nav={nav}
+          mobile={mobile}
+          journalDay={() => assistantJournalDay(goalRef.current, todayIso())}
+        />
         {/* Directly under the one top bar, above everything the person came
             here to do: the answer to "why am I on this screen?" has to arrive
             before they start reading the conversation, not after. */}

@@ -92,6 +92,34 @@ const LAUNCH_PATH_SECTIONS: Readonly<Record<string, boolean>> = {
   requirements: true,
 };
 
+/**
+ * EVERY CLUSTER STARTS CLOSED (coordinator decision 2026-11-22, item 2, on the
+ * owner's orders of 2026-11-21/22: only the fields the action needs, extras
+ * behind a disclosure). Step 2 opened to ~2,700 px of optional clusters at
+ * 390 px. The fill-rate intent above is kept another way: the launch-path
+ * clusters are emphasised rows, and every closed row says how many of its
+ * fields are filled, so what adds value is named and what is done is seen.
+ */
+const SECTION_FIELDS: Readonly<Record<string, readonly (keyof AdvancedDemandFormState)[]>> = {
+  engagement: ["opportunityType", "targetSupply", "engagementForm", "contractCountry"],
+  time: ["startEarliest", "startLatest", "endDate", "hoursPerWeek", "minGuaranteedHours", "shifts", "overtimeExpected", "applicationDeadline"],
+  compensation: ["compMin", "compMax", "basis", "unit", "guaranteedBase", "perDiem", "paymentFrequency", "deductions", "noDeductions"],
+  accommodation: ["accommodationState", "accommodationPayer", "accommodationPrice", "accommodationPricePeriod", "room", "occupancy", "distanceKm", "amenities", "deposit", "familyPossible"],
+  transport: ["internationalTravel", "dailyTransport", "betweenSites", "arrivalPickup", "companyVehicle", "fuelCard", "ownVehicleRequired", "licenceCategories", "returnTravel"],
+  requirements: ["certificates", "languages", "minExperienceYears", "drawingsReading", "independentWork", "leadership", "ownTools", "ownVehicle", "ownWorkwear"],
+  process: ["applicationMethod", "documentVerification", "interviewStages", "listingKind", "practicalTest", "responseDeadlineDays"],
+};
+
+/** How many of a cluster's fields hold something (a choice, a value, a ticked box). */
+function filledCount(state: AdvancedDemandFormState, id: string): number {
+  return (SECTION_FIELDS[id] ?? []).filter((k) => {
+    const v = (state as unknown as Record<string, unknown>)[k];
+    if (Array.isArray(v)) return v.length > 0;
+    if (typeof v === "boolean") return v;
+    return typeof v === "string" ? v.trim().length > 0 : v != null;
+  }).length;
+}
+
 type Patch = (patch: Partial<AdvancedDemandFormState>) => void;
 
 export function DemandAdvancedSections({
@@ -102,9 +130,7 @@ export function DemandAdvancedSections({
   onChange: Patch;
 }) {
   const t = useTranslations("structuredDemand");
-  const [open, setOpen] = useState<Record<string, boolean>>({
-    ...LAUNCH_PATH_SECTIONS,
-  });
+  const [open, setOpen] = useState<Record<string, boolean>>({});
   const toggle = (id: string) => setOpen((o) => ({ ...o, [id]: !o[id] }));
 
   // ── Small shared controls ──────────────────────────────────────────────────
@@ -277,18 +303,29 @@ export function DemandAdvancedSections({
     children: ReactNode;
   }) {
     const isOpen = open[id] === true;
+    const filled = filledCount(state, id);
+    const launchPath = LAUNCH_PATH_SECTIONS[id] === true;
     return (
-      <section className="rounded-md border border-ink-600">
+      <section className={launchPath ? "rounded-md border border-brand-blue/40" : "rounded-md border border-ink-600"}>
         <button
           type="button"
           onClick={() => toggle(id)}
           aria-expanded={isOpen}
-          className="flex w-full items-center justify-between gap-2 px-4 py-3 text-left"
+          className="flex min-h-11 w-full items-center justify-between gap-2 px-4 py-3 text-left"
           data-testid={`sdv2-section-${id}`}
+          data-launch-path={launchPath || undefined}
         >
           <span className="text-sm font-semibold text-text-primary">{title}</span>
-          <span aria-hidden className="text-text-muted">
-            {isOpen ? "−" : "+"}
+          <span className="flex shrink-0 items-center gap-2 text-text-muted">
+            {filled > 0 ? (
+              <span
+                className="inline-flex min-w-6 items-center justify-center rounded-full border border-brand-blue/50 px-1.5 text-xs font-medium tabular-nums text-brand-blue"
+                data-testid={`sdv2-section-${id}-filled`}
+              >
+                ✓ {filled}
+              </span>
+            ) : null}
+            <span aria-hidden>{isOpen ? "−" : "+"}</span>
           </span>
         </button>
         {isOpen && <div className="flex flex-col gap-4 border-t border-ink-600 p-4">{children}</div>}
