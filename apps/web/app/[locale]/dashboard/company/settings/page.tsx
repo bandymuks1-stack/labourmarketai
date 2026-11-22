@@ -34,6 +34,7 @@ import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+import { isSafeReturnPath } from "@/lib/auth/redirect";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/company/settings");
@@ -61,13 +62,25 @@ export const generateMetadata = dashboardPageMetadata("/dashboard/company/settin
  */
 export default async function CompanySettingsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  /** A started action that sent the person here to declare a capability
+   *  first (`need`), and where to return once it is declared (`next`). */
+  searchParams?: Promise<{ need?: string; next?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const userId = await requireRoleOrRedirect(locale, "company");
   const t = await getTranslations("organizationDoors.pages.settings");
+  // RETURN TO THE ACTION (owner 2026-11-22): an action that needs a capability
+  // first (the student invite needs `training_provider`) sends the person here
+  // with `need` (pre-ticked: only the missing information) and `next` (the
+  // action itself). Once declared, the card returns them to it. Both are
+  // validated: `need` is one known self-declarable slug, `next` an internal path.
+  const sp = (await searchParams) ?? {};
+  const needCapability = sp.need === "training_provider" ? sp.need : null;
+  const returnTo = typeof sp.next === "string" && isSafeReturnPath(sp.next) ? sp.next : null;
   const tDisclosure = await getTranslations("common.disclosure");
   const tCompany = await getTranslations("roleDashboards.company");
   const tNotes = await getTranslations("featureNotes");
@@ -200,6 +213,8 @@ export default async function CompanySettingsPage({
             <OrganizationCapabilitiesCard
               organizationId={capabilityOrgId}
               declared={declaredCapabilities}
+              preselect={needCapability ? [needCapability] : []}
+              returnTo={returnTo}
             />
           </div>
         ) : null}

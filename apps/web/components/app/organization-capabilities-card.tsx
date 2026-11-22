@@ -3,6 +3,8 @@
 import { useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 
+import { useRouter } from "@/lib/i18n/navigation";
+
 import {
   partitionCapabilities,
   type CapabilityChoice,
@@ -35,12 +37,22 @@ import { declareOrganizationCapabilities } from "@/lib/organizations/capability-
 export function OrganizationCapabilitiesCard({
   organizationId,
   declared,
+  preselect = [],
+  returnTo = null,
 }: {
   readonly organizationId: string;
   readonly declared: readonly string[];
+  /** Capabilities a started action needs, pre-ticked (never saved for the
+   *  person: they still press save). Already-declared ones are ignored. */
+  readonly preselect?: readonly string[];
+  /** The started action to return to once the declaration is saved. */
+  readonly returnTo?: string | null;
 }) {
   const t = useTranslations();
-  const [picked, setPicked] = useState<readonly string[]>([]);
+  const router = useRouter();
+  const [picked, setPicked] = useState<readonly string[]>(() =>
+    preselect.filter((slug) => !declared.includes(slug)),
+  );
   const [pending, start] = useTransition();
   const [state, setState] = useState<"idle" | "saved" | "error" | "denied">(
     "idle",
@@ -62,6 +74,8 @@ export function OrganizationCapabilitiesCard({
       if (res.ok) {
         setPicked([]);
         setState("saved");
+        // Back to the action that needed this declaration (owner 2026-11-22).
+        if (returnTo) router.push(returnTo as "/dashboard");
         return;
       }
       setState(res.code === "not-permitted" ? "denied" : "error");
