@@ -249,6 +249,7 @@ export function TeamOffersReceived({
                   <Button
                     type="button"
                     size="sm"
+                    className="min-h-11 sm:min-h-9"
                     disabled={pending || !needOpen}
                     onClick={() => respond(offer.offerId, "accept")}
                     data-testid={`team-offer-accept-${offer.offerId}`}
@@ -259,6 +260,7 @@ export function TeamOffersReceived({
                     type="button"
                     size="sm"
                     variant="ghost"
+                    className="min-h-11 sm:min-h-9"
                     disabled={pending}
                     onClick={() => respond(offer.offerId, "decline")}
                     data-testid={`team-offer-decline-${offer.offerId}`}
@@ -303,6 +305,7 @@ export function TeamOffersReceived({
                       <Button
                         type="button"
                         size="sm"
+                        className="min-h-11 sm:min-h-9"
                         disabled={pending || !projectByOffer[offer.offerId]}
                         onClick={() => assign(offer.offerId)}
                         data-testid={`team-offer-assign-submit-${offer.offerId}`}
