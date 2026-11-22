@@ -1,0 +1,50 @@
+#!/usr/bin/env bash
+# #3604 equivalence check, isolated database only (signup-isolated stack).
+#
+# In ONE transaction that is rolled back at the end (the database is left as it
+# was): seed synthetic rows, then
+#   phase 0: rollback body  -> policies P0, access A0  (the production state)
+#   phase 1: migration body -> P1, A1
+#   phase 2: rollback body  -> P2, A2
+#   phase 3: migration body -> P3, A3
+# and require: P0 == P2 and P1 == P3 byte for byte; P1 with
+# `( SELECT auth.uid() AS uid)` written back as `auth.uid()` == P0; and
+# A0 == A1 == A2 == A3 (every read and write of every actor).
+set -euo pipefail
+cd "$(dirname "$0")/../.."
+N=20261122130000_rls_worker_lookup_initplan
+UP="supabase/migrations/${N}_v1.sql"; DOWN="supabase/rollbacks/${N}_v1.down.sql"; T="supabase/tests/${N}"
+PSQL=${PSQL:-"docker exec -i supabase_db_labourmarketai psql -U postgres -X -q -tA"}
+body() { grep -viE '^\s*(begin|commit);\s*$' "$1"; }
+out=$(mktemp -d)
+{
+  echo "begin;"
+  cat "${T}_seed.sql"
+  for ph in 0 1 2 3; do
+    if [ $((ph % 2)) -eq 0 ]; then body "$DOWN"; else body "$UP"; fi
+    echo "\\echo PHASE|$ph"
+    cat "${T}_policies.sql"
+    cat "${T}_assert.sql"
+  done
+  echo "rollback;"
+} | $PSQL -v ON_ERROR_STOP=0 2>&1 \
+  | sed -E 's/^psql:[^:]*:[0-9]+: //' | grep -vE '^$|^(DETAIL|CONTEXT|HINT|NOTICE):' > "$out/raw.txt"
+awk -v d="$out" '
+  /^PHASE\|/ { ph=substr($0,7); next }
+  /^POLICY\|/ { cur="P"; print > (d "/P" ph ".txt"); next }
+  /^(READ|WRITE)\|/ { if (k!="") print k " => " v > (d "/A" kph ".txt"); k=$0; kph=ph; v=""; cur="A"; next }
+  { if (cur=="A") v=(v==""?$0:v " ; " $0); else if (cur=="P") print > (d "/P" ph ".txt") }
+  END { if (k!="") print k " => " v > (d "/A" kph ".txt") }' "$out/raw.txt"
+fail=0
+for i in 0 1 2 3; do
+  [ -s "$out/P$i.txt" ] && [ "$(wc -l < "$out/A$i.txt")" -eq 168 ] || { echo "::error::phase $i incomplete"; fail=1; }
+done
+cmp -s "$out/P0.txt" "$out/P2.txt" && echo "PASS rollback restores the 18 policies byte for byte" || { echo "::error::rollback differs"; diff "$out/P0.txt" "$out/P2.txt" | head -20; fail=1; }
+cmp -s "$out/P1.txt" "$out/P3.txt" && echo "PASS re-apply gives the same policies" || { echo "::error::re-apply differs"; fail=1; }
+sed 's/( SELECT auth.uid() AS uid)/auth.uid()/g' "$out/P1.txt" | cmp -s - "$out/P0.txt" && echo "PASS only auth.uid() -> (select auth.uid()) changed ($(grep -o '( SELECT auth.uid() AS uid)' "$out/P1.txt" | wc -l) calls)" || { echo "::error::a policy changed beyond the wrapping"; fail=1; }
+for i in 1 2 3; do
+  cmp -s "$out/A0.txt" "$out/A$i.txt" && echo "PASS access phase $i == phase 0 (168 checks)" || { echo "::error::access differs in phase $i"; diff "$out/A0.txt" "$out/A$i.txt" | head -20; fail=1; }
+done
+grep -q "WRITE|worker|dis_insert_for_worker => rows=1" "$out/A0.txt" || { echo "::error::the allowed write did not succeed: the check would prove nothing"; fail=1; }
+grep -c "=> visible=" "$out/A0.txt" | sed 's/^/reads: /'; grep -c "^WRITE" "$out/A0.txt" | sed 's/^/writes: /'
+exit $fail
