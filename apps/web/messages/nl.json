@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
-    "subtitleAgency": "Wat de publieke markt nu vraagt — dezelfde pool die uw kandidaten op het bord zien.",
-    "subtitleInstitution": "Wat de publieke markt nu vraagt — de richtingen waar uw lerenden naartoe gaan.",
     "active": "{count} actuele vacatures",
     "employers": "{count} werkgevers",
     "filtered": "{profession}: {count} vacatures",
@@ -2082,7 +2080,6 @@
       "eyebrow": "BEDRIJFSWERKRUIMTE",
       "programs": {
         "title": "Opleidingen en cohorten",
-        "subtitle": "Wat u onderwijst, gericht op een richting op de arbeidsmarkt, en de groepen lerenden daarbinnen. Vraag toont actuele publieke vacatures voor die richting.",
         "empty": "Nog geen opleidingen. Voeg de eerste toe en richt die op de werkrichting waar ze toe leidt.",
         "addProgram": "Opleiding toevoegen",
         "noDirection": "Geen werkrichting ingesteld",
@@ -7114,7 +7111,6 @@
   "learning": {
     "pageTitle": "Leren en beoordelen",
     "pageLead": "Suggesties op basis van echte werkactiviteit, bewaard zodat een persoon ze kan beoordelen. Niets hier wordt op zichzelf als bewezen behandeld.",
-    "title": "Beoordelingswachtrij",
     "lead": "Signalen worden suggesties, en een persoon beslist. Leren beslist nooit iets op zichzelf.",
     "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog niets om te beoordelen.",
@@ -18845,8 +18841,7 @@
         "invitationAccepted": "Uitnodiging geaccepteerd. Bevestig hieronder het verbindingsverzoek van het bureau met uw bedrijf."
       },
       "education": {
-        "title": "Opleiding en programma's",
-        "subtitle": "Programma's, lerenden en de marktvraag naar hun richtingen."
+        "title": "Opleiding en programma's"
       },
       "history": {
         "title": "Gegevens importeren en geschiedenis",
