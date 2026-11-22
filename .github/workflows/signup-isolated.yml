@@ -213,7 +213,8 @@ concurrency:
 jobs:
   signup-isolated:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # 45 min ran out on run 45059964507 (the walk already ended at 42 of 45 before the profile loops).
+    timeout-minutes: 60
     env:
       APP_ORIGIN: http://127.0.0.1:3000
       # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
