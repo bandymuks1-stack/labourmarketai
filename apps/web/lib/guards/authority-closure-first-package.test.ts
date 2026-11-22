@@ -236,6 +236,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // it corrects that context's record; the chain root walk is cycle-safe, no depth cap). Two SECURITY DEFINER
       // bodies; RED draft, needs-human-gate, NOT applied.
       "20261120190000_",
+      // 2026-11-22 owner request: a confirmed account deletion is erased within one month of receipt (GDPR
+      // Art. 12(3)); two SECURITY DEFINER bodies + one helper. RED draft, needs-human-gate, NOT applied.
+      "20261122160000_",
       // 2026-11-18 COMM-1 profiles.communication_locale (renamed from 20260920122000; RED draft, needs-human-gate, NOT applied).
       "20261118100100_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
