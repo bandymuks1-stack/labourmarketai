@@ -47,6 +47,7 @@ on:
       - "supabase/migrations/20261118143000_training_assignment_engaged_groups_v1.sql"
       - "apps/web/tests/e2e/training-groups-isolated.spec.ts"
       - "apps/web/tests/e2e/journeys-coverage-isolated.spec.ts"
+      - "apps/web/tests/e2e/header-desktop-fit-isolated.spec.ts"
       - "apps/web/components/app/marketplace-loop-section.tsx"
       - "apps/web/components/app/service-offerings-section.tsx"
       - "apps/web/components/app/business-public-profile-panel.tsx"
@@ -76,6 +77,7 @@ on:
       - "apps/web/tests/e2e/journal-template-isolated.spec.ts"
       # The journal opens with the work day (owner P1 2026-11-21).
       - "apps/web/tests/e2e/journal-day-choice-isolated.spec.ts"
+      - "apps/web/tests/e2e/journal-reach-isolated.spec.ts"
       - "apps/web/app/*/dashboard/journal/**"
       - "apps/web/lib/journal/day-choice.ts"
       - "apps/web/lib/journal/journal-templates*.ts"
@@ -219,7 +221,7 @@ jobs:
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
       # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -444,8 +446,9 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-      # The journal's day choice (journal-day-choice-isolated.spec.ts, owner P1
-      # 2026-11-21): one synthetic worker on this stack, 375 / 1280 px.
+      # The journal's day choice and reach (journal-day-choice-isolated and
+      # journal-reach-isolated, owner P1 2026-11-21/22): synthetic workers on
+      # this stack, 375 / 390 / 1280 px.
       - name: Upload the journal day-choice screenshots
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
