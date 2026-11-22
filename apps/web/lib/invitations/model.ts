@@ -484,15 +484,22 @@ export function invitationJoinsExistingOrganization(input: {
    *  revoked, accepted or expired link promises nothing and fixes no role. */
   status: string | null | undefined;
   expiresAt: string | null | undefined;
+  /** The SIGNED-IN caller's own answer to this invitation (get_invitation_preview_v2
+   *  `my_decision`). The caller who already accepted it — at sign-up, or by the
+   *  wizard before onboarding finishes — is joining, whatever the link's status
+   *  is now (Codex on #3586). Someone else opening a used link is not. */
+  myDecision?: string | null;
   now?: number;
 }): boolean {
+  if (!input.organizationName || !input.organizationName.trim()) return false;
+  if (!(JOINS_EXISTING_ORGANIZATION_TYPES as readonly string[]).includes(input.invitationType ?? "")) return false;
+  if (input.myDecision === "accepted") return true;
   if (input.status !== "pending") return false;
   if (input.expiresAt) {
     const at = Date.parse(input.expiresAt);
     if (!Number.isFinite(at) || at <= (input.now ?? Date.now())) return false;
   }
-  if (!input.organizationName || !input.organizationName.trim()) return false;
-  return (JOINS_EXISTING_ORGANIZATION_TYPES as readonly string[]).includes(input.invitationType ?? "");
+  return true;
 }
 
 /**

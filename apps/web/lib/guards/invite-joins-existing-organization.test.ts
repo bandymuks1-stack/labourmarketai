@@ -48,6 +48,23 @@ describe("an invitation into an existing organization", () => {
     ).toBe(true);
   });
 
+  it("the caller who already accepted keeps joining; a stranger on a used link does not (Codex on #3586)", () => {
+    const now = Date.parse("2026-11-22T00:00:00Z");
+    const used = { invitationType: "join_organization", organizationName: "Acme", status: "accepted", expiresAt: null, now };
+    expect(invitationJoinsExistingOrganization({ ...used, myDecision: "accepted" })).toBe(true);
+    expect(invitationJoinsExistingOrganization({ ...used, myDecision: null })).toBe(false);
+    expect(invitationJoinsExistingOrganization({ ...used, myDecision: "declined" })).toBe(false);
+    expect(
+      invitationJoinsExistingOrganization({ ...used, invitationType: "invite_company", myDecision: "accepted" }),
+      "accepting never widens the kinds",
+    ).toBe(false);
+    for (const p of ["lib/onboarding/invited-worker-context.ts", "app/[locale]/onboarding/page.tsx"]) {
+      const src = read(p);
+      expect(src, p).toContain("readMyInvitationDecision(inviteToken)");
+      expect(src, p).toMatch(/expiresAt: \w+\.preview\.expiresAt,\s*\n\s*myDecision,/);
+    }
+  });
+
   it("the server action and the onboarding page use the same rule", () => {
     for (const p of ["lib/onboarding/invited-worker-context.ts", "app/[locale]/onboarding/page.tsx", "app/[locale]/auth/signup/page.tsx"]) {
       const src = read(p);

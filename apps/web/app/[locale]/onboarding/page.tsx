@@ -20,6 +20,7 @@ import {
   invitationJoinsExistingOrganization,
 } from "@/lib/invitations/model";
 import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
+import { readMyInvitationDecision } from "@/lib/invitations/my-decision";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
@@ -72,7 +73,10 @@ export default async function OnboardingPage({
   // above that button (owner decision 1).
   let invitationReviewNotice: string | null = null;
   if (inviteToken) {
-    const preview = await readPublicInvitationPreview(inviteToken, { emitOpened: false });
+    const [preview, myDecision] = await Promise.all([
+      readPublicInvitationPreview(inviteToken, { emitOpened: false }),
+      readMyInvitationDecision(inviteToken),
+    ]);
     // The SAME rule completeOnboarding enforces (resolveInvitedWorkerContext):
     // a person joining an existing organization sets up no organization of
     // their own here (owner P0 2026-11-22).
@@ -87,6 +91,7 @@ export default async function OnboardingPage({
           organizationName: preview.preview.organizationName,
           status: preview.preview.status,
           expiresAt: preview.preview.expiresAt,
+          myDecision,
         }));
     if (
       preview.kind === "ok" &&

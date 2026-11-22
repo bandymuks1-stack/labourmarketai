@@ -8,6 +8,7 @@ import {
   pickAddressedJoinPlatform,
 } from "@/lib/invitations/model";
 import { listInvitationsForMe } from "@/lib/invitations/network";
+import { readMyInvitationDecision } from "@/lib/invitations/my-decision";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 
 /**
@@ -39,7 +40,10 @@ export async function resolveInvitedWorkerContext(
 ): Promise<InvitedWorkerContext> {
   const inviteToken = inviteTokenFromNextPath(nextPath);
   if (inviteToken) {
-    const preview = await readPublicInvitationPreview(inviteToken, { emitOpened: false });
+    const [preview, myDecision] = await Promise.all([
+      readPublicInvitationPreview(inviteToken, { emitOpened: false }),
+      readMyInvitationDecision(inviteToken),
+    ]);
     return {
       inviteToken,
       addressedInvitationId: null,
@@ -56,6 +60,7 @@ export async function resolveInvitedWorkerContext(
             organizationName: preview.preview.organizationName,
             status: preview.preview.status,
             expiresAt: preview.preview.expiresAt,
+            myDecision,
           })),
     };
   }
