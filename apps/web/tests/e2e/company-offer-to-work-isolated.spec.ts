@@ -1,7 +1,10 @@
 import { test, expect, type Browser, type Page } from "@playwright/test";
 
 import {
+  accessToken,
   BASE,
+  SB_ANON,
+  SB_URL,
   isolatedStack,
   lit,
   onboard,
@@ -26,6 +29,7 @@ import {
 const B = BASE;
 const RUN = Date.now().toString(36);
 const CO = `cotw-co-${RUN}@example.test`, SUB = `cotw-sub-${RUN}@example.test`, W = `cotw-w-${RUN}@example.test`, ADM = `cotw-adm-${RUN}@example.test`;
+const OUT = `cotw-out-${RUN}@example.test`;
 const CO_ORG = `Chain Client Builders ${RUN}`, SUB_ORG = `Chain Tiling Contractor ${RUN}`, CREW = `Tiling crew ${RUN}`;
 const ROLE = `Tiler ${RUN}`;
 const s: Record<string, string> = {};
@@ -41,6 +45,15 @@ async function shot(p: Page, name: string) {
     expect(sw, `${name} @${wd}: no sideways scroll`).toBeLessThanOrEqual(wd + 1);
   }
   await p.setViewportSize({ width: 1280, height: 900 });
+}
+/** One RPC under that person's OWN session (anon key + their token): no superuser read. */
+async function rpcAs(address: string, fn: string, args: Record<string, unknown>): Promise<{ status: number; json: unknown }> {
+  const r = await fetch(`${SB_URL}/rest/v1/rpc/${fn}`, {
+    method: "POST",
+    headers: { apikey: SB_ANON, Authorization: `Bearer ${await accessToken(address)}`, "Content-Type": "application/json" },
+    body: JSON.stringify(args),
+  });
+  return { status: r.status, json: await r.json().catch(() => null) };
 }
 async function fresh(browser: Browser): Promise<Page> {
   return (await browser.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
@@ -196,4 +209,29 @@ test("6. both sides see that the work started; the crew member has the project",
   await shot(w, "c6-worker-journal");
   const n = sql<{ n: number }>(`select count(*)::int as n from public.team_assignments ta join public.engagement_contexts ec on ec.organization_id = ta.team_org_id and ec.status='active' join public.profiles p on p.id = ec.profile_id join auth.users u on u.id = p.id where ta.project_id = ${lit(s.project)} and u.email = ${lit(W)}`)[0]!.n;
   expect(n, "the crew member is attached to the project through the crew").toBe(1);
+});
+
+test("7. decision 0033: the crew member and an outside company read nothing of the deal", async ({ browser }) => {
+  const out = await fresh(browser);
+  await signUp(out, B, OUT); await onboard(out, "hire", "Outside Company Owner"); await setUpCompany(out, `Outside Builders ${RUN}`);
+  await out.context().close();
+  const readers: Array<[string, Record<string, unknown>]> = [
+    ["list_team_demand_offer_terms_v2", { p_offer_id: s.offer }],
+    ["team_demand_offer_progress_v1", { p_offer_id: s.offer }],
+    ["list_offer_crew_options_v1", { p_offer_id: s.offer }],
+  ];
+  for (const who of [W, OUT]) {
+    for (const [fn, args] of readers) {
+      const r = await rpcAs(who, fn, args);
+      expect(r.status, `${who === W ? "crew member" : "outsider"} ${fn}`).toBe(200);
+      expect(r.json, `${who === W ? "crew member" : "outsider"} gets no row from ${fn}`).toEqual([]);
+    }
+    const named = await rpcAs(who, "name_team_demand_offer_unit_v1", { p_offer_id: s.offer, p_unit_team_org_id: s.team });
+    expect(named.status, "naming a crew on someone else's offer is refused").not.toBe(200);
+  }
+  // The client is a party, but the crew picker is the supplier's alone.
+  expect((await rpcAs(CO, "list_offer_crew_options_v1", { p_offer_id: s.offer })).json, "the client gets no crew options").toEqual([]);
+  // The supplier itself reads the terms: the readers above are not simply empty.
+  const own = await rpcAs(SUB, "list_team_demand_offer_terms_v2", { p_offer_id: s.offer });
+  expect(Array.isArray(own.json) && (own.json as unknown[]).length > 0, "the supplier reads its own terms").toBe(true);
 });

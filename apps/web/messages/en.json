@@ -19693,7 +19693,9 @@
       "candidate_limit_reached": "At most 10 candidates can be proposed on one offer.",
       "candidate_not_open": "This candidate can no longer be chosen.",
       "candidate_already_selected": "The client has already chosen this candidate.",
-      "client_company_unknown": "The need's company could not be identified."
+      "client_company_unknown": "The need's company could not be identified.",
+      "unit_not_of_company": "This crew has no member on the offering company's people list.",
+      "already_started": "The work on this offer has already started on another project."
     },
     "received": {
       "title": "Teams offered for this need",
@@ -19815,12 +19817,13 @@
       "crew": "Crew: {name}, {count, plural, one {# person} other {# people}}",
       "crewNotNamedSupplier": "Name the crew that will do this work.",
       "crewNotNamedReceiver": "The company has not named its crew yet.",
-      "noCrews": "You have no crew (brigade) yet.",
+      "noCrews": "No crew can be named yet: a crew (brigade) needs at least one member who is on your company's people list.",
       "createCrew": "Create one on the People page",
       "crewLabel": "Crew",
       "crewPlaceholder": "Choose a crew",
       "crewSubmit": "Name this crew",
       "crewNamed": "Crew named.",
+      "crewNamedReconfirm": "Crew named. The terms were confirmed for another crew, so both sides confirm them again.",
       "startNeeds": "The work can start when both sides have confirmed the terms and the company has named its crew.",
       "startIntro": "Both sides confirmed the terms and the crew is named. Create the project: the crew is added to it and the work starts there.",
       "titleLabel": "Project name",

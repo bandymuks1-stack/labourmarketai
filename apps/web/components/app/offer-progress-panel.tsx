@@ -67,7 +67,7 @@ export function OfferProgressPanel({
     startTransition(async () => {
       const r = await nameOfferUnitAction({ offerId, unitTeamOrgId: crew });
       if (r.status === "ok") {
-        setMsg({ ok: true, text: t("crewNamed") });
+        setMsg({ ok: true, text: "confirmationsCleared" in r && r.confirmationsCleared ? t("crewNamedReconfirm") : t("crewNamed") });
         await reload();
         router.refresh();
       } else {

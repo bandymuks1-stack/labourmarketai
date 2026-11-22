@@ -19693,7 +19693,9 @@
       "candidate_limit_reached": "W jednej ofercie można zaproponować najwyżej 10 kandydatów.",
       "candidate_not_open": "Tego kandydata nie można już wybrać.",
       "candidate_already_selected": "Klient już wybrał tego kandydata.",
-      "client_company_unknown": "Nie udało się ustalić firmy potrzeby."
+      "client_company_unknown": "Nie udało się ustalić firmy potrzeby.",
+      "unit_not_of_company": "Ta brygada nie ma żadnego członka z listy osób firmy składającej ofertę.",
+      "already_started": "Prace w ramach tej oferty zostały już rozpoczęte w innym projekcie."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
@@ -19815,12 +19817,13 @@
       "crew": "Brygada: {name}, {count, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
       "crewNotNamedSupplier": "Proszę wskazać brygadę, która wykona tę pracę.",
       "crewNotNamedReceiver": "Firma nie wskazała jeszcze swojej brygady.",
-      "noCrews": "Nie mają Państwo jeszcze brygady.",
+      "noCrews": "Nie można jeszcze wskazać brygady: brygada potrzebuje co najmniej jednego członka z listy osób Państwa firmy.",
       "createCrew": "Proszę ją utworzyć na stronie Ludzie",
       "crewLabel": "Brygada",
       "crewPlaceholder": "Wybierz brygadę",
       "crewSubmit": "Wskaż tę brygadę",
       "crewNamed": "Brygada wskazana.",
+      "crewNamedReconfirm": "Brygada wskazana. Warunki były potwierdzone dla innej brygady, więc obie strony potwierdzają je ponownie.",
       "startNeeds": "Pracę można rozpocząć, gdy obie strony potwierdzą warunki, a firma wskaże swoją brygadę.",
       "startIntro": "Obie strony potwierdziły warunki, a brygada jest wskazana. Proszę utworzyć projekt: brygada zostanie do niego dodana i tam rozpocznie się praca.",
       "titleLabel": "Nazwa projektu",

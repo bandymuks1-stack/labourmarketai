@@ -30,6 +30,8 @@ end $$;
 drop function if exists public.hand_off_team_demand_offer_v2(uuid, uuid, uuid, uuid);
 drop function if exists public.team_demand_offer_progress_v1(uuid);
 drop function if exists public.name_team_demand_offer_unit_v1(uuid, uuid);
+drop function if exists public.list_offer_crew_options_v1(uuid);
+drop function if exists public.offer_crew_eligible_v1(uuid, uuid);
 drop function if exists public.confirm_team_demand_offer_terms_v1(uuid, integer);
 drop function if exists public.list_team_demand_offer_terms_v2(uuid);
 drop function if exists public.propose_team_demand_offer_terms_v2(uuid, integer, text, date, date, text, text, text);

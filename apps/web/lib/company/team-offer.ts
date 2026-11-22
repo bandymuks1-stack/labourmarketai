@@ -168,7 +168,7 @@ export async function confirmOfferTerms(
 export async function nameOfferUnit(
   offerId: string,
   unitTeamOrgId: string,
-): Promise<TeamOfferWriteResult<{ outcome: "named" | "unchanged" }>> {
+): Promise<TeamOfferWriteResult<{ outcome: "named" | "unchanged"; confirmationsCleared: boolean }>> {
   const ctx = await authed();
   if (!ctx) return { status: "not_authed" };
   const { data, error } = await asAny(ctx.supabase).rpc("name_team_demand_offer_unit_v1", {
@@ -176,31 +176,29 @@ export async function nameOfferUnit(
     p_unit_team_org_id: unitTeamOrgId,
   });
   if (error) return { status: offerRefusalOf(error) };
-  const outcome = (data as { outcome?: unknown } | null)?.outcome;
-  return outcome === "named" || outcome === "unchanged" ? { status: "ok", outcome } : { status: "error" };
+  const d = data as { outcome?: unknown; confirmations_cleared?: unknown } | null;
+  const outcome = d?.outcome;
+  return outcome === "named" || outcome === "unchanged"
+    ? { status: "ok", outcome, confirmationsCleared: d?.confirmations_cleared === true }
+    : { status: "error" };
 }
 
-/** The caller's own brigades (crews it may name). Read under its own session. */
-export async function listOwnCrews(): Promise<ReadResult<{ id: string; name: string }>> {
-  const ctx = await authed();
-  if (!ctx) return { status: "unavailable" };
-  try {
-    const { data, error } = await asAny(ctx.supabase)
-      .from("organizations")
-      .select("id, display_name")
-      .eq("owner_profile_id", ctx.userId)
-      .eq("organization_type", "team")
-      .is("archived_at", null)
-      .order("created_at", { ascending: true })
-      .limit(50);
-    if (error) return { status: "unavailable" };
-    const rows = (Array.isArray(data) ? data : []).flatMap((r: { id?: unknown; display_name?: unknown }) =>
-      typeof r.id === "string" ? [{ id: r.id, name: typeof r.display_name === "string" && r.display_name.trim() ? r.display_name.trim() : "-" }] : [],
-    );
-    return { status: "ok", rows };
-  } catch {
-    return { status: "unavailable" };
-  }
+/**
+ * The crews the supplier may name for THIS offer — by the database's own rule
+ * (offer_crew_eligible_v1: a brigade of the offering organization's owner
+ * with a member on the offering company's active roster), so the picker
+ * never offers a brigade the naming would refuse.
+ */
+export function listOfferCrewOptions(offerId: string): Promise<ReadResult<{ id: string; name: string; memberCount: number }>> {
+  return readRows("list_offer_crew_options_v1", { p_offer_id: offerId }, (raw) => {
+    const r = raw as { unit_team_org_id?: unknown; name?: unknown; member_count?: unknown } | null;
+    if (!r || typeof r.unit_team_org_id !== "string") return null;
+    return {
+      id: r.unit_team_org_id,
+      name: typeof r.name === "string" && r.name.trim() ? r.name.trim() : "-",
+      memberCount: typeof r.member_count === "number" ? r.member_count : 0,
+    };
+  });
 }
 
 /** Whether the negotiation migration is live (a nil-id read answers zero rows when it is). */
