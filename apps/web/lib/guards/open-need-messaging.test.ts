@@ -126,6 +126,12 @@ describe("the other doors (independent review R2) — narrowed, nothing else", (
     expect(UP).toMatch(/and cp\.profile_id is distinct from c\.created_by\s+and not exists/);
   });
 
+  it("only the door creates an open-need thread; other direct contact never reuses one", () => {
+    expect(UP).toMatch(/create policy conversations_insert on public\.conversations for insert\s+with check \(created_by = auth\.uid\(\) and source_type is distinct from 'open_need'\)/);
+    expect(DOWN).toMatch(/create policy conversations_insert on public\.conversations for insert\s+with check \(created_by = auth\.uid\(\)\);/);
+    expect(read("lib/communication/direct-conversation-core.ts")).toMatch(/\.or\("source_type\.is\.null,source_type\.neq\.open_need"\)/);
+  });
+
   it("no guess test through revoking a participant", () => {
     expect(UP).toMatch(/c\.id = p_conversation_id and c\.source_type = 'open_need'\)\s+and not public\.is_admin\(\) then\s+raise exception 'not_authorized'/);
   });

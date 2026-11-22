@@ -25,6 +25,10 @@ begin
 end $$;
 
 -- The narrowed policies back to their 0021 / 20260712130000 text.
+drop policy if exists conversations_insert on public.conversations;
+create policy conversations_insert on public.conversations for insert
+  with check (created_by = auth.uid());
+
 drop policy if exists conversation_participants_select on public.conversation_participants;
 create policy conversation_participants_select on public.conversation_participants for select
   using (

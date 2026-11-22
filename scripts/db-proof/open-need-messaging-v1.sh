@@ -96,7 +96,7 @@ create function public._onm_take(p text) returns void language sql as \$f\$
     select schemaname || tablename || policyname || coalesce(qual, '') || coalesce(with_check, '') || array_to_string(roles, ',') || cmd as x
       from pg_policies where schemaname in ('public', 'storage')
        and tablename <> 'open_need_identity_disclosures'
-       and policyname not in ('conversation_participants_select', 'conversation_messages_select',
+       and policyname not in ('conversation_participants_select', 'conversation_messages_select', 'conversations_insert',
                               'conversation-attachments participant insert')) s
   union all
   select p, 'check', pg_get_constraintdef(oid) from pg_constraint where conname = 'conversations_source_type_check';
@@ -250,6 +250,8 @@ check "disclosing twice keeps one row" "true|1" "$CLIENT" "select public.disclos
 check "after disclosure the agency reads the name, both rows and both authors" "Clara Client|2|1" "$AGENT" "select (select display_name from public.conversation_counterpart_identities(array[$T])) || '|' || (select count(*) from public.conversation_participants where conversation_id = $T)::text || '|' || (select count(*) from public.conversation_messages where conversation_id = $T and author_id = '$CLIENT')::text"
 check "after disclosure the client may attach files" "x" "$CLIENT" "insert into storage.objects(bucket_id, name) values ('conversation-attachments', $T::text || '/$CLIENT/0e0e0000-0000-4000-8000-0000000000f4/a.pdf') returning 'x'"
 check "a stranger reads no disclosure row" "0" "$STRANGER" "select count(*)::text from public.open_need_identity_disclosures"
+check "R2 N1: nobody hand-makes an open-need thread (only the door)" "ERROR: new row violates row-level security policy for table \"conversations\"" "$STRANGER" "insert into public.conversations(subject, kind, created_by, source_type, source_id) values ('x','direct','$STRANGER','open_need','$N1') returning 'x'"
+check "R2 N1: an ordinary thread is still created as before" "x" "$STRANGER" "insert into public.conversations(subject, kind, created_by) values ('x','direct','$STRANGER') returning 'x'"
 check "the CHECK still refuses an unknown source" "ERROR: new row for relation \"conversations\" violates check constraint \"conversations_source_type_check\"" "$AGENT" "insert into public.conversations(subject, kind, created_by, source_type, source_id) values ('x','direct','$AGENT','made_up','$N1') returning 'x'"
 # ── the cap ──────────────────────────────────────────────────────────────
 cat <<SQL

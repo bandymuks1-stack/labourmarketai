@@ -46,6 +46,8 @@
 --        blinded caller the other side's author_id replaced by a stable
 --        per-thread pseudonymous id (mine / theirs and unread still work; the
 --        real author stays stored for audit);
+--      conversations_insert — an 'open_need' thread is created by the door
+--        only (a hand-made one would read a need's title without the gate);
 --      attachments — an undisclosed client cannot upload (storage path and
 --        uploader_id would carry its id): storage insert policy + a trigger.
 --   7. conversation_live_recipients_v1 — service_role only: the live
@@ -459,6 +461,12 @@ revoke all on function public.list_open_demand_for_team_offer_v1(uuid) from publ
 grant execute on function public.list_open_demand_for_team_offer_v1(uuid) to authenticated;
 
 -- 6) RLS, narrowed: a blinded caller never reads the other side's id.
+-- Only the door creates an open-need thread (R2 N1): a hand-made one would
+-- read a need's title without the board's gate.
+drop policy if exists conversations_insert on public.conversations;
+create policy conversations_insert on public.conversations for insert
+  with check (created_by = auth.uid() and source_type is distinct from 'open_need');
+
 drop policy if exists conversation_participants_select on public.conversation_participants;
 create policy conversation_participants_select on public.conversation_participants for select
   using (
