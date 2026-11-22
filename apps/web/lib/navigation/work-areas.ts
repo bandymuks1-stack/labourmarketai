@@ -212,6 +212,42 @@ export function customerHeaderDoors(
   return CUSTOMER_HEADER_DOORS;
 }
 
+/**
+ * THE PERSON'S OWN DOORS IN THE ONE HEADER (coordinator 2026-11-22: job search
+ * and offers clearly and quickly reachable at 375/390 px and on desktop). The
+ * core loop (chat · journal · calendar · messages) is the primary row; job
+ * search ("Žiūrėti galimybes") and the incoming offers ("Rezervacijos") were
+ * in NO header surface — only the home's stations reached them, so from any
+ * other page the way to a job ran through home. They now lead "More" and the
+ * phone sheet for a worker in their own workspace. Existing routes, existing
+ * labels; the core row is unchanged.
+ */
+export const PERSONAL_HEADER_DOORS: readonly NavItem[] = [
+  {
+    id: "area:opportunities",
+    href: "/dashboard/opportunities",
+    tabLabelKey: "auth.dashboard.myZone.actions.findOpportunities.title",
+    iconKey: "compass",
+  },
+  {
+    id: "area:bookings",
+    href: "/dashboard/bookings",
+    tabLabelKey: "auth.dashboard.myZone.actions.bookings.title",
+    iconKey: "handshake",
+  },
+];
+
+/** A worker in their own workspace gets the personal doors; an organization
+ *  workspace keeps its own (`organizationHeaderAreas`). */
+export function personalHeaderDoors(
+  heldRoles: readonly string[],
+  activeWorkspace: { readonly kind: "personal" | "organization" } | null | undefined,
+): readonly NavItem[] {
+  if (!heldRoles.includes("worker")) return [];
+  if (activeWorkspace?.kind === "organization") return [];
+  return PERSONAL_HEADER_DOORS;
+}
+
 export type WorkAreaContext = "personal" | "organization";
 
 /** The areas of a workspace — the one lookup every home surface uses. */
