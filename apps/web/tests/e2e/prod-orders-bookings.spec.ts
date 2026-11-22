@@ -601,6 +601,9 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
   await expect(form, "the customer setup is complete enough to file requests").toBeVisible({ timeout: 30_000 });
   await page.getByTestId("buyer-requests-field-title").fill(`${NOTE} užsakymas`);
   await page.getByTestId("buyer-requests-field-need-summary").fill(`${NOTE}: plytelių klojimas vonios kambaryje`);
+  // The country is a required ISO choice since #3234; an unchosen select
+  // stops the submit in the browser and no result is ever shown.
+  await page.getByTestId("buyer-requests-field-country").selectOption("LT");
   await page.getByTestId("buyer-requests-status-draft").check();
   await page.getByTestId("buyer-requests-submit").click();
   await expect(page.getByTestId("buyer-requests-result")).toBeVisible({ timeout: 30_000 });

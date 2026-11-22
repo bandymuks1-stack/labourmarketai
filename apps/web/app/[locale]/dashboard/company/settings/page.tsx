@@ -34,6 +34,8 @@ import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+import { isSafeReturnPath } from "@/lib/auth/redirect";
+import { PageBack } from "@/components/app/premium/page-back";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/company/settings");
@@ -61,13 +63,27 @@ export const generateMetadata = dashboardPageMetadata("/dashboard/company/settin
  */
 export default async function CompanySettingsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  /** A started action that sent the person here to declare a capability
+   *  first (`need`), and the action itself to return to (`next`). */
+  searchParams?: Promise<{ need?: string; next?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const userId = await requireRoleOrRedirect(locale, "company");
   const t = await getTranslations("organizationDoors.pages.settings");
+  // RETURN TO THE ACTION (owner 2026-11-22): the student invite needs the
+  // `training_provider` capability first, so it sends the person here with
+  // `need` and `next` (the invite itself). Under the capability card a link
+  // takes them back to that invite. Both are validated: `need` is the one
+  // known slug, `next` an internal path.
+  const sp = (await searchParams) ?? {};
+  const returnTo =
+    sp.need === "training_provider" && typeof sp.next === "string" && isSafeReturnPath(sp.next)
+      ? sp.next
+      : null;
   const tDisclosure = await getTranslations("common.disclosure");
   const tCompany = await getTranslations("roleDashboards.company");
   const tNotes = await getTranslations("featureNotes");
@@ -201,6 +217,11 @@ export default async function CompanySettingsPage({
               organizationId={capabilityOrgId}
               declared={declaredCapabilities}
             />
+            {returnTo ? (
+              <PageBack href={returnTo} className="mt-4" data-testid="settings-return-to-action">
+                {tCompany("learners.invite")}
+              </PageBack>
+            ) : null}
           </div>
         ) : null}
 
