@@ -91,7 +91,9 @@ export function Card({
   label?: string;
   live?: boolean;
   variant?: CardVariant;
-  /** Dense listing contexts: p-4 instead of the default p-6. */
+  /** Dense listing contexts: p-4 instead of the default p-6 (which is p-4 on
+   *  phones as well — owner phone report 2026-11-20: 24px of inner padding
+   *  on a 320–390px screen made every card taller and its text wrap more). */
   compact?: boolean;
   className?: string;
   children: React.ReactNode;
@@ -107,7 +109,7 @@ export function Card({
       data-variant={variant === "standard" ? undefined : variant}
       className={cn(
         "card-border",
-        compact ? "p-4" : "p-6",
+        compact ? "p-4" : "p-4 sm:p-6",
         variants[variant],
         // A content layout makes the card a column so the inner wrapper can
         // fill it (justify-center on a stretched card keeps working).

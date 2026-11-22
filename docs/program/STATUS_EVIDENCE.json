@@ -12,26 +12,26 @@
   "profile-cv-history|phone-375": {
    "spec": "profile-cv-history",
    "device": "phone-375",
-   "run": 44637832323,
-   "result": "failure",
-   "build": "7e517e32",
-   "at": "2026-11-19T23:39:29Z"
+   "run": 44856987867,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T02:54:46Z"
   },
   "company-chain|phone": {
    "spec": "company-chain",
    "device": "phone",
-   "run": 44640499331,
-   "result": "failure",
-   "build": "7e517e32",
-   "at": "2026-11-19T23:51:58Z"
+   "run": 44859165488,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:10:53Z"
   },
   "company-chain|phone-375": {
    "spec": "company-chain",
    "device": "phone-375",
-   "run": 44641241487,
+   "run": 44859841951,
    "result": "failure",
-   "build": "7e517e32",
-   "at": "2026-11-20T00:01:25Z"
+   "build": "d447a639",
+   "at": "2026-11-21T03:14:41Z"
   },
   "agency-chain|phone": {
    "spec": "agency-chain",
@@ -124,10 +124,10 @@
   "company-chain|desktop": {
    "spec": "company-chain",
    "device": "desktop",
-   "run": 44639596268,
-   "result": "failure",
-   "build": "7e517e32",
-   "at": "2026-11-19T23:46:08Z"
+   "run": 44858511879,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:02:55Z"
   },
   "profile-cv-history|desktop": {
    "spec": "profile-cv-history",
@@ -136,6 +136,22 @@
    "result": "success",
    "build": "7e517e32",
    "at": "2026-11-19T23:02:56Z"
+  },
+  "learning-practice|desktop": {
+   "spec": "learning-practice",
+   "device": "desktop",
+   "run": 44860184317,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:19:16Z"
+  },
+  "company-governance|desktop": {
+   "spec": "company-governance",
+   "device": "desktop",
+   "run": 44856477733,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T02:37:24Z"
   }
  }
 }
