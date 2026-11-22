@@ -4,7 +4,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 
 import type { EmployerContextReason } from "@/lib/company/employer-company-context";
 import { requireEmployerCompany } from "@/lib/company/employer-company-context";
-import { isDemandKind } from "@/lib/demand/market-direction";
+import { isLabourDemandRow } from "@/lib/demand/market-direction";
 import { parseStructuredNeed } from "@/lib/market/fit";
 import {
   INTEREST_STATUSES,
@@ -124,7 +124,7 @@ export async function getOrgDemandRollup(): Promise<OrgDemandRollup> {
     status: string;
     payload: unknown;
     kind: string | null;
-  }[]).filter((r) => isDemandKind(r.kind));
+  }[]).filter((r) => isLabourDemandRow(r)); // not a help-desk or privacy request
 
   const byStatus = Object.fromEntries(
     ROLLUP_DEMAND_STATUSES.map((s) => [s, 0]),
