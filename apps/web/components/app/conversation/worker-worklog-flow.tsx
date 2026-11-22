@@ -57,6 +57,7 @@ import { formatUtcDate } from "@/lib/time/display";
 import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { addCalendarDays } from "@/lib/time/local-day";
 import { quoteText } from "@/lib/i18n/quote";
 
 export type WorkLogLabels = {
@@ -367,6 +368,8 @@ export function WorkerWorkLogFlow({
   const contextDecidedByPerson = useRef(false);
   const resolvedForDate = useRef<string | null>(null);
   const [workDate, setWorkDate] = useState(draft.date);
+  // The person's own calendar day, read once when the flow opens.
+  const [today] = useState(() => personCalendarDay());
   const [site, setSite] = useState(draft.site ?? "");
   const [notes, setNotes] = useState(draft.notes);
   const [pending, start] = useTransition();
@@ -1177,6 +1180,36 @@ export function WorkerWorkLogFlow({
           draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />
         )}
       </dl>
+
+      {/* THE DAY, OFFERED (owner P1 2026-11-21): today or yesterday in one
+          tap, any other day in the date field above. The day the sentence
+          named is already set; the person only changes it if it is wrong.
+          The journal's own day words — no new copy. */}
+      <div className="flex flex-wrap gap-2" data-testid="worklog-date-choices">
+        {[
+          { day: today, label: tCandidate("stream.today"), id: "today" },
+          { day: addCalendarDays(today, -1), label: tCandidate("stream.yesterday"), id: "yesterday" },
+        ].map((choice) => (
+          <button
+            key={choice.id}
+            type="button"
+            aria-pressed={workDate === choice.day}
+            disabled={confirming || pending}
+            onClick={() => {
+              setWorkDate(choice.day);
+              clearError();
+            }}
+            data-testid={`worklog-date-${choice.id}`}
+            className={`inline-flex min-h-11 items-center rounded-control border px-3 text-support font-semibold transition-colors disabled:opacity-50 ${
+              workDate === choice.day
+                ? "border-brand-blue bg-brand-blue/15 text-brand-blue"
+                : "border-ink-500 bg-ink-800 text-text-secondary hover:border-brand-blue/50"
+            }`}
+          >
+            {choice.label}
+          </button>
+        ))}
+      </div>
 
       <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} locale={locale} />
 
