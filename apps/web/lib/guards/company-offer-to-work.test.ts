@@ -38,14 +38,15 @@ const NEW_FNS = [
   "list_team_demand_offer_terms_v2",
   "confirm_team_demand_offer_terms_v1",
   "name_team_demand_offer_unit_v1",
+  "list_offer_crew_options_v1",
   "team_demand_offer_progress_v1",
   "hand_off_team_demand_offer_v2",
 ];
 
 describe("migration: additive, nothing existing is replaced", () => {
-  it("defines only the six new functions; no v1 function, policy or grant on a table changes", () => {
+  it("defines only the new functions (and one internal rule); no v1 function, policy or grant on a table changes", () => {
     const defined = [...code(UP).matchAll(/create or replace function public\.(\w+)\(/g)].map((m) => m[1]);
-    expect(defined.sort()).toEqual([...NEW_FNS].sort());
+    expect(defined.sort()).toEqual([...NEW_FNS, "offer_crew_eligible_v1"].sort());
     expect(code(UP)).not.toMatch(/\b(create|drop|alter) policy\b/i);
     expect(code(UP)).not.toMatch(/grant\s+(select|insert|update|delete)/i);
     expect(code(UP)).not.toMatch(/\b(update|delete from)\s+public\.team_demand_offers\b(?![\s\S]*?where id = o\.id)/i);
@@ -122,6 +123,29 @@ describe("the crew, never the whole company, reaches the project", () => {
     expect(name).toMatch(/raise exception 'unit_has_no_members'/);
     expect(hand()).toMatch(/u\.owner_profile_id = v_owner/);
   });
+  it("ONE crew rule: the brigade must have a member on the offering COMPANY's active roster", () => {
+    const rule = fnBlock(UP, "offer_crew_eligible_v1");
+    expect(rule).toMatch(/u\.owner_profile_id = g\.owner_profile_id/);
+    expect(rule).toMatch(/cw\.company_id = g\.legacy_company_id\s+and cw\.status = 'active'/);
+    expect(UP).toMatch(/revoke all on function public\.offer_crew_eligible_v1\(uuid, uuid\) from authenticated;/);
+    expect(code(UP)).not.toMatch(/grant execute on function public\.offer_crew_eligible_v1/);
+    // The picker, the naming and the hand-off all read the same rule.
+    expect(fnBlock(UP, "list_offer_crew_options_v1")).toMatch(/public\.offer_crew_eligible_v1\(o\.team_org_id, u\.id\)/);
+    expect(fnBlock(UP, "name_team_demand_offer_unit_v1")).toMatch(/not public\.offer_crew_eligible_v1\(o\.team_org_id, p_unit_team_org_id\) then\s+raise exception 'unit_not_of_company'/);
+    expect(hand()).toMatch(/not public\.offer_crew_eligible_v1\(o\.team_org_id, o\.unit_team_org_id\) then\s+raise exception 'unit_not_of_company'/);
+  });
+  it("the crew picker is only the supplier's, and reads the database's rule (not the caller's own brigades)", () => {
+    expect(fnBlock(UP, "list_offer_crew_options_v1")).toMatch(/team_offer_party_side_v1\(o\.id\) is distinct from 'supplier' then\s+return;/);
+    const svc = read(join(WEB, "lib/company/team-offer.ts"));
+    expect(svc).toMatch(/readRows\("list_offer_crew_options_v1"/);
+    expect(svc).not.toMatch(/listOwnCrews/);
+  });
+  it("a different crew clears both confirmations: the client confirms again what will happen", () => {
+    const name = fnBlock(UP, "name_team_demand_offer_unit_v1");
+    expect(name).toMatch(/update public\.team_demand_offer_terms\s+set supplier_confirmed_at = null, supplier_confirmed_by = null,\s+receiver_confirmed_at = null, receiver_confirmed_by = null\s+where offer_id = o\.id/);
+    // The unchanged answer comes before the update: re-naming the same crew keeps the confirmations.
+    expect(name.indexOf("'unchanged'")).toBeLessThan(name.indexOf("set supplier_confirmed_at = null"));
+  });
   it("only the need's owner hands off, onto its own project", () => {
     expect(hand()).toMatch(/not public\.team_offer_receiver_v1\(o\.request_id\)/);
     expect(hand()).toMatch(/raise exception 'project_not_of_demand_owner'/);
@@ -137,7 +161,7 @@ describe("rollback", () => {
   it("refuses while any agreement, place or crew exists; drops only what the migration added", () => {
     expect(DOWN).toMatch(/named crews exist - forward-fix/);
     expect(DOWN).toMatch(/confirmed terms or places exist - forward-fix/);
-    for (const fn of NEW_FNS) expect(DOWN).toMatch(new RegExp(`drop function if exists public\\.${fn}\\(`));
+    for (const fn of [...NEW_FNS, "offer_crew_eligible_v1"]) expect(DOWN).toMatch(new RegExp(`drop function if exists public\\.${fn}\\(`));
     expect(DOWN).not.toMatch(/create or replace function/);
   });
 });
@@ -154,7 +178,7 @@ describe("the app", () => {
   it("starting the work creates ONE project through the shared core and gate, and removes it on a refusal", () => {
     expect(actions).toMatch(/hasOrganizationCapability\(company\.role, "manage-projects"\)/);
     expect(actions).toMatch(/insertProjectForCompany\(supabase, company\.companyId, \{ title, city: null \}\)/);
-    expect(actions).toMatch(/if \(handed\.status !== "ok"\) \{\s+await rollbackCreatedProject\(supabase, created\.id\);/);
+    expect(actions).toMatch(/if \(handed\.status !== "ok" \|\| handed\.outcome === "already_assigned"\) \{\s+const removed = await rollbackCreatedProject\(supabase, created\.id\);/);
   });
   it("no copy calls a confirmation a signature or a contract", () => {
     for (const l of ["en", "lt", "ru", "nl", "de", "pl", "sv"]) {

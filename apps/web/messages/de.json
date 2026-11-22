@@ -19687,7 +19687,9 @@
       "not_an_organization_offer": "Nur ein Unternehmensangebot benennt eine Kolonne.",
       "invalid_title": "Der Projektname braucht 2 bis 120 Zeichen.",
       "no_company": "Öffnen Sie zuerst den Unternehmensbereich.",
-      "project_not_created": "Das Projekt konnte nicht angelegt werden."
+      "project_not_created": "Das Projekt konnte nicht angelegt werden.",
+      "unit_not_of_company": "Diese Kolonne hat kein Mitglied auf der Personenliste des anbietenden Unternehmens.",
+      "already_started": "Die Arbeit zu diesem Angebot wurde bereits in einem anderen Projekt begonnen."
     },
     "received": {
       "title": "Für diesen Bedarf angebotene Teams",
@@ -19809,12 +19811,13 @@
       "crew": "Kolonne: {name}, {count, plural, one {# Person} other {# Personen}}",
       "crewNotNamedSupplier": "Benennen Sie die Kolonne, die diese Arbeit ausführt.",
       "crewNotNamedReceiver": "Das Unternehmen hat seine Kolonne noch nicht benannt.",
-      "noCrews": "Sie haben noch keine Kolonne.",
+      "noCrews": "Noch keine Kolonne benennbar: Eine Kolonne braucht mindestens ein Mitglied, das auf der Personenliste Ihres Unternehmens steht.",
       "createCrew": "Legen Sie eine auf der Seite Personen an",
       "crewLabel": "Kolonne",
       "crewPlaceholder": "Kolonne wählen",
       "crewSubmit": "Diese Kolonne benennen",
       "crewNamed": "Kolonne benannt.",
+      "crewNamedReconfirm": "Kolonne benannt. Die Bedingungen waren für eine andere Kolonne bestätigt, daher bestätigen beide Seiten sie erneut.",
       "startNeeds": "Die Arbeit kann beginnen, wenn beide Seiten die Bedingungen bestätigt haben und das Unternehmen seine Kolonne benannt hat.",
       "startIntro": "Beide Seiten haben die Bedingungen bestätigt und die Kolonne ist benannt. Legen Sie das Projekt an: die Kolonne wird hinzugefügt und die Arbeit beginnt dort.",
       "titleLabel": "Projektname",

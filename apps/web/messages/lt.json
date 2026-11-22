@@ -19687,7 +19687,9 @@
       "not_an_organization_offer": "Brigadą nurodo tik įmonės pasiūlymas.",
       "invalid_title": "Projekto pavadinimas turi būti nuo 2 iki 120 simbolių.",
       "no_company": "Pirmiausia atidarykite įmonės darbo erdvę.",
-      "project_not_created": "Projekto sukurti nepavyko."
+      "project_not_created": "Projekto sukurti nepavyko.",
+      "unit_not_of_company": "Šioje brigadoje nėra nė vieno nario iš siūlančios įmonės žmonių sąrašo.",
+      "already_started": "Darbai pagal šį pasiūlymą jau pradėti kitame projekte."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
@@ -19809,12 +19811,13 @@
       "crew": "Brigada: {name}, {count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
       "crewNotNamedSupplier": "Nurodykite brigadą, kuri atliks šiuos darbus.",
       "crewNotNamedReceiver": "Įmonė dar nenurodė savo brigados.",
-      "noCrews": "Jūs dar neturite brigados.",
+      "noCrews": "Brigados dar negalima nurodyti: brigadoje turi būti bent vienas narys iš jūsų įmonės žmonių sąrašo.",
       "createCrew": "Sukurkite ją puslapyje „Žmonės“",
       "crewLabel": "Brigada",
       "crewPlaceholder": "Pasirinkite brigadą",
       "crewSubmit": "Nurodyti šią brigadą",
       "crewNamed": "Brigada nurodyta.",
+      "crewNamedReconfirm": "Brigada nurodyta. Sąlygos buvo patvirtintos kitai brigadai, todėl abi pusės jas patvirtina iš naujo.",
       "startNeeds": "Darbus galima pradėti, kai abi šalys patvirtina sąlygas ir įmonė nurodo savo brigadą.",
       "startIntro": "Abi šalys patvirtino sąlygas, brigada nurodyta. Sukurkite projektą: brigada bus į jį įtraukta ir darbai prasidės ten.",
       "titleLabel": "Projekto pavadinimas",

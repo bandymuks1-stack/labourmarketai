@@ -19687,7 +19687,9 @@
       "not_an_organization_offer": "Only a company offer names a crew.",
       "invalid_title": "The project name needs 2 to 120 characters.",
       "no_company": "Open the company workspace first.",
-      "project_not_created": "The project could not be created."
+      "project_not_created": "The project could not be created.",
+      "unit_not_of_company": "This crew has no member on the offering company's people list.",
+      "already_started": "The work on this offer has already started on another project."
     },
     "received": {
       "title": "Teams offered for this need",
@@ -19809,12 +19811,13 @@
       "crew": "Crew: {name}, {count, plural, one {# person} other {# people}}",
       "crewNotNamedSupplier": "Name the crew that will do this work.",
       "crewNotNamedReceiver": "The company has not named its crew yet.",
-      "noCrews": "You have no crew (brigade) yet.",
+      "noCrews": "No crew can be named yet: a crew (brigade) needs at least one member who is on your company's people list.",
       "createCrew": "Create one on the People page",
       "crewLabel": "Crew",
       "crewPlaceholder": "Choose a crew",
       "crewSubmit": "Name this crew",
       "crewNamed": "Crew named.",
+      "crewNamedReconfirm": "Crew named. The terms were confirmed for another crew, so both sides confirm them again.",
       "startNeeds": "The work can start when both sides have confirmed the terms and the company has named its crew.",
       "startIntro": "Both sides confirmed the terms and the crew is named. Create the project: the crew is added to it and the work starts there.",
       "titleLabel": "Project name",

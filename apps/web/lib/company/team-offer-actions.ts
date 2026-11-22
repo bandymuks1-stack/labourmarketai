@@ -9,7 +9,7 @@ import { insertProjectForCompany, rollbackCreatedProject } from "@/lib/projects/
 import {
   confirmOfferTerms,
   handOffTeamOffer,
-  listOwnCrews,
+  listOfferCrewOptions,
   loadOfferProgress,
   nameOfferUnit,
   listOfferableDemand,
@@ -173,7 +173,7 @@ export async function nameOfferUnitAction(input: { offerId: string; unitTeamOrgI
 }
 
 export type OfferProgressData =
-  | { status: "ok"; progress: OfferProgress; crews: readonly { id: string; name: string }[] }
+  | { status: "ok"; progress: OfferProgress; crews: readonly { id: string; name: string; memberCount: number }[] }
   | { status: "needs_migration" | "unavailable" | "error" };
 
 /** Where the offer stands; for the supplier also the crews it may name. */
@@ -185,7 +185,7 @@ export async function loadOfferProgressAction(input: { offerId: string }): Promi
   if (!progress) return { status: "unavailable" };
   const crews =
     progress.mySide === "supplier" && progress.offerKind === "organization"
-      ? await listOwnCrews().then((c) => (c.status === "ok" ? c.rows : []))
+      ? await listOfferCrewOptions(input.offerId).then((c) => (c.status === "ok" ? c.rows : []))
       : [];
   return { status: "ok", progress, crews };
 }
@@ -217,9 +217,12 @@ export async function startWorkFromOfferAction(input: { offerId: string; title: 
   const created = await insertProjectForCompany(supabase, company.companyId, { title, city: null });
   if (!created.ok) return { status: created.reason === "invalid_title" ? "invalid_title" : "project_not_created" };
   const handed = await handOffTeamOffer({ offerId: input.offerId, projectId: created.id });
-  if (handed.status !== "ok") {
-    await rollbackCreatedProject(supabase, created.id);
-    return { status: handed.status };
+  // A refusal, or a second start (the crew is already on another project):
+  // the project created a moment ago would stay empty, so it goes again.
+  if (handed.status !== "ok" || handed.outcome === "already_assigned") {
+    const removed = await rollbackCreatedProject(supabase, created.id);
+    if (!removed) console.error("[team-offer] start-work: the empty project could not be removed", { projectId: created.id });
+    return { status: handed.status === "ok" ? "already_started" : handed.status };
   }
   revalidatePath("/", "layout");
   return { status: "ok", projectId: created.id };

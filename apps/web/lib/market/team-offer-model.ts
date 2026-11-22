@@ -239,6 +239,10 @@ export type TeamOfferRefusal =
   | "terms_not_agreed"
   | "unit_not_named"
   | "unit_not_yours"
+  /** The brigade has no member on the offering company's active roster. */
+  | "unit_not_of_company"
+  /** The work on this offer was already started (on another project). */
+  | "already_started"
   | "unit_has_no_members"
   | "not_an_organization_offer"
   | "needs_migration"
@@ -270,6 +274,7 @@ const STABLE_WORDS: readonly TeamOfferRefusal[] = [
   "terms_not_agreed",
   "unit_not_named",
   "unit_not_yours",
+  "unit_not_of_company",
   "unit_has_no_members",
   "not_an_organization_offer",
 ];

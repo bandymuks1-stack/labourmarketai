@@ -19687,7 +19687,9 @@
       "not_an_organization_offer": "Alleen een bedrijfsaanbod noemt een ploeg.",
       "invalid_title": "De projectnaam moet 2 tot 120 tekens hebben.",
       "no_company": "Open eerst de werkruimte van het bedrijf.",
-      "project_not_created": "Het project kon niet worden aangemaakt."
+      "project_not_created": "Het project kon niet worden aangemaakt.",
+      "unit_not_of_company": "Deze ploeg heeft geen lid op de personenlijst van het aanbiedende bedrijf.",
+      "already_started": "Het werk voor dit aanbod is al gestart in een ander project."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
@@ -19809,12 +19811,13 @@
       "crew": "Ploeg: {name}, {count, plural, one {# persoon} other {# personen}}",
       "crewNotNamedSupplier": "Noem de ploeg die dit werk doet.",
       "crewNotNamedReceiver": "Het bedrijf heeft zijn ploeg nog niet genoemd.",
-      "noCrews": "U hebt nog geen ploeg.",
+      "noCrews": "Er kan nog geen ploeg worden aangewezen: een ploeg heeft minstens één lid nodig dat op de personenlijst van uw bedrijf staat.",
       "createCrew": "Maak er een aan op de pagina Mensen",
       "crewLabel": "Ploeg",
       "crewPlaceholder": "Kies een ploeg",
       "crewSubmit": "Deze ploeg noemen",
       "crewNamed": "Ploeg genoemd.",
+      "crewNamedReconfirm": "Ploeg aangewezen. De voorwaarden waren bevestigd voor een andere ploeg, dus beide partijen bevestigen ze opnieuw.",
       "startNeeds": "Het werk kan beginnen wanneer beide partijen de voorwaarden hebben bevestigd en het bedrijf zijn ploeg heeft genoemd.",
       "startIntro": "Beide partijen hebben de voorwaarden bevestigd en de ploeg is genoemd. Maak het project aan: de ploeg wordt eraan toegevoegd en het werk begint daar.",
       "titleLabel": "Projectnaam",

@@ -19687,7 +19687,9 @@
       "not_an_organization_offer": "Endast ett företagserbjudande anger ett arbetslag.",
       "invalid_title": "Projektnamnet behöver 2 till 120 tecken.",
       "no_company": "Öppna företagets arbetsyta först.",
-      "project_not_created": "Projektet kunde inte skapas."
+      "project_not_created": "Projektet kunde inte skapas.",
+      "unit_not_of_company": "Det här arbetslaget har ingen medlem på det erbjudande företagets personlista.",
+      "already_started": "Arbetet med det här erbjudandet har redan startat i ett annat projekt."
     },
     "received": {
       "title": "Team som erbjudits för det här behovet",
@@ -19809,12 +19811,13 @@
       "crew": "Arbetslag: {name}, {count, plural, one {# person} other {# personer}}",
       "crewNotNamedSupplier": "Ange arbetslaget som utför arbetet.",
       "crewNotNamedReceiver": "Företaget har inte angett sitt arbetslag ännu.",
-      "noCrews": "Ni har inget arbetslag ännu.",
+      "noCrews": "Inget arbetslag kan anges ännu: ett arbetslag behöver minst en medlem som finns på ert företags personlista.",
       "createCrew": "Skapa ett på sidan Personer",
       "crewLabel": "Arbetslag",
       "crewPlaceholder": "Välj arbetslag",
       "crewSubmit": "Ange detta arbetslag",
       "crewNamed": "Arbetslaget angivet.",
+      "crewNamedReconfirm": "Arbetslaget är angivet. Villkoren var bekräftade för ett annat arbetslag, så båda parter bekräftar dem igen.",
       "startNeeds": "Arbetet kan börja när båda parter har bekräftat villkoren och företaget har angett sitt arbetslag.",
       "startIntro": "Båda parter har bekräftat villkoren och arbetslaget är angivet. Skapa projektet: arbetslaget läggs till och arbetet börjar där.",
       "titleLabel": "Projektnamn",

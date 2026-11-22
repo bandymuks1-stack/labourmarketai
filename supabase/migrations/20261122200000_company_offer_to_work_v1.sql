@@ -28,8 +28,17 @@
 --      A newer version starts again with no confirmation.
 --   6. name_team_demand_offer_unit_v1 — the supplier names its crew: a
 --      brigade owned by the offering organization's owner, not archived, with
---      at least one active member. Its members reach the project only through
---      the hand-off, exactly as a brigade offer's members do today.
+--      at least one active member who is on the offering COMPANY's active
+--      roster (offer_crew_eligible_v1, so a brigade of another company of the
+--      same owner is refused). Its members reach the project only through
+--      the hand-off, exactly as a brigade offer's members do today. Changing
+--      the crew after a confirmation clears both confirmations: the client
+--      confirms again what it agreed to, crew included.
+--   6a. offer_crew_eligible_v1 — that one rule, internal (no grant); the
+--      crew picker (list_offer_crew_options_v1), the naming and the hand-off
+--      all read it, so the picker never offers what the database refuses.
+--   6b. list_offer_crew_options_v1 — the supplier side: the brigades it may
+--      name for THIS offer (id, name, member count).
 --   7. team_demand_offer_progress_v1 — both parties: where the offer stands
 --      (named crew and its size, latest version, who confirmed, agreed).
 --   8. hand_off_team_demand_offer_v2 — v1's rules; a company offer is handed
@@ -285,6 +294,85 @@ begin
 end;
 $$;
 
+-- ── 6a. offer_crew_eligible_v1 (internal) ────────────────────────────────
+-- A brigade may be the crew of a company offer when it is a brigade (team)
+-- owned by the offering organization's owner, not archived, and at least one
+-- of its active members is on the offering COMPANY's active roster. Brigades
+-- carry no company column, so the roster is the tie to the company.
+create or replace function public.offer_crew_eligible_v1(p_team_org_id uuid, p_unit_team_org_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = public
+as $$
+  select coalesce((
+    select true
+      from public.organizations g
+      join public.organizations u on u.id = p_unit_team_org_id
+     where g.id = p_team_org_id
+       and g.owner_profile_id is not null
+       and g.legacy_company_id is not null
+       and u.organization_type = 'team'
+       and u.archived_at is null
+       and u.owner_profile_id = g.owner_profile_id
+       and exists (
+         select 1
+           from public.engagement_contexts ec
+           join public.workers w on w.profile_id = ec.profile_id
+           join public.company_workers cw on cw.worker_id = w.id
+          where ec.organization_id = u.id
+            and ec.relationship_slug = 'employee'
+            and ec.status = 'active'
+            and cw.company_id = g.legacy_company_id
+            and cw.status = 'active')
+     limit 1), false)
+$$;
+revoke all on function public.offer_crew_eligible_v1(uuid, uuid) from public;
+revoke all on function public.offer_crew_eligible_v1(uuid, uuid) from anon;
+revoke all on function public.offer_crew_eligible_v1(uuid, uuid) from authenticated;
+
+-- ── 6b. list_offer_crew_options_v1 ───────────────────────────────────────
+create or replace function public.list_offer_crew_options_v1(
+  p_offer_id uuid
+) returns table (
+  unit_team_org_id uuid,
+  name             text,
+  member_count     integer
+)
+language plpgsql
+stable
+security definer
+set search_path = public
+as $$
+declare
+  o record;
+begin
+  if auth.uid() is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  select t.id, t.offer_kind, t.team_org_id into o
+    from public.team_demand_offers t where t.id = p_offer_id;
+  if not found or o.offer_kind <> 'organization'
+     or public.team_offer_party_side_v1(o.id) is distinct from 'supplier' then
+    return;
+  end if;
+  return query
+  select u.id,
+         coalesce(nullif(btrim(u.display_name), ''), '-'),
+         (select count(*)::integer from public.engagement_contexts ec
+           where ec.organization_id = u.id and ec.relationship_slug = 'employee' and ec.status = 'active')
+    from public.organizations g
+    join public.organizations u
+      on u.owner_profile_id = g.owner_profile_id and u.organization_type = 'team' and u.archived_at is null
+   where g.id = o.team_org_id
+     and g.owner_profile_id is not null
+     and public.offer_crew_eligible_v1(o.team_org_id, u.id)
+   order by u.created_at
+   limit 50;
+end;
+$$;
+
 -- ── 6. name_team_demand_offer_unit_v1 ────────────────────────────────────
 -- Returns jsonb {outcome: 'named' | 'unchanged'}. Refusals: offer_not_open |
 -- not_an_organization_offer | unit_not_yours | unit_has_no_members (22023).
@@ -297,9 +385,10 @@ security definer
 set search_path = public
 as $$
 declare
-  uid     uuid := auth.uid();
-  o       record;
-  v_owner uuid;
+  uid       uuid := auth.uid();
+  o         record;
+  v_owner   uuid;
+  v_cleared integer := 0;
 begin
   if uid is null then
     raise exception 'Not authenticated' using errcode = '42501';
@@ -333,15 +422,28 @@ begin
           and ec.status = 'active') then
     raise exception 'unit_has_no_members' using errcode = '22023';
   end if;
+  -- The crew belongs to the offering COMPANY, not only to its owner.
+  if not public.offer_crew_eligible_v1(o.team_org_id, p_unit_team_org_id) then
+    raise exception 'unit_not_of_company' using errcode = '22023';
+  end if;
   if o.unit_team_org_id is not distinct from p_unit_team_org_id then
-    return jsonb_build_object('outcome', 'unchanged');
+    return jsonb_build_object('outcome', 'unchanged', 'confirmations_cleared', false);
   end if;
 
   update public.team_demand_offers set unit_team_org_id = p_unit_team_org_id where id = o.id;
+  -- A different crew is a different agreement: what either side confirmed
+  -- before is no longer what will happen, so both confirm again.
+  update public.team_demand_offer_terms
+     set supplier_confirmed_at = null, supplier_confirmed_by = null,
+         receiver_confirmed_at = null, receiver_confirmed_by = null
+   where offer_id = o.id
+     and (supplier_confirmed_at is not null or receiver_confirmed_at is not null);
+  get diagnostics v_cleared = row_count;
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
   values (uid, 'team_demand_offer_unit_named_v1', 'team_demand_offers', o.id,
-    jsonb_build_object('unit_team_org_id', p_unit_team_org_id, 'previous', o.unit_team_org_id));
-  return jsonb_build_object('outcome', 'named');
+    jsonb_build_object('unit_team_org_id', p_unit_team_org_id, 'previous', o.unit_team_org_id,
+      'confirmations_cleared', v_cleared > 0));
+  return jsonb_build_object('outcome', 'named', 'confirmations_cleared', v_cleared > 0);
 end;
 $$;
 
@@ -477,6 +579,9 @@ begin
             and u.owner_profile_id = v_owner) then
       raise exception 'unit_not_yours' using errcode = '22023';
     end if;
+    if not public.offer_crew_eligible_v1(o.team_org_id, o.unit_team_org_id) then
+      raise exception 'unit_not_of_company' using errcode = '22023';
+    end if;
     v_unit := o.unit_team_org_id;
   end if;
 
@@ -576,6 +681,9 @@ grant execute on function public.list_team_demand_offer_terms_v2(uuid) to authen
 revoke all on function public.confirm_team_demand_offer_terms_v1(uuid, integer) from public;
 revoke all on function public.confirm_team_demand_offer_terms_v1(uuid, integer) from anon;
 grant execute on function public.confirm_team_demand_offer_terms_v1(uuid, integer) to authenticated;
+revoke all on function public.list_offer_crew_options_v1(uuid) from public;
+revoke all on function public.list_offer_crew_options_v1(uuid) from anon;
+grant execute on function public.list_offer_crew_options_v1(uuid) to authenticated;
 revoke all on function public.name_team_demand_offer_unit_v1(uuid, uuid) from public;
 revoke all on function public.name_team_demand_offer_unit_v1(uuid, uuid) from anon;
 grant execute on function public.name_team_demand_offer_unit_v1(uuid, uuid) to authenticated;
