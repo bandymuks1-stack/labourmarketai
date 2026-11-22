@@ -13084,6 +13084,7 @@
     },
     "goToRoster": "Gå till personalstyrkan",
     "invalidLabel": "Kontrollera e-postadressen – inbjudan skickades inte.",
+    "offerLimitLabel": "För många erbjudanden. Försök igen senare.",
     "deliveryHeading": "Inbjudningslänk",
     "deliveryCreated": "Inte skickad via e-post – e-postleverans är inte konfigurerad. Kopiera länken och skicka den till kunden själv.",
     "deliverySent": "Inbjudan skickades via e-post. Du kan fortfarande kopiera länken.",

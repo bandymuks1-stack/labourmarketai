@@ -3,7 +3,7 @@ import { join } from "node:path";
 
 import { expect, test, type Page } from "@playwright/test";
 
-import { BASE, isolatedStack, onboard, recordJournal, signIn, signUp } from "./isolated-web-a-helpers";
+import { BASE, isolatedStack, onboard, signIn, signUp } from "./isolated-web-a-helpers";
 
 /**
  * NO EXAMPLE PAY FIGURES (decision 0032, lane A 2026-11-22), on the THROWAWAY
@@ -15,8 +15,10 @@ import { BASE, isolatedStack, onboard, recordJournal, signIn, signUp } from "./i
  *       same — at 390 and 1280 px, screenshots in the `journal-day-choice`
  *       artifact (pay-*.png);
  *   P-3 rates and prices (owner-approved number clean-up): the public project
- *       cost calculator, the services page and the listings page carry no
- *       placeholder that names a sum of money, in any input in the markup.
+ *       cost calculator's rate (its "rates" step), the services page's rate
+ *       and the listings page's price are each opened and seen on screen, and
+ *       carry no example sum; no placeholder anywhere on those screens names
+ *       a sum of money.
  */
 
 test.skip(!isolatedStack(), "local stack only (SIGNUP_ISOLATED=1, app and Supabase on 127.0.0.1)");
@@ -44,8 +46,6 @@ test("P-0. a worker signs up", async ({ page }) => {
   await signUp(page, BASE, W);
   await onboard(page, "work", "Synthetic Pay Worker");
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
-  // Setup: one journal entry, so the Living CV has recorded work behind the card.
-  await recordJournal(page, BASE, `QA-SYNTHETIC pay ${RUN}: tiled the bathroom floor for 6 hours`);
 });
 
 for (const size of SIZES) {
@@ -55,17 +55,16 @@ for (const size of SIZES) {
     const page = await ctx.newPage();
     await signIn(page, BASE, W);
 
-    // P-1 the Living CV work card. Its editor sits inside the profile's
-    // closed "details" disclosure; the section's own deep link opens it
-    // (DetailsHashOpener), as the other worker walks do. Required, never skipped.
+    // P-1 the Living CV work card. The editor sits inside the profile's
+    // details disclosure, which opens when the hash names a section inside it
+    // (the same address the opportunities page links to); at 390 px the bare
+    // page keeps it folded.
     await page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
-    const toggle = page.getByRole("main").getByTestId("work-card-editor-toggle");
-    await expect(toggle, "P-1: the work card editor is on the worker's profile").toBeVisible({ timeout: 60_000 });
-    const editor = page.getByRole("main").getByTestId("work-card-editor");
-    await expect(async () => {
-      if (!(await editor.isVisible())) await toggle.click();
-      await expect(editor).toBeVisible({ timeout: 5_000 });
-    }).toPass({ timeout: 30_000 });
+    const toggle = page.getByTestId("work-card-editor-toggle").filter({ visible: true }).first();
+    await expect(toggle, "P-1: the work card can be edited").toBeVisible({ timeout: 60_000 });
+    await toggle.click();
+    const editor = page.getByTestId("work-card-editor").filter({ visible: true }).first();
+    await expect(editor).toBeVisible({ timeout: 30_000 });
     await editor.locator('input[name="salary_min"]').scrollIntoViewIfNeeded();
     await noExampleFigures(page, editor, `${size.label} work card`);
     await page.screenshot({ path: join(OUT, `pay-work-card-${size.label}.png`) });
@@ -82,12 +81,9 @@ for (const size of SIZES) {
     await send.click();
     const salary = page.getByLabel("Salary from (€)").filter({ visible: true }).last();
     await expect(salary, "P-2: the chat opens the work-card form").toBeVisible({ timeout: 60_000 });
-    // The chat form is the inline action card (components/app/conversation/inline-action-form.tsx), not a <form>.
-    const form = page
-      .locator('[data-testid^="inline-action-form-"]')
-      .filter({ has: page.getByTestId("field-salaryMin") })
-      .filter({ visible: true })
-      .last();
+    // The chat's inline action form is a <div data-testid="inline-action-form-…">,
+    // not a <form>.
+    const form = page.locator('[data-testid^="inline-action-form-"]').filter({ has: salary }).last();
     await salary.scrollIntoViewIfNeeded();
     await noExampleFigures(page, form, `${size.label} chat work-card form`);
     await page.screenshot({ path: join(OUT, `pay-chat-form-${size.label}.png`) });
@@ -105,26 +101,58 @@ async function placeholders(page: Page): Promise<string[]> {
   );
 }
 
+/** The field is on screen, holds no example sum, and the screen names no money anywhere. */
+async function noExampleMoney(page: Page, field: ReturnType<Page["locator"]>, what: string): Promise<void> {
+  await field.scrollIntoViewIfNeeded();
+  await expect(field, `${what}: the field is on screen`).toBeVisible({ timeout: 30_000 });
+  const own = (await field.getAttribute("placeholder")) ?? "";
+  expect(own, `${what}: no example figure`).not.toMatch(/\d/);
+  expect((await placeholders(page)).filter((p) => MONEY.test(p)), `${what}: no placeholder names money`).toEqual([]);
+  const overflow = await page.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth);
+  expect(overflow, `${what}: no sideways scroll`).toBeLessThanOrEqual(1);
+}
+
 for (const size of SIZES) {
   test(`P-3 (${size.label}). rates and prices carry no example money`, async ({ browser }) => {
     mkdirSync(OUT, { recursive: true });
     const ctx = await browser.newContext({ viewport: { width: size.width, height: size.height }, deviceScaleFactor: 2 });
     const page = await ctx.newPage();
-    // The public calculator, signed out.
+
+    // The public calculator, signed out: the rate is on its "rates" step.
     await page.goto(`${BASE}/en/calculators/project-cost`);
-    await page.waitForLoadState("networkidle").catch(() => {});
-    expect((await placeholders(page)).filter((p) => MONEY.test(p)), `${size.label} calculator`).toEqual([]);
+    const calc = page.getByTestId("project-cost-calculator");
+    await expect(calc).toBeVisible({ timeout: 60_000 });
+    await expect(async () => {
+      if (!(await calc.getByTestId("pcc-rate").isVisible())) await calc.getByTestId("pcc-next").click();
+      await expect(calc.getByTestId("pcc-rate")).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 30_000 });
+    await noExampleMoney(page, calc.getByTestId("pcc-rate"), `${size.label} calculator rate`);
     await page.screenshot({ path: join(OUT, `pay-calculator-${size.label}.png`) });
-    // The signed-in services and listings pages.
+
     await signIn(page, BASE, W);
-    for (const path of ["/en/dashboard/services", "/en/dashboard/listings"]) {
-      await page.goto(`${BASE}${path}`);
-      await page.waitForLoadState("networkidle").catch(() => {});
-      const found = (await placeholders(page)).filter((p) => MONEY.test(p));
-      test.info().annotations.push({ type: "evidence", description: `${size.label} ${path} → ${new URL(page.url()).pathname}` });
-      expect(found, `${size.label} ${path}`).toEqual([]);
-      await page.screenshot({ path: join(OUT, `pay-${path.split("/").pop()}-${size.label}.png`) });
-    }
+    const main = page.getByRole("main");
+
+    // The services page: the offering form opens on "add".
+    await page.goto(`${BASE}/en/dashboard/services`);
+    const services = main.getByTestId("service-offerings-section");
+    await expect(services.getByTestId("service-offering-add"), "P-3: services can be added").toBeVisible({ timeout: 60_000 });
+    await expect(async () => {
+      if (!(await services.getByTestId("service-offering-rate").isVisible())) await services.getByTestId("service-offering-add").click();
+      await expect(services.getByTestId("service-offering-rate")).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 30_000 });
+    await noExampleMoney(page, services.getByTestId("service-offering-rate"), `${size.label} service rate`);
+    await page.screenshot({ path: join(OUT, `pay-services-${size.label}.png`) });
+
+    // The listings page: the listing form opens on "add"; the price is labelled "Price".
+    await page.goto(`${BASE}/en/dashboard/listings`);
+    await expect(main.getByTestId("listing-add"), "P-3: listings can be added").toBeVisible({ timeout: 60_000 });
+    const price = main.getByLabel("Price", { exact: true }).filter({ visible: true }).first();
+    await expect(async () => {
+      if (!(await price.isVisible())) await main.getByTestId("listing-add").click();
+      await expect(price).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: 30_000 });
+    await noExampleMoney(page, price, `${size.label} listing price`);
+    await page.screenshot({ path: join(OUT, `pay-listings-${size.label}.png`) });
     await ctx.close();
   });
 }

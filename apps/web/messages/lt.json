@@ -13084,6 +13084,7 @@
     },
     "goToRoster": "Pereiti į komandą",
     "invalidLabel": "Patikrinkite el. pašto adresą — kvietimas neišsiųstas.",
+    "offerLimitLabel": "Per daug pasiūlymų. Bandykite vėliau.",
     "deliveryHeading": "Kvietimo nuoroda",
     "deliveryCreated": "Neišsiųsta el. paštu — el. laiškų siuntimas nesukonfigūruotas. Nukopijuokite nuorodą ir nusiųskite ją klientui savarankiškai.",
     "deliverySent": "Kvietimo laiškas išsiųstas. Nuorodą vis tiek galite nukopijuoti.",

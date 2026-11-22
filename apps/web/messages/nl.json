@@ -13084,6 +13084,7 @@
     },
     "goToRoster": "Naar het team",
     "invalidLabel": "Controleer het e-mailadres — de uitnodiging is niet verzonden.",
+    "offerLimitLabel": "Te veel aanbiedingen. Probeer het later opnieuw.",
     "deliveryHeading": "Uitnodigingslink",
     "deliveryCreated": "Niet gemaild — e-mailbezorging is niet ingesteld. Kopieer de link en stuur die zelf naar de klant.",
     "deliverySent": "De uitnodigingsmail is verzonden. U kunt de link nog steeds kopiëren.",

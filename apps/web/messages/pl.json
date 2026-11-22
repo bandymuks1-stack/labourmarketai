@@ -13084,6 +13084,7 @@
     },
     "goToRoster": "Przejdź do listy",
     "invalidLabel": "Proszę sprawdzić adres e-mail — zaproszenie nie zostało wysłane.",
+    "offerLimitLabel": "Zbyt wiele ofert. Proszę spróbować później.",
     "deliveryHeading": "Link zaproszenia",
     "deliveryCreated": "Nie wysłano e-mailem — wysyłka e-maili nie jest skonfigurowana. Proszę skopiować link i wysłać go klientowi samodzielnie.",
     "deliverySent": "E-mail z zaproszeniem został wysłany. Nadal można skopiować link.",

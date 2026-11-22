@@ -13084,6 +13084,7 @@
     },
     "goToRoster": "Go to the roster",
     "invalidLabel": "Check the e-mail address — the invitation was not sent.",
+    "offerLimitLabel": "Too many offers for now. Try again later.",
     "deliveryHeading": "Invitation link",
     "deliveryCreated": "Not e-mailed — e-mail delivery is not configured. Copy the link and send it to the client yourself.",
     "deliverySent": "The invitation e-mail was sent. You can still copy the link.",
