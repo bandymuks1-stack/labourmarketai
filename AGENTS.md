@@ -104,6 +104,11 @@ Before you modify or create a material product capability:
 9. classify the change: `CONNECT` · `FIX` · `EXTEND` · `REPLACE` · `NEW`;
 10. **search for an existing implementation before creating a new one.**
 
+    The concrete, reviewable form of this step (register lookup, similar
+    implementations, open PRs, decisions, extend-vs-new proof, one owner per
+    capability) is [`docs/AGENT_CHANGE_RULES.md`](docs/AGENT_CHANGE_RULES.md);
+    the PR template's "Reuse check" section records it.
+
 Hard rules:
 
 - `NEW` is permitted **only** after proving no equivalent capability exists.
