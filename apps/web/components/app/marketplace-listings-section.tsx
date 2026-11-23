@@ -427,7 +427,7 @@ export function MarketplaceListingsSection({
               role="tablist"
               aria-label={t("domainFilterLabel")}
               data-testid="market-group-tabs"
-              className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+              className="flex flex-wrap gap-1"
             >
               {(["all", ...groupKeys] as const).map((g) => {
                 const selected = g === "all" ? domainTab === "all" : activeGroup === g;
@@ -455,7 +455,7 @@ export function MarketplaceListingsSection({
                 role="group"
                 aria-label={groupLabel(activeGroup)}
                 data-testid="market-domain-chips"
-                className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+                className="flex flex-wrap gap-1"
               >
                 {[activeGroup, ...GROUPS[activeGroup]].map((d) => (
                   <button
@@ -483,7 +483,7 @@ export function MarketplaceListingsSection({
             role="group"
             aria-label={t("actorFilterLabel")}
             data-testid="market-actor-filter"
-            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+            className="flex flex-wrap gap-1"
           >
             {(["all", ...actorKindsPresent] as const).map((k) => (
               <button

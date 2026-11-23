@@ -21,6 +21,10 @@ const NAV_STRIPS = [
   "components/app/historical/historical-workspace.tsx",
   "components/app/player-card/player-card-modes.tsx",
   "components/app/conversation/chat/my-space-row.tsx",
+  // Carousel spec N11 (finding M3): the marketplace's group tabs, domain
+  // chips and actor filter, and scouting's filter chips, wrap.
+  "components/app/marketplace-listings-section.tsx",
+  "app/[locale]/dashboard/company/scouting/page.tsx",
 ];
 
 describe("navigation strips wrap instead of scrolling sideways", () => {

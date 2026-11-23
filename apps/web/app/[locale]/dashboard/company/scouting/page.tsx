@@ -679,7 +679,7 @@ export default async function CompanyScoutingPage({
           {/* PHONE: one row that scrolls sideways inside itself, so a long
               facet list never pushes the candidates below the fold and the
               page itself never scrolls sideways. From sm up the chips wrap. */}
-          <div className="-m-1 flex gap-2 overflow-x-auto p-1 sm:m-0 sm:flex-wrap sm:overflow-visible sm:p-0">
+          <div className="flex flex-wrap gap-2">
             <Link
               href={filterHref({ availableNow: !result.filters.availableNow })}
               data-testid="scout-filter-available"
