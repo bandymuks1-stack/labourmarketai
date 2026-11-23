@@ -79,7 +79,9 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
     // below `sm`, a code-only language chip). Under 360px only the mark shows
     // and the name stays for screen readers. Measured at 360/375 in six
     // locales by tests/e2e/premium-nav.spec.ts.
-    expect(navSrc).toMatch(/className="flex shrink-0 items-center gap-1\.5 font-display text-sm/);
+    // 2026-11-14 (#3322 tap targets): the logo link also carries the 44px
+    // tap floor (min-h-11), so it is no longer a 24px-tall target on a phone.
+    expect(navSrc).toMatch(/className="flex min-h-11 shrink-0 items-center gap-1\.5 font-display text-sm/);
     expect(navSrc).toMatch(/<span className="whitespace-nowrap max-\[359px\]:sr-only">/);
     expect(navSrc).not.toMatch(/<span className="truncate/);
     expect(navSrc).toMatch(/<LmLogo[^/]*shrink-0/);
@@ -135,7 +137,9 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
     expect(menuSrc).not.toMatch(/<ThemeToggleIcon\b/);
     expect(menuSrc).not.toMatch(/<LocaleSwitcher\b/);
     // The language switcher is in the header row at every width (ad-locale rule).
-    expect(navSrc).toMatch(/<LocaleSwitcher className="flex" compactBelowSm \/>/);
+    // (It shows its code up to `lg`, where the row also carries the
+    // assistant entry: CAROUSEL_NAVIGATION_SPEC N2.)
+    expect(navSrc).toMatch(/<LocaleSwitcher className="flex" compactBelowSm compactBelowLg \/>/);
     expect(navSrc.match(/<LocaleSwitcher\b/g)).toHaveLength(1);
   });
 });

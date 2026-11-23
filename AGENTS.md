@@ -104,6 +104,11 @@ Before you modify or create a material product capability:
 9. classify the change: `CONNECT` · `FIX` · `EXTEND` · `REPLACE` · `NEW`;
 10. **search for an existing implementation before creating a new one.**
 
+    The concrete, reviewable form of this step (register lookup, similar
+    implementations, open PRs, decisions, extend-vs-new proof, one owner per
+    capability) is [`docs/AGENT_CHANGE_RULES.md`](docs/AGENT_CHANGE_RULES.md);
+    the PR template's "Reuse check" section records it.
+
 Hard rules:
 
 - `NEW` is permitted **only** after proving no equivalent capability exists.
@@ -287,6 +292,21 @@ minimal, Apple/macOS-level design: short clear function names, only what the use
 helper text without a real need. Legal, consent, security and essential action-consequence texts
 stay. Reviews apply this as a criterion (`.claude/skills/code-review/SKILL.md`). Full text:
 `docs/DECISIONS/0032-no-interface-noise.md`.
+
+## Direct counterparty and responsibility chain (binding, decision 0033, owner rule 2026-11-19)
+
+This applies to every party: employers, workers, agencies, contractors, subcontractors, suppliers,
+service providers and other partners.
+- A client works only with its direct partner.
+- Each party sees only the data its own relationships and functions need.
+- Each party answers to its direct client for its own obligations and for the partners it brings in.
+- Other chain participants' identity and commercial terms are not disclosed, unless the law requires
+  it.
+- The whole chain is kept for internal audit, under access rights.
+
+The rule applies to LabourMarket.ai, Agentai OS and related projects. It is not a mandate to build or
+rework anything without a concrete need and the owner's permission. Full text:
+`docs/DECISIONS/0033-direct-counterparty-and-responsibility-chain.md`.
 
 ## Auto-commit policy
 

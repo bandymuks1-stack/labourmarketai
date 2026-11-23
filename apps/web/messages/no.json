@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "[EN] Message language",
+    "intro": "[EN] Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "[EN] I read messages in",
+    "sameAsInterface": "[EN] Same as the interface",
+    "saved": "[EN] Saved.",
+    "error": "[EN] The change could not be saved and was reverted. Please try again.",
+    "unavailable": "[EN] This setting is not available yet — messages follow the interface language until it is."
+  },
   "demandReadback": {
     "notVerifiedYet": "Bedriften din er ennå ikke verifisert, så behovene du sender inn her vises ikke for arbeidere før verifiseringen er fullført.",
     "notVerifiedHowTo": "Legg til organisasjonsnummer og be om en gjennomgang",
@@ -447,7 +456,7 @@
           },
           "education": {
             "title": "Jeg representerer et utdanningssted",
-            "desc": "Inviter elever, se deltakelsen deres og koble dem til praksis og jobber."
+            "desc": "Inviter elever, driv programmer og følg praksisen og resultatene deres."
           }
         },
         "agency": {
@@ -504,7 +513,6 @@
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
-      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
       "divider": "[EN] or",
       "email_label": "[EN] Work email",
       "email_placeholder": "[EN] name@company.com",
@@ -531,6 +539,9 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Én profil for din arbeidserfaring og dine muligheter — i neste steg sier du hva du kommer for.",
+      "inviteFrom": "{inviter} inviterer deg til å bli med i {organization}.",
+      "inviteTo": "Du er invitert til å bli med i {organization}.",
+      "inviteNext": "Når du registrerer deg, blir du med i {organization}.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Send lenken på nytt",
       "resend_sent": "Sendt på nytt. Sjekk innboksen og søppelpostmappen.",
@@ -2043,7 +2054,8 @@
         "noMembers": "Ingen medlemmer akkurat nå.",
         "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
         "manage": "Endre team"
-      }
+      },
+      "organizationLink": "Organisasjonens historikk og prosjekter"
     },
     "workerView": {
       "eyebrow": "Mitt prosjekt",
@@ -3813,9 +3825,7 @@
         "preferredCountries": "[EN] Preferred countries",
         "preferredCountriesPlaceholder": "[EN] e.g. NL, DE",
         "salaryMin": "[EN] Salary from (€)",
-        "salaryMinPlaceholder": "[EN] 1500",
         "salaryMax": "[EN] Salary to (€)",
-        "salaryMaxPlaceholder": "[EN] 2500",
         "willingToRelocate": "[EN] Willing to relocate?",
         "hasTransport": "[EN] Can you get to work on your own?",
         "needsAccommodation": "[EN] Need accommodation?",
@@ -4109,8 +4119,12 @@
           "chipHelpPeople": "Team og invitasjoner",
           "chipHelpPlanning": "Åpne planlegging",
           "chipHelpServices": "Mine tjenester",
-          "chipHelpJournal": "Arbeidsjournal"
-        }
+          "chipHelpJournal": "Arbeidsjournal",
+          "chipHelpSettings": "Innstillinger",
+          "chipHelpPrivacy": "Personvern og dine data"
+        },
+        "account": "Innlogging, e-post, varsler og utseende finner du under Innstillinger.",
+        "privacy": "Under Personvern og dine data kan du laste ned dataene dine, se hvem som ser profilen din, og be om at kontoen din slettes."
       },
       "interestInboxAmbiguous": "Det kan bety to ting — hva vil du se?",
       "chipInterestOnMyNeeds": "Interesse for mine forespørsler",
@@ -4799,7 +4813,6 @@
     },
     "v3": {
       "lead": "For arbeidstakere, arbeidsgivere og tjenesteleverandører i alle yrker og bransjer. Registrering og grunnleggende publisering av et behov er gratis.",
-      "moreChoices": "Flere valg",
       "or": "eller beskriv det med egne ord",
       "needFree": "Du kan sende en forespørsel uten å registrere deg. Det er gratis å sende den; vilkår og pris for tjenestene avtales separat.",
       "market": {
@@ -6414,9 +6427,10 @@
       "createProgram": "[EN] Add course",
       "noPrograms": "[EN] No courses added yet.",
       "assigneePlaceholder": "[EN] Person's email",
+      "assigneePick": "Person",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -6863,7 +6877,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Registrering, kontakt og rolle"
       },
       "workers": {
         "invitationsManagedElsewhere": "Invitasjoner håndteres av personen i bedriften som har ansvaret for dem.",
@@ -7085,7 +7100,8 @@
       "address": "Adresse",
       "project": "Prosjekt",
       "notInSource": "Ikke i kilden",
-      "linked": "Koblet"
+      "linked": "Koblet",
+      "openProject": "Åpne prosjektet"
     },
     "whoWorked": "Hvem som jobbet her",
     "timeline": "Hva som ble gjort",
@@ -7103,7 +7119,24 @@
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
       "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
     },
-    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
+    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem.",
+    "projects": {
+      "title": "Prosjekter på plattformen",
+      "counts": "{running} pågående · {completed} fullført",
+      "untitled": "Prosjekt uten navn",
+      "running": "Pågående",
+      "completed": "Fullført",
+      "all": "Alle {count} prosjekter"
+    },
+    "journal": {
+      "title": "Arbeid registrert i journalen",
+      "hours": "Registrerte timer",
+      "confirmed": "Timer bekreftet av organisasjonen",
+      "people": "Personer som registrerte arbeid",
+      "period": "Registrert",
+      "basis": "Fra {entries} journalinnføringer som personer registrerte under denne organisasjonen. Telt atskilt fra den importerte historikken ovenfor og aldri lagt til den.",
+      "unavailable": "Arbeidet registrert i journalen under denne organisasjonen kunne ikke leses akkurat nå."
+    }
   },
   "workLifecycle": {
     "pending": "Ikke ennå",
@@ -7882,6 +7915,9 @@
       "invites": "Invitasjons- og varslings-e-post",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
+    },
+    "alerts": {
+      "title": "Eiervarsler og pushvarsler"
     }
   },
   "historyDuplicates": {
@@ -8008,6 +8044,7 @@
       "partnerWithUs": "Bli partner",
       "forAgencies": "Slik fungerer det for byråer",
       "setUpAgency": "Registrer byrået ditt",
+      "setUpInstitution": "For utdanningsinstitusjoner",
       "b2bEnquiry": "Forespørsel om bedriftstjenester (B2B)",
       "projectEnquiry": "Forespørsel om individuelt prosjekt"
     },

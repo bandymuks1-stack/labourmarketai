@@ -128,6 +128,8 @@ import {
 // the dominant-skill sentence and this period's hours — composed by the same
 // presentation model and the same lead component the station renders.
 import { Card } from "@/components/ui/Card";
+import { buttonLinkClassName } from "@/components/ui/Button";
+import { chipLinkClassName } from "@/components/ui/Chip";
 import { DominantLead } from "@/components/app/work-in-numbers/dominant-lead";
 import { scopeText } from "@/components/app/work-in-numbers/period-nav";
 import {
@@ -139,6 +141,8 @@ import {
 } from "@/lib/journal/work-in-numbers-view";
 import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
 import { JournalQuickRecord } from "./quick-record";
+import { JournalDayChoice } from "./day-choice";
+import { quickRecordDraftOwner } from "@/lib/journal/quick-record-draft";
 import { JournalCalendar } from "@/components/app/journal/journal-calendar";
 import { JournalDayObject } from "@/components/app/journal/journal-day-object";
 import { buildDayObject } from "@/lib/journal/day-object";
@@ -601,7 +605,7 @@ export default async function JournalPage({
             {t("navSubtitle")}
           </p>
         </header>
-        <div className="card-border max-w-2xl p-6">
+        <Card className="max-w-2xl">
           <p className="text-sm leading-relaxed text-text-secondary">
             {noContextOrg
               ? t(`noContext.${contextState}Named`, { org: noContextOrg })
@@ -613,23 +617,19 @@ export default async function JournalPage({
             {contextState === "none" && (
               <Link
                 href="/dashboard/profile"
-                className="inline-flex items-center gap-1.5 rounded-md border border-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:border-brand-blue/80"
+                className={buttonLinkClassName("primary", "sm")}
               >
                 {t("noContextProfileCta")}
               </Link>
             )}
             <Link
               href="/dashboard"
-              className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs font-semibold text-text-primary ${
-                contextState === "none"
-                  ? "border-ink-500 hover:border-brand-blue"
-                  : "border-brand-blue hover:border-brand-blue/80"
-              }`}
+              className={buttonLinkClassName(contextState === "none" ? "secondary" : "primary", "sm")}
             >
               {t("noContextCta")}
             </Link>
           </div>
-        </div>
+        </Card>
       </div>
     );
   }
@@ -1217,6 +1217,9 @@ export default async function JournalPage({
           organizationPeriodRecords,
         })
       : null;
+  // The person has no journal entry at all (the model's own signal, the one
+  // the numbers lead reads) — the screen then carries ONE empty state.
+  const journalHasNoEntries = dominantAnswer(workIntelligence, []).kind === "no_entries";
   // THE STRIP'S MONTH IS THE MODEL'S (issue #1689, lane B). This counted
   // entries by the `created_at` CALENDAR month while the section's "30
   // days" tile counted by the work day over a rolling window — two numbers
@@ -1267,6 +1270,42 @@ export default async function JournalPage({
       ])
     : [null, null];
 
+  // Journal → CV bridge: make the one path between the work log and the CV it
+  // feeds visible. Honest counts only when entries exist; with no entries yet
+  // the line stays as a quiet zero-state so the direct CV link is ALWAYS
+  // reachable from the journal (cv-workspace-ia). ONE element, rendered in ONE
+  // of two places: once the person has entries it leads the records list, so
+  // the CV — where a manager's confirmation shows as confirmed work — is one
+  // tap from the journal on a phone instead of two (open the status
+  // disclosure, then the link). With no entry yet it stays inside the
+  // disclosure: the empty state already says the list is empty, and the
+  // recorder's saved state carries its own CV link.
+  const cvBridgeLeads = entries !== null && totalEntryCount > 0;
+  const cvBridge = (
+    <p
+      className="flex flex-wrap items-center gap-x-3 gap-y-1 text-meta leading-relaxed text-text-muted"
+      data-testid="journal-cv-bridge"
+    >
+      <span>
+        {entries === null
+          ? t("cvBridgeUnavailable")
+          : totalEntryCount > 0
+            ? t("cvBridge", {
+                confirmed: confirmedEntryCount,
+                total: totalEntryCount,
+              })
+            : t("cvBridgeEmpty")}
+      </span>
+      <Link
+        href="/cv"
+        className={chipLinkClassName(false)}
+        data-testid="journal-cv-bridge-link"
+      >
+        {t("cvBridgeLink")} →
+      </Link>
+    </p>
+  );
+
   return (
     <div className="flex flex-col gap-6">
       <TelemetryView
@@ -1278,8 +1317,8 @@ export default async function JournalPage({
           <PageTitle>{t("navTitle")}</PageTitle>
           <Link
             href="/dashboard"
-            className="shrink-0 rounded-md border border-border-subtle px-2.5 py-1 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
             data-testid="room-my-spaces-link"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-md border border-border-subtle px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-ink-500 hover:text-text-primary"
           >
             {tSpaces("mySpaces")} →
           </Link>
@@ -1347,7 +1386,7 @@ export default async function JournalPage({
           className="group order-4 rounded-md border border-border-subtle bg-surface-1/50 scroll-mt-20"
           data-testid="mano-cv-player-card-lead"
         >
-          <summary className="cursor-pointer list-none px-4 py-2.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center px-4 font-mono text-meta uppercase tracking-label text-text-secondary hover:text-text-primary">
             <span className="inline-flex items-center gap-2">
               <span
                 aria-hidden
@@ -1410,6 +1449,17 @@ export default async function JournalPage({
           conversation and the voice door stay reachable as text links inside
           the recorder (§1.5: nothing removed). */}
       <div id="journal-composer" className="order-1">
+        <div className="flex flex-col gap-3">
+        {/* THE WORK DAY FIRST (owner P1 2026-11-21): today, yesterday, a week
+            ago, the calendar, or the earlier entries — the same `?date=` the
+            calendar sets. An edit keeps its own saved date, so no choice. */}
+        {!editingEntry && (
+          <JournalDayChoice
+            today={todayIsoKey}
+            selected={selectedDate}
+            full={composeFull}
+          />
+        )}
         {editingEntry ? (
           <div className="flex flex-col gap-2">
             <JournalEntryComposer
@@ -1433,6 +1483,7 @@ export default async function JournalPage({
             <JournalEntryComposer
               key={selectedDate ?? "new"}
               defaultWorkDate={selectedDate}
+              draftOwner={quickRecordDraftOwner(user.id, activeOrganizationId)}
               engagements={composerEngagements}
               contextResolution={contextResolution}
               activeWorkspaceNotice={activeWorkspaceNotice}
@@ -1456,6 +1507,7 @@ export default async function JournalPage({
             locale={locale}
             labels={workLogLabels}
             selectedDay={selectedDate}
+            draftOwner={quickRecordDraftOwner(user.id, activeOrganizationId)}
             selectedDayLabel={
               selectedDate && selectedDate !== todayIsoKey
                 ? formatUtcDate(selectedDate, locale)
@@ -1495,6 +1547,7 @@ export default async function JournalPage({
             }
           />
         )}
+        </div>
       </div>
 
       {/* MANO VEIKLA SKAIČIAIS — one compact card (target IA §2): the
@@ -1509,6 +1562,12 @@ export default async function JournalPage({
         const period = wi ? focusPeriod(wi) : null;
         const scope = wi ? scopeText(wi, locale, tIntel) : tIntel("numbers.scope.all");
         const openChecks = wi ? splitChecks(wi.checks).open.length : 0;
+        // ONE EMPTY STATE (owner P0 2026-11-23). A journal with no entries
+        // at all said so three times in a row: under the calendar, in the
+        // list's empty state and here. The list's empty state is the one
+        // that carries the action, so it speaks alone; this card returns
+        // with the first entry.
+        if (answer.kind === "no_entries") return null;
         return (
           <section
             id="work-intelligence"
@@ -1575,6 +1634,7 @@ export default async function JournalPage({
           {/* The ONE primary action lives in the log-via-chat block above
               (owner audit §6.1) — no duplicate gradient CTA here. */}
         </div>
+        {cvBridgeLeads ? cvBridge : null}
         {/* Evidence drill-down (W5 slice 3): a player-card evidence bar lands
             here with ?skill=<slug>. The strip names the active filter and the
             REAL count, and offers the one way back — never a silent subset. */}
@@ -1592,7 +1652,7 @@ export default async function JournalPage({
             <Link
               href={"/dashboard/journal#journal-entries" as "/dashboard"}
               data-testid="journal-skill-filter-clear"
-              className="inline-flex min-h-[2rem] items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue"
+              className={buttonLinkClassName("secondary", "sm")}
             >
               {t("skillFilterClear")}
             </Link>
@@ -1611,6 +1671,7 @@ export default async function JournalPage({
           locale={locale as ActiveLocale}
           selected={selectedDate}
           carry={calendarCarry}
+          quietWhenEmpty={journalHasNoEntries}
         />
         {/* THE SELECTED DAY'S ACTIONS. What a person wants on a day they
             tapped: record work on that day, and see that same day on the one
@@ -1628,7 +1689,7 @@ export default async function JournalPage({
             <Link
               href={journalComposerHref(selectedDate, false) as "/dashboard"}
               data-testid="journal-day-record"
-              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-2.5 text-xs font-medium text-brand-blue transition-colors hover:bg-brand-blue/10"
+              className={buttonLinkClassName("secondary", "sm")}
             >
               {t("dayNav.recordOnDay")}
             </Link>
@@ -1637,7 +1698,7 @@ export default async function JournalPage({
                 `/dashboard/planning?view=day&date=${selectedDate}` as "/dashboard"
               }
               data-testid="journal-day-open-calendar"
-              className="inline-flex min-h-11 items-center rounded-md border border-ink-500 px-2.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue"
+              className={buttonLinkClassName("secondary", "sm")}
             >
               {t("dayNav.openInCalendar")} →
             </Link>
@@ -1659,7 +1720,7 @@ export default async function JournalPage({
           className="group rounded-md border border-border-subtle bg-surface-1/40"
           data-testid="journal-status-details"
         >
-          <summary className="cursor-pointer select-none px-3 py-2 text-xs font-medium text-text-secondary hover:text-text-primary">
+          <summary className="flex min-h-11 cursor-pointer select-none items-center px-3 text-xs font-medium text-text-secondary hover:text-text-primary">
             {t("statusExplainer")}
           </summary>
           <div className="flex flex-col gap-2 px-3 pb-3">
@@ -1683,30 +1744,10 @@ export default async function JournalPage({
             data-testid="journal-evidence-status-strip"
           />
         )}
-        {/* Journal → CV bridge: make the one path between the work log and the
-            CV it feeds visible. Honest counts only when entries exist; with no
-            entries yet the line stays as a quiet zero-state so the direct CV
-            link is ALWAYS reachable from the journal (cv-workspace-ia). */}
-        <p
-          className="text-meta leading-relaxed text-text-muted"
-          data-testid="journal-cv-bridge"
-        >
-          {entries === null
-            ? t("cvBridgeUnavailable")
-            : totalEntryCount > 0
-              ? t("cvBridge", {
-                  confirmed: confirmedEntryCount,
-                  total: totalEntryCount,
-                })
-              : t("cvBridgeEmpty")}{" "}
-          <Link
-            href="/cv"
-            className="font-medium text-brand-blue hover:underline"
-            data-testid="journal-cv-bridge-link"
-          >
-            {t("cvBridgeLink")} →
-          </Link>
-        </p>
+        {/* The CV bridge sits here while there is no entry yet (or the list
+            could not be read); once entries exist it leads the records
+            above, outside this disclosure. */}
+        {cvBridgeLeads ? null : cvBridge}
         {/* Proof-engine loop strip — ONE dense row, real counts only:
             įrašai → įgūdžių įrodymai → CV → pasiūlymai. A failed
             list read shows no counts at all (SEP-7). */}
@@ -1748,8 +1789,10 @@ export default async function JournalPage({
              records. A real answer over a known window (SEP-7: a recorded
              zero, not an unknown), with the one action that changes it and
              the way back to every day. */
-          <div
-            className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/40 px-4 py-4"
+          <Card
+            compact
+            variant="empty"
+            className="flex flex-col gap-2"
             data-testid="journal-day-empty"
             data-day={selectedDate ?? calendarGrid.rangeStart}
             data-scope={diaryScope}
@@ -1759,12 +1802,12 @@ export default async function JournalPage({
             </p>
             <Link
               href={journalComposerHref(selectedDate, false) as "/dashboard"}
-              className="self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
+              className="inline-flex min-h-11 items-center self-start text-support font-medium text-brand-blue underline-offset-4 hover:underline"
               data-testid="journal-day-empty-record"
             >
               {t("dayNav.recordOnDay")} →
             </Link>
-          </div>
+          </Card>
         ) : (entries ?? []).length === 0 ? (
           <EmptyState
             testId="journal-empty-state"
@@ -2352,7 +2395,7 @@ export default async function JournalPage({
                                 "identify_verifier" ? (
                                   <Link
                                     href={IDENTIFY_VERIFIER_HREF as "/dashboard"}
-                                    className="underline underline-offset-2 hover:text-text-primary"
+                                    className="inline-flex min-h-11 items-center underline underline-offset-2 hover:text-text-primary"
                                     data-testid={`journal-entry-identify-verifier-${e.id}`}
                                   >
                                     {tVerify("action.identify_verifier")}

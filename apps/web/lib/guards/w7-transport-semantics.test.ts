@@ -40,7 +40,7 @@ const MOBILITY: Record<string, RegExp> = {
   ru: /добира(ться|ется) до работы/i,
   nl: /naar het werk komen/i,
   de: /zur Arbeit kommen/i,
-  pl: /dotrze[ćc]? do pracy|doj(echać|edziesz|eżdża) do pracy|dojazd do pracy/i,
+  pl: /dotrze[ćc]? do pracy|doj(echać|edziesz|adą|eżdża)( Państwo)? do pracy|dojazd do pracy/i,
   sv: /ta (mig|dig|sig) till (arbetet|jobbet)/i,
 };
 const OWNERSHIP: Record<string, RegExp> = {

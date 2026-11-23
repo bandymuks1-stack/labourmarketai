@@ -5,6 +5,7 @@ import {
   ACTIVITY_SOURCE_MODULE_IDS,
   buildActivityRows,
   filterActivityRows,
+  activitySourceChips,
   isActivitySourceModuleId,
   type ActivityStateFilter,
 } from "@/lib/dashboard/activity-centre";
@@ -86,6 +87,7 @@ export default async function ActivityCentrePage({
   const durable = await getDurableNotifications(100);
   const rows = buildActivityRows(counts);
   const visible = filterActivityRows(rows, { moduleId: moduleFilter, state });
+  const sourceChips = activitySourceChips(rows, ACTIVITY_SOURCE_MODULE_IDS, { moduleId: moduleFilter, state });
 
   return (
     <div className="flex flex-col gap-6" data-testid="activity-centre-page">
@@ -129,6 +131,7 @@ export default async function ActivityCentrePage({
             </Link>
           ))}
         </div>
+        {sourceChips.length > 0 ? (
         <div className="flex flex-wrap items-center gap-2">
           <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {tA("filters.moduleLabel")}
@@ -141,7 +144,7 @@ export default async function ActivityCentrePage({
           >
             {tA("filters.allModules")}
           </Link>
-          {ACTIVITY_SOURCE_MODULE_IDS.map((id) => (
+          {sourceChips.map((id) => (
             <Link
               key={id}
               href={activityHref(state, id) as "/dashboard"}
@@ -153,6 +156,7 @@ export default async function ActivityCentrePage({
             </Link>
           ))}
         </div>
+        ) : null}
       </nav>
 
       {visible.length === 0 ? (

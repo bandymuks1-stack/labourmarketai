@@ -514,6 +514,9 @@ export async function recordHumanMatch(input: {
     return { kind: "error", message: rErr.message };
   }
   if (!existing) return { kind: "not-found" };
+  // A privacy request is never a labour need: it is not matched, and its
+  // status is never set to one a commercial reader accepts (P0 2026-11-22).
+  if (isPrivacyRequestPayload(existing.payload)) return { kind: "not-found" };
 
   const payload =
     existing.payload && typeof existing.payload === "object"

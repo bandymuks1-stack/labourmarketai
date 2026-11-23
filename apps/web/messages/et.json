@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "[EN] Message language",
+    "intro": "[EN] Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "[EN] I read messages in",
+    "sameAsInterface": "[EN] Same as the interface",
+    "saved": "[EN] Saved.",
+    "error": "[EN] The change could not be saved and was reverted. Please try again.",
+    "unavailable": "[EN] This setting is not available yet — messages follow the interface language until it is."
+  },
   "demandReadback": {
     "notVerifiedYet": "Teie ettevõte ei ole veel kinnitatud, seega siin esitatud vajadusi töötajatele enne kinnitamise lõppu ei näidata.",
     "notVerifiedHowTo": "Lisa registrikood ja taotle ülevaatust",
@@ -447,7 +456,7 @@
           },
           "education": {
             "title": "Esindan õppeasutust",
-            "desc": "Kutsu õppijaid, näe nende osalust ning ühenda nad praktika ja tööga."
+            "desc": "Kutsu õppijaid, vii läbi programme ning jälgi nende praktikat ja tulemusi."
           }
         },
         "agency": {
@@ -504,7 +513,6 @@
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
-      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
       "divider": "[EN] or",
       "email_label": "[EN] Work email",
       "email_placeholder": "[EN] name@company.com",
@@ -531,6 +539,9 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Üks profiil sinu töökogemuse ja võimaluste jaoks — järgmises sammus täpsustad, miks tulid.",
+      "inviteFrom": "{inviter} kutsub teid liituma organisatsiooniga {organization}.",
+      "inviteTo": "Teid kutsutakse liituma organisatsiooniga {organization}.",
+      "inviteNext": "Registreerudes liitute organisatsiooniga {organization}.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Saada link uuesti",
       "resend_sent": "Uuesti saadetud. Kontrolli postkasti ja rämpsposti kausta.",
@@ -2043,7 +2054,8 @@
         "noMembers": "Praegu liikmeid pole.",
         "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
         "manage": "Muuda meeskondi"
-      }
+      },
+      "organizationLink": "Organisatsiooni ajalugu ja projektid"
     },
     "workerView": {
       "eyebrow": "Minu projekt",
@@ -3813,9 +3825,7 @@
         "preferredCountries": "[EN] Preferred countries",
         "preferredCountriesPlaceholder": "[EN] e.g. NL, DE",
         "salaryMin": "[EN] Salary from (€)",
-        "salaryMinPlaceholder": "[EN] 1500",
         "salaryMax": "[EN] Salary to (€)",
-        "salaryMaxPlaceholder": "[EN] 2500",
         "willingToRelocate": "[EN] Willing to relocate?",
         "hasTransport": "[EN] Can you get to work on your own?",
         "needsAccommodation": "[EN] Need accommodation?",
@@ -4109,8 +4119,12 @@
           "chipHelpPeople": "Meeskond ja kutsed",
           "chipHelpPlanning": "Ava planeerimine",
           "chipHelpServices": "Minu teenused",
-          "chipHelpJournal": "Tööpäevik"
-        }
+          "chipHelpJournal": "Tööpäevik",
+          "chipHelpSettings": "Seaded",
+          "chipHelpPrivacy": "Privaatsus ja sinu andmed"
+        },
+        "account": "Sisselogimise, e-posti, teavituste ja välimuse leiad seadetest.",
+        "privacy": "Jaotises „Privaatsus ja sinu andmed“ saad oma andmed alla laadida, näha, kes sinu profiili näeb, ja taotleda konto kustutamist."
       },
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
       "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
@@ -4799,7 +4813,6 @@
     },
     "v3": {
       "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine ja põhivajaduse avaldamine on tasuta.",
-      "moreChoices": "Rohkem valikuid",
       "or": "või kirjeldage oma sõnadega",
       "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
       "market": {
@@ -6414,9 +6427,10 @@
       "createProgram": "[EN] Add course",
       "noPrograms": "[EN] No courses added yet.",
       "assigneePlaceholder": "[EN] Person's email",
+      "assigneePick": "Isik",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -6863,7 +6877,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Registreerimine, kontaktid ja roll"
       },
       "workers": {
         "invitationsManagedElsewhere": "Kutsete eest hoolitseb selle eest vastutav ettevõtte isik.",
@@ -7085,7 +7100,8 @@
       "address": "Aadress",
       "project": "Projekt",
       "notInSource": "Allikas puudub",
-      "linked": "Seotud"
+      "linked": "Seotud",
+      "openProject": "Ava projekt"
     },
     "whoWorked": "Kes siin töötas",
     "timeline": "Mida tehti",
@@ -7103,7 +7119,24 @@
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
       "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
     },
-    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid.",
+    "projects": {
+      "title": "Projektid platvormil",
+      "counts": "{running} käimas · {completed} lõpetatud",
+      "untitled": "Nimeta projekt",
+      "running": "Käimas",
+      "completed": "Lõpetatud",
+      "all": "Kõik {count} projekti"
+    },
+    "journal": {
+      "title": "Päevikusse kirja pandud töö",
+      "hours": "Kirja pandud tunnid",
+      "confirmed": "Organisatsiooni kinnitatud tunnid",
+      "people": "Tööd kirja pannud inimesed",
+      "period": "Kirja pandud",
+      "basis": "{entries} päevikukirjest, mille inimesed selle organisatsiooni all tegid. Loetakse eraldi ülaltoodud imporditud ajaloost ja sellele kunagi ei liideta.",
+      "unavailable": "Selle organisatsiooni all päevikusse kirja pandud tööd ei õnnestunud praegu lugeda."
+    }
   },
   "workLifecycle": {
     "pending": "Veel mitte",
@@ -7882,6 +7915,9 @@
       "invites": "Kutse- ja teavituskirjad",
       "invitesOn": "sees",
       "invitesOff": "VÄLJAS – lülitatakse eraldi sisse: INVITE_EMAIL_PROVIDER=smtp ja üks testsaatmine"
+    },
+    "alerts": {
+      "title": "Omaniku hoiatused ja tõuketeated"
     }
   },
   "historyDuplicates": {
@@ -8008,6 +8044,7 @@
       "partnerWithUs": "Hakka partneriks",
       "forAgencies": "Kuidas see agentuuridele toimib",
       "setUpAgency": "Registreeri agentuur",
+      "setUpInstitution": "Õppeasutustele",
       "b2bEnquiry": "Äriteenuste päring (B2B)",
       "projectEnquiry": "Individuaalse projekti päring"
     },

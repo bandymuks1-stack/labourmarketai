@@ -256,8 +256,13 @@ async function registerThroughLink(browser: Browser, link: string, address: stri
   await w.locator('form button[type="submit"]').click();
   await w.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
   if (/\/onboarding/.test(w.url())) {
-    await w.getByTestId("onboarding-intent-work").click();
-    await w.getByTestId("onboarding-intents-continue").click();
+    // An invitation into an existing organization asks no "what did you
+    // come for" question (owner P0 2026-11-22); older links still may.
+    const intent = w.getByTestId("onboarding-intent-work");
+    if (await intent.waitFor({ state: "visible", timeout: 5_000 }).then(() => true, () => false)) {
+      await intent.click();
+      await w.getByTestId("onboarding-intents-continue").click();
+    }
     await w.getByTestId("onboarding-display-name").fill(name);
     await w.getByTestId("onboarding-country").click();
     await w.getByRole("option", { name: /Lithuania/ }).first().click();
@@ -767,4 +772,90 @@ test("EX-5. screenshots at 375 and 1440: O's CV, W2's CV, company A's history an
       }
     }
   }
+});
+
+// ── EX-6: register 2.37, the linked subject contests an imported record ─────
+//
+// ARCH-5 / decision 0030: a LINKED person may contest a record an organization
+// imported about them (`subject_contest_and_clash_receipt`); the record is
+// never edited, the contest is an event, and the person may take it back
+// (`withdraw_organization_evidence_dispute_v1`). Who has no account is still
+// the owner's open question and is not walked. Placed after the totals above
+// so no figure they assert can move.
+test("EX-6. W1 contests one of R1's imported records on their own profile, the record stays as it was, and W1 takes the contest back; O cannot contest it", async () => {
+  const w1 = as(W1);
+  await w1.goto(`${BASE}/en/dashboard/profile#organization-history`);
+  const list = w1.getByRole("main").getByTestId("organization-evidence-records");
+  await expect(list, "W1's imported history is on their profile").toBeVisible({ timeout: 60_000 });
+  const before = sql<{ id: string; hours: string | null; activity_date: string | null; original_text: string; evidence_state: string }>(
+    `select id, hours::text as hours, activity_date::text as activity_date, original_text, evidence_state
+         from public.organization_evidence_records where organization_person_id = ${lit(s.r1)} order by id`,
+  );
+  expect(before.length).toBe(R1_RECORDS.length);
+
+  // Pin the record by its place in the list: once its dispute button is pressed
+  // the button becomes a form, so a filter on the button would move to the next record.
+  const items = list.locator(":scope > li");
+  const hasOpen = await items.evaluateAll((els) =>
+    els.map((el) => el.querySelector('[data-testid="evidence-dispute-open"]') !== null),
+  );
+  const at = hasOpen.indexOf(true);
+  expect(at, "one of R1's records offers a contest").toBeGreaterThanOrEqual(0);
+  const record = items.nth(at);
+  await record.getByTestId("evidence-dispute-open").click();
+  await record.getByTestId("evidence-dispute-note").fill(`QA-SYNTHETIC contest ${RUN}: I was not on site that day`);
+  await record.getByTestId("evidence-dispute-submit").click();
+  // The action revalidates the profile: on success the record re-renders as
+  // "disputed by you" and the form (with its confirmation) is gone, so the
+  // stored event below is the proof; a refusal would stay on screen.
+  await expect(record.getByTestId("evidence-dispute-error")).toHaveCount(0);
+
+  const events = () =>
+    sql<{ record_id: string; event_type: string; actor_profile_id: string; actor_role: string | null }>(
+      `select record_id, event_type, actor_profile_id, actor_role from public.organization_evidence_events
+        where actor_profile_id = ${lit(s.w1Id)} and event_type in ('disputed', 'dispute_withdrawn') order by created_at`,
+    );
+  await expect.poll(() => events().length, { timeout: 30_000 }).toBe(1);
+  const [contest] = events();
+  expect(contest).toMatchObject({ event_type: "disputed", actor_profile_id: s.w1Id, actor_role: null });
+  expect(before.map((r) => r.id), "the contest is about one of R1's records").toContain(contest!.record_id);
+
+  await w1.reload();
+  const marked = w1.getByRole("main").getByTestId("organization-evidence-records").locator("li").filter({
+    has: w1.getByTestId("evidence-record-disputed"),
+  });
+  await expect(marked, "the record shows the person's contest").toHaveCount(1, { timeout: 60_000 });
+  const after = sql<{ id: string; hours: string | null; activity_date: string | null; original_text: string; evidence_state: string }>(
+    `select id, hours::text as hours, activity_date::text as activity_date, original_text, evidence_state
+         from public.organization_evidence_records where organization_person_id = ${lit(s.r1)} order by id`,
+  );
+  expect(after, "the record itself is never edited").toEqual(before);
+
+  // O manages A: the contest is the subject's act, not the organization's.
+  const asOwner = await fetch(`${SB_URL}/rest/v1/organization_evidence_events`, {
+    method: "POST",
+    headers: {
+      apikey: SB_ANON,
+      Authorization: `Bearer ${await accessToken(O)}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({
+      record_id: contest!.record_id,
+      organization_id: s.orgA,
+      event_type: "disputed",
+      actor_profile_id: s.oId,
+    }),
+  });
+  expect(asOwner.ok, `the owner's write is refused (${asOwner.status})`).toBe(false);
+
+  await marked.getByTestId("evidence-dispute-withdraw").click();
+  // Revalidated the same way: the stored event is the proof.
+  await expect.poll(() => events().map((e) => e.event_type), { timeout: 30_000 }).toEqual(["disputed", "dispute_withdrawn"]);
+  await w1.reload();
+  const list2 = w1.getByRole("main").getByTestId("organization-evidence-records");
+  await expect(list2.getByTestId("evidence-record-disputed"), "no standing contest after it is taken back").toHaveCount(0, {
+    timeout: 60_000,
+  });
+  await expect(list2.getByTestId("evidence-dispute-withdrawn-history"), "the contest is not erased, only withdrawn").toHaveCount(1);
 });

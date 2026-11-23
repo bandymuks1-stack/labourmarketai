@@ -39,8 +39,18 @@ const SV_DOCUMENT_TYPE_NEEDLES: Readonly<Record<string, readonly string[]>> = {
   professional_certificate: ["yrkesbevis", "examensbevis", "utbildningsbevis", "kursintyg", "yrkesintyg", "gesällbrev", "gesallbrev", "truckkort", "heta arbeten"],
 };
 
+/**
+ * Words that CONTAIN a document needle but name no document. "Noriu
+ * persikvalifikuoti į elektriką" (I want to retrain as an electrician) holds
+ * "kvalifik", and was read as "you said you hold a certificate" (chat path
+ * check 2026-11-19) — a claim the person never made. Retraining is the wish
+ * to gain a qualification, not a statement of having one, so the word is
+ * removed before the needles are read.
+ */
+const NOT_A_DOCUMENT_RE = /persikvalifik\p{L}*/gu;
+
 export function guessDocumentType(text: string): string | null {
-  const hay = ` ${(text ?? "").toLowerCase()} `;
+  const hay = ` ${(text ?? "").toLowerCase().replace(NOT_A_DOCUMENT_RE, " ")} `;
   const swedish = looksSwedish(text);
   for (const { slug, needles } of DOCUMENT_TYPE_NEEDLES) {
     const all = swedish ? [...needles, ...(SV_DOCUMENT_TYPE_NEEDLES[slug] ?? [])] : needles;

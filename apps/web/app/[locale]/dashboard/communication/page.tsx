@@ -566,16 +566,20 @@ export default async function CommunicationListPage({
               className={
                 conversations.length === 0
                   ? "flex flex-col items-center gap-3 py-2 text-center lg:gap-4 lg:py-6"
-                  : "flex flex-col items-center gap-4 py-6 text-center"
+                  : "flex flex-col items-center gap-3 py-2 text-center lg:gap-4 lg:py-6"
               }
             >
               <MessageSquare
-                className={conversations.length === 0 ? "hidden h-8 w-8 text-text-muted lg:block" : "h-8 w-8 text-text-muted"}
+                className="hidden h-8 w-8 text-text-muted lg:block"
                 strokeWidth={1.5}
                 aria-hidden
               />
               {conversations.length > 0 && (
-                <p className="text-sm text-text-secondary" data-testid="communication-pane-pick">
+                // "Pick a conversation in the list" points at a list BESIDE the
+                // pane — true from lg only. On a phone the list is above and a
+                // tap opens the thread, so the prompt (and its icon) read as an
+                // empty second screen under the list (design audit 2026-11-22).
+                <p className="hidden text-sm text-text-secondary lg:block" data-testid="communication-pane-pick">
                   {t("panePick")}
                 </p>
               )}

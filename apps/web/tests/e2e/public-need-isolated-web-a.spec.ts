@@ -92,6 +92,22 @@ test("N-1. an anonymous visitor submits the public company-need form and the int
 
   const result = page.getByTestId("company-need-result");
   await expect(result, "the form answers the visitor").toBeVisible({ timeout: 60_000 });
+  // AI is off on this stack (AI_PROVIDER_MODE=disabled): the result says so in
+  // the catalogue's own words, never a silent gap where a suggestion would
+  // have been — at 1280 px and at 390 px. Imported here so this walk adds
+  // nothing to the shared import line above.
+  const { readFileSync } = await import("node:fs");
+  const { resolve } = await import("node:path");
+  const EN = JSON.parse(readFileSync(resolve(__dirname, "../../messages/en.json"), "utf8")) as {
+    companyNeed: { aiDisabled: string };
+  };
+  const aiOff = result.getByTestId("company-need-ai-disabled");
+  await expect(aiOff, "AI off: the form says no suggestion is prepared").toBeVisible();
+  await expect(aiOff).toHaveText(EN.companyNeed.aiDisabled);
+  await expect(result.getByTestId("company-need-ai-none"), "AI off is not 'no suggestion produced'").toHaveCount(0);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await expect(aiOff, "AI off: the same words at 390 px").toBeVisible();
+  await expect(aiOff).toHaveText(EN.companyNeed.aiDisabled);
   // The stored row is the proof (the result card's received-vs-prepared
   // wording is the page's claim; the database is the fact).
 

@@ -1,4 +1,5 @@
-import { expect, test, type Browser, type Locator, type Page } from "@playwright/test";
+import { expect, test, type Browser, type Page } from "@playwright/test";
+import { clickUntilVisible } from "./click-until-visible";
 
 import { verifyCompanyAsLocalAdmin } from "./isolated-web-a-helpers";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
@@ -198,13 +199,6 @@ async function as(browser: Browser, address: string): Promise<{ page: Page; clos
 
 /** Click until the expected result shows: a click that lands before the page
  *  hydrated is a silent no-op, so the click is retried, never assumed. */
-async function clickUntil(target: Locator, result: Locator, timeout = 60_000): Promise<void> {
-  await expect(async () => {
-    if (!(await result.isVisible().catch(() => false))) await target.click({ timeout: 5_000 });
-    await expect(result).toBeVisible({ timeout: 5_000 });
-  }).toPass({ timeout });
-}
-
 /** Everything the main region renders, once the page's own content streamed in. */
 async function mainText(page: Page): Promise<string> {
   const main = page.getByRole("main");
@@ -235,7 +229,7 @@ async function newDiscoverableWorker(browser: Browser, address: string, name: st
   await page.goto(`${BASE}/en/dashboard/privacy#visibility`);
   const section = page.getByTestId("privacy-visibility");
   await expect(section).toBeVisible({ timeout: 30_000 });
-  await clickUntil(section.getByTestId("discoverability-open"), section.getByTestId("discoverability-grant"));
+  await clickUntilVisible(section.getByTestId("discoverability-open"), section.getByTestId("discoverability-grant"));
   await section.getByTestId("discoverability-grant").click();
   await expect(section.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
   return page;
@@ -249,7 +243,7 @@ async function recordWork(page: Page, text: string): Promise<void> {
   const box = main.getByTestId("journal-quick-record-text");
   await expect(box).toBeVisible({ timeout: 60_000 });
   await box.fill(text);
-  await clickUntil(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
+  await clickUntilVisible(main.getByTestId("journal-quick-record-understand"), main.getByTestId("worklog-flow"));
   await main.getByTestId("worklog-save").click();
   await main.getByTestId("worklog-confirm").click();
   const done = main.getByTestId("worklog-done");
@@ -393,21 +387,25 @@ test("K-2. a welder (another trade) records a day of work; same honest evidence 
 test("K-3. the Living CV shows the skills as recorded work, with their basis", async ({ browser }) => {
   const tiler = await as(browser, TILER);
   await tiler.page.goto(`${BASE}/en/cv`);
-  const caps = tiler.page.getByTestId("premium-cv-capabilities");
-  await expect(caps).toBeVisible({ timeout: 60_000 });
-  const tiling = caps.locator("li", { hasText: /^\s*Tiling/ }).first();
-  await expect(tiling, "tiling is on the Living CV").toBeVisible();
-  await expect(tiling, "at the recorded level — not confirmed").toHaveAttribute("data-level", "recorded");
-  await expect(caps.locator('li[data-level="confirmed"]'), "nothing reads as confirmed").toHaveCount(0);
+  // The Living CV lists each skill ONCE, in its skills section (owner P0
+  // 2026-11-23: the hero no longer repeats them).
+  const skills = tiler.page.getByTestId("cv-skills");
+  await expect(skills).toBeVisible({ timeout: 60_000 });
+  const tiling = skills.locator("[data-magnitude]", { hasText: /^\s*Tiling/ });
+  await expect(tiling, "tiling is on the Living CV, once").toHaveCount(1);
+  await expect(
+    skills.getByTestId("cv-tier-evidence").locator("[data-magnitude]", { hasText: /^\s*Tiling/ }),
+    "at the recorded level — not confirmed",
+  ).toHaveCount(1);
+  await expect(skills.getByTestId("cv-tier-confirmed"), "nothing reads as confirmed").toHaveCount(0);
   // The basis is said on the line: the recorded hours when the entry's time
   // can be given to this skill; since #2894 (P0-B) a session shared by
-  // several skills says "Involved in N h, not attributed to it alone" (one
-  // total is never split by guesswork, #1689); otherwise "shown by your
-  // records" — never the "you say so" line of a bare declaration.
+  // several skills says it was involved in N h not attributed to it alone
+  // (one total is never split by guesswork, #1689) — never "no records yet".
   await expect(tiling, "the basis is stated").toContainText(
-    /\d+(\.\d+)? h recorded|Involved in \d+(\.\d+)? h, not attributed to it alone|Shown by your records/,
+    /\d+(\.\d+)? h, (your own record|\d+(\.\d+)? h of it confirmed)|involved in \d+(\.\d+)? h of work not attributed/,
   );
-  await expect(tiling).not.toContainText(/nothing shows it yet/);
+  await expect(tiling).not.toContainText(/no records yet/);
   await tiler.close();
 });
 
@@ -562,11 +560,24 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
 
   // It STAYS withdrawn: a re-run of recognition over the same text.
   await page.goto(`${BASE}/en/dashboard/journal`);
-  await page.getByTestId(`journal-entry-more-${state.tilerEntry}`).first().evaluate((d) => ((d as HTMLDetailsElement).open = true));
   // The re-run must really HAPPEN: only the success result counts (a failed
   // run would only re-check the earlier unlink, proving nothing).
   const rerun = page.getByTestId(`journal-entry-reprocess-${state.tilerEntry}`).first();
-  await clickUntil(rerun, page.getByTestId(`journal-entry-reprocess-result-${state.tilerEntry}`).first());
+  const rerunResult = page.getByTestId(`journal-entry-reprocess-result-${state.tilerEntry}`).first();
+  // The button sits in the entry's native <details>; a re-render of the row
+  // (its `open` is not React state) closes it again, so every attempt opens
+  // it first. Opening it once before the retries raced with that re-render.
+  await clickUntilVisible(rerun, rerunResult, {
+    timeout: 60_000,
+    what: "the re-run result",
+    prepare: () =>
+      page
+        .getByTestId(`journal-entry-more-${state.tilerEntry}`)
+        .first()
+        .evaluate((d) => {
+          (d as HTMLDetailsElement).open = true;
+        }),
+  });
   await expect(page.getByTestId(`journal-entry-reprocess-failed-${state.tilerEntry}`)).toHaveCount(0);
   await expect(page.getByTestId(`journal-entry-reprocess-error-${state.tilerEntry}`)).toHaveCount(0);
   links = await entryLinks(state.tilerEntry);
@@ -575,9 +586,10 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
 
   // The Living CV follows: flooring is no longer shown as recorded work.
   await page.goto(`${BASE}/en/cv`);
-  const caps = page.getByTestId("premium-cv-capabilities");
-  await expect(caps).toBeVisible({ timeout: 60_000 });
-  await expect(caps.locator('li[data-level="recorded"]', { hasText: /^\s*Flooring/ })).toHaveCount(0);
-  await expect(caps.locator('li[data-level="recorded"]', { hasText: /^\s*Tiling/ })).toHaveCount(1);
+  const cvSkills = page.getByTestId("cv-skills");
+  await expect(cvSkills).toBeVisible({ timeout: 60_000 });
+  const recorded = cvSkills.getByTestId("cv-tier-evidence");
+  await expect(recorded.locator("[data-magnitude]", { hasText: /^\s*Flooring/ })).toHaveCount(0);
+  await expect(recorded.locator("[data-magnitude]", { hasText: /^\s*Tiling/ })).toHaveCount(1);
   await tiler.close();
 });

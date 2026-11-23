@@ -33,7 +33,33 @@ on:
       - ".github/scripts/android-assemble-release.sh"
       - "apps/mobile/.maestro/jobs-need-journey.yaml"
       - "apps/mobile/.maestro/need-second-journey.yaml"
+      - "apps/mobile/.maestro/employer-screens-journey.yaml"
+      - "apps/mobile/.maestro/cv-forms-journey.yaml"
+      - "apps/mobile/.maestro/booking-journey.yaml"
+      - "apps/mobile/.maestro/review-journey.yaml"
+      - "apps/mobile/.maestro/agency-clients-journey.yaml"
+      - "apps/mobile/.maestro/absences-journey.yaml"
+      - "apps/mobile/.maestro/agency-roster-journey.yaml"
+      - "apps/mobile/.maestro/sent-proposals-journey.yaml"
+      - "apps/mobile/src/screens/sent-proposals.tsx"
+      - "apps/mobile/src/screens/invite-worker.tsx"
+      - "apps/mobile/src/screens/absences.tsx"
+      - "apps/mobile/src/screens/agency.tsx"
+      - "apps/mobile/src/screens/agency-invite-client.tsx"
+      - "apps/mobile/src/screens/client-agencies.tsx"
+      - "apps/mobile/src/screens/journal-review.tsx"
+      - "apps/mobile/src/screens/propose-booking.tsx"
+      - "apps/mobile/src/screens/offers.tsx"
+      - "apps/mobile/src/screens/work-history-form.tsx"
+      - "apps/mobile/src/screens/language-form.tsx"
+      - "apps/mobile/src/screens/education-form.tsx"
+      - "apps/mobile/src/screens/cv-entries.tsx"
       - "apps/mobile/src/screens/need-intake.tsx"
+      - "apps/mobile/src/screens/candidates.tsx"
+      - "apps/mobile/src/screens/need-lifecycle.tsx"
+      - "apps/mobile/src/screens/agency-offers.tsx"
+      - "apps/mobile/src/screens/education.tsx"
+      - "apps/mobile/app/(shell)/today.tsx"
       - "packages/client-core/src/config.ts"
 
 permissions:
@@ -50,7 +76,7 @@ jobs:
     env:
       APP_ORIGIN: http://127.0.0.1:3000
       SKIP_MIGRATION: 20261025120000_business_history_periods_vivatrex_lmai_bounds_v1.sql
-      SKIP_MIGRATION_SHA256: e4dea150dbd1c344ab7319af74066f12090f764ccdb5511571be65e8244b233e
+      SKIP_MIGRATION_SHA256: 43f04f60b120bdd0b8be10044163012b7f65033508d3e1eb94bca2cc968a1f45
       PAYMENTS_ENABLED: "false"
       BILLING_PROVIDER: none
       AI_PROVIDER_MODE: disabled
@@ -132,7 +158,10 @@ jobs:
           set -uo pipefail
           supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
           rc=$?
-          grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
+          # An empty or fully-filtered log must not end the step before it
+          # reports supabase's own exit code (run 44431973350 printed nothing).
+          { grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" || true; } | tail -n 60
+          echo "supabase start exit code: $rc"
           exit $rc
 
       - name: Export the LOCAL stack env (masked; refuses anything non-local)
@@ -152,6 +181,10 @@ jobs:
           CTS="$(openssl rand -hex 32)"; echo "::add-mask::$CTS"
           CRON="$(openssl rand -hex 24)"; echo "::add-mask::$CRON"
           SEED_PW="Qa-$(openssl rand -hex 16)-1a!"; echo "::add-mask::$SEED_PW"
+          WORKER_PW="Qa-$(openssl rand -hex 16)-2b!"; echo "::add-mask::$WORKER_PW"
+          WORKER2_PW="Qa-$(openssl rand -hex 16)-3c!"; echo "::add-mask::$WORKER2_PW"
+          WORKER3_PW="Qa-$(openssl rand -hex 16)-4d!"; echo "::add-mask::$WORKER3_PW"
+          AGENCY_PW="Qa-$(openssl rand -hex 16)-5e!"; echo "::add-mask::$AGENCY_PW"
           {
             echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
             echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON"
@@ -167,6 +200,14 @@ jobs:
             echo "EXPO_PUBLIC_API_BASE_URL=http://10.0.2.2:3000"
             echo "MOBILE_NEED_SEED_EMAIL=qa.mobile.need.${GITHUB_RUN_ID}@local.test"
             echo "MOBILE_NEED_SEED_PASSWORD=$SEED_PW"
+            echo "MOBILE_WORKER_SEED_EMAIL=qa.mobile.cv.${GITHUB_RUN_ID}@local.test"
+            echo "MOBILE_WORKER_SEED_PASSWORD=$WORKER_PW"
+            echo "MOBILE_WORKER2_SEED_EMAIL=qa.mobile.worker2.${GITHUB_RUN_ID}@local.test"
+            echo "MOBILE_WORKER2_SEED_PASSWORD=$WORKER2_PW"
+            echo "MOBILE_WORKER3_SEED_EMAIL=qa.mobile.worker3.${GITHUB_RUN_ID}@local.test"
+            echo "MOBILE_WORKER3_SEED_PASSWORD=$WORKER3_PW"
+            echo "MOBILE_AGENCY_SEED_EMAIL=qa.mobile.agency.${GITHUB_RUN_ID}@local.test"
+            echo "MOBILE_AGENCY_SEED_PASSWORD=$AGENCY_PW"
           } >> "$GITHUB_ENV"
 
       - name: Prove the replay — ledger rows equal migration files
@@ -178,6 +219,10 @@ jobs:
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
 
       - name: Build web
+        # Same heap as quality.yml's build: the default Node heap is no longer
+        # enough for the app (run 44426090349 died "JavaScript heap out of memory").
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Start web app (acceptance mode — refuses a non-local target)
@@ -188,14 +233,25 @@ jobs:
           for i in $(seq 1 60); do curl -fsS -o /dev/null "$APP_ORIGIN/en" && break; sleep 2; done
           curl -fsS -o /dev/null "$APP_ORIGIN/en"
 
-      - name: Seed the synthetic company through the real sign-up form (local only)
+      - name: Seed the synthetic company and worker through the real sign-up form (local only)
         working-directory: apps/web
         env:
           SIGNUP_ISOLATED: "1"
           E2E_BASE_URL: http://127.0.0.1:3000
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
-        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-0" --reporter=list --trace=off
+        run: pnpm exec playwright test tests/e2e/signup-isolated.spec.ts -g "M-[0-4]\." --reporter=list --trace=off
+
+      - name: Read the two worker seeds' ids for the booking journey (local stack)
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          B="$(q "select w.id from public.workers w join auth.users u on u.id = w.profile_id where u.email = '$MOBILE_WORKER_SEED_EMAIL'")"
+          N="$(q "select w.id from public.workers w join auth.users u on u.id = w.profile_id where u.email = '$MOBILE_WORKER2_SEED_EMAIL'")"
+          [ -n "$B" ] && [ -n "$N" ] || { echo "::error::a worker seed has no workers row"; exit 1; }
+          R="$(q "select je.id from public.journal_entries je join public.workers w on w.id = je.worker_id join auth.users u on u.id = w.profile_id where u.email = '$MOBILE_WORKER3_SEED_EMAIL' and je.original_text like 'QA-SYNTHETIC mobile review%'")"
+          [ -n "$R" ] || { echo "::error::the review seed has no marked journal entry"; exit 1; }
+          { echo "BOOK_WORKER_ID=$B"; echo "NOT_FIT_WORKER_ID=$N"; echo "REVIEW_ENTRY_ID=$R"; } >> "$GITHUB_ENV"
 
       - name: Expo prebuild (Android)
         working-directory: apps/mobile
@@ -239,13 +295,24 @@ jobs:
           echo "$HOME/.maestro/bin" >> "$GITHUB_PATH"
           "$HOME/.maestro/bin/maestro" --version
 
-      - name: Emulator — sign in, search jobs, post ONE need (local stack)
+      - name: Emulator — sign in, search jobs, post two needs, walk the employer screens (local stack)
         uses: reactivecircus/android-emulator-runner@a421e43855164a8197daf9d8d40fe71c6996bb0d # v2.38.0
         env:
           MAESTRO_CLI_NO_ANALYTICS: "1"
           MAESTRO_DRIVER_STARTUP_TIMEOUT: "240000"
           MOBILE_QA_EMAIL: ${{ env.MOBILE_NEED_SEED_EMAIL }}
           MOBILE_QA_PASSWORD: ${{ env.MOBILE_NEED_SEED_PASSWORD }}
+          MOBILE_WORKER_EMAIL: ${{ env.MOBILE_WORKER_SEED_EMAIL }}
+          MOBILE_WORKER_PASSWORD: ${{ env.MOBILE_WORKER_SEED_PASSWORD }}
+          BOOK_WORKER_ID: ${{ env.BOOK_WORKER_ID }}
+          NOT_FIT_WORKER_ID: ${{ env.NOT_FIT_WORKER_ID }}
+          REVIEW_ENTRY_ID: ${{ env.REVIEW_ENTRY_ID }}
+          MOBILE_AGENCY_EMAIL: ${{ env.MOBILE_AGENCY_SEED_EMAIL }}
+          MOBILE_AGENCY_PASSWORD: ${{ env.MOBILE_AGENCY_SEED_PASSWORD }}
+          MOBILE_WORKER3_EMAIL: ${{ env.MOBILE_WORKER3_SEED_EMAIL }}
+          MOBILE_WORKER3_PASSWORD: ${{ env.MOBILE_WORKER3_SEED_PASSWORD }}
+          MOBILE_WORKER2_EMAIL: ${{ env.MOBILE_WORKER2_SEED_EMAIL }}
+          MOBILE_WORKER2_PASSWORD: ${{ env.MOBILE_WORKER2_SEED_PASSWORD }}
         with:
           api-level: 34
           arch: x86_64
@@ -277,6 +344,129 @@ jobs:
           fi
           echo "ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: on-device draft + confirm stored the first AND the second need (two distinct rows, one each) for the synthetic company (local stack, production untouched)"
           echo "- ANDROID_NEED_SUBMIT_ISOLATED_PROVEN: sign-in → jobs search → empty need refused → first need sent → Done → fresh form → second need sent → two submitted rows (local stack)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the employer screens' writes — one need closed, then reopened, by the seed
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          SEED="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$SEED" ] || { echo "::error::seed user missing"; exit 1; }
+          C="$(q "select count(*) from public.audit_logs a join public.customer_requests cr on cr.id::text = a.entity_id::text where a.action = 'close_demand' and a.actor_id = '$SEED' and cr.profile_id = '$SEED'")"
+          R="$(q "select count(*) from public.audit_logs a join public.customer_requests cr on cr.id::text = a.entity_id::text where a.action = 'reopen_demand' and a.actor_id = '$SEED' and cr.profile_id = '$SEED'")"
+          S="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'submitted'")"
+          X="$(q "select count(*) from public.customer_requests where profile_id = '$SEED' and status = 'closed'")"
+          echo "close_demand rows=$C reopen_demand rows=$R submitted=$S closed=$X"
+          [ "$C" = "1" ] && [ "$R" = "1" ] || { echo "::error::expected exactly one close and one reopen by the seed (close=$C reopen=$R)"; exit 1; }
+          [ "$S" = "2" ] && [ "$X" = "0" ] || { echo "::error::expected both needs submitted again (submitted=$S closed=$X)"; exit 1; }
+          echo "ANDROID_EMPLOYER_SCREENS_ISOLATED_PROVEN: on-device close → reopen of a need (draft + confirm each) stored once each; both needs open again (local stack, production untouched)"
+          echo "- ANDROID_EMPLOYER_SCREENS_ISOLATED_PROVEN: Today organization stations → close + reopen a need → candidates → agency offers (none) → programmes (not a training provider)" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the CV forms' writes — one job, one language, one school, owned by the worker seed
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          W="$(q "select id from auth.users where email = '$MOBILE_WORKER_SEED_EMAIL'")"
+          [ -n "$W" ] || { echo "::error::worker seed missing"; exit 1; }
+          J="$(q "select count(*) from public.engagement_contexts where profile_id = '$W' and title = 'QA-SYNTHETIC mobile tiler' and ended_at is null")"
+          L="$(q "select count(*) from public.worker_languages wl join public.workers w on w.id = wl.worker_id where w.profile_id = '$W' and wl.lang = 'en' and wl.level = 'B2'")"
+          E="$(q "select count(*) from public.worker_education where profile_id = '$W' and institution_name = 'QA-SYNTHETIC mobile school'")"
+          echo "work history rows=$J languages=$L education rows=$E"
+          [ "$J" = "1" ] && [ "$L" = "1" ] && [ "$E" = "1" ] || { echo "::error::expected one row each (work=$J language=$L education=$E)"; exit 1; }
+          echo "ANDROID_CV_FORMS_ISOLATED_PROVEN: on-device work history (ongoing), language and education stored once each for the synthetic worker (local stack, production untouched)"
+          echo "- ANDROID_CV_FORMS_ISOLATED_PROVEN: sign out company → sign in worker → add work history, language, education → one row each" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the booking journey's writes — one not-a-fit, one shortlisted, one accepted booking
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          C="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$C" ] || { echo "::error::company seed missing"; exit 1; }
+          NF="$(q "select count(*) from public.demand_shortlist where owner_id = '$C' and worker_id = '$NOT_FIT_WORKER_ID' and status = 'not_fit' and note = 'QA-SYNTHETIC not a fit for this need'")"
+          SL="$(q "select count(*) from public.demand_shortlist where owner_id = '$C' and worker_id = '$BOOK_WORKER_ID' and status in ('saved','interested')")"
+          # The worker's ACCEPT, read from the append-only event log: the later
+          # sent-proposals journey reschedules and withdraws this same booking,
+          # so its current status is proven there, not here.
+          BK="$(q "select count(*) from public.booking_request_events e join public.booking_requests b on b.id = e.booking_request_id where b.owner_id = '$C' and b.worker_id = '$BOOK_WORKER_ID' and e.event_type = 'accepted' and e.to_status = 'accepted' and e.actor_id <> '$C'")"
+          ROWS="$(q "select count(*) from public.booking_requests where owner_id = '$C' and worker_id = '$BOOK_WORKER_ID'")"
+          OTHER="$(q "select count(*) from public.booking_requests where worker_id = '$NOT_FIT_WORKER_ID'")"
+          EV="$(q "select string_agg(e.event_type, ',' order by e.created_at) from public.booking_request_events e join public.booking_requests b on b.id = e.booking_request_id where b.owner_id = '$C' and b.worker_id = '$BOOK_WORKER_ID'")"
+          echo "not_fit=$NF shortlisted=$SL worker_accepts=$BK booking_rows=$ROWS bookings_to_not_fit=$OTHER events=$EV"
+          [ "$NF" = "1" ] && [ "$SL" = "1" ] && [ "$BK" = "1" ] && [ "$ROWS" = "1" ] && [ "$OTHER" = "0" ] || { echo "::error::expected one not-a-fit, one shortlisted, one accepted booking and none to the not-a-fit worker"; exit 1; }
+          echo "ANDROID_BOOKING_ISOLATED_PROVEN: on-device shortlist → not a fit (with reason) for one worker, shortlist → proposed start for the other, accepted by that worker on their phone; stored once each (local stack, production untouched)"
+          echo "- ANDROID_BOOKING_ISOLATED_PROVEN: company finds two discoverable workers → not a fit for one → proposes a start to the other → that worker accepts under Offers" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the work review's write — one employer approval of the employee's entry, with its note
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          C="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$C" ] || { echo "::error::company seed missing"; exit 1; }
+          A="$(q "select count(*) from public.journal_entry_confirmations where entry_id = '$REVIEW_ENTRY_ID' and confirmer_id = '$C' and confirmation_scope->>'decision' = 'approved' and confirmation_scope->>'note' = 'QA-SYNTHETIC approved from the phone' and confirmation_scope->'authority'->>'basis' = 'employer'")"
+          ALL="$(q "select count(*) from public.journal_entry_confirmations where entry_id = '$REVIEW_ENTRY_ID'")"
+          AUD="$(q "select count(*) from public.audit_logs where action = 'review_journal_entry' and entity_id = '$REVIEW_ENTRY_ID'")"
+          echo "employer_approvals=$A confirmations=$ALL audit_rows=$AUD"
+          [ "$A" = "1" ] && [ "$ALL" = "1" ] && [ "$AUD" = "1" ] || { echo "::error::expected exactly one employer approval (with the note) and one audit row"; exit 1; }
+          echo "ANDROID_REVIEW_ISOLATED_PROVEN: on-device work review — the company approved its employee's journal entry with a note (draft + confirm), stored once with employer authority (local stack, production untouched)"
+          echo "- ANDROID_REVIEW_ISOLATED_PROVEN: company → Work review → approve the employee's entry with a note → one employer confirmation + one audit row" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the agency ↔ client writes — one active connection and one shared need
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          A="$(q "select o.legacy_company_id from public.organizations o join auth.users u on u.id = o.owner_profile_id where u.email = '$MOBILE_AGENCY_SEED_EMAIL'")"
+          C="$(q "select o.legacy_company_id from public.organizations o join auth.users u on u.id = o.owner_profile_id where u.email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$A" ] && [ -n "$C" ] || { echo "::error::agency or company seed has no company"; exit 1; }
+          CONN="$(q "select count(*) from public.agency_client_connections where agency_company_id = '$A' and client_company_id = '$C' and status = 'active' and invited_email = lower('$MOBILE_NEED_SEED_EMAIL')")"
+          SH="$(q "select count(*) from public.agency_client_request_shares s join public.agency_client_connections c on c.id = s.connection_id where c.agency_company_id = '$A' and c.client_company_id = '$C' and s.status = 'active'")"
+          echo "active_connections=$CONN active_shares=$SH"
+          [ "$CONN" = "1" ] && [ "$SH" = "1" ] || { echo "::error::expected one active connection and one shared need"; exit 1; }
+          echo "ANDROID_AGENCY_CLIENTS_ISOLATED_PROVEN: on-device agency invited the company by e-mail; the company accepted and shared one need (prepare + confirm each), stored once (local stack, production untouched)"
+          echo "- ANDROID_AGENCY_CLIENTS_ISOLATED_PROVEN: agency → invite client → company → Staffing agencies → accept → share a need → one active connection + one share" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the leave & absence writes — one approved absence for the employee, reviewed by the company
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          C="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          W="$(q "select w.id from public.workers w join auth.users u on u.id = w.profile_id where u.email = '$MOBILE_WORKER3_SEED_EMAIL'")"
+          [ -n "$C" ] && [ -n "$W" ] || { echo "::error::company or employee seed missing"; exit 1; }
+          AP="$(q "select count(*) from public.worker_absences where worker_id = '$W' and status = 'approved' and reviewed_by = '$C' and absence_type = 'annual_leave' and start_date = '2027-04-01' and end_date = '2027-04-02' and note = 'QA-SYNTHETIC two days off'")"
+          ALL="$(q "select count(*) from public.worker_absences where worker_id = '$W'")"
+          echo "approved=$AP absences=$ALL"
+          [ "$AP" = "1" ] && [ "$ALL" = "1" ] || { echo "::error::expected exactly one absence, approved by the company"; exit 1; }
+          echo "ANDROID_ABSENCES_ISOLATED_PROVEN: on-device the employee requested annual leave and the company approved it (draft + confirm each), stored once (local stack, production untouched)"
+          echo "- ANDROID_ABSENCES_ISOLATED_PROVEN: employee → Leave & absence → request 2 days → company → Requests to review → approve → one approved row" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the agency roster → proposal writes — worker on the roster, invitation accepted, one open offer
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          A="$(q "select o.legacy_company_id from public.organizations o join auth.users u on u.id = o.owner_profile_id where u.email = '$MOBILE_AGENCY_SEED_EMAIL'")"
+          [ -n "$A" ] || { echo "::error::agency seed has no company"; exit 1; }
+          RO="$(q "select count(*) from public.company_workers where company_id = '$A' and worker_id = '$NOT_FIT_WORKER_ID' and status = 'active'")"
+          IN="$(q "select count(*) from public.company_worker_invitations where company_id = '$A' and invited_email = lower('$MOBILE_WORKER2_SEED_EMAIL') and status = 'accepted'")"
+          OF="$(q "select count(*) from public.agency_candidate_offers where agency_company_id = '$A' and worker_id = '$NOT_FIT_WORKER_ID' and status = 'offered'")"
+          echo "roster=$RO invitation_accepted=$IN open_offers=$OF"
+          [ "$RO" = "1" ] && [ "$IN" = "1" ] && [ "$OF" = "1" ] || { echo "::error::expected the worker on the roster, the invitation accepted and one open offer"; exit 1; }
+          echo "ANDROID_AGENCY_ROSTER_ISOLATED_PROVEN: on-device the agency invited a worker, the worker accepted, and the agency proposed them for the client's shared need (prepare + confirm each), stored once (local stack, production untouched)"
+          echo "- ANDROID_AGENCY_ROSTER_ISOLATED_PROVEN: agency → Invite a worker → worker accepts under Offers → agency proposes for the shared need → client sees the offer" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Prove the sent-proposals writes — the accepted booking rescheduled (reopened), then withdrawn with its reason
+        run: |
+          set -euo pipefail
+          q() { docker exec supabase_db_labourmarketai psql -U postgres -tAc "$1"; }
+          C="$(q "select id from auth.users where email = '$MOBILE_NEED_SEED_EMAIL'")"
+          [ -n "$C" ] || { echo "::error::company seed missing"; exit 1; }
+          B="$(q "select id from public.booking_requests where owner_id = '$C' and worker_id = '$BOOK_WORKER_ID'")"
+          [ -n "$B" ] || { echo "::error::the company's booking is missing"; exit 1; }
+          ST="$(q "select status || ':' || start_date || ':' || coalesce(expected_end_date::text, '-') from public.booking_requests where id = '$B'")"
+          EV="$(q "select string_agg(event_type, ',' order by created_at) from public.booking_request_events where booking_request_id = '$B'")"
+          RS="$(q "select count(*) from public.booking_request_events where booking_request_id = '$B' and event_type = 'rescheduled' and from_status = 'accepted' and to_status = 'proposed' and actor_id = '$C'")"
+          WD="$(q "select count(*) from public.booking_request_events where booking_request_id = '$B' and event_type = 'withdrawn' and actor_id = '$C' and reason_kind = 'dates_changed' and reason_note = 'QA-SYNTHETIC new dates no longer fit'")"
+          echo "booking=$ST events=$EV reopened=$RS withdrawn_with_reason=$WD"
+          [ "$ST" = "withdrawn:2027-04-05:2027-04-30" ] && [ "$EV" = "proposed,accepted,rescheduled,withdrawn" ] && [ "$RS" = "1" ] && [ "$WD" = "1" ] || { echo "::error::expected the booking rescheduled to 2027-04-05..2027-04-30 (reopened) and then withdrawn once with its reason"; exit 1; }
+          echo "ANDROID_SENT_PROPOSALS_ISOLATED_PROVEN: on-device the company changed the dates of its accepted booking (reopened for the worker) and then withdrew it with a reason (prepare + confirm each), stored once each (local stack, production untouched)"
+          echo "- ANDROID_SENT_PROPOSALS_ISOLATED_PROVEN: company → Proposals you sent → change dates (accepted → proposed) → withdraw with reason → one rescheduled + one withdrawn event" >> "$GITHUB_STEP_SUMMARY"
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()

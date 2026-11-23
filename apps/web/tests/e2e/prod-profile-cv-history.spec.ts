@@ -403,10 +403,9 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   await inMain(page).getByTestId("cv-import-confirm-wh-0").last().click();
   await expect(inMain(page).getByTestId("cv-import-saved-wh-0").last()).toBeVisible({ timeout: 30_000 });
   const after = await livingCv(page);
-  const saved = after
-    .locator('[data-testid="premium-cv-experience-row"][data-level="declared"]', { hasText: corrected })
-    .or(after.getByTestId("cv-history-node").filter({ hasText: corrected }));
-  await expect(saved.first(), "the corrected row is on the Living CV, as stated by the person").toBeVisible({ timeout: 60_000 });
+  const saved = after.getByTestId("cv-history-node").filter({ hasText: corrected });
+  await expect(saved, "the corrected row is on the Living CV, once").toHaveCount(1, { timeout: 60_000 });
+  await expect(saved, "as stated by the person").toHaveAttribute("data-standing", "stated");
   await expect(after.getByText(company), "the parser's reading was not saved").toHaveCount(0);
   await ctx.close();
 });
@@ -518,10 +517,10 @@ test("P-7 (2.5). an employment row is added on the profile and shows on the Livi
   await expect(row.locator('[data-testid^="capability-experience-remove-"]'), "a self-declared row is the person's to remove").toHaveCount(1);
 
   const cv = await livingCv(page);
-  const declared = cv
-    .locator('[data-testid="premium-cv-experience-row"][data-level="declared"]', { hasText: EXPERIENCE })
-    .or(cv.getByTestId("cv-history-node").filter({ hasText: EXPERIENCE }).filter({ has: page.getByTestId("cv-history-standing") }));
-  await expect(declared.first(), "the row is on the Living CV, labelled as stated by the person").toBeVisible({ timeout: 30_000 });
+  // Listed once (owner P0 2026-11-23), as the person's own statement.
+  const declared = cv.getByTestId("cv-history-node").filter({ hasText: EXPERIENCE });
+  await expect(declared, "the row is on the Living CV, once").toHaveCount(1, { timeout: 30_000 });
+  await expect(declared, "labelled as stated by the person").toHaveAttribute("data-standing", "stated");
   await ctx.close();
 });
 
@@ -890,6 +889,37 @@ test("P-20 (3.27). the company's history page opens in Alfa's workspace", async 
   await ctx.close();
 });
 
+test("P-20b (3.36). Alfa's member reads its organization CV: the projects block, its counts, and the way back from a project", async ({ browser }) => {
+  // Read-only: Alfa's own projects, opened by its owner (a member).
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/company/history");
+  await expect(inMain(page).getByTestId("company-history")).toBeVisible({ timeout: 30_000 });
+  const projects = inMain(page).getByTestId("company-work-history-projects");
+  await expect(projects, "Alfa has projects, so its organization CV lists them").toBeVisible({ timeout: 30_000 });
+  const counts = projects.getByTestId("company-work-history-projects-counts");
+  await expect(counts).toBeVisible();
+  // #3452: the count reads as words, never a raw ICU pattern.
+  await expect(counts).not.toContainText("{");
+  await expect(counts).not.toContainText("plural");
+  const rows = projects.getByTestId("company-work-history-project");
+  const n = await rows.count();
+  expect(n, "at least one project row").toBeGreaterThan(0);
+  expect(n, "at most 12 rows").toBeLessThanOrEqual(12);
+  const id = await rows.first().getAttribute("data-project");
+  expect(id, "the row names its project").toBeTruthy();
+  await rows.first().click();
+  await page.waitForURL(new RegExp(`/dashboard/projects/${id}`), { timeout: 30_000 });
+  // #3452: a member of the project's organization gets the way back to its history.
+  const back = inMain(page).getByTestId("project-organization-link");
+  await expect(back, "a member sees the link to the organization history").toBeVisible({ timeout: 30_000 });
+  await back.click();
+  await page.waitForURL(/\/company\/history/, { timeout: 30_000 });
+  await expect(inMain(page).getByTestId("company-work-history-projects")).toBeVisible({ timeout: 30_000 });
+  console.info(`[company-history] 3.36: projects block rows=${n} counts="${(await counts.innerText()).trim()}"; member back link works`);
+  await ctx.close();
+});
+
 test("P-21 (3.31). the company report opens and its export downloads as a file", async ({ browser }) => {
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
@@ -1064,14 +1094,12 @@ test("P-25 (UF-3). a job with no organization reads as the person stated it on t
 
   const cv = await livingCv(page);
   // The title leads the row (#3084), not the word for the relationship.
-  const row = cv.getByTestId("premium-cv-experience-row").filter({ hasText: title });
-  await expect(row, "the Living CV names the job by its title").toHaveCount(1, { timeout: 30_000 });
+  // ONE list, on screen and in print (owner P0 2026-11-23).
+  const row = cv.getByTestId("cv-history-node").filter({ hasText: title });
+  await expect(row, "the Living CV names the job by its title, once").toHaveCount(1, { timeout: 30_000 });
   // Only the year was stated (#3086): no month, no day, on screen or in print.
   await expect(row, "a stated year has no invented month").toContainText("2019");
   await expect(row).not.toContainText("2019-01");
-  const printed = cv.getByTestId("cv-history-node").filter({ hasText: title });
-  await expect(printed, "the printed list reads the same").toHaveCount(1);
-  await expect(printed).not.toContainText("2019-01");
   await ctx.close();
 });
 

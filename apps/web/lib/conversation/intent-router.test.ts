@@ -1164,6 +1164,15 @@ const PARITY_MATRIX: Readonly<Record<RoutedIntent, Record<ActiveLocale, string>>
     pl: "Mamy 20 spawaczy i szukamy dla nich pracy.",
     sv: "Vi har 20 svetsare tillgängliga.",
   },
+  "offer-team": {
+    lt: "Noriu pasiūlyti savo komandą",
+    en: "I want to offer my team",
+    ru: "Хочу предложить свою команду",
+    nl: "Ik wil mijn team aanbieden",
+    de: "Ich möchte unser Team anbieten",
+    pl: "Chcę zaoferować swój zespół",
+    sv: "Jag vill erbjuda mitt team",
+  },
   "agency-invites": {
     lt: "Agentūra mane pakvietė bendradarbiauti",
     en: "An agency invited us to connect",
@@ -1635,5 +1644,28 @@ describe("a question about the needs we already have reviews them; a new need st
     "we need welders next month",
   ])("%s → need-workers", (text) => {
     expect(classifyIntent(text).intent).toBe("need-workers");
+  });
+});
+
+describe("a person's own bookings reach the offers answer in every active language", () => {
+  // Local chat probe 2026-11-18: "Show my upcoming bookings" got the AI-off
+  // reply, because `\bbooking\b` refused the plural and only Swedish had its
+  // own word. The employer's "book a worker" stays with propose-booking.
+  it.each([
+    "Show my upcoming bookings",
+    "Show my bookings",
+    "my booking",
+    "Rodyk mano rezervacijas",
+    "Meine Buchungen",
+    "mijn boekingen",
+    "moje rezerwacje",
+    "мои бронирования",
+    "Visa mina bokningar",
+  ])("%s → offers", (text) => {
+    expect(classifyIntent(text).intent).toBe("offers");
+  });
+
+  it("an employer booking a worker is still propose-booking", () => {
+    expect(classifyIntent("I want to book a worker").intent).toBe("propose-booking");
   });
 });

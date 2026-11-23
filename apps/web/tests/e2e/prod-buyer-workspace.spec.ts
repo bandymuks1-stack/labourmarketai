@@ -2,6 +2,7 @@ import { appendFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 
 /**
  * PRODUCTION — THE BUYER WORKSPACE (matrix 6.4), with the ONE owner-created
@@ -136,6 +137,9 @@ test("B-2 (6.4). a request saved as a draft appears once in the buyer's own list
   await expect(form, "the request form is open to a set-up customer").toBeVisible({ timeout: 30_000 });
   await page.getByTestId("buyer-requests-field-title").fill(`${NOTE} užsakymas`);
   await page.getByTestId("buyer-requests-field-need-summary").fill(`${NOTE}: plytelių klojimas vonios kambaryje (testas).`);
+  // The country is a required ISO choice since #3234; an unchosen select
+  // stops the submit in the browser and no result is ever shown.
+  await page.getByTestId("buyer-requests-field-country").selectOption("LT");
   await page.getByTestId("buyer-requests-status-draft").check();
   await page.getByTestId("buyer-requests-submit").click();
   await expect(page.getByTestId("buyer-requests-result")).toBeVisible({ timeout: 30_000 });
@@ -394,4 +398,12 @@ test.afterAll(async ({ browser }) => {
     }
   }
   if (failed.length > 0) reportCleanupProblem(failed);
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("buyer-workspace");
 });

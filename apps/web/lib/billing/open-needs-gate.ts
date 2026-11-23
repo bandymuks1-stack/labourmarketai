@@ -88,7 +88,9 @@ export async function countActiveOpenNeeds(
     .select("id", { count: "exact", head: true })
     .in("status", [...ACTIVE_OPEN_NEED_STATUSES])
     .or(`organization_id.eq.${organizationId},and(profile_id.eq.${profileId},organization_id.is.null)`)
-    .or(DEMAND_KIND_OR_FILTER);
+    .or(DEMAND_KIND_OR_FILTER)
+    // A privacy request to the platform uses up no open-needs quota.
+    .is("payload->>privacy_request_type", null);
   if (error) return null;
   return typeof count === "number" ? count : 0;
 }

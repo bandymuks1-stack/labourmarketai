@@ -6,6 +6,7 @@ import { chooseWorkContextIfAsked } from "./worklog-context";
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { closeOwnNeed, findOwnNeed } from "./prod-need-close";
 import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
@@ -109,7 +110,7 @@ test("0. owner disbands earlier synthetic brigades, keeping their history", asyn
     }
     if (!teamId) break;
     // Addressed by its id, not by its place in a list the panel re-renders.
-    const card = page.getByTestId(`team-brigade-${teamId}`);
+    const card = page.getByRole("main").getByTestId(`team-brigade-${teamId}`);
     await card.getByTestId(`team-disband-${teamId}`).click();
     await expect(card.getByTestId(`team-disband-explain-${teamId}`)).toBeVisible();
     await card.getByTestId(`team-disband-confirm-${teamId}`).click();
@@ -300,7 +301,7 @@ test("B2B-2. the brigade (2 members) offers itself against exactly that need", a
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
   // The offer form is folded; opening it loads the offerable needs.
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const select = page.getByTestId(`team-offer-demand-${teamId}`);
   await expect(select).toBeVisible({ timeout: 20_000 });
   // The free-text role is normalised to a profession slug, so the need is
@@ -353,7 +354,7 @@ test("B2B-4. supplier proposes terms v1 (people, rate, dates, scope)", async ({ 
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const box = await terms(page, offerId);
   const form = box.getByTestId(`team-offer-terms-form-${offerId}`);
   await form.locator('input[type="number"]').fill("2");
@@ -383,7 +384,7 @@ test("B2B-6. supplier agrees to v2: agreed in principle, history kept, message v
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const box = await terms(page, offerId);
   await box.getByTestId(`team-offer-terms-agree-${offerId}`).click();
   const history = box.getByTestId(`team-offer-terms-history-${offerId}`);
@@ -607,4 +608,12 @@ test.afterAll(async ({ browser }) => {
   } finally {
     await ctx.close();
   }
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("brigade-formation");
 });

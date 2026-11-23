@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "[EN] Message language",
+    "intro": "[EN] Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "[EN] I read messages in",
+    "sameAsInterface": "[EN] Same as the interface",
+    "saved": "[EN] Saved.",
+    "error": "[EN] The change could not be saved and was reverted. Please try again.",
+    "unavailable": "[EN] This setting is not available yet — messages follow the interface language until it is."
+  },
   "demandReadback": {
     "notVerifiedYet": "Jūsu uzņēmums vēl nav verificēts, tāpēc šeit iesniegtās vajadzības darbiniekiem netiek rādītas, kamēr verifikācija nav pabeigta.",
     "notVerifiedHowTo": "Pievienot reģistrācijas numuru un pieprasīt pārbaudi",
@@ -447,7 +456,7 @@
           },
           "education": {
             "title": "Pārstāvu mācību iestādi",
-            "desc": "Aiciniet izglītojamos, redziet viņu dalību un savienojiet viņus ar praksēm un darbu."
+            "desc": "Aiciniet izglītojamos, vadiet programmas un sekojiet viņu praksei un rezultātiem."
           }
         },
         "agency": {
@@ -504,7 +513,6 @@
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
-      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
       "divider": "[EN] or",
       "email_label": "[EN] Work email",
       "email_placeholder": "[EN] name@company.com",
@@ -531,6 +539,9 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Viens profils tavai darba pieredzei un iespējām — nākamajā solī norādīsi, kāpēc atnāci.",
+      "inviteFrom": "{inviter} aicina jūs pievienoties {organization}.",
+      "inviteTo": "Jūs esat aicināti pievienoties {organization}.",
+      "inviteNext": "Reģistrējoties jūs pievienosieties {organization}.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Sūtīt saiti vēlreiz",
       "resend_sent": "Nosūtīts vēlreiz. Pārbaudiet iesūtni un mēstuļu mapi.",
@@ -2043,7 +2054,8 @@
         "noMembers": "Pašlaik dalībnieku nav.",
         "unavailable": "Komandas neizdevās ielādēt. Mēģiniet vēlreiz.",
         "manage": "Mainīt komandas"
-      }
+      },
+      "organizationLink": "Organizācijas vēsture un projekti"
     },
     "workerView": {
       "eyebrow": "Mans projekts",
@@ -3813,9 +3825,7 @@
         "preferredCountries": "[EN] Preferred countries",
         "preferredCountriesPlaceholder": "[EN] e.g. NL, DE",
         "salaryMin": "[EN] Salary from (€)",
-        "salaryMinPlaceholder": "[EN] 1500",
         "salaryMax": "[EN] Salary to (€)",
-        "salaryMaxPlaceholder": "[EN] 2500",
         "willingToRelocate": "[EN] Willing to relocate?",
         "hasTransport": "[EN] Can you get to work on your own?",
         "needsAccommodation": "[EN] Need accommodation?",
@@ -4109,8 +4119,12 @@
           "chipHelpPeople": "Komanda un uzaicinājumi",
           "chipHelpPlanning": "Atvērt plānošanu",
           "chipHelpServices": "Mani pakalpojumi",
-          "chipHelpJournal": "Darba žurnāls"
-        }
+          "chipHelpJournal": "Darba žurnāls",
+          "chipHelpSettings": "Iestatījumi",
+          "chipHelpPrivacy": "Privātums un jūsu dati"
+        },
+        "account": "Pieteikšanās, e-pasts, paziņojumi un izskats ir Iestatījumos.",
+        "privacy": "Sadaļā “Privātums un jūsu dati” varat lejupielādēt savus datus, redzēt, kas redz jūsu profilu, un pieprasīt konta dzēšanu."
       },
       "interestInboxAmbiguous": "Tas var nozīmēt divas lietas — ko vēlaties redzēt?",
       "chipInterestOnMyNeeds": "Interese par maniem pieprasījumiem",
@@ -4799,7 +4813,6 @@
     },
     "v3": {
       "lead": "Darbiniekiem, darba devējiem un pakalpojumu sniedzējiem — visās profesijās un nozarēs. Reģistrācija un pamata vajadzības publicēšana ir bez maksas.",
-      "moreChoices": "Vairāk iespēju",
       "or": "vai aprakstiet saviem vārdiem",
       "needFree": "Pieprasījumu varat iesniegt bez reģistrācijas. Iesniegšana ir bez maksas; pakalpojumu nosacījumi un cena tiek saskaņoti atsevišķi.",
       "market": {
@@ -6414,9 +6427,10 @@
       "createProgram": "[EN] Add course",
       "noPrograms": "[EN] No courses added yet.",
       "assigneePlaceholder": "[EN] Person's email",
+      "assigneePick": "Persona",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -6863,7 +6877,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Reģistrācija, kontakti un amats"
       },
       "workers": {
         "invitationsManagedElsewhere": "Par ielūgumiem rūpējas par to atbildīgā uzņēmuma persona.",
@@ -7085,7 +7100,8 @@
       "address": "Adrese",
       "project": "Projekts",
       "notInSource": "Avotā nav",
-      "linked": "Saistīts"
+      "linked": "Saistīts",
+      "openProject": "Atvērt projektu"
     },
     "whoWorked": "Kas šeit strādāja",
     "timeline": "Kas darīts",
@@ -7103,7 +7119,24 @@
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
       "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
     },
-    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos."
+    "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos.",
+    "projects": {
+      "title": "Projekti platformā",
+      "counts": "{running} notiek · {completed} pabeigti",
+      "untitled": "Projekts bez nosaukuma",
+      "running": "Notiek",
+      "completed": "Pabeigts",
+      "all": "Visi {count} projekti"
+    },
+    "journal": {
+      "title": "Žurnālā ierakstītais darbs",
+      "hours": "Ierakstītās stundas",
+      "confirmed": "Organizācijas apstiprinātās stundas",
+      "people": "Cilvēki, kas ierakstīja darbu",
+      "period": "Ierakstīts",
+      "basis": "No {entries} žurnāla ierakstiem, ko cilvēki veica šajā organizācijā. Skaitīts atsevišķi no augstāk redzamās importētās vēstures un nekad tai nepieskaitīts.",
+      "unavailable": "Šobrīd neizdevās nolasīt šajā organizācijā žurnālā ierakstīto darbu."
+    }
   },
   "workLifecycle": {
     "pending": "Vēl nav",
@@ -7882,6 +7915,9 @@
       "invites": "Ielūgumu un paziņojumu e-pasti",
       "invitesOn": "ieslēgti",
       "invitesOff": "IZSLĒGTI – ieslēdz atsevišķi: INVITE_EMAIL_PROVIDER=smtp un viena testa nosūtīšana"
+    },
+    "alerts": {
+      "title": "Īpašnieka brīdinājumi un push paziņojumi"
     }
   },
   "historyDuplicates": {
@@ -8008,6 +8044,7 @@
       "partnerWithUs": "Kļūt par partneri",
       "forAgencies": "Kā tas darbojas aģentūrām",
       "setUpAgency": "Reģistrēt aģentūru",
+      "setUpInstitution": "Mācību iestādēm",
       "b2bEnquiry": "Uzņēmējdarbības pakalpojumu pieprasījums (B2B)",
       "projectEnquiry": "Individuāla projekta pieprasījums"
     },

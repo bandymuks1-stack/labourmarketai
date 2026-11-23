@@ -182,7 +182,7 @@ describe("the first need is the first door", () => {
     // The card: the shared door as the one primary, the calm invite line.
     expect(src).toMatch(/<NeedDoorLink\s+surface="company_home_first"/);
     expect(src).toMatch(/data-testid="company-first-need-invite"/);
-    expect(src).toMatch(/\/dashboard\/network\?type=join_as_employee/);
+    expect(src).toMatch(/href=\{WORKER_INVITE_HREF as "\/dashboard"\}/);
     // "Create the first project" stays, in the quiet grammar while the card shows.
     expect(src).toMatch(
       /href="\/dashboard\/company\/projects\/new"\s*className=\{`\$\{needFirst \? ACTION_LINK : PRIMARY_LINK\} w-fit`\}\s*data-testid="company-home-projects-empty-cta"/,

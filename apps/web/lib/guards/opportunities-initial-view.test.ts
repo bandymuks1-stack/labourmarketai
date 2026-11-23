@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
+import { buildDiscoveryQuery, parseDiscoveryParams } from "@/lib/opportunities/discovery-filters";
 
 /**
  * COMPRESSED FIRST VIEW GUARD (owner rule 2026-08-29).
@@ -79,6 +80,43 @@ describe("external vacancies section — compression is presentation only", () =
     expect(section).toContain("initialCount = null");
     expect(section).toMatch(
       /initialCount != null && cards\.length > initialCount/,
+    );
+  });
+});
+
+/**
+ * A person who opened the whole board stays on it (new-worker walk
+ * 2026-11-23): a filter chip, a sort link and "clear filters" used to drop
+ * ?view=all, so a new worker who cleared a filter fell back to the
+ * "nothing suitable yet" first view and lost the list they were reading.
+ */
+describe("opportunities board — the whole board survives filter, sort and reset", () => {
+  const none = parseDiscoveryParams({}).filters;
+
+  it("a filter or sort link keeps ?view=all", () => {
+    expect(buildDiscoveryQuery(none, "relevance", { country: "DE" }, "all")).toBe(
+      "?country=DE&view=all",
+    );
+    expect(buildDiscoveryQuery(none, "relevance", { sort: "newest" }, "all")).toBe(
+      "?sort=newest&view=all",
+    );
+    // un-ticking the last filter still leaves the whole board
+    const de = parseDiscoveryParams({ country: "DE" }).filters;
+    expect(buildDiscoveryQuery(de, "relevance", { country: null }, "all")).toBe("?view=all");
+  });
+
+  it("the default view writes no view param", () => {
+    expect(buildDiscoveryQuery(none, "relevance", { country: "DE" })).toBe("?country=DE");
+    expect(buildDiscoveryQuery(none, "relevance", {}, "top")).toBe("");
+    expect(buildDiscoveryQuery(none, "relevance", {}, "discover")).toBe("");
+  });
+
+  it("the page passes its view to every filter link and both reset links", () => {
+    expect(page).toContain("buildDiscoveryQuery(filters, sort, patch, view)");
+    expect(page).toMatch(/resetHref = view === "all" \? `\$\{boardHref\}\?view=all` : boardHref/);
+    expect(page).toMatch(/href=\{resetHref\}\s+data-testid="opportunities-filters-reset"/);
+    expect(page).toMatch(
+      /href=\{resetHref\}\s+className=\{[^\n]*\}\s+data-testid="opportunities-filtered-empty-reset"/,
     );
   });
 });

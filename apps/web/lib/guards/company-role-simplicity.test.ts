@@ -111,7 +111,7 @@ describe("agency is a companyType, never a root role", () => {
 
 describe("company country validation is human, never technical", () => {
   it("the form renders a country SELECT over seeded codes (no free text)", () => {
-    expect(setupForm).toMatch(/<select[\s\S]{0,200}name="country"/);
+    expect(setupForm).toMatch(/<[sS]elect[\s\S]{0,200}name="country"/);
     // Global-access rule (2026-09-22): the SELECT offers EVERY ISO country, the priority
     // markets first — a market list orders the list, it never shortens it.
     // 2026-10-08: the list is NAMED ON THE SERVER and handed to the client
@@ -222,7 +222,8 @@ describe("work-report photo: 1 free photo, server-enforced, honest copy", () => 
     expect(journalComposer).toMatch(/journal-photo-input/);
     expect(journalComposer).toMatch(/journal-photo-free-tier-note/);
     expect(ltJournal.photo?.freeTierNote).toBe(
-      "Nemokamai gali pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrašai bus VIP funkcija.",
+      // Formal address since the owner decision of 2026-11-15.
+      "Nemokamai galite pridėti 1 nuotrauką prie įrašo. Daugiau nuotraukų ir išplėstiniai įrašai bus VIP funkcija.",
     );
   });
   it("upload degrades honestly when storage is not provisioned", () => {

@@ -100,7 +100,16 @@
       "outcomeBlocked": "[EN] not confirmed ({code})",
       "receipt": "Apstiprināts: {title}",
       "receiptSkills": "{count, plural, zero {# prasmju} one {# prasme} other {# prasmes}}",
-      "skillsUnavailable": "Prasmju sarakstu neizdevās nolasīt — pieskāriens apstiprinās tikai pašu ierakstu."
+      "skillsUnavailable": "Prasmju sarakstu neizdevās nolasīt — pieskāriens apstiprinās tikai pašu ierakstu.",
+      "projectFilterLabel": "Projekts",
+      "projectAll": "Visi projekti ({n})",
+      "projectNone": "Bez projekta ({n})",
+      "projectUnnamed": "Projekts, nosaukums nav redzams",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Rādīt",
+      "projectResult": "Rāda {shown} no {total} ierakstiem",
+      "projectOnCard": "Projekts: {name}",
+      "noProjectOnCard": "Bez projekta"
     },
     "result": {
       "entrySuperseded": "Ieraksts jau ir aizstāts ar jaunāku versiju — kartīte vairs nav aktuāla un tiks noņemta no saraksta.",
@@ -313,5 +322,12 @@
     "metricsInsertFailed": "Ieraksts netika saglabāts pilnībā: {reason}. Ieraksts tika noraidīts — mēģiniet vēlreiz.",
     "moduleFieldInvalid": "Šie lauki neatbilst šāda veida iesaistei: {fields}. Nekas netika saglabāts — noņemiet tos un mēģiniet vēlreiz."
   },
-  "contextEnded": "beidzies"
+  "contextEnded": "beidzies",
+  "dayChoice": {
+    "today": "Šodien",
+    "yesterday": "Vakar",
+    "weekAgo": "Pirms nedēļas",
+    "calendar": "Kalendārs",
+    "earlier": "Iepriekšējie ieraksti"
+  }
 }

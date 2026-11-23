@@ -90,7 +90,15 @@ select
   'Primary sources: owner mailbox thread 2026-02-23; invoice NL26001_23february2026; NIP 7011295735, Żurawia 47/49 Warszawa. docs/launch/HISTORICAL_ORG_LINKAGE_CORRECTION_2026-10-25.md',
   'From 2026-02-23 the De Klusbaas work was invoiced by the newly established Labour Market AI Sp. z o.o, continuing the same business history previously carried under Vivat Rex. Legal-entity identity is not asserted.',
   null
-where not exists (
+-- CLEAN-DATABASE GUARD (2026-11-22): a fresh database (local `supabase db
+-- reset`, CI, a preview branch) has no such organization, and this literal
+-- insert then failed on the foreign key and stopped every later migration.
+-- Production already applied this file; the guard changes nothing there.
+where exists (
+  select 1 from public.organizations o
+  where o.id = '19f47e78-7bd1-4120-9937-603dba769f8a'
+)
+and not exists (
   select 1 from public.organization_history_periods p
   where p.organization_id = '19f47e78-7bd1-4120-9937-603dba769f8a'
     and lower(btrim(p.period_label)) = 'labour market ai sp. z o.o'

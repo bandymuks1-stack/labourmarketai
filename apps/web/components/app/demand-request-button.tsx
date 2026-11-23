@@ -89,9 +89,14 @@ export function DemandRequestButton({
   intent,
   stepTitles,
   repeatRequestId = null,
+  hasOwnPreviousRequest = null,
   usage = null,
   organizationId = null,
 }: {
+  /** Whether the caller already has a request of this direction to copy
+   *  from (read by the page). False hides "Fill from my last request";
+   *  null (unknown) keeps it. */
+  hasOwnPreviousRequest?: boolean | null;
   intent: "hire_workers" | "partner";
   /** The organization this page was rendered for. Sent with the submit so a
    *  workspace switched meanwhile (another tab) REFUSES instead of posting
@@ -188,6 +193,10 @@ export function DemandRequestButton({
   const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
   );
+  // The need this form just saved, so its next step opens THAT need's
+  // candidates. Without it the scouting room picks a need by its own rule (most
+  // offers or hands raised first), which can be an older need.
+  const [savedRequestId, setSavedRequestId] = useState<string | null>(null);
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
   // stays an honest "not stated" and the request submits exactly as before.
   const tsd = useTranslations("structuredDemand");
@@ -448,6 +457,7 @@ export function DemandRequestButton({
         setShowCountryError(true);
         return;
       }
+      setSavedRequestId(res.ok ? res.requestId : null);
       setState(
         res.ok
           ? "done"
@@ -594,7 +604,11 @@ export function DemandRequestButton({
             organisation's own offers list, where the saved offer now stands. */}
         {intent === "hire_workers" ? (
           <Link
-            href={"/dashboard/company/scouting" as "/dashboard"}
+            href={
+              (savedRequestId
+                ? `/dashboard/company/scouting?request=${encodeURIComponent(savedRequestId)}`
+                : "/dashboard/company/scouting") as "/dashboard"
+            }
             className="w-fit text-sm font-medium text-brand-blue hover:underline"
             data-testid="demand-done-scouting-link"
           >
@@ -674,6 +688,7 @@ export function DemandRequestButton({
         <div className="flex flex-col gap-4">
           {/* Duplicate-and-edit — repeat action: copy the own last request
               into the form, then edit. Own data echoed back; nothing invented. */}
+          {hasOwnPreviousRequest === false ? null : (
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
@@ -709,6 +724,7 @@ export function DemandRequestButton({
               </span>
             )}
           </div>
+          )}
           <label className="flex flex-col gap-1.5">
             <Label>{t(`${key}.roleLabel`)}</Label>
             <Input

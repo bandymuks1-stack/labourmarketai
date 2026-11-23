@@ -28,6 +28,7 @@ export const FUNCTION_ICONS = {
   partnerWithUs: "handshake",
   forAgencies: "info",
   setUpAgency: "building",
+  setUpInstitution: "graduationCap",
 } as const satisfies Record<string, string>;
 
 export const PROFESSION_ICONS = {
