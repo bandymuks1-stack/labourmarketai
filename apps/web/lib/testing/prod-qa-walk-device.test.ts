@@ -1,7 +1,7 @@
 import type { BrowserContextOptions } from "@playwright/test";
 import { describe, expect, it } from "vitest";
 
-import { WALK_DEVICES, WALK_PHONE, WALK_PHONE_375, walkDevice, walkPhone, withWalkDevice } from "./prod-qa-walk-device";
+import { WALK_DESKTOP_1440, WALK_DEVICES, WALK_PHONE, WALK_PHONE_375, WALK_TABLET_768, WALK_THEMES, walkDevice, walkPhone, walkTheme, withWalkDevice } from "./prod-qa-walk-device";
 
 describe("which device a production walk runs on", () => {
   it("is the desktop unless the walk is told otherwise", () => {
@@ -10,10 +10,12 @@ describe("which device a production walk runs on", () => {
     expect(walkDevice({ PROD_QA_DEVICE: "desktop" })).toBe("desktop");
     expect(walkDevice({ PROD_QA_DEVICE: " phone " })).toBe("phone");
     expect(walkDevice({ PROD_QA_DEVICE: "phone-375" })).toBe("phone-375");
+    expect(walkDevice({ PROD_QA_DEVICE: "tablet-768" })).toBe("tablet-768");
+    expect(walkDevice({ PROD_QA_DEVICE: "desktop-1440" })).toBe("desktop-1440");
   });
 
   it("refuses a device it does not know instead of quietly running on a desktop", () => {
-    expect(() => walkDevice({ PROD_QA_DEVICE: "tablet" })).toThrow(/must be "desktop", "phone" or "phone-375"/);
+    expect(() => walkDevice({ PROD_QA_DEVICE: "tablet" })).toThrow(/must be one of "desktop", "phone", "phone-375", "tablet-768", "desktop-1440"/);
     expect(() => walkDevice({ PROD_QA_DEVICE: "phone-360" })).toThrow();
     expect(() => walkDevice({ PROD_QA_DEVICE: "Phone" })).toThrow();
   });
@@ -61,11 +63,39 @@ describe("the screen a context is opened with", () => {
 
   it("every phone device is inside the width range the owner named (375 to 390 px), and the desktop has none", () => {
     expect(walkPhone("desktop")).toBeNull();
-    const widths = WALK_DEVICES.map(walkPhone).flatMap((p) => (p?.viewport ? [p.viewport.width] : []));
+    const widths = WALK_DEVICES.map(walkPhone).flatMap((p) => (p?.viewport && p.isMobile && p.viewport.width < 600 ? [p.viewport.width] : []));
     expect(widths).toEqual([390, 375]);
     for (const w of widths) {
       expect(w).toBeGreaterThanOrEqual(375);
       expect(w).toBeLessThanOrEqual(390);
     }
+  });
+
+  it("the size matrix is 375, 390, 768 and 1440 besides the walk's own desktop (#3679 addendum)", () => {
+    expect(WALK_DEVICES.map(walkPhone).map((p) => p?.viewport?.width ?? null)).toEqual([null, 390, 375, 768, 1440]);
+    const tablet: BrowserContextOptions = withWalkDevice<BrowserContextOptions>("tablet-768", { storageState: "x.json" });
+    expect(tablet).toEqual({ ...WALK_TABLET_768, storageState: "x.json" });
+    expect(tablet.hasTouch).toBe(true);
+    expect(tablet.userAgent).not.toMatch(/Mobile/);
+    const wide: BrowserContextOptions = withWalkDevice<BrowserContextOptions>("desktop-1440", { storageState: "x.json" });
+    expect(wide).toEqual({ ...WALK_DESKTOP_1440, storageState: "x.json" });
+    expect(wide.hasTouch).toBe(false);
+    expect(wide.userAgent).toBeUndefined();
+    // A step with its own screen is shielded the same way on every device.
+    const desktopStep = { viewport: { width: 1280, height: 800 } };
+    expect(withWalkDevice("tablet-768", desktopStep)).toEqual(withWalkDevice("phone", desktopStep));
+    expect(withWalkDevice("desktop-1440", desktopStep)).toEqual(withWalkDevice("phone", desktopStep));
+  });
+});
+
+describe("which colour scheme a production walk runs in", () => {
+  it("is light unless the walk is told otherwise, and refuses a scheme it does not know", () => {
+    expect(walkTheme({})).toBe("light");
+    expect(walkTheme({ PROD_QA_THEME: "" })).toBe("light");
+    expect(walkTheme({ PROD_QA_THEME: "light" })).toBe("light");
+    expect(walkTheme({ PROD_QA_THEME: " dark " })).toBe("dark");
+    expect(WALK_THEMES).toEqual(["light", "dark"]);
+    expect(() => walkTheme({ PROD_QA_THEME: "Dark" })).toThrow(/must be "light" or "dark"/);
+    expect(() => walkTheme({ PROD_QA_THEME: "auto" })).toThrow();
   });
 });

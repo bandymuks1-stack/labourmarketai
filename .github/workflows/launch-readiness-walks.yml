@@ -65,8 +65,17 @@ jobs:
           # 2026-11-23: the CV chain (P-13/P-15/P-26, fix #3653) passed on phone-375 (run 45091874326);
           # the owner requires the FULL sequence on all three devices on the fixed build, so the
           # phone and desktop CV pairs run once more after this start.
-          RERUN: "profile-cv-history:desktop profile-cv-history:phone"
-          RERUN_START: "2026-11-23T01:20:00Z"
+          # Those re-ran and passed (45094839877 desktop, 45097071365 phone).
+          # Owner order 2026-11-23 08:00 UTC: company-chain on phone-375 and learning-practice on phone
+          # run once more on the current build (their last passes, 44882509064 and 44883030318, are
+          # from 11-21). mobile-surfaces:phone needs no entry: it failed (45098478024) before the
+          # 05:12 UTC deploy of #3678, so the failed-pair rule already re-runs it.
+          # Those passed on f0424833 (45140908370, 45141893755; mobile-surfaces 45142813658).
+          # Owner P0 2026-11-23: verify in production the merged fixes #3690 (each CV skill and
+          # job listed once) and #3685 (one journal empty state, 768 px name, DE skill names):
+          # the CV chain on all three devices and the journal pair run once more after this start.
+          RERUN: "profile-cv-history:desktop profile-cv-history:phone profile-cv-history:phone-375 journal-confirm:desktop journal-confirm:phone"
+          RERUN_START: "2026-11-23T11:15:00Z"
           # 2026-11-23 00:45 UTC: GitHub's schedule fired no tick after 22:35 UTC again; a push to
           # this file (the push trigger) starts the chain, which then hands over by itself.
         run: |

@@ -427,7 +427,17 @@ export async function collect({ client, repo, sinceIso, fetchHealth, sleep, conc
 // one, and flag a contradiction instead of guessing.
 
 /** Screens a production walk can run on (.github/workflows/prod-qa-walk.yml input `device`). */
-export const WALK_DEVICES = Object.freeze(["desktop", "phone", "phone-375"]);
+export const WALK_DEVICES = Object.freeze(["desktop", "phone", "phone-375", "tablet-768", "desktop-1440"]);
+
+/**
+ * A run dispatched in the dark colour scheme is named "prod-qa-walk <spec> <device> dark" (input
+ * `theme`). The ledger holds the light result per walk and screen; a dark run is not merged into it,
+ * so it never stands in for, or overwrites, the light one.
+ */
+export function isDarkWalkTitle(title) {
+  const parts = String(title ?? "").trim().split(/\s+/);
+  return parts[0] === "prod-qa-walk" && parts[3] === "dark";
+}
 
 /**
  * "prod-qa-walk <spec> [<device>]" -> { spec, device }. Automatic walks (push, schedule) are always
@@ -459,6 +469,7 @@ export function mergeWalkLedger(ledger, walks) {
   for (const w of walks ?? []) {
     if (w.status && w.status !== "completed") continue;
     if (!w.conclusion || w.conclusion === "cancelled" || w.conclusion === "skipped") continue;
+    if (isDarkWalkTitle(w.title)) continue;
     const { spec, device } = parseWalkTitle(w.title);
     if (!spec || spec === "push" || spec === "schedule") continue;
     if (!device) {

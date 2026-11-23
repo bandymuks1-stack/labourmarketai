@@ -21,7 +21,9 @@ name: Signup Isolated (local Supabase)
 #     accounts on this stack only; owner decision 2026-11-14, CV screenshots
 #     from synthetic accounts as CI artifacts), and journal-day-choice-isolated
 #     uploads its 375 / 1280 px screenshots as `journal-day-choice` (owner P1
-#     2026-11-21, synthetic worker). No other walk's output is kept.
+#     2026-11-21, synthetic worker), and cv-shown-twice-isolated uploads its
+#     375 / 390 / 768 / 1440 px Living CV screenshots as `cv-shown-twice`
+#     (owner P0 2026-11-23, synthetic worker). No other walk's output is kept.
 
 on:
   workflow_dispatch:
@@ -104,6 +106,10 @@ on:
       - "apps/web/lib/organization-evidence/**"
       - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
       - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
+      # Each skill and each job listed once on the Living CV (owner P0 2026-11-23).
+      - "apps/web/tests/e2e/cv-shown-twice-isolated.spec.ts"
+      - "apps/web/components/app/cv/**"
+      - "apps/web/lib/cv-export/**"
       - "apps/web/tests/e2e/recognition-chain-isolated.spec.ts"
       - "apps/web/tests/e2e/phone-journeys-isolated.spec.ts"
       # The signed-in header and main screens at 320-390 px in seven languages
@@ -223,7 +229,7 @@ jobs:
     env:
       APP_ORIGIN: http://127.0.0.1:3000
       # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
-      SPEC_P0: tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts tests/e2e/demoted-owner-isolated.spec.ts
+      SPEC_P0: tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts tests/e2e/demoted-owner-isolated.spec.ts tests/e2e/cv-shown-twice-isolated.spec.ts
       # The walks share this one throwaway stack: self-serve sign-up, the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
@@ -453,6 +459,17 @@ jobs:
             apps/web/test-results/experience-integration/
             apps/web/test-results/experience-integration-iso*/error-context.md
             apps/web/test-results/invite-join/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Each skill and each job listed once on the Living CV (owner P0
+      # 2026-11-23): a synthetic worker on this stack, 375 / 390 / 768 / 1440 px.
+      - name: Upload the cv-shown-twice screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cv-shown-twice
+          path: apps/web/test-results/cv-shown-twice/
           if-no-files-found: warn
           retention-days: 14
 
