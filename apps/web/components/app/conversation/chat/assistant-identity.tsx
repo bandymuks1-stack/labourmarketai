@@ -38,14 +38,18 @@ const SIZE = {
 export function AssistantMark({
   size = "md",
   className = "",
+  testId = "assistant-mark",
 }: {
   size?: keyof typeof SIZE;
   className?: string;
+  /** The header's "My space" wears the mark too (owner P0 2026-11-23, N3);
+   *  it carries its own id so the stream's turns stay countable. */
+  testId?: string;
 }) {
   return (
     <span
       aria-hidden
-      data-testid="assistant-mark"
+      data-testid={testId}
       className={`flex flex-none items-center justify-center border border-ink-500 bg-ink-800 ${SIZE[size]} ${className}`}
     >
       <LmLogo title="" className="size-full" />
