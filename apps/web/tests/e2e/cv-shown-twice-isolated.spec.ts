@@ -295,8 +295,13 @@ for (const screen of SCREENS) {
         status: w[0]?.status ?? null,
         countries: w[0]?.countries ?? null,
         languages: sql<{ v: string }>(`select lang || ':' || level as v from public.worker_languages where worker_id = ${lit(who.workerId)} order by v`).map((r) => r.v),
+        // Self-declared jobs only. Every worker also has the personal journal
+        // context (organization_id null, no title, created at sign-up by
+        // 20260702140000_worker_personal_engagement): that row is not a job.
         jobs: sql<{ v: string }>(
-          `select title as v from public.engagement_contexts where profile_id = ${lit(who.profileId)} and organization_id is null order by v`,
+          `select title as v from public.engagement_contexts
+            where profile_id = ${lit(who.profileId)} and organization_id is null and title is not null
+            order by v`,
         ).map((r) => r.v),
         schools: sql<{ v: string }>(`select institution_name as v from public.worker_education where profile_id = ${lit(who.profileId)} order by v`).map((r) => r.v),
         claims: sql<{ v: string }>(`select label as v from public.profile_skill_claims where profile_id = ${lit(who.profileId)} order by v`).map((r) => r.v),
