@@ -1,5 +1,9 @@
 # Canonical Paths + Duplicate-Flow Audit — Account / Roles / Profile / CV / Dashboard
 
+> **SUPERSEDED as the duplication register by [`DUPLICATION_AUDIT.md`](DUPLICATION_AUDIT.md) (2026-11-23, issue #3679).**
+> Kept here as evidence, unchanged apart from this note. Guards and code cite this file and its section numbers, so it is not moved or
+> renumbered. `DUPLICATION_AUDIT.md` §12 records the current state of each item below.
+
 **Date:** 2026-06-02
 **Branch:** `fix/cc/canonical-paths-duplicate-flow-audit`
 **Doctrine:** "one clear output point, many hidden inputs" — one canonical human-facing

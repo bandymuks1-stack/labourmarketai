@@ -1,5 +1,9 @@
 # Duplication freeze register — 2026-08-17
 
+> **SUPERSEDED as the duplication register by [`DUPLICATION_AUDIT.md`](DUPLICATION_AUDIT.md) (2026-11-23, issue #3679).**
+> Kept here as evidence, unchanged apart from this note. Guards and code cite this file and its section numbers, so it is not moved or
+> renumbered. `DUPLICATION_AUDIT.md` §12 records the current state of each item below.
+
 Owner-gated record of KEEP-FROZEN decisions from the duplication
 consolidation analysis (Train L; plan basis:
 `docs/audits/full-reality-audit-2026-08-17.md` + live production SELECTs
