@@ -109,7 +109,7 @@ export async function listDiscoverableOfferings(
   let query = asAny(ctx.supabase)
     .from("service_offerings")
     .select(
-      "id, title, description, category_slug, location_country, remote, rate_text, provider_id, created_at",
+      "id, title, description, category_slug, location_country, remote, rate_text, created_at",
     )
     .eq("status", "active")
     .neq("provider_id", ctx.userId);
@@ -129,7 +129,6 @@ export async function listDiscoverableOfferings(
     locationCountry: (r.location_country as string | null) ?? null,
     remote: r.remote === true,
     rateText: (r.rate_text as string | null) ?? null,
-    providerId: String(r.provider_id ?? ""),
     createdAt: String(r.created_at ?? ""),
   }));
   // QA-labelled rows never reach real people (owner order 2026-10-01): discovery

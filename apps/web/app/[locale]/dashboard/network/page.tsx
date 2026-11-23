@@ -513,11 +513,11 @@ export default async function NetworkPage({
             maxLength={80}
             placeholder={t("search.placeholder")}
             data-testid="network-search-input"
-            className="min-h-10 min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary"
+            className="min-h-11 min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-sm text-text-primary"
           />
           <button
             type="submit"
-            className="inline-flex min-h-10 items-center rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue hover:border-brand-blue"
+            className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue hover:border-brand-blue"
           >
             {t("search.submit")}
           </button>

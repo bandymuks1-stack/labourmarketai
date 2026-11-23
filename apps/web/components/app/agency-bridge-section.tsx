@@ -83,6 +83,8 @@ export interface AgencyBridgeLabels {
   readonly withdrawButton: string;
   readonly openScouting: string;
   readonly errorLabel: string;
+  /** Too many offers in a short time, on one need or in 24 h. */
+  readonly offerLimitLabel: string;
   readonly statusLabels: Record<string, string>;
   readonly stageLabels: Record<string, string>;
   // Delivery through the invitation primitive.
@@ -122,7 +124,8 @@ function failed(s: BridgeActionState): boolean {
     s.status === "error" ||
     s.status === "forbidden" ||
     s.status === "invalid" ||
-    s.status === "not-found"
+    s.status === "not-found" ||
+    s.status === "rate-limited"
   );
 }
 
@@ -515,7 +518,9 @@ export function AgencyBridgeSection({
             <p className="text-xs text-state-danger" role="alert" data-testid="agency-bridge-error">
               {[inviteState, offerState, revokeState, withdrawState, linkState].some((s) => s.status === "invalid")
                 ? labels.invalidLabel
-                : labels.errorLabel}
+                : offerState.status === "rate-limited"
+                  ? labels.offerLimitLabel
+                  : labels.errorLabel}
             </p>
           )}
         </>
