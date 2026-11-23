@@ -576,6 +576,24 @@ test("EX-1. O's CV: A as owner, B as manager (no hours), only O's own 3 h — ne
   await expect(wiOrgRow(exp, s.orgB), "B is a role of O's — with zero hours").toHaveAttribute("data-hours", "0");
 });
 
+// ── EX-1b ───────────────────────────────────────────────────────────────────
+
+test("EX-1b. O's profile card names A and B — the same organizations as Work in Numbers (CV-15 / G-7)", async () => {
+  expect(s.membershipId, "EX-0 set the walk up").toBeTruthy();
+  const o = as(O);
+  // Work in Numbers (the decision-0025 reading) holds both of O's roles.
+  const exp = await openWorkInNumbers(o);
+  await expect(wiOrgRow(exp, s.orgA)).toHaveCount(1);
+  await expect(wiOrgRow(exp, s.orgB), "B is a role of O's in Work in Numbers").toHaveCount(1);
+  // The profile card's history reads the same relationships: the manager
+  // role in B used to be missing from it (its own query left `manager` out).
+  await o.goto(`${BASE}/en/dashboard/profile`);
+  const history = o.getByRole("main").getByTestId("live-profile-history");
+  await expect(history, "the card's work history renders").toBeVisible({ timeout: 60_000 });
+  await expect(history).toContainText(ORG_A);
+  await expect(history, "the manager role in B is on the card too").toContainText(ORG_B);
+});
+
 // ── EX-2 ────────────────────────────────────────────────────────────────────
 
 test("EX-2. W2's CV lists A (6 h) and B (5 h), 11 h in total, the same on the CV and the Living CV numbers", async () => {

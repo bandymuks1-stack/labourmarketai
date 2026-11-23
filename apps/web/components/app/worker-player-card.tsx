@@ -23,6 +23,7 @@ import {
   type HistoryTimelineLabels,
 } from "@/components/app/player-card/work-history-timeline";
 import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
+import { shownWorkHistory } from "@/lib/player-card/work-history-model";
 import {
   deriveWorkerReadiness,
   missingReadinessPillars,
@@ -314,7 +315,10 @@ export function WorkerPlayerCard({
    * name where the work happened carries no information, so it is dropped;
    * the section disappears entirely when none of them can.
    */
-  const namedHistory = card.workHistory.filter(
+  // The card's display bound, applied here at render time: the model holds
+  // the whole history (decision 0025), the card shows its newest rows.
+  const shownHistory = shownWorkHistory(card.workHistory);
+  const namedHistory = shownHistory.filter(
     (h) => (h.organizationName ?? h.title ?? "").trim().length > 0,
   );
   /**
@@ -322,7 +326,7 @@ export function WorkerPlayerCard({
    * SAME rows the text list uses, so the picture and the list can never
    * disagree; the deriver is pure and unit-tested.
    */
-  const historyTimeline = deriveWorkHistoryTimeline(card.workHistory, new Date());
+  const historyTimeline = deriveWorkHistoryTimeline(shownHistory, new Date());
   /**
    * Premium self-check (owner post-deploy review): the card used to print the
    * work history twice — once as a text list and, after this stage, once as a

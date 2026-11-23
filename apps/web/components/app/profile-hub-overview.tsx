@@ -14,7 +14,7 @@ import {
   missingReadinessPillars,
   type ReadinessPillarKey,
 } from "@/lib/player-card/readiness";
-import { countCurrentEngagements } from "@/lib/player-card/work-history-model";
+import { countCurrentEngagements, shownWorkHistory } from "@/lib/player-card/work-history-model";
 import { contextHoursById } from "@/lib/player-card/context-hours";
 import type { ContextWorkTime } from "@/lib/journal/work-intelligence";
 import { buildWorkTypeLabelMap } from "@/lib/taxonomy/work-categories";
@@ -773,7 +773,7 @@ export async function ProfileHubOverview({
                       dashed country-level chip, never a city. */}
                   <div className="mt-1.5" data-testid="live-profile-history">
                     <WorkSpine>
-                      {playerCard.workHistory.map((e) => (
+                      {shownWorkHistory(playerCard.workHistory).map((e) => (
                         <WorkSpineNode key={e.id}>
                           <span className="flex flex-col gap-0.5 text-basis text-text-primary">
                             <span>

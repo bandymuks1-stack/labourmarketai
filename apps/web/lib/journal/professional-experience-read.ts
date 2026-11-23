@@ -49,6 +49,7 @@ type ContextRow = {
   status: string | null;
   started_at: string | null;
   ended_at: string | null;
+  country_code: string | null;
   organizations: { display_name: string | null; legal_name: string | null } | null;
 };
 
@@ -110,7 +111,7 @@ export async function readOwnExperienceRelationships(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from("engagement_contexts")
-      .select("id, relationship_slug, title, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)")
+      .select("id, relationship_slug, title, organization_id, status, started_at, ended_at, country_code, organizations(display_name, legal_name)")
       .eq("profile_id", userId)
       .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS, ...LEADERSHIP_RELATIONSHIPS])
       .order("started_at", { ascending: false, nullsFirst: false })
@@ -175,6 +176,7 @@ export async function readOwnExperienceRelationships(
       endedAt: row.ended_at,
       current: row.status === "active" && !row.ended_at,
       source: "engagement",
+      countryCode: row.country_code?.trim() || null,
       businessPeriods: row.organization_id ? (periodsByOrg.get(row.organization_id) ?? []) : [],
     });
   }

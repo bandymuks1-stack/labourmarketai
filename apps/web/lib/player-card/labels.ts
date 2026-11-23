@@ -7,6 +7,7 @@ import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
 import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
+import { shownWorkHistory } from "@/lib/player-card/work-history-model";
 import { contextHoursById } from "@/lib/player-card/context-hours";
 import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
 import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenance";
@@ -92,8 +93,9 @@ export async function buildPlayerCardLabels(
     dateStyle: "medium",
     timeZone: "UTC",
   });
-  // The history band is derived from the SAME rows the card's text list uses.
-  const history = deriveWorkHistoryTimeline(card.workHistory, new Date());
+  // The history band is derived from the SAME rows the card's text list uses
+  // (its display bound, `shownWorkHistory`, as the card renders them).
+  const history = deriveWorkHistoryTimeline(shownWorkHistory(card.workHistory), new Date());
   // Hours per engagement — the journal's own per-context figures joined on
   // `engagement_contexts.id`; org-reported minutes never enter these numbers
   // (they stay beside, on the journal's own checks).
