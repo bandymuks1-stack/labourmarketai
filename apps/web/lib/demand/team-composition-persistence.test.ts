@@ -60,9 +60,15 @@ describe("both write paths carry the composition", () => {
 
   it("the chat executor sends it as structured_v2.team; the server keeps it only when it explains team_size", () => {
     const WEB = join(__dirname, "..", "..");
+    // Both the chat executor and the MCP confirm build it through the ONE
+    // mapper (F7 / AI-2), so the composition cannot be dropped on one door.
     const executor = readFileSync(join(WEB, "lib", "conversation", "company-executors.ts"), "utf8");
-    expect(executor).toMatch(/\{ count: input\.teamCount, per_team: input\.perTeamSize \}/);
-    expect(executor).toMatch(/\.\.\.\(team \? \{ team \} : \{\}\)/);
+    expect(executor).toMatch(/structuredV2: structuredV2FromDeclaredDemand\(input\)/);
+    const mcp = readFileSync(join(WEB, "lib", "capabilities", "registry.ts"), "utf8");
+    expect(mcp).toMatch(/structuredV2: structuredV2FromDeclaredDemand\(draft\)/);
+    const mapper = readFileSync(join(WEB, "lib", "demand", "structured-demand-v2.ts"), "utf8");
+    expect(mapper).toMatch(/\{ count: input\.teamCount, per_team: input\.perTeamSize \}/);
+    expect(mapper).toMatch(/\.\.\.\(team \? \{ team \} : \{\}\)/);
     const submit = readFileSync(join(WEB, "lib", "demand", "demand-request.ts"), "utf8");
     expect(submit).toMatch(/teamCompositionFor\(teamSize, sanitizedV2\.team\.count, sanitizedV2\.team\.per_team\)/);
   });

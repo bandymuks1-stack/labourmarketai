@@ -63,48 +63,34 @@ export const companyCreateDemandFields = z.object({
    *  cluster) — internship / apprenticeship / temporary assignment … Never
    *  inferred from the description; absent = the employer stated none. */
   opportunityType: z.enum(OPPORTUNITY_TYPES).nullable().optional(),
+  /** Stated start day (ISO) → `structured_v2.time.start_earliest`. */
+  startDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
+  /** Stated end day (ISO) → `structured_v2.time.end_date`. */
+  endDate: z
+    .string()
+    .regex(/^\d{4}-\d{2}-\d{2}$/)
+    .nullable()
+    .optional(),
+  /** Teams of a stated size → `structured_v2.team` (only while
+   *  `teamSize` = teamCount × perTeamSize; the canonical submit checks). */
+  teamCount: z.number().int().min(1).max(100).nullable().optional(),
+  perTeamSize: z.number().int().min(1).max(100).nullable().optional(),
 });
 
-export const companyCreateDemandSchema = z
-  .object({
-    intent: z.enum(["hire_workers", "partner"]).default("hire_workers"),
+/**
+ * The web chat's demand input: THE SAME base fields (one schema, so the chat
+ * and MCP can no longer drift apart — duplication audit AI-2), plus the chat's
+ * `mode` switch. The chat forms send ISO codes, so its country stays exactly
+ * two letters; MCP and the phone also accept a country name, resolved later.
+ */
+export const companyCreateDemandSchema = companyCreateDemandFields
+  .extend({
     mode: z.enum(["draft", "submit"]).default("submit"),
-    description: z.string().trim().min(3).max(4000),
-    role: z.string().trim().max(120).nullable().optional(),
-    location: z.string().trim().max(120).nullable().optional(),
-    skills: z.string().trim().max(4000).nullable().optional(),
-    urgency: z.enum(["flexible", "this_week", "urgent"]).nullable().optional(),
-    notes: z.string().trim().max(4000).nullable().optional(),
-    /** Work-type slug — validated against the shared taxonomy canonically. */
-    workType: z.string().trim().max(64).nullable().optional(),
     country: z.string().trim().length(2).nullable().optional(),
-    teamSize: z.number().int().min(1).max(100000).nullable().optional(),
-    accommodation: z
-      .enum(["provided_free", "provided_paid", "provided_deducted", "not_provided"])
-      .nullable()
-      .optional(),
-    transport: z
-      .enum(["provided", "compensated", "not_provided", "unknown"])
-      .nullable()
-      .optional(),
-    /** Same declared opportunity type as `companyCreateDemandFields`. */
-    opportunityType: z.enum(OPPORTUNITY_TYPES).nullable().optional(),
-    /** Stated start day (ISO) → `structured_v2.time.start_earliest`. */
-    startDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .nullable()
-      .optional(),
-    /** Stated end day (ISO) → `structured_v2.time.end_date`. */
-    endDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .nullable()
-      .optional(),
-    /** Teams of a stated size → `structured_v2.team` (only while
-     *  `teamSize` = teamCount × perTeamSize; the executor checks). */
-    teamCount: z.number().int().min(1).max(100).nullable().optional(),
-    perTeamSize: z.number().int().min(1).max(100).nullable().optional(),
   })
   .refine((v) => v.mode !== "draft" || v.intent === "hire_workers", {
     message: "drafts exist only for the hire_workers intent",

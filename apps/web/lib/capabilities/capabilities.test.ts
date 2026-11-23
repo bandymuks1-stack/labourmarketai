@@ -107,6 +107,7 @@ import {
   runCapability,
 } from "./registry";
 import { getConversationAction } from "@/lib/conversation/action-registry";
+import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES, OVERWRITES, SENDS_EMAIL } from "./conversation-action-bridge";
 import type { CapabilityCaller } from "./contract";
 
@@ -2152,6 +2153,56 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
     expect(demandSubmit).toHaveBeenCalledTimes(1);
     const [, , , fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
     expect(fieldsArg).toMatchObject({ country: "SE" });
+  });
+
+  it("F7 / AI-2: confirm keeps the start and end day and the team split, through the ONE mapper the chat uses", async () => {
+    demandSubmit.mockClear();
+    const stated = {
+      ...DRAFT,
+      teamSize: 12,
+      startDate: "2026-12-01",
+      endDate: "2027-02-28",
+      teamCount: 3,
+      perTeamSize: 4,
+      opportunityType: "temporary_assignment" as const,
+    };
+    const drafted = await runCapability("demand.create_draft", caller({}), stated);
+    expect(drafted.ok).toBe(true);
+    if (drafted.ok) {
+      expect(drafted.data?.preview).toMatchObject({
+        startDate: "2026-12-01",
+        endDate: "2027-02-28",
+        teamCount: 3,
+        perTeamSize: 4,
+      });
+    }
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), { ...stated, confirmationToken: token });
+    expect(confirmed.ok).toBe(true);
+    const [, , , fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
+    // Byte-identical to what the chat executor sends for the same input.
+    expect((fieldsArg as { structuredV2: unknown }).structuredV2).toEqual(structuredV2FromDeclaredDemand(stated));
+    expect((fieldsArg as { structuredV2: unknown }).structuredV2).toEqual({
+      opportunity_type: "temporary_assignment",
+      team: { count: 3, per_team: 4 },
+      time: { start_earliest: "2026-12-01", end_date: "2027-02-28" },
+    });
+  });
+
+  it("F7: the token binds the dates and the team split — a confirm cannot change them", async () => {
+    demandSubmit.mockClear();
+    const stated = { ...DRAFT, startDate: "2026-12-01", teamCount: 1, perTeamSize: 3 };
+    const drafted = await runCapability("demand.create_draft", caller({}), stated);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    for (const changed of [
+      { ...stated, startDate: "2027-01-01" },
+      { ...stated, endDate: "2027-03-01" },
+      { ...stated, teamCount: 3, perTeamSize: 1 },
+    ]) {
+      const r = await runCapability("demand.create_confirm", caller({}), { ...changed, confirmationToken: token });
+      expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    }
+    expect(demandSubmit).not.toHaveBeenCalled();
   });
 
   it("draft → confirm runs THE canonical submit core with the gate's own organization id", async () => {

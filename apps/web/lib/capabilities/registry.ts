@@ -73,6 +73,7 @@ import {
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
 import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
+import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
 import {
   activeOrganizationOf,
   orderContextsForChoice,
@@ -1646,6 +1647,12 @@ const DEMAND_FIELDS = [
   "accommodation",
   "transport",
   "opportunityType",
+  // Bound by the token too: a confirm cannot swap in other dates or another
+  // team split than the person saw in the draft.
+  "startDate",
+  "endDate",
+  "teamCount",
+  "perTeamSize",
 ] as const;
 
 /** null-vs-absent must not change the hash for optional fields — absent and
@@ -1681,7 +1688,9 @@ const demandCreateDraft: CapabilityDescriptor = {
     "the country where the work is; ASK the person when they have not said " +
     "it, never guess); role/location/skills/urgency/notes are optional " +
     "free text; workType/teamSize/accommodation/transport are structured " +
-    "facts a worker's board may later see. Without a country the draft " +
+    "facts a worker's board may later see. startDate/endDate (YYYY-MM-DD) and " +
+    "teamCount × perTeamSize (teams of a stated size, only when they multiply " +
+    "to teamSize) are kept only when the person stated them. Without a country the draft " +
     "returns missing: [\"country\"] and no token. Confirming requires " +
     "demand.create_confirm with this exact draft and token.",
   exposed: true,
@@ -1729,6 +1738,10 @@ const demandCreateDraft: CapabilityDescriptor = {
           country: draft.country ?? null,
           workType: draft.workType ?? null,
           urgency: draft.urgency ?? null,
+          startDate: draft.startDate ?? null,
+          endDate: draft.endDate ?? null,
+          teamCount: draft.teamCount ?? null,
+          perTeamSize: draft.perTeamSize ?? null,
         },
         confirmationToken: token,
         note: "Nothing was created. Confirming requires demand.create_confirm with this exact draft and token; the demand will be created for the named organization.",
@@ -1805,9 +1818,10 @@ const demandCreateConfirm: CapabilityDescriptor = {
         teamSize: draft.teamSize ?? undefined,
         accommodation: draft.accommodation ?? undefined,
         transport: draft.transport ?? undefined,
-        // Declared opportunity type → structured cluster (same as the web
-        // and chat legs); absent when not stated.
-        structuredV2: draft.opportunityType ? { opportunity_type: draft.opportunityType } : undefined,
+        // The ONE mapper the chat uses too: opportunity type, start and end
+        // day, team split. Absent when not stated; the canonical submit drops
+        // a team that no longer explains teamSize.
+        structuredV2: structuredV2FromDeclaredDemand(draft),
       },
     );
     if (!result.ok) {
