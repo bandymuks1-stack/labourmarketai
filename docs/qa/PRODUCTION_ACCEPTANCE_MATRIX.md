@@ -97,13 +97,26 @@ Lane D supplied the LOCAL and CI evidence for this section for #3679. There are 
 - **Organization lane:** the client posts a need → a crew offer with versioned terms → the client agrees to a version → the crew works on the client's project → crew journal entries are submitted to the client → the client accepts or disputes them.
 - **Personal services lane:** offering → discovery → request → accept.
 
-Lane D reports that no production walk covers the whole organization lane. The rows below credit `brigade-formation` with the steps it walks in production, and mark the report step LOCAL.
+Lane D confirmed that `brigade-formation` desktop run 44906216102 walks the organization lane in production:
+- B2B-1: the need;
+- B2B-2: the crew offer;
+- B2B-4: terms v1;
+- B2B-5: the buyer's counter v2, which the buyer cannot accept itself;
+- B2B-6: the supplier agrees;
+- B2B-7: the buyer agrees and assigns the crew to its project;
+- B2B-8: members journal on that project;
+- B2B-9: the buyer sees the hours after a reload;
+- B2B-9b: a third organization and an anonymous visitor read nothing.
+
+That run is **desktop only**. The 390 px path is LOCAL: `subcontractor-chain-isolated` (#3670), where a 40 px button defect was found and fixed.
+
+The formal work report is LOCAL only: the worker submits to the client as counterparty, and the client accepts, requests a correction or disputes.
 
 | Step | Status | Production runs · LOCAL evidence | Notes |
 |---|---|---|---|
 | Order view | PASS | marketplace desktop · 44971191106 · eed72052 · 86<br>marketplace-goods-services desktop · 44967795943 · 86<br>marketplace-goods-services phone · 44968374455 · 86<br>buyer-workspace desktop · 45094390854 · ee29a3b7 · 6 | |
 | Offer | PASS | brigade-formation desktop · 44906216102 · eed72052 · 86 (B2B-2, B2B-4)<br>marketplace-goods-services (S-1 to S-3) | |
-| Terms (versioned, agreed) | PASS | brigade-formation (B2B-4: terms v1; B2B-5: counter; B2B-7: accept) | |
+| Terms (versioned, agreed) | PASS (desktop) / LOCAL (390 px) | brigade-formation (B2B-4 to B2B-7) | 390 px: `subcontractor-chain-isolated` (#3670). |
 | Execution (crew on the client's project) | PASS (team path) / BLOCKED (service path) | brigade-formation (B2B-7 to B2B-9) | No product door leads from an accepted service request to a project. |
 | Reports: entries submitted, client accepts or disputes | LOCAL | `subcontractor-chain-isolated` (#3670, not on main): 13/13 with the PR's fix | Before the fix, the 390 px step failed: the client's "Assign team to project" button was 40 px. The PR's CI run 45074123691 (head fc6831a) passed the walk step. A run on head 2bb90eb (45116196998) was still in progress when this was written. In production, the buyer sees the journaled hours (B2B-9), but the accept and dispute step has not been walked there. |
 | Personal services lane | PASS / LOCAL | marketplace-goods-services (S-1 to S-5) | LOCAL: `journeys-coverage-isolated` SC-1 to SC-6, 26/26 at 1440 and 390 px (#3578). |
