@@ -307,8 +307,11 @@ export function CardRail({
           </button>
         )}
       </div>
-      {/* Touch widths: it must be obvious there is more. */}
-      {overflows && (
+      {/* Touch widths: it must be obvious there is more. The strip says it
+          with the pill cut at the edge alone: one row under the header,
+          never a second line of chrome on every inner page (Lane A review
+          of N5: header 121 px + strip). */}
+      {overflows && !strip && (
         <p
           aria-hidden
           data-rail-part="hint"

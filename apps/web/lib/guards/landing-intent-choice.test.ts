@@ -128,7 +128,8 @@ describe("one rail, one panel", () => {
     expect(rail).not.toMatch(/scrollTo\(|scrollLeft\s*=/);
     // Fade + dots + the word on touch widths; arrows only when it overflows.
     expect(rail).toMatch(/mask-image:linear-gradient/);
-    expect(rail).toMatch(/\{overflows && \(\s*<p[\s\S]{0,200}md:hidden/);
+    // The goal strip (N5) shows "more" by the cut pill alone: one row.
+    expect(rail).toMatch(/\{overflows && !strip && \(\s*<p[\s\S]{0,200}md:hidden/);
     expect(rail).toMatch(/\{overflows && \(\s*<button/);
     expect(rail).toMatch(/hidden size-11[^"]*md:inline-flex/);
   });
