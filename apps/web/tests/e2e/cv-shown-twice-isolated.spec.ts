@@ -236,7 +236,9 @@ async function shownWhere(p: Page, needle: string): Promise<string[]> {
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     for (let t = walker.nextNode(); t; t = walker.nextNode()) {
       const el = t.parentElement;
-      if (!el || !t.textContent?.includes(n) || el.closest(skip) || !visible(el)) continue;
+      // A textarea's initial text is also its child text node; the field
+      // loop below counts it once, by its value.
+      if (!el || !t.textContent?.includes(n) || el.closest(skip) || el.closest("textarea") || !visible(el)) continue;
       found.push(where(el));
     }
     for (const f of Array.from(document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea"))) {
@@ -501,7 +503,16 @@ for (const screen of SCREENS) {
         const at = await shownWhere(p, needle);
         const n = at.length;
         proof(`profile after sign-in: ${what} shown ${n}x${n > 1 ? ` at: ${at.join(" | ")}` : ""}`);
-        expect.soft(n, `${screen.name}px profile: the ${what} is shown exactly once (${at.join(" | ")})`).toBe(1);
+        if (what === "job") {
+          // The profile has two jobs to do with a job: the overview's history
+          // reads it, the capability section edits it. Each shows it ONCE.
+          const inBlock = (block: string) => at.filter((w) => w.includes(block)).length;
+          expect.soft(inBlock("live-profile-history"), `${screen.name}px profile overview: the job is shown exactly once (${at.join(" | ")})`).toBe(1);
+          expect.soft(inBlock("#capabilities"), `${screen.name}px profile capabilities: the job is shown exactly once (${at.join(" | ")})`).toBe(1);
+          expect.soft(n, `${screen.name}px profile: the job is shown nowhere else (${at.join(" | ")})`).toBe(2);
+        } else {
+          expect.soft(n, `${screen.name}px profile: the ${what} is shown exactly once (${at.join(" | ")})`).toBe(1);
+        }
       }
 
       // THE LIVING CV.
