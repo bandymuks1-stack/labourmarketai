@@ -808,9 +808,23 @@ const INCLUDED_PART_RX =
 /** The same words OPENING a phrase: "iš jų dvi valandos …" (a figure in
  *  words has no digit to stand in front of). */
 const OPENS_WITH_INCLUDED_PART_RX = new RegExp(`^\\s*(?:${INCLUDED_PART_RX.source.replace(/^\(\?<!\\p\{L\}\)/, "")})`, "iu");
+/** Where a phrase's figure starts: its first digit, or its first written
+ *  number ("In total eight hours" → at "eight"). Every lead and head below is
+ *  read in front of the figure, and a figure in words has no digit
+ *  (DUPLICATION_AUDIT AI-9; review on #3720). -1 when there is none. */
+function figureStart(rawPhrase: string): number {
+  const digit = rawPhrase.search(/\d/);
+  for (const m of rawPhrase.matchAll(/\p{L}+/gu)) {
+    const at = m.index ?? -1;
+    if (digit >= 0 && at > digit) break;
+    if (parseWordNumber(m[0]) !== null) return at;
+  }
+  return digit;
+}
+
 /** True when a phrase introduces itself as part of the figure before it. */
 function opensAsIncludedPart(rawPhrase: string): boolean {
-  const digit = rawPhrase.search(/\d/);
+  const digit = figureStart(rawPhrase);
   return OPENS_WITH_INCLUDED_PART_RX.test(rawPhrase) || (digit > 0 && INCLUDED_PART_RX.test(rawPhrase.slice(0, digit)));
 }
 /** A part whose DURATION is written in brackets: "… koordinavimas (2 val. per
@@ -915,7 +929,7 @@ function sentenceStarts(text: string): number[] {
 }
 
 function numbersIn(text: string): number[] {
-  return [...text.matchAll(/\d+(?:[.,]\d+)?/g)].map((m) => Number(m[0].replace(",", ".")));
+  return [...digitizeWordNumbers(text).matchAll(/\d+(?:[.,]\d+)?/g)].map((m) => Number(m[0].replace(",", ".")));
 }
 
 /**
@@ -995,7 +1009,7 @@ function containedTotal(
     // Said again AS the total: the cue or the total word stands right in front
     // of the figure ("tai įeina į 15 valandų", "kartu 15 valandų", "iš viso
     // 15 val."), not anywhere in the phrase ("4 val. kartu su kolega").
-    const digit = f.rawPhrase.search(/\d/);
+    const digit = figureStart(f.rawPhrase);
     const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
     // A block of the day is never the day said again: the part of the day is
     // read in front of THIS figure or in its own phrase ("vakare iš viso 4
@@ -1018,7 +1032,7 @@ function containedTotal(
   const totalSentence = sentenceText(total);
   const totalLabelled =
     /^[^:\n]{1,60}:\s*(?:\p{L}+\s+){0,2}\d/u.test(totalSentence.trim()) || RESTATED_TOTAL_LEAD_RX.test(
-      total.rawPhrase.slice(0, Math.max(0, total.rawPhrase.search(/\d/))),
+      total.rawPhrase.slice(0, Math.max(0, figureStart(total.rawPhrase))),
     );
   // An inclusion word speaks about the FIGURE before it only when nothing but
   // punctuation (or one referring word) stands between them: "Dirbau 15 val.,
@@ -1026,7 +1040,7 @@ function containedTotal(
   // of the 15; in "Dirbau 8 val. Vakare mokymai, iš jų 2 val. praktikos" the 2
   // hours are part of the training, on top of the 8.
   const speaksOfFigureBefore = (f: JournalFragmentSuggestion): boolean => {
-    const digit = f.rawPhrase.search(/\d/);
+    const digit = figureStart(f.rawPhrase);
     const head = digit > 0 ? f.rawPhrase.slice(0, digit) : f.rawPhrase;
     const hit = INCLUDED_PART_RX.exec(head);
     if (!hit) return false;

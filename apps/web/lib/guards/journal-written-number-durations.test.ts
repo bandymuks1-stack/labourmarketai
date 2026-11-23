@@ -38,6 +38,15 @@ describe("journal durations from written numbers (AI-9)", () => {
     expect(time("один час работал")).toEqual({ value: 1, unitSlug: "hours" });
   });
 
+  it("a total said again in words is not counted twice", () => {
+    // Review on #3720: the restatement checks looked for a digit only, so
+    // "In total eight hours" was added to the 8 and saved as 16.
+    const frags = (s: string) => extractJournalSuggestions(s).fragments.map((f) => f.time);
+    expect(frags("8 hours. In total eight hours.")).toEqual([{ value: 8, unitSlug: "hours" }]);
+    expect(frags("Dirbau 8 valandas. Iš viso aštuonias valandas.")).toEqual([{ value: 8, unitSlug: "hours" }]);
+    expect(frags("8 hours. In total eight hours.")).toEqual(frags("8 hours. In total 8 hours."));
+  });
+
   it("the journal recognizer keeps no number lexicon of its own", () => {
     const src = readFileSync(join(WEB, "lib/structuring/extract-journal-suggestions.ts"), "utf8");
     expect(src).not.toMatch(/LT_NUMBER_WORDS|const\s+\w*NUMBER_WORDS\s*[:=]/);
