@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Jag representerar en utbildningsanordnare",
-            "desc": "Bjud in studerande, se deras deltagande och koppla dem till praktik och jobb."
+            "desc": "Bjud in studerande, driv program och följ deras praktik och resultat."
           }
         },
         "heading": "Börjar du som person eller som företag?",
@@ -15972,7 +15972,6 @@
     },
     "v3": {
       "lead": "För arbetstagare, arbetsgivare och tjänsteleverantörer i alla yrken och branscher. Registrering och grundläggande publicering av ett behov är gratis.",
-      "moreChoices": "Fler alternativ",
       "or": "eller beskriv det med egna ord",
       "needFree": "Du kan skicka en förfrågan utan att registrera dig. Det är kostnadsfritt att skicka den; villkor och pris för tjänsterna avtalas separat.",
       "market": {
@@ -19678,26 +19677,26 @@
       "terms_await_other_side": "Det här är dina egna villkor – den andra parten svarar på dem.",
       "organization_offer_not_a_unit": "Ett företagserbjudande tilldelas inte som ett team; kom överens om personerna i samtalet.",
       "terms_changed": "Den andra parten har just föreslagit nya villkor. Granska den senaste versionen och svara sedan.",
-      "terms_missing": "Det finns inga villkor att bekräfta ännu.",
+      "no_company": "Öppna företagets arbetsyta först.",
+      "unit_has_no_members": "Det arbetslaget har inga aktiva medlemmar.",
+      "already_started": "Arbetet med det här erbjudandet har redan startat i ett annat projekt.",
+      "unit_not_of_company": "Det här arbetslaget har ingen medlem på det erbjudande företagets personlista.",
       "terms_not_agreed": "Båda parter måste först bekräfta samma villkor.",
       "unit_not_named": "Företaget har inte angett sitt arbetslag ännu.",
       "unit_not_yours": "Det arbetslaget tillhör inte er egen organisation.",
-      "unit_has_no_members": "Det arbetslaget har inga aktiva medlemmar.",
       "not_an_organization_offer": "Endast ett företagserbjudande anger ett arbetslag.",
-      "invalid_title": "Projektnamnet behöver 2 till 120 tecken.",
-      "no_company": "Öppna företagets arbetsyta först.",
+      "terms_missing": "Det finns inga villkor att bekräfta ännu.",
       "project_not_created": "Projektet kunde inte skapas.",
-      "not_an_agency_offer": "Endast en bemanningsbyrås erbjudande kan ange kandidater.",
-      "worker_not_on_roster": "Den personen finns inte på er aktiva lista.",
-      "candidate_limit_reached": "Högst 10 kandidater kan föreslås på ett erbjudande.",
-      "candidate_not_open": "Den här kandidaten kan inte längre väljas.",
-      "candidate_already_selected": "Kunden har redan valt den här kandidaten.",
-      "client_company_unknown": "Behovets företag kunde inte fastställas.",
-      "unit_not_of_company": "Det här arbetslaget har ingen medlem på det erbjudande företagets personlista.",
-      "already_started": "Arbetet med det här erbjudandet har redan startat i ett annat projekt.",
+      "invalid_title": "Projektnamnet behöver 2 till 120 tecken.",
       "worker_not_discoverable": "Den här personen har inte valt att vara synlig för företag. Det kan slås på i personens integritetsinställningar.",
+      "candidate_not_open": "Den här kandidaten kan inte längre väljas.",
       "candidate_not_available": "Den här kandidaten är inte längre tillgänglig.",
-      "connection_conflict": "Kopplingen till den här bemanningsfirman ändrades under tiden. Ladda om och försök igen."
+      "client_company_unknown": "Behovets företag kunde inte fastställas.",
+      "worker_not_on_roster": "Den personen finns inte på er aktiva lista.",
+      "candidate_already_selected": "Kunden har redan valt den här kandidaten.",
+      "connection_conflict": "Kopplingen till den här bemanningsfirman ändrades under tiden. Ladda om och försök igen.",
+      "candidate_limit_reached": "Högst 10 kandidater kan föreslås på ett erbjudande.",
+      "not_an_agency_offer": "Endast en bemanningsbyrås erbjudande kan ange kandidater."
     },
     "received": {
       "title": "Team som erbjudits för det här behovet",
@@ -19794,15 +19793,15 @@
       "proposed": "Version {version} har skickats.",
       "place": "Arbetsplats",
       "placePlaceholder": "t.ex. Vilnius, Žirmūnų g. 1, kundens plats",
+      "confirm": "Bekräfta version {version}",
+      "confirmedMine": "Bekräftat. Väntar på den andra parten.",
       "confirmNeedsTerms": "Föreslå villkoren här. Därefter bekräftar båda parter samma version.",
       "confirmNote": "Båda parter bekräftar samma version. Det registrerar de överenskomna villkoren; det är ingen underskrift och skapar inte i sig ett avtal.",
-      "confirm": "Bekräfta version {version}",
-      "confirmedByYou": "Ni har bekräftat version {version}",
-      "notConfirmedByYou": "Ni har inte bekräftat version {version} ännu",
-      "otherConfirmed": "den andra parten har bekräftat den",
       "otherNotConfirmed": "den andra parten har inte bekräftat den ännu",
+      "otherConfirmed": "den andra parten har bekräftat den",
+      "confirmedByYou": "Ni har bekräftat version {version}",
       "agreedBoth": "Överenskommet av båda parter: version {version}",
-      "confirmedMine": "Bekräftat. Väntar på den andra parten."
+      "notConfirmedByYou": "Ni har inte bekräftat version {version} ännu"
     },
     "threadContext": "Om erbjudandet: {subject}",
     "messageAbout": "Sv: {subject}",

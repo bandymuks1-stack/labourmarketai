@@ -266,3 +266,22 @@ describe("6. i18n - every shipped full locale carries the namespace with the sam
     for (const l of LOCALES) expect(JSON.stringify(ns(l)), l).not.toMatch(/\bdemo\b/i);
   });
 });
+
+describe("7. what is not built says so (owner P0 2026-11-23)", () => {
+  // #3715 told both sides that a company offer could not start work yet. With
+  // the company-offer-to-work flow (20261122200000) the OfferProgressPanel
+  // carries that truth on BOTH sides: while the migration is missing it says
+  // "this step is not open here yet" (needs_migration), never a working control.
+  const panel = readFileSync(join(WEB, "components/app/offer-progress-panel.tsx"), "utf8");
+  const form = readFileSync(join(WEB, "components/app/team-demand-offer-form.tsx"), "utf8");
+  const received = readFileSync(join(WEB, "components/app/team-offers-received.tsx"), "utf8");
+  it("both sides render the progress panel for a company offer", () => {
+    expect(received).toMatch(/<OfferProgressPanel offerId=\{offer\.offerId\} side="receiver"/);
+    expect(form).toMatch(/<OfferProgressPanel offerId=\{o\.offerId\} side="supplier"/);
+  });
+  it("without the migration the panel says the step is not open yet", () => {
+    expect(panel).toMatch(/if \(data\.status === "needs_migration"\) return <p className="text-xs text-text-muted">\{t\("notYet"\)\}<\/p>;/);
+    const en = JSON.parse(readFileSync(join(WEB, "messages", "en.json"), "utf8")) as { teamDemandOffer: { progress: { notYet: string } } };
+    expect(en.teamDemandOffer.progress.notYet).toMatch(/not open here yet/);
+  });
+});

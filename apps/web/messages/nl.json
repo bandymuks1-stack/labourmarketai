@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Ik vertegenwoordig een onderwijsinstelling",
-            "desc": "Nodig lerenden uit, zie hun deelname en verbind ze met stages en banen."
+            "desc": "Nodig lerenden uit, voer programma's uit en volg hun stage en resultaten."
           }
         },
         "heading": "Begint u als persoon of als bedrijf?",
@@ -15972,7 +15972,6 @@
     },
     "v3": {
       "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en de basisplaatsing van een behoefte zijn gratis.",
-      "moreChoices": "Meer opties",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
       "market": {
@@ -19678,26 +19677,26 @@
       "terms_await_other_side": "Dit zijn uw eigen voorwaarden — de andere partij antwoordt.",
       "organization_offer_not_a_unit": "Een bedrijfsaanbod wordt niet als ploeg toegewezen; spreek de mensen af in het gesprek.",
       "terms_changed": "De andere partij heeft zojuist nieuwe voorwaarden voorgesteld. Bekijk de nieuwste versie en antwoord dan.",
-      "terms_missing": "Er zijn nog geen voorwaarden om te bevestigen.",
+      "no_company": "Open eerst de werkruimte van het bedrijf.",
+      "unit_has_no_members": "Die ploeg heeft geen actieve leden.",
+      "already_started": "Het werk voor dit aanbod is al gestart in een ander project.",
+      "unit_not_of_company": "Deze ploeg heeft geen lid op de personenlijst van het aanbiedende bedrijf.",
       "terms_not_agreed": "Beide partijen moeten eerst dezelfde voorwaarden bevestigen.",
       "unit_not_named": "Het bedrijf heeft zijn ploeg nog niet genoemd.",
       "unit_not_yours": "Die ploeg is geen ploeg van uw eigen organisatie.",
-      "unit_has_no_members": "Die ploeg heeft geen actieve leden.",
       "not_an_organization_offer": "Alleen een bedrijfsaanbod noemt een ploeg.",
-      "invalid_title": "De projectnaam moet 2 tot 120 tekens hebben.",
-      "no_company": "Open eerst de werkruimte van het bedrijf.",
+      "terms_missing": "Er zijn nog geen voorwaarden om te bevestigen.",
       "project_not_created": "Het project kon niet worden aangemaakt.",
-      "not_an_agency_offer": "Alleen het aanbod van een uitzendbureau kan kandidaten noemen.",
-      "worker_not_on_roster": "Die persoon staat niet in uw actieve bestand.",
-      "candidate_limit_reached": "Op één aanbod kunnen hoogstens 10 kandidaten worden voorgesteld.",
-      "candidate_not_open": "Deze kandidaat kan niet meer worden gekozen.",
-      "candidate_already_selected": "De klant heeft deze kandidaat al gekozen.",
-      "client_company_unknown": "Het bedrijf van de behoefte kon niet worden bepaald.",
-      "unit_not_of_company": "Deze ploeg heeft geen lid op de personenlijst van het aanbiedende bedrijf.",
-      "already_started": "Het werk voor dit aanbod is al gestart in een ander project.",
+      "invalid_title": "De projectnaam moet 2 tot 120 tekens hebben.",
       "worker_not_discoverable": "Deze persoon koos er niet voor zichtbaar te zijn voor bedrijven. Dat kan in de privacy-instellingen worden aangezet.",
+      "candidate_not_open": "Deze kandidaat kan niet meer worden gekozen.",
       "candidate_not_available": "Deze kandidaat is niet meer beschikbaar.",
-      "connection_conflict": "De verbinding met dit bureau is intussen gewijzigd. Laad opnieuw en probeer het nog eens."
+      "client_company_unknown": "Het bedrijf van de behoefte kon niet worden bepaald.",
+      "worker_not_on_roster": "Die persoon staat niet in uw actieve bestand.",
+      "candidate_already_selected": "De klant heeft deze kandidaat al gekozen.",
+      "connection_conflict": "De verbinding met dit bureau is intussen gewijzigd. Laad opnieuw en probeer het nog eens.",
+      "candidate_limit_reached": "Op één aanbod kunnen hoogstens 10 kandidaten worden voorgesteld.",
+      "not_an_agency_offer": "Alleen het aanbod van een uitzendbureau kan kandidaten noemen."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
@@ -19794,15 +19793,15 @@
       "proposed": "Versie {version} verstuurd.",
       "place": "Werklocatie",
       "placePlaceholder": "bijv. Vilnius, Žirmūnų g. 1, de locatie van de klant",
+      "confirm": "Versie {version} bevestigen",
+      "confirmedMine": "Bevestigd. Wachten op de andere partij.",
       "confirmNeedsTerms": "Stel hier de voorwaarden voor. Daarna bevestigen beide partijen dezelfde versie.",
       "confirmNote": "Beide partijen bevestigen dezelfde versie. Zo worden de afgesproken voorwaarden vastgelegd; het is geen handtekening en vormt op zich geen contract.",
-      "confirm": "Versie {version} bevestigen",
-      "confirmedByYou": "U hebt versie {version} bevestigd",
-      "notConfirmedByYou": "U hebt versie {version} nog niet bevestigd",
-      "otherConfirmed": "de andere partij heeft die bevestigd",
       "otherNotConfirmed": "de andere partij heeft die nog niet bevestigd",
+      "otherConfirmed": "de andere partij heeft die bevestigd",
+      "confirmedByYou": "U hebt versie {version} bevestigd",
       "agreedBoth": "Door beide partijen afgesproken: versie {version}",
-      "confirmedMine": "Bevestigd. Wachten op de andere partij."
+      "notConfirmedByYou": "U hebt versie {version} nog niet bevestigd"
     },
     "threadContext": "Over het aanbod: {subject}",
     "messageAbout": "Betreft aanbod: {subject}",
