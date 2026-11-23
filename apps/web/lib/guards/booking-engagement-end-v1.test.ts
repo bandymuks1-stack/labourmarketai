@@ -1814,6 +1814,7 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
       // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261120190000_former_employer_chain_fixes_v1.sql",
+      "20261123120000_history_performing_party_nonstop_v1.sql",
 ]);
   });
 
