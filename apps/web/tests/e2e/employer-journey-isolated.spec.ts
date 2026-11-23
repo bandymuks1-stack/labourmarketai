@@ -33,8 +33,8 @@ import {
  *   E-7  agreeing terms: the worker sees the proposed start and the company's terms before deciding;
  *   E-8  choosing the worker: the worker accepts; the hire is stored as an active engagement;
  *   E-9  project: the company creates a project and puts the hired worker on it;
- *   E-10 journals: the worker records a day on the project; the company accepts it as the client;
- *        the worker sees it accepted (a direct hire opens no employer relationship).
+ *   E-10 journals: the hire is a work relationship (HIRE-5); the worker records a day on the project; the
+ *        company confirms it; the hours show on the worker's Living CV and on the company's project.
  */
 const RUN = `${Date.now().toString(36)}`;
 const email = (who: string) => `emp-${who}-${RUN}@walk.labourmarket.test`;
@@ -364,88 +364,85 @@ for (const w of WIDTHS) {
       expect(await rowsAs(STRANGER, `projects?id=eq.${s.projectId}&select=id`), "the stranger reads no project").toHaveLength(0);
     });
 
-    test(`E-10 (${w.name}). journals: the worker records a day; the company accepts it as the client`, async ({ browser }) => {
-      // A DIRECT hire opens no employer relationship (owner decision 2026-09-28, 20260928220000):
-      // the worker records the day in their own journal on the company's project, and the
-      // company decides it as the CLIENT (accept / correct / dispute), never as an employer.
-      const co = await open(browser, w, COMPANY);
-      await co.page.goto(`${BASE}/en/dashboard/projects/${s.projectId}`);
-      const panel = co.page.getByRole("main").getByTestId("counterparty-link-panel");
-      await expect(panel, "the project offers to register the client side").toBeVisible({ timeout: 60_000 });
-      const row = panel.getByTestId(`counterparty-link-row-${s.workerId}`);
-      await expect(row, "the hired worker is a candidate on the project").toBeVisible({ timeout: 30_000 });
-      await expect(async () => {
-        if (!(await panel.getByTestId(`counterparty-link-active-${s.workerId}`).isVisible().catch(() => false))) {
-          await panel.getByTestId(`counterparty-link-register-${s.workerId}`).click({ timeout: 5_000 });
-        }
-        await expect(panel.getByTestId(`counterparty-link-active-${s.workerId}`)).toBeVisible({ timeout: 10_000 });
-      }).toPass({ timeout: 60_000 });
-      await fits(co.page, "the project page");
-      await co.done();
-      const links = sql<{ id: string; org: string }>(
-        `select id, counterparty_organization_id::text as org from public.work_counterparty_links
-          where project_id = ${lit(s.projectId)} and worker_id = ${lit(s.workerId)} and revoked_at is null`,
+    test(`E-10 (${w.name}). journals: the hire is a work relationship; the day reaches the Living CV and the company's project`, async ({ browser }) => {
+      // HIRE-5 (owner addendum 2026-11-23): the accepted booking opened ONE 'collaborator'
+      // relationship with the company (20261123113700), so the day is recorded FOR the company.
+      const eng = sql<{ id: string; slug: string }>(
+        `select id, relationship_slug as slug from public.engagement_contexts
+          where profile_id = ${lit(s.workerProfileId)} and organization_id = ${lit(s.orgId)} and status = 'active'`,
       );
-      expect(links.map((l) => l.org), "one stored client link, to the company").toEqual([s.orgId]);
+      expect(eng.map((e) => e.slug), "the hire opened one work relationship with the company").toEqual(["collaborator"]);
+      s.engagementId = eng[0]!.id;
+
+      const co = await open(browser, w, COMPANY);
+      await co.page.goto(`${BASE}/en/dashboard/company/people#org-members`);
+      const fold = co.page.getByRole("main").getByTestId("people-more").first();
+      await expect(fold).toBeAttached({ timeout: 60_000 });
+      if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
+      const toggle = co.page.getByRole("main").getByTestId(`toggle-review-${s.engagementId}`);
+      await expect(toggle, "the company can review the hired worker's journal").toBeVisible({ timeout: 60_000 });
+      await toggle.click();
+      await expect
+        .poll(
+          () => sql<{ r: boolean | null }>(`select journal_review_enabled as r from public.engagement_contexts where id = ${lit(s.engagementId)}`)[0]?.r ?? null,
+          { message: "review is on for the relationship", timeout: 30_000 },
+        )
+        .toBe(true);
+      await co.done();
 
       const wk = await open(browser, w, WORKER);
       await wk.page.goto(`${BASE}/en/dashboard/journal`);
       const main = wk.page.getByRole("main");
-      await main.getByTestId("journal-quick-record-text").fill(DAY);
+      await main.getByTestId("journal-quick-record-text").fill(`${DAY}, 8 hours`);
       await main.getByTestId("journal-quick-record-understand").click();
       await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 60_000 });
+      const context = main.getByTestId("worklog-context");
+      if (await context.count()) await context.selectOption(s.engagementId);
       const project = main.getByTestId("worklog-project");
       if (await project.count()) await project.selectOption(s.projectId);
-      else await expect(main.getByTestId("worklog-project-auto"), "the one project is filed on its own").toBeVisible();
       await main.getByTestId("worklog-save").click();
       await main.getByTestId("worklog-confirm").click();
       await expect(main.getByTestId("worklog-done").or(main.getByTestId("worklog-error")).or(main.getByTestId("worklog-blocked"))).toBeVisible({
         timeout: 30_000,
       });
       await expect(main.getByTestId("worklog-done"), "the entry is saved").toBeVisible();
-      const entries = sql<{ id: string; p: string | null }>(
-        `select id, project_id::text as p from public.journal_entries where worker_id = ${lit(s.workerId)} and original_text ilike ${lit(`%${RUN}%`)}`,
-      );
-      expect(entries.map((e) => e.p), "one stored entry, on the company's project").toEqual([s.projectId]);
-      s.entryId = entries[0]!.id;
-      await wk.page.goto(`${BASE}/en/dashboard/journal`);
-      const review = main.getByTestId(`entry-review-${s.entryId}`);
-      await expect(review, "the entry offers review by the company").toHaveAttribute("data-phase", "ready_to_submit", { timeout: 60_000 });
-      await expect(async () => {
-        if ((await review.getAttribute("data-phase")) !== "submitted") await review.getByTestId(`entry-review-submit-${s.entryId}`).click({ timeout: 5_000 });
-        await expect(review).toHaveAttribute("data-phase", "submitted", { timeout: 10_000 });
-      }).toPass({ timeout: 60_000 });
-      await fits(wk.page, "the journal");
       await wk.done();
+      const entries = sql<{ id: string; e: string | null; p: string | null }>(
+        `select id, engagement_context_id::text as e, project_id::text as p from public.journal_entries
+          where worker_id = ${lit(s.workerId)} and original_text ilike ${lit(`%${RUN}%`)}`,
+      );
+      expect(entries.map((x) => [x.e, x.p]), "one entry, for the company relationship, on its project").toEqual([[s.engagementId, s.projectId]]);
+      s.entryId = entries[0]!.id;
 
       const co2 = await open(browser, w, COMPANY);
-      await co2.page.goto(`${BASE}/en/dashboard/inbox/counterparty`);
-      const card = co2.page.getByRole("main").getByTestId(`counterparty-card-${s.entryId}`);
-      await expect(card, "the day waits in the company's queue").toBeVisible({ timeout: 60_000 });
-      await expect(card).toContainText(DAY);
-      await fits(co2.page, "the company's queue");
-      const decide = card.getByTestId(`counterparty-decide-${s.entryId}`);
-      await expect(async () => {
-        await card.getByRole("radio", { name: /accept the work/i }).check({ timeout: 5_000 });
-        await expect(decide).toBeEnabled({ timeout: 3_000 });
-      }).toPass({ timeout: 60_000 });
-      const decided = () =>
-        sql<{ d: string | null }>(
-          `select confirmation_scope->>'decision' as d from public.journal_entry_confirmations where entry_id = ${lit(s.entryId)}`,
-        ).map((r) => r.d);
-      await expect(async () => {
-        if (decided().length === 0) await decide.click({ timeout: 5_000 });
-        await expect.poll(decided, { timeout: 10_000 }).toEqual(["approved"]);
-      }).toPass({ timeout: 60_000 });
+      await co2.page.goto(`${BASE}/en/dashboard/inbox`);
+      const m2 = co2.page.getByRole("main");
+      await expect(m2.getByTestId(`inbox-entry-${s.entryId}`), "the day waits in the company's queue").toBeVisible({ timeout: 60_000 });
+      await m2.getByTestId(`journal-approve-entry-${s.entryId}`).click();
+      await expect
+        .poll(
+          () =>
+            sql<{ d: string | null }>(
+              `select confirmation_scope->>'decision' as d from public.journal_entry_confirmations where entry_id = ${lit(s.entryId)}`,
+            ).map((r) => r.d),
+          { message: "the company confirmed the day once", timeout: 30_000 },
+        )
+        .toEqual(["approved"]);
+      // The company's own history of the work: the project's confirmed hours.
+      await co2.page.goto(`${BASE}/en/dashboard/projects/${s.projectId}/operations`);
+      await expect(co2.page.getByRole("main").getByTestId("ops-centre-hours-confirmed"), "the project counts the confirmed hours").toContainText(/\b8\b/, {
+        timeout: 60_000,
+      });
       await co2.done();
 
+      // The worker's Living CV: the company, with the day's hours from the journal.
       const wk2 = await open(browser, w, WORKER);
-      await wk2.page.goto(`${BASE}/en/dashboard/journal`);
-      await expect(wk2.page.getByRole("main").getByTestId(`entry-review-${s.entryId}`), "the worker sees the day accepted").toHaveAttribute(
-        "data-phase",
-        "accepted",
-        { timeout: 60_000 },
-      );
+      await wk2.page.goto(`${BASE}/en/cv`);
+      const cv = wk2.page.getByRole("main").first();
+      const line = cv.getByTestId("cv-history-node").filter({ hasText: ORG });
+      await expect(line, "the company is on the Living CV").toHaveCount(1, { timeout: 60_000 });
+      await expect(line.getByTestId("cv-history-recorded"), "with the day's hours").toContainText(/8 h/);
+      await fits(wk2.page, "the Living CV");
       await wk2.done();
       expect(await rowsAs(STRANGER, `journal_entries?id=eq.${s.entryId}&select=id`), "the stranger reads no journal entry").toHaveLength(0);
     });
