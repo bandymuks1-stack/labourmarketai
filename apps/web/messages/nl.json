@@ -181,6 +181,12 @@
       "actionWebsite": "Website van het bedrijf openen",
       "heroContact": "Hoe u contact opneemt",
       "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+    },
+    "cv": {
+      "title": "Staat van dienst",
+      "historyHours": "Uren op losse dagen",
+      "historyPeople": "Mensen in de registratie",
+      "enableHint": "Als dit aanstaat, worden ook totalen getoond van het werk dat onder uw organisatie is vastgelegd: uren, mensen en maanden, alleen waar minstens 5 mensen achter staan. Nooit namen."
     }
   },
   "marketplaceListings": {

@@ -229,6 +229,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-15 owner decision: a learner's journal is read by the organization only while the learning
       // link is active and review is on (one RLS policy replaced; RED draft, needs-human-gate, NOT applied).
       "20261115120000_",
+      // 2026-11-17 public company Living CV (RED, needs-human-gate, NOT applied).
+      "20261117060000_",
       // 2026-11-17 owner decision: a former employer keeps the journal recorded during the employment and
       // nothing new, and can no longer change it (RLS + three SECURITY DEFINER bodies; RED draft, needs-human-gate, NOT applied).
       "20261118164500_",

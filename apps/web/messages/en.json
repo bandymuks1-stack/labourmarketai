@@ -181,6 +181,12 @@
       "actionWebsite": "Open the company's website",
       "heroContact": "How to get in touch",
       "provenance": "The company filled in this page itself."
+    },
+    "cv": {
+      "title": "Track record",
+      "historyHours": "Hours on single days",
+      "historyPeople": "People on record",
+      "enableHint": "When on, totals of the work recorded under your organization are shown too: hours, people and months, only where at least 5 people stand behind them. Never names."
     }
   },
   "marketplaceListings": {

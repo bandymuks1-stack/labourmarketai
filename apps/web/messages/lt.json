@@ -181,6 +181,12 @@
       "actionWebsite": "Atidaryti įmonės svetainę",
       "heroContact": "Kaip susisiekti",
       "provenance": "Šį puslapį užpildė pati įmonė."
+    },
+    "cv": {
+      "title": "Atlikti darbai",
+      "historyHours": "Valandos atskiromis dienomis",
+      "historyPeople": "Žmonės įrašuose",
+      "enableHint": "Įjungus rodomos ir jūsų organizacijoje užregistruoto darbo sumos: valandos, žmonių skaičius ir mėnesiai, tik kai už jų yra bent 5 žmonės. Vardai niekada nerodomi."
     }
   },
   "marketplaceListings": {
