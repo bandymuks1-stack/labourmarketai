@@ -71,7 +71,7 @@ create function public._pnp_take(p text) returns void language sql as \$f\$
        and p2.proname not in ('provider_need_alias_v1','provider_need_of_alias_v1','list_open_demand_for_team_offer_v1',
          'list_team_demand_offers_for_team_v1','offer_team_to_demand_v1','open_need_conversation_open_v1',
          'open_need_thread_ensure_v1','conversation_source_context','disclose_open_need_identity_v1',
-         'list_open_demand_for_agencies','mark_agency_can_offer')) s
+         'list_open_demand_for_agencies','mark_agency_can_offer','list_open_needs_for_offer_v2')) s
   union all
   select p, 'policies', md5(string_agg(x, '|' order by x)) from (
     select schemaname || tablename || policyname || coalesce(qual, '') || coalesce(with_check, '') || array_to_string(roles, ',') || cmd as x
@@ -117,8 +117,33 @@ body "$UP"
 body "$UP"   # idempotent
 cat <<SQL
 select public._pnp_take('applied');
+-- The restore is checked here, before any open-need thread exists: the
+-- rollback refuses once one does (R2 P3-1, checked at the end). A savepoint
+-- keeps the applied state for the checks that follow.
+\\echo __PHASE|ROLLBACK (savepoint, before any thread)
+savepoint pnp_before_down;
+-- Open-need threads committed on this local stack by earlier browser walks
+-- would make the rollback refuse; inside this savepoint only they are set
+-- aside (the savepoint is rolled back right after the checks).
+update public.conversations set source_type = null where source_type = 'open_need';
+select exists (select 1 from public.provider_need_aliases) as pnp_alias_rows \\gset
+SQL
+body "$DOWN"
+cat <<SQL
+select public._pnp_take('rolled_back');
+\\echo __N|rollback restores every function body and ACL~same
+select '__R|' || case when (select digest from public._pnp_snap where phase='before' and what='procs')
+                         = (select digest from public._pnp_snap where phase='rolled_back' and what='procs') then 'same' else 'differs' end;
+\\echo __N|rollback restores the offer column grants~same
+select '__R|' || case when (select digest from public._pnp_snap where phase='before' and what='columns')
+                         = (select digest from public._pnp_snap where phase='rolled_back' and what='columns') then 'same' else 'differs' end;
+\\echo __N|rollback drops the alias table only when it is empty (no drop of rows)~true
+select '__R|' || ((to_regclass('public.provider_need_aliases') is not null) = :'pnp_alias_rows'::boolean)::text;
+rollback to savepoint pnp_before_down;
+\\echo __PHASE|APPLIED (back from the savepoint)
 SQL
 check "the board gives an alias, never the need id" "false" "$AGENT" "select ($ALIAS = '$N1')::text"
+check "the #3630 reader v2 gives the same alias, never the need id" "true|false" "$AGENT" "select ((select request_id from public.list_open_needs_for_offer_v2('$OA') where role_text = 'Pseudo welder' limit 1) = $ALIAS)::text || '|' || exists (select 1 from public.list_open_needs_for_offer_v2('$OA') where request_id = '$N1')::text"
 check "the alias is stable across reads" "true" "$AGENT" "select ($ALIAS = (select request_id from public.list_open_demand_for_team_offer_v1('$OA') where role_text = 'Pseudo welder' limit 1))::text"
 check "the alias differs per provider organization" "false" "$AGENT" "select ($ALIAS = (select request_id from public.list_open_demand_for_team_offer_v1('$OA2') where role_text = 'Pseudo welder' limit 1))::text"
 check "the join is gone: no board id appears on the worker board" "0" "$AGENT" "select count(*)::text from public.list_open_demand_for_team_offer_v1('$OA') b where b.request_id in (select id from public.list_open_demand_for_workers())"
@@ -161,26 +186,19 @@ select '__R|' || case when (select digest from public._pnp_snap where phase='bef
 \\echo __N|no policy changed~same
 select '__R|' || case when (select digest from public._pnp_snap where phase='before' and what='policies')
                          = (select digest from public._pnp_snap where phase='applied' and what='policies') then 'same' else 'differs' end;
-\\echo __PHASE|ROLLBACK
+\\echo __PHASE|ROLLBACK (with an open-need thread)
+savepoint pnp_refuse;
+\\set ON_ERROR_STOP off
 SQL
-body "$DOWN"
+# The rollback's own first block, its refusal (R2 P3-1): it never keys a
+# thread back to the real need id.
+awk '/^do \$\$/{f=1} f{print} /^end \$\$;/{if(f) exit}' "$DOWN"
 cat <<SQL
-select public._pnp_take('rolled_back');
-\\echo __N|rollback restores every function body and ACL~same
-select '__R|' || case when (select digest from public._pnp_snap where phase='before' and what='procs')
-                         = (select digest from public._pnp_snap where phase='rolled_back' and what='procs') then 'same' else 'differs' end;
-\\echo __N|rollback restores the offer column grants~same
-select '__R|' || case when (select digest from public._pnp_snap where phase='before' and what='columns')
-                         = (select digest from public._pnp_snap where phase='rolled_back' and what='columns') then 'same' else 'differs' end;
-\\echo __N|rollback re-keys the thread to the need id~true
-select '__R|' || ((select source_id from public.conversations where source_type = 'open_need' and created_by = '$AGENT' order by created_at limit 1) = '$N1')::text;
-\\echo __N|rollback keeps a non-empty alias table (no drop of rows)~1
-select '__R|' || (to_regclass('public.provider_need_aliases') is not null)::int::text;
-\\echo __PHASE|RE-APPLY
-SQL
-body "$UP"
-cat <<SQL
-\\echo __N|forward re-applies and re-keys again~false
+\\set ON_ERROR_STOP on
+rollback to savepoint pnp_refuse;
+\\echo __N|rollback refuses while an open-need thread exists~open-need threads exist - forward-fix, do not roll back
+\\echo __R|:LAST_ERROR_MESSAGE
+\\echo __N|the thread still carries the alias afterwards~false
 select '__R|' || ((select source_id from public.conversations where source_type = 'open_need' and created_by = '$AGENT' order by created_at limit 1) = '$N1')::text;
 rollback;
 SQL
