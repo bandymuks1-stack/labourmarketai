@@ -303,6 +303,20 @@ All agency production runs are on 7e517e32, 112 behind.
 | BLOCKED | Personal service lane after acceptance (#3697)<br>Institution-arranged placement (owner decision) |
 | GAP | Worker and employer steps 4 to 5: the CV trace of an application or engagement<br>Agency steps 6 to 8<br>Subcontractor steps 8 and 9, and identity<br>Identity in production for agency, subcontractor and institution<br>History for organizations |
 
+## Owner's Living CV screens (#3736)
+
+`prod-living-cv-screens` photographs the Living CV in production. It uses a read-only synthetic account, de-identifies the pages before they render and encrypts the screenshots. It has not run; it waits for the read-only grant and for review.
+
+| Screen | Page | Status |
+|---|---|---|
+| Company Living CV, both organizations | `/lt/dashboard/company/history`, one per active workspace | BLOCKED until the grant is live |
+| Worker, as the employer sees them | `/lt/dashboard/company/people/<personId>` | BLOCKED until the grant is live |
+| Worker, as the worker sees their own CV | `/lt/cv`, `/lt/dashboard/profile#organization-history` | GAP |
+
+**The employer's view is not the worker's own CV.** Under decision 0033 the employer sees only records tied to its own relationship with the person. Records from other organizations and the worker's own journal entries are not on that page, by design. The worker's own CV can only be shown through the worker's own session. A walk must never mint one for a real person, so this stays a GAP until there is either a consenting synthetic worker with real history or the person's own walk.
+
+When the walk first runs, its screens are the before-state for #3732 (one-spine reads) and the party-role fold.
+
 ## Walk plan for today
 
 The daily budget is 24 walks in a rolling 24 h. At 10:30 UTC about 14 have reached production in the window, so about 10 are free now. Four more free up after 17:56 UTC, and six after 02:10 UTC tomorrow. Each window starts only after the coordinator confirms no merge batch is deploying (brake e).
