@@ -236,6 +236,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // it corrects that context's record; the chain root walk is cycle-safe, no depth cap). Two SECURITY DEFINER
       // bodies; RED draft, needs-human-gate, NOT applied.
       "20261120190000_",
+      // 2026-11-23 owner decision: employer party rows naming 20b2c802 on 576 historical records of 8 roster people of
+      // 19f47e78 (rows in the existing organization_evidence_parties; RED draft, needs-human-gate, NOT applied).
+      "20261123120000_",
       // 2026-11-18 COMM-1 profiles.communication_locale (renamed from 20260920122000; RED draft, needs-human-gate, NOT applied).
       "20261118100100_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
