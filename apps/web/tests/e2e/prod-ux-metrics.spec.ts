@@ -216,8 +216,27 @@ function pageExtras({ banned }: { banned: [string, string][] }): Record<string, 
   return { banned_words: bannedWords, broken_img: brokenImg, theme_dark: document.documentElement.dataset.theme === "dark" ? 1 : 0 };
 }
 
+/**
+ * Document-level metrics: they describe the document load, so after a
+ * client-side navigation (a header or in-page link Next.js follows without a
+ * new document) they would still be the START page's, plus long tasks from
+ * every page before. Such rows omit them (Codex P2 on #3689).
+ */
+const DOCUMENT_METRICS = new Set([
+  "ttfb_ms", "dcl_ms", "load_ms", "html_kb", "lcp_ms",
+  "cls_x10000", "cls_top_x10000", "cls_top_dy_px", "cls_top_h_px",
+  "longtasks_total", "longtasks_after", "longtask_after_ms", "loaf_after", "loaf_block_after_ms",
+]);
+
 /** Measures the page that is open now (after a goto or a click). */
-async function measureHere(page: Page, w: Where, route: string, head: Kv[], consoleErrors: { take: () => number }): Promise<PageResult> {
+async function measureHere(
+  page: Page,
+  w: Where,
+  route: string,
+  head: Kv[],
+  consoleErrors: { take: () => number },
+  opts: { clientNav?: boolean } = {},
+): Promise<PageResult> {
   const landed = new URL(page.url());
   if (/\/auth\/(login|sign-?in)/.test(landed.pathname)) {
     row(w, route, [...head, ["signin", "1"], ["measured", "0"]]);
@@ -225,7 +244,10 @@ async function measureHere(page: Page, w: Where, route: string, head: Kv[], cons
   }
   // Observation window: long tasks / animation frames and layout shifts in the 3 s after load.
   await page.waitForTimeout(3_000);
-  const m = await page.evaluate(measure, { tapMin: w.screen.tapMin, locale: w.locale, namespaces: NAMESPACES }).catch(() => null);
+  const measured = await page.evaluate(measure, { tapMin: w.screen.tapMin, locale: w.locale, namespaces: NAMESPACES }).catch(() => null);
+  const m = measured && opts.clientNav
+    ? Object.fromEntries(Object.entries(measured).filter(([k]) => !DOCUMENT_METRICS.has(k))) as typeof measured
+    : measured;
   const extras = await page.evaluate(pageExtras, { banned: BANNED }).catch(() => null);
   if (!m || !extras) {
     row(w, route, [...head, ["measured", "0"]]);
@@ -237,6 +259,7 @@ async function measureHere(page: Page, w: Where, route: string, head: Kv[], cons
   const tops = await page.evaluate(componentTops).catch(() => ({ small: "none", cta: "none" }));
   const errors = consoleErrors.take();
   const kv: Kv[] = [...head, ["measured", "1"], ["theme", extras.theme_dark ? "dark" : "light"]];
+  if (opts.clientNav) kv.push(["doc_metrics", "na"]);
   // min_font_px keeps one decimal (11.5 px must not print as 12); every other value is an integer.
   for (const [k, v] of Object.entries(m)) kv.push([k, k === "min_font_px" ? v.toFixed(1) : n(v)]);
   kv.push(["banned_words", n(extras.banned_words!)], ["broken_img", n(extras.broken_img!)], ["console_errors", n(errors)], ["screenshot", "none"]);
@@ -276,6 +299,19 @@ async function measureRoute(page: Page, w: Where, route: string, consoleErrors: 
     ["landed_locale_ok", landed.pathname.split("/")[1] === w.locale ? "1" : "0"],
     ["nav_ms", n(navMs)],
   ];
+  if (w.role === "institution" && status < 400) {
+    // The education home redirects an organization without training_provider to
+    // the company home. Only the education surface itself counts as institution
+    // coverage; anything else is recorded BLOCKED, never measured as the
+    // institution (Codex P2 on #3689).
+    const onEducation =
+      /\/dashboard\/company\/education\/?$/.test(landed.pathname) &&
+      (await page.getByTestId("company-education").first().waitFor({ state: "visible", timeout: 15_000 }).then(() => true, () => false));
+    if (!onEducation) {
+      row(w, url, [...head, ["blocked", "1"], ["reason", "no-training-provider-workspace"], ["measured", "0"]]);
+      return { measured: false, navFailed: false, metrics: {}, defects: [] };
+    }
+  }
   if (status >= 400) {
     // Not the surface: role-routes judges reachability; nothing to measure here.
     row(w, url, [...head, ["measured", "0"]]);
@@ -408,13 +444,13 @@ async function clickJourney(browser: Browser, w: Where, start: string): Promise<
     const l1Ms = l1 ? await clickAway(page, l1) : null;
     steps.push(["l1", l1Ms === null ? "0" : "1"], ["l1_ms", l1Ms === null ? "na" : n(l1Ms)]);
     if (l1Ms === null) defects.push(`${w.role} ${w.screen.label}: the header navigation did not open another area`);
-    else defects.push(...(await measureHere(page, w, staticPath(page.url()), [["role", w.role], ["status", "click"], ["level", "1"]], consoleErrors)).defects);
+    else defects.push(...(await measureHere(page, w, staticPath(page.url()), [["role", w.role], ["status", "click"], ["level", "1"]], consoleErrors, { clientNav: true })).defects);
     // L2, L3 — a link inside the page. A page with no such link is reported, not judged.
     for (const level of [2, 3] as const) {
       const link = l1Ms === null ? null : await innerLink(page, w.locale);
       const ms = link ? await clickAway(page, link) : null;
       steps.push([`l${level}`, link === null ? "na" : ms === null ? "0" : "1"], [`l${level}_ms`, ms === null ? "na" : n(ms)]);
-      if (ms !== null) defects.push(...(await measureHere(page, w, staticPath(page.url()), [["role", w.role], ["status", "click"], ["level", String(level)]], consoleErrors)).defects);
+      if (ms !== null) defects.push(...(await measureHere(page, w, staticPath(page.url()), [["role", w.role], ["status", "click"], ["level", String(level)]], consoleErrors, { clientNav: true })).defects);
     }
     // The AI entry: the logo is the way home, and the home is the AI conversation.
     const logo = page.getByTestId("shell-logo-home").filter({ visible: true }).first();
