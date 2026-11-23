@@ -261,7 +261,16 @@ async function registerThroughLink(browser: Browser, link: string, address: stri
   await w.goto(link);
   await w.getByTestId("invite-register").click();
   await w.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
-  await w.locator('input[type="email"]').fill(address);
+  // A join link asks for the address; an invitation ADDRESSED to one person
+  // shows it masked and read-only, and must not be typed over.
+  const invited = w.getByTestId("signup-invited-email");
+  const open = w.locator('input[type="email"]');
+  await expect(invited.or(open).first(), "the sign-up form shows its address field").toBeVisible({ timeout: 30_000 });
+  if (await invited.count()) {
+    await expect(invited, "the addressed invitation keeps its address read-only").toHaveAttribute("readonly", "");
+  } else {
+    await open.fill(address);
+  }
   await w.locator('input[name="password"]').fill(PASSWORD);
   const confirm = w.locator('input[name="confirm_password"]');
   if (await confirm.count()) await confirm.fill(PASSWORD);
