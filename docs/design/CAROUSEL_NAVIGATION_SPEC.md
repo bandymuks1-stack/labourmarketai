@@ -87,13 +87,9 @@ These are stated as gaps. No names are invented for them.
    current header (`apps/web/lib/config/navigation.ts:146-151`) shows four
    core items plus "More". That contract is out of date and is not a goal set.
 
-**Owner decision OD-1, DECIDED 2026-11-23 as (a) (§7):** the signed-in level-1 set. There are two
-options:
-- **(a)** the same six goals for everyone, with level 2 filtered by role and
-  rights;
-- **(b)** role-specific goal sets.
-
-This spec assumes neither. §6 works under both until the owner chooses.
+**OD-1, the signed-in level-1 set, DECIDED (a)** (owner P0 2026-11-23,
+§7): the same six goals for everyone, with level 2 filtered by role and
+server rights. Role-specific goal sets are not used.
 
 ---
 
