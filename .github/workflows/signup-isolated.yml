@@ -53,6 +53,9 @@ on:
       - "supabase/migrations/20261114100000_booking_refuses_closed_need_v1.sql"
       - "supabase/migrations/20261115120000_journal_learning_access_follows_link_v1.sql"
       - "supabase/migrations/20261118143000_training_assignment_engaged_groups_v1.sql"
+      - "supabase/migrations/20261122130000_rls_worker_lookup_initplan_v1.sql"
+      - "supabase/rollbacks/20261122130000_rls_worker_lookup_initplan_v1.down.sql"
+      - "supabase/tests/20261122130000_rls_worker_lookup_initplan_*"
       - "apps/web/tests/e2e/training-groups-isolated.spec.ts"
       - "apps/web/tests/e2e/journeys-coverage-isolated.spec.ts"
       - "apps/web/tests/e2e/header-desktop-fit-isolated.spec.ts"
@@ -381,6 +384,13 @@ jobs:
 
       - name: Closed need refuses an accept — concurrent close and accept
         run: bash supabase/tests/20261114100000_booking_refuses_closed_need_race.sh
+
+      # #3604: the 18 worker-lookup policies read auth.uid() once. In one rolled-back
+      # transaction: rollback body, migration, rollback, migration; the policies must
+      # differ only by the wrapping, the rollback must restore them byte for byte,
+      # and 168 reads and writes of seven actors must give the same result each time.
+      - name: Worker-lookup policies — same access before, after and after rollback
+        run: bash supabase/tests/20261122130000_rls_worker_lookup_initplan_equivalence.sh
 
       # The same heap the other build jobs give `next build` (quality.yml, e2e-smoke.yml,
       # deploy-vps.yml). Its type-check worker passes 2 GB on this code base; without the

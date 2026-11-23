@@ -471,7 +471,11 @@ function dbState(): DbState {
            (select proacl::text from pg_proc where oid = '${FN}'::regprocedure) as acl,
            p.polcmd::text as cmd, p.polpermissive as permissive,
            (select string_agg(r.rolname, ',' order by r.rolname) from pg_roles r where r.oid = any (p.polroles)) as roles,
-           pg_get_expr(p.polwithcheck, p.polrelid) as check,
+           -- #3604 (20261122130000) writes this policy's auth.uid() as (select auth.uid()):
+           -- the same value, proven equal by supabase/tests/20261122130000_rls_worker_lookup_initplan_equivalence.sh.
+           -- The replayed forward state therefore deparses it as "( SELECT auth.uid() AS uid)"; this
+           -- walk pins the 2026-10-29 text, so it reads the call back in its earlier spelling.
+           replace(pg_get_expr(p.polwithcheck, p.polrelid), '( SELECT auth.uid() AS uid)', 'auth.uid()') as check,
            md5(coalesce((select string_agg(pg_get_functiondef(f.oid), '|' order by f.oid::regprocedure::text)
                            from pg_proc f join pg_namespace n on n.oid = f.pronamespace
                           where n.nspname = 'public' and f.prokind = 'f' and f.oid <> '${FN}'::regprocedure), '')
