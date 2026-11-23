@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "I represent an education provider",
-            "desc": "Invite learners, see their participation and connect them to internships and jobs."
+            "desc": "Invite learners, run programmes and follow their practice and results."
           }
         },
         "heading": "Are you starting as a person or a company?",
@@ -15970,7 +15970,6 @@
     },
     "v3": {
       "lead": "For workers, employers and service providers in every profession and sector. Registration and basic request posting are free.",
-      "moreChoices": "More options",
       "or": "or describe it in your own words",
       "needFree": "You can submit an enquiry without registering. Submission is free; service terms and price are agreed separately.",
       "market": {
@@ -19676,17 +19675,17 @@
       "terms_await_other_side": "These are your own terms — the other side answers them.",
       "organization_offer_not_a_unit": "A company offer is not assigned as a team; agree the people in the conversation.",
       "terms_changed": "The other side has just proposed new terms. Review the latest version, then answer.",
-      "terms_missing": "There are no terms to confirm yet.",
+      "no_company": "Open the company workspace first.",
+      "unit_has_no_members": "That crew has no active members.",
+      "already_started": "The work on this offer has already started on another project.",
+      "unit_not_of_company": "This crew has no member on the offering company's people list.",
       "terms_not_agreed": "Both sides must confirm the same terms first.",
       "unit_not_named": "The company has not named its crew yet.",
       "unit_not_yours": "That crew is not one of your organization's own brigades.",
-      "unit_has_no_members": "That crew has no active members.",
       "not_an_organization_offer": "Only a company offer names a crew.",
-      "invalid_title": "The project name needs 2 to 120 characters.",
-      "no_company": "Open the company workspace first.",
+      "terms_missing": "There are no terms to confirm yet.",
       "project_not_created": "The project could not be created.",
-      "unit_not_of_company": "This crew has no member on the offering company's people list.",
-      "already_started": "The work on this offer has already started on another project."
+      "invalid_title": "The project name needs 2 to 120 characters."
     },
     "received": {
       "title": "Teams offered for this need",
@@ -19783,15 +19782,15 @@
       "proposed": "Version {version} sent.",
       "place": "Place of work",
       "placePlaceholder": "e.g. Vilnius, Žirmūnų g. 1, the client's site",
+      "confirm": "Confirm version {version}",
+      "confirmedMine": "Confirmed. Waiting for the other side.",
       "confirmNeedsTerms": "Propose the terms here. Both sides then confirm the same version.",
       "confirmNote": "Both sides confirm the same version. That records the agreed terms; it is not a signature and does not create a contract by itself.",
-      "confirm": "Confirm version {version}",
-      "confirmedByYou": "You confirmed version {version}",
-      "notConfirmedByYou": "You have not confirmed version {version}",
-      "otherConfirmed": "the other side confirmed it",
       "otherNotConfirmed": "the other side has not confirmed it yet",
+      "otherConfirmed": "the other side confirmed it",
+      "confirmedByYou": "You confirmed version {version}",
       "agreedBoth": "Agreed by both sides: version {version}",
-      "confirmedMine": "Confirmed. Waiting for the other side."
+      "notConfirmedByYou": "You have not confirmed version {version}"
     },
     "threadContext": "About the offer: {subject}",
     "messageAbout": "Re: {subject}",

@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Reprezentuję instytucję edukacyjną",
-            "desc": "Zapraszanie uczących się, wgląd w ich udział i łączenie ich z praktykami i pracą."
+            "desc": "Zapraszanie uczących się, prowadzenie programów i śledzenie ich praktyk oraz wyników."
           }
         },
         "heading": "Zaczynają Państwo jako osoba czy jako firma?",
@@ -15970,7 +15970,6 @@
     },
     "v3": {
       "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
-      "moreChoices": "Więcej opcji",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
       "market": {
@@ -19676,17 +19675,17 @@
       "terms_await_other_side": "To Państwa własne warunki — odpowiada druga strona.",
       "organization_offer_not_a_unit": "Oferta firmy nie jest przypisywana jako zespół; ludzi proszę ustalić w rozmowie.",
       "terms_changed": "Druga strona właśnie zaproponowała nowe warunki. Proszę sprawdzić najnowszą wersję, a potem odpowiedzieć.",
-      "terms_missing": "Nie ma jeszcze warunków do potwierdzenia.",
+      "no_company": "Proszę najpierw otworzyć przestrzeń firmy.",
+      "unit_has_no_members": "Ta brygada nie ma aktywnych członków.",
+      "already_started": "Prace w ramach tej oferty zostały już rozpoczęte w innym projekcie.",
+      "unit_not_of_company": "Ta brygada nie ma żadnego członka z listy osób firmy składającej ofertę.",
       "terms_not_agreed": "Najpierw obie strony muszą potwierdzić te same warunki.",
       "unit_not_named": "Firma nie wskazała jeszcze swojej brygady.",
       "unit_not_yours": "Ta brygada nie należy do Państwa organizacji.",
-      "unit_has_no_members": "Ta brygada nie ma aktywnych członków.",
       "not_an_organization_offer": "Brygadę wskazuje tylko oferta firmy.",
-      "invalid_title": "Nazwa projektu musi mieć od 2 do 120 znaków.",
-      "no_company": "Proszę najpierw otworzyć przestrzeń firmy.",
+      "terms_missing": "Nie ma jeszcze warunków do potwierdzenia.",
       "project_not_created": "Nie udało się utworzyć projektu.",
-      "unit_not_of_company": "Ta brygada nie ma żadnego członka z listy osób firmy składającej ofertę.",
-      "already_started": "Prace w ramach tej oferty zostały już rozpoczęte w innym projekcie."
+      "invalid_title": "Nazwa projektu musi mieć od 2 do 120 znaków."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
@@ -19783,15 +19782,15 @@
       "proposed": "Wersja {version} wysłana.",
       "place": "Miejsce pracy",
       "placePlaceholder": "np. Wilno, ul. Žirmūnų 1, budowa klienta",
+      "confirm": "Potwierdź wersję {version}",
+      "confirmedMine": "Potwierdzone. Oczekiwanie na drugą stronę.",
       "confirmNeedsTerms": "Proszę zaproponować tu warunki. Następnie obie strony potwierdzają tę samą wersję.",
       "confirmNote": "Obie strony potwierdzają tę samą wersję. W ten sposób zapisane zostają uzgodnione warunki; nie jest to podpis i samo w sobie nie tworzy umowy.",
-      "confirm": "Potwierdź wersję {version}",
-      "confirmedByYou": "Potwierdzili Państwo wersję {version}",
-      "notConfirmedByYou": "Nie potwierdzili Państwo jeszcze wersji {version}",
-      "otherConfirmed": "druga strona ją potwierdziła",
       "otherNotConfirmed": "druga strona jeszcze jej nie potwierdziła",
+      "otherConfirmed": "druga strona ją potwierdziła",
+      "confirmedByYou": "Potwierdzili Państwo wersję {version}",
       "agreedBoth": "Uzgodnione przez obie strony: wersja {version}",
-      "confirmedMine": "Potwierdzone. Oczekiwanie na drugą stronę."
+      "notConfirmedByYou": "Nie potwierdzili Państwo jeszcze wersji {version}"
     },
     "threadContext": "Dotyczy oferty: {subject}",
     "messageAbout": "Dotyczy oferty: {subject}",

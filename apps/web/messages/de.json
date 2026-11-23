@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Ich vertrete eine Bildungseinrichtung",
-            "desc": "Laden Sie Lernende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit Praktika und Jobs."
+            "desc": "Laden Sie Lernende ein, führen Sie Programme durch und verfolgen Sie Praxis und Ergebnisse."
           }
         },
         "heading": "Starten Sie als Person oder als Unternehmen?",
@@ -15970,7 +15970,6 @@
     },
     "v3": {
       "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
-      "moreChoices": "Weitere Optionen",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
       "market": {
@@ -19676,17 +19675,17 @@
       "terms_await_other_side": "Das sind Ihre eigenen Bedingungen — die andere Seite antwortet.",
       "organization_offer_not_a_unit": "Ein Unternehmensangebot wird nicht als Team zugewiesen; klären Sie die Personen im Gespräch.",
       "terms_changed": "Die andere Seite hat gerade neue Bedingungen vorgeschlagen. Prüfen Sie die neueste Version und antworten Sie dann.",
-      "terms_missing": "Es gibt noch keine Bedingungen zu bestätigen.",
+      "no_company": "Öffnen Sie zuerst den Unternehmensbereich.",
+      "unit_has_no_members": "Diese Kolonne hat keine aktiven Mitglieder.",
+      "already_started": "Die Arbeit zu diesem Angebot wurde bereits in einem anderen Projekt begonnen.",
+      "unit_not_of_company": "Diese Kolonne hat kein Mitglied auf der Personenliste des anbietenden Unternehmens.",
       "terms_not_agreed": "Zuerst müssen beide Seiten dieselben Bedingungen bestätigen.",
       "unit_not_named": "Das Unternehmen hat seine Kolonne noch nicht benannt.",
       "unit_not_yours": "Diese Kolonne gehört nicht zu Ihrer eigenen Organisation.",
-      "unit_has_no_members": "Diese Kolonne hat keine aktiven Mitglieder.",
       "not_an_organization_offer": "Nur ein Unternehmensangebot benennt eine Kolonne.",
-      "invalid_title": "Der Projektname braucht 2 bis 120 Zeichen.",
-      "no_company": "Öffnen Sie zuerst den Unternehmensbereich.",
+      "terms_missing": "Es gibt noch keine Bedingungen zu bestätigen.",
       "project_not_created": "Das Projekt konnte nicht angelegt werden.",
-      "unit_not_of_company": "Diese Kolonne hat kein Mitglied auf der Personenliste des anbietenden Unternehmens.",
-      "already_started": "Die Arbeit zu diesem Angebot wurde bereits in einem anderen Projekt begonnen."
+      "invalid_title": "Der Projektname braucht 2 bis 120 Zeichen."
     },
     "received": {
       "title": "Für diesen Bedarf angebotene Teams",
@@ -19783,15 +19782,15 @@
       "proposed": "Version {version} gesendet.",
       "place": "Arbeitsort",
       "placePlaceholder": "z. B. Vilnius, Žirmūnų g. 1, Baustelle des Kunden",
+      "confirm": "Version {version} bestätigen",
+      "confirmedMine": "Bestätigt. Warten auf die andere Seite.",
       "confirmNeedsTerms": "Schlagen Sie hier die Bedingungen vor. Danach bestätigen beide Seiten dieselbe Version.",
       "confirmNote": "Beide Seiten bestätigen dieselbe Version. Damit werden die vereinbarten Bedingungen festgehalten; das ist keine Unterschrift und begründet für sich keinen Vertrag.",
-      "confirm": "Version {version} bestätigen",
-      "confirmedByYou": "Sie haben Version {version} bestätigt",
-      "notConfirmedByYou": "Sie haben Version {version} noch nicht bestätigt",
-      "otherConfirmed": "die andere Seite hat sie bestätigt",
       "otherNotConfirmed": "die andere Seite hat sie noch nicht bestätigt",
+      "otherConfirmed": "die andere Seite hat sie bestätigt",
+      "confirmedByYou": "Sie haben Version {version} bestätigt",
       "agreedBoth": "Von beiden Seiten vereinbart: Version {version}",
-      "confirmedMine": "Bestätigt. Warten auf die andere Seite."
+      "notConfirmedByYou": "Sie haben Version {version} noch nicht bestätigt"
     },
     "threadContext": "Zum Angebot: {subject}",
     "messageAbout": "Betrifft Angebot: {subject}",

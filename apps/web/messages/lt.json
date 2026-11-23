@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Atstovauju mokymo įstaigai",
-            "desc": "Kvieskite besimokančiuosius, matykite jų dalyvavimą ir junkite juos prie praktikų ir darbų."
+            "desc": "Kvieskite besimokančiuosius, vykdykite programas ir sekite jų praktiką bei rezultatus."
           }
         },
         "heading": "Pradedate kaip asmuo ar įmonė?",
@@ -15970,7 +15970,6 @@
     },
     "v3": {
       "lead": "Darbuotojams, darbdaviams ir paslaugų teikėjams – visų profesijų ir sektorių. Registracija ir pagrindinis poreikio skelbimas nemokami.",
-      "moreChoices": "Daugiau pasirinkimų",
       "or": "arba aprašykite savo žodžiais",
       "needFree": "Užklausą galite pateikti be registracijos. Pateikimas nemokamas; paslaugų sąlygos ir kaina derinamos atskirai.",
       "market": {
@@ -19676,17 +19675,17 @@
       "terms_await_other_side": "Tai jūsų sąlygos — atsako kita pusė.",
       "organization_offer_not_a_unit": "Įmonės pasiūlymas nepriskiriamas kaip komanda; žmones suderinkite pokalbyje.",
       "terms_changed": "Kita pusė ką tik pasiūlė naujas sąlygas. Peržiūrėkite naujausią versiją ir tada atsakykite.",
-      "terms_missing": "Patvirtinti dar nėra ką: sąlygos nepasiūlytos.",
+      "no_company": "Pirmiausia atidarykite įmonės darbo erdvę.",
+      "unit_has_no_members": "Ši brigada neturi aktyvių narių.",
+      "already_started": "Darbai pagal šį pasiūlymą jau pradėti kitame projekte.",
+      "unit_not_of_company": "Šioje brigadoje nėra nė vieno nario iš siūlančios įmonės žmonių sąrašo.",
       "terms_not_agreed": "Pirmiausia abi šalys turi patvirtinti tas pačias sąlygas.",
       "unit_not_named": "Įmonė dar nenurodė savo brigados.",
       "unit_not_yours": "Ši brigada nėra Jūsų organizacijos brigada.",
-      "unit_has_no_members": "Ši brigada neturi aktyvių narių.",
       "not_an_organization_offer": "Brigadą nurodo tik įmonės pasiūlymas.",
-      "invalid_title": "Projekto pavadinimas turi būti nuo 2 iki 120 simbolių.",
-      "no_company": "Pirmiausia atidarykite įmonės darbo erdvę.",
+      "terms_missing": "Patvirtinti dar nėra ką: sąlygos nepasiūlytos.",
       "project_not_created": "Projekto sukurti nepavyko.",
-      "unit_not_of_company": "Šioje brigadoje nėra nė vieno nario iš siūlančios įmonės žmonių sąrašo.",
-      "already_started": "Darbai pagal šį pasiūlymą jau pradėti kitame projekte."
+      "invalid_title": "Projekto pavadinimas turi būti nuo 2 iki 120 simbolių."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
@@ -19783,15 +19782,15 @@
       "proposed": "{version} versija išsiųsta.",
       "place": "Darbų vieta",
       "placePlaceholder": "pvz. Vilnius, Žirmūnų g. 1, užsakovo objektas",
+      "confirm": "Patvirtinti {version} versiją",
+      "confirmedMine": "Patvirtinta. Laukiama kitos šalies.",
       "confirmNeedsTerms": "Pasiūlykite sąlygas čia. Tada abi šalys patvirtina tą pačią versiją.",
       "confirmNote": "Abi šalys patvirtina tą pačią versiją. Taip užfiksuojamos suderintos sąlygos; tai nėra parašas ir savaime nesukuria sutarties.",
-      "confirm": "Patvirtinti {version} versiją",
-      "confirmedByYou": "Jūs patvirtinote {version} versiją",
-      "notConfirmedByYou": "Jūs dar nepatvirtinote {version} versijos",
-      "otherConfirmed": "kita šalis ją patvirtino",
       "otherNotConfirmed": "kita šalis jos dar nepatvirtino",
+      "otherConfirmed": "kita šalis ją patvirtino",
+      "confirmedByYou": "Jūs patvirtinote {version} versiją",
       "agreedBoth": "Abiejų šalių suderinta: {version} versija",
-      "confirmedMine": "Patvirtinta. Laukiama kitos šalies."
+      "notConfirmedByYou": "Jūs dar nepatvirtinote {version} versijos"
     },
     "threadContext": "Pokalbis apie pasiūlymą: {subject}",
     "messageAbout": "Dėl pasiūlymo: {subject}",

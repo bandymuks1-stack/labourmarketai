@@ -1,80 +1,43 @@
 import type { ReactNode } from "react";
 
-import { Accented, EvidenceBar, Eyebrow, LevelMark, RegionHead, Stamp, type EvidenceLevel } from "@/components/app/premium/grammar";
+import { Accented, Eyebrow } from "@/components/app/premium/grammar";
 
 /**
- * THE LIVING CV — a working life as a reader asks about it (frozen premium
- * design class 4e695e261, ported as grammar onto canonical data):
+ * THE LIVING CV'S IDENTITY MOMENT — who this is, before anything is listed
+ * (frozen premium design class 4e695e261, ported as grammar onto canonical
+ * data): the name, the professions, the headline figures, and the
+ * organizations the person leads.
  *
- *   WHO (identity moment) → WHAT they can do → WHERE and with whom they did it
- *
- * Every line appears only when there is something true to say; a thin CV is
- * thin, never padded. Evidence is a quiet property of each line (a mark, a
- * bar and the same numbers in words), never a table of its own. Leadership of
- * an organization is rendered by the page beside this, never as hours here.
+ * WHAT IT DOES NOT LIST (owner P0 2026-11-23, "CV skills and work experience
+ * shown twice"): skills and work history. They used to have regions here
+ * ("What you can do", "Where you have worked") built from the same rows the
+ * page's own sections list below — so every skill and every job stood twice
+ * on one screen, and the skill region was a second presentation beside the
+ * canonical one (no claim folding, eight items then "+N more"). Each skill
+ * and each job is now listed ONCE, by the page's sections: skills through
+ * `presentSkills` (lib/cv-export/skill-presentation.ts, with the potential
+ * capabilities of decision 0023), history through the one experience reading
+ * (lib/journal/professional-experience.ts, decision 0025). Pinned by
+ * lib/guards/cv-each-item-once.test.ts.
  *
  * Pure and i18n-agnostic: the page passes resolved strings.
  */
 
 export type PremiumCvFact = { readonly value: string; readonly label: string };
 
-export type PremiumCvCapability = {
-  readonly key: string;
-  readonly label: string;
-  readonly level: EvidenceLevel;
-  /** Hours the person's records attribute to the skill; null = none recorded. */
-  readonly hours: number | null;
-  readonly confirmedHours: number;
-  /** Already-localised "12 h confirmed · 40 h recorded" (also the bar's label). */
-  readonly evidenceText: string;
-};
-
-export type PremiumCvExperience = {
-  readonly key: string;
-  /** Formatted "06/2025 – 11/2025" / "03/2024 – now"; null when undated. */
-  readonly period: string | null;
-  readonly title: string;
-  readonly subtitle: string | null;
-  /** "800 h stated as a period total · organisation records", already localised. */
-  readonly detail: string | null;
-  /** Where the line comes from, already localised ("Your record", "Organisation records"). */
-  readonly source: string;
-  readonly level: EvidenceLevel;
-  readonly current: boolean;
-};
-
 export function PremiumLivingCv({
   name,
   eyebrow,
   summary,
   facts,
-  capabilities,
-  capabilitiesHead,
-  experience,
-  experienceHead,
-  hiddenCapabilities,
-  moreLabel,
-  emptyCapabilities,
-  emptyExperience,
   leadership,
-  formatHours = (h) => `${Math.round(h)} h`,
 }: {
   readonly name: string;
   readonly eyebrow: string;
   readonly summary: string | null;
   readonly facts: readonly PremiumCvFact[];
-  readonly capabilities: readonly PremiumCvCapability[];
-  readonly capabilitiesHead: { readonly eyebrow: string; readonly title: string };
-  readonly experience: readonly PremiumCvExperience[];
-  readonly experienceHead: { readonly eyebrow: string; readonly title: string };
-  readonly hiddenCapabilities: number;
-  readonly moreLabel: string;
-  readonly emptyCapabilities: string;
-  readonly emptyExperience: string;
   /** The page's "organizations you lead" region, when there is one. */
   readonly leadership?: ReactNode;
-  /** Whole hours in the reader's unit ("8 ч" in RU, "8 val." in LT). */
-  readonly formatHours?: (hours: number) => string;
 }) {
   // Exactly ONE accent word (the grammar's rule): the last word of the name.
   const parts = name.trim().split(/\s+/);
@@ -106,72 +69,6 @@ export function PremiumLivingCv({
             ))}
           </dl>
         ) : null}
-      </section>
-
-      {/* WHAT THEY CAN DO */}
-      <section className="flex flex-col gap-4" data-testid="premium-cv-capabilities">
-        <RegionHead eyebrow={capabilitiesHead.eyebrow} title={capabilitiesHead.title} className="mb-2" />
-        {capabilities.length === 0 ? (
-          <p className="text-sm text-text-secondary">{emptyCapabilities}</p>
-        ) : (
-          <ul className="flex flex-col">
-            {capabilities.map((c) => (
-              <li
-                key={c.key}
-                data-level={c.level}
-                className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 border-t border-text-primary/10 py-3.5 first:border-t-0 sm:grid-cols-[1fr_5.5rem_12rem_4.5rem]"
-              >
-                <span className="flex items-center gap-3 text-[1rem] font-medium text-text-primary">
-                  <LevelMark level={c.level} />
-                  {c.label}
-                </span>
-                <span className="max-sm:hidden">
-                  <EvidenceBar
-                    confirmed={c.confirmedHours}
-                    recorded={Math.max((c.hours ?? 0) - c.confirmedHours, 0)}
-                    width={80}
-                    label={c.evidenceText}
-                  />
-                </span>
-                <span className="text-meta text-text-muted max-sm:order-3 max-sm:col-span-2">{c.evidenceText}</span>
-                <span className="text-right font-display text-[1rem] font-semibold tabular-nums text-text-secondary">
-                  {c.hours !== null && c.hours > 0 ? formatHours(c.hours) : "—"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        {hiddenCapabilities > 0 ? <p className="text-support text-text-muted">{moreLabel}</p> : null}
-      </section>
-
-      {/* WHERE AND WITH WHOM */}
-      <section className="flex flex-col gap-4" data-testid="premium-cv-experience">
-        <RegionHead eyebrow={experienceHead.eyebrow} title={experienceHead.title} className="mb-2" />
-        {experience.length === 0 ? (
-          <p className="text-sm text-text-secondary">{emptyExperience}</p>
-        ) : (
-          <ol className="flex flex-col">
-            {experience.map((e) => (
-              <li
-                key={e.key}
-                data-level={e.level}
-                className={`grid grid-cols-1 gap-x-6 gap-y-1.5 border-t border-text-primary/10 py-5 first:border-t-0 ${e.period ? "md:grid-cols-[9.5rem_1fr]" : ""}`}
-                data-testid="premium-cv-experience-row"
-              >
-                {e.period ? <Stamp className="pt-1">{e.period}</Stamp> : null}
-                <div className="flex min-w-0 flex-col gap-1">
-                  <p className="flex items-center gap-2.5 text-[1.02rem] font-medium leading-snug text-text-primary">
-                    <LevelMark level={e.level} />
-                    {e.title}
-                  </p>
-                  {e.subtitle ? <p className="text-support text-text-secondary">{e.subtitle}</p> : null}
-                  {e.detail ? <p className="text-meta text-text-muted">{e.detail}</p> : null}
-                  <Stamp className="!text-[0.66rem]">{e.source}</Stamp>
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
       </section>
 
       {leadership}
