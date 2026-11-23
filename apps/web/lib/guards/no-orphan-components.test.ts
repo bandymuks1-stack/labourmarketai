@@ -1,5 +1,5 @@
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { dirname, join, relative, resolve, sep } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -20,6 +20,9 @@ import { describe, expect, it } from "vitest";
  */
 
 const WEB = join(__dirname, "..", "..");
+
+/** Repo-relative path with forward slashes, so the lists match on Windows too. */
+const relWeb = (p: string) => relative(WEB, p).split(sep).join("/");
 const PRODUCT_DIRS = ["app", "lib", "components", "content"];
 
 /** Known orphans on main, 2026-11-23. Shrink only. */
@@ -108,18 +111,18 @@ function productImported(): Set<string> {
   const imported = new Set<string>();
   const sources = PRODUCT_DIRS.filter((d) => existsSync(join(WEB, d))).flatMap((d) => walk(join(WEB, d)));
   for (const file of sources) {
-    if (isTestPath(relative(WEB, file))) continue;
+    if (isTestPath(relWeb(file))) continue;
     const src = readFileSync(file, "utf8");
     for (const m of src.matchAll(SPECIFIER)) {
       const target = resolveSpecifier(file, m[1]);
-      if (target && target !== file) imported.add(relative(WEB, target));
+      if (target && target !== file) imported.add(relWeb(target));
     }
   }
   return imported;
 }
 
 const COMPONENTS = walk(join(WEB, "components"))
-  .map((p) => relative(WEB, p))
+  .map((p) => relWeb(p))
   .filter((rel) => !isTestPath(rel))
   .sort();
 const IMPORTED = productImported();
