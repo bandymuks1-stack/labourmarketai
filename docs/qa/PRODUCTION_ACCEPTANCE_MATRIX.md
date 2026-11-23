@@ -44,19 +44,24 @@ Chain: registration → CV → search → apply → message → offer → hire �
 
 Chain: company sign-up → need → candidate and brigade offers → agreement → hire or order → project → work accounting.
 
-| Step | Status | Production runs | Notes |
-|---|---|---|---|
-| Company sign-up | PASS | fresh-activation desktop · 44901160408 · eed72052 · 86 | A brand-new company goes through onboarding, then the company. |
-| Need | PASS | company-chain desktop · 44858511879 · d447a639 · 88 (C-0b)<br>company-chain phone · 44859165488 · d447a639 · 88<br>company-chain phone-375 · 44882509064 · eed72052 · 86<br>need-intake desktop · 44642526482 · 7e517e32 · 104<br>need-intake phone · 44643169770 · 104<br>need-intake phone-375 · 44643949860 · 104 | |
-| Candidate offers | PASS | company-chain (C-2 to C-4, U-3) | |
-| Brigade offers | PASS | brigade-formation desktop · 44906216102 · eed72052 · 86 (B2B-2 to B2B-7) | |
-| Agreement | PASS | orders-bookings (O-5 to O-7); brigade-formation (B2B-6, B2B-7) | |
-| Hire | PASS | orders-bookings desktop and phone · 45049554634 / 45052181467 · 33 (O-9 to O-11) | |
-| Order (service request) | PASS | marketplace-goods-services desktop · 44967795943 · eed72052 · 86 (S-1 to S-4) | |
-| Project | PASS | project-execution desktop · 44906961206 · eed72052 · 86 (E-1 to E-5, E-12); brigade-formation (B2B-7 to B2B-9) | Direct hire → project → hours is LOCAL only: `hiring-chain-isolated` (lane C, #3611). |
-| Work accounting | PASS | company-chain (H-2); project-execution (E-11); org-roster desktop and phone · 44905313755 / 44905801746 · 86 | |
+Lane C supplied this section for #3679 on 2026-11-23 at about 05:20 UTC, read from GitHub Actions.
 
-Lane C's own chain detail, sent for #3679, replaces this section where it differs.
+**No single production run covers the whole employer chain end to end.** Each step is covered by the walk named in its row.
+
+| Step | Status | Production runs (spec device · run · build · behind) | Notes |
+|---|---|---|---|
+| Company sign-up | PASS / LOCAL | fresh-activation desktop · 44901160408 · eed72052 · 86 | LOCAL: `employer-journey-isolated` E-1 and E-2 (sign-up, company profile) at 1440 and 390, signup-isolated runs 45077346479 (#3675) and 45086260914 (#3647). |
+| Need | PASS | company-chain desktop · 44858511879 · d447a639 · 88 (C-0b)<br>company-chain phone · 44859165488 · d447a639 · 88<br>company-chain phone-375 · 44882509064 · eed72052 · 86 | An earlier phone-375 run, 44859841951, failed and is superseded by 44882509064. The public form `need-intake` last completed on 11-20 (desktop 44642526482, phone 44643169770, phone-375 44643949860, all 104 behind). It does not appear among the 60 most recent dispatches, so re-dispatch it before claiming the current build. |
+| Candidate offers (hand-raiser, contact) | PASS | company-chain (C-1 to C-4, H-1, H-2) | |
+| Shortlist | PASS | company-talent-history desktop · 44975633092 · eed72052 · 86 (K-1 to K-5) | The note is internal; the worker and other organizations see nothing. |
+| Brigade offers | PASS | brigade-formation desktop · 44906216102 · eed72052 · 86 | A brigade is formed and the B2B need intake goes through. |
+| Agreement | PASS | orders-bookings desktop · 45049554634 · ed4ecf85 · 33 (O-1 to O-6)<br>orders-bookings phone · 45052181467 · ed4ecf85 · 33 | The booking is proposed, withdrawn and re-dated, then the worker accepts and the conversation continues. The PR-only flow is RED and not applied: the company offer, both parties confirming terms, then the crew and the project (#3649). |
+| Hire | PASS | orders-bookings (O-9 to O-11) | A direct hire opens no employer `engagement_context` (`20260928220000`). Its day is accepted by the company as the client, at `/dashboard/inbox/counterparty`. |
+| Order (buyer workspace) | PASS | buyer-workspace desktop · 45094390854 · ee29a3b7 · 6 | Two earlier failures are superseded. 44971584269 failed because the walk never chose the required country (fixed by #3589). 45003241107 was stopped by the deploy-quiet brake, and no test ran. |
+| Project | PASS / LOCAL | project-execution desktop · 44906961206 · eed72052 · 86 (E-1 to E-6)<br>project-context desktop · 44907816401 · eed72052 · 86 | E-1 to E-6 create the project, stages and tasks, assign a worker and issue the clash receipt. LOCAL: `employer-journey-isolated` E-9 (project and assignment); `hiring-chain-isolated` (direct hire → project, #3611). |
+| Work accounting | PASS / LOCAL | journal-confirm desktop · 44902949287 · eed72052 · 86<br>journal-confirm phone · 44903366199 · eed72052 · 86<br>org-roster desktop · 44905313755 · 86<br>org-roster phone · 44905801746 · 86 | journal-confirm: the worker records the day, the employer approves it, and the worker sees it confirmed. org-roster: roster import, on- and offboarding, instruction, asset and isolation. LOCAL: `employer-journey-isolated` E-10 (a journal day accepted by the company as the client). |
+
+Also in open PRs, RED and not applied: agency named candidates (#3651), messaging on an open need (#3647) and provider pseudonyms (#3657).
 
 ## Agency — Lane H
 
