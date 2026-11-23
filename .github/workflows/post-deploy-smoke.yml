@@ -286,3 +286,34 @@ jobs:
             echo "**The build changed during the signed-in smoke (now \`${after:-unreadable or not ok}\`): this run records nothing.**" >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
+
+  # ONE ISSUE FOR A RED DEPLOY (owner order 2026-11-23). After both halves, never
+  # on a pull request: a red smoke opens the issue, or adds to the one already
+  # open, with the deploy SHA and the pull requests merged since the last green
+  # smoke, so the regression is traced to its change. A green smoke closes it.
+  # It reads GitHub only. No data is rolled back; a code rollback is a human
+  # decision (.github/scripts/post-deploy-regression-issue.sh).
+  report:
+    needs: [smoke, signed-in]
+    if: always() && github.event_name != 'pull_request' && (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      actions: read # the last green run of this workflow
+      issues: write # the one regression issue
+    steps:
+      - name: Checkout (full history, to list the merges since the last green smoke)
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Open, update or close the regression issue
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SMOKE: ${{ needs.smoke.result }}
+          SIGNED_IN: ${{ needs.signed-in.result }}
+          BUILD: ${{ needs.smoke.outputs.build }}
+          DEPLOY_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash .github/scripts/post-deploy-regression-issue.sh
