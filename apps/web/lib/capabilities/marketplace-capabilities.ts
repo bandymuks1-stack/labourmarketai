@@ -283,10 +283,18 @@ function makeShortlistPair(op: ShortlistOp): [CapabilityDescriptor, CapabilityDe
         }
       : { status: "not_fit", note: d.reason as string };
 
-  /** The token binds "keep" and "clear" as DIFFERENT drafts. */
+  /** The token binds "keep", "clear" and "set" as DIFFERENT drafts — the
+   *  operation is its own field, so no note text can stand in for "keep". */
   const normalized = (d: Record<string, unknown>) => {
     const i = intended(d);
-    return { requestId: d.requestId, workerId: d.workerId, status: i.status, note: i.note === undefined ? "__keep__" : i.note };
+    const noteChange: "keep" | "clear" | "set" = i.note === undefined ? "keep" : i.note === null ? "clear" : "set";
+    return {
+      requestId: d.requestId,
+      workerId: d.workerId,
+      status: i.status,
+      noteChange,
+      note: i.note ?? null,
+    };
   };
 
   /** Everything the draft checks, re-checked at confirm. */
@@ -360,8 +368,8 @@ function makeShortlistPair(op: ShortlistOp): [CapabilityDescriptor, CapabilityDe
             workerId: n.workerId,
             decision: n.status,
             // What happens to the stored note, in plain terms.
-            note: n.note === "__keep__" ? null : n.note,
-            noteChange: n.note === "__keep__" ? "keep" : n.note === null ? "clear" : "set",
+            note: n.note,
+            noteChange: n.noteChange,
           },
           confirmationToken: token,
           note: `Nothing was written. Confirming requires ${confirmId} with this exact input and token.`,

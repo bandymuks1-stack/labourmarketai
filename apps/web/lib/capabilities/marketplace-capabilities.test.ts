@@ -184,6 +184,23 @@ describe("shortlist: role, not membership, admits a colleague", () => {
     expect((shortlistWrite.mock.calls[0][2] as { note?: unknown }).note).toBeUndefined();
   });
 
+  it("AI-1 / Codex P2: no note text can stand in for \"keep\" — a literal \"__keep__\" is a note, not a keep", async () => {
+    const caller = makeCaller(colleaguesNeed());
+    shortlistWrite.mockClear();
+    const keepDraft = await cap("shortlist.add_draft").run(caller, { requestId: REQ, workerId: WORKER });
+    const keepToken = keepDraft.ok ? (keepDraft.data as { confirmationToken: string }).confirmationToken : "";
+    const forged = await cap("shortlist.add_confirm").run(caller, {
+      requestId: REQ,
+      workerId: WORKER,
+      note: "__keep__",
+      confirmationToken: keepToken,
+    });
+    expect(forged.ok === false && forged.code).toBe("confirmation_rejected");
+    expect(shortlistWrite).not.toHaveBeenCalled();
+    const literal = await cap("shortlist.add_draft").run(caller, { requestId: REQ, workerId: WORKER, note: "__keep__" });
+    expect(literal.ok && (literal.data as { preview: { noteChange: string } }).preview.noteChange).toBe("set");
+  });
+
   it("remove needs the person to be on the shortlist, and writes not_fit with the reason", async () => {
     const script = colleaguesNeed();
     const r1 = await cap("shortlist.remove_draft").run(makeCaller(script), { requestId: REQ, workerId: WORKER, reason: "no licence" });
