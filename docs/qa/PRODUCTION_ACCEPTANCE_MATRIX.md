@@ -161,6 +161,14 @@ Each cell is the newest production run for that step: spec · run · behind. GAP
 
 Gaps to close: step 2 for every group (dispatch request-doors and public-market-direction); step 1 for agency, subcontractor and institution; step 6 for student and institution; step 5 for student. Step 7 is partly covered until ux-metrics runs on this build.
 
+Further gaps from Lane D (2026-11-23):
+
+- The personal service lane has nothing after a request is accepted: no terms, execution or report. #3697 (draft) states this under accepted requests.
+- No production walk moves a learner into a worker profile with the learning history kept. This adds to the student's step 6 gap.
+- The education sign-up choice promised that the institution connects learners to internships and jobs, but no such door exists. #3700 corrects the line in every locale.
+
+D's result files also confirm two per-step counts: marketplace-goods-services desktop 44967795943 passed 14/14 (G-1 to G-9, S-1 to S-5), and buyer-workspace desktop 45094390854 passed 10/10 (B-0 to B-8).
+
 ## Walk plan for today
 
 The daily budget is 24 walks in a rolling 24 h. At 10:30 UTC about 14 have reached production in the window, so about 10 are free now. Four more free up after 17:56 UTC, and six after 02:10 UTC tomorrow. Each window starts only after the coordinator confirms no merge batch is deploying (brake e).
