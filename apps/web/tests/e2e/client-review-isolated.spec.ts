@@ -385,9 +385,17 @@ async function newClient(
 /** A's owner offers the crew against a client's need with its terms; the client accepts those
  *  terms and hands the crew off onto its own project (lib/company/team-offer.ts, the same RPCs). */
 async function crewToClient(client: string, needId: string, projectId: string, terms: string): Promise<{ offerId: string }> {
+  // A provider sees and offers on its own order pseudonym only (20261122223000); the alias the
+  // board gave A's crew is found with the service role, never by the provider.
+  const board = await rpcOk<Array<{ request_id: string }>>(OA, "list_open_demand_for_team_offer_v1", { p_team_org_id: s.teamId });
+  expect(board.map((r) => r.request_id), "the board never carries the real need id").not.toContain(needId);
+  const alias = sql<{ alias: string }>(
+    `select alias::text from public.provider_need_aliases where provider_org_id = ${lit(s.teamId)} and request_id = ${lit(needId)}`,
+  )[0]?.alias;
+  expect(board.map((r) => r.request_id), "the need is on A's crew's board under its pseudonym").toContain(alias);
   const offer = await rpcOk<{ outcome: string; offer_id: string }>(OA, "offer_team_to_demand_v1", {
     p_team_org_id: s.teamId,
-    p_request_id: needId,
+    p_request_id: alias,
     p_note: null,
   });
   expect(offer.outcome).toBe("created");
