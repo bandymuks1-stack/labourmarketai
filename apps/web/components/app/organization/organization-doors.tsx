@@ -19,11 +19,12 @@ import { ORGANIZATION_DOOR_ICONS } from "@/lib/navigation/nav-card-icons";
  * active one.
  *
  * Drawn on the ONE rail, `CardRail` (spec N7, Option A of
- * docs/design/CAROUSEL_NAVIGATION_SPEC.md §8.2): one row at every width that
- * snaps, the next door peeking and the dots under it on phones, arrows on wide
- * screens when the row overflows. No door is hidden behind a menu
- * (constitution §13). The current door is brought into view without moving
- * the page.
+ * docs/design/CAROUSEL_NAVIGATION_SPEC.md §8.2), in the same one-row `strip`
+ * size as the six-goal strip above it (N5): 44 px pills that snap, the next
+ * door cut at the edge, arrows on wide screens when the row overflows. Full
+ * cards here put ~160 px of doors on every organisation page of a phone.
+ * No door is hidden behind a menu (constitution §13). The current door is
+ * brought into view without moving the page.
  */
 export type OrganizationDoorItem = {
   readonly id: OrganizationDoorId;
@@ -72,7 +73,7 @@ export function OrganizationDoors({
       <CardRail
         label={ariaLabel}
         cards={cards}
-        size="regular"
+        size="strip"
         activeId={activeId}
         swipeHint={swipeHint}
         prevLabel={prevLabel}

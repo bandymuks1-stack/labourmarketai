@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { ORGANIZATION_DOOR_ROUTES, organizationDoorLabelKey } from "@/lib/company/organization-doors";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
@@ -64,5 +66,13 @@ describe("the two organization door lists agree", () => {
     expect(new Set(routes).size).toBe(routes.length);
     expect(ORGANIZATION_DOOR_ROUTES.calendar).toBe("/dashboard/planning");
     expect(area.get("capacity")).toBe("/dashboard/company/planning");
+  });
+});
+
+describe("the doors are one row, the same size as the goal strip (N7 on N5)", () => {
+  it("OrganizationDoors draws CardRail in the strip size, never full cards", () => {
+    const src = readFileSync(join(__dirname, "../../components/app/organization/organization-doors.tsx"), "utf8");
+    expect(src).toMatch(/<CardRail[\s\S]*?size="strip"/);
+    expect(src).not.toMatch(/size="(regular|compact)"/);
   });
 });
