@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -20,6 +20,9 @@ import { foldText } from "@/lib/structuring/normalize";
  */
 
 const WEB = join(__dirname, "..", "..");
+
+/** Repo-relative path with forward slashes, so the lists match on Windows too. */
+const relWeb = (p: string) => relative(WEB, p).split(sep).join("/");
 
 const MOVED_TO_FOLD_TEXT = [
   "lib/conversation/correct-work-model.ts",
@@ -66,7 +69,7 @@ function walk(dir: string, out: string[] = []): string[] {
 
 const WITH_LOCAL_STRIP = ["app", "lib", "components"]
   .flatMap((d) => walk(join(WEB, d)))
-  .map((p) => relative(WEB, p))
+  .map((p) => relWeb(p))
   .filter((rel) => !rel.includes("/guards/") && NFD_STRIP.test(readFileSync(join(WEB, rel), "utf8")))
   .sort();
 
