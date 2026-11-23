@@ -211,24 +211,38 @@ const SCREENS = [
  * career-journey diagram is excluded, as above (a drawing, not a listing).
  */
 async function shownCount(p: Page, needle: string): Promise<number> {
+  return (await shownWhere(p, needle)).length;
+}
+
+/** Where each visible copy of `needle` sits: the chain of the nearest
+ *  data-testid / id ancestors, so a failure names the doubling block. */
+async function shownWhere(p: Page, needle: string): Promise<string[]> {
   return p.evaluate((n) => {
+    const where = (el: Element) => {
+      const chain: string[] = [el.tagName.toLowerCase()];
+      for (let a: Element | null = el; a && chain.length < 5; a = a.parentElement) {
+        const tag = a.getAttribute("data-testid") ?? (a.id ? `#${a.id}` : null);
+        if (tag) chain.push(tag);
+      }
+      return chain.join(" < ");
+    };
     const visible = (el: Element) => {
       if (!el.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })) return false;
       const r = el.getBoundingClientRect();
       return r.width > 1 && r.height > 1;
     };
     const skip = 'option, select, script, style, template, [role="option"], [role="listbox"], [data-testid="cv-journey"]';
-    let count = 0;
+    const found: string[] = [];
     const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
     for (let t = walker.nextNode(); t; t = walker.nextNode()) {
       const el = t.parentElement;
       if (!el || !t.textContent?.includes(n) || el.closest(skip) || !visible(el)) continue;
-      count += 1;
+      found.push(where(el));
     }
     for (const f of Array.from(document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea"))) {
-      if (f.type !== "hidden" && f.value.includes(n) && !f.closest(skip) && visible(f)) count += 1;
+      if (f.type !== "hidden" && f.value.includes(n) && !f.closest(skip) && visible(f)) found.push(where(f));
     }
-    return count;
+    return found;
   }, needle);
 }
 
@@ -484,9 +498,10 @@ for (const screen of SCREENS) {
         ["education", v.school],
         ["skill claim", v.claim],
       ] as const) {
-        const n = await shownCount(p, needle);
-        proof(`profile after sign-in: ${what} shown ${n}x`);
-        expect.soft(n, `${screen.name}px profile: the ${what} is shown exactly once`).toBe(1);
+        const at = await shownWhere(p, needle);
+        const n = at.length;
+        proof(`profile after sign-in: ${what} shown ${n}x${n > 1 ? ` at: ${at.join(" | ")}` : ""}`);
+        expect.soft(n, `${screen.name}px profile: the ${what} is shown exactly once (${at.join(" | ")})`).toBe(1);
       }
 
       // THE LIVING CV.
@@ -503,9 +518,10 @@ for (const screen of SCREENS) {
         ["education", v.school],
         ["skill claim", v.claim],
       ] as const) {
-        const n = await shownCount(p, needle);
-        proof(`Living CV after sign-in: ${what} shown ${n}x`);
-        expect.soft(n, `${screen.name}px Living CV: the ${what} is shown exactly once`).toBe(1);
+        const at = await shownWhere(p, needle);
+        const n = at.length;
+        proof(`Living CV after sign-in: ${what} shown ${n}x${n > 1 ? ` at: ${at.join(" | ")}` : ""}`);
+        expect.soft(n, `${screen.name}px Living CV: the ${what} is shown exactly once (${at.join(" | ")})`).toBe(1);
       }
     });
 
