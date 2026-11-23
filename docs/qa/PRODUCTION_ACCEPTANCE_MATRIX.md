@@ -93,15 +93,20 @@ Lane H supplied this section for #3679. The production walk is `agency-chain`, w
 
 Chain: order view → offer → terms → execution → reports.
 
-| Step | Status | Production runs | Notes |
+Lane D supplied the LOCAL and CI evidence for this section for #3679. There are two lanes:
+- **Organization lane:** the client posts a need → a crew offer with versioned terms → the client agrees to a version → the crew works on the client's project → crew journal entries are submitted to the client → the client accepts or disputes them.
+- **Personal services lane:** offering → discovery → request → accept.
+
+Lane D reports that no production walk covers the whole organization lane. The rows below credit `brigade-formation` with the steps it walks in production, and mark the report step LOCAL.
+
+| Step | Status | Production runs · LOCAL evidence | Notes |
 |---|---|---|---|
 | Order view | PASS | marketplace desktop · 44971191106 · eed72052 · 86<br>marketplace-goods-services desktop · 44967795943 · 86<br>marketplace-goods-services phone · 44968374455 · 86<br>buyer-workspace desktop · 45094390854 · ee29a3b7 · 6 | |
-| Offer | PASS | marketplace-goods-services (S-1 to S-3); brigade-formation (B2B-2, B2B-4) | |
-| Terms | PASS | brigade-formation (B2B-4, B2B-5); marketplace-goods-services (S-3, accept with a note) | |
-| Execution | PASS (team path) / BLOCKED (service path) | brigade-formation (B2B-7 to B2B-9) | No product door leads from an accepted service request to a project. |
-| Reports | PASS (team path) | brigade-formation (B2B-9, the buyer sees the journaled hours) | |
-
-Lane D's own chain detail replaces this section where it differs.
+| Offer | PASS | brigade-formation desktop · 44906216102 · eed72052 · 86 (B2B-2, B2B-4)<br>marketplace-goods-services (S-1 to S-3) | |
+| Terms (versioned, agreed) | PASS | brigade-formation (B2B-4: terms v1; B2B-5: counter; B2B-7: accept) | |
+| Execution (crew on the client's project) | PASS (team path) / BLOCKED (service path) | brigade-formation (B2B-7 to B2B-9) | No product door leads from an accepted service request to a project. |
+| Reports: entries submitted, client accepts or disputes | LOCAL | `subcontractor-chain-isolated` (#3670, not on main): 13/13 with the PR's fix | Before the fix, the 390 px step failed: the client's "Assign team to project" button was 40 px. The PR's CI run 45074123691 (head fc6831a) passed the walk step. A run on head 2bb90eb (45116196998) was still in progress when this was written. In production, the buyer sees the journaled hours (B2B-9), but the accept and dispute step has not been walked there. |
+| Personal services lane | PASS / LOCAL | marketplace-goods-services (S-1 to S-5) | LOCAL: `journeys-coverage-isolated` SC-1 to SC-6, 26/26 at 1440 and 390 px (#3578). |
 
 ## Student — Lane L
 
@@ -135,6 +140,7 @@ Chain: programmes → cohorts → invites → practice → results.
 | Synthetic needs never left open | PASS | Since #3619, every walk that posts a need closes it in `afterAll` and the workflow sweeps again in `always()`. `[need-sweep] workflow: sessions=5 open-synthetic=0 closed=0 failed=0` on orders-bookings 45049554634 and 45052181467 and on profile-cv-history 45051053618. |
 | Tablet (768 px) | LOCAL | `acceptance-matrix-isolated` (#3582). The production walk has no tablet device. |
 | AI acts on intent | PASS | chat-confirm-once desktop · 44972019714 · 86<br>manager-chat desktop · 44972421825 · 86<br>mcp-chain desktop · 44972915546 · 86<br>mcp-agents desktop · 44973332549 · 86 |
+| Free paths and payments | LOCAL / BLOCKED | `free-paths-isolated` 4/4: needs posted free at 1440 and 390 px; `/pricing` shows both plans, the paid plan cannot be bought, and no Stripe request is made. `billing-isolated` 5/5: Stripe TEST state. Stripe hosted Checkout and the Customer Portal are BLOCKED, because there is no Stripe TEST key. Source: Lane D. |
 | Admin and privacy | PASS | company-governance desktop · 44856477733 · 88<br>documents-approvals desktop · 44974276075 · 86<br>search-support-privacy desktop · 44974866504 · 86<br>worker-records-exports desktop · 44904394732 · 86 |
 
 ## To dispatch before claiming the deployed build
