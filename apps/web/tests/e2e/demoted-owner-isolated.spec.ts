@@ -24,7 +24,7 @@ import {
  * reach with their OWN session.
  *
  *   DO-1 the creator, demoted to member by a co-owner, loses owns_company,
- *        manages_organization and the company row edit; the owner pointer
+ *        manages_organization and the company edit (save_company_setup_v3); the owner pointer
  *        moves to the co-owner (R2 P3-1 on #3620: database proof).
  *   DO-2 the co-owner, an owner by membership who did not create the company,
  *        keeps owns_company and manages_organization (the reverse case).
@@ -62,15 +62,32 @@ async function rpc<T>(address: string, fn: string, body: Record<string, unknown>
   return (await r.json()) as T;
 }
 
-/** Rows the caller's own session actually updated (RLS filters silently). */
-async function editCompany(address: string): Promise<number> {
-  const r = await rest(address, `companies?id=eq.${state.companyId}`, {
-    method: "PATCH",
-    headers: { Prefer: "return=representation" },
-    body: JSON.stringify({ description: `edited ${RUN}` }),
+/**
+ * The company identity edit as the app makes it: save_company_setup_v3 (a
+ * direct UPDATE on companies is not granted to signed-in users). true = the
+ * edit went through; false = refused as not_owner.
+ */
+async function editCompany(address: string): Promise<boolean> {
+  const r = await rest(address, "rpc/save_company_setup_v3", {
+    method: "POST",
+    body: JSON.stringify({
+      p_company_id: state.companyId,
+      p_legal_name: `Synthetic Demotion Co ${RUN}`,
+      p_country: null,
+      p_registration_code: null,
+      p_address: null,
+      p_website: null,
+      p_contact_email: null,
+      p_contact_phone: null,
+      p_requester_role: null,
+      p_submit: false,
+      p_company_type: null,
+    }),
   });
-  expect(r.ok, `companies PATCH → ${r.status}`).toBe(true);
-  return ((await r.json()) as unknown[]).length;
+  if (r.ok) return true;
+  const body = (await r.json().catch(() => ({}))) as { message?: string };
+  expect(body.message ?? "", `save_company_setup_v3 → ${r.status}`).toContain("not_owner");
+  return false;
 }
 
 test("DO-1. a creator demoted to member loses every owner right; the owner pointer moves", async ({ browser }) => {
@@ -107,7 +124,7 @@ test("DO-1. a creator demoted to member loses every owner right; the owner point
   // Before: the creator is an owner on every path.
   expect(await rpc<boolean>(CREATOR, "owns_company", { c: state.companyId }), "creator owns before").toBe(true);
   expect(await rpc<boolean>(CREATOR, "manages_organization", { org: state.orgId }), "creator manages before").toBe(true);
-  expect(await editCompany(CREATOR), "creator edits the company row before").toBe(1);
+  expect(await editCompany(CREATOR), "creator edits the company before").toBe(true);
 
   const [creatorRow] = sql<{ id: string }>(
     `select id from public.company_memberships where organization_id = ${lit(state.orgId)} and profile_id = ${lit(state.creatorId)} and status = 'active'`,
@@ -120,7 +137,7 @@ test("DO-1. a creator demoted to member loses every owner right; the owner point
   // After: no owner right is left on any path.
   expect(await rpc<boolean>(CREATOR, "owns_company", { c: state.companyId }), "creator no longer owns").toBe(false);
   expect(await rpc<boolean>(CREATOR, "manages_organization", { org: state.orgId }), "creator no longer manages").toBe(false);
-  expect(await editCompany(CREATOR), "the company row edit is refused by RLS").toBe(0);
+  expect(await editCompany(CREATOR), "the company edit is refused (not_owner)").toBe(false);
   const [o] = sql<{ owner: string }>(`select owner_profile_id as owner from public.organizations where id = ${lit(state.orgId)}`);
   expect(o?.owner, "the owner pointer moved to the co-owner").toBe(state.coownerId);
   const [e] = sql<{ n: number }>(

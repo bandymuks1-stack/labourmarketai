@@ -27,10 +27,14 @@
 --       'manager' / 'external_manager' ones), read by manages_organization,
 --       which ~40 policies and definer guards consume;
 --   (c) the creator arm, for the person who created the company or agency:
---       owns_company, owns_agency, save_company_setup_v3 and the RLS policies
+--       owns_company, owns_agency and save_company_setup_v3 still pass on
+--       `profile_id = auth.uid()`, so a creator demoted to member can still
+--       edit the company identity through save_company_setup_v3 and passes
+--       every owns_company / owns_agency check. The RLS policies
 --       companies_update / companies_delete / agencies_update /
---       agencies_delete still pass on `profile_id = auth.uid()`, so a creator
---       demoted to member can still edit or DELETE the company row.
+--       agencies_delete carry the same creator arm; signed-in users hold no
+--       UPDATE or DELETE privilege on those tables today (production read
+--       2026-11-23), so narrowing them is defense in depth.
 --   The app's employer context already follows the membership: an active
 --   `member` row resolves as member and opens no employer surface
 --   (lib/company/employer-company-context.ts, isGovernanceRole), so no app
