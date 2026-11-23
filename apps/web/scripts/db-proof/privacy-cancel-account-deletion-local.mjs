@@ -111,7 +111,8 @@ const someoneSleeping = `select exists (select 1 from pg_stat_activity where dat
 const someoneLockWaiting = `select exists (select 1 from pg_stat_activity where datname = '${DB}' and wait_event_type = 'Lock' and pid <> pg_backend_pid())`;
 
 // mirror of privacy-erasure-v3-local.mjs (the executor v3 proof), customer_requests excepted
-const MIRROR = String.raw`
+// (exported: market-lifecycle-discard-guard-local.mjs builds on the same schema)
+export const MIRROR = String.raw`
 create schema auth; create schema storage;
 create function auth.uid() returns uuid language sql stable as $$ select nullif(nullif(current_setting('request.jwt.claims', true), '')::jsonb->>'sub', '')::uuid $$;
 create table auth.users (
@@ -234,7 +235,7 @@ create table public.audit_logs (id uuid primary key default gen_random_uuid(), a
 
 // customer_requests in its real shape (0028 + 20260530150000 + 20260806200000;
 // closed_outcome comes from the REAL 20261024090000 below)
-const CUSTOMER_REQUESTS = String.raw`
+export const CUSTOMER_REQUESTS = String.raw`
 create table public.customer_requests (
   id uuid primary key default gen_random_uuid(), profile_id uuid not null references public.profiles(id) on delete cascade,
   organization_id uuid references public.organizations(id), title text not null check (char_length(title) between 1 and 200),
@@ -248,7 +249,7 @@ create table public.customer_requests (
 
 // faithful extracts: 0024 is_admin (+ the profile_roles it reads), 0028 RLS + grant,
 // a service_offerings stub for 20261024090000, Supabase's schema usage grants
-const EXTRACTS = String.raw`
+export const EXTRACTS = String.raw`
 create table public.profile_roles (profile_id uuid references public.profiles(id) on delete cascade, role text not null);
 create or replace function public.is_admin()
 returns boolean language sql stable security definer set search_path = public as $$
@@ -631,9 +632,12 @@ cluster: <repo>/.tmp/pgcancel-${process.pid} (port ${port}, throwaway, synthetic
   process.exit(failures ? 1 : 0);
 }
 
-main().catch((e) => {
-  console.error(`ERROR: ${e.message}`);
-  try { run(bin("pg_ctl"), ["-D", dataDir, "-m", "fast", "-w", "stop"], { stdio: "ignore", allowFail: true }); } catch { /* already down */ }
-  console.log(`\nSUMMARY: ${pass} PASS, ${failures + 1} FAIL (aborted)`);
-  process.exit(1);
-});
+// run only when executed, not when another proof imports the schema above
+if (process.argv[1] && resolve(process.argv[1]).toLowerCase() === fileURLToPath(import.meta.url).toLowerCase()) {
+  main().catch((e) => {
+    console.error(`ERROR: ${e.message}`);
+    try { run(bin("pg_ctl"), ["-D", dataDir, "-m", "fast", "-w", "stop"], { stdio: "ignore", allowFail: true }); } catch { /* already down */ }
+    console.log(`\nSUMMARY: ${pass} PASS, ${failures + 1} FAIL (aborted)`);
+    process.exit(1);
+  });
+}
