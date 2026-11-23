@@ -19635,7 +19635,8 @@
       "heading": "Dina erbjudanden",
       "none": "Inga erbjudanden ännu.",
       "withdraw": "Återkalla",
-      "message": "Skicka meddelande till kunden"
+      "message": "Skicka meddelande till kunden",
+      "orgNext": "Beställaren har i princip tackat ja (inget avtal). Att starta arbetet från ett företagserbjudande via plattformen är inte tillgängligt än: kom överens om detaljerna och vilka som ska arbeta i samtalet."
     },
     "status": {
       "offered": "Väntar på svar",
@@ -19736,7 +19737,7 @@
       "message": "Skicka meddelande till teamet",
       "messageCompany": "Skicka meddelande till företaget",
       "kindOrganization": "Företagserbjudande",
-      "orgNext": "Överenskommet i princip (inget avtal). Kom överens om detaljerna och vilka personer som ska arbeta i samtalet."
+      "orgNext": "I princip överenskommet (inget avtal). Att starta arbetet från ett företagserbjudande via plattformen är inte tillgängligt än: kom överens om detaljerna och vilka som ska arbeta i samtalet."
     },
     "orgHeading": "Erbjud vårt företag till ett öppet behov",
     "orgIntro": "Erbjud själva företaget – era personer, er tjänst eller som underentreprenör – mot ett öppet behov. Inget arbetslag behöver skapas först.",
