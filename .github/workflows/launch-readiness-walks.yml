@@ -62,8 +62,11 @@ jobs:
           # Owner order 2026-11-22: these pairs run once more on the current build, even though they
           # passed earlier (P-13 phone-375, and orders-bookings after #3625). Only a run created after
           # RERUN_START counts for them.
-          RERUN: "profile-cv-history:phone-375 orders-bookings:desktop orders-bookings:phone"
-          RERUN_START: "2026-11-22T16:00:00Z"
+          # 2026-11-23: the CV chain (P-13/P-15/P-26, fix #3653) passed on phone-375 (run 45091874326);
+          # the owner requires the FULL sequence on all three devices on the fixed build, so the
+          # phone and desktop CV pairs run once more after this start.
+          RERUN: "profile-cv-history:desktop profile-cv-history:phone"
+          RERUN_START: "2026-11-23T01:20:00Z"
           # 2026-11-23 00:45 UTC: GitHub's schedule fired no tick after 22:35 UTC again; a push to
           # this file (the push trigger) starts the chain, which then hands over by itself.
         run: |
