@@ -10,7 +10,7 @@ Every row is one chain step, with:
 - the build it ran on;
 - the distance from the deployed build.
 
-**Deployed build:** `125e21827`, from `deploy-vps` run 45115249287 on 2026-11-23 at 05:01 UTC. It is four commits after `97bd4d4dc` (#3678); those four commits are #3667, #3671, #3672 and #3673. "Behind" is `git rev-list --count <run build>..125e21827`.
+**Deployed build:** `f04248335`, from `deploy-vps` run 45139627704 on 2026-11-23 at 08:38 UTC. It is three commits after `125e21827` (#3683, #3691 and #3692), which in turn is four commits after `97bd4d4dc` (#3678). "Behind" is `git rev-list --count <run build>..f04248335`.
 
 **Status:**
 
@@ -29,16 +29,16 @@ Chain: registration → CV → search → apply → message → offer → hire �
 
 | Step | Status | Production runs (spec device · run · build · behind) | Notes |
 |---|---|---|---|
-| Registration and onboarding | PASS | role-routes desktop · 44899143018 · eed72052 · 86<br>role-routes phone · 44900081769 · eed72052 · 86<br>fresh-activation desktop · 44901160408 · eed72052 · 86 | fresh-activation onboards a brand-new worker on a 390 px phone. `signup-form` has not run on a device since 11-15. |
-| CV (profile, sections, Living CV) | PASS | profile-cv-history phone-375 · 45091874326 · ee29a3b7 · 6<br>profile-cv-history phone · 45097071365 · 8bcda5be · 5<br>profile-cv-history desktop · 45094839877 · 8bcda5be · 5 | Full P-* sequence on all three devices. These runs follow the P-13/P-15/P-26 task (G leads the product fixes, L owns test stability). |
-| Search | PASS | jobs-search desktop · 44902071507 · eed72052 · 86<br>jobs-search phone · 44902549477 · eed72052 · 86 | |
-| Apply | PASS | company-chain desktop · 44858511879 · d447a639 · 88 (C-1, C-2)<br>orders-bookings phone · 45052181467 · ed4ecf85 · 33 (O-2) | |
-| Message | PASS | company-chain desktop · 44858511879 (C-3, C-4)<br>chat-continuity phone · 44903881953 · eed72052 · 86<br>notifications-inapp phone · 44904905556 · eed72052 · 86 | A third party cannot read the thread. This is LOCAL: `journeys-coverage-isolated` (#3578). |
-| Offer (booking accepted) | PASS | orders-bookings phone · 45052181467 · ed4ecf85 · 33 (O-5) | |
-| Hire visible to both sides | PASS | orders-bookings desktop · 45049554634 · ed4ecf85 · 33 (O-9 to O-11)<br>orders-bookings phone · 45052181467 · ed4ecf85 · 33 (O-9 to O-11) | #3628: the company sees the booked person and the engagement, the worker sees it, and an unrelated organization sees neither. |
-| History (journal → Living CV) | PASS | journal-confirm desktop · 44902949287 · eed72052 · 86<br>journal-confirm phone · 44903366199 · eed72052 · 86 | fresh-activation also proves the first entry reaching the Living CV. |
-| Phone surfaces | FAIL | mobile-surfaces phone · 45098478024 · 8bcda5be · 5 · FAIL (M-6) | #3678 changed M-6 so it allows only the organisation doors row on a phone, checked positively. It is in the deployed build and waits for a re-run. |
-| Invited worker | BLOCKED | invited-worker phone · 45001807853 · 397710f1 · 76 · FAIL | The synthetic invited account does not exist; the owner creates it with `prod-qa-invited-provision.yml`. |
+| Registration and onboarding | PASS | role-routes desktop · 44899143018 · eed72052 · 89<br>role-routes phone · 44900081769 · eed72052 · 89<br>fresh-activation desktop · 44901160408 · eed72052 · 89 | fresh-activation onboards a brand-new worker on a 390 px phone. `signup-form` has not run on a device since 11-15. |
+| CV (profile, sections, Living CV) | PASS | profile-cv-history phone-375 · 45091874326 · ee29a3b7 · 9<br>profile-cv-history phone · 45097071365 · 8bcda5be · 8<br>profile-cv-history desktop · 45094839877 · 8bcda5be · 8 | Full P-* sequence on all three devices. These runs follow the P-13/P-15/P-26 task (G leads the product fixes, L owns test stability). |
+| Search | PASS | jobs-search desktop · 44902071507 · eed72052 · 89<br>jobs-search phone · 44902549477 · eed72052 · 89 | |
+| Apply | PASS | company-chain desktop · 44858511879 · d447a639 · 91 (C-1, C-2)<br>orders-bookings phone · 45052181467 · ed4ecf85 · 36 (O-2) | |
+| Message | PASS | company-chain desktop · 44858511879 (C-3, C-4)<br>chat-continuity phone · 44903881953 · eed72052 · 89<br>notifications-inapp phone · 44904905556 · eed72052 · 89 | A third party cannot read the thread. This is LOCAL: `journeys-coverage-isolated` (#3578). |
+| Offer (booking accepted) | PASS | orders-bookings phone · 45052181467 · ed4ecf85 · 36 (O-5) | |
+| Hire visible to both sides | PASS | orders-bookings desktop · 45049554634 · ed4ecf85 · 36 (O-9 to O-11)<br>orders-bookings phone · 45052181467 · ed4ecf85 · 36 (O-9 to O-11) | #3628: the company sees the booked person and the engagement, the worker sees it, and an unrelated organization sees neither. |
+| History (journal → Living CV) | PASS | journal-confirm desktop · 44902949287 · eed72052 · 89<br>journal-confirm phone · 44903366199 · eed72052 · 89 | fresh-activation also proves the first entry reaching the Living CV. |
+| Phone surfaces | PASS | mobile-surfaces phone · 45142813658 · f0424833 · 0 | This run confirms the #3678 M-6 change and supersedes 45098478024 (8bcda5be, FAIL on M-6). |
+| Invited worker | BLOCKED | invited-worker phone · 45001807853 · 397710f1 · 79 · FAIL | The synthetic invited account is owner-dispatch only (decision 2026-10-28): the owner creates it with `prod-qa-invited-provision.yml`, and no agent may provision it. |
 
 ## Employer — Lane C
 
@@ -50,16 +50,16 @@ Lane C supplied this section for #3679 on 2026-11-23 at about 05:20 UTC, read fr
 
 | Step | Status | Production runs (spec device · run · build · behind) | Notes |
 |---|---|---|---|
-| Company sign-up | PASS / LOCAL | fresh-activation desktop · 44901160408 · eed72052 · 86 | LOCAL: `employer-journey-isolated` E-1 and E-2 (sign-up, company profile) at 1440 and 390, signup-isolated runs 45077346479 (#3675) and 45086260914 (#3647). |
-| Need | PASS | company-chain desktop · 44858511879 · d447a639 · 88 (C-0b)<br>company-chain phone · 44859165488 · d447a639 · 88<br>company-chain phone-375 · 44882509064 · eed72052 · 86 | An earlier phone-375 run, 44859841951, failed and is superseded by 44882509064. The public form `need-intake` last completed on 11-20 (desktop 44642526482, phone 44643169770, phone-375 44643949860, all 104 behind). It does not appear among the 60 most recent dispatches, so re-dispatch it before claiming the current build. |
+| Company sign-up | PASS / LOCAL | fresh-activation desktop · 44901160408 · eed72052 · 89 | LOCAL: `employer-journey-isolated` E-1 and E-2 (sign-up, company profile) at 1440 and 390, signup-isolated runs 45077346479 (#3675) and 45086260914 (#3647). |
+| Need | PASS | company-chain desktop · 44858511879 · d447a639 · 91 (C-0b)<br>company-chain phone · 44859165488 · d447a639 · 91<br>company-chain phone-375 · 45140908370 · f0424833 · 0 | Earlier phone-375 runs are superseded: 44859841951 failed, and 44882509064 passed on eed72052. Two tries on f0424833, 45138442951 and 45139668246, were refused by the deploy brake before walking; they are not failures. The public form `need-intake` last completed on 11-20 (desktop 44642526482, phone 44643169770, phone-375 44643949860, all 104 behind). It does not appear among the 60 most recent dispatches, so re-dispatch it before claiming the current build. |
 | Candidate offers (hand-raiser, contact) | PASS | company-chain (C-1 to C-4, H-1, H-2) | |
-| Shortlist | PASS | company-talent-history desktop · 44975633092 · eed72052 · 86 (K-1 to K-5) | The note is internal; the worker and other organizations see nothing. |
-| Brigade offers | PASS | brigade-formation desktop · 44906216102 · eed72052 · 86 | A brigade is formed and the B2B need intake goes through. |
-| Agreement | PASS | orders-bookings desktop · 45049554634 · ed4ecf85 · 33 (O-1 to O-6)<br>orders-bookings phone · 45052181467 · ed4ecf85 · 33 | The booking is proposed, withdrawn and re-dated, then the worker accepts and the conversation continues. The PR-only flow is RED and not applied: the company offer, both parties confirming terms, then the crew and the project (#3649). |
+| Shortlist | PASS | company-talent-history desktop · 44975633092 · eed72052 · 89 (K-1 to K-5) | The note is internal; the worker and other organizations see nothing. |
+| Brigade offers | PASS | brigade-formation desktop · 44906216102 · eed72052 · 89 | A brigade is formed and the B2B need intake goes through. |
+| Agreement | PASS | orders-bookings desktop · 45049554634 · ed4ecf85 · 36 (O-1 to O-6)<br>orders-bookings phone · 45052181467 · ed4ecf85 · 36 | The booking is proposed, withdrawn and re-dated, then the worker accepts and the conversation continues. The PR-only flow is RED and not applied: the company offer, both parties confirming terms, then the crew and the project (#3649). |
 | Hire | PASS | orders-bookings (O-9 to O-11) | A direct hire opens no employer `engagement_context` (`20260928220000`). Its day is accepted by the company as the client, at `/dashboard/inbox/counterparty`. |
-| Order (buyer workspace) | PASS | buyer-workspace desktop · 45094390854 · ee29a3b7 · 6 | Two earlier failures are superseded. 44971584269 failed because the walk never chose the required country (fixed by #3589). 45003241107 was stopped by the deploy-quiet brake, and no test ran. |
-| Project | PASS / LOCAL | project-execution desktop · 44906961206 · eed72052 · 86 (E-1 to E-6)<br>project-context desktop · 44907816401 · eed72052 · 86 | E-1 to E-6 create the project, stages and tasks, assign a worker and issue the clash receipt. LOCAL: `employer-journey-isolated` E-9 (project and assignment); `hiring-chain-isolated` (direct hire → project, #3611). |
-| Work accounting | PASS / LOCAL | journal-confirm desktop · 44902949287 · eed72052 · 86<br>journal-confirm phone · 44903366199 · eed72052 · 86<br>org-roster desktop · 44905313755 · 86<br>org-roster phone · 44905801746 · 86 | journal-confirm: the worker records the day, the employer approves it, and the worker sees it confirmed. org-roster: roster import, on- and offboarding, instruction, asset and isolation. LOCAL: `employer-journey-isolated` E-10 (a journal day accepted by the company as the client). |
+| Order (buyer workspace) | PASS | buyer-workspace desktop · 45094390854 · ee29a3b7 · 9 | Two earlier failures are superseded. 44971584269 failed because the walk never chose the required country (fixed by #3589). 45003241107 was stopped by the deploy-quiet brake, and no test ran. |
+| Project | PASS / LOCAL | project-execution desktop · 44906961206 · eed72052 · 89 (E-1 to E-6)<br>project-context desktop · 44907816401 · eed72052 · 89 | E-1 to E-6 create the project, stages and tasks, assign a worker and issue the clash receipt. LOCAL: `employer-journey-isolated` E-9 (project and assignment); `hiring-chain-isolated` (direct hire → project, #3611). |
+| Work accounting | PASS / LOCAL | journal-confirm desktop · 44902949287 · eed72052 · 89<br>journal-confirm phone · 44903366199 · eed72052 · 89<br>org-roster desktop · 44905313755 · 89<br>org-roster phone · 44905801746 · 89 | journal-confirm: the worker records the day, the employer approves it, and the worker sees it confirmed. org-roster: roster import, on- and offboarding, instruction, asset and isolation. LOCAL: `employer-journey-isolated` E-10 (a journal day accepted by the company as the client). |
 
 Also in open PRs, RED and not applied: agency named candidates (#3651), messaging on an open need (#3647) and provider pseudonyms (#3657).
 
@@ -76,11 +76,11 @@ Lane H supplied this section for #3679. The production walk is `agency-chain`, w
 6. the client accepts, and a booking is proposed;
 7. the outcome and the conversation follow.
 
-**Runs:** desktop 44644887648, phone 44645924736 and phone-375 44646951459. All three ran on 7e517e32, 104 behind; there has been no production run since 11-20. Earlier runs: 44241546296, 43965333204 and 43884747629 passed. 43810187731 and 43724558463 failed; the 43724558463 failure ("too many open booking proposals") was fixed by the walk's own withdraw in `afterAll`.
+**Runs:** desktop 44644887648, phone 44645924736 and phone-375 44646951459. All three ran on 7e517e32, 107 behind; there has been no production run since 11-20. Earlier runs: 44241546296, 43965333204 and 43884747629 passed. 43810187731 and 43724558463 failed; the 43724558463 failure ("too many open booking proposals") was fixed by the walk's own withdraw in `afterAll`.
 
 | Step | Status | Production runs | Notes |
 |---|---|---|---|
-| Sign-up | PASS | agency-chain desktop · 44644887648 · 7e517e32 · 104<br>agency-chain phone · 44645924736 · 104<br>agency-chain phone-375 · 44646951459 · 104 | |
+| Sign-up | PASS | agency-chain desktop · 44644887648 · 7e517e32 · 107<br>agency-chain phone · 44645924736 · 107<br>agency-chain phone-375 · 44646951459 · 107 | |
 | Permitted needs, connection route | PASS | agency-chain (A-3 to A-5) | |
 | Permitted needs, open board without the client's identity | BLOCKED | — | Open PR #3630, RED and not applied. Production still returns the company name on the open board. |
 | Submit candidates, connection route | PASS | agency-chain (A-5, A-6) | |
@@ -114,8 +114,8 @@ The formal work report is LOCAL only: the worker submits to the client as counte
 
 | Step | Status | Production runs · LOCAL evidence | Notes |
 |---|---|---|---|
-| Order view | PASS | marketplace desktop · 44971191106 · eed72052 · 86<br>marketplace-goods-services desktop · 44967795943 · 86<br>marketplace-goods-services phone · 44968374455 · 86<br>buyer-workspace desktop · 45094390854 · ee29a3b7 · 6 | |
-| Offer | PASS | brigade-formation desktop · 44906216102 · eed72052 · 86 (B2B-2, B2B-4)<br>marketplace-goods-services (S-1 to S-3) | |
+| Order view | PASS | marketplace desktop · 44971191106 · eed72052 · 89<br>marketplace-goods-services desktop · 44967795943 · 89<br>marketplace-goods-services phone · 44968374455 · 89<br>buyer-workspace desktop · 45094390854 · ee29a3b7 · 9 | |
+| Offer | PASS | brigade-formation desktop · 44906216102 · eed72052 · 89 (B2B-2, B2B-4)<br>marketplace-goods-services (S-1 to S-3) | |
 | Terms (versioned, agreed) | PASS (desktop) / LOCAL (390 px) | brigade-formation (B2B-4 to B2B-7) | 390 px: `subcontractor-chain-isolated` (#3670). |
 | Execution (crew on the client's project) | PASS (team path) / BLOCKED (service path) | brigade-formation (B2B-7 to B2B-9) | No product door leads from an accepted service request to a project. |
 | Reports: entries submitted, client accepts or disputes | LOCAL | `subcontractor-chain-isolated` (#3670, not on main): 13/13 with the PR's fix | Before the fix, the 390 px step failed: the client's "Assign team to project" button was 40 px. The PR's CI run 45074123691 (head fc6831a) passed the walk step. The run on head 2bb90eb (45116196998) also passed, with subcontractor-chain and free-paths in it. In production, the buyer sees the journaled hours (B2B-9), but the accept and dispute step has not been walked there. |
@@ -127,7 +127,7 @@ Chain: profile → learning history → practice → worker profile that keeps t
 
 | Step | Status | Evidence | Notes |
 |---|---|---|---|
-| Profile and student sign-up | PASS | learning-practice phone · 44883030318 · eed72052 · 86 (L-3, L-5, L-11)<br>learning-practice phone-375 · 44883485138 · 86 | LOCAL as well: `signup-isolated` ST-1 and `phone-journeys` S-1. |
+| Profile and student sign-up | PASS | learning-practice phone · 45141893755 · f0424833 · 0<br>learning-practice phone · 44883030318 · eed72052 · 89 (L-3, L-5, L-11)<br>learning-practice phone-375 · 44883485138 · 89 | LOCAL as well: `signup-isolated` ST-1 and `phone-journeys` S-1. |
 | Learning history | PASS | profile-cv-history (P-9, an education row shown on the Living CV) on all three devices: 45091874326 · 6, 45097071365 · 5, 45094839877 · 5 | |
 | Find a practice | PASS / LOCAL | learning-practice (L-11, the board narrowed to internships) | An internship-typed need being found and applied to is LOCAL: `journeys-coverage-isolated` (#3578). |
 | Practice record and sign-off | LOCAL | learning-practice (L-6, L-7) shows the practice review and the sign-off pick; production must not write sign-offs | `recognition-chain-isolated` I-9 to I-13b: intern link, practice day, employer confirmation, CV practice history. |
@@ -139,7 +139,7 @@ Chain: programmes → cohorts → invites → practice → results.
 
 | Step | Status | Production runs | Notes |
 |---|---|---|---|
-| Programmes | PASS | learning-practice desktop · 44860184317 · d447a639 · 88 (L-1)<br>learning-practice phone · 44883030318 · 86 (L-12) | |
+| Programmes | PASS | learning-practice desktop · 44860184317 · d447a639 · 91 (L-1)<br>learning-practice phone · 45141893755 · f0424833 · 0 (L-12) | |
 | Cohorts | PASS | learning-practice (L-4) | The cohort join request (`cohort-join-request`) is dispatch-only and has not run in production. Status BLOCKED until it is dispatched. |
 | Invites | PASS | learning-practice (L-2, L-3, L-12) | |
 | Practice | PASS (review) / BLOCKED (arranged placement) | learning-practice (L-6, L-7) | No institution-arranged placement door exists: the employer invites the intern directly. This is an owner decision. |
@@ -152,16 +152,15 @@ Chain: programmes → cohorts → invites → practice → results.
 |---|---|---|
 | Synthetic needs never left open | PASS | Since #3619, every walk that posts a need closes it in `afterAll` and the workflow sweeps again in `always()`. `[need-sweep] workflow: sessions=5 open-synthetic=0 closed=0 failed=0` on orders-bookings 45049554634 and 45052181467 and on profile-cv-history 45051053618. |
 | Tablet (768 px) | LOCAL | `acceptance-matrix-isolated` (#3582). The production walk has no tablet device. |
-| AI acts on intent | PASS | chat-confirm-once desktop · 44972019714 · 86<br>manager-chat desktop · 44972421825 · 86<br>mcp-chain desktop · 44972915546 · 86<br>mcp-agents desktop · 44973332549 · 86 |
+| AI acts on intent | PASS | chat-confirm-once desktop · 44972019714 · 89<br>manager-chat desktop · 44972421825 · 89<br>mcp-chain desktop · 44972915546 · 89<br>mcp-agents desktop · 44973332549 · 89 |
 | Free paths and payments | LOCAL / BLOCKED | `free-paths-isolated` 4/4: needs posted free at 1440 and 390 px; `/pricing` shows both plans, the paid plan cannot be bought, and no Stripe request is made. `billing-isolated` 5/5: Stripe TEST state. `free-paths-isolated` passed again in CI run 45116196998 (#3670, head 2bb90eb). Stripe hosted Checkout and the Customer Portal are BLOCKED, because there is no Stripe TEST key. Source: Lane D. |
-| Admin and privacy | PASS | company-governance desktop · 44856477733 · 88<br>documents-approvals desktop · 44974276075 · 86<br>search-support-privacy desktop · 44974866504 · 86<br>worker-records-exports desktop · 44904394732 · 86 |
+| Admin and privacy | PASS | company-governance desktop · 44856477733 · 91<br>documents-approvals desktop · 44974276075 · 89<br>search-support-privacy desktop · 44974866504 · 89<br>worker-records-exports desktop · 44904394732 · 89 |
 
 ## To dispatch before claiming the deployed build
 
-1. `mobile-surfaces:phone` (#3678 is deployed).
-2. `invited-worker:phone`, after the owner creates the account.
-3. Rows 33 or more commits behind, if the report must claim `125e21827`:
-   - orders-bookings (33);
-   - the eed72052 / d447a639 set (86–88);
-   - agency-chain and need-intake (104). Lane H asks for agency-chain on desktop, phone and phone-375; H cannot dispatch it.
-4. `cohort-join-request:desktop`, to clear the BLOCKED cohort join row.
+1. `invited-worker:phone`, after the owner creates the account.
+2. Rows 36 or more commits behind, if the report must claim `f04248335`:
+   - orders-bookings (36);
+   - the eed72052 / d447a639 set (89–91);
+   - agency-chain and need-intake (107). Lane H asks for agency-chain on desktop, phone and phone-375; H cannot dispatch it.
+3. `cohort-join-request:desktop`, to clear the BLOCKED cohort join row.
