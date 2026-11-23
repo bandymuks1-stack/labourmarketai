@@ -67,15 +67,27 @@ Also in open PRs, RED and not applied: agency named candidates (#3651), messagin
 
 Chain: sign-up → permitted needs → submit candidates → agreement → authorised placement.
 
+Lane H supplied this section for #3679. The production walk is `agency-chain`, which proves the connection route:
+1. the agency sets up its organization;
+2. it adds a roster worker;
+3. it connects to the client;
+4. the client shares a need;
+5. the agency offers its roster worker;
+6. the client accepts, and a booking is proposed;
+7. the outcome and the conversation follow.
+
+**Runs:** desktop 44644887648, phone 44645924736 and phone-375 44646951459. All three ran on 7e517e32, 104 behind; there has been no production run since 11-20. Earlier runs: 44241546296, 43965333204 and 43884747629 passed. 43810187731 and 43724558463 failed; the 43724558463 failure ("too many open booking proposals") was fixed by the walk's own withdraw in `afterAll`.
+
 | Step | Status | Production runs | Notes |
 |---|---|---|---|
-| Sign-up and connection | PASS | agency-chain desktop · 44644887648 · 7e517e32 · 104 (A-1 to A-3)<br>agency-chain phone · 44645924736 · 104<br>agency-chain phone-375 · 44646951459 · 104 | |
-| Permitted needs | PASS | agency-chain (A-4, A-5) | |
-| Submit candidates | PASS | agency-chain (A-5, A-6) | |
-| Agreement | PASS | agency-chain (A-6, A-6b, A-7) | |
-| Authorised placement with a new client | BLOCKED | — | The agency's QA client already employs the worker. A placement with a new client needs a cast change, which is an owner decision. |
-
-Lane H's own chain detail replaces this section where it differs.
+| Sign-up | PASS | agency-chain desktop · 44644887648 · 7e517e32 · 104<br>agency-chain phone · 44645924736 · 104<br>agency-chain phone-375 · 44646951459 · 104 | |
+| Permitted needs, connection route | PASS | agency-chain (A-3 to A-5) | |
+| Permitted needs, open board without the client's identity | BLOCKED | — | Open PR #3630, RED and not applied. Production still returns the company name on the open board. |
+| Submit candidates, connection route | PASS | agency-chain (A-5, A-6) | |
+| Submit candidates, open board | LOCAL | — | #3651: e2e 7/7 plus a local journey walk on build 2611491f3. RED, not applied. |
+| Agreement: the client accepts, then a booking | PASS | agency-chain (A-6) | |
+| Agreement: both parties confirm the terms (company offer) | LOCAL | — | #3649 e2e 8/8. RED, not applied. |
+| Authorised placement: the worker accepts, then an engagement | PASS (booked-hire path) / BLOCKED (new client) | orders-bookings (O-9 to O-11) for the engagement; the agency's worker-accept step A-6b is J-2's #3460 | A client that does not already employ the worker needs a cast change, which is an owner decision. |
 
 ## Subcontractor — Lane D
 
@@ -132,5 +144,5 @@ Chain: programmes → cohorts → invites → practice → results.
 3. Rows 33 or more commits behind, if the report must claim `125e21827`:
    - orders-bookings (33);
    - the eed72052 / d447a639 set (86–88);
-   - agency-chain and need-intake (104).
+   - agency-chain and need-intake (104). Lane H asks for agency-chain on desktop, phone and phone-375; H cannot dispatch it.
 4. `cohort-join-request:desktop`, to clear the BLOCKED cohort join row.
