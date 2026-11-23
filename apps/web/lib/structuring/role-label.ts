@@ -107,7 +107,10 @@ export const TRADE_STEM_SOURCE =
   // English word for `montuotoj` / `монтажник` was simply absent. `fitter` is
   // bounded so it cannot open on "fitted" / "fitting"; `installer` and
   // `montuotoj` cover the other ordinary forms.
-  "fitter\\b|fitters\\b|installer|montuotoj";
+  "fitter\\b|fitters\\b|installer|montuotoj|" +
+  // pl (2026-11-22): "Potrzebujemy 5 spawaczy" measured `unknown` — the
+  // list held no Polish trade. Stems cover the counted genitive ("spawaczy").
+  "spawacz|elektryk|hydraulik|stolarz|cie[sś]l|murarz|malarz|dekarz|kierowc|kucharz|kelner|sprz[aą]tacz|magazynier|glazurnik|tynkarz|betoniarz|zbrojarz|monter(?:a|ów|ow|zy|ami)?\\b";
 
 /**
  * SWEDISH TRADE NOUNS (sv activation, 2026-11-12), folded.

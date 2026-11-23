@@ -33,12 +33,19 @@ const read = (rel: string) => readFileSync(join(process.cwd(), rel), "utf-8");
 describe("the launch-path clusters are visible, not buried", () => {
   const advanced = read("components/app/demand-advanced-sections.tsx");
 
-  it("time, compensation and requirements open expanded", () => {
+  it("time, compensation and requirements are the emphasised launch-path rows; every row says what is filled", () => {
+    // Coordinator decision 2026-11-22, item 2 (owner orders 2026-11-21/22:
+    // only the fields the action needs, extras behind a disclosure): every
+    // cluster starts CLOSED. The fill-rate intent of finish-mode item 8 is
+    // kept by naming the launch-path clusters as emphasised rows and by a
+    // filled count on every closed row.
     expect(advanced).toMatch(/const LAUNCH_PATH_SECTIONS[\s\S]*?time: true/);
     expect(advanced).toMatch(/const LAUNCH_PATH_SECTIONS[\s\S]*?compensation: true/);
     expect(advanced).toMatch(/const LAUNCH_PATH_SECTIONS[\s\S]*?requirements: true/);
-    // Seeded into the disclosure state, not merely declared.
-    expect(advanced).toMatch(/useState<Record<string, boolean>>\(\{\s*\.\.\.LAUNCH_PATH_SECTIONS,?\s*\}\)/);
+    expect(advanced).toMatch(/useState<Record<string, boolean>>\(\{\}\)/);
+    expect(advanced).toMatch(/const launchPath = LAUNCH_PATH_SECTIONS\[id\] === true;/);
+    expect(advanced).toMatch(/data-launch-path=\{launchPath \|\| undefined\}/);
+    expect(advanced).toMatch(/sdv2-section-\$\{id\}-filled/);
   });
 
   it("the clusters NOT on the launch path stay progressive disclosure", () => {

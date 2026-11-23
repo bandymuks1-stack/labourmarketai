@@ -75,3 +75,48 @@ test.describe("language menu on a desktop (1280 × 800)", () => {
     expect(f.lastReachable).toBe(true);
   });
 });
+
+/**
+ * THE ABOUT PAGE FOLDS ITS LONG SECTIONS (coordinator decision 2026-11-22).
+ * At 390 px /about was 10,819 px. Each explanatory section keeps its heading
+ * and lead in view; its body opens in place. No copy is removed.
+ */
+test.describe("about page on a phone (390 × 844)", () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test("sections fold behind one label, stay complete when opened, and the page is shorter", async ({ page }) => {
+    await page.goto("/en/about");
+    await expect(page.getByTestId("about-page")).toBeVisible({ timeout: 30_000 });
+    const folds = page.getByTestId("about-fold");
+    expect(await folds.count(), "every long section folds").toBeGreaterThanOrEqual(5);
+    const closed = await page.evaluate(() => document.documentElement.scrollHeight);
+    expect(closed, "the folded page is far shorter than 10,819 px").toBeLessThan(7000);
+    // Opened, a section shows its body again.
+    const evidence = page.getByTestId("about-evidence");
+    await evidence.getByTestId("about-fold").locator(":scope > summary").tap();
+    await expect(evidence.locator("ol").first()).toBeVisible();
+    await expect(page.locator("h2")).not.toHaveCount(0);
+  });
+});
+
+/**
+ * THE PRICING PLAN LISTS FOLD (coordinator decision 2026-11-22). Each plan's
+ * feature list opens behind its own "Includes · n" row; the plan's name,
+ * access state and statement stay in view. No price or legal text changes.
+ */
+test.describe("pricing plan boundary on a phone (390 × 844)", () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test("each plan's features fold behind one row and open complete", async ({ page }) => {
+    await page.goto("/en/pricing");
+    const boundary = page.getByTestId("plan-boundary");
+    await expect(boundary).toBeVisible({ timeout: 30_000 });
+    const folds = boundary.getByTestId("plan-boundary-features");
+    expect(await folds.count(), "every listed plan folds its features").toBeGreaterThanOrEqual(3);
+    const list = folds.first().locator('[data-features-from="plans-registry"]');
+    await expect(list).toBeHidden();
+    await folds.first().locator(":scope > summary").tap();
+    await expect(list).toBeVisible();
+    expect(await list.locator("li").count()).toBeGreaterThan(0);
+  });
+});

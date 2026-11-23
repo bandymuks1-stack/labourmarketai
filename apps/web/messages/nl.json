@@ -209,7 +209,6 @@
     "formLabelLabel": "Locatie",
     "formLabelPlaceholder": "Stad of regio",
     "formPriceLabel": "Prijs",
-    "formPricePlaceholder": "bijv. € 450/maand of in overleg",
     "priceHint": "Prijs is optioneel en beschrijvend. Er wordt hier geen betaling gedaan.",
     "save": "Opslaan",
     "saving": "Opslaan…",
@@ -2976,8 +2975,7 @@
           "label": "Hoeveel werknemers nodig"
         },
         "salary": {
-          "label": "Salaris (€)",
-          "placeholder": "Bijv. 2200"
+          "label": "Salaris (€)"
         },
         "countries": {
           "label": "Voorkeurslanden (ISO-codes)",
@@ -4273,6 +4271,9 @@
         "admin": "Beheerder"
       },
       "subcopy": "Eén profiel voor uw werkervaring en kansen — in de volgende stap geeft u aan waarvoor u komt.",
+      "inviteFrom": "{inviter} nodigt u uit om lid te worden van {organization}.",
+      "inviteTo": "U bent uitgenodigd om lid te worden van {organization}.",
+      "inviteNext": "Na het aanmelden wordt u lid van {organization}.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -4283,7 +4284,6 @@
       "confirm_password_label": "Bevestig wachtwoord",
       "submit_label": "Registreren",
       "signing": "Aanmaken...",
-      "disclaimer": "Uw feedback vormt het product — vertel ons wat werkt en wat er mist.",
       "has_account": "Heeft u al een account?",
       "login_link": "Inloggen",
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw.",
@@ -4641,7 +4641,6 @@
               "hoursPerWorker": "Uren per werknemer",
               "totalHours": "Totaal aantal uren (optionele overschrijving)",
               "rate": "Uur- / dagtarief",
-              "ratePlaceholder": "bijv. 20",
               "country": "Land / locatie",
               "materials": "Materialen",
               "equipment": "Apparatuur / gereedschap",
@@ -7166,7 +7165,6 @@
       "countryPlaceholder": "bijv. LT",
       "remoteLabel": "Kan op afstand worden gedaan",
       "rateLabel": "Tarief (optioneel)",
-      "ratePlaceholder": "bijv. ca. 25 EUR/u, bespreekbaar",
       "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief."
     },
     "save": "Opslaan",
@@ -12837,7 +12835,7 @@
         "invite_to_demand": "Een werkgever nodigde u uit voor een werkbehoefte"
       },
       "from": "Uitgenodigd door {name}",
-      "organization": "Bedrijf: {name}",
+      "organization": "Organisatie: {name}",
       "project": "Project: {name}",
       "role": "Voorgestelde rol: {role}",
       "accept": "Uitnodiging accepteren",
@@ -12866,10 +12864,9 @@
       "capacity": "Relatie: {capacity}",
       "capacityNotEmployment": "Dit is geen vacature-aanbod en schept geen dienstverband.",
       "selfStart": "Eigen account aanmaken",
-      "anonExplainer": "Registreer of log in om deze uitnodiging te beantwoorden. Uw account, profiel en werkgeschiedenis blijven van u — wie u uitnodigt legt alleen de verbinding.",
+      "anonExplainer": "Registreer of log in om deze uitnodiging te beantwoorden. Uw account, profiel en werkgeschiedenis blijven van u: aannemen legt alleen de verbinding, nooit een geverifieerde vaardigheid, dienstverband of toewijzing.",
       "register": "Registreren en doorgaan",
       "signIn": "Ik heb al een account",
-      "youOwnYourIdentity": "Uw professionele identiteit blijft van u. Een uitnodiging aannemen maakt op zichzelf geen geverifieerde vaardigheid, dienstverband of toewijzing aan.",
       "referredVia": "Doorverwezen via {source}",
       "campaign": "Uitnodiging: {label}",
       "seats": "{used} van {max} plaatsen bezet",
@@ -13087,6 +13084,7 @@
     },
     "goToRoster": "Naar het team",
     "invalidLabel": "Controleer het e-mailadres — de uitnodiging is niet verzonden.",
+    "offerLimitLabel": "Te veel aanbiedingen. Probeer het later opnieuw.",
     "deliveryHeading": "Uitnodigingslink",
     "deliveryCreated": "Niet gemaild — e-mailbezorging is niet ingesteld. Kopieer de link en stuur die zelf naar de klant.",
     "deliverySent": "De uitnodigingsmail is verzonden. U kunt de link nog steeds kopiëren.",
@@ -14292,9 +14290,7 @@
         "preferredCountries": "Voorkeurslanden",
         "preferredCountriesPlaceholder": "Bijv. NL, DE",
         "salaryMin": "Loon vanaf (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Loon tot (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Bereid te verhuizen?",
         "hasTransport": "Kunt u zelfstandig naar het werk komen?",
         "needsAccommodation": "Huisvesting nodig?",
@@ -19622,6 +19618,7 @@
     "heading": "Dit team aanbieden voor een vraag",
     "intro": "Bied het team als één eenheid aan voor één openstaande vraag van een geverifieerd bedrijf.",
     "privacy": "Het bedrijf ziet alleen feiten op teamniveau: omvang, vaardigheden, beschikbaarheid. Het aanbod noemt geen enkel lid en toont geen ledenprofiel. Leden verschijnen pas in een project nadat het bedrijf het team heeft geaccepteerd en daar heeft ingedeeld.",
+    "orgPrivacy": "Het bedrijf ziet de naam van uw bedrijf, uw bericht en uw voorwaarden. Er wordt niemand genoemd totdat u afspreekt wie het werk doet.",
     "tooSmall": "Een team kan alleen worden aangeboden met minstens 2 actieve leden.",
     "loading": "Laden…",
     "unavailable": "De openstaande vraag kon nu niet worden geladen.",
@@ -19632,6 +19629,7 @@
     "noteLabel": "Bericht aan het bedrijf (optioneel)",
     "notePlaceholder": "Bijvoorbeeld: ploeg van 3, kan over twee weken starten",
     "submit": "Team aanbieden",
+    "orgSubmit": "Ons bedrijf aanbieden",
     "submitting": "Aanbieden…",
     "sent": {
       "heading": "Uw aanbiedingen",
@@ -19710,8 +19708,14 @@
       },
       "blockers": "Het team als geheel voldoet niet aan: {list}",
       "missing": "Niet opgegeven: {list}",
+      "missingData": {
+        "need_not_structured": "de eisen van de behoefte",
+        "no_team_members": "actieve leden",
+        "team_skills_not_stated": "de vaardigheden van het team"
+      },
       "noNeedStructure": "Deze vraag is nog niet gestructureerd, dus het team kan er niet mee worden vergeleken.",
       "note": "Bericht van het team",
+      "noteCompany": "Bericht van het bedrijf",
       "accept": "In principe akkoord",
       "decline": "Afwijzen",
       "noProjects": "U heeft nog geen open project om het team aan toe te wijzen.",
@@ -19730,6 +19734,7 @@
       },
       "createProject": "Project aanmaken",
       "message": "Bericht aan het team",
+      "messageCompany": "Bericht aan het bedrijf",
       "kindOrganization": "Bedrijfsaanbod",
       "orgNext": "In principe akkoord (geen contract). Spreek de details en de mensen die het werk doen af in het gesprek."
     },
@@ -19753,7 +19758,6 @@
       },
       "capacity": "Mensen",
       "rate": "Tarief",
-      "ratePlaceholder": "bijv. 32 €/u of vaste prijs",
       "period": "Periode",
       "start": "Begin",
       "end": "Einde",

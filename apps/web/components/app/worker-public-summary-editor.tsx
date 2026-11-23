@@ -1,23 +1,37 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
+import { clearTabDraft, readTabDraft, writeTabDraft } from "@/lib/drafts/tab-draft";
 import { saveWorkerPublicSummary } from "@/lib/worker/public-summary-actions";
 
 const HEADLINE_MAX = 120;
 const BIO_MAX = 1000;
+/** Tab draft of a save that has not answered yet (`lib/drafts/tab-draft.ts`). */
+export const PUBLIC_SUMMARY_DRAFT = "profile-public-summary";
 
 /**
  * The person's employer-facing summary (PER-2). Who reads it is said above the
  * fields, before anything is typed; saving is explicit; nothing is mirrored from
  * the private profile text.
+ *
+ * EVERY SAVE ANSWERS (P-26, run 45047648320): a save sent while a deploy
+ * activates is answered `x-nextjs-action-not-found`, `StaleBuildRecovery`
+ * reloads the page, and the click got no answer while the typed text was gone.
+ * The text being saved is kept in the tab draft until the server answers; the
+ * reloaded page reads it back: the server holds it → "saved", otherwise the
+ * text is put back with the error answer. A thrown action answers "error" too.
+ * While a save is on its way, "Saving…" shows: every save shows one answer.
  */
 export function WorkerPublicSummaryEditor({
   initialHeadline,
   initialBio,
+  draftOwner,
   labels,
 }: {
   initialHeadline: string;
   initialBio: string;
+  /** The signed-in person's id: a kept save is answered only for them. */
+  draftOwner: string;
   labels: {
     title: string;
     audience: string;
@@ -26,6 +40,8 @@ export function WorkerPublicSummaryEditor({
     bio: string;
     bioPlaceholder: string;
     save: string;
+    /** shown while the save is on its way */
+    saving: string;
     saved: string;
     tooLong: string;
     error: string;
@@ -39,6 +55,24 @@ export function WorkerPublicSummaryEditor({
   const [state, setState] = useState<"idle" | "saved" | "too-long" | "error">("idle");
   const dirty = headline.trim() !== saved.headline || bio.trim() !== saved.bio;
 
+  // A save the page was reloaded under (see above) is answered on arrival.
+  useEffect(() => {
+    const kept = readTabDraft(PUBLIC_SUMMARY_DRAFT, draftOwner);
+    if (!kept) return;
+    clearTabDraft(PUBLIC_SUMMARY_DRAFT);
+    const keptHeadline = kept.headline ?? "";
+    const keptBio = kept.bio ?? "";
+    if (keptHeadline.trim() === initialHeadline && keptBio.trim() === initialBio) {
+      setState("saved");
+      return;
+    }
+    setHeadline(keptHeadline);
+    setBio(keptBio);
+    setState("error");
+    // once, on arrival: the kept save belongs to the page that was reloaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <section id="profile-public-summary" className="flex scroll-mt-20 flex-col gap-3" data-testid="profile-public-summary">
       <div>
@@ -49,10 +83,19 @@ export function WorkerPublicSummaryEditor({
         className="flex flex-col gap-3"
         onSubmit={(e) => {
           e.preventDefault();
+          writeTabDraft(PUBLIC_SUMMARY_DRAFT, draftOwner, { headline, bio });
           startTransition(async () => {
-            const res = await saveWorkerPublicSummary({ headline, bio });
-            if (res.kind === "saved") setSaved({ headline: headline.trim(), bio: bio.trim() });
-            setState(res.kind === "saved" ? "saved" : res.kind === "too-long" ? "too-long" : "error");
+            try {
+              const res = await saveWorkerPublicSummary({ headline, bio });
+              if (res.kind === "saved") {
+                setSaved({ headline: headline.trim(), bio: bio.trim() });
+                clearTabDraft(PUBLIC_SUMMARY_DRAFT);
+              }
+              setState(res.kind === "saved" ? "saved" : res.kind === "too-long" ? "too-long" : "error");
+            } catch {
+              // the action threw (network, a deploy): the text stays, the answer shows
+              setState("error");
+            }
           });
         }}
       >
@@ -97,12 +140,17 @@ export function WorkerPublicSummaryEditor({
           >
             {labels.save}
           </button>
-          {state === "saved" && !dirty ? (
+          {pending ? (
+            <span role="status" className="text-xs text-text-muted" data-testid="profile-public-summary-saving">
+              {labels.saving}
+            </span>
+          ) : null}
+          {!pending && state === "saved" && !dirty ? (
             <span role="status" className="text-xs text-state-success" data-testid="profile-public-summary-saved">
               {labels.saved}
             </span>
           ) : null}
-          {state === "too-long" || state === "error" ? (
+          {!pending && (state === "too-long" || state === "error") ? (
             <span role="alert" className="text-xs text-state-warning" data-testid="profile-public-summary-error">
               {state === "too-long" ? labels.tooLong : labels.error}
             </span>

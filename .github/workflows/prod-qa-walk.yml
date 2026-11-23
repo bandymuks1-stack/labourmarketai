@@ -651,6 +651,18 @@ jobs:
       # Sessions never outlive the walk: every minted session's refresh token is
       # revoked at Supabase and every session file deleted, pass or fail
       # (scripts/prod-qa-revoke-sessions.ts prints counts only).
+      # Owner order 2026-11-22: no synthetic need stays on the open board. Every walk that can
+      # post one already sweeps in its afterAll; this covers a cancel, a timeout or a crash.
+      # The minted sessions' OWN tokens and the product's close RPC only (no service role,
+      # no delete); it needs the session files, so it stands before the revoke.
+      - name: Close every open synthetic need (always)
+        if: always() && steps.mint.outcome == 'success'
+        timeout-minutes: 3
+        shell: bash
+        run: |
+          cd apps/web
+          pnpm exec tsx scripts/prod-qa-close-synthetic-needs.ts
+
       - name: Revoke and delete the synthetic sessions
         if: always()
         shell: bash

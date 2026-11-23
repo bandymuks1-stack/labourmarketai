@@ -209,7 +209,6 @@
     "formLabelLabel": "Lokalizacja",
     "formLabelPlaceholder": "Miasto lub region",
     "formPriceLabel": "Cena",
-    "formPricePlaceholder": "np. 450 €/miesiąc lub do uzgodnienia",
     "priceHint": "Cena jest opcjonalna i opisowa. Płatności nie są tu realizowane.",
     "save": "Zapisz",
     "saving": "Zapisywanie…",
@@ -2976,8 +2975,7 @@
           "label": "Ilu pracowników jest potrzebnych"
         },
         "salary": {
-          "label": "Wynagrodzenie (€)",
-          "placeholder": "np. 2200"
+          "label": "Wynagrodzenie (€)"
         },
         "countries": {
           "label": "Preferowane kraje (kody ISO)",
@@ -4273,6 +4271,9 @@
         "admin": "Administrator"
       },
       "subcopy": "Jeden profil dla Państwa doświadczenia zawodowego i możliwości — w następnym kroku wskażą Państwo, po co przychodzą.",
+      "inviteFrom": "{inviter} zaprasza Państwa do dołączenia do {organization}.",
+      "inviteTo": "Zaproszenie do dołączenia do {organization}.",
+      "inviteNext": "Po rejestracji dołączą Państwo do {organization}.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -4283,7 +4284,6 @@
       "confirm_password_label": "Powtórz hasło",
       "submit_label": "Zarejestruj się",
       "signing": "Tworzenie...",
-      "disclaimer": "Państwa opinia kształtuje produkt — prosimy napisać nam, co działa, a czego brakuje.",
       "has_account": "Mają Państwo już konto?",
       "login_link": "Logowanie",
       "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie za chwilę.",
@@ -4641,7 +4641,6 @@
               "hoursPerWorker": "Godziny na pracownika",
               "totalHours": "Łączne godziny (opcjonalne nadpisanie)",
               "rate": "Stawka godzinowa / dniówka",
-              "ratePlaceholder": "np. 20",
               "country": "Kraj / lokalizacja",
               "materials": "Materiały",
               "equipment": "Sprzęt / narzędzia",
@@ -7166,7 +7165,6 @@
       "countryPlaceholder": "np. LT",
       "remoteLabel": "Można wykonać zdalnie",
       "rateLabel": "Stawka (opcjonalnie)",
-      "ratePlaceholder": "np. ok. 25 EUR/godz., do negocjacji",
       "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa."
     },
     "save": "Zapisz",
@@ -12837,7 +12835,7 @@
         "invite_to_demand": "Pracodawca zaprosił Państwa do zapotrzebowania na pracowników"
       },
       "from": "Zaproszenie od {name}",
-      "organization": "Firma: {name}",
+      "organization": "Organizacja: {name}",
       "project": "Projekt: {name}",
       "role": "Proponowana rola: {role}",
       "accept": "Zaakceptuj zaproszenie",
@@ -12866,10 +12864,9 @@
       "capacity": "Relacja: {capacity}",
       "capacityNotEmployment": "To nie jest oferta pracy i nie tworzy zatrudnienia.",
       "selfStart": "Utwórz własne konto",
-      "anonExplainer": "Proszę się zarejestrować lub zalogować, aby odpowiedzieć na to zaproszenie. Zachowują Państwo własne konto, profil i historię pracy — osoba, która Państwa zaprosiła, tworzy jedynie połączenie, nic więcej.",
+      "anonExplainer": "Proszę się zarejestrować lub zalogować, aby odpowiedzieć na to zaproszenie. Konto, profil i historia pracy pozostają Państwa: przyjęcie tworzy jedynie połączenie, nigdy zweryfikowanej umiejętności, zatrudnienia ani przydziału.",
       "register": "Zarejestruj się i kontynuuj",
       "signIn": "Mam już konto",
-      "youOwnYourIdentity": "Państwa tożsamość zawodowa pozostaje Państwa. Zaakceptowanie zaproszenia samo w sobie nigdy nie tworzy zweryfikowanej umiejętności, zatrudnienia ani przydziału.",
       "referredVia": "Polecono przez {source}",
       "campaign": "Zaproszenie: {label}",
       "seats": "Zajęto {used} z {max} miejsc",
@@ -13087,6 +13084,7 @@
     },
     "goToRoster": "Przejdź do listy",
     "invalidLabel": "Proszę sprawdzić adres e-mail — zaproszenie nie zostało wysłane.",
+    "offerLimitLabel": "Zbyt wiele ofert. Proszę spróbować później.",
     "deliveryHeading": "Link zaproszenia",
     "deliveryCreated": "Nie wysłano e-mailem — wysyłka e-maili nie jest skonfigurowana. Proszę skopiować link i wysłać go klientowi samodzielnie.",
     "deliverySent": "E-mail z zaproszeniem został wysłany. Nadal można skopiować link.",
@@ -14292,9 +14290,7 @@
         "preferredCountries": "Preferowane kraje",
         "preferredCountriesPlaceholder": "np. NL, DE",
         "salaryMin": "Wynagrodzenie od (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Wynagrodzenie do (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Gotowość do przeprowadzki?",
         "hasTransport": "Czy dojadą Państwo do pracy samodzielnie?",
         "needsAccommodation": "Potrzebują Państwo zakwaterowania?",
@@ -19622,6 +19618,7 @@
     "heading": "Zaproponuj ten zespół do zapotrzebowania",
     "intro": "Proszę zaproponować zespół jako jedną jednostkę do jednego otwartego zapotrzebowania zweryfikowanej firmy.",
     "privacy": "Firma widzi tylko fakty na poziomie zespołu: wielkość, umiejętności, dostępność. Oferta nie wskazuje żadnego członka ani nie pokazuje profilu członka. Członkowie pojawiają się w projekcie dopiero po tym, jak firma przyjmie zespół i tam go przypisze.",
+    "orgPrivacy": "Firma widzi nazwę Państwa firmy, wiadomość i warunki. Nikt nie jest wymieniony z nazwiska, dopóki nie uzgodnią Państwo, kto będzie pracować.",
     "tooSmall": "Zespół można zaproponować tylko wtedy, gdy ma co najmniej 2 aktywnych członków.",
     "loading": "Ładowanie…",
     "unavailable": "Nie udało się teraz wczytać otwartego zapotrzebowania.",
@@ -19632,6 +19629,7 @@
     "noteLabel": "Wiadomość do firmy (opcjonalnie)",
     "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",
     "submit": "Zaproponuj zespół",
+    "orgSubmit": "Zaoferuj naszą firmę",
     "submitting": "Wysyłanie…",
     "sent": {
       "heading": "Państwa oferty",
@@ -19710,8 +19708,14 @@
       },
       "blockers": "Zespół jako całość nie spełnia: {list}",
       "missing": "Nie podano: {list}",
+      "missingData": {
+        "need_not_structured": "wymagania potrzeby",
+        "no_team_members": "aktywni członkowie",
+        "team_skills_not_stated": "umiejętności zespołu"
+      },
       "noNeedStructure": "To zapotrzebowanie nie jest jeszcze uporządkowane, więc zespołu nie można z nim porównać.",
       "note": "Wiadomość od zespołu",
+      "noteCompany": "Wiadomość od firmy",
       "accept": "Uzgodnij wstępnie",
       "decline": "Odrzuć",
       "noProjects": "Nie mają Państwo jeszcze otwartego projektu, do którego można przypisać zespół.",
@@ -19730,6 +19734,7 @@
       },
       "createProject": "Utwórz projekt",
       "message": "Napisz do zespołu",
+      "messageCompany": "Napisz do firmy",
       "kindOrganization": "Oferta firmy",
       "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, proszę ustalić w rozmowie."
     },
@@ -19753,7 +19758,6 @@
       },
       "capacity": "Osób",
       "rate": "Stawka",
-      "ratePlaceholder": "np. 32 €/h lub cena ryczałtowa",
       "period": "Okres",
       "start": "Początek",
       "end": "Koniec",

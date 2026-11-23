@@ -39,6 +39,7 @@ import {
 import { PRESENT_ACTIVITY_VERB_SOURCE, SV_PRESENT_ACTIVITY_VERB_SOURCE } from "@/lib/structuring/value-statement";
 import { UNICODE_WORD_BOUNDARY } from "@/lib/structuring/unicode-word-boundary";
 import { looksSwedish } from "@/lib/structuring/looks-swedish";
+import { SV_WORD_NUMBER_SOURCE, WORD_NUMBER_SOURCE } from "@/lib/structuring/word-numbers";
 import { HELP_TOPICS } from "./product-help-topics";
 
 export type ConversationIntent =
@@ -2739,7 +2740,7 @@ const RULES: IntentRule[] = [
       p("\\b(prze)?pracowali[sś]my\\b", 3), // pl
       sv("\\b(jobbade|arbetade)\\b", 3), // sv — "jag jobbade / arbetade"
       sv("\\bfran\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}till\\s*\\d{1,2}", 3), // sv "från 8 till 17"
-      sv("\\d{1,2}\\s*(timm|tim\\b)", 2), // sv — "8 timmar"
+      sv(`(?:\\d{1,2}\\s*|\\b(?:${WORD_NUMBER_SOURCE}|${SV_WORD_NUMBER_SOURCE})\\s+)(timm|tim\\b)`, 2), // sv — "8 / åtta timmar"
       svNoSeek("\\b(idag|i\\s+dag|igar|i\\s+gar)\\b.{0,80}\\d{1,2}([.,]\\d)?\\s*(timm|tim\\b)", 2), // sv
       sv("\\b(rast|lunchrast)\\b", 1), // sv
       sv("\\b(bygget|arbetsplatsen)\\b", 1), // sv
@@ -2755,15 +2756,19 @@ const RULES: IntentRule[] = [
       p("\\bvon\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}bis\\s*\\d{1,2}", 3), // de "von 8 bis 17"
       p("\\bvan\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}tot\\s*\\d{1,2}", 3), // nl "van 8 tot 17"
       p("\\bod\\s*\\d{1,2}(?:[:.]\\d{2})?\\D{0,4}do\\s*\\d{1,2}", 3), // pl "od 8 do 17"
-      // "8 valandas / hours / часов / Stunden / uur / godzin"
-      p("\\d{1,2}\\s*(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren|godz)", 2),
+      // "8 valandas / hours / часов / Stunden / uur / godzin" — and the same
+      // count as a WORD ("aštuonias valandas", "eight hours", "восемь часов",
+      // "acht Stunden", "osiem godzin"; 2026-11-22: those routed `unknown`).
+      p(`(?:\\d{1,2}\\s*|\\b(?:${WORD_NUMBER_SOURCE})\\s+)(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren|godz)`, 2),
       // A DAY + A DURATION is a report of work done, whatever the verb (owner
       // launch order 2026-10-10 §5). "Šiandien Oslo projekte armavome
       // pamatus, 8 valandas" scored 2 here and 3 on `projects` (the bare
       // locative "projekte"), so the owner's own work-log sentence listed
       // the projects instead of opening the record. Not when the sentence
       // also seeks work or workers.
-      pNoSeek("\\b(šiandien|vakar|užvakar|today|yesterday|сегодня|вчера|heute|gestern|vandaag|gisteren|dzisiaj|wczoraj)\\b.{0,80}\\d{1,2}([.,]\\d)?\\s*(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren|godz)", 2),
+      // The day before yesterday counts as a day too ("vorgestern" holds no
+      // word boundary before "gestern"), and the duration may be a word.
+      pNoSeek(`\\b(šiandien|vakar|užvakar|today|yesterday|сегодня|вчера|позавчера|heute|gestern|vorgestern|vandaag|gisteren|eergisteren|dzisiaj|wczoraj|przedwczoraj)\\b.{0,80}(?:\\d{1,2}([.,]\\d)?\\s*|\\b(?:${WORD_NUMBER_SOURCE})\\s+)(val\\.?|valand|hour|hrs?|час|stunden|std|uur|uren|godz)`, 2),
       // break / lunch minutes
       p("(pertrauk|pietūs|pietus|break|lunch|обед|перерыв|przerw|obiad)", 1),
       // "objekte / site / на объекте" — a work site
@@ -3156,7 +3161,7 @@ const RULES: IntentRule[] = [
       p("работник", 4),
       p("сотрудник", 4),
       p("\\b(mitarbeiter|arbeiter|arbeitskräfte|fachkräfte)\\b", 4), // de
-      p("\\b(medewerkers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl
+      p("\\b(medewerkers|werknemers|personeel|arbeiders|arbeidskrachten|vakmensen)\\b", 4), // nl — "Ik heb vijf werknemers nodig"
       p("(pracownik|robotnik|pracownic)", 4), // pl — pracownicy / pracowników
       p("\\b(hire|hiring|recruit(ing|ment)?|staffing)\\b", 3),
       p("(нанять|наним|найм)", 3),
@@ -3179,8 +3184,10 @@ const RULES: IntentRule[] = [
         // — but by `\breikia\s+žmoni`, bound to ONE verb. "ieškome 10 žmonių
         // klientui" (an agency buying for a client) uses a different verb and
         // measured `unknown`. Reading the shared seek vocabulary instead of a
-        // single hard-coded verb is the point of this rule.
-        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|mensen|leute|personen|personeel|люд|человек|рабочих|žmoni|zmoni)`,
+        // single hard-coded verb is the point of this rule. `рабочие`,
+        // `darbininkai` and `hands` join 2026-11-22: "требуются пять рабочие",
+        // "reikia penki darbininkai", "we need five hands" measured `unknown`.
+        `(?:${SEEK_VERB_SOURCE})\\s+(?:[^\\s]+\\s+){0,3}?(people|hands|mensen|leute|personen|personeel|arbeiders|люд|человек|рабоч(?:их|ие|ий)(?!\\s+(?:дн|час|мест|смен|недел|журнал|график|одежд|инструмент|врем|процесс))|строител|builders|statybinink|bauarbeiter|bouwvakkers|žmoni|zmoni|darbinink)`,
         5,
       ),
       // pl (2026-09-20). `SEEK_VERB_SOURCE` lives in lib/structuring and
@@ -3189,7 +3196,9 @@ const RULES: IntentRule[] = [
       p("(potrzebuj|poszukuj|szuka|brakuje\\s+nam)\\w*\\s*(?:[^\\s]+\\s+){0,3}?(ludzi|os[oó]b|pracownik|pracownic|robotnik|r[aą]k\\s+do\\s+pracy)", 5),
       // …and the same verbs beside a TRADE, which is the vocabulary
       // `TRADE_STEM_SOURCE` already shares with the supply direction.
-      p(`(potrzebuj|poszukuj|szukam[y]?|brakuje\\s+nam|zatrudni)\\w*\\s*.{0,30}(?:${TRADE_STEM_SOURCE})`, 6),
+      // The words between may never be a WORK noun: "Szukam pracy jako
+      // spawacz" is the person's own job search (pinned in chat-goal-paths).
+      p(`(potrzebuj|poszukuj|szukam[y]?|brakuje\\s+nam|zatrudni)\\w*\\s+(?:(?!prac[ayeo]?\\b|zleceni|zatrudnieni)[^\\s]+\\s+){0,4}?(?:${TRADE_STEM_SOURCE})`, 6),
       // sv (2026-11-12) — "Jag behöver 12 ställningsbyggare i Rotterdam",
       // "Vi söker personal", "Vi behöver 3 svetsare". The words between the
       // verb and the noun may never be a WORK noun: "Jag söker jobb som

@@ -187,7 +187,7 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           clipped overflow hid the buttons, counts and "Visa veikla"
           (UX review 2026-10-24). `grid-cols-1` is `minmax(0, 1fr)`; the
           columns carry `min-w-0` for the same reason on lg. */}
-      <div data-testid="today-regions" className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+      <div data-testid="today-regions" className="grid grid-cols-1 items-start gap-4 [counter-reset:home-region] sm:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
           <Suspense fallback={<HomeRegionPending label={t("reading")} size="action" />}>
             <HomeWaiting locale={locale} />

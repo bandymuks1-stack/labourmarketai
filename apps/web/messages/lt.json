@@ -209,7 +209,6 @@
     "formLabelLabel": "Vieta",
     "formLabelPlaceholder": "Miestas ar regionas",
     "formPriceLabel": "Kaina",
-    "formPricePlaceholder": "pvz. 450 €/mėn arba pagal susitarimą",
     "priceHint": "Kaina neprivaloma ir aprašomoji. Mokėjimai čia nevykdomi.",
     "save": "Išsaugoti",
     "saving": "Saugoma…",
@@ -2976,8 +2975,7 @@
           "label": "Kiek darbuotojų reikia"
         },
         "salary": {
-          "label": "Atlyginimas (€)",
-          "placeholder": "Pvz., 2200"
+          "label": "Atlyginimas (€)"
         },
         "countries": {
           "label": "Pageidaujamos šalys (ISO kodai)",
@@ -4273,6 +4271,9 @@
         "admin": "Administratorius"
       },
       "subcopy": "Vienas profilis jūsų darbo patirčiai ir galimybėms — kitame žingsnyje patikslinsite, ko atėjote.",
+      "inviteFrom": "{inviter} kviečia jus prisijungti prie {organization}.",
+      "inviteTo": "Esate kviečiami prisijungti prie {organization}.",
+      "inviteNext": "Užsiregistravę prisijungsite prie {organization}.",
       "google_label": "Tęsti su Google",
       "google_redirecting": "Nukreipiama...",
       "divider": "arba",
@@ -4283,7 +4284,6 @@
       "confirm_password_label": "Pakartokite slaptažodį",
       "submit_label": "Registruotis",
       "signing": "Kuriama...",
-      "disclaimer": "Jūsų atsiliepimai formuoja produktą — parašykite, kas veikia ir ko trūksta.",
       "has_account": "Jau turite paskyrą?",
       "login_link": "Prisijungti",
       "error_generic": "Įvyko klaida. Pabandykite dar kartą vėliau.",
@@ -4641,7 +4641,6 @@
               "hoursPerWorker": "Valandų vienam darbuotojui",
               "totalHours": "Iš viso valandų (nebūtina, pakeičia)",
               "rate": "Valandinis / dienos tarifas",
-              "ratePlaceholder": "pvz., 20",
               "country": "Šalis / vieta",
               "materials": "Medžiagos",
               "equipment": "Įranga / įrankiai",
@@ -7166,7 +7165,6 @@
       "countryPlaceholder": "pvz. LT",
       "remoteLabel": "Gali būti atliekama nuotoliniu būdu",
       "rateLabel": "Įkainis (nebūtina)",
-      "ratePlaceholder": "pvz. apie 25 EUR/val., derinama",
       "rateHint": "Tik laisvas tekstas — pavyzdžiui, orientacinis valandinis įkainis."
     },
     "save": "Išsaugoti",
@@ -12837,7 +12835,7 @@
         "invite_to_demand": "Darbdavys pakvietė jus į darbo poreikį"
       },
       "from": "Kvietė: {name}",
-      "organization": "Įmonė: {name}",
+      "organization": "Organizacija: {name}",
       "project": "Projektas: {name}",
       "role": "Siūloma rolė: {role}",
       "accept": "Priimti kvietimą",
@@ -12866,10 +12864,9 @@
       "capacity": "Ryšys: {capacity}",
       "capacityNotEmployment": "Tai nėra darbo pasiūlymas ir nesukuria įdarbinimo.",
       "selfStart": "Susikurti savo paskyrą",
-      "anonExplainer": "Užsiregistruokite arba prisijunkite, kad atsakytumėte į šį kvietimą. Paskyra, profilis ir darbo istorija lieka jūsų — kvietėjas sukuria tik ryšį.",
+      "anonExplainer": "Užsiregistruokite arba prisijunkite, kad atsakytumėte į šį kvietimą. Paskyra, profilis ir darbo istorija lieka jūsų: priėmus kvietimą sukuriamas tik ryšys, ne patvirtintas įgūdis, darbo santykiai ar paskyrimas.",
       "register": "Registruotis ir tęsti",
       "signIn": "Jau turiu paskyrą",
-      "youOwnYourIdentity": "Jūsų profesinė tapatybė lieka jūsų. Kvietimo priėmimas savaime nesukuria nei patvirtinto įgūdžio, nei darbo santykių, nei paskyrimo.",
       "referredVia": "Nukreipta per {source}",
       "campaign": "Kvietimas: {label}",
       "seats": "Užimta {used} iš {max} vietų",
@@ -13087,6 +13084,7 @@
     },
     "goToRoster": "Pereiti į komandą",
     "invalidLabel": "Patikrinkite el. pašto adresą — kvietimas neišsiųstas.",
+    "offerLimitLabel": "Per daug pasiūlymų. Bandykite vėliau.",
     "deliveryHeading": "Kvietimo nuoroda",
     "deliveryCreated": "Neišsiųsta el. paštu — el. laiškų siuntimas nesukonfigūruotas. Nukopijuokite nuorodą ir nusiųskite ją klientui savarankiškai.",
     "deliverySent": "Kvietimo laiškas išsiųstas. Nuorodą vis tiek galite nukopijuoti.",
@@ -14292,9 +14290,7 @@
         "preferredCountries": "Norimos šalys",
         "preferredCountriesPlaceholder": "Pvz., NL, DE",
         "salaryMin": "Atlygis nuo (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Atlygis iki (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Ar sutinki persikelti?",
         "hasTransport": "Ar galite savarankiškai atvykti į darbą?",
         "needsAccommodation": "Ar reikia apgyvendinimo?",
@@ -19622,6 +19618,7 @@
     "heading": "Pasiūlyti šią komandą paklausai",
     "intro": "Pasiūlykite komandą kaip vieną vienetą vienai atviroms patvirtintos įmonės paklausai.",
     "privacy": "Įmonė mato tik komandos lygio faktus: dydį, įgūdžius, prieinamumą. Pasiūlymas nenurodo jokio nario ir nerodo nario profilio. Nariai projekte matomi tik tada, kai įmonė komandą priima ir ten priskiria.",
+    "orgPrivacy": "Įmonė mato Jūsų įmonės pavadinimą, pastabą ir sąlygas. Joks asmuo neįvardijamas, kol nesusitariate, kas dirbs.",
     "tooSmall": "Komandą galima siūlyti tik jei joje yra bent 2 aktyvūs nariai.",
     "loading": "Kraunama…",
     "unavailable": "Šiuo metu nepavyko įkelti atviros paklausos.",
@@ -19632,6 +19629,7 @@
     "noteLabel": "Pastaba įmonei (nebūtina)",
     "notePlaceholder": "Pavyzdžiui: 3 žmonių brigada, galime pradėti po dviejų savaičių",
     "submit": "Pasiūlyti komandą",
+    "orgSubmit": "Pasiūlyti savo įmonę",
     "submitting": "Siūloma…",
     "sent": {
       "heading": "Jūsų pasiūlymai",
@@ -19710,8 +19708,14 @@
       },
       "blockers": "Komanda kaip visuma neatitinka: {list}",
       "missing": "Nenurodyta: {list}",
+      "missingData": {
+        "need_not_structured": "poreikio reikalavimai",
+        "no_team_members": "aktyvūs nariai",
+        "team_skills_not_stated": "komandos įgūdžiai"
+      },
       "noNeedStructure": "Šis poreikis dar nesustruktūruotas, todėl komandos su juo palyginti negalima.",
       "note": "Komandos pastaba",
+      "noteCompany": "Įmonės pastaba",
       "accept": "Sutarti iš esmės",
       "decline": "Atmesti",
       "noProjects": "Dar neturite atviro projekto, kuriam galėtumėte priskirti komandą.",
@@ -19730,6 +19734,7 @@
       },
       "createProject": "Sukurti projektą",
       "message": "Rašyti komandai",
+      "messageCompany": "Rašyti įmonei",
       "kindOrganization": "Įmonės pasiūlymas",
       "orgNext": "Sutarta iš esmės (ne sutartis). Detales ir dirbsiančius žmones suderinkite pokalbyje."
     },
@@ -19753,7 +19758,6 @@
       },
       "capacity": "Žmonių",
       "rate": "Įkainis",
-      "ratePlaceholder": "pvz. 32 €/val. arba fiksuota kaina",
       "period": "Laikotarpis",
       "start": "Pradžia",
       "end": "Pabaiga",
