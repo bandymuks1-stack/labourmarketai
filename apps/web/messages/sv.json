@@ -19865,7 +19865,7 @@
       },
       "withdraw": "Återkalla",
       "withdrawn": "Kandidaten återkallad.",
-      "selectNote": "Att välja kopplar ert företag till den här bemanningsfirman: en bestående koppling som ni kan avsluta på sidan Partner. Det skickar också en bokningsförfrågan till personen. Det är inget avtal.",
+      "selectNote": "Att välja kopplar ert företag till den här bemanningsfirman, som då ser ert företags namn: en bestående koppling som ni kan avsluta på sidan Partner. Det skickar också en bokningsförfrågan till personen. Det är inget avtal.",
       "noteLabel": "Meddelande till personen (valfritt)",
       "select": "Välj denna kandidat",
       "selected": "Bokningsförfrågan skickad. Personen bestämmer.",
