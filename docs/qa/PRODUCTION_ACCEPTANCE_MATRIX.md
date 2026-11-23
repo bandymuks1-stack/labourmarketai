@@ -279,7 +279,7 @@ All agency production runs are on 7e517e32, 112 behind.
 | 6. Work, time and results | LOCAL: I-4, I-11 (practice days; production must not write them) | LOCAL: I-5, I-12 | LOCAL: I-13 |
 | 7. Confirmation | LOCAL: I-12 (the employer confirms the intern) | LOCAL: I-13 | LOCAL: I-13b |
 | 8. Living CV, automatically | LOCAL: I-13b (the practice period stands as confirmed) | n/a | LOCAL: I-13b |
-| 9. Reuse | GAP: no walk turns a learner into a worker profile with the history kept | GAP | GAP |
+| 9. Reuse | GAP: no walk turns a learner into a worker profile with the history kept. `recognition-chain-isolated` I-16 (#3716, CI pending) adds it. | GAP | GAP |
 
 ### Education institution
 
