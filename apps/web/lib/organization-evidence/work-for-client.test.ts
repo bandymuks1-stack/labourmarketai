@@ -73,8 +73,16 @@ describe("clientsOfRecords: whom the organization's own records were for", () =>
       SUB,
     );
     expect(clients).toEqual([
-      { organizationId: CLIENT, records: 2 },
-      { organizationId: OTHER, records: 1 },
+      { organizationId: CLIENT, records: 2, label: null },
+      { organizationId: OTHER, records: 1, label: null },
     ]);
+  });
+
+  it("keeps the name the records give the client, for a reader who cannot read the client itself", () => {
+    const clients = clientsOfRecords(
+      [rec({ parties: [{ role: "client", organizationId: CLIENT, label: " Synthetic Client Ltd " }] }), rec({})],
+      SUB,
+    );
+    expect(clients).toEqual([{ organizationId: CLIENT, records: 2, label: "Synthetic Client Ltd" }]);
   });
 });

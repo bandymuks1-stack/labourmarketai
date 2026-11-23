@@ -111,7 +111,7 @@ export async function CompanyWorkHistory({
         {/* A company with no imported history can still have real projects
             and journal work. */}
         <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
-        <WorkForClientBlock work={load.forClient} t={t} locale={locale} />
+        <WorkForClientBlock work={load.forClient} unreadable={load.partnerWorkUnreadable} t={t} locale={locale} />
         <ClientsBlock clients={load.clients} t={t} />
         <OrganizationProjectsBlock projects={load.projects} t={t} />
       </section>
@@ -170,7 +170,7 @@ export async function CompanyWorkHistory({
 
       <ClientsBlock clients={load.clients} t={t} />
 
-      <WorkForClientBlock work={load.forClient} t={t} locale={locale} />
+      <WorkForClientBlock work={load.forClient} unreadable={load.partnerWorkUnreadable} t={t} locale={locale} />
 
       <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
 
@@ -256,14 +256,22 @@ function OrganizationJournalBlock({
  *  name; never added to the organization's own work. */
 function WorkForClientBlock({
   work,
+  unreadable,
   t,
   locale,
 }: {
   work: WorkForClient | null;
+  /** The partners' books could not be read: UNKNOWN, never "none" (SEP-7). */
+  unreadable: boolean;
   t: Awaited<ReturnType<typeof getTranslations>>;
   locale: string;
 }) {
-  if (!work) return null;
+  const note = unreadable ? (
+    <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-for-client-unreadable">
+      {t("forClient.unreadable")}
+    </p>
+  ) : null;
+  if (!work) return note;
   const when = span(work.firstDate, work.lastDate, locale);
   return (
     <section
@@ -286,6 +294,7 @@ function WorkForClientBlock({
       <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-for-client-basis">
         {t("forClient.basis", { count: work.records })}
       </p>
+      {note}
     </section>
   );
 }

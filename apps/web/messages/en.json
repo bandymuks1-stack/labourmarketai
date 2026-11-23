@@ -19397,7 +19397,8 @@
       "confirmed": "Records confirmed",
       "unconfirmed": "Records not confirmed",
       "periodHours": "{hours} h stated as period totals, not added to single days.",
-      "basis": "From {count, plural, one {# record} other {# records}} in your subcontractors' own books. Counted apart from your own work."
+      "basis": "From {count, plural, one {# record} other {# records}} in your subcontractors' own books. Counted apart from your own work.",
+      "unreadable": "Work recorded in partners' books could not be read right now. That does not mean there is none."
     },
     "clients": {
       "title": "Clients",

@@ -19397,7 +19397,8 @@
       "confirmed": "Patvirtinti įrašai",
       "unconfirmed": "Nepatvirtinti įrašai",
       "periodHours": "{hours} val. nurodyta kaip laikotarpio suma, nepridėta prie atskirų dienų.",
-      "basis": "Iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} jūsų subrangovų apskaitoje. Skaičiuojama atskirai nuo jūsų pačių darbų."
+      "basis": "Iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} jūsų subrangovų apskaitoje. Skaičiuojama atskirai nuo jūsų pačių darbų.",
+      "unreadable": "Partnerių apskaitoje užfiksuotų darbų šiuo metu nepavyko perskaityti. Tai nereiškia, kad jų nėra."
     },
     "clients": {
       "title": "Užsakovai",

@@ -3321,8 +3321,14 @@ export async function correctSessionDateProvenance(
 
 // ── performing-company attribution ──────────────────────────────────────────
 
-/** Roles a performing company can be named in (the party role vocabulary). */
-export const PERFORMING_PARTY_ROLES = ["employer", "subcontractor", "agency", "other"] as const;
+/**
+ * Roles a performing company can be named in. Each one states the capacity in
+ * which that company DID the work, so a record naming it is folded into its own
+ * history. There is deliberately no catch-all `other`: a role that does not say
+ * the company performed the work cannot make the work that company's (decision
+ * 0033). A `client` is the party the work was done FOR (`CLIENT_PARTY_ROLE`).
+ */
+export const PERFORMING_PARTY_ROLES = ["employer", "subcontractor", "agency"] as const;
 /** The role naming the organization the work was done FOR (decision 0033). */
 export const CLIENT_PARTY_ROLE = "client";
 export type PerformingPartyRole = (typeof PERFORMING_PARTY_ROLES)[number];

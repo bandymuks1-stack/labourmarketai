@@ -7143,7 +7143,8 @@
       "confirmed": "Apstiprinātie ieraksti",
       "unconfirmed": "Neapstiprinātie ieraksti",
       "periodHours": "{hours} st. norādītas kā perioda summa, nav pieskaitītas atsevišķām dienām.",
-      "basis": "No {count, plural, zero {# ierakstiem} one {# ieraksta} other {# ierakstiem}} jūsu apakšuzņēmēju uzskaitē. Skaitīts atsevišķi no jūsu pašu darba."
+      "basis": "No {count, plural, zero {# ierakstiem} one {# ieraksta} other {# ierakstiem}} jūsu apakšuzņēmēju uzskaitē. Skaitīts atsevišķi no jūsu pašu darba.",
+      "unreadable": "Partneru uzskaitē reģistrēto darbu pašlaik neizdevās nolasīt. Tas nenozīmē, ka tā nav."
     },
     "clients": {
       "title": "Pasūtītāji",

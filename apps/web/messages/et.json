@@ -7143,7 +7143,8 @@
       "confirmed": "Kinnitatud kirjed",
       "unconfirmed": "Kinnitamata kirjed",
       "periodHours": "{hours} h on märgitud perioodi summana, üksikute päevade hulka lisamata.",
-      "basis": "{count, plural, one {# kirjest} other {# kirjest}} teie alltöövõtjate enda arvestuses. Loetud eraldi teie enda tööst."
+      "basis": "{count, plural, one {# kirjest} other {# kirjest}} teie alltöövõtjate enda arvestuses. Loetud eraldi teie enda tööst.",
+      "unreadable": "Partnerite arvestuses olevat tööd ei õnnestunud praegu lugeda. See ei tähenda, et seda pole."
     },
     "clients": {
       "title": "Tellijad",

@@ -34,4 +34,17 @@ describe("the history reader keeps a client apart from the performer", () => {
   it("the store filters by role when asked", () => {
     expect(read("lib/organization-evidence/evidence-store.ts")).toMatch(/if \(roles\) q = q\.in\("party_role", roles as string\[\]\)/);
   });
+
+  it("a failed read of partners' books is said, never an empty aggregate (SEP-7)", () => {
+    expect(src).toMatch(/partnerWorkUnreadable: performedHere === null \|\| doneForHere === null/);
+    const ui = read("components/app/organization/company-work-history.tsx");
+    expect(ui).toMatch(/unreadable=\{load\.partnerWorkUnreadable\}/g);
+    expect(ui.match(/unreadable=\{load\.partnerWorkUnreadable\}/g)).toHaveLength(2);
+    expect(ui).toContain('data-testid="company-work-history-for-client-unreadable"');
+  });
+
+  it("no catch-all role makes another organization's work this one's", async () => {
+    const core = read("lib/organization-evidence/import-core.ts");
+    expect(core).toMatch(/export const PERFORMING_PARTY_ROLES = \["employer", "subcontractor", "agency"\] as const;/);
+  });
 });

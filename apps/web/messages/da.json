@@ -7143,7 +7143,8 @@
       "confirmed": "Bekræftede poster",
       "unconfirmed": "Ikke-bekræftede poster",
       "periodHours": "{hours} t angivet som periodesum, ikke lagt til enkelte dage.",
-      "basis": "Fra {count, plural, one {# post} other {# poster}} i jeres underleverandørers egne registre. Talt adskilt fra jeres eget arbejde."
+      "basis": "Fra {count, plural, one {# post} other {# poster}} i jeres underleverandørers egne registre. Talt adskilt fra jeres eget arbejde.",
+      "unreadable": "Arbejde i partneres registre kunne ikke læses lige nu. Det betyder ikke, at der ikke er noget."
     },
     "clients": {
       "title": "Kunder",

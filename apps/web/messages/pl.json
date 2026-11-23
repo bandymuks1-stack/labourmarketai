@@ -19397,7 +19397,8 @@
       "confirmed": "Potwierdzone wpisy",
       "unconfirmed": "Niepotwierdzone wpisy",
       "periodHours": "{hours} h podano jako sumę za okres; nie dodano do pojedynczych dni.",
-      "basis": "Z {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}} w ewidencji podwykonawców. Liczone osobno od własnej pracy organizacji."
+      "basis": "Z {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}} w ewidencji podwykonawców. Liczone osobno od własnej pracy organizacji.",
+      "unreadable": "Nie udało się teraz odczytać prac zapisanych w ewidencji partnerów. Nie oznacza to, że ich nie ma."
     },
     "clients": {
       "title": "Klienci",

@@ -70,19 +70,29 @@ export function summarizeWorkForClient(records: readonly RecordFacts[]): WorkFor
   };
 }
 
-export type ClientOfRecords = { readonly organizationId: string; readonly records: number };
+export type ClientOfRecords = {
+  readonly organizationId: string;
+  readonly records: number;
+  /** The name the records themselves give the client (`party_label`), if any. */
+  readonly label: string | null;
+};
 
 /** The organizations this organization's own records name as their client, most records first. */
 export function clientsOfRecords(records: readonly RecordFacts[], ownOrganizationId: string): ClientOfRecords[] {
-  const by = new Map<string, number>();
+  const by = new Map<string, { records: number; label: string | null }>();
   for (const r of live(records)) {
     if (r.organizationId !== ownOrganizationId) continue;
-    const clients = new Set(
-      r.parties
-        .filter((p) => p.role === "client" && p.organizationId && p.organizationId !== ownOrganizationId)
-        .map((p) => p.organizationId!),
-    );
-    for (const id of clients) by.set(id, (by.get(id) ?? 0) + 1);
+    const seen = new Set<string>();
+    for (const p of r.parties) {
+      if (p.role !== "client" || !p.organizationId || p.organizationId === ownOrganizationId) continue;
+      const entry = by.get(p.organizationId) ?? { records: 0, label: null };
+      if (!seen.has(p.organizationId)) entry.records += 1;
+      seen.add(p.organizationId);
+      entry.label = entry.label ?? (p.label?.trim() || null);
+      by.set(p.organizationId, entry);
+    }
   }
-  return [...by].map(([organizationId, n]) => ({ organizationId, records: n })).sort((a, b) => b.records - a.records);
+  return [...by]
+    .map(([organizationId, e]) => ({ organizationId, records: e.records, label: e.label }))
+    .sort((a, b) => b.records - a.records);
 }

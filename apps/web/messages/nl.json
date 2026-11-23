@@ -19397,7 +19397,8 @@
       "confirmed": "Bevestigde registraties",
       "unconfirmed": "Niet-bevestigde registraties",
       "periodHours": "{hours} u opgegeven als periodetotaal, niet opgeteld bij losse dagen.",
-      "basis": "Uit {count, plural, one {# registratie} other {# registraties}} in de eigen administratie van uw onderaannemers. Apart geteld van uw eigen werk."
+      "basis": "Uit {count, plural, one {# registratie} other {# registraties}} in de eigen administratie van uw onderaannemers. Apart geteld van uw eigen werk.",
+      "unreadable": "Het werk in de administratie van partners kon nu niet worden gelezen. Dat betekent niet dat er geen is."
     },
     "clients": {
       "title": "Opdrachtgevers",

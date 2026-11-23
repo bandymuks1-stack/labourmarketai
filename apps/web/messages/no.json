@@ -7143,7 +7143,8 @@
       "confirmed": "Bekreftede poster",
       "unconfirmed": "Ikke bekreftede poster",
       "periodHours": "{hours} t oppgitt som periodesum, ikke lagt til enkeltdager.",
-      "basis": "Fra {count, plural, one {# post} other {# poster}} i underleverandørenes egne registre. Telt separat fra deres eget arbeid."
+      "basis": "Fra {count, plural, one {# post} other {# poster}} i underleverandørenes egne registre. Telt separat fra deres eget arbeid.",
+      "unreadable": "Arbeid i partneres registre kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes."
     },
     "clients": {
       "title": "Oppdragsgivere",

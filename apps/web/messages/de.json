@@ -19397,7 +19397,8 @@
       "confirmed": "Bestätigte Einträge",
       "unconfirmed": "Nicht bestätigte Einträge",
       "periodHours": "{hours} Std. als Zeitraumsumme angegeben, nicht zu einzelnen Tagen addiert.",
-      "basis": "Aus {count, plural, one {# Eintrag} other {# Einträgen}} in den eigenen Unterlagen Ihrer Subunternehmer. Getrennt von Ihrer eigenen Arbeit gezählt."
+      "basis": "Aus {count, plural, one {# Eintrag} other {# Einträgen}} in den eigenen Unterlagen Ihrer Subunternehmer. Getrennt von Ihrer eigenen Arbeit gezählt.",
+      "unreadable": "Die in den Unterlagen der Partner erfasste Arbeit konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt."
     },
     "clients": {
       "title": "Auftraggeber",

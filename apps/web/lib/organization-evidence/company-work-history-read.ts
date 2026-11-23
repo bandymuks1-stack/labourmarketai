@@ -92,6 +92,9 @@ export type CompanyWorkHistoryLoad =
       /** The clients this organization's own records name, most records first. `name`
        *  is null when the caller cannot read that organization (never guessed). */
       readonly clients: readonly { readonly organizationId: string; readonly name: string | null; readonly records: number }[];
+      /** A read of the work stored in partners' books failed: the surface says so,
+       *  and an absent aggregate then means UNKNOWN, never "none" (SEP-7). */
+      readonly partnerWorkUnreadable: boolean;
       /** A safety ceiling was reached while reading: the totals cover only
        *  what was read and the surface MUST say so (never a silent cap). */
       readonly truncated: boolean;
@@ -280,17 +283,19 @@ export async function loadCompanyWorkHistory(
     attributedCount: attributed.length,
     forClient,
     clients,
+    partnerWorkUnreadable: performedHere === null || doneForHere === null,
     truncated: recs.truncated,
   };
 }
 
 /**
- * The client organizations' names, under the caller's own RLS: a client the
- * caller is not a member of stays unnamed (null), never guessed or widened.
+ * The client organizations' names, under the caller's own RLS. A client the
+ * caller is not a member of is named by the label its records carry
+ * (`party_label`); with neither it stays unnamed (null), never guessed or widened.
  */
 async function nameClients(
   supabase: Awaited<ReturnType<typeof createClient>>,
-  clients: readonly { readonly organizationId: string; readonly records: number }[],
+  clients: readonly { readonly organizationId: string; readonly records: number; readonly label: string | null }[],
 ): Promise<{ organizationId: string; name: string | null; records: number }[]> {
   if (clients.length === 0) return [];
   const names = new Map<string, string>();
@@ -306,7 +311,11 @@ async function nameClients(
   } catch {
     /* unnamed, never guessed */
   }
-  return clients.map((c) => ({ ...c, name: names.get(c.organizationId) ?? null }));
+  return clients.map((c) => ({
+    organizationId: c.organizationId,
+    records: c.records,
+    name: names.get(c.organizationId) ?? c.label,
+  }));
 }
 
 /**

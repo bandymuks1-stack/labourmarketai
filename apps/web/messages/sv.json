@@ -19397,7 +19397,8 @@
       "confirmed": "Bekräftade poster",
       "unconfirmed": "Ej bekräftade poster",
       "periodHours": "{hours} h angivna som periodsumma, inte lagda till enskilda dagar.",
-      "basis": "Från {count, plural, one {# post} other {# poster}} i era underentreprenörers egna register. Räknas separat från ert eget arbete."
+      "basis": "Från {count, plural, one {# post} other {# poster}} i era underentreprenörers egna register. Räknas separat från ert eget arbete.",
+      "unreadable": "Arbete i partners register kunde inte läsas just nu. Det betyder inte att det saknas."
     },
     "clients": {
       "title": "Beställare",
