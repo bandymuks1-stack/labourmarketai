@@ -173,15 +173,6 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
         </p>
       </header>
 
-      {/* THE SIX GOALS — the public home's goal navigator, signed in
-          (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC N4): the same six
-          goals for every role, each opening the functions this person may
-          use. Streams behind a box of the rail's height, so nothing below
-          moves when it arrives. */}
-      <Suspense fallback={<div data-testid="signed-in-goals-pending" className="min-h-[13rem]" aria-hidden />}>
-        <SignedInGoalNavigation />
-      </Suspense>
-
       {/* THE FOUR REGIONS — two columns from lg (01+02 | 03+04), one column
           on a phone in DOM order 01→04 (the one primary action first). Each
           streams from its own loader behind a placeholder that RESERVES the
@@ -244,6 +235,17 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           </Suspense>
         </div>
       </div>
+
+      {/* THE SIX GOALS — the public home's goal navigator, signed in
+          (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC N4): the same six
+          goals for every role, each opening the functions this person may
+          use. After the regions, so the one primary action stays on the
+          first screen of a phone; directly above the stations it replaces
+          in N6. Streams behind a box of the rail's height, so nothing below
+          moves when it arrives. */}
+      <Suspense fallback={<div data-testid="signed-in-goals-pending" className="min-h-[13rem]" aria-hidden />}>
+        <SignedInGoalNavigation />
+      </Suspense>
 
       {/* 6 · STATIONS — the contextual workspaces, one tap each, as the light
           3D area switcher (owner order 2026-10-25): cards with depth, the

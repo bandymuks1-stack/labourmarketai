@@ -127,3 +127,27 @@ describe("every card is a real, existing step with a real label", () => {
     expect(read("lib/navigation/signed-in-goals.ts")).not.toMatch(/PUBLIC_INTENT_IDS = |const .*GOAL_IDS/);
   });
 });
+
+describe("the main action stays on the first screen (owner P0 2026-11-07, Lane A/M review of N4)", () => {
+  const before = (src: string, a: string, b: string) => {
+    const i = src.indexOf(a);
+    const j = src.indexOf(b);
+    expect(i, a).toBeGreaterThan(-1);
+    expect(j, b).toBeGreaterThan(-1);
+    return i < j;
+  };
+
+  it("the worker home: regions (the one primary action) → goals → stations", () => {
+    const src = read("components/app/today/today-screen.tsx");
+    expect(before(src, 'data-testid="today-regions"', "<SignedInGoalNavigation")).toBe(true);
+    expect(before(src, "<SignedInGoalNavigation", 'data-testid="today-stations"')).toBe(true);
+  });
+
+  it("the company home: title → approvals → primary action → goals → area switcher", () => {
+    const src = read("components/app/organization/company-model-screen.tsx");
+    expect(before(src, "<h2", "<OrganizationApprovalsCard")).toBe(true);
+    expect(before(src, "<OrganizationApprovalsCard", 'testId="company-model-primary"')).toBe(true);
+    expect(before(src, 'testId="company-model-primary"', "<SignedInGoalNavigation")).toBe(true);
+    expect(before(src, "<SignedInGoalNavigation", "<AreaSwitcher")).toBe(true);
+  });
+});
