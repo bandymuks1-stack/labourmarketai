@@ -14,7 +14,8 @@ import { describe, expect, it } from "vitest";
  *   - nothing that names a person or an organization reaches the log: no text locators, no text
  *     assertions, no console output, failures rethrown as the step name only;
  *   - the workflow publishes ONLY the two encrypted files, destroys the plaintext whatever
- *     happens, and publishes nothing unless all eight screens exist;
+ *     happens, and publishes nothing unless all twelve screens exist (1440, 390 and 375 px);
+ *   - at 375 px nothing overflows or sits off-screen;
  *   - only the coordinator's PUBLIC key is in the repository.
  */
 const WEB = join(__dirname, "..", "..");
@@ -72,6 +73,16 @@ describe("the walk is read-only and prints no names", () => {
     expect(spec).toMatch(/return route\.abort\(\)/);
   });
 
+  it("photographs 1440, 390 and 375 px, and at 375 px fails on any overflow or off-screen content", () => {
+    expect(spec).toMatch(/key: "1440"/);
+    expect(spec).toMatch(/key: "390"/);
+    expect(spec).toMatch(/key: "375", options: \{ viewport: \{ width: 375/);
+    const shoot = spec.slice(spec.indexOf("async function shoot"));
+    expect(shoot.indexOf("assertFits(")).toBeGreaterThan(-1);
+    expect(shoot.indexOf("assertFits(")).toBeLessThan(shoot.indexOf("page.screenshot("));
+    expect(spec).toMatch(/r\.right > innerWidth \+ 1 \|\| r\.left < -1/);
+  });
+
   it("writes the screens only outside the repository", () => {
     expect(spec).toMatch(/PROD_QA_LCV_DIR must be an absolute directory outside the repository/);
   });
@@ -83,7 +94,7 @@ describe("the workflow publishes only ciphertext", () => {
     expect(enc).toMatch(/if: always\(\) && needs\.debounce\.outputs\.spec == 'living-cv-screens'/);
     expect(enc).toMatch(/trap destroy EXIT/);
     expect(enc).toMatch(/shred -u/);
-    expect(enc).toMatch(/"\$n" -ne 8/);
+    expect(enc).toMatch(/"\$n" -ne 12/);
     expect(enc).toMatch(/steps\.walk\.outcome/);
     expect(enc).toMatch(/openssl rand -hex 32/);
     expect(enc).toMatch(/openssl enc -aes-256-cbc -pbkdf2 -salt/);

@@ -93,7 +93,7 @@ on:
           # Numbers-only UX/UI measurements (worker/owner/agency x desktop/phone + active-locale sweep, ~115 page
           # loads, read-only) for the per-function UX audit. Prints [ux] lines; no screenshots. Dispatch only.
           - ux-metrics
-          # Coordinator order 2026-11-23 (owner-approved read-only grant): the owner's eight Living CV
+          # Coordinator order 2026-11-23 (owner-approved read-only grant): the owner's Living CV
           # screens, de-identified before rendering, published ONLY encrypted to the coordinator's key.
           # Read-only; needs the owner-created qa.livingcv+read1 account and its grant. Dispatch only.
           - living-cv-screens
@@ -637,7 +637,7 @@ jobs:
       # living-cv-screens: the repository is public, so the screens are published ONLY encrypted.
       # A random AES-256 key encrypts the zip; the coordinator's RSA public key encrypts that key.
       # The plaintext PNGs, the zip and the key are destroyed on the runner whatever happens, and
-      # nothing is published unless all eight screens exist. Guard: lib/guards/living-cv-screens.test.ts.
+      # nothing is published unless all twelve screens (4 pages x 1440/390/375 px) exist. Guard: lib/guards/living-cv-screens.test.ts.
       - name: "Living CV screens: encrypt, then destroy the plaintext"
         id: lcv
         if: always() && needs.debounce.outputs.spec == 'living-cv-screens'
@@ -658,8 +658,8 @@ jobs:
           trap destroy EXIT
           mkdir -p "$LCV_OUT" "$LCV_TMP"
           n=$(find "$LCV_DIR" -maxdepth 1 -type f -name '*.png' 2>/dev/null | wc -l)
-          if [ "${{ steps.walk.outcome }}" != "success" ] || [ "$n" -ne 8 ]; then
-            echo "::error::walk ${{ steps.walk.outcome }}, ${n} of 8 screens; nothing is published"
+          if [ "${{ steps.walk.outcome }}" != "success" ] || [ "$n" -ne 12 ]; then
+            echo "::error::walk ${{ steps.walk.outcome }}, ${n} of 12 screens; nothing is published"
             exit 1
           fi
           (cd "$LCV_DIR" && zip -q -X "$LCV_TMP/lcv.zip" ./*.png)

@@ -16,7 +16,7 @@ import {
 import { test } from "./prod-walk";
 
 /**
- * prod-living-cv-screens — the owner's eight Living CV screens, de-identified and encrypted
+ * prod-living-cv-screens — the owner's Living CV screens, de-identified and encrypted
  * (coordinator order 2026-11-23, owner-approved read-only grant).
  *
  * Read-only. The synthetic `livingcv` account holds a READ-ONLY membership in exactly two
@@ -44,7 +44,7 @@ import { test } from "./prod-walk";
  * assertions, no logging, and every failure is rethrown as a fixed message naming only the step. Only
  * the count of leaked tokens is ever reported.
  *
- * Screens (each at 1440 and 390 px), written as metadata-free PNGs to PROD_QA_LCV_DIR (outside
+ * Screens (each at 1440, 390 and 375 px — twelve files), written as metadata-free PNGs to PROD_QA_LCV_DIR (outside
  * the repository). The workflow zips, encrypts and destroys them; only the encrypted files are
  * uploaded.
  *   1. a worker's Living CV in the first organization, overview (the first screen);
@@ -65,6 +65,8 @@ const PERSON_HREF = /\/dashboard\/company\/people\/([0-9a-f-]{36})(?:[/?#]|$)/;
 const VIEWPORTS = [
   { key: "1440", options: { viewport: { width: 1440, height: 900 } } },
   { key: "390", options: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
+  // Owner, 2026-11-23: the narrowest phone too. Here nothing may overflow or sit off-screen.
+  { key: "375", options: { viewport: { width: 375, height: 812 }, isMobile: true, hasTouch: true }, fit: true },
 ] as const;
 
 /** Words that are never names: the product's own LT and EN catalogues (interface, professions, skills). */
@@ -235,14 +237,44 @@ async function assertClean(page: Page, p: Pseudonyms): Promise<void> {
   }
 }
 
-async function shoot(page: Page, p: Pseudonyms, file: string, fullPage: boolean): Promise<void> {
+/**
+ * At 375 px nothing may be wider than the screen: no sideways scroll, and no visible element whose
+ * box reaches past either edge (content cut off or hidden off-screen). Counts only, never text.
+ */
+async function assertFits(page: Page): Promise<void> {
+  const { scroll, inner, outside } = await page.evaluate(() => {
+    const innerWidth = window.innerWidth;
+    let n = 0;
+    for (const el of document.querySelectorAll<HTMLElement>("body *")) {
+      const r = el.getBoundingClientRect();
+      if (r.width === 0 || r.height === 0) continue;
+      const cs = getComputedStyle(el);
+      if (cs.visibility === "hidden" || cs.display === "none" || cs.position === "fixed") continue;
+      // A closed drawer or an accessibility-only label is not content on the screen.
+      if (el.closest("[aria-hidden='true'], [hidden], [inert], .sr-only")) continue;
+      if (r.right > innerWidth + 1 || r.left < -1) n += 1;
+    }
+    return {
+      scroll: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
+      inner: innerWidth,
+      outside: n,
+    };
+  });
+  if (scroll > inner + 1 || outside > 0) {
+    step = `${step} (375 px: page ${scroll} px wide on a ${inner} px screen, ${outside} elements past the edge)`;
+    throw new Error("does not fit");
+  }
+}
+
+async function shoot(page: Page, p: Pseudonyms, file: string, fullPage: boolean, fit = false): Promise<void> {
   await maskRendered(page);
   await assertClean(page, p);
+  if (fit) await assertFits(page);
   const png = stripPngMetadata(await page.screenshot({ fullPage, animations: "disabled", caret: "hide" }));
   writeFileSync(join(OUT, file), png, { mode: 0o600 });
 }
 
-test("LCV. eight de-identified Living CV screens", async ({ browser }) => {
+test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ browser }) => {
   if (!OUT || !isAbsolute(OUT) || resolve(OUT).startsWith(resolve(__dirname, "..", "..", ".."))) {
     throw new Error("PROD_QA_LCV_DIR must be an absolute directory outside the repository");
   }
@@ -293,17 +325,17 @@ test("LCV. eight de-identified Living CV screens", async ({ browser }) => {
       await at(`${vp.key}: worker Living CV, overview`, async () => {
         await activate(view, orgs[0]!.id);
         await open(view, `/dashboard/company/people/${personId}`);
-        await shoot(view, p, `1-worker-overview-${vp.key}.png`, false);
+        await shoot(view, p, `1-worker-overview-${vp.key}.png`, false, "fit" in vp);
       });
-      await at(`${vp.key}: worker Living CV, history`, () => shoot(view, p, `2-worker-history-${vp.key}.png`, true));
+      await at(`${vp.key}: worker Living CV, history`, () => shoot(view, p, `2-worker-history-${vp.key}.png`, true, "fit" in vp));
       await at(`${vp.key}: first organization's company Living CV`, async () => {
         await open(view, "/dashboard/company/history");
-        await shoot(view, p, `3-company-1-${vp.key}.png`, true);
+        await shoot(view, p, `3-company-1-${vp.key}.png`, true, "fit" in vp);
       });
       await at(`${vp.key}: second organization's company Living CV`, async () => {
         await activate(view, orgs[1]!.id);
         await open(view, "/dashboard/company/history");
-        await shoot(view, p, `4-company-2-${vp.key}.png`, true);
+        await shoot(view, p, `4-company-2-${vp.key}.png`, true, "fit" in vp);
       });
     } catch {
       throw new Error(`living-cv-screens failed at: ${step}`);
