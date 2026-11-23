@@ -14,6 +14,7 @@ import {
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { AreaSwitcher } from "@/components/app/area-switcher";
+import { SignedInGoalNavigation } from "@/components/navigation/signed-in-goal-navigation";
 import { deriveTodayState } from "@/lib/today/today-model";
 import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
@@ -171,6 +172,15 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           </Suspense>
         </p>
       </header>
+
+      {/* THE SIX GOALS — the public home's goal navigator, signed in
+          (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC N4): the same six
+          goals for every role, each opening the functions this person may
+          use. Streams behind a box of the rail's height, so nothing below
+          moves when it arrives. */}
+      <Suspense fallback={<div data-testid="signed-in-goals-pending" className="min-h-[13rem]" aria-hidden />}>
+        <SignedInGoalNavigation />
+      </Suspense>
 
       {/* THE FOUR REGIONS — two columns from lg (01+02 | 03+04), one column
           on a phone in DOM order 01→04 (the one primary action first). Each

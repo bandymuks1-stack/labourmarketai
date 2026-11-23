@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
 import { AreaSwitcher } from "@/components/app/area-switcher";
+import { SignedInGoalNavigation } from "@/components/navigation/signed-in-goal-navigation";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { Link } from "@/lib/i18n/navigation";
 import { learnerInviteHref, ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
@@ -59,6 +61,12 @@ export async function CompanyModelScreen({
       // thread's column at every width.
       className="flex w-full flex-col gap-3 pb-2 pt-4 max-sm:pt-2"
     >
+      {/* THE SIX GOALS first (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC
+          N4): the public home's navigator, each goal opening what this
+          organization may use. The area switcher below stays until N6. */}
+      <Suspense fallback={<div data-testid="signed-in-goals-pending" className="min-h-[13rem]" aria-hidden />}>
+        <SignedInGoalNavigation />
+      </Suspense>
       <h2 className="font-display text-card-title font-semibold text-text-primary">
         {t("title")}
       </h2>
