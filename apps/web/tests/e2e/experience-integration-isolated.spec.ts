@@ -263,7 +263,7 @@ async function registerThroughLink(browser: Browser, link: string, address: stri
   await w.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
   // A join link asks for the address; an invitation ADDRESSED to one person
   // shows it masked and read-only, and must not be typed over.
-  const invited = w.getByTestId("signup-invited-email");
+  const invited = w.locator('input[name="invited-address"]');
   const open = w.locator('input[type="email"]');
   await expect(invited.or(open).first(), "the sign-up form shows its address field").toBeVisible({ timeout: 30_000 });
   if (await invited.count()) {
