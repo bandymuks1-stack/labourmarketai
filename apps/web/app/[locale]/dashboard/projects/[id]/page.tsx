@@ -1,3 +1,4 @@
+import { chipLinkClassName } from "@/components/ui/Chip";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -340,12 +341,7 @@ export default async function ProjectStadiumPage({
               <Link
                 href={areaHref(null)}
                 aria-current={selectedArea === null ? "true" : undefined}
-                className={cn(
-                  "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 font-mono text-meta uppercase tracking-label transition-colors",
-                  selectedArea === null
-                    ? "border-brand-blue text-brand-blue"
-                    : "border-ink-500 text-text-secondary hover:border-brand-blue",
-                )}
+                className={chipLinkClassName(selectedArea === null)}
               >
                 {t("allAreas")}
                 <span className="tabular-nums text-text-primary">{ops.workers.length}</span>
@@ -356,12 +352,7 @@ export default async function ProjectStadiumPage({
                   href={areaHref(a.key)}
                   aria-current={selectedArea === a.key ? "true" : undefined}
                   data-testid={`stadium-area-${a.key}`}
-                  className={cn(
-                    "inline-flex min-h-11 items-center gap-2 rounded-full border px-4 text-sm transition-colors",
-                    selectedArea === a.key
-                      ? "border-brand-blue text-text-primary"
-                      : "border-ink-500 text-text-secondary hover:border-brand-blue",
-                  )}
+                  className={chipLinkClassName(selectedArea === a.key)}
                 >
                   <span aria-hidden className={cn("size-2 rounded-full", toneOf(i, a.key))} />
                   {a.label}

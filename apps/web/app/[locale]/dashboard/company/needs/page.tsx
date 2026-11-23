@@ -1,3 +1,4 @@
+import { chipLinkClassName } from "@/components/ui/Chip";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { UserSearch } from "lucide-react";
 
@@ -211,11 +212,7 @@ export default async function CompanyNeedsPage({
               <Link
                 href="/dashboard/company/needs?audience=need#demand-intake"
                 aria-current={!isStaffingAgency ? "true" : undefined}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
-                  !isStaffingAgency
-                    ? "border-brand-cyan/60 bg-brand-cyan/10 text-text-primary"
-                    : "border-border text-text-secondary"
-                }`}
+                className={chipLinkClassName(!isStaffingAgency)}
                 data-testid="company-needs-audience-need"
               >
                 {tWow("demand.hire.title")}
@@ -223,11 +220,7 @@ export default async function CompanyNeedsPage({
               <Link
                 href="/dashboard/company/needs?audience=offer#demand-intake"
                 aria-current={isStaffingAgency ? "true" : undefined}
-                className={`rounded-md border px-3 py-1.5 text-sm ${
-                  isStaffingAgency
-                    ? "border-brand-cyan/60 bg-brand-cyan/10 text-text-primary"
-                    : "border-border text-text-secondary"
-                }`}
+                className={chipLinkClassName(isStaffingAgency)}
                 data-testid="company-needs-audience-offer"
               >
                 {tWow("demand.partner.title")}
