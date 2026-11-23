@@ -76,6 +76,14 @@
 > "tik job board / tik recruitment / tik CV / tik marketplace / tik ERP /
 > tik žurnalas / tik chatbot" struktūrą.
 
+## No second implementation (binding, owner P0 2026-11-23)
+
+Before building any new function, page, route, component, navigation, store, API/RPC, SQL
+function, table, agent tool or assistant, run the pre-build check in
+[`docs/AGENT_CHANGE_RULES.md`](docs/AGENT_CHANGE_RULES.md) and fill the PR template's
+"Reuse check". One owner per capability, one module, one change path. Reviewers block a PR
+without it.
+
 ## Auto-commit policy
 
 After completing any work session, agents MUST automatically commit and push 
