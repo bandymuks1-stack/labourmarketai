@@ -87,7 +87,7 @@ These are stated as gaps. No names are invented for them.
    current header (`apps/web/lib/config/navigation.ts:146-151`) shows four
    core items plus "More". That contract is out of date and is not a goal set.
 
-**Owner decision needed (OD-1):** the signed-in level-1 set. There are two
+**Owner decision OD-1, DECIDED 2026-11-23 as (a) (§7):** the signed-in level-1 set. There are two
 options:
 - **(a)** the same six goals for everyone, with level 2 filtered by role and
   rights;
@@ -278,8 +278,8 @@ decided. #3270 is not merged as is: N4 takes only its server-rights filter.
 
 | id | Question | Options | Default until decided |
 |---|---|---|---|
-| OD-1 | The signed-in level-1 set | (a) the six public goals for every role, level 2 filtered by rights; (b) role-specific goal sets (names to be approved) | Nothing changes on signed-in pages |
-| OD-2 | The signed-in AI entry | (a) mark "My space" with the assistant mark; (b) a seventh header control, which does not fit at 320 px | Current state |
+| OD-1 | The signed-in level-1 set | **DECIDED (a)**, owner P0 2026-11-23: "Visi šeši pagrindiniai tikslai turi būti pasiekiami viešuose ir prisijungusių vartotojų ekranuose. Funkcijos pritaikomos pagal naudotojo vaidmenį." (All six main goals must be reachable on public and signed-in screens. Functions are adapted to the user's role.) The same six goals for every role; level 2 filtered by server rights. | — |
+| OD-2 | The signed-in AI entry | **DECIDED (a)**, owner P0 2026-11-23 ("AI asistentas aiškiai matomas ir pasiekiamas", the AI assistant clearly visible and reachable), with the variant chosen by the coordinator: "My space" carries the assistant mark. A seventh header control does not fit at 320 px. | — |
 | OD-3 | Level 3 for goals other than `work` | the categories per goal | None |
 | OD-4 | Pins storage (RED) | a profile column or a table under RLS | No pins |
 | OD-5 | Retire `docs/launch/role-aware-navigation-contract-v1.md` §"Primary navigation — the six-item contract" | mark SUPERSEDED by this spec and `lib/config/navigation.ts` | It stays, out of date |
