@@ -439,7 +439,7 @@ export function MarketplaceListingsSection({
                     aria-selected={selected}
                     data-testid={`market-group-${g}`}
                     onClick={() => setDomainTab(g)}
-                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                    className={`inline-flex min-h-11 max-w-full items-center rounded-full border px-3 py-2 text-sm transition-colors ${
                       selected
                         ? "border-text-primary bg-ink-700 text-text-primary"
                         : "border-ink-500 text-text-secondary hover:border-text-secondary"
@@ -464,7 +464,7 @@ export function MarketplaceListingsSection({
                     aria-pressed={domainTab === d}
                     data-testid={`market-domain-${d}`}
                     onClick={() => setDomainTab(d)}
-                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-1.5 text-meta transition-colors sm:min-h-9 ${
+                    className={`inline-flex min-h-11 max-w-full items-center rounded-full border px-3 py-1.5 text-meta transition-colors sm:min-h-9 ${
                       domainTab === d
                         ? "border-text-secondary text-text-primary"
                         : "border-ink-600 text-text-secondary hover:border-text-secondary"
@@ -491,7 +491,7 @@ export function MarketplaceListingsSection({
                 type="button"
                 aria-pressed={actorTab === k}
                 onClick={() => setActorTab(k)}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                className={`inline-flex min-h-11 max-w-full items-center rounded-full border px-3 py-2 text-sm transition-colors ${
                   actorTab === k
                     ? "border-text-primary bg-ink-700 text-text-primary"
                     : "border-ink-500 text-text-secondary hover:border-text-secondary"
