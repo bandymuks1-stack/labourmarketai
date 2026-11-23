@@ -164,6 +164,12 @@ Each entry names its source.
 | DEAD-6 | Literal dashboard links | NOT A DUPLICATE (0 dead) | MAIN | Keep; template literals unchecked |
 | BYP-1 | Voice transcription outside the AI egress gate | SUSPECTED | MAIN | Record it in the egress register |
 | SEC-1..5 | Security items | 4 open (RED PRs), 1 closed | | §11 |
+| ISO-1 | Organization hours that reach no project | CONFIRMED | PROD | Link each allocation to its project (C) |
+| ISO-2 | Organization-context journal time with no project | CONFIRMED | PROD | Suggest the project; never guess (C) |
+| ISO-3 | Unlinked roster people | CONFIRMED (consent by design) | PROD | Make sure the link offer reaches the person (G) |
+| ISO-4 | Booking accept outside the employment record | CONFIRMED | MAIN | Booking accept opens the engagement row (C, HIRE-5) |
+| ISO-5 | `experience_years` with no writer | CONFIRMED | MAIN | Read from the one history (G, CV-1) |
+| ISO-6 | Ended employee contexts with no hours | SUSPECTED | PROD | Measure against ISO-3 first (G) |
 
 ## 3. Registers
 
@@ -1848,3 +1854,108 @@ Each of these looks like a duplicate, but differs in purpose, rights or source. 
 | G | CV, skills, history, AI | 05:23; G-18 at 06:55 | `origin/main` `125e218278` |
 | M | Employer and agency UI | 05:24 | `main` `125e21827` |
 | S | Versioned RPCs, dead code, production use | 05:28 | `main` `125e2182`; production build `430bd475` |
+
+## 16. Isolated data (ISO)
+
+Owner addendum, 2026-11-23: LabourMarket.ai is ONE continuous chain. A fact recorded once is used everywhere
+it relates to. This category lists data that **exists but that no reader carries into the history** it
+belongs to. Each owner lane fixes its own entries; lane E keeps this register.
+
+**Method.** Lane S, 2026-11-23, read-only production queries. Each check applies the rule the reading code uses:
+- a live journal entry, `isLiveJournalEntry` (`lib/journal/journal-list-core.ts:188`);
+- the Living CV reading, `loadWorkIntelligence` (`lib/journal/work-intelligence-read.ts`), counted once per correction chain (`lib/journal/counted-once.ts`);
+- live organization hours, `work_hour_allocations` that have not been superseded.
+
+Production volumes stay in the private record (`AGENTS.md`, lines 82-85), so only the conclusions are public.
+Much of production is synthetic QA data from the production walks, so these checks measure the code paths, not
+real people's use.
+
+**What reaches the history (checked, not isolated):**
+- **Every journal entry reaches the Living CV.** The only live entries the reading leaves out are originals
+  replaced by a live correction, which is correct by design. No live entry belongs to a worker without a person.
+- **Every accepted booking reaches an engagement,** under `lib/booking/engagement-invariant.ts`: either its own
+  engagement, or one the same company and worker already hold (`covered_active`).
+
+### ISO-1 · Organization hour records that reach no project
+
+Finding: CONFIRMED (production read). Owner lane: C, with M.
+
+| Field | Content |
+|---|---|
+| Function | Hours an organization records for a person, read per project |
+| Implementations | `work_hour_allocations` (`lib/work-hours/allocations.ts`); the per-project reading (`lib/projects/project-hours.ts`) |
+| Usage | Project hours, reports, the organization's history |
+| Problem | About half of the live allocations name no work object, or name an object that has no project. Those hours never appear on a project. |
+| Proposal | Link each allocation to its project when it is recorded (the work object → project link), and offer the existing records to be linked. Data is never invented. |
+| Risk | Project totals change once records are linked. |
+| Evidence | Lane S, production read 2026-11-23 (the counts are in the private record). |
+
+### ISO-2 · Organization-context journal time that reaches no project
+
+Finding: CONFIRMED (production read). Owner lane: C, with A.
+
+| Field | Content |
+|---|---|
+| Function | Work time a person records in an organization's context, read per project |
+| Implementations | `journal_entries.project_id`; the per-project reading (`lib/projects/project-hours.ts:27,136`) |
+| Usage | Project hours; the organization's view of its people's work |
+| Problem | Most live journal entries that carry time and belong to an organization context name no project. They reach the person's Living CV (see above), but not the organization's projects. |
+| Proposal | When the organization has projects, the journal asks for or suggests the project, using the existing project mention reader (`lib/conversation/project-mention.ts`). Never guess silently: the owner rule of 2026-09-29 forbids it. |
+| Risk | A wrong project would be worse than none, so this needs a suggestion, never an automatic link. |
+| Evidence | Lane S, production read 2026-11-23. |
+
+### ISO-3 · Unlinked roster people: organization history that has not reached a person yet
+
+Finding: CONFIRMED that the records exist; NOT A DEFECT in the reader, because consent is required. Owner lane: G, with M.
+
+| Field | Content |
+|---|---|
+| Function | An organization's imported records about a person, carried into that person's history |
+| Implementations | `organization_people.linked_profile_id`, read by `lib/organization-evidence/evidence-store.ts:486-499` and `history-signals-read.ts:170-208`; the person's answer comes through `lib/organization-evidence/roster-link-actions.ts` |
+| Usage | The person's continuous history (decision 0025) |
+| Problem | Roster people with no linked person keep their records only on the organization's side. That part is by design: the person must accept the link, and "silence is not consent" (`roster-link-actions.ts`). The gap is reach: the offer has to arrive in front of the right person. |
+| Proposal | Keep the consent. Measure whether every unlinked roster person with a contact has been offered the link (`roster-link-candidates.ts`), and route the offer through the one notification spine. |
+| Risk | Linking the wrong person would attach someone else's history. Consent stays the only path. |
+| Evidence | Coordinator addendum and Lane S (the counts are in the private record). |
+
+### ISO-4 · Booking accept records the hire outside the employment record the history reads
+
+Finding: CONFIRMED (code); see HIRE-5. Owner lane: C.
+
+| Field | Content |
+|---|---|
+| Function | A worker accepts a booking, which hires them |
+| Implementations | `respond_booking_request_v3`/`_v4` insert only `company_worker_engagements` (HIRE-5). The journal, evidence and CV loop reads `engagement_contexts`. |
+| Usage | Booking accept |
+| Problem | Every accepted booking reaches an engagement (checked above), but only in the booking ledger. No employment context opens for the history to read until another path creates one. |
+| Proposal | As HIRE-5 says: booking accept also opens the employee or collaborator engagement row. |
+| Risk | See HIRE-5. |
+| Evidence | HIRE-5; Lane S's booking check. |
+
+### ISO-5 · `workers.experience_years` has no writer
+
+Finding: CONFIRMED (code). Owner lane: G.
+
+| Field | Content |
+|---|---|
+| Function | The experience figure that employers see |
+| Implementations | See CV-1. |
+| Usage | 4 screens and 1 matching rule (CV-1). |
+| Problem | The figure is not fed from the one continuous history (decision 0025), and nothing writes it. |
+| Proposal | As CV-1 says: replace it with a figure from the one reading, released only with consent. |
+| Risk | See CV-1. |
+| Evidence | CV-1. |
+
+### ISO-6 · Ended employment contexts that carry no recorded hours
+
+Finding: SUSPECTED. It may be no isolation at all, because a role without hours is valid. Owner lane: G.
+
+| Field | Content |
+|---|---|
+| Function | A person's past employment relationship and its work |
+| Implementations | `engagement_contexts` with relationship `employee` and status `ended`; the 0025 reading (`lib/journal/professional-experience.ts`) |
+| Usage | The person's history |
+| Problem | Most ended employee contexts carry no live journal entry and no allocation. Decision 0025 allows a role without hours, and owner contexts are roles without hours by design. Whether these ones lost hours that were recorded elsewhere is not known. |
+| Proposal | Measure first: for each such context, check whether the organization holds day or period records for the same person that were never linked (ISO-3). |
+| Risk | None from measuring. |
+| Evidence | Lane S, production read 2026-11-23. |
