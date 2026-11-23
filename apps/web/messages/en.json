@@ -19872,7 +19872,7 @@
     },
     "noHours": "Records that state no hours: {count}. Unknown hours are not counted as zero.",
     "undated": "Records with no stated date: {count}. They stay in the history below.",
-    "periodApart": "{hours} h of the total are period totals, kept apart and never spread onto days or months.",
+    "periodApart": "Also: {hours} h stated as period totals — not included in the hours above, never spread onto days or months.",
     "noWorkObject": "Records tied to no project or place the platform knows: {count}. They stay in this history under their source label.",
     "places": {
       "title": "By project or place",

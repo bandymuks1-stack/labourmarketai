@@ -7339,7 +7339,7 @@
     },
     "noHours": "Ieraksti bez norādītām stundām: {count}. Nezināmas stundas netiek skaitītas kā nulle.",
     "undated": "Ieraksti bez norādīta datuma: {count}. Tie paliek vēsturē zemāk.",
-    "periodApart": "{hours} h no kopsummas ir perioda kopsummas, turētas atsevišķi un nekad nesadalītas pa dienām vai mēnešiem.",
+    "periodApart": "Turklāt: {hours} h norādītas kā perioda kopsummas — nav iekļautas augstāk norādītajās stundās un nekad netiek sadalītas pa dienām vai mēnešiem.",
     "noWorkObject": "Ieraksti, kas nav saistīti ar platformai zināmu projektu vai vietu: {count}. Tie paliek šajā vēsturē ar avota nosaukumu.",
     "places": {
       "title": "Pēc projekta vai vietas",

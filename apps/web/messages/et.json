@@ -7339,7 +7339,7 @@
     },
     "noHours": "Kirjed, kus tunde pole märgitud: {count}. Teadmata tunde ei loeta nulliks.",
     "undated": "Kirjed ilma märgitud kuupäevata: {count}. Need jäävad allolevasse ajalukku.",
-    "periodApart": "{hours} t kogusummast on perioodisummad, hoitud eraldi ja mitte kunagi jaotatud päevadele ega kuudele.",
+    "periodApart": "Lisaks: {hours} t on antud perioodisummadena — need ei sisaldu ülaltoodud tundides ega jaotata kunagi päevadele ega kuudele.",
     "noWorkObject": "Kirjed, mis pole seotud platvormile tuntud projekti ega kohaga: {count}. Need jäävad sellesse ajalukku allika nime all.",
     "places": {
       "title": "Projekti või koha järgi",

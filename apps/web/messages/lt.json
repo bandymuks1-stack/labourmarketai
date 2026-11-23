@@ -19872,7 +19872,7 @@
     },
     "noHours": "Įrašai, kuriuose nenurodytos valandos: {count}. Nežinomos valandos neskaičiuojamos kaip nulis.",
     "undated": "Įrašai be nurodytos datos: {count}. Jie lieka istorijoje žemiau.",
-    "periodApart": "{hours} val. iš bendros sumos yra laikotarpio sumos, laikomos atskirai ir niekada neišskaidomos į dienas ar mėnesius.",
+    "periodApart": "Be to: {hours} val. nurodyta kaip laikotarpio sumos — neįtraukta į aukščiau nurodytas valandas ir niekada neišskaidoma į dienas ar mėnesius.",
     "noWorkObject": "Įrašai, nesusieti su platformai žinomu projektu ar vieta: {count}. Jie lieka šioje istorijoje pagal šaltinio pavadinimą.",
     "places": {
       "title": "Pagal projektą ar vietą",

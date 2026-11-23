@@ -82,6 +82,37 @@ describe("1 · one reading, every surface", () => {
       expect(src, name).not.toMatch(/recordedHoursTotal\s*\+\s*|organizationHistoryHours\s*\+\s*|\+\s*organizationHistoryHours|totalHours\s*\+\s*organization/);
     }
   });
+  it("an organization viewing a person sees the ONE reading, not workers.experience_years (CV-1)", () => {
+    // `workers.experience_years` is written by nothing; the person page printed
+    // it as their experience. The page now states the decision-0025 figure over
+    // the RLS-scoped work model it already renders, with the person's
+    // engagements as far as the VIEWER's RLS returns them.
+    const personPage = read("app/[locale]/dashboard/people/[workerId]/page.tsx");
+    const pageCode = code("app/[locale]/dashboard/people/[workerId]/page.tsx");
+    expect(pageCode).not.toMatch(/worker\.experience_years\s*>|t\("experienceYears"/);
+    expect(personPage).toMatch(/experienceFiguresOf\(orgWorkIntelligence, visibleRelationships\)\.professionalExperienceHours/);
+    expect(personPage).toContain("readVisibleExperienceRelationships(supabase,");
+    expect(personPage).toContain('data-testid="person-experience-total"');
+    expect(personPage).toContain('tIdentity("experienceTotal")');
+    // the scale below gets the same relationships, so its total is the same figure
+    expect(personPage).toMatch(/audience="organization"\s*relationships=\{visibleRelationships\}/);
+    // a truncated read never prints a partial "total"
+    expect(personPage).toMatch(/orgWorkIntelligence && !orgWorkIntelligence\.coverage\.truncated/);
+    // the viewer-scoped relationships: engagement rows ONLY, under the viewer's RLS
+    const start = reader.indexOf("export async function readVisibleExperienceRelationships(");
+    const visible = reader.slice(start, reader.indexOf("\n}\n", start));
+    expect(start).toBeGreaterThan(-1);
+    expect(visible).toMatch(/\.from\("engagement_contexts"\)[\s\S]*?\.eq\("profile_id", profileId\)/);
+    expect(visible).not.toMatch(/readMyLedOrganizations|organization_people|readWorkedOrganizationPeriods|service_role|createAdminClient/);
+  });
+  it("the company-side person card never adds a period total into its headline hours (CV-4)", () => {
+    const summary = code("lib/organization-evidence/person-history-summary.ts");
+    const card = code("components/app/organization/person-history-summary.tsx");
+    expect(summary).toMatch(/const hours = personHoursOf\(live\);/);
+    expect(summary).not.toMatch(/statedHours|reduce\(\(s, r\) => s \+ \(r\.hours \?\? 0\), 0\)/);
+    expect(card).toMatch(/value=\{`\$\{nf\(summary\.dayHours\)\} h`\}/);
+    expect(card).not.toMatch(/summary\.statedHours/);
+  });
 });
 
 describe("2 · the reading is pure, finance-free and person-scoped", () => {

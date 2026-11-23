@@ -7339,7 +7339,7 @@
     },
     "noHours": "Poster uden angivne timer: {count}. Ukendte timer tælles ikke som nul.",
     "undated": "Poster uden angivet dato: {count}. De bliver i historikken nedenfor.",
-    "periodApart": "{hours} t af summen er periodesummer, holdt adskilt og aldrig fordelt på dage eller måneder.",
+    "periodApart": "Desuden: {hours} t angivet som periodesummer — ikke medregnet i timerne ovenfor og aldrig fordelt på dage eller måneder.",
     "noWorkObject": "Poster uden tilknytning til et projekt eller sted, platformen kender: {count}. De bliver i denne historik under deres kildebetegnelse.",
     "places": {
       "title": "Efter projekt eller sted",

@@ -102,6 +102,70 @@ export async function readWorkedOrganizationPeriods(
   return out;
 }
 
+/** Engagement rows → relationships: the ONE mapping both readers use (a
+ *  scaffold context is dropped, an ended one keeps its organization's name). */
+async function engagementRelationships(
+  supabase: SupabaseClient,
+  rows: readonly ContextRow[],
+  periodsByOrg: ReadonlyMap<string, ExperienceRelationship["businessPeriods"]>,
+): Promise<ExperienceRelationship[]> {
+  const named = await withHistoricalOrgNames(supabase, [...rows]);
+  const out: ExperienceRelationship[] = [];
+  for (const row of named) {
+    const organizationName = orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name);
+    if (!isRecordedEngagement({ title: row.title, started_at: row.started_at, ended_at: row.ended_at, organizationName })) {
+      continue;
+    }
+    out.push({
+      engagementContextId: row.id,
+      organizationId: row.organization_id,
+      organizationName,
+      relationship: row.relationship_slug,
+      title: row.title?.trim() || null,
+      startedAt: row.started_at,
+      endedAt: row.ended_at,
+      current: row.status === "active" && !row.ended_at,
+      source: "engagement",
+      businessPeriods: row.organization_id ? (periodsByOrg.get(row.organization_id) ?? []) : [],
+    });
+  }
+  return out;
+}
+
+const ENGAGEMENT_SELECT =
+  "id, relationship_slug, title, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)";
+
+/**
+ * ANOTHER PERSON'S RELATIONSHIPS, AS FAR AS THE VIEWER MAY READ THEM — the
+ * input the one reading needs when an organization looks at a person
+ * (`/dashboard/people/[workerId]`): it ties the person's journal lines to
+ * their organizations so a journal hour inside an organization period is
+ * counted once. ONLY the person's `engagement_contexts` rows the VIEWER's RLS
+ * returns (their own organization's engagements); never the viewer's own
+ * memberships, never the person's roster rows, no business periods (labels
+ * only — no hour depends on them). Nothing is widened: what RLS hides is
+ * simply absent. `null` = the read failed (the total is then UNKNOWN).
+ */
+export async function readVisibleExperienceRelationships(
+  supabase: SupabaseClient,
+  profileId: string,
+): Promise<ExperienceRelationship[] | null> {
+  if (!profileId) return null;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const contexts = (await (supabase as any)
+    .from("engagement_contexts")
+    .select(ENGAGEMENT_SELECT)
+    .eq("profile_id", profileId)
+    .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS, ...LEADERSHIP_RELATIONSHIPS])
+    .order("started_at", { ascending: false, nullsFirst: false })
+    .limit(READ_LIMIT)) as { data: ContextRow[] | null; error: { code?: string } | null };
+  if (contexts.error) {
+    console.error("[experience] visible engagement read failed:", contexts.error.code);
+    return null;
+  }
+  return engagementRelationships(supabase, contexts.data ?? [], new Map());
+}
+
 export async function readOwnExperienceRelationships(
   supabase: SupabaseClient,
   userId: string,
@@ -110,7 +174,7 @@ export async function readOwnExperienceRelationships(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (supabase as any)
       .from("engagement_contexts")
-      .select("id, relationship_slug, title, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)")
+      .select(ENGAGEMENT_SELECT)
       .eq("profile_id", userId)
       .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS, ...LEADERSHIP_RELATIONSHIPS])
       .order("started_at", { ascending: false, nullsFirst: false })
@@ -158,26 +222,7 @@ export async function readOwnExperienceRelationships(
     periodsByOrg.set(id, periods);
   }
 
-  const named = await withHistoricalOrgNames(supabase, contexts.data ?? []);
-  const out: ExperienceRelationship[] = [];
-  for (const row of named) {
-    const organizationName = orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name);
-    if (!isRecordedEngagement({ title: row.title, started_at: row.started_at, ended_at: row.ended_at, organizationName })) {
-      continue;
-    }
-    out.push({
-      engagementContextId: row.id,
-      organizationId: row.organization_id,
-      organizationName,
-      relationship: row.relationship_slug,
-      title: row.title?.trim() || null,
-      startedAt: row.started_at,
-      endedAt: row.ended_at,
-      current: row.status === "active" && !row.ended_at,
-      source: "engagement",
-      businessPeriods: row.organization_id ? (periodsByOrg.get(row.organization_id) ?? []) : [],
-    });
-  }
+  const out = await engagementRelationships(supabase, contexts.data ?? [], periodsByOrg);
   // A governing membership with no engagement row of the same relationship
   // is a role of its own — the owner who never wrote themselves into their
   // company's roster, the manager appointed by membership only.

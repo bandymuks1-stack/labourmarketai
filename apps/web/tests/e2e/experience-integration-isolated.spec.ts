@@ -859,3 +859,124 @@ test("EX-6. W1 contests one of R1's imported records on their own profile, the r
   });
   await expect(list2.getByTestId("evidence-dispute-withdrawn-history"), "the contest is not erased, only withdrawn").toHaveCount(1);
 });
+
+// ── EX-7 ────────────────────────────────────────────────────────────────────
+
+test("EX-7. a record with project_id NULL reaches its project through its work object: A's history, R1's card and W1's CV all name it", async () => {
+  // The production shape (aggregate, owner addendum 2026-11-23): every record
+  // of an organization carries project_id NULL, the records carry a
+  // work_object_id, and the work object carries the project. Nothing is
+  // back-filled: the readers resolve record.project_id ?? work_object.project_id.
+  //
+  // Seeding: the project, the work object and the one imported record are
+  // written with the LOCAL service key (the same pattern as the imported rows
+  // above and integrated-fixes.spec.ts) — the import UI places records on a
+  // work object it creates itself, but there is no product door that leaves
+  // record.project_id empty while the object has a project. W1 is ASSIGNED to
+  // the project (service seed too) because a historical project's title is
+  // readable by a worker only through an assignment (projects_select RLS:
+  // owner / manager / is_assigned_to_project) — the walk does not widen that.
+  const PROJECT = `QA-SYNTHETIC Canal Renovation ${RUN}`;
+  const PLACE = `QA-SYNTHETIC Canal Site ${RUN}`;
+  const DAY = "2025-05-05";
+  const [{ legacy_company_id: companyId }] = sql<{ legacy_company_id: string | null }>(
+    `select legacy_company_id from public.organizations where id = ${lit(s.orgA)}`,
+  ) as [{ legacy_company_id: string | null }];
+  const project = await seed<{ id: string }>("projects", {
+    title: PROJECT,
+    organization_id: s.orgA,
+    company_id: companyId,
+    status: "live",
+  });
+  const object = await seed<{ id: string }>("work_objects", {
+    organization_id: s.orgA,
+    project_id: project.id,
+    name: PLACE,
+    status: "active",
+    created_by: s.oId,
+  });
+  const file = `experience-project-${RUN}.csv`;
+  const session = await seed<{ id: string }>("evidence_import_sessions", {
+    organization_id: s.orgA,
+    source_kind: "manual",
+    source_filename: file,
+    source_fingerprint: sha(`experience-session:project:${RUN}`),
+    source_language: "en",
+    supplied_by_organization_id: s.orgA,
+    supplier_role: "employer",
+    actor_kind: "human",
+    created_by: s.oId,
+    notes: `experience integration ${RUN}`,
+  });
+  const importedAt = new Date().toISOString();
+  const fingerprint = sha(`experience-record:${s.orgA}:${s.r1}:${DAY}:4:project:${RUN}`);
+  await seed("organization_evidence_records", {
+    organization_id: s.orgA,
+    organization_person_id: s.r1,
+    activity_kind: "work",
+    outcome_kind: "hours_worked",
+    work_object_id: object.id,
+    project_id: null,
+    activity_date: DAY,
+    hours: 4,
+    original_text: `Recorded work ${DAY}`,
+    original_language: "en",
+    evidence_state: "LEGACY_IMPORTED",
+    supplied_by_organization_id: s.orgA,
+    supplier_role: "employer",
+    supplied_by_profile_id: s.oId,
+    imported_by_profile_id: s.oId,
+    imported_at: importedAt,
+    session_id: session.id,
+    source_kind: "manual",
+    source_filename: file,
+    source_fact: { row: DAY },
+    derived: {},
+    record_fingerprint: fingerprint,
+    hash_prev: null,
+    hash_self: sha(`work-history-chain:v1::${fingerprint}:${importedAt}`),
+  });
+  await seed("project_worker_assignments", { project_id: project.id, worker_id: s.w1WorkerId, status: "active" });
+  // The fact shape this walk is about, read back.
+  expect(
+    sql<{ project_id: string | null; object_project: string | null }>(
+      `select r.project_id, o.project_id as object_project
+         from public.organization_evidence_records r join public.work_objects o on o.id = r.work_object_id
+        where r.work_object_id = ${lit(object.id)}`,
+    ),
+  ).toEqual([{ project_id: null, object_project: project.id }]);
+
+  // A's company history: the place's detail opens its project.
+  const o = as(O);
+  await o.goto(`${BASE}/en/dashboard/company/history?org=${s.orgA}`);
+  const tile = o.getByRole("main").getByTestId("company-work-history-place").filter({ hasText: PLACE });
+  await expect(tile, "one tile for the work object").toHaveCount(1, { timeout: 60_000 });
+  await tile.click();
+  const place = o.getByRole("main").locator("#company-place-detail").getByTestId("company-place");
+  await expect(place).toBeVisible({ timeout: 60_000 });
+  await expect(place.getByTestId("company-place-project-link"), "the place opens its project").toHaveAttribute(
+    "href",
+    new RegExp(`/dashboard/projects/${project.id}$`),
+  );
+
+  // R1's card in A: the place line links the project, and the organization
+  // history in the card names it.
+  await o.goto(`${BASE}/en/dashboard/company/people/${s.r1}`);
+  const card = o.getByRole("main").getByTestId("company-person");
+  await expect(card).toHaveAttribute("data-state", "ready", { timeout: 60_000 });
+  await expect(
+    card.locator(`[data-testid="company-person-place-project"][data-project="${project.id}"]`),
+    "the person card's place links the project",
+  ).toHaveCount(1);
+  await expect(
+    card.getByTestId("cv-organization-history-entry").filter({ hasText: PROJECT }),
+    "the card's organization history names the project",
+  ).toHaveCount(1);
+
+  // W1's own CV: the confirmed imported work is listed under its project.
+  const cv = await openCv(as(W1));
+  await expect(
+    cv.getByTestId("cv-organization-history-entry").filter({ hasText: PROJECT }),
+    "W1's CV names the project the record reached through its work object",
+  ).toHaveCount(1, { timeout: 60_000 });
+});

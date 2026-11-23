@@ -4,6 +4,7 @@ import {
   type CompanyWorkHistory,
   type PlaceObjectFacts,
 } from "./company-work-history";
+import { personHoursOf } from "./person-hours";
 
 /**
  * THE COMPANY-SIDE HISTORICAL PERSON CARD, AS NUMBERS (pure).
@@ -15,8 +16,12 @@ import {
  *
  *   · hours are STATED hours, summed only over records that state them;
  *   · a record with no hours is COUNTED, not treated as zero (unknown != 0);
- *   · a PERIOD record's hours are kept apart and never spread onto days or
- *     months (single-day records only feed the month table);
+ *   · a PERIOD record's hours are their OWN figure: never added to the day
+ *     hours (the headline), never spread onto days or months — the ONE
+ *     per-person rule, `personHoursOf` (person-hours.ts, 2026-10-05). The
+ *     card's places already state day hours; the headline says the same
+ *     (decision 0025: a period total never joins a day sum outside the one
+ *     reading, `deriveProfessionalExperience`);
  *   · an undated record stays in the history and is counted.
  *
  * Nothing here is written, inferred or verified.
@@ -25,9 +30,10 @@ import {
 export interface PersonHistorySummary {
   readonly history: CompanyWorkHistory;
   readonly liveRecords: number;
-  /** Sum of the hours the records STATE. */
-  readonly statedHours: number;
-  /** Stated hours of period aggregates (inside `statedHours`), kept apart. */
+  /** Stated hours of the records that are NOT period aggregates (dated days,
+   *  and undated single records) — the headline. Never includes `periodHours`. */
+  readonly dayHours: number;
+  /** Stated hours of period aggregates — a figure of its own, kept apart. */
   readonly periodHours: number;
   /** Records that state no hours — unknown, not zero. */
   readonly recordsWithoutHours: number;
@@ -38,9 +44,6 @@ export interface PersonHistorySummary {
   /** `YYYY-MM` → stated hours of single-day records, oldest first. */
   readonly byMonth: readonly { readonly month: string; readonly hours: number }[];
 }
-
-const isPeriod = (r: EvidenceRecordView) =>
-  r.activityDate === null && r.periodStart !== null && r.periodEnd !== null;
 
 export function summarizePersonHistory(
   records: readonly EvidenceRecordView[],
@@ -54,11 +57,13 @@ export function summarizePersonHistory(
       months.set(m, (months.get(m) ?? 0) + r.hours);
     }
   }
+  // Day and period hours by the ONE per-person rule — never one sum.
+  const hours = personHoursOf(live);
   return {
     history: buildCompanyWorkHistory(live, objects),
     liveRecords: live.length,
-    statedHours: live.reduce((s, r) => s + (r.hours ?? 0), 0),
-    periodHours: live.filter(isPeriod).reduce((s, r) => s + (r.hours ?? 0), 0),
+    dayHours: hours.dayHours,
+    periodHours: hours.periodHours,
     recordsWithoutHours: live.filter((r) => r.hours === null).length,
     recordsUndated: live.filter((r) => !r.activityDate && !r.periodStart && !r.periodEnd).length,
     recordsWithoutWorkObject: live.filter((r) => !r.workObjectId).length,
