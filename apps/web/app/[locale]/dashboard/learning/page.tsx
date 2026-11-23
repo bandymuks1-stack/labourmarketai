@@ -11,6 +11,7 @@ import {
   type LearningLabels,
 } from "@/components/app/learning-review-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { Explain } from "@/components/app/premium/grammar";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
@@ -44,6 +45,7 @@ export default async function LearningPage({
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/learning`);
 
   const t = await getTranslations("learning");
+  const tDisclosure = await getTranslations("common.disclosure");
   const itemsResult = await listVisibleReviewItems();
   const policiesResult = await listManagedLearningPolicies();
 
@@ -61,8 +63,6 @@ export default async function LearningPage({
   const policies = policiesResult.kind === "ok" ? policiesResult.rows : [];
 
   const labels: LearningLabels = {
-    title: t("title"),
-    lead: t("lead"),
     notAvailable: t("notAvailable"),
     empty: t("empty"),
     workerHeading: t("worker.heading"),
@@ -103,7 +103,10 @@ export default async function LearningPage({
     <div className="flex flex-col gap-4" data-testid="learning-page">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("pageTitle")}</PageTitle>
-        <p className="text-sm leading-relaxed text-text-secondary">{t("pageLead")}</p>
+        <Explain summary={tDisclosure("details")}>
+          <p>{t("pageLead")}</p>
+          <p>{t("lead")}</p>
+        </Explain>
       </header>
       <LearningReviewSection
         initialItems={items}

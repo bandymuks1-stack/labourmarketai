@@ -273,6 +273,12 @@ describe("the registry itself", () => {
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
+      // Partner registration Slice 1 (2026-11-10): a discovered company's representative takes it over.
+      "company.claims.list",
+      "company.claim.invite.preview",
+      "company.claim.invite.confirm",
+      "company.claim.decide.preview",
+      "company.claim.decide.confirm",
       // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -544,6 +550,12 @@ describe("the registry itself", () => {
       // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
       "company.ingest.preview",
       "company.ingest.confirm",
+      // Partner registration Slice 1 (2026-11-10): a discovered company's representative takes it over.
+      "company.claims.list",
+      "company.claim.invite.preview",
+      "company.claim.invite.confirm",
+      "company.claim.decide.preview",
+      "company.claim.decide.confirm",
       // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
       // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
       // and in order on purpose: exposing a capability is a reviewed product
@@ -785,9 +797,11 @@ describe("the registry itself", () => {
       // Nothing in the registry reaches outside the product's own domain —
       // except a bridged web action that sends an e-mail invitation, which
       // says so (reviewed list `SENDS_EMAIL`).
+      // The one non-bridged sender, reviewed 2026-11-10: the company takeover invitation e-mails the
+      // representative from the operator tool itself (company-claim-capabilities.ts).
       const action = c.conversationActionId;
-      expect(c.annotations.openWorldHint).toBe(
-        Boolean(action && SENDS_EMAIL.has(action) && c.kind !== "draft"),
+      expect(c.annotations.openWorldHint, c.id).toBe(
+        Boolean(action && SENDS_EMAIL.has(action) && c.kind !== "draft") || c.id === "company.claim.invite.confirm",
       );
       // Nothing in the registry destroys data (journal writes are append-only)
       // — except a bridged web action that overwrites a stored value or ends a
@@ -2100,6 +2114,44 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
       expect(typeof r.data?.confirmationToken).toBe("string");
     }
     expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a draft WITHOUT a country returns missing: [\"country\"] and NO token (Swedish employer audit CL-1)", async () => {
+    demandSubmit.mockClear();
+    for (const country of [undefined, null, "XX"]) {
+      const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country });
+      expect(r).toMatchObject({ ok: false, code: "country_required", missing: ["country"] });
+      expect(JSON.stringify(r)).not.toContain("confirmationToken");
+    }
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a country NAME (any supported language) or a lower-case code is resolved to ISO — the phone types names", async () => {
+    for (const typed of ["Sweden", "Švedija", "se"]) {
+      const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country: typed });
+      expect(r.ok, typed).toBe(true);
+      if (r.ok) expect(r.data?.preview, typed).toMatchObject({ country: "SE" });
+    }
+  });
+
+  it("a name the resolver does not know is refused as country_required — never a guessed market", async () => {
+    demandSubmit.mockClear();
+    const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country: "Atlantis" });
+    expect(r).toMatchObject({ ok: false, code: "country_required", missing: ["country"] });
+    expect(JSON.stringify(r)).not.toContain("confirmationToken");
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("confirming with the SAME typed name spends the token and submits the resolved code", async () => {
+    demandSubmit.mockClear();
+    const typed = { ...DRAFT, country: "Sweden" };
+    const drafted = await runCapability("demand.create_draft", caller({}), typed);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), { ...typed, confirmationToken: token });
+    expect(confirmed.ok).toBe(true);
+    expect(demandSubmit).toHaveBeenCalledTimes(1);
+    const [, , , fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
+    expect(fieldsArg).toMatchObject({ country: "SE" });
   });
 
   it("draft → confirm runs THE canonical submit core with the gate's own organization id", async () => {

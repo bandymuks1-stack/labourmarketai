@@ -10,6 +10,8 @@ import {
   withdrawTeamEnquiryAction,
 } from "@/lib/company/team-enquiry-actions";
 import type { MyTeamEnquiry } from "@/lib/company/team-enquiries";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 
 /**
  * Employer-side team enquiry surfaces (Trust Connect Teams v1, gap 3).
@@ -83,6 +85,7 @@ export function TeamEnquiryButton({
     <div className="flex w-full flex-col gap-2" data-testid={`team-enquiry-entry-${teamOrgId}`}>
       {!open ? (
         <Button
+          className="min-h-11"
           type="button"
           size="sm"
           variant="secondary"
@@ -96,38 +99,39 @@ export function TeamEnquiryButton({
           <p className="text-xs text-text-secondary">{t("formIntro")}</p>
           <label className="flex flex-col gap-1 text-xs text-text-secondary">
             {t("messageLabel")}
-            <textarea
+            <Textarea
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               rows={3}
               maxLength={500}
               placeholder={t("messagePlaceholder")}
               data-testid={`team-enquiry-message-${teamOrgId}`}
-              className="rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+              className="max-sm:text-base"
             />
           </label>
           <div className="grid gap-2 sm:grid-cols-2">
             <label className="flex flex-col gap-1 text-xs text-text-secondary">
               {t("startLabel")}
-              <input
+              <Input
                 type="date"
                 value={startDate}
                 onChange={(e) => setStartDate(e.target.value)}
-                className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+                className="max-sm:min-h-11 max-sm:text-base"
               />
             </label>
             <label className="flex flex-col gap-1 text-xs text-text-secondary">
               {t("endLabel")}
-              <input
+              <Input
                 type="date"
                 value={endDate}
                 onChange={(e) => setEndDate(e.target.value)}
-                className="min-h-9 rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+                className="max-sm:min-h-11 max-sm:text-base"
               />
             </label>
           </div>
           <div className="flex flex-wrap gap-2">
             <Button
+              className="min-h-11"
               type="button"
               size="sm"
               disabled={pending || message.trim().length === 0}
@@ -137,6 +141,7 @@ export function TeamEnquiryButton({
               {pending ? t("sending") : t("submit")}
             </Button>
             <Button
+              className="min-h-11"
               type="button"
               size="sm"
               variant="ghost"
@@ -273,6 +278,7 @@ export function MyTeamEnquiriesList({
             {e.status === "created" && (
               <div>
                 <Button
+                  className="min-h-11"
                   type="button"
                   size="sm"
                   variant="secondary"

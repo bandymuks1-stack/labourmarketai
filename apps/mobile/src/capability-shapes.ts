@@ -323,6 +323,9 @@ export type DemandUrgency = "flexible" | "this_week" | "urgent";
 
 export type DemandDraftFields = {
   readonly description: string;
+  /** Where the work is: a country name in any supported language or an ISO
+   *  code; the server resolves it (`resolveCountryCode`), as the web chat does. */
+  readonly country: string;
   readonly role?: string;
   readonly location?: string;
   readonly urgency?: DemandUrgency;
@@ -540,3 +543,298 @@ export type WorkerProjectsData =
       readonly activeCount: number;
     }
   | { readonly kind: "empty" };
+
+// ── offers: proposals and invitations addressed to me ─────────────────────
+// booking.list and invitations.list are the web pages' own reads; the answer
+// goes through worker.respond-booking / worker.respond-invitation, the same
+// prepare → confirm pair the web chat card runs. Nothing new on the server.
+
+/** One booking row as `booking.list` returns it (lib/booking BookingRow). */
+export type BookingOffer = {
+  readonly id: string;
+  readonly status: "proposed" | "accepted" | "declined" | "withdrawn" | "expired";
+  readonly startDate: string | null;
+  readonly expectedEndDate: string | null;
+  readonly roleText: string | null;
+  readonly note: string | null;
+  readonly proposerName: string | null;
+  readonly responseDeadlineDate: string | null;
+};
+
+export type BookingListData = {
+  readonly kind: "ok";
+  readonly incoming: readonly BookingOffer[];
+  readonly outgoing: readonly BookingOffer[];
+};
+
+/** The server's own answer key: exactly the respond input minus `decision`. */
+export type InvitationRef =
+  | { readonly source: "invitation"; readonly invitationId: string }
+  | { readonly source: "company_roster" | "agency_roster"; readonly orgId: string };
+
+export type InvitationOffer = {
+  readonly ref: InvitationRef;
+  /** What accepting makes the person: the web's own two fields
+   *  (`invitations.list`), e.g. employee vs. intern of the same organization. */
+  readonly invitationType?: string | null;
+  readonly relationshipSlug?: string | null;
+  readonly organizationName: string | null;
+  readonly projectTitle: string | null;
+  readonly inviterName: string | null;
+  readonly personalMessage: string | null;
+  readonly expiresAt: string | null;
+};
+
+export type InvitationsListData =
+  | { readonly kind: "ok"; readonly items: readonly InvitationOffer[]; readonly total: number }
+  | { readonly kind: "empty" };
+
+/** A bridged prepare step: the exact input to confirm with, and its token. */
+export type RespondPrepareData = {
+  readonly input: unknown;
+  readonly confirmationToken: string;
+};
+
+/**
+ * `cv.verified.get` — the person's Living CV as the printable CV page renders
+ * it (`lib/cv-export/verified-cv.ts`, `buildVerifiedCv`). Only the parts the
+ * phone shows are typed; the rest is ignored, never re-derived.
+ */
+export type VerifiedCvWorkRow = {
+  readonly id: string | null;
+  readonly title: string | null;
+  readonly orgName: string | null;
+  /** Paid work vs a placement or volunteering — decided by the relationship. */
+  readonly kind: string;
+  readonly startedAt: string | null;
+  readonly endedAt: string | null;
+};
+
+export type VerifiedCvLanguageRow = { readonly lang: string; readonly level: string };
+
+export type VerifiedCvEducationRow = {
+  readonly institutionName: string;
+  readonly programOrField: string | null;
+  readonly educationTypeSlug: string;
+  readonly startYear: number | null;
+  readonly endYear: number | null;
+  readonly isCurrent: boolean;
+};
+
+export type VerifiedCvGetData =
+  | {
+      readonly ok: true;
+      readonly cv: {
+        readonly workHistory: readonly VerifiedCvWorkRow[];
+        readonly languages: readonly VerifiedCvLanguageRow[];
+        readonly education: readonly VerifiedCvEducationRow[];
+      };
+    }
+  | { readonly ok: false; readonly code: "not_authenticated" | "no_worker" };
+
+/** A one-step worker action (`worker.add-work-history`, `worker.add-language`):
+ *  the bridge answers with the action id and whatever the action returned. */
+export type WorkerActionData = { readonly action: string };
+
+/** `demand.list` — the needs of the organization the person acts for. */
+export type DemandListNeed = {
+  readonly id: string;
+  readonly title: string | null;
+  readonly status: string | null;
+  readonly role: string | null;
+  readonly location: string | null;
+  readonly headcount: number | null;
+  /** UNKNOWN ≠ ZERO: null when the count could not be read. */
+  readonly interestedPeople: number | null;
+  readonly shortlisted: number | null;
+};
+
+export type DemandListData = {
+  readonly actingFor: string;
+  readonly needs: readonly DemandListNeed[];
+};
+
+export type MatchStatus = "strong" | "possible" | "weak" | "insufficient_data";
+
+export type ShortlistStatus = "saved" | "interested" | "not_fit" | "reviewed";
+
+/** `candidate.search` — anonymized candidates for ONE need (no name, no
+ *  contact), ranked by the web scouting page's own match. */
+export type CandidateRow = {
+  readonly workerId: string;
+  readonly preview: { readonly anonymizedLabel: string };
+  readonly match: {
+    readonly status: MatchStatus;
+    readonly evidence: {
+      readonly matchedManagerConfirmed: number;
+      readonly matchedJournalSupported: number;
+      readonly matchedSelfDeclared: number;
+    };
+  };
+  readonly canContact: boolean;
+  readonly shortlistStatus: ShortlistStatus | null;
+};
+
+export type CandidateSearchData = {
+  readonly actingFor: string;
+  readonly need: { readonly id: string; readonly title: string | null; readonly status: string | null };
+  readonly totalCandidates: number;
+  readonly candidates: readonly CandidateRow[];
+};
+
+/** `shortlist.add_draft` — the preview of the decision and its one-time token. */
+export type ShortlistDraftData = {
+  readonly preview: {
+    readonly actingFor: string;
+    readonly need: { readonly id: string; readonly title: string | null };
+    readonly workerId: string;
+    readonly decision: ShortlistStatus;
+  };
+  readonly confirmationToken: string;
+};
+
+/**
+ * `client.agency_offers.get` — the employer's open agency candidate offers and
+ * the brigades / companies offered for its needs (`lib/conversation/
+ * client-offers-contract.ts`). No worker name: the read never returns one.
+ */
+export type ClientAgencyOffer = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly agencyName: string;
+  readonly note: string | null;
+  readonly createdAt: string;
+};
+
+export type ClientTeamOffer = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+  readonly teamName: string;
+  readonly status: "offered" | "accepted" | "assigned";
+  readonly memberCount: number;
+  readonly offeredAt: string;
+};
+
+export type ClientOffersData = {
+  readonly offers: readonly ClientAgencyOffer[];
+  readonly teamOffers: readonly ClientTeamOffer[];
+  readonly openDemands: number;
+};
+
+/**
+ * `education.workspace.get` — an education organization's programmes, cohorts
+ * and the learners it may assign (`lib/conversation/education-workspace-contract.ts`).
+ * `not-institution` arrives as data; an unreadable workspace arrives as a failure.
+ */
+export type EducationCohort = {
+  readonly id: string;
+  readonly name: string;
+  /** null: membership is not visible to this role — unknown, never 0. */
+  readonly memberCount: number | null;
+};
+
+export type EducationProgramme = {
+  readonly id: string;
+  readonly name: string;
+  readonly demandCount: number | null;
+  readonly cohorts: readonly EducationCohort[];
+};
+
+export type EducationWorkspaceData =
+  | {
+      readonly kind: "ok";
+      readonly organizationId: string;
+      readonly programmes: readonly EducationProgramme[];
+      readonly assignable: readonly { readonly profileId: string; readonly label: string }[];
+      readonly membersVisible: boolean;
+    }
+  | { readonly kind: "not-institution" };
+
+/**
+ * `agency.clients.get` — a staffing agency's client bridge
+ * (`lib/conversation/agency-workspace-contract.ts`): the needs clients shared,
+ * the agency's OWN roster (labels as the web's agency bridge shows them) and
+ * its proposals. `not-agency` arrives as data; an unreadable bridge as a failure.
+ */
+export type AgencySharedNeed = { readonly shareId: string; readonly requestId: string; readonly title: string };
+export type AgencyRosterWorker = { readonly workerId: string; readonly label: string };
+export type AgencyProposal = {
+  readonly offerId: string;
+  readonly requestId: string;
+  readonly title: string;
+  readonly workerLabel: string;
+  readonly stageLabel: string;
+  readonly decisionLabel: string | null;
+  readonly offerStatus: string;
+};
+export type AgencyClientsData =
+  | {
+      readonly kind: "ok";
+      readonly agencyCompanyId: string;
+      readonly shared: readonly AgencySharedNeed[];
+      readonly roster: readonly AgencyRosterWorker[];
+      readonly progress: readonly AgencyProposal[];
+    }
+  | { readonly kind: "not-agency" };
+
+/**
+ * journal.review_queue.get (`apps/web/lib/capabilities/employer-operations-
+ * capabilities.ts`): the work entries waiting for the caller's decision. An
+ * entry here is the person's own record — not rejected and not verified.
+ */
+export type JournalReviewEntry = {
+  readonly entryId: string;
+  readonly person: { readonly workerProfileId: string | null; readonly name: string | null };
+  readonly text: string | null;
+  readonly projectId: string | null;
+  readonly writtenAt: string;
+};
+export type JournalReviewQueueData = { readonly pending: readonly JournalReviewEntry[]; readonly total: number };
+/** `REVIEW_DECISIONS` in `apps/web/lib/journal/review-status.ts`. */
+export type JournalReviewDecision = "approved" | "changes_requested" | "rejected";
+
+/**
+ * client.agency_connections.get (`apps/web/lib/conversation/client-bridge-
+ * contract.ts`, kind "ok"): the agency invitations waiting for this company's
+ * answer, and its open needs not yet shared with a connected agency.
+ */
+export type ClientAgencyInvite = { readonly connectionId: string; readonly agencyName: string; readonly createdAt: string };
+export type ClientAgencyShareable = {
+  readonly connectionId: string;
+  readonly agencyName: string;
+  readonly requestId: string;
+  readonly demandTitle: string;
+};
+export type ClientAgenciesData = {
+  readonly kind: "ok";
+  readonly invites: readonly ClientAgencyInvite[];
+  readonly shareable: readonly ClientAgencyShareable[];
+  readonly activeConnections: number;
+};
+
+/**
+ * absence.mine.list / absence.pending_review.list (`apps/web/lib/leave/
+ * absences.ts`, types in absences-model.ts). `workerId` is the caller's own
+ * worker record — the one absence.request needs.
+ */
+export type AbsenceType = "annual_leave" | "sickness" | "unpaid" | "training" | "other";
+export type AbsenceStatus = "requested" | "approved" | "rejected" | "cancelled";
+export type WorkerAbsence = {
+  readonly id: string;
+  readonly workerId: string;
+  readonly workerName: string | null;
+  readonly absenceType: AbsenceType;
+  readonly startDate: string;
+  readonly endDate: string;
+  readonly halfDay: boolean;
+  readonly note: string | null;
+  readonly status: AbsenceStatus;
+};
+export type MyAbsencesData =
+  | { readonly applied: false }
+  | { readonly applied: true; readonly workerId: string | null; readonly absences: readonly WorkerAbsence[] };
+export type ManagerAbsencesData =
+  | { readonly applied: false }
+  | { readonly applied: true; readonly pending: readonly WorkerAbsence[] };

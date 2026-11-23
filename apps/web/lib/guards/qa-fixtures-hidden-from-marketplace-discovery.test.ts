@@ -25,6 +25,6 @@ describe("QA fixtures never reach real people through marketplace discovery", ()
     expect(svc).toMatch(/isQaViewer\(user\)/);
     const lst = read("lib/marketplace/listings.ts");
     expect(lst).toMatch(/isQaViewer\(user\)/);
-    expect(lst).toMatch(/hideQaMarked\(rows/);
+    expect(lst).toMatch(/hideQaMarked\((withoutForeignIds\()?rows/);
   });
 });

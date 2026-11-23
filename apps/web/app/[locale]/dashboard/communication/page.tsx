@@ -67,6 +67,9 @@ export default async function CommunicationListPage({
   // bounce, never a fake "sent".
   const { notice } = await searchParams;
   const showCannotOpen = notice === "cannot_open";
+  // A thread the person was removed from (its page redirects here): say so,
+  // with nothing about the thread itself.
+  const showUnavailable = notice === "unavailable";
   setRequestLocale(locale);
   const t = await getTranslations("communication");
   const supabase = await createClient();
@@ -419,6 +422,25 @@ export default async function CommunicationListPage({
           </span>
         </div>
       )}
+      {showUnavailable && (
+        <div
+          role="status"
+          data-testid="communication-unavailable"
+          className="flex items-start gap-2 rounded-md border border-ink-600/60 bg-ink-800/40 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+        >
+          <Lock
+            className="mt-0.5 h-3.5 w-3.5 shrink-0 text-text-muted"
+            strokeWidth={2}
+            aria-hidden
+          />
+          <span className="flex flex-col gap-0.5">
+            <span className="font-medium text-text-primary">
+              {t("noLongerAvailable.title")}
+            </span>
+            <span className="text-text-muted">{t("noLongerAvailable.body")}</span>
+          </span>
+        </div>
+      )}
 
       {/* Real server-state refresh on focus + gentle interval — returning to
           this tab reflects new messages and cleared unread without a manual
@@ -544,16 +566,20 @@ export default async function CommunicationListPage({
               className={
                 conversations.length === 0
                   ? "flex flex-col items-center gap-3 py-2 text-center lg:gap-4 lg:py-6"
-                  : "flex flex-col items-center gap-4 py-6 text-center"
+                  : "flex flex-col items-center gap-3 py-2 text-center lg:gap-4 lg:py-6"
               }
             >
               <MessageSquare
-                className={conversations.length === 0 ? "hidden h-8 w-8 text-text-muted lg:block" : "h-8 w-8 text-text-muted"}
+                className="hidden h-8 w-8 text-text-muted lg:block"
                 strokeWidth={1.5}
                 aria-hidden
               />
               {conversations.length > 0 && (
-                <p className="text-sm text-text-secondary" data-testid="communication-pane-pick">
+                // "Pick a conversation in the list" points at a list BESIDE the
+                // pane — true from lg only. On a phone the list is above and a
+                // tap opens the thread, so the prompt (and its icon) read as an
+                // empty second screen under the list (design audit 2026-11-22).
+                <p className="hidden text-sm text-text-secondary lg:block" data-testid="communication-pane-pick">
                   {t("panePick")}
                 </p>
               )}

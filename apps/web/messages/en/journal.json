@@ -261,7 +261,8 @@
   "unnamedOrganization": {
     "company": "Company without a name",
     "agency": "Agency without a name",
-    "other": "Organization without a name"
+    "other": "Organization without a name",
+    "ended": "Earlier organization without a name"
   },
   "activeWorkspaceNoRelationship": "You are acting for {org}, but no work relationship with {org} is recorded, so it is not offered here. Choose the context this work really belongs to.",
   "project": "Project",
@@ -408,6 +409,9 @@
     "skills": "Skills",
     "title": "Entries to confirm",
     "quick": {
+      "elsewhere": "{n} more are waiting for your approval in other organizations you manage. Switch organization to see and approve them.",
+      "byOrganization": "By organization:",
+      "unnamedOrganization": "An organization whose name could not be read",
       "openQuick": "Quick confirm →",
       "title": "Quick confirm",
       "subtitle": "One glance, one tap: the card shows the worker, the date, the works and the exact skills your tap confirms. Every confirmation is your real decision, recorded only when you tap.",
@@ -436,12 +440,24 @@
       "outcomeBlocked": "not confirmed ({code})",
       "receipt": "Confirmed: {title}",
       "receiptSkills": "{count, plural, one {# skill} other {# skills}}",
-      "skillsUnavailable": "The skill list could not be read — the tap confirms the entry only."
+      "skillsUnavailable": "The skill list could not be read — the tap confirms the entry only.",
+      "projectFilterLabel": "Project",
+      "projectAll": "All projects ({n})",
+      "projectNone": "No project ({n})",
+      "projectUnnamed": "Project, name not available",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Show",
+      "projectResult": "Showing {shown} of {total} entries",
+      "projectOnCard": "Project: {name}",
+      "noProjectOnCard": "No project"
     },
     "loadFailed": "The review queue could not be loaded. That does not mean there is nothing to review — try again."
   },
   "listEmpty": "You don't have any work records yet — your entries will show up here.",
   "listEmptyTitle": "Start building work records",
+  "listUnavailableTitle": "Your work records could not be read right now",
+  "listUnavailable": "This is a failed read, not an empty journal. Nothing you recorded has been lost — reload the page in a moment.",
+  "cvBridgeUnavailable": "Your records could not be read right now, so their count is unknown.",
   "listEmptyNext": "Create your first entry in the box above — it stays private until you submit it.",
   "listEmptyCta": "Or record it in the chat",
   "logViaChatBody": "Other ways to record work:",
@@ -592,6 +608,13 @@
     "dayEmpty": "No records on this day.",
     "moreDays": "Showing the latest recorded day. {count, plural, one {# more day} other {# more days}} with records — pick a date on the calendar.",
     "periodEmpty": "No records in this period."
+  },
+  "dayChoice": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "weekAgo": "A week ago",
+    "calendar": "Calendar",
+    "earlier": "Earlier entries"
   },
   "spreadsheet": {
     "title": "Spreadsheet mode — several entries at once",

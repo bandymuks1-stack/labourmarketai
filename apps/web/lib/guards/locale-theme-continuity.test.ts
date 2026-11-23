@@ -25,8 +25,9 @@ describe("locale switcher preserves route context", () => {
     // The switcher must read window.location.search + window.location.hash
     // (not usePathname alone, which strips both)…
     expect(src).toMatch(/window\.location\.search\s*\+\s*window\.location\.hash/);
-    // …and append it to the pathname it links to.
-    expect(src).toMatch(/href=\{`\$\{pathname\}\$\{suffix\}`\}/);
+    // …and append it to the path it links to: the page's own hreflang alternate
+    // for that locale (an answer's slug is translated), else the same pathname.
+    expect(src).toMatch(/href=\{`\$\{alternatePathFor\(l, alternates\) \?\? pathname\}\$\{suffix\}`\}/);
   });
 
   it("switches locale via next-intl Link (soft navigation, no reload)", () => {

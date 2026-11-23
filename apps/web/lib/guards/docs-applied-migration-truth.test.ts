@@ -102,6 +102,8 @@ describe("no doc denies a migration the ledger says is applied", () => {
       for (const file of markdownFiles(docsRoot)) {
         // The ledger itself quotes the old state as history — that is its job.
         if (file.endsWith("APPLIED_LEDGER.md")) continue;
+        // Generated: one row per PR, quoting each PR title as it was written (history, not a claim).
+        if (file.endsWith("SYSTEM_REGISTER.md")) continue;
         const raw = readFileSync(file, "utf8");
         const lines = raw.split("\n");
         const banner = lines.slice(0, 40).join("\n");

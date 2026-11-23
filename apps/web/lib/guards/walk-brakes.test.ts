@@ -10,7 +10,9 @@ import {
   judgeHealth,
   judgeHealthSamples,
   judgeSupabaseEdge,
+  judgeSr1Readings,
   judgeWalkRun,
+  SR1_READING_KEYS,
 } from "../../../../.github/scripts/walk-brakes.mjs";
 
 /**
@@ -80,6 +82,11 @@ describe("deploy brake", () => {
     expect(judgeDeployBrake([done(2), done(60, 2)], now).refuse).toBe(true);
     expect(judgeDeployBrake([done(THRESHOLDS.deployQuietMinutes + 1)], now).refuse).toBe(false);
     expect(judgeDeployBrake([], now).refuse).toBe(false);
+  });
+  it("a finished run that shipped nothing holds no quiet period, a running one still refuses", () => {
+    expect(judgeDeployBrake([{ ...done(1), deploySkipped: true }, done(60, 2)], now).refuse).toBe(false);
+    expect(judgeDeployBrake([{ ...done(1), deploySkipped: true }, done(2, 2)], now).refuse).toBe(true);
+    expect(judgeDeployBrake([{ id: 9, status: "in_progress", updated_at: now.toISOString() }], now).refuse).toBe(true);
   });
   it("judges by the most recent end, whatever the list order", () => {
     expect(judgeDeployBrake([done(60), done(1, 2)], now).refuse).toBe(true);
@@ -188,6 +195,61 @@ describe("gap and Supabase edge brakes", () => {
   });
 });
 
+describe("SR-1 readings privacy check", () => {
+  // The four line shapes prod-sr1-first-search.spec.ts writes.
+  const header = { at: "2026-11-09T07:00:00.000Z", browser: "chrome 141.0.7390.54", mode: "headless scripted, GitHub runner", rounds: 8 };
+  const base = { at: "2026-11-09T07:01:00.000Z", round: 0, actor: "signed_in", term: "virėja" };
+  const result = {
+    ...base,
+    outcome: "results",
+    board_ms: 812,
+    search_ms: 640,
+    ttfb_ms: 210,
+    dcl_ms: 480,
+    full_page_load: true,
+    to_profession_filter: false,
+    signed_in: true,
+  };
+  const timeout = { ...base, actor: "signed_out", outcome: "board_timeout", board_ms: 60_000, signed_in: null };
+  const error = { ...base, outcome: "error", kind: "TimeoutError", signed_in: false };
+  const file = (...lines: unknown[]) => lines.map((l) => (typeof l === "string" ? l : JSON.stringify(l))).join("\n") + "\n";
+
+  it("publishes a file of the readings the spec writes", () => {
+    expect(judgeSr1Readings(file(header, result, timeout, error))).toEqual({ publish: true, why: "4 readings checked" });
+  });
+
+  it("knows every field the spec writes", () => {
+    for (const line of [header, result, timeout, error]) {
+      for (const key of Object.keys(line)) expect(SR1_READING_KEYS).toContain(key);
+    }
+  });
+
+  it("withholds an empty, broken or wrongly shaped file", () => {
+    expect(judgeSr1Readings("").publish).toBe(false);
+    expect(judgeSr1Readings("\n \n").publish).toBe(false);
+    expect(judgeSr1Readings(file(header, '{"at":"2026-11-09T07:01:00.000Z","round":')).publish).toBe(false);
+    expect(judgeSr1Readings(file(header, "[1,2]")).publish).toBe(false);
+    expect(judgeSr1Readings(file(header, "null")).publish).toBe(false);
+    expect(judgeSr1Readings(file(header, '"text"')).publish).toBe(false);
+  });
+
+  it("withholds a field no reading writes, a nested value, a long text or an address", () => {
+    expect(judgeSr1Readings(file(header, { ...result, message: "boom" })).publish).toBe(false);
+    expect(judgeSr1Readings(file(header, { ...result, kind: { name: "x" } })).publish).toBe(false);
+    expect(judgeSr1Readings(file(header, { ...result, term: ["a"] })).publish).toBe(false);
+    expect(judgeSr1Readings(file(header, { ...result, term: "x".repeat(81) })).publish).toBe(false);
+    expect(judgeSr1Readings(file(header, { ...result, term: "someone@example.com" })).publish).toBe(false);
+    // A duplicated key: JSON.parse keeps the last value, the published file still holds the first.
+    expect(judgeSr1Readings(file(header, '{"at":"2026-11-09T07:01:00.000Z","term":"someone@example.com","term":"kock"}')).publish).toBe(false);
+  });
+
+  it("says why with a line number, never the field or the value", () => {
+    const why = judgeSr1Readings(file(header, { ...result, secret_field: "private value" })).why;
+    expect(why).toBe("line 2 has a field no reading writes");
+    expect(why).not.toMatch(/secret_field|private/);
+  });
+});
+
 describe("workflow wiring", () => {
   const yml = readFileSync(resolve(__dirname, "../../../../.github/workflows/prod-qa-walk.yml"), "utf8");
   const budget = yml.slice(yml.indexOf("\n  budget:"), yml.indexOf("\n  walk:"));
@@ -211,6 +273,31 @@ describe("workflow wiring", () => {
     expect(step(walk, "deploy")).not.toMatch(/OVERRIDE|budget_override/);
     // …while the error and Supabase brakes are the ones it may lift.
     expect(step(budget, "errors")).toMatch(/OVERRIDE/);
+  });
+
+  const stepOf = (name: string) => {
+    const at = walk.indexOf(`- name: ${name}`);
+    expect(at, name).toBeGreaterThan(-1);
+    const next = walk.indexOf("\n      - name:", at + 1);
+    return walk.slice(at, next === -1 ? undefined : next);
+  };
+
+  it("publishes the walk result and the SR-1 readings only after their privacy checks passed", () => {
+    expect(stepOf("Upload result (no screenshots, no traces, no sessions)")).toContain(
+      "if: always() && steps.privacy.outputs.published == 'true'",
+    );
+    expect(stepOf("Check the SR-1 readings before they are published")).toContain("walk-brakes.mjs sr1-check");
+    expect(stepOf("Upload the SR-1 readings (one day)")).toContain("steps.sr1.outputs.published == 'true'");
+  });
+
+  it("a withheld result leaves a marker under the walk's artefact name, so the daily count still sees the walk", () => {
+    const marker = stepOf("Upload the withheld marker");
+    expect(marker).toContain("if: always() && steps.privacy.outputs.published != 'true'");
+    expect(marker).toContain("name: prod-qa-${{ needs.debounce.outputs.spec }}-${{ github.run_id }}");
+    expect(marker).toContain("path: prod-qa-withheld.txt");
+    expect(stepOf("Upload result (no screenshots, no traces, no sessions)")).toContain(
+      "name: prod-qa-${{ needs.debounce.outputs.spec }}-${{ github.run_id }}",
+    );
   });
 
   it("the walk job re-checks health, deploys and the gap after its concurrency wait, before any production step", () => {

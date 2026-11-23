@@ -2,6 +2,16 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
+import { chooseSide, screenInsets } from "@/lib/ui/overlay-placement";
+
+/** Sizes in rem, as the panel is styled (`max-h-60`, `min-h-11` rows, the
+ *  search row), so the placement still adds up at 200 % text. */
+const LIST_MAX_REM = 15;
+const ROW_REM = 2.75;
+const SEARCH_ROW_REM = 3.25;
+/** One row at least. The side with more room is chosen first, so the floor
+ *  only matters on a very short screen, where the panel must still end on it. */
+const LIST_MIN_REM = ROW_REM;
 
 /**
  * Canonical dark listbox — the single reusable replacement for native
@@ -113,7 +123,15 @@ export function DarkListbox({
   const [activeIndex, setActiveIndex] = useState(-1);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
   const searchRef = useRef<HTMLInputElement>(null);
+  // Where the open panel fits (responsive sweep 2026-11-21): a field near the
+  // bottom of the screen, or just above a fixed bar (the onboarding Finish
+  // bar), opened its list off the screen. It now opens on the side with room
+  // and is never taller than that room.
+  const [place, setPlace] = useState<{ side: "below" | "above"; listMax?: number }>({
+    side: "below",
+  });
   const listboxId = useId();
 
   const selected = options.find((o) => o.value === value) ?? null;
@@ -122,6 +140,25 @@ export function DarkListbox({
   // existing consumer keeps the exact list it passed in.
   const q = query.trim();
   const visible = searchable && q.length > 0 ? filter(options, q) : options;
+
+  /** Opens the panel on the side of the field with room. Measured BEFORE the
+   *  panel renders, so its first frame is already in place: the search field
+   *  takes focus on that frame, and a page that keeps focused fields clear of
+   *  a fixed bar (onboarding) would otherwise scroll to a panel still placed
+   *  under the bar. */
+  function openPanel() {
+    const b = buttonRef.current?.getBoundingClientRect();
+    if (b) {
+      const rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const listMaxPx = LIST_MAX_REM * rem;
+      const searchH = searchable ? SEARCH_ROW_REM * rem : 0;
+      const want = searchH + Math.min(listMaxPx, options.length * ROW_REM * rem + 8) + 10;
+      const insets = screenInsets(rootRef.current, b.left + b.width / 2);
+      const { side, room } = chooseSide(b, want, window.innerHeight, insets.top, insets.bottom, 4, 8);
+      setPlace({ side, listMax: Math.max(LIST_MIN_REM * rem, Math.min(listMaxPx, room - searchH - 10)) });
+    }
+    setOpen(true);
+  }
 
   // Close on outside click + Escape (mobile-portrait friendly).
   useEffect(() => {
@@ -151,7 +188,7 @@ export function DarkListbox({
       return;
     }
     setActiveIndex(-1);
-    if (searchable) searchRef.current?.focus();
+    if (searchable) searchRef.current?.focus({ preventScroll: true });
   }, [open, searchable]);
 
   function commit(next: string) {
@@ -166,7 +203,7 @@ export function DarkListbox({
     if (e.key === "ArrowDown" || e.key === "ArrowUp") {
       e.preventDefault();
       if (!open) {
-        setOpen(true);
+        openPanel();
         return;
       }
       const dir = e.key === "ArrowDown" ? 1 : -1;
@@ -195,7 +232,7 @@ export function DarkListbox({
         }
       } else {
         e.preventDefault();
-        setOpen(true);
+        openPanel();
       }
     }
   }
@@ -204,6 +241,7 @@ export function DarkListbox({
     <div ref={rootRef} className={cn("relative", className)}>
       {name ? <input type="hidden" name={name} value={value} /> : null}
       <button
+        ref={buttonRef}
         type="button"
         disabled={disabled}
         aria-haspopup="listbox"
@@ -213,7 +251,11 @@ export function DarkListbox({
         data-invalid={invalid ? "true" : undefined}
         id={buttonId}
         data-testid={testId}
-        onClick={() => !disabled && setOpen((v) => !v)}
+        onClick={() => {
+          if (disabled) return;
+          if (open) setOpen(false);
+          else openPanel();
+        }}
         onKeyDown={onNavKeyDown}
         className={cn(
           "flex w-full items-center justify-between gap-2 rounded-md border bg-ink-700 px-4 py-3 text-left text-sm text-text-primary outline-none transition-colors focus:border-brand-blue disabled:opacity-50",
@@ -231,7 +273,13 @@ export function DarkListbox({
         // `left-0 right-0` keeps the panel exactly as wide as the field, so on
         // a phone it can never reach past the screen edge; the list scrolls
         // inside it instead of growing the page.
-        <div className="absolute left-0 right-0 z-50 mt-1 rounded-md border border-ink-500 bg-ink-900 p-1 shadow-card">
+        <div
+          data-listbox-side={place.side}
+          className={cn(
+            "absolute left-0 right-0 z-50 rounded-md border border-ink-500 bg-ink-900 p-1 shadow-card",
+            place.side === "above" ? "bottom-full mb-1" : "mt-1",
+          )}
+        >
           {searchable && (
             <input
               ref={searchRef}
@@ -261,6 +309,7 @@ export function DarkListbox({
             // into the page — on a phone that chain is pull-to-refresh, which
             // reloaded the onboarding wizard mid-choice (audit 2026-10-26).
             className="max-h-60 overflow-auto overscroll-contain"
+            style={{ maxHeight: place.listMax }}
           >
             {visible.map((o, i) => {
               const isSelected = o.value === value;
@@ -277,7 +326,7 @@ export function DarkListbox({
                     onClick={() => !o.disabled && commit(o.value)}
                     onMouseEnter={() => setActiveIndex(i)}
                     className={cn(
-                      "flex w-full items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left text-sm",
+                      "flex min-h-11 w-full items-center justify-between gap-2 rounded-sm px-3 py-2.5 text-left text-sm",
                       isSelected ? "text-brand-blue" : "text-text-primary",
                       isActive && !o.disabled && "bg-ink-700",
                       o.disabled && "cursor-not-allowed text-text-muted",

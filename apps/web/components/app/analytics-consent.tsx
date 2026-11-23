@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { Link } from "@/lib/i18n/navigation";
 import {
@@ -18,10 +19,15 @@ import { refuseAnalytics } from "@/lib/consent/account-campaign";
  *   - the CONTROL on the Cookie Policy page (linked from the footer), where
  *     the choice is changed or withdrawn at any time.
  *
- * The banner sits in the normal page flow at the very top, never fixed over
- * the page: it pushes content down instead of covering a field or a CTA on
- * a phone (tests/e2e/auth-field-touch-floor.spec.ts), and needs no z-index
- * or safe-area handling.
+ * The banner sits in the normal page flow, never fixed over the page: it
+ * pushes content down instead of covering a field or a CTA on a phone
+ * (tests/e2e/auth-field-touch-floor.spec.ts), and needs no z-index or
+ * safe-area handling. It is compact (one sentence, a "more" link to the
+ * Cookie Policy where the full text lives, both buttons in one row) so the
+ * first screen keeps its own action in view at 360x740. Placement:
+ *   - "top": every page except /auth/*, above the page;
+ *   - "after-form": mounted by the auth layout BELOW the form, so sign-up
+ *     and sign-in come first on a phone.
  *
  * Both choices are offered side by side with the SAME button style: nothing
  * is pre-selected, refusing takes exactly one press, like accepting, and
@@ -62,28 +68,51 @@ function useConsentChoice(): { ready: boolean; choice: AnalyticsConsentChoice | 
   return state;
 }
 
-export function AnalyticsConsentBanner({ strings }: { strings: AnalyticsConsentBannerStrings }) {
+/** /auth/* with or without a locale prefix: the auth layout mounts its own banner. */
+const AUTH_PATH = /^\/(?:[a-z]{2}\/)?auth(?:\/|$)/;
+
+export function isAuthPath(pathname: string | null): boolean {
+  return AUTH_PATH.test(pathname ?? "");
+}
+
+export function AnalyticsConsentBanner({
+  strings,
+  placement = "top",
+}: {
+  strings: AnalyticsConsentBannerStrings;
+  placement?: "top" | "after-form";
+}) {
   const { ready, choice } = useConsentChoice();
-  // Server render and first paint show nothing: the choice lives on the device.
-  if (!ready || choice !== null) return null;
+  const pathname = usePathname();
+  // In the server render and the first paint, so its height is there from the start
+  // and nothing below it moves (UX-3). A person who already chose never sees it: the
+  // inline CONSENT_BOOTSTRAP_SCRIPT hides it before paint, and this removes it.
+  if (ready && choice !== null) return null;
+  if (placement === "top" && isAuthPath(pathname)) return null;
   return (
     <section
       role="region"
       aria-label={strings.label}
       data-testid="analytics-consent-banner"
-      className="border-b border-border-subtle bg-surface-1 px-4 py-3 sm:px-6"
+      data-placement={placement}
+      className={
+        placement === "top"
+          ? "border-b border-border-subtle bg-surface-1 px-3 py-2 sm:px-6 sm:py-2.5 print:hidden"
+          : "mt-6 rounded-md border border-border-subtle bg-surface-1 px-4 py-2.5 print:hidden"
+      }
     >
-      <div className="mx-auto flex max-w-4xl flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm leading-relaxed text-text-secondary">
+      <div className="mx-auto flex max-w-4xl flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <p className="text-xs leading-snug text-text-secondary sm:text-sm">
           {strings.text}{" "}
           <Link href="/legal/cookies" className="underline hover:text-text-primary">
             {strings.more}
           </Link>
         </p>
-        <div className="flex shrink-0 gap-2">
+        <div className="flex shrink-0 flex-wrap gap-2">
           <Button
             variant="secondary"
             size="sm"
+            className="min-h-11 flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
             data-testid="analytics-consent-refuse"
             onClick={refuseAnalytics}
           >
@@ -92,6 +121,7 @@ export function AnalyticsConsentBanner({ strings }: { strings: AnalyticsConsentB
           <Button
             variant="secondary"
             size="sm"
+            className="min-h-11 flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
             data-testid="analytics-consent-accept"
             onClick={() => setAnalyticsConsent("granted")}
           >
@@ -121,6 +151,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
         <Button
           variant="secondary"
           size="sm"
+          className="min-h-11"
           data-testid="analytics-consent-control-refuse"
           aria-pressed={choice === "refused"}
           onClick={refuseAnalytics}
@@ -130,6 +161,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
         <Button
           variant="secondary"
           size="sm"
+          className="min-h-11"
           data-testid="analytics-consent-control-allow"
           aria-pressed={choice === "granted"}
           onClick={() => setAnalyticsConsent("granted")}

@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
+import { InAppBrowserNotice } from "@/components/app/in-app-browser-notice";
 import {
   FacebookButton,
   GoogleButton,
@@ -21,6 +22,8 @@ import {
 } from "@/lib/invitations/signup-accept-action";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { bindWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
+import { isWorkerProfileDoorNext } from "@/lib/marketing/worker-profile-door";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   RESEND_COOLDOWN_SECONDS,
@@ -69,6 +72,7 @@ export function SignupForm({
   linkedinEnabled = false,
   facebookEnabled = false,
   invitation,
+  inviteLines,
 }: {
   linkedinEnabled?: boolean;
   facebookEnabled?: boolean;
@@ -77,6 +81,10 @@ export function SignupForm({
    *  browser. A server action signs up with it (the e-mail binding still
    *  compares the session to exactly that address), no confirm-password field
    *  is asked, and the canonical acceptance continues once the session exists. */
+  /** Who invited the person, to which organization, and what happens next —
+   *  already localized on the server from the invitation's own preview. Shown
+   *  in place of the generic sub-copy (owner P0 2026-11-22). */
+  inviteLines?: readonly string[];
   invitation?: {
     token: string;
     maskedEmail: string;
@@ -225,6 +233,9 @@ export function SignupForm({
       fieldError("confirm", t("error_password_mismatch"));
       return;
     }
+    // The intake draft, if this tab has one, is bound to this email only
+    // (decision 0024; lib/staffing/worker-intake-draft.ts).
+    if (!invitation && nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);
     setStatus("signing");
     // Registration-started conversion signal (Pre-Advertising Launch
     // Readiness v1) with first-touch campaign attribution. Fires only after
@@ -382,7 +393,7 @@ export function SignupForm({
               ? `/auth/login?next=${encodeURIComponent(nextPath)}`
               : "/auth/login"
           }
-          className="text-sm text-brand-blue hover:text-brand-champagne"
+          className="inline-flex min-h-11 items-center text-sm text-brand-blue hover:text-brand-champagne"
         >
           {t("login_link")} →
         </Link>
@@ -393,14 +404,22 @@ export function SignupForm({
   return (
     /* `method="post"` — pre-hydration fallback only. See login-form.tsx: without
        it an early submit GETs the password into the URL. */
-    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-4 sm:gap-6" noValidate>
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-3 sm:gap-6" noValidate>
       <header>
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
           {t("headline")}
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:mt-3">
-          {t("subcopy")}
-        </p>
+        {inviteLines && inviteLines.length > 0 ? (
+          <div className="mt-2 flex flex-col gap-1 text-sm leading-relaxed text-text-secondary sm:mt-3" data-testid="signup-invite-context">
+            {inviteLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:mt-3">
+            {t("subcopy")}
+          </p>
+        )}
       </header>
 
       {/* Owner window 11 §21 — the sentence the visitor typed on the
@@ -419,56 +438,54 @@ export function SignupForm({
             second copy above the submit used to render — a real person read the
             same paragraph twice on one short form (window 6 walk, 2026-09-06). */}
         <AuthLegalNotice variant="signup" />
+        <InAppBrowserNotice text={tSocial("inAppBrowser")} />
 
-        <GoogleButton
-          label={t("google_label")}
-          redirectingLabel={t("google_redirecting")}
-          errorLabel={t("error_generic")}
-          disabled={disabled}
-          nextPath={nextPath}
-          context="signup"
-          registrationStep="signup_page"
-        />
+        {/* ONE provider row on a phone (P0-1b, 360×740): Google keeps its
+            words and the room; LinkedIn and Facebook are 48 px logo squares
+            beside it (full accessible names). From sm up each provider has
+            its own full-width row. The notice above still precedes them all. */}
+        <div className="flex gap-2 sm:flex-col sm:gap-3">
+          <GoogleButton
+            label={t("google_label")}
+            wrapperClassName="min-w-0 flex-1"
+            redirectingLabel={t("google_redirecting")}
+            errorLabel={t("error_generic")}
+            disabled={disabled}
+            nextPath={nextPath}
+            context="signup"
+            registrationStep="signup_page"
+          />
 
-        {/* LinkedIn/Facebook render ONLY when the auth server reports the
-            provider enabled — the same account-creating same-tab flow, behind
-            the same GDPR notice above. */}
-        {/* Two secondary providers share ONE row on a phone (bare provider
-            names, full accessible names) so the e-mail form's action reaches
-            the first screen at 390 px; from sm up each keeps its own row. */}
-        {(linkedinEnabled || facebookEnabled) && (
-          <div
-            className={cn(
-              "flex flex-col gap-2 sm:gap-3",
-              linkedinEnabled && facebookEnabled && "grid grid-cols-2 sm:flex",
-            )}
-          >
-            {linkedinEnabled && (
-              <LinkedInButton
-                label={tSocial("continueWithLinkedIn")}
-                compactLabel={facebookEnabled ? "LinkedIn" : undefined}
-                redirectingLabel={t("google_redirecting")}
-                errorLabel={t("error_generic")}
-                disabled={disabled}
-                nextPath={nextPath}
-                context="signup"
-                registrationStep="signup_page"
-              />
-            )}
-            {facebookEnabled && (
-              <FacebookButton
-                label={tSocial("continueWithFacebook")}
-                compactLabel={linkedinEnabled ? "Facebook" : undefined}
-                redirectingLabel={t("google_redirecting")}
-                errorLabel={t("error_generic")}
-                disabled={disabled}
-                nextPath={nextPath}
-                context="signup"
-                registrationStep="signup_page"
-              />
-            )}
-          </div>
-        )}
+          {/* LinkedIn/Facebook render ONLY when the auth server reports the
+              provider enabled — the same account-creating same-tab flow, behind
+              the same GDPR notice above. */}
+          {linkedinEnabled && (
+            <LinkedInButton
+              label={tSocial("continueWithLinkedIn")}
+              compactLabel=""
+              wrapperClassName="w-12 flex-none sm:w-auto"
+              redirectingLabel={t("google_redirecting")}
+              errorLabel={t("error_generic")}
+              disabled={disabled}
+              nextPath={nextPath}
+              context="signup"
+              registrationStep="signup_page"
+            />
+          )}
+          {facebookEnabled && (
+            <FacebookButton
+              label={tSocial("continueWithFacebook")}
+              compactLabel=""
+              wrapperClassName="w-12 flex-none sm:w-auto"
+              redirectingLabel={t("google_redirecting")}
+              errorLabel={t("error_generic")}
+              disabled={disabled}
+              nextPath={nextPath}
+              context="signup"
+              registrationStep="signup_page"
+            />
+          )}
+        </div>
       </div>
 
       <div className="flex items-center gap-3" aria-hidden>
@@ -479,7 +496,7 @@ export function SignupForm({
         <span className="h-px flex-1 bg-ink-500" />
       </div>
 
-      <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+      <label className="flex flex-col gap-1 text-xs text-text-secondary sm:gap-1.5">
         {t("email_label")}
         <input
           type={invitation ? "text" : "email"}
@@ -510,7 +527,7 @@ export function SignupForm({
         <StaffReviewNotice text={invitation.reviewNoticeText} testId="signup-review-notice" />
       ) : null}
 
-      <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+      <label className="flex flex-col gap-1 text-xs text-text-secondary sm:gap-1.5">
         {t("password_label")}
         <input
           type={invitation && showPw ? "text" : "password"}
@@ -549,7 +566,7 @@ export function SignupForm({
           {t("show_password")}
         </button>
       ) : (
-        <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
+        <label className="flex flex-col gap-1 text-xs text-text-secondary sm:gap-1.5">
           {t("confirm_password_label")}
           <input
             type="password"
@@ -614,11 +631,6 @@ export function SignupForm({
         </span>
       </div>
 
-      {/* Pilot-feedback line: one quiet sentence under the action, not a
-          warning box between the fields and the button. */}
-      <p className="text-xs leading-relaxed text-text-muted" data-testid="signup-pilot-line">
-        {t("disclaimer")}
-      </p>
     </form>
   );
 }

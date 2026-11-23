@@ -1,9 +1,10 @@
 import "server-only";
 
-import { withoutCounterpartyRows } from "@/lib/journal/review-status";
+import { CONFIRMABLE_ENTRY_BY_WORKER_COLUMNS, confirmedEntriesByWorker } from "@/lib/journal/review-status";
 import { liveJournalEntriesOnly } from "@/lib/journal/journal-list-core";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { agencyBoardBurstLimited } from "@/lib/agency/board-abuse-guard";
 import { createClient } from "@/lib/supabase/server";
 import {
   getOwnAgency,
@@ -112,6 +113,13 @@ const RPC_NOT_FOUND = new Set(["42883", "PGRST202"]);
 export async function getAgencyPool(): Promise<AgencyPoolResult> {
   const agency = await getOwnAgency();
   if (!agency) return { kind: "no-agency" };
+  // Bulk reading is limited per account and IP (owner decision 2026-11-22).
+  {
+    const {
+      data: { user },
+    } = await (await createClient()).auth.getUser();
+    if (!user || (await agencyBoardBurstLimited("read", user.id))) return { kind: "error", message: "rate_limited" };
+  }
 
   const linked = await listActiveAgencyWorkers(agency.id);
   if (linked.kind === "needs-migration") return { kind: "needs-migration" };
@@ -184,39 +192,21 @@ export async function getAgencyPool(): Promise<AgencyPoolResult> {
   if (linkedIds.length > 0) {
     try {
       const { data: entryRows } = await liveJournalEntriesOnly(
-        asAny(supabase).from("journal_entries").select("id, worker_id").in("worker_id", linkedIds),
+        asAny(supabase).from("journal_entries").select(CONFIRMABLE_ENTRY_BY_WORKER_COLUMNS).in("worker_id", linkedIds),
       );
-      const entryIds: string[] = [];
-      const entryWorker = new Map<string, string>();
-      for (const e of (entryRows ?? []) as { id: string; worker_id: string }[]) {
+      const entries = (entryRows ?? []) as Parameters<typeof confirmedEntriesByWorker>[0];
+      for (const e of entries) {
         entriesByWorker.set(
           e.worker_id,
           (entriesByWorker.get(e.worker_id) ?? 0) + 1,
         );
-        entryIds.push(e.id);
-        entryWorker.set(e.id, e.worker_id);
       }
+      // Confirmed entries by the one rule: employer decisions only (decision 0018), and
+      // never the person's own (EVID-2).
+      const confirmed = confirmedEntriesByWorker(entries);
       for (const id of linkedIds) {
         entriesByWorker.set(id, entriesByWorker.get(id) ?? 0);
-        confirmationsByWorker.set(id, 0);
-      }
-      if (entryIds.length > 0) {
-        const { data: confRows } = await asAny(supabase)
-          .from("journal_entry_confirmations")
-          .select("entry_id, confirmation_scope")
-          .in("entry_id", entryIds);
-        // Employer confirmations only (decision 0018): a client acceptance is
-        // its own signal and never raises the pool's confirmation count.
-        for (const c of withoutCounterpartyRows(
-          (confRows ?? []) as { entry_id: string; confirmation_scope: unknown }[],
-        )) {
-          const wid = entryWorker.get(c.entry_id);
-          if (!wid) continue;
-          confirmationsByWorker.set(
-            wid,
-            (confirmationsByWorker.get(wid) ?? 0) + 1,
-          );
-        }
+        confirmationsByWorker.set(id, confirmed.get(id) ?? 0);
       }
     } catch {
       // bridge reads failed → stay locked (null)
@@ -346,6 +336,7 @@ export type MarkCanOfferOutcome =
   | "not_agency"
   | "request_not_found"
   | "request_not_open"
+  | "rate_limited"
   | "needs_gate"
   | "error";
 
@@ -358,6 +349,11 @@ export async function markAgencyCanOffer(
 ): Promise<MarkCanOfferOutcome> {
   try {
     const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return "not_agency";
+    if (await agencyBoardBurstLimited("offer", user.id)) return "rate_limited";
     const { data, error } = await asAny(supabase).rpc("mark_agency_can_offer", {
       p_request_id: requestId,
       p_note: note,

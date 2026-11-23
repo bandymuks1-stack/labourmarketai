@@ -10,12 +10,13 @@ import {
   type EvidenceStatus,
 } from "@/components/app/evidence-status-strip";
 import { EmptyState } from "@/components/app/empty-state";
+import { chipLinkClassName } from "@/components/ui/Chip";
 import { createClient } from "@/lib/supabase/server";
 import { readCounterpartyQueue } from "@/lib/journal/counterparty-review";
 import { queueBucket } from "@/lib/journal/counterparty-review-model";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
-import { countConfirmedEntriesFromRows } from "@/lib/journal/review-status";
+import { countConfirmedEntriesFromRows, type ConfirmationRow } from "@/lib/journal/review-status";
 import {
   WORKER_NAME_FIELDS,
   resolveWorkerName,
@@ -247,9 +248,15 @@ export default async function InboxPage({
   let autoConfirmedCount = 0;
   const { data: confRows, error: confError } = await supabase
     .from("journal_entry_confirmations")
-    .select("entry_id, confirmation_scope, created_at");
+    .select("entry_id, confirmation_scope, created_at, confirmer_id, journal_entries(workers(profile_id))");
   if (!confError && Array.isArray(confRows)) {
-    const counted = countConfirmedEntriesFromRows(confRows);
+    // Only a decision by someone else confirms an entry (EVID-2), so each row names its entry's author.
+    const counted = countConfirmedEntriesFromRows(
+      (confRows as unknown as (ConfirmationRow & {
+        entry_id: string;
+        journal_entries: { workers: { profile_id: string | null } | null } | null;
+      })[]).map((r) => ({ ...r, subject_profile_id: r.journal_entries?.workers?.profile_id ?? null })),
+    );
     confirmedCount = counted.confirmed;
     // W6 slice 1: policy-written confirmations are surfaced with their honest
     // marker — an automatic confirmation never hides inside the count.
@@ -307,17 +314,17 @@ export default async function InboxPage({
             {autoConfirmedCount} · {tTier("autoConfirmQualifier")}
           </p>
         ) : null}
-        <div className="flex flex-wrap gap-x-4">
+        <div className="flex flex-wrap gap-2">
           <Link
             href="/dashboard/inbox/quick"
-            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            className={chipLinkClassName(false)}
             data-testid="inbox-quick-link"
           >
             {t("inbox.quick.openQuick")}
           </Link>
           <Link
             href="/dashboard/inbox/counterparty"
-            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            className={chipLinkClassName(false)}
             data-testid="inbox-counterparty-link"
           >
             {t("counterparty.queue.openLink")}
@@ -325,7 +332,7 @@ export default async function InboxPage({
           </Link>
           <Link
             href="/dashboard/inbox/report"
-            className="w-fit text-xs font-medium text-brand-blue hover:underline"
+            className={chipLinkClassName(false)}
             data-testid="inbox-report-link"
           >
             {t("inbox.openReport")}

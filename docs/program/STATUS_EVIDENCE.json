@@ -1,0 +1,445 @@
+{
+ "schema": 1,
+ "walks": {
+  "profile-cv-history|phone": {
+   "spec": "profile-cv-history",
+   "device": "phone",
+   "run": 45097071365,
+   "result": "success",
+   "build": "8bcda5be",
+   "at": "2026-11-23T02:06:10Z"
+  },
+  "profile-cv-history|phone-375": {
+   "spec": "profile-cv-history",
+   "device": "phone-375",
+   "run": 45091874326,
+   "result": "success",
+   "build": "ee29a3b7",
+   "at": "2026-11-23T01:13:10Z"
+  },
+  "company-chain|phone": {
+   "spec": "company-chain",
+   "device": "phone",
+   "run": 44859165488,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:10:53Z"
+  },
+  "company-chain|phone-375": {
+   "spec": "company-chain",
+   "device": "phone-375",
+   "run": 44859841951,
+   "result": "failure",
+   "build": "d447a639",
+   "at": "2026-11-21T03:14:41Z"
+  },
+  "agency-chain|phone": {
+   "spec": "agency-chain",
+   "device": "phone",
+   "run": 44645924736,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:33:13Z"
+  },
+  "agency-chain|phone-375": {
+   "spec": "agency-chain",
+   "device": "phone-375",
+   "run": 44646951459,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:40:11Z"
+  },
+  "learning-practice|phone": {
+   "spec": "learning-practice",
+   "device": "phone",
+   "run": 43895965767,
+   "result": "success",
+   "build": "bdfff68f",
+   "at": "2026-11-16T15:29:44Z"
+  },
+  "learning-practice|phone-375": {
+   "spec": "learning-practice",
+   "device": "phone-375",
+   "run": 43829421484,
+   "result": "success",
+   "build": "a26004b3",
+   "at": "2026-11-16T08:16:57Z"
+  },
+  "cv-readonly|desktop": {
+   "spec": "cv-readonly",
+   "device": "desktop",
+   "run": 43833613507,
+   "result": "success",
+   "build": "a8dfb015",
+   "at": "2026-11-16T08:46:45Z"
+  },
+  "company-governance|phone": {
+   "spec": "company-governance",
+   "device": "phone",
+   "run": 44243678287,
+   "result": "success",
+   "build": "62903b2d",
+   "at": "2026-11-18T05:26:59Z"
+  },
+  "register-gaps|phone": {
+   "spec": "register-gaps",
+   "device": "phone",
+   "run": 44241539906,
+   "result": "success",
+   "build": "62903b2d",
+   "at": "2026-11-18T05:05:47Z"
+  },
+  "agency-chain|desktop": {
+   "spec": "agency-chain",
+   "device": "desktop",
+   "run": 44644887648,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:26:09Z"
+  },
+  "need-intake|phone-375": {
+   "spec": "need-intake",
+   "device": "phone-375",
+   "run": 44643949860,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:18:35Z"
+  },
+  "need-intake|phone": {
+   "spec": "need-intake",
+   "device": "phone",
+   "run": 44643169770,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:11:47Z"
+  },
+  "need-intake|desktop": {
+   "spec": "need-intake",
+   "device": "desktop",
+   "run": 44642526482,
+   "result": "success",
+   "build": "7e517e32",
+   "at": "2026-11-20T00:05:45Z"
+  },
+  "company-chain|desktop": {
+   "spec": "company-chain",
+   "device": "desktop",
+   "run": 44858511879,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:02:55Z"
+  },
+  "profile-cv-history|desktop": {
+   "spec": "profile-cv-history",
+   "device": "desktop",
+   "run": 45094839877,
+   "result": "success",
+   "build": "8bcda5be",
+   "at": "2026-11-23T01:42:41Z"
+  },
+  "learning-practice|desktop": {
+   "spec": "learning-practice",
+   "device": "desktop",
+   "run": 44860184317,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T03:19:16Z"
+  },
+  "company-governance|desktop": {
+   "spec": "company-governance",
+   "device": "desktop",
+   "run": 44856477733,
+   "result": "success",
+   "build": "d447a639",
+   "at": "2026-11-21T02:37:24Z"
+  },
+  "mobile-surfaces|phone": {
+   "spec": "mobile-surfaces",
+   "device": "phone",
+   "run": 45098478024,
+   "result": "failure",
+   "build": "8bcda5be",
+   "at": "2026-11-23T02:17:04Z"
+  },
+  "public-org-locales|phone": {
+   "spec": "public-org-locales",
+   "device": "phone",
+   "run": 44977198005,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T02:46:48Z"
+  },
+  "staff-review-notice|desktop": {
+   "spec": "staff-review-notice",
+   "device": "desktop",
+   "run": 44976838568,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T02:39:01Z"
+  },
+  "worker-identity-split|desktop": {
+   "spec": "worker-identity-split",
+   "device": "desktop",
+   "run": 44976482806,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T02:33:35Z"
+  },
+  "company-talent-history|desktop": {
+   "spec": "company-talent-history",
+   "device": "desktop",
+   "run": 44975633092,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T02:28:52Z"
+  },
+  "search-support-privacy|desktop": {
+   "spec": "search-support-privacy",
+   "device": "desktop",
+   "run": 44974866504,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T02:18:34Z"
+  },
+  "documents-approvals|desktop": {
+   "spec": "documents-approvals",
+   "device": "desktop",
+   "run": 44974276075,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T02:09:35Z"
+  },
+  "ai-off-honesty|desktop": {
+   "spec": "ai-off-honesty",
+   "device": "desktop",
+   "run": 44973720651,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T02:01:47Z"
+  },
+  "mcp-agents|desktop": {
+   "spec": "mcp-agents",
+   "device": "desktop",
+   "run": 44973332549,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T01:54:39Z"
+  },
+  "mcp-chain|desktop": {
+   "spec": "mcp-chain",
+   "device": "desktop",
+   "run": 44972915546,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T01:48:33Z"
+  },
+  "manager-chat|desktop": {
+   "spec": "manager-chat",
+   "device": "desktop",
+   "run": 44972421825,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T01:43:06Z"
+  },
+  "chat-confirm-once|desktop": {
+   "spec": "chat-confirm-once",
+   "device": "desktop",
+   "run": 44972019714,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T01:37:04Z"
+  },
+  "buyer-workspace|desktop": {
+   "spec": "buyer-workspace",
+   "device": "desktop",
+   "run": 45094390854,
+   "result": "success",
+   "build": "ee29a3b7",
+   "at": "2026-11-23T01:27:48Z"
+  },
+  "marketplace|desktop": {
+   "spec": "marketplace",
+   "device": "desktop",
+   "run": 44971191106,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T01:26:45Z"
+  },
+  "orders-bookings|phone": {
+   "spec": "orders-bookings",
+   "device": "phone",
+   "run": 45052181467,
+   "result": "success",
+   "build": "ed4ecf85",
+   "at": "2026-11-22T18:12:17Z"
+  },
+  "orders-bookings|desktop": {
+   "spec": "orders-bookings",
+   "device": "desktop",
+   "run": 45049554634,
+   "result": "success",
+   "build": "ed4ecf85",
+   "at": "2026-11-22T17:42:39Z"
+  },
+  "marketplace-goods-services|phone": {
+   "spec": "marketplace-goods-services",
+   "device": "phone",
+   "run": 44968374455,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T00:52:44Z"
+  },
+  "marketplace-goods-services|desktop": {
+   "spec": "marketplace-goods-services",
+   "device": "desktop",
+   "run": 44967795943,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T00:46:09Z"
+  },
+  "rota-repeat|desktop": {
+   "spec": "rota-repeat",
+   "device": "desktop",
+   "run": 44967288707,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T00:38:56Z"
+  },
+  "calendar-planning|desktop": {
+   "spec": "calendar-planning",
+   "device": "desktop",
+   "run": 44966863726,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-22T00:33:24Z"
+  },
+  "project-context|desktop": {
+   "spec": "project-context",
+   "device": "desktop",
+   "run": 44907816401,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T13:20:37Z"
+  },
+  "project-execution|desktop": {
+   "spec": "project-execution",
+   "device": "desktop",
+   "run": 44906961206,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T13:12:54Z"
+  },
+  "brigade-formation|desktop": {
+   "spec": "brigade-formation",
+   "device": "desktop",
+   "run": 44906216102,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T13:02:23Z"
+  },
+  "org-roster|phone": {
+   "spec": "org-roster",
+   "device": "phone",
+   "run": 44905801746,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:53:11Z"
+  },
+  "org-roster|desktop": {
+   "spec": "org-roster",
+   "device": "desktop",
+   "run": 44905313755,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:47:41Z"
+  },
+  "notifications-inapp|phone": {
+   "spec": "notifications-inapp",
+   "device": "phone",
+   "run": 44904905556,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:42:30Z"
+  },
+  "worker-records-exports|desktop": {
+   "spec": "worker-records-exports",
+   "device": "desktop",
+   "run": 44904394732,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:36:47Z"
+  },
+  "chat-continuity|phone": {
+   "spec": "chat-continuity",
+   "device": "phone",
+   "run": 44903881953,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:30:56Z"
+  },
+  "journal-confirm|phone": {
+   "spec": "journal-confirm",
+   "device": "phone",
+   "run": 44903366199,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:25:04Z"
+  },
+  "journal-confirm|desktop": {
+   "spec": "journal-confirm",
+   "device": "desktop",
+   "run": 44902949287,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:18:55Z"
+  },
+  "jobs-search|phone": {
+   "spec": "jobs-search",
+   "device": "phone",
+   "run": 44902549477,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:13:25Z"
+  },
+  "jobs-search|desktop": {
+   "spec": "jobs-search",
+   "device": "desktop",
+   "run": 44902071507,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T12:08:27Z"
+  },
+  "invited-worker|phone": {
+   "spec": "invited-worker",
+   "device": "phone",
+   "run": 45001807853,
+   "result": "failure",
+   "build": "397710f1",
+   "at": "2026-11-22T08:14:34Z"
+  },
+  "fresh-activation|desktop": {
+   "spec": "fresh-activation",
+   "device": "desktop",
+   "run": 44901160408,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T11:59:09Z"
+  },
+  "role-routes|phone": {
+   "spec": "role-routes",
+   "device": "phone",
+   "run": 44900081769,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T11:51:50Z"
+  },
+  "role-routes|desktop": {
+   "spec": "role-routes",
+   "device": "desktop",
+   "run": 44899143018,
+   "result": "success",
+   "build": "eed72052",
+   "at": "2026-11-21T11:37:54Z"
+  }
+ }
+}

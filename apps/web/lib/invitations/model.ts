@@ -464,6 +464,45 @@ export function invitationImpliesWorkerContext(input: {
 }
 
 /**
+ * Does this invitation bring the person INTO an existing, named organization
+ * (owner P0 2026-11-22: a person who should join an organization must not set
+ * up a second one by accident)? Then onboarding asks no "what did you come
+ * for" question and never creates a company for them; they join the inviting
+ * organization as the person they are. A partner, client-company, platform or
+ * demand invitation is not this: those people may run their own organization.
+ */
+export const JOINS_EXISTING_ORGANIZATION_TYPES: readonly InvitationType[] = [
+  "join_organization",
+  "join_team",
+  "join_as_employee",
+  "join_project",
+];
+export function invitationJoinsExistingOrganization(input: {
+  invitationType: string | null | undefined;
+  organizationName: string | null | undefined;
+  /** Only a PENDING invitation still brings anyone in (R3 on #3586): a
+   *  revoked, accepted or expired link promises nothing and fixes no role. */
+  status: string | null | undefined;
+  expiresAt: string | null | undefined;
+  /** The SIGNED-IN caller's own answer to this invitation (get_invitation_preview_v2
+   *  `my_decision`). The caller who already accepted it — at sign-up, or by the
+   *  wizard before onboarding finishes — is joining, whatever the link's status
+   *  is now (Codex on #3586). Someone else opening a used link is not. */
+  myDecision?: string | null;
+  now?: number;
+}): boolean {
+  if (!input.organizationName || !input.organizationName.trim()) return false;
+  if (!(JOINS_EXISTING_ORGANIZATION_TYPES as readonly string[]).includes(input.invitationType ?? "")) return false;
+  if (input.myDecision === "accepted") return true;
+  if (input.status !== "pending") return false;
+  if (input.expiresAt) {
+    const at = Date.parse(input.expiresAt);
+    if (!Number.isFinite(at) || at <= (input.now ?? Date.now())) return false;
+  }
+  return true;
+}
+
+/**
  * May onboarding skip the role question for an invitation found WITHOUT its
  * link? Stricter than `invitationImpliesWorkerContext` (the token path, which
  * stays as it is): only a `join_platform` referral from a REGISTERED partner

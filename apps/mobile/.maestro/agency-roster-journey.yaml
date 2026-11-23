@@ -1,0 +1,289 @@
+# AGENCY ROSTER → PROPOSAL — isolated runs only (android-need-isolated.yml),
+# after absences-journey.yaml (which leaves the company signed in) and after
+# agency-clients-journey.yaml (the company shared a need with the agency).
+#
+# What a green run proves, on the job's LOCAL stack (production untouched):
+#   1. the agency (M-4) invites a worker (M-2) to its roster by e-mail
+#      (company.invite-worker prepare → confirm, from "Invite a worker");
+#   2. that worker signs in and ACCEPTS the invitation under Offers
+#      (worker.respond-invitation), joining the agency's roster;
+#   3. the agency proposes that worker for the client's shared need
+#      (agency.propose-candidate prepare → confirm);
+#   4. the client company sees the agency's offer under Agency offers
+#      (client.agency_offers.get) — read only, not answered here.
+# The next workflow step finds the roster row, the accepted invitation and
+# one open offer.
+appId: ai.labourmarket.app
+name: agency-roster-journey
+---
+# --- 1. The agency invites the worker ---
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element:
+      id: "sign-out"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_AGENCY_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_AGENCY_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "today-open-invite-worker"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-invite-worker"
+- extendedWaitUntil:
+    visible:
+      id: "invite-worker-form"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "invite-worker-email"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "invite-worker-email"
+- inputText: ${MOBILE_WORKER2_EMAIL}
+- hideKeyboard
+- scrollUntilVisible:
+    element:
+      id: "invite-worker-review"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "invite-worker-review"
+- scrollUntilVisible:
+    element:
+      id: "invite-worker-confirm"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "invite-worker-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "invite-worker-done"
+    timeout: 60000
+
+# --- 2. The worker accepts under Offers ---
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element:
+      id: "sign-out"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_WORKER2_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_WORKER2_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "today-open-offers"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-offers"
+- extendedWaitUntil:
+    visible:
+      id: "offers-invitation-0"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "offers-invitation-accept-0"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "offers-invitation-accept-0"
+- scrollUntilVisible:
+    element:
+      id: "offers-confirm"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "offers-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "offers-done"
+    timeout: 60000
+
+# --- 3. The agency proposes the worker for the shared need ---
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element:
+      id: "sign-out"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_AGENCY_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_AGENCY_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "today-open-agency"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-agency"
+- extendedWaitUntil:
+    visible:
+      id: "agency-list"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "agency-propose-.*"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "agency-propose-.*"
+    index: 0
+- extendedWaitUntil:
+    visible:
+      id: "agency-propose-form"
+    timeout: 30000
+- scrollUntilVisible:
+    element:
+      id: "agency-worker-${ROSTER_WORKER_ID}"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "agency-worker-${ROSTER_WORKER_ID}"
+- scrollUntilVisible:
+    element:
+      id: "agency-review"
+    direction: DOWN
+    timeout: 20000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "agency-review"
+- scrollUntilVisible:
+    element:
+      id: "agency-confirm"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "agency-confirm"
+- extendedWaitUntil:
+    visible:
+      id: "agency-done"
+    timeout: 60000
+
+# --- 4. The client sees the offer ---
+- tapOn:
+    id: "tab-settings"
+- scrollUntilVisible:
+    element:
+      id: "sign-out"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "sign-out"
+- extendedWaitUntil:
+    visible:
+      id: "email"
+    timeout: 30000
+- tapOn:
+    id: "email"
+- inputText: ${MOBILE_QA_EMAIL}
+- tapOn:
+    id: "password"
+- inputText: ${MOBILE_QA_PASSWORD}
+- hideKeyboard
+- tapOn:
+    id: "submit"
+- extendedWaitUntil:
+    visible:
+      id: "tab-today"
+    timeout: 60000
+- scrollUntilVisible:
+    element:
+      id: "today-open-agency-offers"
+    direction: DOWN
+    timeout: 30000
+    centerElement: true
+- waitForAnimationToEnd
+- tapOn:
+    id: "today-open-agency-offers"
+- extendedWaitUntil:
+    visible:
+      id: "agency-offers-list"
+    timeout: 60000

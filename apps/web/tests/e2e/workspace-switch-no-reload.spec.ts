@@ -32,6 +32,7 @@ const EMAIL = "mp03.owner@local.test";
 const PASSWORD = "password";
 const ORG_A = "MP03 Alfa";
 const ORG_B = "MP03 Beta";
+const ORG_C = "MP03 Gamma";
 const HOME = "/en/dashboard";
 /** A well-formed demand id no workspace owns — only its PRESENCE in the URL
  *  matters: the switch must drop it. */
@@ -165,9 +166,15 @@ test.describe.serial("a workspace switch is visible without a reload", () => {
     const trigger = visibleChip(page).getByRole("button").first();
     await expect(trigger).toHaveAttribute("aria-label", new RegExp(ORG_A));
     // Owned organizations carry no relationship sub-label; a non-owned row
-    // would (`workspace-relationship-<id>`) — asserted only where it exists.
+    // does (`workspace-relationship-<id>`). The fixture owner OWNS Alfa and
+    // Beta and MANAGES Gamma (dev-fixtures-mp03.sql), so exactly that row
+    // carries one.
     const menu = await openChipMenu(page);
-    await expect(menu.getByTestId(/^workspace-relationship-/)).toHaveCount(0);
+    const row = (name: string) =>
+      menu.locator('[data-testid^="workspace-option-"]').filter({ hasText: name });
+    await expect(row(ORG_A).getByTestId(/^workspace-relationship-/)).toHaveCount(0);
+    await expect(row(ORG_B).getByTestId(/^workspace-relationship-/)).toHaveCount(0);
+    await expect(row(ORG_C).getByTestId(/^workspace-relationship-/)).toHaveCount(1);
     await page.keyboard.press("Escape");
   });
 });

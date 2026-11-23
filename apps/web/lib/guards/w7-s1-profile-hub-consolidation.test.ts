@@ -112,7 +112,6 @@ describe("W7-S1 — no capability was lost", () => {
     ["skill-evidence support block", /profile-hub-skill-evidence/],
     ["the one not-verified disclaimer", /profile-hub-not-verified/],
     ["one primary next action", /profile-hub-primary-action/],
-    ["opportunities link", /profile-hub-opportunities-link/],
   ];
 
   for (const [what, re] of CAPABILITIES) {
@@ -128,7 +127,10 @@ describe("W7-S1 — no capability was lost", () => {
       "/dashboard/journal",
       "/dashboard/opportunities",
     ]) {
-      expect(HUB, `${href} lost`).toContain(href);
+      // The profile page as a whole: the opportunities board is linked from
+      // the page header ("Man tinkamos galimybės") since the hub's repeat of
+      // it was removed (coordinator decision 2026-11-22 13:05 UTC).
+      expect(HUB + PAGE, `${href} lost`).toContain(href);
     }
   });
 
@@ -185,7 +187,9 @@ describe("W7-S1 — accessibility of the surface it introduced", () => {
   });
 
   it("semantic headings: the hub is an h2 with h3 subsections", () => {
-    expect(HUB).toMatch(/<h2 className="truncate font-display/);
+    // The level is the contract; the name WRAPS (design audit 2026-11-22: a
+    // truncated h2 cut "Audit Worker mw…" at 768 px).
+    expect(HUB).toMatch(/<h2 className="[^"]*font-display/);
     expect(HUB).toMatch(/<h3 className="font-mono text-meta/);
     // The page keeps exactly one h1 (PageTitle renders the h1).
     expect((PAGE.match(/<h1|<PageTitle/g) ?? []).length).toBe(1);
@@ -216,5 +220,18 @@ describe("W7-S1 — today's activity reads a canonical model", () => {
     expect(HUB).toMatch(/countTodayJournalEntries/);
     // The surface reads models; it never counts rows itself.
     expect(HUB).not.toMatch(/\.from\(|\.rpc\(|createClient/);
+  });
+});
+
+describe("no duplicated actions on the profile (coordinator decision 2026-11-22 13:05 UTC, decision 0032)", () => {
+  it("one opportunities link: the page header's, not a repeat in the hub", () => {
+    expect(PAGE).toMatch(/profile-opportunities-link/);
+    expect(HUB).not.toMatch(/profile-hub-opportunities-link/);
+  });
+  it("the CV link shows only when the primary action does not already open the editor", () => {
+    expect(HUB).toMatch(/\{!aboutOk && journalIsPrimary && \(/);
+  });
+  it("one checklist row for the journal: evidence waits until the journal row is done", () => {
+    expect(HUB).toMatch(/missingSteplessAll\.includes\("journal"\)\s*\?\s*missingSteplessAll\.filter\(\(k\) => k !== "evidence"\)/);
   });
 });

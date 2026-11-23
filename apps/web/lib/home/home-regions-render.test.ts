@@ -58,6 +58,11 @@ function scoped(loc: string, ns: string) {
 }
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }));
+// The proof prompt is the network page's own client component (its own words);
+// here only its placement on the home is under test.
+vi.mock("@/components/app/verify-email-prompt", () => ({
+  VerifyEmailPrompt: () => null,
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async (ns: string) => scoped(state.locale, ns)),
 }));
@@ -157,6 +162,35 @@ describe("UNKNOWN is never ZERO — every region names a failed read", () => {
     expect(w).toContain('data-testid="today-next-cta"');
     expect(w).toContain('data-testid="today-open-unknown"');
     expect(w).not.toContain('data-testid="home-waiting-clear"');
+  });
+});
+
+describe("W-1: invitations that wait on a mailbox proof are not a read failure", () => {
+  it("offers the existing proof prompt instead of 'could not be read', and never claims nothing is waiting", async () => {
+    const w = html(
+      await HomeWaitingView({
+        locale: "en",
+        region: deriveWaiting(NEXT, { kind: "known", items: [] }),
+        unknownDoors: [],
+        mailboxProof: true,
+      }),
+    );
+    expect(w).toContain('data-testid="home-mailbox-proof"');
+    expect(w).not.toContain('data-testid="today-open-unknown"');
+    expect(w).not.toContain('data-testid="home-waiting-clear"');
+  });
+
+  it("a real failure is still named, beside the prompt", async () => {
+    const w = html(
+      await HomeWaitingView({
+        locale: "en",
+        region: deriveWaiting(NEXT, { kind: "known", items: [] }),
+        unknownDoors: ["offers"],
+        mailboxProof: true,
+      }),
+    );
+    expect(w).toContain('data-testid="today-open-unknown"');
+    expect(w).toContain('data-testid="home-mailbox-proof"');
   });
 });
 
@@ -290,11 +324,21 @@ describe("restraint: plain titles, real copy in every active locale", () => {
 });
 
 describe("one reading order on every screen", () => {
-  it("opportunities are 03 and recent events 04 — the DOM order, so the phone needs no renumbering", async () => {
+  it("regions are numbered by their place among the regions drawn — DOM order, no hard-coded figure, no gap", async () => {
     const outside = html(await HomeOutsideView({ outside: ALL_UNKNOWN.outside }));
     const because = html(await HomeBecauseView({ locale: "en", because: ALL_UNKNOWN.because }));
-    expect(outside).toMatch(/>04</);
-    expect(because).toMatch(/>05</);
+    // Each numbered region counts itself; the number is drawn by CSS from
+    // the one counter the regions container resets. A region left out
+    // ("Tuščia = tvarkinga") therefore leaves no gap: the home read
+    // 01, 02, 03, 05 when "Your opportunities" had nothing to show
+    // (design audit 2026-11-22).
+    for (const h of [outside, because]) {
+      expect(h).toContain("[counter-increment:home-region]");
+      expect(h).toContain("before:content-[counter(home-region,decimal-leading-zero)]");
+      expect(h).not.toMatch(/>0[1-5]</);
+    }
+    const screen = readFileSync(join(__dirname, "..", "..", "components/app/today/today-screen.tsx"), "utf8");
+    expect(screen).toMatch(/data-testid="today-regions" className="[^"]*\[counter-reset:home-region\]/);
     // A failed read always offers a way to read again.
     expect(outside).toContain('data-testid="home-opportunity-unknown-retry"');
     expect(because).toContain('data-testid="home-because-unknown-retry"');

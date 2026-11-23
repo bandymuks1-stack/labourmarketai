@@ -2,6 +2,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { CheckCircle2, Circle } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
+import { statedIsoText } from "@/lib/cv/period-dates";
 import { deriveProfileNextAction } from "@/lib/dashboard/next-action";
 import { skillEvidenceStatus } from "@/lib/profile/skill-evidence";
 import { getWorkerPlayerCard } from "@/lib/player-card/player-card";
@@ -305,11 +306,17 @@ export async function ProfileHubOverview({
   // Completeness is a NAMED list, never a percentage (§19). The canonical
   // helper decides what is missing; this only drops the pillars a plain-
   // language step already covers, so nothing is stated twice.
-  const missingStepless = readiness
+  const missingSteplessAll = readiness
     ? missingReadinessPillars(readiness).filter((k) =>
         STEPLESS_PILLARS.includes(k),
       )
     : [];
+  // "Rašyti įrašą" and "Pridėti darbo įrašą" both open the journal: one row
+  // for one action (coordinator decision 2026-11-22 13:05 UTC). Evidence shows
+  // alone only once the journal itself is no longer missing.
+  const missingStepless = missingSteplessAll.includes("journal")
+    ? missingSteplessAll.filter((k) => k !== "evidence")
+    : missingSteplessAll;
   const nothingMissing =
     steps.length > 0 &&
     missingSteps.length === 0 &&
@@ -435,7 +442,7 @@ export async function ProfileHubOverview({
         avatarUrl={avatarUrl}
         initials={playerInitials(personName)}
         heading={
-          <h2 className="truncate font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary max-sm:whitespace-normal max-sm:break-words sm:text-4xl">
+          <h2 className="break-words font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary [overflow-wrap:anywhere] sm:text-4xl">
             {personName}
           </h2>
         }
@@ -544,12 +551,13 @@ export async function ProfileHubOverview({
           data-visibility={visibility}
         >
           <DiscoverabilityConsent
+            compact
             locale={locale}
             source="profile"
             state={discoverability}
             legal={PROFILE_DISCOVERABILITY_V1.texts[toConsentLocale(locale)]}
             preview={discoverabilityPreviewFields(visibilityPreview, tConsent)}
-            labels={discoverabilityConsentLabels(tConsent)}
+            labels={discoverabilityConsentLabels(tConsent, locale)}
           />
         </div>
       )}
@@ -588,12 +596,15 @@ export async function ProfileHubOverview({
               )}
               {/* Readiness signals with no setup step of their own — the
                   absorbed LiveProfileSection's missing-list, same copy. */}
-              {missingStepless.map((k) =>
+              {/* One list, one count: these rows continue the steps'
+                  numbers (the profile read "1. … 5." and then an unnumbered
+                  "Rašyti įrašą", design audit 2026-11-22). */}
+              {missingStepless.map((k, j) =>
                 row(
                   k,
                   `profile-hub-missing-${k}`,
                   PILLAR_HREF[k],
-                  tAction(k),
+                  `${missingSteps.length + j + 1}. ${tAction(k)}`,
                   null,
                   false,
                 ),
@@ -682,8 +693,15 @@ export async function ProfileHubOverview({
             {t("journalLink")} →
           </Link>
         )}
-        {/* The EXISTING CV import path, shown only when no CV text is saved. */}
-        {!aboutOk && (
+        {/* The EXISTING CV import path, shown only when no CV text is saved
+            and the primary action is the journal. When the primary action is
+            "add what is missing ↓" it already opens this same editor
+            (#profile-edit), so a second link there was a duplicate. At most two
+            quiet links follow the primary action (owner orders 2026-11-21/22,
+            decision 0032; coordinator decision 2026-11-22 13:05 UTC). The
+            opportunities link went too: the page header carries "Man tinkamos
+            galimybės" (`profile-opportunities-link`). */}
+        {!aboutOk && journalIsPrimary && (
           <a
             href="#profile-edit"
             className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
@@ -691,15 +709,6 @@ export async function ProfileHubOverview({
           >
             {t("cvImportLink")} ↓
           </a>
-        )}
-        {hasWorker && (
-          <Link
-            href="/dashboard/opportunities"
-            className="inline-flex min-h-11 w-fit items-center gap-1 text-sm font-medium text-text-secondary transition-colors hover:text-text-primary"
-            data-testid="profile-hub-opportunities-link"
-          >
-            {t("opportunitiesLink")} →
-          </Link>
         )}
       </div>
 
@@ -789,11 +798,12 @@ export async function ProfileHubOverview({
                             </span>
                             <span className="flex flex-wrap items-center gap-2">
                               <PlaceTimeStamp>
-                                {e.startedAt ?? tLive("dateUnknown")}
+                                {(e.organizationName ? e.startedAt : statedIsoText(e.startedAt, "start")) ??
+                                  tLive("dateUnknown")}
                                 {e.current
                                   ? ` · ${tLive("current")}`
                                   : e.endedAt
-                                    ? ` — ${e.endedAt}`
+                                    ? ` — ${e.organizationName ? e.endedAt : statedIsoText(e.endedAt, "end")}`
                                     : ""}
                               </PlaceTimeStamp>
                               {/* The journal's hours in THIS engagement —

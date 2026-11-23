@@ -295,6 +295,21 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    delivery and the reissue ceiling) and
     //    mark_external_referral_delivery_v1. Reads or writes no table
     //    directly, touches no chat table.
+    //  - lib/invitations/delivery-attempts.ts — keeps WHY an invitation send
+    //    failed (owner P0 2026-11-13). Calls exactly one service_role-only
+    //    RPC, record_invitation_delivery_attempt_v1 (reason CODE + class +
+    //    next retry; never an address, never delivery_status). Reads no
+    //    table, touches no chat table.
+    //  - lib/invitations/delivery-retry-run.ts — the scheduled retry of
+    //    TEMPORARY failures of already-authorised partner referral sends
+    //    (owner P0 2026-11-13), behind CRON_SECRET, no user session. Only the
+    //    service_role-only RPCs invitation_delivery_retry_candidates_v1,
+    //    reissue_external_referral_v1, mark_external_referral_delivery_v1,
+    //    record_invitation_delivery_attempt_v1, dead_letter_invitation_delivery_v1
+    //    and invitation_delivery_health_v1, plus record_invitation_dsn_v1 for bounce
+    //    reconciliation (our Message-IDs only), and invitation_known_historical_unknown_v1
+    //    (one integer: owner-registered historical unknown outcomes, 2026-11-14).
+    //    Touches no chat table.
     //  - lib/invitations/public-preview.ts — the logged-out invitation
     //    landing's read (universal network v1). A stranger holding a link has
     //    no session; the alternative — granting a preview function to anon —
@@ -521,6 +536,10 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       // inside the database, by the reviewed registry).
       "app/api/cron/privacy-erasure/route.ts",
       "app/api/internal/capability-readback/v1/route.ts",
+      "app/api/internal/commercial-requests/v1/route.ts",
+      // 2026-11-14: registrations daily, aggregate counts only through the service_role-only
+      // lm_registrations_daily_v1 RPC; reads no chat table.
+      "app/api/internal/registrations-daily/v1/route.ts",
       "components/admin/product-metrics-section.tsx",
       "components/admin/vacancy-sources-section.tsx",
       "lib/admin/billing-actions.ts",
@@ -545,6 +564,8 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       // 2026-10-24: the forecast scheduler (cron forecast-recompute). ONLY the
       // three service-role forecast doors; no chat table; nothing outbound.
       "lib/forecast/forecast-store.ts",
+      "lib/invitations/delivery-attempts.ts",
+      "lib/invitations/delivery-retry-run.ts",
       "lib/invitations/external-referral-receive.ts",
       "lib/invitations/external-referral-reprocess-run.ts",
       "lib/invitations/public-preview.ts",

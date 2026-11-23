@@ -428,13 +428,25 @@ export async function loadWorkIntelligence(
       .eq("worker_id", workerId),
     readOrganizationRecords(caller.supabase, workerId),
     // Whose entries these are — "confirmed" excludes the subject's own
-    // decision (review-status.ts). Unreadable = the plain latest decision.
+    // decision (review-status.ts). Unreadable = the whole reading is unknown:
+    // without the subject, a self-approval would count as confirmed hours
+    // (decision 0028 J-2.3, audit 2026-11-03).
     caller.supabase.from("workers").select("profile_id").eq("id", workerId).limit(1),
   ]);
-  if (!entriesRead.ok || !linkRead.ok || skillsRead.error) return null;
-  const subjectProfileId = subjectRead.error
-    ? null
-    : (((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null);
+  if (!entriesRead.ok || !linkRead.ok || skillsRead.error || subjectRead.error) {
+    // Which read failed, by code only (no ids, no values): an UNKNOWN reading
+    // is shown to the person as "could not be read", so the cause must be
+    // findable in the server log (UX gap W-1, 2026-11-18).
+    console.error("[work-intelligence] read failed:", {
+      entries: entriesRead.ok ? "ok" : entriesRead.code,
+      links: linkRead.ok ? "ok" : "error",
+      skills: skillsRead.error ? (skillsRead.error.code ?? "error") : "ok",
+      subject: subjectRead.error ? (subjectRead.error.code ?? "error") : "ok",
+    });
+  }
+  if (!entriesRead.ok || !linkRead.ok || skillsRead.error || subjectRead.error) return null;
+  const subjectProfileId =
+    ((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null;
   const storedSkillRows = (skillsRead.data ?? []) as unknown as (WorkerSkillSourceRow & {
     verified_by?: string | null;
     verified_at?: string | null;
@@ -525,7 +537,10 @@ export async function loadOwnWorkIntelligence(
   if (!user) return null;
   const caller: DomainCaller = { supabase, userId: user.id };
   const worker = await readWorkerCoreRow(caller);
-  if (!worker.ok || !worker.value) return null;
+  if (!worker.ok || !worker.value) {
+    console.error("[work-intelligence] own worker row:", worker.ok ? "absent" : "unreadable");
+    return null;
+  }
   return loadWorkIntelligence(caller, worker.value.id, opts);
 }
 

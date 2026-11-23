@@ -10,8 +10,9 @@
 
 export type CriteriaSnapshot = {
   hasWorkerProfile: boolean;
-  /** profile_skill_claims count (the worker-owned skill claims). */
-  skillsCount: number;
+  /** profile_skill_claims count (the worker-owned skill claims). null = the
+   *  count could not be read (SEP-7): never "0 skills", never "missing". */
+  skillsCount: number | null;
   /** worker_languages codes, e.g. ["lt","en"]. */
   languages: string[];
   /** workers.preferred_countries ISO-2 codes. */
@@ -23,8 +24,8 @@ export type CriteriaSnapshot = {
   availableFrom: string | null;
   willingToRelocate: boolean | null;
   preferredContractType: string | null;
-  /** worker_documents rows the worker owns. */
-  documentsCount: number;
+  /** worker_documents rows the worker owns. null = could not be read. */
+  documentsCount: number | null;
   /** workers.current_location_country ISO-2 (W6: the work-card prefill reads
    *  it; matching does not, so it is no criterion and stays optional). */
   locationCountry?: string | null;
@@ -56,7 +57,7 @@ export type CriteriaKey = (typeof CRITERIA_KEYS)[number];
 /** Which criteria have a real value in the snapshot. */
 export function presentCriteria(s: CriteriaSnapshot): Record<CriteriaKey, boolean> {
   return {
-    skills: s.skillsCount > 0,
+    skills: (s.skillsCount ?? 0) > 0,
     languages: s.languages.length > 0,
     countries: s.preferredCountries.length > 0,
     salary: s.salaryMinEur != null || s.salaryMaxEur != null,
@@ -64,7 +65,7 @@ export function presentCriteria(s: CriteriaSnapshot): Record<CriteriaKey, boolea
     start: Boolean(s.availableFrom),
     relocate: s.willingToRelocate != null,
     contract: Boolean(s.preferredContractType),
-    documents: s.documentsCount > 0,
+    documents: (s.documentsCount ?? 0) > 0,
   };
 }
 
@@ -80,9 +81,18 @@ const IMPORTANT: readonly CriteriaKey[] = [
   "salary",
 ];
 
+/** Criteria whose value could not be read: neither set nor missing (SEP-7). */
+export function unknownCriteria(s: CriteriaSnapshot): ReadonlySet<CriteriaKey> {
+  const unknown = new Set<CriteriaKey>();
+  if (s.skillsCount === null) unknown.add("skills");
+  if (s.documentsCount === null) unknown.add("documents");
+  return unknown;
+}
+
 export function missingImportantCriteria(s: CriteriaSnapshot): CriteriaKey[] {
   const present = presentCriteria(s);
-  return IMPORTANT.filter((k) => !present[k]);
+  const unknown = unknownCriteria(s);
+  return IMPORTANT.filter((k) => !present[k] && !unknown.has(k));
 }
 
 export type CriteriaLine = { key: CriteriaKey; label: string; value: string };

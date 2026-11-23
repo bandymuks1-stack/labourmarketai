@@ -141,6 +141,8 @@ function mapBridge(r: BridgeActionState): ExecResult {
   const code =
     r.status === "needs-migration"
       ? "needs_migration"
+      : r.status === "rate-limited"
+        ? "rate_limited"
       : r.status === "forbidden"
         ? "not_authorized"
         : r.status === "not-found"
@@ -186,6 +188,9 @@ export const COMPANY_EXECUTORS: {
             input.teamSize == null ? undefined : String(input.teamSize),
           // The declared opportunity type survives the draft leg too.
           opportunityType: input.opportunityType ?? undefined,
+          // The work country the person entered: saveDemandDraft stamps it on
+          // the column the wizard prefills, so continuing the draft keeps it.
+          country: input.country ?? undefined,
           notes: input.notes ?? undefined,
         });
         return row

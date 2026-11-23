@@ -1,4 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
+import { collectPageErrors, expectRenderedOnce } from "./render-once";
 
 import {
   BASE,
@@ -20,6 +21,7 @@ import {
   sql,
   sqlExec,
   userId,
+  onboardInvited,
 } from "./isolated-web-a-helpers";
 
 /**
@@ -91,7 +93,10 @@ test("M-1. a worker opts in to e-mail for three notification kinds; the consent 
   await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
   state.workerId = await userId(WORKER);
 
+  const errors = collectPageErrors(page);
   await page.goto(`${APP}/en/dashboard/account`);
+  // Exactly once, with evidence on a duplicate (the intermittent fault seen here).
+  await expectRenderedOnce(page, "account-notification-preferences", errors, "M-1");
   const section = page.getByTestId("account-notification-preferences");
   await expect(section).toBeVisible({ timeout: 30_000 });
   await section.locator("summary").click();
@@ -198,7 +203,7 @@ test("M-3. a notification e-mail: the invited person registers and the inviter i
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(page.url())) await onboard(page, "work", "Synthetic Notify Invitee");
+  if (/\/onboarding/.test(page.url())) await onboardInvited(page, "Synthetic Notify Invitee");
   await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(page.url())) {
     const accept = page.getByTestId("invite-accept");

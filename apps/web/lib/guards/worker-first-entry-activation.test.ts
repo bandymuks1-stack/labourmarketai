@@ -73,10 +73,11 @@ describe("#4 — the first work entry is the new worker's one next action", () =
       expect(line as string, loc).not.toMatch(LATER);
       expect(line as string, loc).not.toMatch(/\bdemo\b|verified|patvirtint|garantuo|guarantee/i);
     }
-    // LT speaks to the person informally ("tu"), as the rest of the card does.
+    // LT speaks to the person formally ("jūs"), as the rest of the card does
+    // (owner decision 2026-11-15).
     const lt = at(mono("lt"), "auth.dashboard.workCard.why.evidenceFirst") as string;
-    expect(lt).toMatch(/\btavo\b|\bdirbai\b/);
-    expect(lt).not.toMatch(/\bjūs|\bjūsų/i);
+    expect(lt).toMatch(/(?<![a-ząčęėįšųūž])jūsų(?![a-ząčęėįšųūž])|\bdirbote\b/);
+    expect(lt).not.toMatch(/\btavo\b|\bdirbai\b/i);
   });
 });
 
@@ -118,6 +119,7 @@ describe("#5 — one honest 'Save', then the Living CV and a calm way back", () 
       nl: /nog door niemand bevestigd/,
       de: /noch von niemandem bestätigt/,
       pl: /niepotwierdzon/,
+      sv: /inte bekräfta|ännu inte bekräftat|obekräfta/,
     };
     for (const loc of activeLocales) {
       const w = at(mono(loc), "conversation.worklog") as Record<string, string>;
@@ -125,10 +127,12 @@ describe("#5 — one honest 'Save', then the Living CV and a calm way back", () 
         expect(w[k]?.trim(), `${loc} conversation.worklog.${k}`).toBeTruthy();
       }
       expect(w.continue, `${loc}: the first button must not read as a save`).not.toBe(w.save);
+      // A locale without a pattern must FAIL here, not pass on toMatch(undefined).
+      expect(NOT_CONFIRMED[loc], `${loc}: no NOT_CONFIRMED pattern`).toBeInstanceOf(RegExp);
       expect(w.livingCvNote, `${loc}: says it is NOT confirmed`).toMatch(NOT_CONFIRMED[loc]!);
       const all = `${w.livingCvNote} ${w.comeBackNote} ${w.viewLivingCv}`;
-      expect(all, loc).not.toMatch(/\bverified\b|patikrint|verifiz|zweryfikow|проверен/i);
-      expect(all, loc).not.toMatch(/streak|\bXP\b|level[- ]?up|points|taškai|балл|punkty|\bdemo\b/i);
+      expect(all, loc).not.toMatch(/\bverified\b|patikrint|verifiz|zweryfikow|проверен|verifiera/i);
+      expect(all, loc).not.toMatch(/streak|\bXP\b|level[- ]?up|points|taškai|балл|punkty|poäng|\bdemo\b/i);
     }
     expect((at(mono("lt"), "conversation.worklog") as Record<string, string>).continue).toBe("Toliau");
   });
@@ -143,6 +147,7 @@ describe("#7 — the empty journal and the journal funnel", () => {
       nl: /hieronder/i,
       de: /\bunten\b/i,
       pl: /poniżej/i,
+      sv: /\bnedan\b|nedanför/i,
     };
     const ABOVE: Record<string, RegExp> = {
       lt: /viršuje/i,
@@ -151,6 +156,7 @@ describe("#7 — the empty journal and the journal funnel", () => {
       nl: /hierboven/i,
       de: /\boben\b/i,
       pl: /powyżej/i,
+      sv: /\bovan\b|ovanför/i,
     };
     for (const loc of activeLocales) {
       const next = journal(loc).listEmptyNext as string;

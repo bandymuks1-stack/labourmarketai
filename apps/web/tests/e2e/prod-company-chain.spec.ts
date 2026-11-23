@@ -2,8 +2,11 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { closeOwnNeed, requestIdOf } from "./prod-need-close";
 
 /**
  * PRODUCTION COMPANY CHAIN — the three company-path steps the Product Master
@@ -50,11 +53,17 @@ test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted 
 test.describe.configure({ mode: "serial", timeout: 240_000, retries: 0 });
 test.use({ actionTimeout: 30_000 });
 
-async function as(browser: Browser, slot: string, mobile = false): Promise<{ ctx: BrowserContext; page: Page }> {
+/**
+ * `screen`: unset = the walk's device (a desktop, or a phone when the walk is dispatched for
+ * one); "phone" / "desktop" = this step is ABOUT that screen and runs on it on every walk.
+ */
+async function as(browser: Browser, slot: string, screen?: boolean | "phone" | "desktop"): Promise<{ ctx: BrowserContext; page: Page }> {
+  const named = screen === true ? "phone" : screen || undefined;
   const ctx = await browser.newContext({
     storageState: state(slot),
     locale: "lt-LT",
-    ...(mobile ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
+    ...(named === "phone" ? { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } : {}),
+    ...(named === "desktop" ? { viewport: { width: 1280, height: 720 } } : {}),
   });
   return { ctx, page: await ctx.newPage() };
 }
@@ -95,9 +104,6 @@ test("C-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
-function requestIdOf(href: string | null): string {
-  return /request=([0-9a-f-]{36})/.exec(href ?? "")?.[1] ?? "";
-}
 
 /**
  * Post a need through Gama's demand intake (Gama is the active workspace) and
@@ -111,6 +117,7 @@ async function submitNeed(page: Page, role: string, description: string): Promis
   await inMain(page).getByTestId("demand-next").click();
   const size = inMain(page).getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("1");
+  await chooseDemandCountryIfEmpty(page);
   await inMain(page).getByTestId("demand-next").click();
   await inMain(page).getByTestId("demand-create").click();
   const done = inMain(page).getByTestId("demand-done");
@@ -161,32 +168,9 @@ async function postNeed(page: Page, role: string, description: string, marker: s
 
 /** Close one need through its own lifecycle controls (Gama is the active workspace). */
 async function closeNeed(page: Page, id: string): Promise<"closed" | "already-closed"> {
-  await page.goto(`/lt/dashboard/company/scouting?request=${id}`);
-  const controls = inMain(page).getByTestId("demand-lifecycle-controls").first();
-  const unstructured = inMain(page).getByTestId("scouting-not-structured").first();
-  await expect(controls.or(unstructured).first()).toBeVisible({ timeout: 30_000 });
-  if (await controls.isVisible()) {
-    if ((await controls.getAttribute("data-demand-status")) === "closed") return "already-closed";
-    await controls.getByTestId("demand-close").click();
-    await expect(controls).toHaveAttribute("data-demand-status", "closed", { timeout: 30_000 });
-    closedHere.add(id);
-    return "closed";
-  }
-  // A need that names no trade: the scouting page draws its lifecycle controls
-  // only for a structured need, so it is closed where the product offers that
-  // for every submitted need — the chat workspace's candidates result
-  // (`?result=candidates&demand=`, `company.close-demand`).
-  await page.goto(`/lt/dashboard?result=candidates&demand=${id}`);
-  const close = inMain(page).getByTestId("candidates-close-demand").filter({ visible: true }).first();
-  const reopen = inMain(page).getByTestId("candidates-reopen-demand").filter({ visible: true }).first();
-  await expect(close.or(reopen).first(), "the need's own close/reopen action").toBeVisible({ timeout: 60_000 });
-  if (await reopen.isVisible()) return "already-closed";
-  await close.click();
-  const error = inMain(page).getByTestId("candidates-close-demand-error").first();
-  await expect(reopen.or(error).first()).toBeVisible({ timeout: 30_000 });
-  if (await error.isVisible()) throw new Error(`close refused: ${(await error.innerText()).slice(0, 120)}`);
-  closedHere.add(id);
-  return "closed";
+  const outcome = await closeOwnNeed(page, id);
+  if (outcome === "closed") closedHere.add(id);
+  return outcome;
 }
 
 /** Needs this run already closed — afterAll never revisits them. */
@@ -370,6 +354,86 @@ for (const { slot, org, label } of [
   });
 }
 
+// ── N (P0-2, owner direction A 2026-11-03; #2995): navigation by role. The
+// primary row stays the A-03 core loop for every workspace; for the person
+// who runs the organization, the header's "More" and the phone sheet open with
+// that organization's own doors. Read-only: it opens two menus and writes
+// nothing, so it costs this walk no data.
+const CORE_IDS = ["overview", "journal_text_first", "planning", "communication"];
+const MORE_LEADS = {
+  company: ["area:people", "area:projects", "area:work"],
+  agency: ["area:people", "area:clients", "area:projects"],
+} as const;
+/** The ids under one literal testid prefix, in render order, with the prefix cut. */
+const idsAfter = (items: Locator, prefix: string) =>
+  items.evaluateAll((els, p) => els.map((e) => (e.getAttribute("data-testid") ?? "").slice(String(p).length)), prefix);
+
+for (const { slot, org, label, kinds } of [
+  { slot: "owner", org: ALFA, label: "Alfa (company)", kinds: ["company"] as const },
+  // The header follows the ACTING ROLE (actingRoleForWorkspace, the one
+  // resolver): the synthetic agency owner holds only `company` (onboarding's
+  // agency intent grants `company`), so its "More" leads with the company set.
+  // Whether agency-ness should come from the organization instead is the open
+  // owner decision ORG-2 (coordinator ruling 2026-11-03: assert the company set).
+  { slot: "agency", org: AGENCY, label: "the agency", kinds: ["company"] as const },
+]) {
+  test(`N-1 (P0-2). ${label}: the core loop stays; the organization's doors lead "More"`, async ({ browser }) => {
+    // The header bar and its "More" menu exist from the `md` width up, so this step is a
+    // desktop claim on every walk. The phone's own form of it is N-2 (the area sheet).
+    const { ctx, page } = await as(browser, slot, "desktop");
+    await useWorkspace(page, org);
+    await page.goto("/lt/dashboard/projects");
+    const core = page.getByTestId("header-core-nav");
+    await expect(core).toBeVisible({ timeout: 30_000 });
+    expect(await idsAfter(core.locator('[data-testid^="header-core-nav-"]'), "header-core-nav-")).toEqual(CORE_IDS);
+    await page.getByTestId("header-nav-more").click();
+    const more = page.getByTestId("header-nav-more-menu");
+    await expect(more).toBeVisible();
+    const leads = (await idsAfter(more.locator('[data-testid^="header-nav-more-"]'), "header-nav-more-")).slice(0, 3);
+    const kind = kinds.find((k) => JSON.stringify(MORE_LEADS[k]) === JSON.stringify(leads));
+    console.log(`[nav] ${slot}: More opens with ${leads.join(", ")} (${kind ?? "no match"})`);
+    expect(kind, `More leads ${leads.join(", ")}`).toBeTruthy();
+    // #3002: one door, one route — the calendar is the ONE calendar, "Rinka" is
+    // the service/request loop, and no destination appears twice.
+    await expect(core.getByTestId("header-core-nav-planning")).toHaveAttribute("href", "/lt/dashboard/planning");
+    await expect(more.getByTestId("header-nav-more-area:market")).toHaveAttribute("href", "/lt/dashboard/service-requests");
+    const hrefs = [
+      ...(await core.locator('[data-testid^="header-core-nav-"]').evaluateAll((els) => els.map((e) => e.getAttribute("href")))),
+      ...(await more.locator('[data-testid^="header-nav-more-"]').evaluateAll((els) => els.map((e) => e.getAttribute("href")))),
+    ];
+    expect(new Set(hrefs).size, `duplicate destinations: ${hrefs.join(" ")}`).toBe(hrefs.length);
+    // #3003: an organization workspace carries no customer door.
+    await expect(more.getByTestId("header-nav-more-area:buyer")).toHaveCount(0);
+    await ctx.close();
+  });
+}
+
+test("N-3 (#3002). Alfa's door strip: Kalendorius opens the one calendar, Rinka the service requests", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/company");
+  await expect(page.getByTestId("organization-door-calendar").first()).toHaveAttribute("href", "/lt/dashboard/planning", { timeout: 30_000 });
+  await expect(page.getByTestId("organization-door-market").first()).toHaveAttribute("href", "/lt/dashboard/service-requests");
+  await ctx.close();
+});
+
+test("N-2 (P0-2). on the phone, Alfa's area sheet lists the core loop, then its doors", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "owner", true);
+  await useWorkspace(page, ALFA);
+  await page.goto("/lt/dashboard/projects");
+  await page.getByTestId("header-nav-sheet-trigger").click();
+  const sheet = page.getByTestId("header-nav-sheet");
+  await expect(sheet).toBeVisible({ timeout: 30_000 });
+  const ids = await idsAfter(sheet.locator('[data-testid^="header-nav-sheet-"]'), "header-nav-sheet-");
+  expect(ids.slice(0, 4)).toEqual(CORE_IDS);
+  expect(ids.slice(4, 7)).toEqual([...MORE_LEADS.company]);
+  const hrefs = await sheet
+    .locator('[data-testid^="header-nav-sheet-"]')
+    .evaluateAll((els) => els.map((e) => e.getAttribute("href")));
+  expect(new Set(hrefs).size, `duplicate destinations: ${hrefs.join(" ")}`).toBe(hrefs.length);
+  await ctx.close();
+});
+
 // ── U (#2680, owner decision 2026-10-22): a need that names NO trade still
 // shows the people who raised a hand on it, labelled "trade match not
 // assessed", with no score. Before #2680 scouting returned not-structured
@@ -444,4 +508,12 @@ test.afterAll(async ({ browser }) => {
   } finally {
     await ctx.close();
   }
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("company-chain");
 });

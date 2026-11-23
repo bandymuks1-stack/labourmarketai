@@ -51,6 +51,25 @@ export const NON_ESSENTIAL_KEY_PREFIXES = ["lm.funnel."] as const;
 
 const DAY_MS = 86_400_000;
 
+/**
+ * THE BANNER IS IN THE FIRST PAINT (UX-3). It used to appear only after hydration,
+ * because the choice lives on the device, and its height pushed the whole page down
+ * on every first visit. The server now renders it, and this script, inline in
+ * <head>, marks the document before paint when a valid choice exists, so a person
+ * who already chose never sees it (`html[data-consent-decided]` in globals.css).
+ * The same rules as `parseConsentRecord`; lib/guards/consent-banner-first-paint.test.ts
+ * runs both on the same values. It reads the one key and writes nothing to the device.
+ */
+export const CONSENT_BOOTSTRAP_SCRIPT =
+  "(function(){try{var v=JSON.parse(localStorage.getItem(" +
+  JSON.stringify(ANALYTICS_CONSENT_KEY) +
+  "));if(!v||typeof v!=='object'||Array.isArray(v))return;" +
+  "if(v.choice!=='granted'&&v.choice!=='refused')return;" +
+  "if(typeof v.decidedOn!=='string'||!/^\\d{4}-\\d{2}-\\d{2}$/.test(v.decidedOn))return;" +
+  "var d=Date.parse(v.decidedOn+'T00:00:00Z');if(isNaN(d)||Date.now()-d>" +
+  String(CONSENT_VALID_DAYS * DAY_MS) +
+  ")return;document.documentElement.setAttribute('data-consent-decided','');}catch(e){}})();";
+
 function todayIso(now: Date): string {
   return now.toISOString().slice(0, 10);
 }

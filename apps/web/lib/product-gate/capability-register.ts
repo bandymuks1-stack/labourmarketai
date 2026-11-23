@@ -591,7 +591,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/candidates", "lib/scouting"],
     coreModule: "lib/candidates/candidate-drafts.ts",
     surfaces: ["app/[locale]/dashboard/candidates"],
-    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link anywhere — it was named as this row's surface until the navigation guard proved nothing leads there.",
+    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link — the public /for-companies lifecycle step linked there until 2026-11-03 and now opens `/dashboard/company/scouting`; the preview-surface guard covers that component too.",
   },
   {
     id: "ORG-8",

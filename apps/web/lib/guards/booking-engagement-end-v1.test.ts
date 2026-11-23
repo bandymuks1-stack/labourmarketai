@@ -1757,6 +1757,63 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-03: J-12 follow-up — the member command refuses request rows. RED draft,
       // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
       "20261103090000_education_cohort_member_request_guard_v1.sql",
+      // 2026-11-03: work-plan scope predicate made internal only (client EXECUTE revoked). RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103170942.
+      "20261103120000_work_plan_worker_in_scope_internal_only_v1.sql",
+      // 2026-11-03: agency docs readiness reads the live agency roster. RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103171024.
+      "20261103130000_agency_pool_docs_readiness_live_roster_v1.sql",
+      // 2026-11-03: agency client records follow owns_company. RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103171134.
+      "20261103140000_agency_clients_company_authority_v1.sql",
+      // 2026-11-03: pg_trgm for the job search trigram index (create-extension). RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103171000_pg_trgm_extension_v1.sql",
+      // 2026-11-03: production rollback record of the trigram index (drop index). RED, APPLIED ledger 20261103194208.
+      "20261103171300_public_vacancies_occupation_trgm_idx_rollback_v1.sql",
+      // 2026-11-04: one scan for the free-text job search (SECURITY DEFINER replace). RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261104160100_search_public_vacancy_previews_live_scan_v5.sql",
+      // 2026-11-05: narrow search table for the free-text job search. RED draft, NOT applied.
+      "20261105100000_public_vacancy_search_table_v1.sql",
+      "20261105100100_search_public_vacancy_previews_narrow_v6.sql",
+      // 2026-11-09: the holder cancels their own account-deletion request; 30-day grace (owner decision); row lock
+      // in the erasure runner and executor. RED draft #3172, the marker is the human-gate acknowledgement, NOT applied.
+      "20261109120000_privacy_cancel_account_deletion.sql",
+      // 2026-11-10: the company-need intake keeps the visitor's locale (SECURITY DEFINER replace, one line).
+      // RED draft #3195, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110140000_company_need_intake_keep_locale_v1.sql",
+      // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
+      // RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-13: owner P0 invitation delivery reliability, codes-only send diagnostics +
+      // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261113190000_invitation_delivery_attempts_v1.sql",
+      // 2026-11-14 owner-chosen RED: a closed need refuses a new proposal or a first accept (draft, needs-human-gate, NOT applied).
+      "20261114100000_booking_refuses_closed_need_v1.sql",
+      // 2026-11-14: owner decision, NEW/ACTIVE counts for five platform groups, aggregate only.
+      // RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
+      "20261114120000_lm_registrations_daily_v1.sql",
+      // 2026-11-14: owner decision, invitation 862a91f4 KNOWN_HISTORICAL_UNKNOWN_OUTCOME — one integer count,
+      // service_role only. RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
+      "20261114150000_invitation_known_historical_unknown_v1.sql",
+      // 2026-11-15: owner decision, an organization reads a learner's journal only while the learning link
+      // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261115120000_journal_learning_access_follows_link_v1.sql",
+      // 2026-09-20 — COMM-1: nullable profiles.communication_locale (CHECK = the 13 communication languages; NULL = follow the UI locale). RED by owner classification, DRAFT needs-human-gate, NOT applied.
+      "20261118100100_profiles_communication_locale_v1.sql",
+      // 2026-11-20: owner decision (coordinator relay) approves the 11.8 training migration at R2's reviewed
+      // version; the marker is its first line, the body is pinned by md5 in
+      // training-assignment-engaged-groups-v1.test.ts. NOT applied by this repository.
+      "20261118143000_training_assignment_engaged_groups_v1.sql",
+      // 2026-11-17: owner decision, a former employer keeps limited access (retained journal up to the end
+      // date, nothing new, no more writes). RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261118164500_former_employer_limited_access_v1.sql",
+      // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
+      // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261120190000_former_employer_chain_fixes_v1.sql",
 ]);
   });
 

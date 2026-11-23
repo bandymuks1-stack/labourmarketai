@@ -86,6 +86,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron) once payments are on — absent from it while they are off; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
   },
+  "cron/invitation-delivery-retry/route.ts": {
+    class: "public",
+    why: "Called only by the VPS (ops/vps/lm-invitation-delivery-retry.sh, scheduled solely after the owner installs /etc/cron.d/labourmarket-invitation-delivery); nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; health (default) sends nothing; retry re-sends at most 10 partner referrals whose own send was authorised, whose LAST failure was a confirmed temporary one and whose link was never opened, through the service-role-only reissue under the address lock; bounces reads delivery reports from the sender mailbox READ-ONLY (IMAP EXAMINE + BODY.PEEK) and marks only our own Message-IDs; the app itself never messages the owner (the VPS script hands new alerts to the Agentai OS project-event inbox). Answers counts, reason codes and alert codes only, no ids, no addresses.",
+  },
   "cron/referral-reprocess/route.ts": {
     class: "public",
     why: "Run BY HAND by the owner on the VPS (ops/vps/lm-referral-reprocess.sh) — never in the cron bundle; nginx 404s /api/cron/* from the internet. Identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user — 401 while unset. POST only; dry_run by default, control = exactly one person, batch = at most 20. Every send goes through the ledgered provider path and the service-role-only reissue function re-checks consent, expiry, account and delivery. Answers counts and reason codes only, no ids, no addresses.",
@@ -114,9 +118,17 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "The partner opportunity network pulls it; identity is the SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — and while the secret is unset the route refuses 401, so it is never an open worker API. Deliberately NOT shared: it answers with every authorised person’s projection at once, which no signed-in account has a reason to ask for, so there is no user path to conflate. The body carries the v1 projection only — opaque actorRef, trades, availability, geography, agreed markets, four authorities — and holds no name, email, phone or address to leak.",
   },
+  "internal/commercial-requests/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS pulls request ids, doors, times and statuses from it; identity is the COMMERCIAL_REQUESTS_FEED_TOKEN machine secret (lib/api/commercial-requests-feed-auth.ts), not a user, and while the secret is unset the route refuses every call. It returns no name, e-mail, phone, company or free text.",
+  },
   "internal/capability-readback/v1/route.ts": {
     class: "public",
     why: "Agentai OS re-verifies its LabourMarket.ai capability contract from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is aggregate integer COUNTS only (lib/api/capability-readback.ts: a fixed key list, everything else refused) — no row, name, id, email or address exists in it to leak.",
+  },
+  "internal/registrations-daily/v1/route.ts": {
+    class: "public",
+    why: "Agentai OS reads one UTC day of NEW and ACTIVE counts for workers, employers, agencies, students and education institutions from it; identity is the same SUPPLY_FEED_BEARER_TOKEN machine secret (lib/api/supply-feed-auth.ts), not a user — 503 while the secret is unset, 401 on a wrong token, so it is never an open API. The body is REAL-population integer COUNTS only, 1–2 withheld (lib/api/registrations-daily.ts) — no row, name, id, email or per-person timestamp exists in it to leak.",
   },
   "public/claims/v1/route.ts": {
     class: "public",

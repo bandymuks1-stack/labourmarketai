@@ -156,9 +156,9 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           settled from the first paint. */}
       <header data-testid="today-header" className="flex flex-col gap-1">
         <p className="text-support font-medium text-text-muted">{t("eyebrow")}</p>
-        <h1 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg lg:text-title-lg">
+        <h2 className="font-display text-title font-bold tracking-tightest text-text-primary sm:text-title-lg lg:text-title-lg">
           {displayName ?? t("headerNoName")}
-        </h1>
+        </h2>
         <p className="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-support text-text-secondary">
           <Suspense fallback={<InlinePending />}>
             <TodayProfession />
@@ -187,7 +187,7 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           clipped overflow hid the buttons, counts and "Visa veikla"
           (UX review 2026-10-24). `grid-cols-1` is `minmax(0, 1fr)`; the
           columns carry `min-w-0` for the same reason on lg. */}
-      <div data-testid="today-regions" className="grid grid-cols-1 items-start gap-4 sm:gap-5 lg:grid-cols-12 lg:gap-6">
+      <div data-testid="today-regions" className="grid grid-cols-1 items-start gap-4 [counter-reset:home-region] sm:gap-5 lg:grid-cols-12 lg:gap-6">
         <div className="flex min-w-0 flex-col gap-4 sm:gap-5 lg:col-span-7 lg:gap-6">
           <Suspense fallback={<HomeRegionPending label={t("reading")} size="action" />}>
             <HomeWaiting locale={locale} />
