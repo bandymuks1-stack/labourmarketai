@@ -38,7 +38,20 @@ function read(rel: string): string {
 }
 
 describe("Guard: profile-text composer is single-canonical (no dual-system UI)", () => {
-  const flow = read("components/app/profile-text-first-flow.tsx");
+  // CV-18 / G-10: the flow takes its proposals, its claim save and its
+  // promotion from the ONE CV-import proposal state it shares with the
+  // conversation's CV upload. The contract below holds across the three.
+  const flowOnly = read("components/app/profile-text-first-flow.tsx");
+  const flow = [
+    flowOnly,
+    read("components/app/use-cv-import-proposals.ts"),
+    read("lib/cv/cv-import-proposals.ts"),
+  ].join("\n");
+
+  it("reads its proposals through the shared CV-import proposal state", () => {
+    expect(flowOnly).toMatch(/from\s+["']@\/components\/app\/use-cv-import-proposals["']/);
+    expect(flowOnly).toMatch(/useCvImportProposals\(/);
+  });
 
   it("imports the deterministic skill-claim extractor", () => {
     expect(flow).toMatch(
@@ -454,7 +467,15 @@ describe("Guard: save-state lifecycle is honest and dedupe-safe", () => {
   //     are not actionable;
   //   - the success message points at the unified surface
   //     ("Įgūdžiai išsaugoti į „Mano įgūdžiai“").
-  const flow = read("components/app/profile-text-first-flow.tsx");
+  // CV-18 / G-10: the flow takes its proposals, its claim save and its
+  // promotion from the ONE CV-import proposal state it shares with the
+  // conversation's CV upload. The contract below holds across the three.
+  const flowOnly = read("components/app/profile-text-first-flow.tsx");
+  const flow = [
+    flowOnly,
+    read("components/app/use-cv-import-proposals.ts"),
+    read("lib/cv/cv-import-proposals.ts"),
+  ].join("\n");
 
   it("imports useRouter so it can refresh the unified surface after save", () => {
     expect(flow).toMatch(/from\s+["']next\/navigation["']/);
@@ -471,12 +492,15 @@ describe("Guard: save-state lifecycle is honest and dedupe-safe", () => {
     // Located AFTER the saveProfileSkillClaimsAction call so the
     // server-rendered CapabilityProfileSection re-fetches the new
     // claims. Comments stripped before match.
-    const codeOnly = flow
+    const codeOnly = flowOnly
       .replace(/\/\*[\s\S]*?\*\//g, "")
       .replace(/\/\/[^\n]*\n/g, "");
     expect(codeOnly).toMatch(
-      /saveProfileSkillClaimsAction\s*\([\s\S]{0,500}router\.refresh\(\)/,
+      /cvProposals\.saveConfirmed\(confirmedClaims\)[\s\S]{0,500}router\.refresh\(\)/,
     );
+    // …and that save IS the profile_skill_claims action.
+    const hook = read("components/app/use-cv-import-proposals.ts");
+    expect(hook).toMatch(/const saveConfirmed = [\s\S]{0,300}await saveProfileSkillClaimsAction\(/);
   });
 
   it("never silently filters out already-saved chips (no .filter on savedClaimSet)", () => {
