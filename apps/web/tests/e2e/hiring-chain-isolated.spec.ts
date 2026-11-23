@@ -175,6 +175,15 @@ for (const w of WIDTHS) {
       await page.reload();
       const again = page.getByRole("main").locator(`li[id="opp-${s.needId}"]`).first().getByTestId(`interest-${s.needId}`);
       await expect(again.getByTestId("interest-sent"), "the application survives a reload").toBeVisible({ timeout: 60_000 });
+
+      // The application leaves a trace on the person's OWN side: their
+      // "my interest" list on the same board, one row for this need.
+      const mine = page.getByRole("main").getByTestId("opportunities-my-interest");
+      await clickUntilVisible(mine.locator("summary").first(), mine.getByTestId("my-interest-list"));
+      await expect(
+        mine.getByTestId("my-interest-list").locator('li[data-source="demand"]'),
+        "the application is in the person's own interest list, once",
+      ).toHaveCount(1);
       await done();
     });
 
