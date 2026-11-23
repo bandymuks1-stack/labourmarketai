@@ -92,8 +92,13 @@ async function readRows<T>(
   }
 }
 
-/** Open demand the manager of `teamId` may offer against (worker-board whitelist). */
-export function listOfferableDemand(teamId: string): Promise<ReadResult<OfferableDemand>> {
+/** Open demand the manager of `teamId` may offer against (worker-board whitelist).
+ *  v2 (20261122170000) = the same rows with duration, language, skills and
+ *  tools, and no client column. Until it is applied, v1 answers; the model
+ *  never reads v1's company_name, so the client is not shown either way. */
+export async function listOfferableDemand(teamId: string): Promise<ReadResult<OfferableDemand>> {
+  const v2 = await readRows("list_open_needs_for_offer_v2", { p_team_org_id: teamId }, parseOfferableDemand);
+  if (v2.status !== "needs_migration") return v2;
   return readRows("list_open_demand_for_team_offer_v1", { p_team_org_id: teamId }, parseOfferableDemand);
 }
 

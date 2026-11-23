@@ -19631,6 +19631,14 @@
     "noDemand": "There is no open demand to offer against right now.",
     "demandLabel": "Demand",
     "demandPlaceholder": "Choose a demand",
+    "need": {
+      "people": "People",
+      "start": "Start",
+      "duration": "Duration",
+      "language": "Language",
+      "skills": "Skills",
+      "tools": "Tools"
+    },
     "alreadyOffered": "already offered",
     "noteLabel": "Note to the company (optional)",
     "notePlaceholder": "For example: crew of 3, can start in two weeks",
