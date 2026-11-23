@@ -108,6 +108,7 @@ import {
 } from "./registry";
 import { getConversationAction } from "@/lib/conversation/action-registry";
 import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
+import { logWorkFields } from "@/lib/journal/log-work-fields";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES, OVERWRITES, SENDS_EMAIL } from "./conversation-action-bridge";
 import type { CapabilityCaller } from "./contract";
 
@@ -1501,6 +1502,38 @@ describe("journal draft → confirm", () => {
       expect(preview.engagementLabel).toBe("Dev Statyba · employee");
       expect(typeof r.data?.confirmationToken).toBe("string");
     }
+  });
+
+  it("AI-3: a dictated entry keeps its voice provenance through MCP — the ONE mapping the chat sends", async () => {
+    coreWrite.mockClear();
+    const voice = { language: "lt", disclosureVersion: "2026-09-01" };
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), { ...DRAFT, voice });
+    expect(drafted.ok).toBe(true);
+    if (drafted.ok) expect(drafted.data?.preview).toMatchObject({ inputOrigin: "voice" });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      voice,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: true });
+    const sent = (coreWrite.mock.calls[0] as unknown[]).find((a) => a instanceof FormData) as FormData;
+    const fields = Object.fromEntries(sent.entries());
+    expect(fields).toEqual(logWorkFields(fields.locale as string, { ...DRAFT, voice }) as Record<string, string>);
+    expect(fields).toMatchObject({ input_origin: "voice", voice_language: "lt", voice_disclosure_version: "2026-09-01" });
+  });
+
+  it("AI-3: a confirm cannot add a voice label the draft never carried", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const r = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      voice: { language: "lt", disclosureVersion: "2026-09-01" },
+      confirmationToken: token,
+    });
+    expect(r.ok).toBe(false);
+    expect(coreWrite).not.toHaveBeenCalled();
   });
 
   it("a resolved draft's token confirms — the OMITTED id round-trips through the preview", async () => {

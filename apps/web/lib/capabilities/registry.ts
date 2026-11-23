@@ -11,7 +11,6 @@ import {
 } from "@/lib/journal/journal-write-core";
 import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
-import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
 import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
@@ -74,6 +73,7 @@ import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-
 import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
 import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
+import { logWorkFields } from "@/lib/journal/log-work-fields";
 import {
   activeOrganizationOf,
   orderContextsForChoice,
@@ -496,6 +496,7 @@ function normalizedDraftForHash(draft: {
   workDate: string;
   siteName?: string | null;
   projectId?: string | null;
+  voice?: { language: string; disclosureVersion: string } | null;
 }): Record<string, unknown> {
   return {
     engagementContextId: draft.engagementContextId,
@@ -505,6 +506,10 @@ function normalizedDraftForHash(draft: {
     // The project the hours belong to ("none" = deliberately not project
     // work) is part of what the human confirmed, so it is part of the hash.
     projectId: draft.projectId ?? null,
+    // Voice provenance is bound too, but only when stated: a typed draft's
+    // hash is unchanged, and a confirm cannot add a voice label the draft
+    // never carried (AI-3).
+    ...(draft.voice ? { voice: { language: draft.voice.language, disclosureVersion: draft.voice.disclosureVersion } } : {}),
   };
 }
 
@@ -792,6 +797,8 @@ const journalCreateDraft: CapabilityDescriptor = {
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
       projectId: draft.projectId ?? null,
+      // Dictated text keeps its provenance through confirm (AI-3).
+      ...(draft.voice ? { voice: draft.voice } : {}),
     };
     const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
@@ -808,6 +815,7 @@ const journalCreateDraft: CapabilityDescriptor = {
           notes: resolved.notes,
           engagementContextId: resolved.engagementContextId,
           projectId: resolved.projectId,
+          ...(draft.voice ? { inputOrigin: "voice" } : {}),
           // The RESOLVED context, named — the human must SEE which context
           // the entry will land in before confirming (preselect-and-show,
           // never silently assign).
@@ -830,17 +838,10 @@ function journalConfirmFields(
   locale: string,
   draft: z.infer<typeof workerLogWorkSchema>,
 ): Record<string, string> {
-  return {
-    locale,
-    engagement_context_id: draft.engagementContextId,
-    notes: draft.notes,
-    work_date: draft.workDate,
-    site_name: draft.siteName ?? "",
-    project_id: draft.projectId ?? "",
-    // The stated time becomes time on the record — the same derivation
-    // the conversation executor applies (issue #1689).
-    ...intakeWorkTimeFields(draft.notes, draft.workDate),
-  };
+  // THE ONE mapping the chat's worker.log-work sends too (AI-3): the stated
+  // time becomes time on the record (#1689) and a dictated entry keeps its
+  // voice provenance.
+  return logWorkFields(locale, draft);
 }
 
 /**
