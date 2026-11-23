@@ -13,10 +13,14 @@ import type { BrowserContextOptions } from "@playwright/test";
  * deliberate: "the worker sees it on a phone", "the same page at 1280". Rewriting them
  * would silently change what the step proves, so the device is a default, never an
  * override.
+ *
+ * `tablet-768` (768 px, touch) and `desktop-1440` (a wide computer screen) complete the
+ * size matrix the owner ordered for the production UX measurement (#3679 addendum:
+ * 375, 390, 768 and 1440). `desktop` stays the walk's own Desktop Chrome screen.
  */
-export type WalkDevice = "desktop" | "phone" | "phone-375";
+export type WalkDevice = "desktop" | "phone" | "phone-375" | "tablet-768" | "desktop-1440";
 
-export const WALK_DEVICES: readonly WalkDevice[] = ["desktop", "phone", "phone-375"];
+export const WALK_DEVICES: readonly WalkDevice[] = ["desktop", "phone", "phone-375", "tablet-768", "desktop-1440"];
 
 /**
  * 390 × 844, touch, a phone's user agent: the size class the acceptance gate names
@@ -43,10 +47,35 @@ export const WALK_PHONE_375: typeof WALK_PHONE = {
   deviceScaleFactor: 2,
 };
 
-/** The screen a phone device opens with; `null` for the desktop, which adds nothing. */
-export function walkPhone(device: WalkDevice): typeof WALK_PHONE | null {
+/**
+ * 768 × 1024, touch: a tablet held upright, the size class between the phones and a
+ * computer. Android Chrome without "Mobile" in the user agent, which is how a tablet
+ * identifies itself.
+ */
+export const WALK_TABLET_768: typeof WALK_PHONE = {
+  viewport: { width: 768, height: 1024 },
+  isMobile: true,
+  hasTouch: true,
+  deviceScaleFactor: 2,
+  userAgent: "Mozilla/5.0 (Linux; Android 14; Pixel Tablet) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36",
+};
+
+/** 1440 × 900, no touch: a wide computer screen, with the walk's own desktop browser identity. */
+export const WALK_DESKTOP_1440: Readonly<Required<Pick<BrowserContextOptions, "viewport" | "isMobile" | "hasTouch">>> = {
+  viewport: { width: 1440, height: 900 },
+  isMobile: false,
+  hasTouch: false,
+};
+
+/**
+ * The screen a device opens with; `null` for the desktop, which adds nothing. (Named
+ * for the first screens it carried; it carries every non-default screen.)
+ */
+export function walkPhone(device: WalkDevice): typeof WALK_PHONE | typeof WALK_DESKTOP_1440 | null {
   if (device === "phone") return WALK_PHONE;
   if (device === "phone-375") return WALK_PHONE_375;
+  if (device === "tablet-768") return WALK_TABLET_768;
+  if (device === "desktop-1440") return WALK_DESKTOP_1440;
   return null;
 }
 
@@ -54,8 +83,26 @@ export function walkPhone(device: WalkDevice): typeof WALK_PHONE | null {
 export function walkDevice(env: Readonly<Record<string, string | undefined>>): WalkDevice {
   const raw = (env.PROD_QA_DEVICE ?? "").trim();
   if (raw === "" || raw === "desktop") return "desktop";
-  if (raw === "phone" || raw === "phone-375") return raw;
-  throw new Error(`PROD_QA_DEVICE must be "desktop", "phone" or "phone-375", not "${raw.slice(0, 20)}"`);
+  const known = WALK_DEVICES.find((d) => d === raw);
+  if (known) return known;
+  throw new Error(`PROD_QA_DEVICE must be one of ${WALK_DEVICES.map((d) => `"${d}"`).join(", ")}, not "${raw.slice(0, 20)}"`);
+}
+
+/**
+ * THE COLOUR SCHEME A PRODUCTION WALK RUNS IN (owner order, #3679 addendum). `light` is
+ * what every walk ran in before; `dark` asks the page for its dark scheme through the
+ * browser, as a viewer's system setting would.
+ */
+export type WalkTheme = "light" | "dark";
+
+export const WALK_THEMES: readonly WalkTheme[] = ["light", "dark"];
+
+/** The theme named by the environment. Unset or empty is light; anything else unknown is refused. */
+export function walkTheme(env: Readonly<Record<string, string | undefined>>): WalkTheme {
+  const raw = (env.PROD_QA_THEME ?? "").trim();
+  if (raw === "" || raw === "light") return "light";
+  if (raw === "dark") return "dark";
+  throw new Error(`PROD_QA_THEME must be "light" or "dark", not "${raw.slice(0, 20)}"`);
 }
 
 /** What a step that names its own screen ran as before the device existed: the desktop browser. */
