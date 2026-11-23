@@ -279,7 +279,7 @@ All agency production runs are on 7e517e32, 112 behind.
 | 6. Work, time and results | LOCAL: I-4, I-11 (practice days; production must not write them) | LOCAL: I-5, I-12 | LOCAL: I-13 |
 | 7. Confirmation | LOCAL: I-12 (the employer confirms the intern) | LOCAL: I-13 | LOCAL: I-13b |
 | 8. Living CV, automatically | LOCAL: I-13b (the practice period stands as confirmed) | n/a | LOCAL: I-13b |
-| 9. Reuse | GAP: no walk turns a learner into a worker profile with the history kept. `recognition-chain-isolated` I-16 (#3716, CI pending) adds it. | GAP | GAP |
+| 9. Reuse | LOCAL: `recognition-chain-isolated` I-16 (#3716, signup-isolated run 45163600144): the same employer hires the learner as an employee; the employment is added beside the intern relationship | LOCAL: I-16 (the practice day stays in the intern relationship) | LOCAL: I-16 (the confirmed practice stays under practice; the employment is listed under work) |
 
 ### Education institution
 
@@ -301,7 +301,7 @@ All agency production runs are on 7e517e32, 112 behind.
 |---|---|
 | FAIL | Employer step 6, a new company's hire is missing from instructions (#3704) |
 | BLOCKED | Personal service lane after acceptance (#3697)<br>Institution-arranged placement (owner decision) |
-| GAP | Worker and employer steps 4 to 5: the CV trace of an application or engagement<br>Agency steps 6 to 8<br>Subcontractor steps 8 and 9, and identity<br>Student step 9 (learner to worker)<br>Identity in production for agency, subcontractor and institution<br>History for organizations |
+| GAP | Worker and employer steps 4 to 5: the CV trace of an application or engagement<br>Agency steps 6 to 8<br>Subcontractor steps 8 and 9, and identity<br>Identity in production for agency, subcontractor and institution<br>History for organizations |
 
 ## Walk plan for today
 
