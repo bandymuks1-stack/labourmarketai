@@ -442,7 +442,7 @@ export async function ProfileHubOverview({
         avatarUrl={avatarUrl}
         initials={playerInitials(personName)}
         heading={
-          <h2 className="truncate font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary max-sm:whitespace-normal max-sm:break-words sm:text-4xl">
+          <h2 className="break-words font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary [overflow-wrap:anywhere] sm:text-4xl">
             {personName}
           </h2>
         }
