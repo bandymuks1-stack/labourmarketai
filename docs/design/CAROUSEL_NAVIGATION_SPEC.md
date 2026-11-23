@@ -344,7 +344,121 @@ Pending. Lane M sends its section to this session.
 
 ---
 
-## 9. Acceptance
+## 9. Verification checklist per role (owner P0 addendum)
+
+This checklist is also the click script for lane L's production walks
+(devices 375/390/768/1440, light and dark).
+
+**Base:** `main` `125e21827`.
+
+**Evidence keys:**
+- `A2` — this lane's local audit (`docs/audits/evidence/a2-design-audit-2026-11-22/`, contact sheets plus `metrics-*.tsv`).
+- `LA` — Lane A's local click-through (§8.1).
+- `code` — the file and line given.
+
+"Not measured" means nobody has looked yet; it is not a pass.
+
+### 9.1 The seven checks
+
+| id | Check | PASS when |
+|---|---|---|
+| C1 | Six goals in one level-1 carousel | One rail with all six goals of §1.2 at every width. No "More options". On phones the next card peeks, the right edge fades and the swipe hint shows. |
+| C2 | Level-2 function carousel | Choosing a goal opens its function cards in place; the address carries `#goal=<id>`; Back closes it. |
+| C3 | Level-3 categories and professions | The goal's catalogue tab (search, sector chips, profession rail) works where level 3 exists; nothing empty is shown where it does not. |
+| C4 | AI assistant always reachable | One visible tap from every screen opens the assistant: `/dashboard`, or `/#find` when signed out. |
+| C5 | Role-appropriate functions | Level 2 shows only what the person's server-side rights allow; every card opens a working page for that role. |
+| C6 | Pin and reorder | A permitted function can be pinned, unpinned and reordered; this persists across sessions; access never depends on a pin. |
+| C7 | Same behaviour public and signed-in | C1–C3 behave the same on the public home and in the signed-in product. |
+
+### 9.2 Current state per role
+
+The signed-out state is the same for every role: the public home.
+
+| Role / mode | C1 | C2 | C3 | C4 | C5 | C6 | C7 |
+|---|---|---|---|---|---|---|---|
+| Any role, signed out | **FAIL** on phones: 4 goals plus "More options" (`focus-landing.tsx:104`; A2 `goalsFirstScreen`=4 at 375/390; `public-home-390-*`). Desktop 6 in one row (A2 1440). Tablet one rail, 3½ visible. | PASS: 6/6 panels open (LA); `#goal=` state (code) | PASS for `work` only; none for the other five (`goal-navigation.tsx:14`) | **FAIL** at ≤ 768: only inside the menu (A2 `aiVisible`=False); PASS at 1440 | n/a; account links go through sign-up with `?next=` (`public-intents.ts:13-25`) | **FAIL**: not built (`card-rail.tsx:273-280`, no caller) | baseline |
+| Worker, signed in | **FAIL**: no goal rail; home shows `AreaSwitcher` stations instead (`today-screen.tsx:244`; A2 `goalNav`=False) | **FAIL**: no level 2; stations are single links (LA 6/6 open) | **FAIL**: none | Home: PASS (the home is the chat). Inner pages: **FAIL**, unmarked "My space" only (A2) | Partly: "More" re-ordered by role (`work-areas.ts:242`); LA 8/8 sheet, 4/4 More | **FAIL** | **FAIL** (different component) |
+| Student, signed in | **FAIL**: same as worker (A2 `student-dashboard-*`) | **FAIL** | **FAIL** | Home PASS; 5 inner pages **FAIL** (A2 `aiVisible`=False on learning, network, inbox, planning, profile) | Partly: same as worker | **FAIL** | **FAIL** |
+| Employer, signed in | **FAIL**: no goal rail; organisation `AreaSwitcher` (`company-model-screen.tsx`) and `OrganizationDoors` | **FAIL** | **FAIL** | Home: not measured by A2. Inner pages: "My space" only (code) | Partly: doors decided server-side (`organization-doors.ts`); "More" by acting role (`work-areas.ts:161`) | **FAIL** | **FAIL** |
+| Agency, signed in | **FAIL**: same components as employer | **FAIL** | **FAIL** | As employer | As employer; agency doors **not measured** (Lane M) | **FAIL** | **FAIL** |
+| Subcontractor, signed in | Not measured. No separate navigation found: an organisation with the provider capability uses the employer components. | Not measured | Not measured | As employer | **Not measured** (Lane M) | **FAIL** | **FAIL** |
+| Institution, signed in | **FAIL**: organisation `AreaSwitcher` plus `OrganizationDoors` with Learning (A2 `institution-dashboard-*`, `institution-dashboard_company_education-*`) | **FAIL** | **FAIL** | Home PASS (A2 `aiVisible`=True); 8 inner pages **FAIL** (A2) | Partly: the education door only with the capability (`work-areas.ts:115-120`) | **FAIL** | **FAIL** |
+
+### 9.3 Click script (for lane L)
+
+Run it per role, per device (375, 390, 768, 1440), per theme (light, dark).
+
+1. Signed out, open `/<locale>`:
+   - count the goal cards in the first viewport and in the rail;
+   - assert that no "More options" control exists (C1);
+   - swipe or scroll the rail: assert the next card peeks and the page does
+     not scroll sideways (C1).
+2. Tap each goal:
+   - assert `#goal=<id>` and the panel with its function cards (C2);
+   - open each card: assert HTTP 200 and the page's `h1`, or sign-up with
+     `next=` for account cards (C2, C5);
+   - press Back: the panel closes (C2).
+3. On `work`, open Professions:
+   - type into search, choose a sector chip, open one profession card (C3).
+4. Find the assistant entry without opening a menu; tap it:
+   - `/#find` when signed out, `/dashboard` when signed in (C4).
+5. Sign in as the role. On `/dashboard`, and on three inner pages of that
+   role, repeat steps 1–4 (C7). Today they fail; record FAIL with the
+   screenshot.
+6. On each level-2 card, assert that it opens a page the role may use, and
+   that no card the role may not use is shown (C5).
+7. Pin one function, reload, reorder, unpin (C6). Today the control does not
+   exist; record FAIL.
+
+---
+
+## 10. Where the remaining design defects come from
+
+Each cause below is evidenced from the code. One is not established.
+
+1. **Competing navigations: YES.** Three horizontal card systems behave
+   differently (§2.4):
+   - `CardRail` scrolls natively;
+   - `AreaSwitcher` is a positioned 3D chooser;
+   - `OrganizationDoors` is a single row of chips.
+
+   The signed-in header draws from two item models (`lib/config/navigation.ts`
+   and `lib/navigation/work-areas.ts`, §8.1). That produces "carousel in
+   carousel" and "unclear horizontal navigation" (`P0_REGISTER.md:18`) and
+   the C7 failures.
+2. **Old versus new workspace components: YES.**
+   - `OrganizationDoors` comes from 2026-09-16
+     (`organization-doors.tsx` doc comment).
+   - `AreaSwitcher` comes from 2026-10-25 (`area-switcher.tsx` doc comment).
+   - `CardRail` and `GoalNavigator` come from 2026-11-12.
+
+   The signed-in homes still use the two older ones. The newer one exists
+   only on the public home.
+3. **Duplicate translation keys for one destination: YES, in navigation
+   labels.** The same route carries different names in the two signed-in
+   models (`apps/web/messages/en.json`):
+
+   | Route | `companyModel.*` (`AreaSwitcher`) | `organizationDoors.*` (doors) |
+   |---|---|---|
+   | `/dashboard/company/people` | People & team | People |
+   | `/dashboard/projects` | Projects & objects | Work |
+   | `/dashboard/company/needs` | What we need | Needs |
+   | `/dashboard/company/partners` | Clients & suppliers | Clients & partners |
+
+   A person sees two names for one place. The fix is one label key per route,
+   reused by the rail. That is a copy and translation change in 11 catalogs,
+   part of N6 and N7.
+4. **Duplicate notification mechanisms: NOT ESTABLISHED.** No navigation
+   surface sends or renders notifications other than the one header bell
+   (`components/app/notification-panel.tsx`, S12). Whether other notification
+   paths duplicate each other is outside this spec and was not checked here
+   (deliverable C, lane E).
+
+These findings go to lane E for `docs/audits/DUPLICATION_AUDIT.md`.
+
+---
+
+## 11. Acceptance
 
 **Not yet confirmed by people.** "Done" for each step means:
 - the guard and e2e listed in §6 pass;
