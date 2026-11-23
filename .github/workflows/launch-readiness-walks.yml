@@ -64,6 +64,8 @@ jobs:
           # RERUN_START counts for them.
           RERUN: "profile-cv-history:phone-375 orders-bookings:desktop orders-bookings:phone"
           RERUN_START: "2026-11-22T16:00:00Z"
+          # 2026-11-23 00:45 UTC: GitHub's schedule fired no tick after 22:35 UTC again; a push to
+          # this file (the push trigger) starts the chain, which then hands over by itself.
         run: |
           set -euo pipefail
           PLAN="company-governance:desktop
