@@ -1,5 +1,5 @@
 import { readdirSync, readFileSync, statSync } from "node:fs";
-import { join, relative } from "node:path";
+import { join, relative, sep } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
@@ -15,6 +15,9 @@ import { describe, expect, it } from "vitest";
  */
 
 const WEB = join(__dirname, "..", "..");
+
+/** Repo-relative path with forward slashes, so the lists match on Windows too. */
+const relWeb = (p: string) => relative(WEB, p).split(sep).join("/");
 const CANONICAL = "lib/organization-evidence/company-work-history.ts";
 const PREDICATE = /activityDate\s*===\s*null\s*&&\s*\w+\.periodStart\s*!==\s*null\s*&&\s*\w+\.periodEnd\s*!==\s*null/;
 
@@ -32,7 +35,7 @@ const SOURCES = ["app", "lib", "components"].flatMap((d) => walk(join(WEB, d)));
 
 describe("one period-record predicate (CV-20)", () => {
   it("the predicate is written only in company-work-history.ts", () => {
-    const copies = SOURCES.map((p) => relative(WEB, p)).filter(
+    const copies = SOURCES.map((p) => relWeb(p)).filter(
       (rel) => rel !== CANONICAL && !rel.includes("/guards/") && PREDICATE.test(readFileSync(join(WEB, rel), "utf8")),
     );
     expect(copies, "Import isPeriodRecord from company-work-history.ts instead of writing the check again.").toEqual([]);
