@@ -75,3 +75,14 @@ rollback;
 
 Apply the `.down.sql` through `apply_migration`. It restores the previous bodies and policies and drops the helper.
 Owner pointers moved and engagements ended while the migration was live stay as the record of what happened.
+
+## Review notes (R2 on #3620)
+
+- **Database proof:** `apps/web/tests/e2e/demoted-owner-isolated.spec.ts`, run by `signup-isolated` on the throwaway stack with every migration replayed.
+  - DO-1: a creator demoted to member loses `owns_company`, `manages_organization` and the company row edit, and the owner pointer moves.
+  - DO-2: an owner by membership who did not create the company keeps both rights.
+  - DO-3: the last owner cannot demote themselves.
+- **The pre-check is the gate.** Run the read-only query above, and have the owner confirm each row it returns, before `apply_migration`.
+- **Order with #3575:**
+  - #3575 *calls* `owns_company` in its creator arms but does not redefine it, nor any other object replaced here. The two apply in either order, and each rollback restores only its own objects.
+  - If this rollback is applied, `owns_company` returns to `main`'s body. #3575's arms keep calling it unchanged.
