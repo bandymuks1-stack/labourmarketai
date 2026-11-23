@@ -3,6 +3,7 @@ import "server-only";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
+import { readActiveAssignmentRowsForProjects } from "@/lib/projects/operations";
 
 /**
  * Work-instructions read service (slice work-instructions-v1).
@@ -155,6 +156,10 @@ export async function listAttentionInstructions(): Promise<WorkerInstruction[]> 
 export interface ManagedWorker {
   profileId: string;
   name: string;
+  /** Set when the worker is reachable ONLY through an active assignment on these
+   *  projects (a direct hire, a placement): the database admits a project-scoped
+   *  instruction there and nothing team-level (send_work_instruction_to_project). */
+  projectIds?: string[];
 }
 
 /** Workers the caller manages (active roster link to a company/agency they own).
@@ -198,6 +203,46 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
   };
   if (!cw.error) collect(cw.data);
   return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * Workers ACTIVELY assigned to the given projects (the caller's managed
+ * projects), through the same batched, RLS-scoped read the company home uses.
+ * A direct hire is on a project, not on the roster, so the instructions picker
+ * reads both (the project-scoped RPC admits exactly this pair). Empty on failure.
+ */
+export async function listProjectAssignedWorkers(projectIds: readonly string[]): Promise<ManagedWorker[]> {
+  if (projectIds.length === 0) return [];
+  const supabase = await createClient();
+  const rows = await readActiveAssignmentRowsForProjects(supabase, projectIds);
+  const out = new Map<string, ManagedWorker>();
+  for (const [projectId, res] of rows) {
+    if (res.error) continue;
+    for (const r of (res.data ?? []) as Array<{
+      worker?: { profile_id?: string | null; display_name?: string | null; profiles?: { full_name?: string | null } | null } | null;
+    }>) {
+      const w = r.worker;
+      if (!w?.profile_id) continue;
+      const prev = out.get(w.profile_id);
+      if (prev) {
+        if (!prev.projectIds!.includes(projectId)) prev.projectIds!.push(projectId);
+        continue;
+      }
+      out.set(w.profile_id, {
+        profileId: w.profile_id,
+        name: w.profiles?.full_name ?? w.display_name ?? w.profile_id.slice(0, 8),
+        projectIds: [projectId],
+      });
+    }
+  }
+  return [...out.values()];
+}
+
+/** The picker: the roster (team-level and project-level), then anyone reachable
+ *  only through a project assignment (project-level only). One row per person. */
+export function mergeInstructionRecipients(roster: ManagedWorker[], assigned: ManagedWorker[]): ManagedWorker[] {
+  const seen = new Set(roster.map((w) => w.profileId));
+  return [...roster, ...assigned.filter((w) => !seen.has(w.profileId))].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**
