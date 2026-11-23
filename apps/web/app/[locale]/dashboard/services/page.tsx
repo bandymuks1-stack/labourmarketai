@@ -79,7 +79,6 @@ export default async function ServicesPage({
     formCountryPlaceholder: t("form.countryPlaceholder"),
     formRemoteLabel: t("form.remoteLabel"),
     formRateLabel: t("form.rateLabel"),
-    formRatePlaceholder: t("form.ratePlaceholder"),
     formRateHint: t("form.rateHint"),
     save: t("save"),
     saving: t("saving"),

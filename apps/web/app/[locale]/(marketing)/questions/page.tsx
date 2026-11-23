@@ -62,12 +62,12 @@ export default async function QuestionsHub({
           {pickL(CHROME.hubEmpty, l)}
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col">
           {categories.map((c) => (
             <li key={c}>
               <Link
                 href={`/questions/category/${c}`}
-                className="text-base font-medium text-brand-blue hover:underline"
+                className="inline-flex min-h-11 items-center text-base font-medium text-brand-blue hover:underline"
               >
                 {pickL(CATEGORY_LABELS[c], l)}
               </Link>

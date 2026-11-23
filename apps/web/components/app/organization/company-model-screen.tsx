@@ -51,10 +51,13 @@ export async function CompanyModelScreen({
     <section
       aria-label={t("title")}
       data-testid="company-model"
-      // Phones: the conversation thread already insets its content by 16px;
-      // a second px-4 here left the company home 32px in from each edge
-      // (owner phone report 2026-11-20). Desktop keeps its inset.
-      className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-2 pt-4 max-sm:px-0 max-sm:pt-2"
+      // The conversation thread already gives this its column and its 16px
+      // inset. A narrower max-w-2xl column with its own px-4 left the company
+      // home 32px in from each edge on phones (owner phone report 2026-11-20)
+      // and, from 640px up, out of line with the assistant below it (48px at
+      // 768, 48px at 1024; design audit 2026-11-22). It now shares the
+      // thread's column at every width.
+      className="flex w-full flex-col gap-3 pb-2 pt-4 max-sm:pt-2"
     >
       <h2 className="font-display text-card-title font-semibold text-text-primary">
         {t("title")}

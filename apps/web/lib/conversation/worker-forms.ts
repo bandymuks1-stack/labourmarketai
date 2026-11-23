@@ -169,8 +169,8 @@ export const WORKER_FORMS: readonly WorkerFormSpec[] = [
       // name to its first two letters ("VI" for Vietnam — the Virgin Islands).
       { name: "locationCountry", kind: "text", labelKey: "conversation.forms.fields.locationCountry", placeholderKey: "conversation.forms.fields.countryCodePlaceholder", maxLength: COUNTRY_TEXT_MAX },
       { name: "preferredCountries", kind: "text", labelKey: "conversation.forms.fields.preferredCountries", placeholderKey: "conversation.forms.fields.preferredCountriesPlaceholder" },
-      { name: "salaryMin", kind: "number", labelKey: "conversation.forms.fields.salaryMin", placeholderKey: "conversation.forms.fields.salaryMinPlaceholder", min: 0, max: 100000 },
-      { name: "salaryMax", kind: "number", labelKey: "conversation.forms.fields.salaryMax", placeholderKey: "conversation.forms.fields.salaryMaxPlaceholder", min: 0, max: 100000 },
+      { name: "salaryMin", kind: "number", labelKey: "conversation.forms.fields.salaryMin", min: 0, max: 100000 },
+      { name: "salaryMax", kind: "number", labelKey: "conversation.forms.fields.salaryMax", min: 0, max: 100000 },
     ],
     // Partial save (W6): every field the person leaves blank is OMITTED —
     // `null` for the scalars, `undefined` for the country list — and the

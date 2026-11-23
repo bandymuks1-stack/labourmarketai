@@ -209,7 +209,6 @@
     "formLabelLabel": "Standort",
     "formLabelPlaceholder": "Stadt oder Region",
     "formPriceLabel": "Preis",
-    "formPricePlaceholder": "z. B. 450 €/Monat oder nach Vereinbarung",
     "priceHint": "Der Preis ist optional und beschreibend. Zahlungen werden hier nicht abgewickelt.",
     "save": "Speichern",
     "saving": "Speichern…",
@@ -2976,8 +2975,7 @@
           "label": "Wie viele Arbeitskräfte benötigt werden"
         },
         "salary": {
-          "label": "Gehalt (€)",
-          "placeholder": "Z. B. 2200"
+          "label": "Gehalt (€)"
         },
         "countries": {
           "label": "Bevorzugte Länder (ISO-Codes)",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Stunden pro Arbeitskraft",
               "totalHours": "Gesamtstunden (optionale Übersteuerung)",
               "rate": "Stunden-/Tagessatz",
-              "ratePlaceholder": "z. B. 20",
               "country": "Land/Ort",
               "materials": "Materialien",
               "equipment": "Ausrüstung/Werkzeuge",
@@ -7168,7 +7165,6 @@
       "countryPlaceholder": "z. B. LT",
       "remoteLabel": "Kann remote erledigt werden",
       "rateLabel": "Preis (optional)",
-      "ratePlaceholder": "z. B. ca. 25 EUR/h, verhandelbar",
       "rateHint": "Nur Freitext — zum Beispiel ein Richtwert für den Stundensatz."
     },
     "save": "Speichern",
@@ -13088,6 +13084,7 @@
     },
     "goToRoster": "Zum Team",
     "invalidLabel": "Prüfen Sie die E-Mail-Adresse — die Einladung wurde nicht gesendet.",
+    "offerLimitLabel": "Zu viele Angebote. Bitte später erneut versuchen.",
     "deliveryHeading": "Einladungslink",
     "deliveryCreated": "Nicht per E-Mail gesendet — der E-Mail-Versand ist nicht eingerichtet. Kopieren Sie den Link und senden Sie ihn dem Kunden selbst.",
     "deliverySent": "Die Einladungs-E-Mail wurde gesendet. Sie können den Link trotzdem kopieren.",
@@ -14293,9 +14290,7 @@
         "preferredCountries": "Wunschländer",
         "preferredCountriesPlaceholder": "z. B. NL, DE",
         "salaryMin": "Lohn ab (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Lohn bis (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Umzugsbereit?",
         "hasTransport": "Können Sie selbstständig zur Arbeit kommen?",
         "needsAccommodation": "Unterkunft nötig?",
@@ -19771,7 +19766,6 @@
       },
       "capacity": "Personen",
       "rate": "Preis",
-      "ratePlaceholder": "z. B. 32 €/Std. oder Festpreis",
       "period": "Zeitraum",
       "start": "Beginn",
       "end": "Ende",

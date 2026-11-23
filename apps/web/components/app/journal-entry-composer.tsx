@@ -2171,6 +2171,21 @@ export function JournalEntryComposer({
           </div>
         )}
 
+        {/* A refused save says why HERE too (R-3 walk, 2026-11-22): the
+            compose stage set the error but never drew it, so a direct save
+            that the server refused (a future day) or that a rule stopped
+            (no context chosen) looked like nothing happened. The SAME alert
+            the review stage shows; the text stays in the field. */}
+        {error && (
+          <p
+            className="rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs text-state-danger"
+            role="alert"
+            data-testid="journal-save-error"
+          >
+            {error}
+          </p>
+        )}
+
         <details
           className="rounded-md border border-ink-600 bg-ink-800/40"
           data-testid="journal-more-options"

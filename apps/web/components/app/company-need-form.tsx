@@ -465,6 +465,16 @@ export function CompanyNeedForm({
                     </p>
                   ) : null}
                 </div>
+              ) : state.draftStatus === "disabled" ? (
+                // AI off: say so (the label the page already passes), never
+                // a silent gap where the suggestion would have been.
+                <p className="text-xs text-text-secondary" data-testid="company-need-ai-disabled">
+                  {labels.aiDisabled}
+                </p>
+              ) : state.draftStatus === "needs_review" ? (
+                <p className="text-xs text-text-secondary" data-testid="company-need-ai-none">
+                  {labels.aiNone}
+                </p>
               ) : null}
 
               {/* Construction-only honest fallback: if there is no suitable

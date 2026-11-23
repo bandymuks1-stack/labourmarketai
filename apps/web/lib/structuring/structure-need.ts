@@ -13,7 +13,7 @@
 import { ALL_WORK_TYPE_SLUGS } from "@/lib/taxonomy/work-categories";
 import { isIsoCountry } from "@/lib/location/country-model";
 import { foldText } from "./normalize";
-import { parseWordNumber } from "./word-numbers";
+import { digitizeWordNumbers, parseWordNumber } from "./word-numbers";
 import { looksSwedish } from "./looks-swedish";
 
 export type StartPeriod = "flexible" | "this_week" | "urgent";
@@ -88,7 +88,7 @@ export const WORK_TYPE_RULES: { slug: string; needles: string[] }[] = [
   { slug: "machine_operator", needles: ["machine operator", "cnc", "staklių operat", "stakliu operat", "оператор станк"] },
   { slug: "quality_control", needles: ["quality control", "quality inspector", "kokybės kontrol", "kokybes kontrol", "контролёр качества", "контролер качества"] },
   { slug: "production_worker", needles: ["production worker", "factory worker", "gamybos darbinink", "производственн", "productiemedewerker", "produktionsmitarbeiter", "pracownik produkcj", "pracownikow produkcj"] },
-  { slug: "cook", needles: ["cook", "chef", "virėj", "virej", "повар", "kucharz", "kucharzy"] },
+  { slug: "cook", needles: ["cook", "chef", "virėj", "virej", "повар", "kucharz", "kucharzy", "köche", "koche", "köchin", "kochin"] },
   { slug: "kitchen_helper", needles: ["kitchen helper", "kitchen porter", "virtuvės pagalb", "virtuves pagalb", "помощник повара"] },
   { slug: "dishwasher", needles: ["dishwasher", "indų plov", "indu plov", "посудомой"] },
   { slug: "waiter", needles: ["waiter", "waitress", "padavėj", "padavej", "официант", "kellner", "kelner"] },
@@ -174,27 +174,31 @@ export const COUNTRY_RULES: { code: string; needles: string[] }[] = [
   // left the location empty (production 2026-10-23). Where a short stem is a
   // prefix of ordinary words ("alyt" in "analytic", "uten" = Norwegian
   // "without"), the needles are the inflected forms themselves.
-  { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "вильн", "wiln", "kaun", "klaipėd", "klaiped", "šiaul", "siaul", "panevėž", "panevez", "alytuj", "alytus", "alytaus", "marijampol", "utenoj", "utena", "utenos"] },
+  { code: "LT", needles: ["lithuania", "lietuv", "литв", "vilni", "вильн", "wiln", "kaun", "klaipėd", "klaiped", "šiaul", "siaul", "panevėž", "panevez", "alytuj", "alytus", "alytaus", "marijampol", "utenoj", "utena", "utenos", "litauen", "litouwen", "^litwa$", "^litwie$", "^litwy$", "^litwe$", "^litwę$"] },
   // "^riga" / "^ryg": a word START — "riga" is inside "brigada" / "brigade",
   // "ryga" inside the Polish "brygada". "^ryg" also reads the Lithuanian
   // locative "Rygoje", which the old nominative needle "ryga" never did.
-  { code: "LV", needles: ["latvia", "latvij", "латв", "^riga", "^ryg"] },
-  { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin"] },
-  { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "varsuv", "krak", "wroc", "vroclav", "gdansk", "gdańsk"] },
-  { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "berlyn", "hamburg", "munich", "münchen", "munchen", "miunchen", "frankfurt", "cologne", "köln", "koln", "keln", "stuttgart", "stutgart"] },
-  { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "roterdam", "роттердам", "hague", "haag", "haga", "eindhoven", "utrecht"] },
-  { code: "DK", needles: ["denmark", "danij", "дани", "copenhagen", "kopenhag", "копенгаг", "aarhus"] },
+  { code: "LV", needles: ["latvia", "latvij", "латв", "^riga", "^ryg", "^lettland$", "letland", "^lotwa$", "^lotwie$", "^lotwy$", "^łotwa$", "^łotwie$"] },
+  { code: "EE", needles: ["estonia", "eston", "estij", "эстон", "tallinn", "talin", "^estland$"] },
+  { code: "PL", needles: ["poland", "lenkij", "polska", "польш", "warsaw", "warszaw", "varsuv", "krak", "wroc", "vroclav", "gdansk", "gdańsk", "^polen$", "polsce"] },
+  { code: "DE", needles: ["germany", "vokietij", "deutschland", "герман", "berlin", "berlyn", "hamburg", "munich", "münchen", "munchen", "miunchen", "frankfurt", "cologne", "köln", "koln", "keln", "stuttgart", "stutgart", "duitsland", "tyskland", "niemczech", "^niemcy$", "^niemiec$"] },
+  { code: "NL", needles: ["netherlands", "holland", "nyderland", "niderland", "нидерланд", "голланд", "amsterdam", "rotterdam", "roterdam", "роттердам", "hague", "haag", "haga", "eindhoven", "utrecht", "^nederland$", "nederlanderna", "nederländerna", "^niederlande$", "^niederlanden$", "holandi"] },
+  { code: "DK", needles: ["denmark", "danij", "дани", "copenhagen", "kopenhag", "копенгаг", "aarhus", "danemark", "dänemark", "denemarken", "danmark", "^danii$"] },
   // "osle" is the Lithuanian locative ("Osle" = in Oslo).
-  { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "osle", "осло", "bergen", "берген", "trondheim"] },
-  { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "stokholm", "gothenburg", "göteborg", "goteborg", "gioteborg", "malmö", "malmo", "malme"] },
-  { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere"] },
+  { code: "NO", needles: ["norway", "norveg", "норвег", "oslo", "osle", "осло", "bergen", "берген", "trondheim", "norwegen", "noorwegen", "^norwegia$", "^norwegii$", "^norwegie$", "^norwegię$", "^norge$"] },
+  { code: "SE", needles: ["sweden", "švedij", "svedij", "sverige", "швец", "stockholm", "stokholm", "gothenburg", "göteborg", "goteborg", "gioteborg", "malmö", "malmo", "malme", "schweden", "^zweden$", "szwecj"] },
+  { code: "FI", needles: ["finland", "suomi", "suomij", "финлянд", "helsinki", "helsink", "espoo", "tampere", "^finnland$"] },
+  // 2026-11-22: each market's name in the other active languages ("in
+  // Deutschland / Duitsland / Niemczech / Tyskland"). DE/NL/PL/SV needs named
+  // no market at all. ADJECTIVES are deliberately absent ("German company",
+  // "Ich spreche Deutsch"): a nationality or a language is not a location.
   // Open-markets update 2026-07-17 — the six newly opened markets.
   { code: "GE", needles: ["georgia", "gruzij", "sakartvel", "грузия", "грузии", "грузию", "tbilisi", "tbilis", "batumi", "kutaisi", "rustavi"] },
-  { code: "BE", needles: ["belgium", "belgij", "бельги", "brussel", "briusel", "antwerp"] },
-  { code: "FR", needles: ["france", "prancūz", "prancuz", "франц", "paris", "paryž", "paryz", "lyon", "marseille"] },
-  { code: "ES", needles: ["spain", "ispanij", "испани", "españa", "espana", "madrid", "barcelona", "valencia"] },
-  { code: "AT", needles: ["austria", "austrij", "австри", "vienna", "wien", "graz", "linz"] },
-  { code: "CH", needles: ["switzerland", "šveicar", "sveicar", "швейцар", "zurich", "zürich", "geneva", "genev", "basel"] },
+  { code: "BE", needles: ["belgium", "belgij", "бельги", "brussel", "briusel", "antwerp", "belgien", "^belgie$", "^belgië$", "^belgii$", "^belgia$"] },
+  { code: "FR", needles: ["france", "prancūz", "prancuz", "франц", "paris", "paryž", "paryz", "lyon", "marseille", "frankreich", "frankrijk", "francj", "frankrike"] },
+  { code: "ES", needles: ["spain", "ispanij", "испани", "españa", "espana", "madrid", "barcelona", "valencia", "spanien", "spanje", "hiszpani"] },
+  { code: "AT", needles: ["austria", "austrij", "австри", "vienna", "wien", "graz", "linz", "^osterreich$", "^österreich$", "oostenrijk", "austrii"] },
+  { code: "CH", needles: ["switzerland", "šveicar", "sveicar", "швейцар", "zurich", "zürich", "geneva", "genev", "basel", "^schweiz$", "zwitserland", "szwajcari"] },
   // PR-G global location model — the USA becomes a first-class market. Country
   // words + major metros only (no 50-state needle list; note "georgia" above
   // maps to the country GE, which sits earlier in this ordered rule list).
@@ -270,14 +274,22 @@ export function maskServiceNoun(hay: string): string {
  * Does the hay contain this needle? Needles are substrings ("lietuv" reads
  * "Lietuvoje"). A needle written "^riga" must START a word: "riga" sits
  * inside "brigada" / "brigade", so every brigade sentence used to resolve to
- * Latvia.
+ * Latvia. A needle ending "$" must also END a word.
  */
 const WORD_START_NEEDLES = new Map<string, RegExp>();
 export function hayHasNeedle(hay: string, needle: string): boolean {
-  if (!needle.startsWith("^")) return hay.includes(needle);
+  // "…$" must END a word: "^nederland$" is the country, never the language
+  // "Nederlands"; "^niemiec$" never the adjective "niemiecki".
+  const start = needle.startsWith("^");
+  const end = needle.endsWith("$");
+  if (!start && !end) return hay.includes(needle);
   let re = WORD_START_NEEDLES.get(needle);
   if (!re) {
-    re = new RegExp(`(?:^|[^\\p{L}\\p{N}])${escapeForRegex(needle.slice(1))}`, "u");
+    const core = needle.slice(start ? 1 : 0, end ? -1 : undefined);
+    re = new RegExp(
+      `${start ? "(?:^|[^\\p{L}\\p{N}])" : ""}${escapeForRegex(core)}${end ? "(?![\\p{L}\\p{N}])" : ""}`,
+      "u",
+    );
     WORD_START_NEEDLES.set(needle, re);
   }
   return re.test(hay);
@@ -337,19 +349,19 @@ function escapeForRegex(s: string): string {
  */
 /** A number directly followed by a word for PEOPLE. */
 const PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|darbinink\w*|работник\w*|человек|рабоч[а-яё]*(?![а-яё])(?!\s+(?:дн|день|час|смен|недел))|сотрудник\w*|люд\w*|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|mitarbeiter\w*|arbeiter\w*|leute|werknemers?|medewerkers?|arbeiders?|mensen|personen|hands\b|ludzi)/i;
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
 const SV_PEOPLE_COUNT_RE =
-  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|работник\w*|человек|personer|medarbetare|arbetare|anst[äa]llda)/i;
+  /\b(\d{1,4})\s*(?:x\s*)?(?:workers?|people|staff|persons?|men|crew(?!s)|welders?|drivers?|cleaners?|cooks?|pickers?|laborers?|labourers?|darbuotoj\w*|žmon\w*|zmon\w*|asmen\w*|darbinink\w*|работник\w*|человек|рабоч[а-яё]*(?![а-яё])(?!\s+(?:дн|день|час|смен|недел))|сотрудник\w*|люд\w*|pracownik\w*|pracownic\w*|robotnik\w*|os[oó]b\w*|mitarbeiter\w*|arbeiter\w*|leute|werknemers?|medewerkers?|arbeiders?|mensen|personen|hands\b|ludzi|personer|medarbetare|arbetare|anst[äa]llda)/i;
 
 /** Demand verbs. "ieškau/ieškome" (LT) and "ищу" (RU) were the missing
  *  halves of pairs whose other half was already here; DE/PL/NL the same
  *  verbs the value-statement reader already knows. */
 const DEMAND_VERB_COUNT_RE =
-  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauche|brauchen|ben[öo]tige|ben[öo]tigen|suchen|zoeken|potrzebuj[eę]|potrzebujemy|szukamy)\s+(?:about\s+|apie\s+|около\s+)?(\d{1,4})\b/i;
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
 const SV_DEMAND_VERB_COUNT_RE =
-  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauchen|suchen|zoeken|potrzebujemy|szukamy|beh[öo]ver|s[öo]ker)\s+(?:about\s+|apie\s+|около\s+|cirka\s+|ungef[äa]r\s+)?(\d{1,4})\b/i;
+  /(?:need|require|looking for|we are looking for|reikia|reikalinga|reikalingi|ieškome|ieskome|ieškau|ieskau|нужно|нужны|требуется|требуются|ищем|ищу|brauche|brauchen|ben[öo]tige|ben[öo]tigen|suchen|zoeken|potrzebuj[eę]|potrzebujemy|szukamy|beh[öo]ver|s[öo]ker)\s+(?:about\s+|apie\s+|около\s+|cirka\s+|ungef[äa]r\s+)?(\d{1,4})\b/i;
 
 /**
  * Words that make the number before them a MEASURE, never a headcount:
@@ -366,6 +378,11 @@ const COUNT_UNIT_WORD_RE =
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
 const SV_COUNT_UNIT_WORD_RE =
   /^(?:years?|yrs?|metų|metu|metai|metus|metams|met|m|months?|mėn\p{L}*|mėnes\p{L}*|menes\p{L}*|weeks?|savait\p{L}*|days?|dien\p{L}*|d|hours?|hrs?|h|val\p{L}*|eur\p{L}*|euro|€|nok|sek|dkk|pln|usd|zl|zł|лет|год\p{L}*|месяц\p{L}*|мес|недел\p{L}*|дн\p{L}*|день|час\p{L}*|евро|руб\p{L}*|jahre?n?|monate?n?|monat|wochen?|tage?n?|stunden?|std|lata?|rok\p{L}*|miesi\p{L}*|tygodn\p{L}*|dni|godzin\p{L}*|jaar|jaren|maand\p{L}*|weken|dagen|uur|uren|år|månad\p{L}*|manad\p{L}*|veck(?:a|or|ors|an)|dag|dagar|dagars|timm\p{L}*|tim|kr|kronor|%|km)$/u;
+
+/** "5 рабочих дней", "5 working days", "5 darbo dienų" — a duration whose
+ *  first word is not itself a unit. Read on what directly follows a number. */
+export const WORKING_TIME_AHEAD_RE =
+  /^\s*(?:рабоч[а-яё]*\s+(?:дн|день|час|смен|недел)|working\s+(?:days?|hours?|weeks?)|business\s+days?|darbo\s+(?:dien|val|savait)|robocz\p{L}*\s+(?:dni|godzin)|werkdag|arbeitstag)/iu;
 
 /** Is this one token a unit of time, money or percent (see COUNT_UNIT_WORD_RE)? */
 export function isCountUnitWord(token: string | null | undefined, swedish = false): boolean {
@@ -593,14 +610,18 @@ function countFrom(m: RegExpMatchArray | null): number | null {
 
 /** A number that provably counts PEOPLE: followed by a person word or by the
  *  recognised occupation's own noun ("2 mūrininkų", "3 darbuotojų"). */
-function detectPeopleCount(hay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+function detectPeopleCount(rawHay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+  const hay = digitizeWordNumbers(rawHay, swedish);
   return (
     countFrom(hay.match(swedish ? SV_PEOPLE_COUNT_RE : PEOPLE_COUNT_RE)) ??
     (occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null)
   );
 }
 
-function detectTeamSize(hay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+function detectTeamSize(rawHay: string, occupationNeedle: string | null, swedish: boolean): number | null {
+  // "пять рабочих", "five workers", "penkių darbuotojų" — the same counts as
+  // "5 рабочих": number words become digits first (owner P1 2026-11-22).
+  const hay = digitizeWordNumbers(rawHay, swedish);
   // A number directly tied to people/workers, OR right after a "need" verb —
   // unless what follows it is a unit (years, months, hours, money): "Need 3
   // years experience" is not three people.
@@ -608,8 +629,9 @@ function detectTeamSize(hay: string, occupationNeedle: string | null, swedish: b
   if (people !== null) return people;
   const verb = hay.match(swedish ? SV_DEMAND_VERB_COUNT_RE : DEMAND_VERB_COUNT_RE);
   if (verb && verb.index !== undefined) {
-    const next = firstWordOf(hay.slice(verb.index + verb[0].length));
-    const n = isCountUnitWord(next, swedish) ? null : countFrom(verb);
+    const rest = hay.slice(verb.index + verb[0].length);
+    const next = firstWordOf(rest);
+    const n = isCountUnitWord(next, swedish) || WORKING_TIME_AHEAD_RE.test(rest) ? null : countFrom(verb);
     if (n !== null) return n;
   }
   return occupationNeedle ? countFrom(hay.match(adjacentOccupationCountRe(occupationNeedle))) : null;

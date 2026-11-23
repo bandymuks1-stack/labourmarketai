@@ -209,7 +209,6 @@
     "formLabelLabel": "Vieta",
     "formLabelPlaceholder": "Miestas ar regionas",
     "formPriceLabel": "Kaina",
-    "formPricePlaceholder": "pvz. 450 €/mėn arba pagal susitarimą",
     "priceHint": "Kaina neprivaloma ir aprašomoji. Mokėjimai čia nevykdomi.",
     "save": "Išsaugoti",
     "saving": "Saugoma…",
@@ -2976,8 +2975,7 @@
           "label": "Kiek darbuotojų reikia"
         },
         "salary": {
-          "label": "Atlyginimas (€)",
-          "placeholder": "Pvz., 2200"
+          "label": "Atlyginimas (€)"
         },
         "countries": {
           "label": "Pageidaujamos šalys (ISO kodai)",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Valandų vienam darbuotojui",
               "totalHours": "Iš viso valandų (nebūtina, pakeičia)",
               "rate": "Valandinis / dienos tarifas",
-              "ratePlaceholder": "pvz., 20",
               "country": "Šalis / vieta",
               "materials": "Medžiagos",
               "equipment": "Įranga / įrankiai",
@@ -7168,7 +7165,6 @@
       "countryPlaceholder": "pvz. LT",
       "remoteLabel": "Gali būti atliekama nuotoliniu būdu",
       "rateLabel": "Įkainis (nebūtina)",
-      "ratePlaceholder": "pvz. apie 25 EUR/val., derinama",
       "rateHint": "Tik laisvas tekstas — pavyzdžiui, orientacinis valandinis įkainis."
     },
     "save": "Išsaugoti",
@@ -13088,6 +13084,7 @@
     },
     "goToRoster": "Pereiti į komandą",
     "invalidLabel": "Patikrinkite el. pašto adresą — kvietimas neišsiųstas.",
+    "offerLimitLabel": "Per daug pasiūlymų. Bandykite vėliau.",
     "deliveryHeading": "Kvietimo nuoroda",
     "deliveryCreated": "Neišsiųsta el. paštu — el. laiškų siuntimas nesukonfigūruotas. Nukopijuokite nuorodą ir nusiųskite ją klientui savarankiškai.",
     "deliverySent": "Kvietimo laiškas išsiųstas. Nuorodą vis tiek galite nukopijuoti.",
@@ -14293,9 +14290,7 @@
         "preferredCountries": "Norimos šalys",
         "preferredCountriesPlaceholder": "Pvz., NL, DE",
         "salaryMin": "Atlygis nuo (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Atlygis iki (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Ar sutinki persikelti?",
         "hasTransport": "Ar galite savarankiškai atvykti į darbą?",
         "needsAccommodation": "Ar reikia apgyvendinimo?",
@@ -19771,7 +19766,6 @@
       },
       "capacity": "Žmonių",
       "rate": "Įkainis",
-      "ratePlaceholder": "pvz. 32 €/val. arba fiksuota kaina",
       "period": "Laikotarpis",
       "start": "Pradžia",
       "end": "Pabaiga",
