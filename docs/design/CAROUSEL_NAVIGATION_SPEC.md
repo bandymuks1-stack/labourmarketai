@@ -23,7 +23,7 @@ public and signed-in surface:
 - No production walk was run for this spec, so nothing below is marked PROD.
 - The A2 browser audit (`docs/audits/A2_DESIGN_AUDIT_2026-11-22.md`) ran
   against a local stack, so its findings are MAIN.
-- Lanes A and M have not sent their sections yet. §8 holds their place.
+- Lane A's section is in §8.1. Lane M's has not arrived; §8.2 holds its place.
 
 ---
 
@@ -147,8 +147,9 @@ base commit.
 
 - **9 public implementations (P1–P9).** Two of them are carousels: P2 runs
   on P3.
-- **8 signed-in implementations on `main` (S1–S8).** Two are carousels or
-  strips: S4, and S5 on phones.
+- **8 signed-in implementations on `main` (S1–S8)**, plus 5 smaller worker
+  surfaces from Lane A (S11–S15, §8.1). Two are carousels or strips: S4, and
+  S5 on phones.
 - **1 open PR (S9)** and **4 closed PRs (S10)**.
 
 Horizontal card systems on `main`: **3**.
@@ -287,7 +288,55 @@ decided. #3270 is not merged as is: N4 takes only its server-rights filter.
 
 ### 8.1 Lane A (worker home, sign-up, job search, CV)
 
-Pending. Lane A sends its section to this session.
+Received 2026-11-23 05:13 UTC from Lane A (session message). The full table
+is in issue #3679, comment 7092221505. Class MAIN, base `125e2182`; local
+browser click-through, `lt`, 390 and 1440 px.
+
+**The one signed-in header (S1).**
+- Mounted by `components/app/dashboard-chrome.tsx` and
+  `components/app/conversation/chat/conversation-chat.tsx` (checked: these
+  are the two JSX mounts). The dashboard layout renders it through the chrome.
+- Three presentations: the core row on desktop, "More" (`:508`) and the phone
+  area sheet (`:621`), plus the worker journal shortcut (`:443`).
+- Items come from **two models**: `lib/config/navigation.ts`
+  (`getCoreNavItems` `:155`, `getHeaderOverflowNavItems` `:183`) and
+  `lib/navigation/work-areas.ts` (`organizationHeaderAreas` `:161`,
+  `customerHeaderDoors` `:206`, `personalHeaderDoors` `:242`).
+
+**Card carousels.** Two implementations, confirming §2.4:
+- `AreaSwitcher`, used by `today-screen.tsx` and `company-model-screen.tsx`;
+- `CardRail`, used by the public goals.
+
+**Further worker surfaces, not in §2:**
+
+| # | Surface | File | Class |
+|---|---|---|---|
+| S11 | Command finder UI | `components/app/command-finder.tsx` (data: S6) | MAIN |
+| S12 | Notification panel | `components/app/notification-panel.tsx` | MAIN |
+| S13 | Planning connections on bookings | `app/[locale]/dashboard/bookings/page.tsx:327` (`PlanningConnections`) with `components/ui/premium-action-card.tsx` | MAIN |
+| S14 | Profile destinations row | `app/[locale]/dashboard/profile/page.tsx:995` (`profile-destinations`) | MAIN |
+| S15 | Page back link | `PageBack`, 23 files mount it (grep `<PageBack`) | MAIN |
+
+S11 and S12 are header utilities. S13 and S14 are in-page link rows, not
+navigation systems. They stay as they are; none of them is a carousel.
+
+**Browser results (Lane A, local, not PROD):**
+- Phone sheet: 8/8 links open the right page.
+- Desktop "More": 4/4 links open the right page.
+- Stations: 6/6 cards open; arrows and touch swipe work; the page does not
+  move sideways.
+- Public goals: 6/6 cards open their panel.
+- Phone: 4 goal cards show, with 2 under "Daugiau pasirinkimų" (More
+  options). This matches §4 row 1 and the A2 audit.
+
+**Not checked by Lane A:**
+- company, agency, subcontractor and institution navigation (Lane M, §8.2);
+- pin and unpin (`card-rail.tsx:273-280`, covered in §4).
+
+**Effect on the plan:**
+- N6 (`AreaSwitcher` → rail on the worker home) is Lane A's area. Lane A
+  reviews it.
+- The two item models in the header stay. N3–N5 change neither.
 
 ### 8.2 Lane M (company and agency workspaces, need and service forms)
 
