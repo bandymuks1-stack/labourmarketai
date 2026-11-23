@@ -136,7 +136,7 @@ for (const w of WIDTHS) {
       await page.goto(`${BASE}/en/dashboard/company/people`);
       const section = page.getByTestId(`team-demand-offer-section-${s.providerOrgId}`);
       await expect(section).toBeVisible({ timeout: 60_000 });
-      if ((await section.getAttribute("open")) === null) await section.locator("summary").click();
+      if ((await section.getAttribute("open")) === null) await section.locator(":scope > summary").click();
       const select = section.getByTestId(`team-offer-demand-${s.providerOrgId}`);
       await expect(select).toBeVisible({ timeout: 60_000 });
       // Owner 2026-11-22 (20261122223000): the board names the need by the provider's own order
@@ -248,7 +248,7 @@ for (const w of WIDTHS) {
       await page.goto(`${BASE}/en/dashboard/company/people`);
       const section = page.getByTestId(`team-demand-offer-section-${s.providerOrgId}`);
       await expect(section).toBeVisible({ timeout: 60_000 });
-      if ((await section.getAttribute("open")) === null) await section.locator("summary").click();
+      if ((await section.getAttribute("open")) === null) await section.locator(":scope > summary").click();
       await section.getByTestId(`team-offer-demand-${s.providerOrgId}`).selectOption(s.alias);
       await section.getByTestId(`team-offer-submit-${s.providerOrgId}`).click();
       const sent = section.getByTestId(`team-offer-sent-${s.providerOrgId}`);
