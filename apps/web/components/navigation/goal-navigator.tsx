@@ -125,6 +125,7 @@ export function GoalNavigator({
   locale,
   headingLevel = "h2",
   lead,
+  variant = "full",
 }: {
   goals: readonly NavigatorGoal[];
   /**
@@ -140,6 +141,12 @@ export function GoalNavigator({
   labels: NavigatorLabels;
   locale: string;
   headingLevel?: "h1" | "h2";
+  /**
+   * `strip`: the inner pages' goal strip under the header
+   * (CAROUSEL_NAVIGATION_SPEC N5) — level 1 as one row of pills, the heading
+   * kept for assistive tech only. Choosing a goal opens the same panel.
+   */
+  variant?: "full" | "strip";
   /** One supporting line directly under the heading: who it is for and what
    *  is free. Above the goals, so it is read before the choice. */
   lead?: string;
@@ -291,7 +298,13 @@ export function GoalNavigator({
       data-testid="goal-navigator"
       className="relative flex min-w-0 scroll-mt-32 flex-col gap-4"
     >
-      <Heading className="font-display text-xl font-bold tracking-tightest text-text-primary sm:text-2xl">
+      <Heading
+        className={
+          variant === "strip"
+            ? "sr-only"
+            : "font-display text-xl font-bold tracking-tightest text-text-primary sm:text-2xl"
+        }
+      >
         {labels.heading}
       </Heading>
       {lead && (
@@ -306,7 +319,7 @@ export function GoalNavigator({
       <CardRail
         label={labels.heading}
         testId="goal-rail"
-        size="compact"
+        size={variant === "strip" ? "strip" : "compact"}
         cards={goals}
         activeId={activeId}
         onSelect={select}

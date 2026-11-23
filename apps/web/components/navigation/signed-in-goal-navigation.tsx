@@ -11,7 +11,7 @@ import { loadGoalAdmission } from "@/lib/navigation/signed-in-goals-server";
  * read goes through the request-cached readers the layout gate already ran;
  * the labels are the keys those functions already carry elsewhere.
  */
-export async function SignedInGoalNavigation() {
+export async function SignedInGoalNavigation({ variant }: { variant?: "full" | "strip" } = {}) {
   const [admission, t] = await Promise.all([loadGoalAdmission(), getTranslations()]);
   const own = new Map<string, readonly OwnGoalFunction[]>(
     signedInGoals(admission).map((goal) => [
@@ -24,5 +24,5 @@ export async function SignedInGoalNavigation() {
       })),
     ]),
   );
-  return <GoalNavigation ownFunctions={own} />;
+  return <GoalNavigation ownFunctions={own} variant={variant} />;
 }

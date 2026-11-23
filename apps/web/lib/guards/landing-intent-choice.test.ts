@@ -317,7 +317,9 @@ describe("icons: one per function, a distinct one per profession", () => {
   });
 
   it("the icon tile is a fixed square — the slot a photograph takes later", () => {
-    expect(rail).toMatch(/flex size-10 shrink-0 items-center justify-center rounded-lg/);
+    // A fixed square on every card; the inner pages' one-line strip (N5)
+    // keeps it square and round at a pill's size.
+    expect(rail).toMatch(/"flex shrink-0 items-center justify-center",\s*strip \? "size-8 rounded-full" : "size-10 rounded-lg"/);
   });
 });
 

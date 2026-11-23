@@ -33,9 +33,12 @@ export async function GoalNavigation({
   headingLevel = "h2",
   lead,
   ownFunctions,
+  variant,
 }: {
   headingLevel?: "h1" | "h2";
   lead?: string;
+  /** `strip`: the inner pages' compact goal row (N5). */
+  variant?: "full" | "strip";
   /**
    * SIGNED IN (CAROUSEL_NAVIGATION_SPEC N4, owner P0 2026-11-23): the same
    * six goals, each opening the functions THIS person may use
@@ -63,6 +66,7 @@ export async function GoalNavigation({
       locale={locale}
       headingLevel={headingLevel}
       lead={lead}
+      variant={variant}
       goals={withOwnFunctions(
         PUBLIC_INTENTS.map((intent) => ({
         id: intent.id,

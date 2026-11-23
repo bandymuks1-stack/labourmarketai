@@ -1,3 +1,4 @@
+import { execSync } from "node:child_process";
 import { existsSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
@@ -82,6 +83,30 @@ describe("functions adapted to the role, never a page that turns the person away
   });
 });
 
+describe("inner pages carry the goals once (N5)", () => {
+  it("the layout mounts the strip once; the chrome shows it in panel mode only", () => {
+    const layout = read("app/[locale]/dashboard/layout.tsx");
+    expect(layout.match(/<SignedInGoalNavigation variant="strip" \/>/g)).toHaveLength(1);
+    const chrome = read("components/app/dashboard-chrome.tsx");
+    expect(chrome.match(/\{goalStrip\}/g)).toHaveLength(1);
+    const panel = chrome.slice(chrome.indexOf('if (mode === "panel")'), chrome.indexOf("// Full:"));
+    expect(panel).toMatch(/\{goalStrip\}/);
+  });
+
+  it("no page mounts the navigator itself", () => {
+    // The homes (today-screen, company-model-screen) carry the full one; no
+    // route under app/[locale]/dashboard renders it a second time.
+    const hits = execSync(
+      `grep -rlE "<(SignedIn)?GoalNavigation\\b" "${join(APP_ROOT, "app", "[locale]", "dashboard")}" || true`,
+      { encoding: "utf8" },
+    )
+      .split("\n")
+      .filter(Boolean)
+      .map((f) => f.slice(APP_ROOT.length + 1));
+    expect(hits).toEqual(["app/[locale]/dashboard/layout.tsx"]);
+  });
+});
+
 describe("every card is a real, existing step with a real label", () => {
   it("each href is an existing page (or a landing fragment) and each label exists in en", () => {
     for (const goal of PUBLIC_INTENT_IDS) {
@@ -98,7 +123,7 @@ describe("every card is a real, existing step with a real label", () => {
     expect(screen).toMatch(/<SignedInGoalNavigation \/>/);
     expect(company).toMatch(/<SignedInGoalNavigation \/>/);
     const wrapper = read("components/navigation/signed-in-goal-navigation.tsx");
-    expect(wrapper).toMatch(/<GoalNavigation ownFunctions=\{own\} \/>/);
+    expect(wrapper).toMatch(/<GoalNavigation ownFunctions=\{own\} variant=\{variant\} \/>/);
     expect(read("lib/navigation/signed-in-goals.ts")).not.toMatch(/PUBLIC_INTENT_IDS = |const .*GOAL_IDS/);
   });
 });
