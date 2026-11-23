@@ -884,6 +884,17 @@ test("EX-6. W1 contests one of R1's imported records on their own profile, the r
   await expect(list2.getByTestId("evidence-dispute-withdrawn-history"), "the contest is not erased, only withdrawn").toHaveCount(1);
 });
 
+/** The roster sits in the people page's "More tools" fold, which its deep
+ *  link opens. If the fold is still closed, open it the way a person would,
+ *  so a closed fold fails fast and by name instead of at the test timeout. */
+async function rosterControlOnScreen(o: Page, control: Locator, what: string): Promise<void> {
+  const fold = o.getByTestId("people-more");
+  await expect(async () => {
+    if (!(await fold.evaluate((d) => (d as HTMLDetailsElement).open))) await fold.locator("summary").first().click();
+    await expect(control).toBeVisible({ timeout: 3_000 });
+  }, `${what} is on screen`).toPass({ timeout: 60_000 });
+}
+
 // ── EX-7 ────────────────────────────────────────────────────────────────────
 
 test("EX-7. a roster name with NO account reaches a Living CV: invited by e-mail, offered, told, confirmed — the organization's records once, as organization-reported", async ({ browser }) => {
@@ -896,7 +907,9 @@ test("EX-7. a roster name with NO account reaches a Living CV: invited by e-mail
   await o.goto(`${BASE}/en/dashboard/company/people#people-import-section`);
   const claim = o.getByRole("main").getByTestId(`roster-claim-invite-${s.r3}`);
   await expect(claim, "an unlinked roster name offers the e-mail invitation").toBeAttached({ timeout: 60_000 });
-  await claim.getByTestId(`roster-claim-email-${s.r3}`).fill(W3);
+  const email = claim.getByTestId(`roster-claim-email-${s.r3}`);
+  await rosterControlOnScreen(o, email, "the invitation form");
+  await email.fill(W3, { timeout: 30_000 });
   await claim.locator('button[type="submit"]').click();
   const invited = o.getByRole("main").getByTestId(`roster-claim-invited-${s.r3}`);
   await expect(invited, "the invitation is created").toBeVisible({ timeout: 30_000 });
@@ -917,7 +930,8 @@ test("EX-7. a roster name with NO account reaches a Living CV: invited by e-mail
   await o.goto(`${BASE}/en/dashboard/company/people#people-import-section`);
   const pick = o.getByRole("main").getByTestId(`roster-link-worker-${s.r3}`);
   await expect(pick, "the new employee can be offered the roster name").toBeAttached({ timeout: 60_000 });
-  await pick.selectOption({ value: `${s.w3WorkerId}:${s.w3Id}` });
+  await rosterControlOnScreen(o, pick, "the link offer");
+  await pick.selectOption({ value: `${s.w3WorkerId}:${s.w3Id}` }, { timeout: 30_000 });
   await o.getByRole("main").getByTestId(`roster-link-offer-${s.r3}`).locator('button[type="submit"]').click();
   await expect(
     o.getByRole("main").getByTestId(`organization-roster-person-${s.r3}`).locator('[data-link-state="link_proposed"]'),
