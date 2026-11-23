@@ -15,6 +15,7 @@ import {
 } from "@/components/app/home/home-regions";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import { AreaSwitcher } from "@/components/app/area-switcher";
+import { SignedInGoalNavigation } from "@/components/navigation/signed-in-goal-navigation";
 import { deriveTodayState } from "@/lib/today/today-model";
 import { PERSONAL_WORK_AREAS } from "@/lib/navigation/work-areas";
 import { professionDisplayName } from "@/lib/worker/self-declared-profession";
@@ -235,6 +236,17 @@ async function TodayScreenHead({ locale }: { locale: ActiveLocale }) {
           </Suspense>
         </div>
       </div>
+
+      {/* THE SIX GOALS — the public home's goal navigator, signed in
+          (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC N4): the same six
+          goals for every role, each opening the functions this person may
+          use. After the regions, so the one primary action stays on the
+          first screen of a phone; directly above the stations it replaces
+          in N6. Streams behind a box of the rail's height, so nothing below
+          moves when it arrives. */}
+      <Suspense fallback={<div data-testid="signed-in-goals-pending" className="min-h-[13rem]" aria-hidden />}>
+        <SignedInGoalNavigation />
+      </Suspense>
 
       {/* 6 · STATIONS — the contextual workspaces, one tap each, as the light
           3D area switcher (owner order 2026-10-25): cards with depth, the

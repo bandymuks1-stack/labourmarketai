@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "I represent an education provider",
-            "desc": "Invite learners, see their participation and connect them to internships and jobs."
+            "desc": "Invite learners, run programmes and follow their practice and results."
           }
         },
         "heading": "Are you starting as a person or a company?",
@@ -15981,7 +15981,6 @@
     },
     "v3": {
       "lead": "For workers, employers and service providers in every profession and sector. Registration and basic request posting are free.",
-      "moreChoices": "More options",
       "or": "or describe it in your own words",
       "needFree": "You can submit an enquiry without registering. Submission is free; service terms and price are agreed separately.",
       "market": {
@@ -19402,6 +19401,19 @@
       "period": "Recorded",
       "basis": "From {entries} journal entries people recorded under this organization. Counted apart from the imported history above and never added to it.",
       "unavailable": "The journal work recorded under this organization could not be read just now."
+    },
+    "forClient": {
+      "title": "Work by your subcontractors",
+      "confirmed": "Records confirmed",
+      "unconfirmed": "Records not confirmed",
+      "periodHours": "{hours} h stated as period totals, not added to single days.",
+      "basis": "From {count, plural, one {# record} other {# records}} in your subcontractors' own books. Counted apart from your own work.",
+      "unreadable": "Work recorded in partners' books could not be read right now. That does not mean there is none."
+    },
+    "clients": {
+      "title": "Clients",
+      "unnamed": "Client organization",
+      "records": "{count, plural, one {# record} other {# records}}"
     }
   },
   "workPlan": {
@@ -19646,7 +19658,8 @@
       "heading": "Your offers",
       "none": "No offers yet.",
       "withdraw": "Withdraw",
-      "message": "Message the client"
+      "message": "Message the client",
+      "orgNext": "The client agreed in principle (not a contract). Starting the work from a company offer through the platform is not available yet: settle the details and the people who will work in the conversation."
     },
     "status": {
       "offered": "Waiting for an answer",
@@ -19747,7 +19760,7 @@
       "message": "Message the team",
       "messageCompany": "Message the company",
       "kindOrganization": "Company offer",
-      "orgNext": "Agreed in principle (not a contract). Settle the details and the people who will work in the conversation."
+      "orgNext": "Agreed in principle (not a contract). Starting the work from a company offer through the platform is not available yet: settle the details and the people who will work in the conversation."
     },
     "orgHeading": "Offer our company to an open need",
     "orgIntro": "Offer your company itself — your people, your service, or as a subcontractor — against one open need. No brigade to set up first.",

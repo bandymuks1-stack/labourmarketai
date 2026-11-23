@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Ich vertrete eine Bildungseinrichtung",
-            "desc": "Laden Sie Lernende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit Praktika und Jobs."
+            "desc": "Laden Sie Lernende ein, führen Sie Programme durch und verfolgen Sie Praxis und Ergebnisse."
           }
         },
         "heading": "Starten Sie als Person oder als Unternehmen?",
@@ -15981,7 +15981,6 @@
     },
     "v3": {
       "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
-      "moreChoices": "Weitere Optionen",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
       "market": {
@@ -19402,6 +19401,19 @@
       "period": "Erfasst",
       "basis": "Aus {entries} Journaleinträgen, die Personen unter dieser Organisation erfasst haben. Getrennt von der importierten Historie oben gezählt und nie zu ihr addiert.",
       "unavailable": "Die unter dieser Organisation im Journal erfasste Arbeit konnte gerade nicht gelesen werden."
+    },
+    "forClient": {
+      "title": "Arbeit Ihrer Subunternehmer",
+      "confirmed": "Bestätigte Einträge",
+      "unconfirmed": "Nicht bestätigte Einträge",
+      "periodHours": "{hours} Std. als Zeitraumsumme angegeben, nicht zu einzelnen Tagen addiert.",
+      "basis": "Aus {count, plural, one {# Eintrag} other {# Einträgen}} in den eigenen Unterlagen Ihrer Subunternehmer. Getrennt von Ihrer eigenen Arbeit gezählt.",
+      "unreadable": "Die in den Unterlagen der Partner erfasste Arbeit konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt."
+    },
+    "clients": {
+      "title": "Auftraggeber",
+      "unnamed": "Auftraggebende Organisation",
+      "records": "{count, plural, one {# Eintrag} other {# Einträge}}"
     }
   },
   "workPlan": {
@@ -19646,7 +19658,8 @@
       "heading": "Ihre Angebote",
       "none": "Noch keine Angebote.",
       "withdraw": "Zurückziehen",
-      "message": "Dem Auftraggeber schreiben"
+      "message": "Dem Auftraggeber schreiben",
+      "orgNext": "Der Auftraggeber hat grundsätzlich zugestimmt (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
     },
     "status": {
       "offered": "Wartet auf Antwort",
@@ -19747,7 +19760,7 @@
       "message": "Dem Team schreiben",
       "messageCompany": "Dem Unternehmen schreiben",
       "kindOrganization": "Unternehmensangebot",
-      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Details und die arbeitenden Personen klären Sie im Gespräch."
+      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
     },
     "orgHeading": "Unser Unternehmen für einen offenen Bedarf anbieten",
     "orgIntro": "Bieten Sie Ihr Unternehmen selbst an — Ihre Leute, Ihre Leistung oder als Subunternehmer — für einen offenen Bedarf. Kein Team muss zuerst angelegt werden.",

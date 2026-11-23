@@ -187,7 +187,9 @@ describe("W7-S1 — accessibility of the surface it introduced", () => {
   });
 
   it("semantic headings: the hub is an h2 with h3 subsections", () => {
-    expect(HUB).toMatch(/<h2 className="truncate font-display/);
+    // The level is the contract; the name WRAPS (design audit 2026-11-22: a
+    // truncated h2 cut "Audit Worker mw…" at 768 px).
+    expect(HUB).toMatch(/<h2 className="[^"]*font-display/);
     expect(HUB).toMatch(/<h3 className="font-mono text-meta/);
     // The page keeps exactly one h1 (PageTitle renders the h1).
     expect((PAGE.match(/<h1|<PageTitle/g) ?? []).length).toBe(1);
