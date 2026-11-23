@@ -1,8 +1,8 @@
 # LabourMarket.ai — 12 valandų būklės ataskaita
 
-<!-- generated-at: 2026-11-22T19:41:30.569Z -->
+<!-- generated-at: 2026-11-23T07:42:24.853Z -->
 
-Sugeneruota 2026-11-22 21:41 (Lietuvos laiku). Laikotarpis: nuo 2026-11-22 09:39.
+Sugeneruota 2026-11-23 09:42 (Lietuvos laiku). Laikotarpis: nuo 2026-11-22 21:40.
 
 **Ataskaitos būsena: COMPLETE** — visos užklausos pavyko, registras ir migracijų žurnalas perskaityti, prieštaravimų nėra.
 
@@ -10,13 +10,13 @@ Privalomos CI patikros: quality, migration-safety (šaltinis: repository policy 
 
 Kanoninis dokumentas (savininko nurodymas 2026-11-14, P0). Kiekviena ataskaita perrašo šį failą; ankstesnės ataskaitos — šio failo git istorijoje. Funkcijų būsenos imamos tik iš [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md) eilučių: funkcija laikoma veikiančia tik tada, kai jos eilutė turi produkcijos įrodymą (`LIVE_VERIFIED`). Kodas ar žalias CI veikimo neįrodo. Generatorius: `.github/scripts/status-report.mjs`.
 
-**Produkcija:** versija `f7320687`, sveikata gera, patikrinta 2026-11-22 21:41.
+**Produkcija:** versija `125e2182`, sveikata gera, patikrinta 2026-11-23 09:42.
 
 **Funkcijos:** 287 privalomos apimties funkcijų; veikia produkcijoje (įrodyta) 200 (69.7 %).
 
 Ką matuoja šis skaičius: kiek registro funkcijų turi produkcijos įrodymą (`LIVE_VERIFIED` — paleidimo ar patikros ID produkcijoje). Tai nėra užbaigimo procentas ir nereiškia, kad likusios 87 neveikia. Jos skirstomos taip: TIK KODE 14, TIK CI PATIKRINTA 4, NEPATIKRINTA 0, NEVEIKIA 7, NEĮGYVENDINTA 21, BLOKUOTA 41. Neveikiančiomis laikomos tik NEVEIKIA eilutės; NEPATIKRINTA, TIK KODE ir TIK CI PATIKRINTA reiškia „neįrodyta produkcijoje“, ne „sugedę“.
 
-**Migracijos produkcijoje:** 482 pritaikyta, 7 repozitorijos failų nepritaikyta (gyvas žurnalo patikrinimas, quality run 45060872068, main 440d8276).
+**Migracijos produkcijoje:** 482 pritaikyta, 7 repozitorijos failų nepritaikyta (gyvas žurnalo patikrinimas, quality run 45114380625, main 125e2182).
 **Neatitikimai:** nerasta.
 
 ## Patvirtinta naujausia būsena
@@ -30,7 +30,7 @@ Paskutinis užbaigtas produkcijos bandymas kiekvienam scenarijui ir ekranui, nep
 | agency-chain | telefonas 375 px | sėkmingas | `7e517e32` | 2026-11-20 02:40 | [44646951459](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44646951459) |
 | ai-off-honesty | kompiuteris | sėkmingas | `eed72052` | 2026-11-22 04:01 | [44973720651](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44973720651) |
 | brigade-formation | kompiuteris | sėkmingas | `eed72052` | 2026-11-21 15:02 | [44906216102](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44906216102) |
-| buyer-workspace | kompiuteris | nepavyko | `9f587dd6` | 2026-11-22 10:32 | [45003241107](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45003241107) |
+| buyer-workspace | kompiuteris | sėkmingas | `ee29a3b7` | 2026-11-23 03:27 | [45094390854](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45094390854) |
 | calendar-planning | kompiuteris | sėkmingas | `eed72052` | 2026-11-22 02:33 | [44966863726](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44966863726) |
 | chat-confirm-once | kompiuteris | sėkmingas | `eed72052` | 2026-11-22 03:37 | [44972019714](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44972019714) |
 | chat-continuity | telefonas 390 px | sėkmingas | `eed72052` | 2026-11-21 14:30 | [44903881953](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44903881953) |
@@ -57,7 +57,7 @@ Paskutinis užbaigtas produkcijos bandymas kiekvienam scenarijui ir ekranui, nep
 | marketplace-goods-services | telefonas 390 px | sėkmingas | `eed72052` | 2026-11-22 02:52 | [44968374455](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44968374455) |
 | mcp-agents | kompiuteris | sėkmingas | `eed72052` | 2026-11-22 03:54 | [44973332549](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44973332549) |
 | mcp-chain | kompiuteris | sėkmingas | `eed72052` | 2026-11-22 03:48 | [44972915546](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44972915546) |
-| mobile-surfaces | telefonas 390 px | nepavyko | `eed72052` | 2026-11-22 04:59 | [44977749659](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44977749659) |
+| mobile-surfaces | telefonas 390 px | nepavyko | `8bcda5be` | 2026-11-23 04:17 | [45098478024](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45098478024) |
 | need-intake | kompiuteris | sėkmingas | `7e517e32` | 2026-11-20 02:05 | [44642526482](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44642526482) |
 | need-intake | telefonas 390 px | sėkmingas | `7e517e32` | 2026-11-20 02:11 | [44643169770](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44643169770) |
 | need-intake | telefonas 375 px | sėkmingas | `7e517e32` | 2026-11-20 02:18 | [44643949860](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44643949860) |
@@ -66,9 +66,9 @@ Paskutinis užbaigtas produkcijos bandymas kiekvienam scenarijui ir ekranui, nep
 | orders-bookings | telefonas 390 px | sėkmingas | `ed4ecf85` | 2026-11-22 20:12 | [45052181467](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45052181467) |
 | org-roster | kompiuteris | sėkmingas | `eed72052` | 2026-11-21 14:47 | [44905313755](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44905313755) |
 | org-roster | telefonas 390 px | sėkmingas | `eed72052` | 2026-11-21 14:53 | [44905801746](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44905801746) |
-| profile-cv-history | kompiuteris | sėkmingas | `7e517e32` | 2026-11-20 01:02 | [44632628432](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44632628432) |
-| profile-cv-history | telefonas 390 px | sėkmingas | `7e517e32` | 2026-11-20 01:26 | [44634343495](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44634343495) |
-| profile-cv-history | telefonas 375 px | nepavyko | `ed4ecf85` | 2026-11-22 19:54 | [45051053618](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45051053618) |
+| profile-cv-history | kompiuteris | sėkmingas | `8bcda5be` | 2026-11-23 03:42 | [45094839877](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45094839877) |
+| profile-cv-history | telefonas 390 px | sėkmingas | `8bcda5be` | 2026-11-23 04:06 | [45097071365](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45097071365) |
+| profile-cv-history | telefonas 375 px | sėkmingas | `ee29a3b7` | 2026-11-23 03:13 | [45091874326](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45091874326) |
 | project-context | kompiuteris | sėkmingas | `eed72052` | 2026-11-21 15:20 | [44907816401](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44907816401) |
 | project-execution | kompiuteris | sėkmingas | `eed72052` | 2026-11-21 15:12 | [44906961206](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44906961206) |
 | public-org-locales | telefonas 390 px | sėkmingas | `eed72052` | 2026-11-22 04:46 | [44977198005](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44977198005) |
@@ -83,41 +83,43 @@ Paskutinis užbaigtas produkcijos bandymas kiekvienam scenarijui ir ekranui, nep
 
 ## Pokyčiai nuo ankstesnės ataskaitos
 
-Lyginama su ataskaita, sugeneruota 2026-11-22 09:41.
+Lyginama su ataskaita, sugeneruota 2026-11-22 21:41.
 
 - Veikia produkcijoje: 200 → 200.
-- Atvirų PR: 112 → 123; sujungta per laikotarpį 50.
-- Produkcijos diegimų per laikotarpį: 23 sėkmingi, 0 nepavykę.
+- Atvirų PR: 123 → 125; sujungta per laikotarpį 31.
+- Produkcijos diegimų per laikotarpį: 13 sėkmingi, 0 nepavykę.
 
 Funkcijų būsenų pokyčių registre nėra.
 
 ## B. Trumpa vadovo suvestinė
 
-**12 valandų ataskaita, 2026-11-22 21:38.** Ankstesnė ataskaita – 2026-11-22 09:41, nepraleista.
+**12 valandų ataskaita, 2026-11-23 09:38.** Ankstesnė ataskaita – 2026-11-22 21:41, nepraleista.
 
-- **Produkcija ir main:**
-  - produkcijoje veikia `f7320687`, sveikata gera; `main` HEAD – `440d8276`;
-  - neįdiegtas tik #3648, sujungtas 21:27 – jo diegimas `440d8276` vykdomas;
-  - per laikotarpį 23 sėkmingi diegimai, 2 atšaukti, 0 nepavykusių;
-  - migracijų žurnalas perskaitytas, patikra sėkminga.
-- **Pokyčiai:** sujungta 50 PR. Svarbiausi:
-  - #2752 (RED, teisiniai tekstai) – savininko sprendimas 2026-11-22: privatumo puslapiai nurodo naujus nemokamus DI tiekėjus prieš juos įjungiant;
-  - #3583, #3600 – Cloudflare Workers AI vienam neaiškiam, redaguotam sakiniui;
-  - #3574, #3635, #3641 – žurnalas atsidaro darbo diena; žurnalas, darbo paieška ir pasiūlymai – darbuotojo antraštėje;
-  - #3586 – prisijungimas prie organizacijos niekada nesukuria naujos; parodoma, kas pakvietė;
-  - #3606, #3653, #3633 – įvestas tekstas išlieka po klaidos, perkrovimo ar diegimo; profilio išsaugojimas visada parodo atsakymą;
-  - #3631 – privatumo prašymai neįtraukiami į dalijimąsi, atitikimą ir skaičius;
-  - #3579 – CSV formulių apsauga, tikslus MCP JSON patikrinimas;
-  - #3607, #3608, #3609 – greitesnis prisijungimas ir pokalbis;
-  - daug sąsajos supaprastinimų pagal sprendimą 0032 (#3590, #3592, #3610, #3617, #3618, #3621, #3622, #3634).
+- **Produkcija ir main:** produkcijoje `125e2182` = `main` HEAD, sveikata gera. 13 sėkmingų diegimų, 0 nepavykusių. Neįdiegtų commit'ų nėra. Migracijų žurnalas perskaitytas, patikra sėkminga.
+- **Pokyčiai:** sujungtas 31 PR. Daugiausia – telefono sąsaja ir paprastesni ekranai pagal sprendimą 0032:
+  - 44 px paspaudimo plotai;
+  - suskleidžiami sąrašai;
+  - pavadinimai vietoje ID;
+  - darbuotojo sąsaja (#3659, #3667, #3668, #3671, #3672, #3674).
+
+  Taip pat:
+  - #3658 – saugumo pataisos (detalės privačiame Internal Brain);
+  - #3629 – agentūros lentos skaitymo ir pasiūlymų apribojimai;
+  - #3639, #3644 – skaičių žodžiais, datų, valandų ir profesijų atpažinimas 7 kalbomis;
+  - #3656 – paleidimo matrica savininko 2026-11-23 ataskaitai;
+  - #3663 – darbdavio kelionė 390 ir 1440 px pločiais izoliuotoje aplinkoje.
 - **Užbaigta su produkcijos įrodymu:**
-  - orders-bookings – kompiuteris `45049554634`, telefonas `45052181467` (`ed4ecf85`) – sėkmingi (savininko pakartojimo užsakymas, #3643);
-  - suplanuotas bandymas `45019963488` – sėkmingas.
-- **Nepavyko:**
-  - profile-cv-history 375 px – `45047648320` ir `45051053618` (`ed4ecf85`). Priežastis – išsaugojimas diegimo metu liko be atsakymo (P-26). Pataisa #3653 įdiegta (`f7320687`), bet bandymas dar nepakartotas;
-  - buyer-workspace kompiuteriu `45003241107` – nepavyko dar kartą; priežastis neišnagrinėta;
-  - invited-worker telefonu `45001807853` – nepavyko, nes sintetinė paskyra nesukurta (savininko užduotis); scenarijus išimtas iš plano (#3591).
-- **Neveikia:**
+  - profile-cv-history – visi trys pločiai vėl sėkmingi:
+    - 375 px `45091874326` (`ee29a3b7`), po #3653 pataisos;
+    - kompiuteris `45094839877` (`8bcda5be`);
+    - 390 px `45097071365` (`8bcda5be`; pirmas bandymas `45096244318` nepavyko, pakartotas sėkmingai);
+  - buyer-workspace kompiuteriu `45094390854` (`ee29a3b7`) – sėkmingas (pirmas bandymas `45093473297` nepavyko).
+- **Nepavyko:** mobile-surfaces telefonu `45098478024` (`8bcda5be`). Po to sujungtas #3678 (M-6 patikra telefonui), bet bandymas dar nepakartotas.
+- **Nepatikrinta:**
+  - company-chain – 375 px po nesėkmės;
+  - learning-practice – 390 ir 375 px;
+  - invited-worker – nėra sintetinės paskyros (savininko užduotis).
+- **Kiti neveikiantys dalykai:**
   - 7.28 (mokėjimai);
   - Telegram pranešimai VPS (5.16) – išjungti;
   - programėlių parduotuvės: 8.15 blokuota.
@@ -127,16 +129,16 @@ Funkcijų būsenų pokyčių registre nėra.
   - #3292 – nejungti;
   - #3227 ir #3252 – atviri.
 - **Artimiausi darbai:**
-  - pakartoti profile-cv-history 375 px po #3653;
-  - išnagrinėti buyer-workspace;
-  - sukurti invited-worker sintetinę paskyrą (savininkas);
-  - company-chain 375 px ir learning-practice telefonu.
-- **#3354:** naujų komentarų nėra.
-  - profile-cv-history 375 px po sėkmės (`44856987867`) du kartus nepavyko (`ed4ecf85`), nes išsaugojimas diegimo metu liko be atsakymo;
-  - pataisa #3653 įdiegta, bet nepakartota.
+  - pakartoti mobile-surfaces po #3678;
+  - company-chain 375 px;
+  - learning-practice telefonu;
+  - invited-worker paskyra (savininkas).
 
-  Galutinio įrodymo dar nėra.
-- **#3345:** naujų komentarų nėra. Telefonu: orders-bookings sėkmingas; profile-cv-history 375 px nepavyko.
+  Pasirengimo bandymų langas baigiasi šiandien.
+- **#3354:** naujų komentarų nėra. profile-cv-history dabar sėkmingas visais trimis pločiais naujausiose versijose (`ee29a3b7`, `8bcda5be`). Galutinio įrodymo su tikru profiliu dar nėra.
+- **#3345:** naujų komentarų nėra. Telefonu šią naktį:
+  - profile-cv-history – 375 ir 390 px sėkmingi;
+  - mobile-surfaces – nepavyko.
 
 ## A1. Būsenos pagal registro grupes
 
@@ -163,21 +165,20 @@ Pasirengimo plano bandymai, naujausias rezultatas:
 
 | Grupė | Scenarijus | Kompiuteris | Telefonas 390 px | Telefonas 375 px |
 |---|---|---|---|---|
-| Darbuotojas | profile-cv-history | sėkmingas `44632628432` (`7e517e32`) | sėkmingas `44634343495` (`7e517e32`) | **nepavyko** `45051053618` (`ed4ecf85`), pataisa #3653 |
+| Darbuotojas | profile-cv-history | sėkmingas `45094839877` (`8bcda5be`) | sėkmingas `45097071365` (`8bcda5be`) | sėkmingas `45091874326` (`ee29a3b7`) |
 | Darbdavys | company-chain | sėkmingas `44858511879` (`d447a639`) | sėkmingas `44859165488` (`d447a639`) | **nepavyko** `44859841951` (`d447a639`) |
 | Įmonė be paskyros | need-intake | sėkmingas `44642526482` (`7e517e32`) | sėkmingas `44643169770` (`7e517e32`) | sėkmingas `44643949860` (`7e517e32`) |
 | Agentūra | agency-chain | sėkmingas `44644887648` (`7e517e32`) | sėkmingas `44645924736` (`7e517e32`) | sėkmingas `44646951459` (`7e517e32`) |
 | Studentas / mokymo įstaiga | learning-practice | sėkmingas `44860184317` (`d447a639`) | dar nepaleista | dar nepaleista |
 
 Kiti šio laikotarpio bandymai:
-- orders-bookings – kompiuteris `45049554634` ir telefonas `45052181467` sėkmingi;
-- buyer-workspace – kompiuteriu nepavyko `45003241107`;
-- invited-worker – telefonu nepavyko `45001807853` (nėra paskyros).
+- buyer-workspace – kompiuteriu sėkmingas `45094390854`;
+- mobile-surfaces – telefonu nepavyko `45098478024`.
 
 Nepatikrinta:
+- company-chain – 375 px;
 - learning-practice – 390 ir 375 px;
-- company-chain ir profile-cv-history – 375 px po pataisų;
-- šios dienos sąsajos pakeitimai (`f7320687`) – penkių grupių scenarijais.
+- invited-worker – telefonu.
 
 | Sritis | Iš viso | VEIKIA PRODUKCIJOJE | TIK KODE | TIK CI PATIKRINTA | NEPATIKRINTA | NEVEIKIA | NEĮGYVENDINTA | BLOKUOTA |
 |---|---|---|---|---|---|---|---|---|
@@ -223,17 +224,14 @@ Funkcija priskiriama grupei pagal registro stulpelį „Kam“; viena funkcija g
 
 #3354 (P0). Nuo 2026-11-15 11:13 naujų komentarų nėra.
 
-**Šio laikotarpio pakeitimai:**
-- #3653 – kiekvienas profilio išsaugojimas parodo atsakymą, ir diegimo metu;
-- #3612 – algos laukuose nėra pavyzdinių sumų;
-- #3618 – profilio sąraše veiksmai nesikartoja.
+**Šio laikotarpio įrodymai:** profile-cv-history sėkmingas visais trimis pločiais:
+- 375 px – `45091874326` (`ee29a3b7`);
+- kompiuteris – `45094839877` (`8bcda5be`);
+- 390 px – `45097071365` (`8bcda5be`).
 
-Įdiegta, bet produkcijoje nepatikrinta.
-
-**Įrodymai:** profile-cv-history 375 px nepavyko du kartus (`45047648320`, `45051053618`, `ed4ecf85`). Kompiuterio ir 390 px rezultatai – sėkmingi (`7e517e32`).
+Išsaugojimo atsakymo pataisa #3653 produkcijoje patvirtinta.
 
 **Laukia:**
-- profile-cv-history 375 px pakartojimas;
 - istorinių darbuotojų priskyrimas (RED);
 - #3292 – nejungti;
 - galutinis įrodymas su tikru profiliu.
@@ -293,32 +291,19 @@ Registro eilutės, kurios sudaro CV sistemą:
 
 | Versija | Rezultatas | Laikas | Įrašas |
 |---|---|---|---|
-| `440d8276` | in_progress | 2026-11-22 21:37 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45061798558) |
-| `f7320687` | success | 2026-11-22 21:24 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45060155585) |
-| `ed4ecf85` | success | 2026-11-22 19:34 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45049706816) |
-| `ed4ecf85` | success | 2026-11-22 19:22 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45048496310) |
-| `f52ff9cf` | success | 2026-11-22 18:58 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45046193186) |
-| `f52ff9cf` | success | 2026-11-22 18:48 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45045158834) |
-| `22d0a7c8` | success | 2026-11-22 18:33 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45043464578) |
-| `ca8aaa25` | success | 2026-11-22 17:55 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45040424273) |
-| `ca8aaa25` | success | 2026-11-22 17:46 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45039018773) |
-| `92cfc63f` | success | 2026-11-22 17:25 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45037078946) |
-| `0016c5c5` | success | 2026-11-22 16:58 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45034505009) |
-| `6c6061a8` | success | 2026-11-22 16:35 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45032258738) |
-| `6c6061a8` | success | 2026-11-22 16:31 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45029324873) |
-| `2b2c28d4` | success | 2026-11-22 16:16 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45027704061) |
-| `c8d1e4f9` | cancelled | 2026-11-22 15:17 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026579973) |
-| `c8d1e4f9` | cancelled | 2026-11-22 15:16 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026573358) |
-| `9d1b678a` | success | 2026-11-22 15:18 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026384218) |
-| `b9b362ac` | success | 2026-11-22 15:12 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45025459822) |
-| `19ee0e6f` | success | 2026-11-22 15:00 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45024464965) |
-| `703647dc` | success | 2026-11-22 14:45 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45023308759) |
-| `c2448a8a` | success | 2026-11-22 13:16 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45016220094) |
-| `9d16f872` | success | 2026-11-22 10:59 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45004900541) |
-| `9d16f872` | success | 2026-11-22 10:45 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45003873021) |
-| `e71cff2f` | success | 2026-11-22 10:31 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45002891854) |
-| `397710f1` | success | 2026-11-22 10:18 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45001767651) |
-| `0bda4252` | success | 2026-11-22 10:03 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45000676495) |
+| `125e2182` | success | 2026-11-23 07:17 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45116356682) |
+| `125e2182` | success | 2026-11-23 07:07 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45115249287) |
+| `2de6589c` | success | 2026-11-23 06:16 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45110769815) |
+| `2de6589c` | success | 2026-11-23 06:07 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45109409755) |
+| `8bcda5be` | success | 2026-11-23 03:47 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45096004999) |
+| `ee29a3b7` | success | 2026-11-23 03:13 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45092918182) |
+| `e95604da` | success | 2026-11-23 01:17 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45081999352) |
+| `e95604da` | success | 2026-11-23 01:05 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45080745658) |
+| `048846f1` | success | 2026-11-23 00:24 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45077119660) |
+| `048846f1` | success | 2026-11-23 00:10 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45075707683) |
+| `f65c5721` | success | 2026-11-22 23:13 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45070222225) |
+| `f65c5721` | success | 2026-11-22 23:07 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45069027622) |
+| `c6789db6` | success | 2026-11-22 22:02 | [run](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45064141767) |
 
 Nepavykę diegimai: nėra.
 
@@ -326,125 +311,85 @@ Nepavykę diegimai: nėra.
 
 | Bandymas | Ekranas | Versija | Rezultatas | Laikas |
 |---|---|---|---|---|
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45060872136) | kompiuteris | `440d8276` | in_progress | 2026-11-22 21:27 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45058852209) | kompiuteris | `f7320687` | cancelled | 2026-11-22 21:27 |
-| [prod-qa-walk orders-bookings phone](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45052181467) | telefonas 390 px | `ed4ecf85` | success | 2026-11-22 20:12 |
-| [prod-qa-walk profile-cv-history phone-375](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45051053618) | telefonas 375 px | `ed4ecf85` | failure | 2026-11-22 19:54 |
-| [prod-qa-walk orders-bookings desktop](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45049554634) | kompiuteris | `ed4ecf85` | success | 2026-11-22 19:42 |
-| [prod-qa-walk profile-cv-history phone-375](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45047648320) | telefonas 375 px | `ed4ecf85` | failure | 2026-11-22 19:25 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45047287092) | kompiuteris | `14dfbf27` | success | 2026-11-22 21:16 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45044692743) | kompiuteris | `f52ff9cf` | cancelled | 2026-11-22 19:03 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45043456946) | kompiuteris | `22d0a7c8` | cancelled | 2026-11-22 18:35 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45042440384) | kompiuteris | `c0e27d71` | cancelled | 2026-11-22 18:22 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038962097) | kompiuteris | `ca8aaa25` | cancelled | 2026-11-22 18:11 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038955701) | kompiuteris | `4754e109` | cancelled | 2026-11-22 17:33 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038949297) | kompiuteris | `b7653285` | cancelled | 2026-11-22 17:33 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038800047) | kompiuteris | `28e6f59c` | cancelled | 2026-11-22 17:33 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038794823) | kompiuteris | `2d505877` | cancelled | 2026-11-22 17:31 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038756500) | kompiuteris | `f1457fd1` | cancelled | 2026-11-22 17:31 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038751332) | kompiuteris | `d816897b` | cancelled | 2026-11-22 17:31 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038745486) | kompiuteris | `d76edd84` | cancelled | 2026-11-22 17:31 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038739833) | kompiuteris | `8de115fa` | cancelled | 2026-11-22 17:31 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038534598) | kompiuteris | `f012798f` | cancelled | 2026-11-22 17:31 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038529470) | kompiuteris | `216d525b` | cancelled | 2026-11-22 17:29 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038524111) | kompiuteris | `65b8e67e` | cancelled | 2026-11-22 17:28 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45038507026) | kompiuteris | `c80fd7e7` | cancelled | 2026-11-22 17:28 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45034979530) | kompiuteris | `92cfc63f` | cancelled | 2026-11-22 17:28 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45033517180) | kompiuteris | `0016c5c5` | cancelled | 2026-11-22 16:50 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45033500986) | kompiuteris | `62bbb33d` | cancelled | 2026-11-22 16:34 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45028453552) | kompiuteris | `6c6061a8` | cancelled | 2026-11-22 16:34 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45027284360) | kompiuteris | `2b2c28d4` | cancelled | 2026-11-22 15:37 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026726533) | kompiuteris | `a73b0e7c` | cancelled | 2026-11-22 15:24 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026569799) | kompiuteris | `c8d1e4f9` | cancelled | 2026-11-22 15:18 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026565234) | kompiuteris | `20486a3d` | cancelled | 2026-11-22 15:16 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026560312) | kompiuteris | `5fd73073` | cancelled | 2026-11-22 15:16 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026174310) | kompiuteris | `9d1b678a` | cancelled | 2026-11-22 15:16 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45026016378) | kompiuteris | `a70c64f3` | cancelled | 2026-11-22 15:11 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45024131864) | kompiuteris | `19ee0e6f` | cancelled | 2026-11-22 15:10 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45023937433) | kompiuteris | `be5cf65d` | cancelled | 2026-11-22 14:48 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45023080075) | kompiuteris | `703647dc` | cancelled | 2026-11-22 14:45 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45022862484) | kompiuteris | `8e79687f` | cancelled | 2026-11-22 14:35 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45022503677) | kompiuteris | `5d26a3fb` | cancelled | 2026-11-22 14:33 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45022305866) | kompiuteris | `71b51902` | cancelled | 2026-11-22 14:29 |
-| [prod-qa-walk schedule](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45019963488) | kompiuteris | `c2448a8a` | success | 2026-11-22 14:03 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45015269130) | kompiuteris | `c2448a8a` | cancelled | 2026-11-22 14:27 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45003825980) | kompiuteris | `9d16f872` | success | 2026-11-22 12:50 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45003361565) | kompiuteris | `8d578cb2` | cancelled | 2026-11-22 10:39 |
-| [prod-qa-walk buyer-workspace desktop](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45003241107) | kompiuteris | `9f587dd6` | failure | 2026-11-22 10:32 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45003041917) | kompiuteris | `7103d476` | cancelled | 2026-11-22 10:33 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45002285218) | kompiuteris | `e71cff2f` | cancelled | 2026-11-22 10:29 |
-| [prod-qa-walk invited-worker phone](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45001807853) | telefonas 390 px | `397710f1` | failure | 2026-11-22 10:14 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45001098885) | kompiuteris | `397710f1` | cancelled | 2026-11-22 10:19 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45001007513) | kompiuteris | `e716ecb0` | cancelled | 2026-11-22 10:04 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44999835444) | kompiuteris | `f22669f5` | cancelled | 2026-11-22 10:03 |
-| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/44999831147) | kompiuteris | `6e1b9e13` | cancelled | 2026-11-22 09:47 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45114380515) | kompiuteris | `125e2182` | success | 2026-11-23 09:03 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45114372169) | kompiuteris | `34307350` | cancelled | 2026-11-23 06:52 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45114362916) | kompiuteris | `430bd475` | cancelled | 2026-11-23 06:52 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45108322681) | kompiuteris | `97bd4d4d` | cancelled | 2026-11-23 06:52 |
+| [prod-qa-walk mobile-surfaces phone](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45098478024) | telefonas 390 px | `8bcda5be` | failure | 2026-11-23 04:17 |
+| [prod-qa-walk profile-cv-history phone](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45097071365) | telefonas 390 px | `8bcda5be` | success | 2026-11-23 04:06 |
+| [prod-qa-walk profile-cv-history phone](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45096244318) | telefonas 390 px | `8bcda5be` | failure | 2026-11-23 03:44 |
+| [prod-qa-walk profile-cv-history desktop](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45094839877) | kompiuteris | `8bcda5be` | success | 2026-11-23 03:42 |
+| [prod-qa-walk buyer-workspace desktop](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45094390854) | kompiuteris | `ee29a3b7` | success | 2026-11-23 03:27 |
+| [prod-qa-walk buyer-workspace desktop](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45093473297) | kompiuteris | `ee29a3b7` | failure | 2026-11-23 03:15 |
+| [prod-qa-walk profile-cv-history phone-375](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45091874326) | telefonas 375 px | `ee29a3b7` | success | 2026-11-23 03:13 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45079795470) | kompiuteris | `e95604da` | success | 2026-11-23 02:59 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45079789461) | kompiuteris | `53493531` | cancelled | 2026-11-23 00:49 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45079783933) | kompiuteris | `115de2fd` | cancelled | 2026-11-23 00:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45079779359) | kompiuteris | `4736ae2b` | cancelled | 2026-11-23 00:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45079563315) | kompiuteris | `9c8c9547` | cancelled | 2026-11-23 00:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074489920) | kompiuteris | `048846f1` | cancelled | 2026-11-23 00:46 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074290657) | kompiuteris | `d277b70f` | cancelled | 2026-11-22 23:52 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074211647) | kompiuteris | `b95b66ac` | cancelled | 2026-11-22 23:50 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074206953) | kompiuteris | `5b29d36d` | cancelled | 2026-11-22 23:49 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074202207) | kompiuteris | `0fc35bcf` | cancelled | 2026-11-22 23:49 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074170496) | kompiuteris | `16f01043` | cancelled | 2026-11-22 23:49 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074165716) | kompiuteris | `8c03bd82` | cancelled | 2026-11-22 23:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074153915) | kompiuteris | `fb3997e9` | cancelled | 2026-11-22 23:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074148288) | kompiuteris | `fda259d6` | cancelled | 2026-11-22 23:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074142816) | kompiuteris | `17f6b80c` | cancelled | 2026-11-22 23:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074137342) | kompiuteris | `b1cb5c16` | cancelled | 2026-11-22 23:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45074131879) | kompiuteris | `cea40255` | cancelled | 2026-11-22 23:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45073890429) | kompiuteris | `db2e94e4` | cancelled | 2026-11-22 23:48 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45073885581) | kompiuteris | `82f35b9e` | cancelled | 2026-11-22 23:45 |
+| [prod-qa-walk push](https://github.com/bandymuks1-stack/labourmarketai/actions/runs/45067939798) | kompiuteris | `f65c5721` | cancelled | 2026-11-22 23:45 |
 
-### Sujungti per laikotarpį (50)
+### Sujungti per laikotarpį (31)
 
-- #3653 fix(profile): every profile save answers on screen, also across a deploy reload
-- #3650 fix(ci): the daily-cap loop reads the run id, not id + date
-- #3648 fix(assistant): read a headcount written in words in every language
-- #3645 fix(mobile): the last Polish informal strings use "Państwo"
-- #3643 ci(launch): re-run three owner-named pairs; retry a brake refusal itself
-- #3641 feat(nav): job search and offers are in the worker's header
-- #3637 fix(workspace): drop org-scoped URL depth on switch so router keeps it
-- #3635 feat(nav): the work journal is one tap from the worker's header
-- #3634 fix(pricing): each plan's feature list folds behind its own row
-- #3633 fix(journal): the detailed form shows a refused save on its first screen
-- #3631 fix(privacy): keep privacy requests off sharing, matching and counts
-- #3628 test(walk): the booked hire is visible to both sides, and to nobody else
-- #3625 fix(offers): company offers read as a company; providers find open needs
-- #3624 fix(journal): refused save shown on the first screen; walk takes the phone path
-- #3623 fix(intake): "from next Monday" is read as the start date, 7 languages
-- #3622 fix(needs): the need form's optional clusters start closed and say what is filled
-- #3621 fix(privacy): profile and onboarding fold the visibility consent into its status line
-- #3619 test(walk): no production walk leaves a synthetic need open
-- #3618 fix(profile): no duplicated actions under the profile checklist
-- #3617 fix(signup): drop the pilot-feedback line under the sign-up button
-- #3615 test(assistant): close LT/EN/RU variants reach the same intents
-- #3612 fix(cv): no example pay figures in the salary fields
-- #3611 test(e2e): hiring chain walk — direct hire to project, 1280 and 390 px
-- #3610 feat(education): compact icon heads, no helper-text walls (0032)
-- #3609 perf(chat): send a person's proposer only the actions they can run
-- #3608 perf(auth): a protected route with no auth cookie goes to login at once [needs-human-gate]
-- #3607 perf(auth): sign-in and sign-up stop shipping the intent classifier
-- #3606 fix(drafts): typed work survives an error, a reload or a new sign-in
-- #3605 fix(assistant): the chat goal survives a page load, not only an unmount
-- #3603 test(journal): prove the journal's reach, past days, refusals and 390 px
-- #3602 fix(ai): an intent answer with an empty field is not a failed answer
-- #3601 fix(ops): the VPS smoke test only reads, and checks the live release
-- #3600 fix(ai): Cloudflare Gemma 4 answers instead of spending the cap thinking
-- #3599 fix(header): the desktop header never overlaps; the workspace name stays
-- #3592 fix(company): needs and offers lists show the newest five, the rest fold
-- #3591 ci(launch): drop invited-worker from the plan until it is provisioned
-- #3590 fix(onboarding): fold the "what comes next" steps behind one line
-- #3589 test(walk): the buyer request walks choose the required country
-- #3588 fix(company): an organisation with volume stays short on a phone
-- #3587 docs(program): 12h status report 2026-11-22 09:41
-- #3586 fix(invite): joining an organization never creates one; say who invited
-- #3585 fix(ui): popups stay on the screen on short and narrow phones
-- #3584 fix(nav): a missing step returns to the action that needed it (student invite → capability → back)
-- #3583 feat(ai): Cloudflare Workers AI for one redacted unclear sentence
-- #3582 test(e2e): Chrome acceptance matrix, 8 scenarios on desktop, tablet, phone
-- #3579 fix(security): CSV formula guard, exact MCP JSON check, honest hints
-- #3578 test(e2e): subcontractor, internship and message-rights journeys end to end
-- #3576 fix(assistant): fill-in-work-report sentences open the journal flow
-- #3574 feat(journal): the journal opens with the work day
-- #2752 docs(legal): name the free-tier AI processors before activation [RED]
+- #3678 test(prod-walk): M-6 allows only the organisation doors row on a phone, checked positively
+- #3677 ci(launch): re-run the CV chain on phone and desktop on the fixed build
+- #3676 ci(launch): restart the walk chain after the schedule stalled again
+- #3675 test(e2e): one verification admin per width in the employer journey
+- #3674 fix(worker-ui): no "pick a conversation" prompt under the phone list
+- #3673 docs(audit): A2 real-browser design audit, public + student/education
+- #3672 fix(worker-ui): profile name wraps; the work map fits its labels
+- #3671 fix(worker-ui): notification sources offered only when they hold something
+- #3669 fix(ui): 44 px tap targets on public and student/education screens (A2 audit)
+- #3668 fix(worker-ui): 44px phone targets; the CV draws no empty box
+- #3667 fix(worker-ui): no "offers you sent" section on a worker's offers page
+- #3666 fix(agency): the client page's need list folds after five, one shared fold
+- #3665 fix(company): the company home shares the assistant's column
+- #3664 perf(time-zone): refresh a first visit only where the page reads the zone
+- #3663 test(e2e): walk the employer journey end to end at 390 and 1440 px
+- #3662 fix(scouting): on a phone the need picker shows five needs and the chosen one
+- #3661 fix(finance): the record filters are the shared chips
+- #3660 fix(company): people and listings read as names, not ids or dashes
+- #3659 fix(worker-ui): numbers follow the sections actually shown
+- #3658 fix(security): hide publisher and provider ids; close two small leaks
+- #3656 docs(qa): launch matrix for the owner 2026-11-23 report
+- #3655 docs(program): 12h status report 2026-11-22 21:41
+- #3644 fix(structuring): recognise dates, hours, trades and markets in 7 locales
+- #3640 fix(ui): no example money in rate and price fields
+- #3639 fix(structuring): read headcount number words in every locale
+- #3638 fix(migrations): guard a partner history insert on a clean database
+- #3636 fix(people): explanations on the People page sit behind one row
+- #3629 fix(agency): limit board reads and offers against floods and fakes
+- #3627 fix(about): each section keeps its heading and lead, its body folds
+- #3616 fix(people): the readiness signals fold behind their title and fit a phone
+- #3613 fix(org): the organisation doors are one row on a phone, the next peeking
 
-### Atviri PR (123)
+### Atviri PR (125)
 
-Kandidatai jungti 0 (prieš jungimą tikrinama iš naujo); konfliktuoja 50; CI nepraėjo 41; laukia peržiūros 19; RED (migracijos, RLS, saugumas) 74.
+Kandidatai jungti 1 (prieš jungimą tikrinama iš naujo); konfliktuoja 49; CI nepraėjo 38; laukia peržiūros 30; RED (migracijos, RLS, saugumas) 75.
 
 PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruošti, tada kiti. Blokatorius — pirmoji iš eilės priežastis (konfliktas, CI, peržiūra).
 
-#### 1. Paskyra, registracija ir organizacijos (22)
+#### 1. Paskyra, registracija ir organizacijos (25)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
 | [#2454](https://github.com/bandymuks1-stack/labourmarketai/pull/2454) | test(e2e): external MCP client conformance walk — DCR, PKCE, consent, token, use, refresh, revoke (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2707](https://github.com/bandymuks1-stack/labourmarketai/pull/2707) | feat(mcp): OAuth permission scopes behind MCP_SCOPE_ENFORCEMENT (RED) (juodraštis) | RED | failure | none / none | CI nepraėjo: quality |
-| [#2713](https://github.com/bandymuks1-stack/labourmarketai/pull/2713) | feat(marketplace): goods purchase requests on listings, delivery fields [RED] (juodraštis) | RED | failure | none / none | CI nepraėjo: quality |
+| [#2713](https://github.com/bandymuks1-stack/labourmarketai/pull/2713) | feat(marketplace): goods purchase requests on listings, delivery fields [RED] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2806](https://github.com/bandymuks1-stack/labourmarketai/pull/2806) | fix(auth): third-party OAuth tokens are accepted only at the connector door (RED) (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2809](https://github.com/bandymuks1-stack/labourmarketai/pull/2809) | ci(oauth): isolated OAuth test job on a local Supabase stack (B5a, RED) (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2811](https://github.com/bandymuks1-stack/labourmarketai/pull/2811) | feat(db): OAuth door gate for direct database access (B1b, RED, ships off) (juodraštis) | RED | failure | none / none | CI nepraėjo: migration-safety |
@@ -456,7 +401,7 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 | [#3292](https://github.com/bandymuks1-stack/labourmarketai/pull/3292) | feat(invitations): decline an invitation from your own list (RED draft, not applied) (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3296](https://github.com/bandymuks1-stack/labourmarketai/pull/3296) | perf(auth): the login form is in the server HTML [needs-human-gate] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3320](https://github.com/bandymuks1-stack/labourmarketai/pull/3320) | RED draft: company registration e-mails, request alerts and delivery control (Lane N) (juodraštis) | RED | success | none / no-block | konfliktas su main (reikia atnaujinti šaką) |
-| [#3620](https://github.com/bandymuks1-stack/labourmarketai/pull/3620) | fix(db): a demoted owner loses owner rights at once (RED draft) (juodraštis) | RED | success | none / blocks | R2 saugumo peržiūra: blokuoja |
+| [#3620](https://github.com/bandymuks1-stack/labourmarketai/pull/3620) | fix(db): a demoted owner loses owner rights at once (RED draft) (juodraštis) | RED | success | none / stale | laukia peržiūros |
 | [#3626](https://github.com/bandymuks1-stack/labourmarketai/pull/3626) | fix(privacy): respectful address in the consent strings and the sign-up legal notice (lt jūs, nl u, pl Państwo) (juodraštis) | RED | success | stale / unclear | R peržiūra ne dabartinei versijai (reikia naujos) |
 | [#1835](https://github.com/bandymuks1-stack/labourmarketai/pull/1835) | test(global-access): production walk + local spec for LT SE DE IE VN US SA GE PH — draft keeps the picked country, onboarding offers every ISO country | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2924](https://github.com/bandymuks1-stack/labourmarketai/pull/2924) | fix(oauth): consent screen names each permission in plain words + revoke path (juodraštis) | GREEN | failure | untrusted / none | CI nepraėjo: quality |
@@ -464,8 +409,11 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 | [#3238](https://github.com/bandymuks1-stack/labourmarketai/pull/3238) | docs(security): chat alert race, one-line status in the register (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3282](https://github.com/bandymuks1-stack/labourmarketai/pull/3282) | docs(register): launch state per function and seven missing team/project rows (juodraštis) | GREEN | success | blocks / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3289](https://github.com/bandymuks1-stack/labourmarketai/pull/3289) | feat(teams): team structure views on the shared StructureTree; name search when inviting (Lane H, PR 3) (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
+| [#3680](https://github.com/bandymuks1-stack/labourmarketai/pull/3680) | docs(qa): production acceptance matrix (deliverable F, #3679) | GREEN | success | none / none | laukia peržiūros |
+| [#3681](https://github.com/bandymuks1-stack/labourmarketai/pull/3681) | docs(design): carousel navigation spec (deliverable D, #3679) (juodraštis) | GREEN | success | none / none | laukia peržiūros |
+| [#3687](https://github.com/bandymuks1-stack/labourmarketai/pull/3687) | docs(audit): duplication audit (#3679 deliverable C) | GREEN | success | none / none | laukia peržiūros |
 
-#### 2. Darbuotojo profilis, darbo žurnalas ir gyvas CV (20)
+#### 2. Darbuotojo profilis, darbo žurnalas ir gyvas CV (19)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
@@ -478,17 +426,16 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 | [#3311](https://github.com/bandymuks1-stack/labourmarketai/pull/3311) | RED draft: a former worker can claim the history an organization holds (Lane H) (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#3324](https://github.com/bandymuks1-stack/labourmarketai/pull/3324) | feat(db): a moderator who is a party to an experience is refused in the database (2.24) [RED] (juodraštis) | RED | success | stale / no-block | konfliktas su main (reikia atnaujinti šaką) |
 | [#3464](https://github.com/bandymuks1-stack/labourmarketai/pull/3464) | feat(organization-cv): public company CV via one k>=5 database function (RED) (juodraštis) | RED | failure | stale / stale | CI nepraėjo: quality |
-| [#3575](https://github.com/bandymuks1-stack/labourmarketai/pull/3575) | fix(db): sign-up role allow-list, manager consent, journal lineage (RED) (juodraštis) | RED | failure | none / stale | CI nepraėjo: signup-isolated |
-| [#3638](https://github.com/bandymuks1-stack/labourmarketai/pull/3638) | fix(migrations): guard vivatrex history insert on a clean database (juodraštis) | RED | failure | stale / none | CI nepraėjo: signup-isolated |
+| [#3575](https://github.com/bandymuks1-stack/labourmarketai/pull/3575) | fix(db): sign-up role allow-list, manager consent, journal lineage (RED) (juodraštis) | RED | success | none / stale | laukia peržiūros |
 | [#3164](https://github.com/bandymuks1-stack/labourmarketai/pull/3164) | feat(mcp): read-only profile at /api/mcp/read (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3219](https://github.com/bandymuks1-stack/labourmarketai/pull/3219) | feat(mcp): curated ChatGPT tool profile at /api/mcp/chatgpt (juodraštis) | GREEN | success | stale / none | R peržiūra ne dabartinei versijai (reikia naujos) |
 | [#3254](https://github.com/bandymuks1-stack/labourmarketai/pull/3254) | feat(chat): work history, plan and search reads for assistants (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3276](https://github.com/bandymuks1-stack/labourmarketai/pull/3276) | test(e2e): worker fills profile and CV, employer search, CV isolation | GREEN | success | stale / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3301](https://github.com/bandymuks1-stack/labourmarketai/pull/3301) | fix(experience): a dispute can be decided and a reply published (2.24) | GREEN | success | stale / stale | konfliktas su main (reikia atnaujinti šaką) |
 | [#3350](https://github.com/bandymuks1-stack/labourmarketai/pull/3350) | test(e2e): two example CVs from synthetic accounts, kept as CI screenshots (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
-| [#3642](https://github.com/bandymuks1-stack/labourmarketai/pull/3642) | test(cv): pay walk gives the worker a card before opening its editor (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
-| [#3644](https://github.com/bandymuks1-stack/labourmarketai/pull/3644) | fix(structuring): recognise dates, hours, trades and markets in 7 locales (juodraštis) | GREEN | missing | stale / none | konfliktas su main (reikia atnaujinti šaką) |
-| [#3654](https://github.com/bandymuks1-stack/labourmarketai/pull/3654) | test(phone): P-15 evidence and the profile section loops at 375 (juodraštis) | GREEN | pending | none / none | CI nebaigtas: signup-isolated |
+| [#3654](https://github.com/bandymuks1-stack/labourmarketai/pull/3654) | ci(signup-isolated): fit the job budget; P-15 evidence and profile loops at 375 (juodraštis) | GREEN | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3685](https://github.com/bandymuks1-stack/labourmarketai/pull/3685) | fix(worker-ui): one empty journal state, whole workspace name at 768, skills named from the catalogue | GREEN | failure | none / none | CI nepraėjo: signup-isolated |
+| [#3690](https://github.com/bandymuks1-stack/labourmarketai/pull/3690) | fix(cv): each skill and each job is listed once on the Living CV (juodraštis) | GREEN | failure | none / none | CI nepraėjo: signup-isolated |
 
 #### 3. Įmonės darbai ir projektai (8)
 
@@ -499,11 +446,11 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 | [#3230](https://github.com/bandymuks1-stack/labourmarketai/pull/3230) | feat(ops): operator alerts for waiting company applications (RED draft) (juodraštis) | RED | failure | untrusted / unclear | konfliktas su main (reikia atnaujinti šaką) |
 | [#3231](https://github.com/bandymuks1-stack/labourmarketai/pull/3231) | feat(db): team_offer_counterpart_v1, the gated recipient of a team offer (RED) (juodraštis) | RED | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
 | [#3295](https://github.com/bandymuks1-stack/labourmarketai/pull/3295) | RED draft: a team's company, a role in a team (team-lead label), a role on a project (Lane H design note) (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
-| [#3649](https://github.com/bandymuks1-stack/labourmarketai/pull/3649) | feat(offers): a company offer reaches real work: terms both confirm, crew, project (juodraštis) | RED | failure | stale / stale | CI nepraėjo: migration-safety |
+| [#3649](https://github.com/bandymuks1-stack/labourmarketai/pull/3649) | feat(offers): a company offer reaches real work: terms both confirm, crew, project (juodraštis) | RED | failure | stale / no-block | CI nepraėjo: migration-safety |
 | [#3241](https://github.com/bandymuks1-stack/labourmarketai/pull/3241) | fix(projects): a project with a place carries its country (juodraštis) | GREEN | success | untrusted / none | konfliktas su main (reikia atnaujinti šaką) |
-| [#3613](https://github.com/bandymuks1-stack/labourmarketai/pull/3613) | fix(org): the organisation doors are one row on a phone, the next peeking | GREEN | failure | stale / none | CI nepraėjo: signup-isolated |
+| [#3670](https://github.com/bandymuks1-stack/labourmarketai/pull/3670) | fix(offers): thumb-sized offer buttons; walk the subcontractor chain on screen (juodraštis) | GREEN | success | stale / none | R peržiūra ne dabartinei versijai (reikia naujos) |
 
-#### 4. Poreikiai, darbo skelbimai ir atranka (18)
+#### 4. Poreikiai, darbo skelbimai ir atranka (19)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
@@ -518,12 +465,13 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 | [#3214](https://github.com/bandymuks1-stack/labourmarketai/pull/3214) | feat(company): signed-in company search, unconfirmed companies marked (RED draft, D2) (juodraštis) | RED | success | untrusted / no-block | konfliktas su main (reikia atnaujinti šaką) |
 | [#3221](https://github.com/bandymuks1-stack/labourmarketai/pull/3221) | feat(mcp): public job search without sign-in on the ChatGPT door [owner gate] (juodraštis) | RED | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
 | [#3256](https://github.com/bandymuks1-stack/labourmarketai/pull/3256) | feat(demand): unconfirmed companies' needs public only by explicit consent (RED, principle C) (juodraštis) | RED | success | none / unclear | konfliktas su main (reikia atnaujinti šaką) |
-| [#3353](https://github.com/bandymuks1-stack/labourmarketai/pull/3353) | RED draft: an agency's placement term, accepted at the hire decision; opt-in to a suggested agency (Lane H) (juodraštis) | RED | failure | none / stale | CI nepraėjo: signup-isolated |
-| [#3630](https://github.com/bandymuks1-stack/labourmarketai/pull/3630) | fix(offers): the open need board names no client (juodraštis) | RED | failure | none / stale | CI nepraėjo: signup-isolated |
-| [#3647](https://github.com/bandymuks1-stack/labourmarketai/pull/3647) | feat(messaging): write about an open need; the client unnamed until it chooses [needs-human-gate] (juodraštis) | RED | failure | stale / none | CI nepraėjo: migration-safety, quality |
-| [#3651](https://github.com/bandymuks1-stack/labourmarketai/pull/3651) | feat(offers): agencies propose named candidates on open needs, anonymised (juodraštis) | RED | failure | blocks / none | CI nepraėjo: migration-safety, signup-isolated |
+| [#3353](https://github.com/bandymuks1-stack/labourmarketai/pull/3353) | RED draft: an agency's placement term, accepted at the hire decision; opt-in to a suggested agency (Lane H) (juodraštis) | RED | success | none / stale | laukia peržiūros |
+| [#3630](https://github.com/bandymuks1-stack/labourmarketai/pull/3630) | fix(offers): the open need board names no client (juodraštis) | RED | success | none / stale | laukia peržiūros |
+| [#3647](https://github.com/bandymuks1-stack/labourmarketai/pull/3647) | feat(messaging): write about an open need; the client unnamed until it chooses [needs-human-gate] (juodraštis) | RED | failure | stale / blocks | CI nepraėjo: migration-safety |
+| [#3651](https://github.com/bandymuks1-stack/labourmarketai/pull/3651) | feat(offers): agencies propose named candidates on open needs, anonymised (juodraštis) | RED | failure | stale / no-block | CI nepraėjo: migration-safety |
+| [#3657](https://github.com/bandymuks1-stack/labourmarketai/pull/3657) | feat(privacy): providers see only order pseudonyms, never a need id [needs-human-gate] (juodraštis) | RED | failure | stale / blocks | CI nepraėjo: signup-isolated, migration-safety |
 | [#2642](https://github.com/bandymuks1-stack/labourmarketai/pull/2642) | fix(jobs): the saved-jobs view never says nothing saved when it is not (owner waiver needed) | GREEN | failure | none / none | CI nepraėjo: quality |
-| [#3222](https://github.com/bandymuks1-stack/labourmarketai/pull/3222) | feat(mcp): job-list widget for the ChatGPT door (Apps SDK) (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
+| [#3222](https://github.com/bandymuks1-stack/labourmarketai/pull/3222) | feat(mcp): job-list widget for the ChatGPT door (Apps SDK) (juodraštis) | GREEN | success | blocks / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3327](https://github.com/bandymuks1-stack/labourmarketai/pull/3327) | fix(jobs): a typed job word with no catalogue profession is not a zero (juodraštis) | GREEN | failure | untrusted / none | CI nepraėjo: quality |
 
 #### 5. Pokalbiai ir pranešimai (5)
@@ -532,7 +480,7 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 |---|---|---|---|---|---|
 | [#2440](https://github.com/bandymuks1-stack/labourmarketai/pull/2440) | fix(db): null-safe owner check in append_assistant_message [RED, NOT applied] (juodraštis) | RED | failure | none / none | CI nepraėjo: quality, Vercel |
 | [#3168](https://github.com/bandymuks1-stack/labourmarketai/pull/3168) | fix(communication): refuse unfaithful message translations | GREEN | success | blocks / none | R peržiūra: blokuoja |
-| [#3227](https://github.com/bandymuks1-stack/labourmarketai/pull/3227) | fix(notifications): B2B offers tell the other side (juodraštis) | GREEN | success | untrusted / none | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
+| [#3227](https://github.com/bandymuks1-stack/labourmarketai/pull/3227) | fix(notifications): B2B offers tell the other side (juodraštis) | GREEN | failure | untrusted / none | CI nepraėjo: signup-isolated |
 | [#3239](https://github.com/bandymuks1-stack/labourmarketai/pull/3239) | test(chat): A-B-C chat-revocation production walk and attachment proof (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3249](https://github.com/bandymuks1-stack/labourmarketai/pull/3249) | fix(chat): attachment links work for 60 s instead of 300 s (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 
@@ -544,7 +492,7 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 | [#2746](https://github.com/bandymuks1-stack/labourmarketai/pull/2746) | feat(db): listing closed outcome + discarded draft never reopens [RED, NOT applied] (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2946](https://github.com/bandymuks1-stack/labourmarketai/pull/2946) | feat(db): RED-1 link an accepted service request to a proposal [RED] (juodraštis) | RED | success | untrusted / no-block | konfliktas su main (reikia atnaujinti šaką) |
 
-#### 7. Planai ir mokėjimai (19)
+#### 7. Planai ir mokėjimai (16)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
@@ -560,36 +508,32 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 | [#3252](https://github.com/bandymuks1-stack/labourmarketai/pull/3252) | fix(billing): paused grants no grace; prove the test-mode lifecycle (juodraštis) | RED | success | untrusted / no-block | peržiūra tik nepatikimo autoriaus (botas / išorinis) |
 | [#3305](https://github.com/bandymuks1-stack/labourmarketai/pull/3305) | test(billing): pin the FREE-limit transition rules (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#3417](https://github.com/bandymuks1-stack/labourmarketai/pull/3417) | feat(billing): permanent VIP organizations hold the highest plan (juodraštis) | RED | success | none / none | laukia peržiūros |
-| [#3604](https://github.com/bandymuks1-stack/labourmarketai/pull/3604) | perf(rls): let 18 worker-lookup policies use the workers index [needs-human-gate] (juodraštis) | RED | missing | stale / stale | trūksta privalomų patikrų: quality, migration-safety |
+| [#3604](https://github.com/bandymuks1-stack/labourmarketai/pull/3604) | perf(rls): let 18 worker-lookup policies use the workers index [needs-human-gate] (juodraštis) | RED | missing | stale / unclear | trūksta privalomų patikrų: quality, migration-safety |
 | [#3614](https://github.com/bandymuks1-stack/labourmarketai/pull/3614) | fix(pricing): the paid card names only what the paid plan adds (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#2403](https://github.com/bandymuks1-stack/labourmarketai/pull/2403) | fix(jobs): a title word no longer overrules a publisher's non-catalogue occupation (G-16 waiver needed) (juodraštis) | GREEN | failure | none / none | CI nepraėjo: quality |
 | [#2842](https://github.com/bandymuks1-stack/labourmarketai/pull/2842) | docs(legal): paid-services terms draft v2 + EN + checkout checklist (for legal review, not published) (juodraštis) | GREEN | success | none / none | laukia peržiūros |
-| [#3627](https://github.com/bandymuks1-stack/labourmarketai/pull/3627) | fix(about): each section keeps its heading and lead, its body folds | GREEN | failure | stale / none | CI nepraėjo: signup-isolated |
-| [#3636](https://github.com/bandymuks1-stack/labourmarketai/pull/3636) | fix(people): explanations on the People page sit behind one row | GREEN | failure | stale / none | CI nepraėjo: signup-isolated |
-| [#3640](https://github.com/bandymuks1-stack/labourmarketai/pull/3640) | fix(ui): no example money in rate and price fields (juodraštis) | GREEN | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
 
-#### 8. Kalbos ir rinkos (5)
+#### 8. Kalbos ir rinkos (3)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
 | [#2463](https://github.com/bandymuks1-stack/labourmarketai/pull/2463) | feat(db): ESCO cold locales archived on the VPS, hot set = UI locales [RED, not applied] (decision 0026) (juodraštis) | RED | success | blocks / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#3232](https://github.com/bandymuks1-stack/labourmarketai/pull/3232) | feat(privacy): Swedish consent texts with the RED hash re-pin (draft, not applied) (juodraštis) | RED | success | untrusted / no-block | konfliktas su main (reikia atnaujinti šaką) |
 | [#3248](https://github.com/bandymuks1-stack/labourmarketai/pull/3248) | feat(db): save_customer_request_v2, a buyer request records kind and language (RED) (juodraštis) | RED | success | untrusted / none | konfliktas su main (reikia atnaujinti šaką) |
-| [#3616](https://github.com/bandymuks1-stack/labourmarketai/pull/3616) | fix(people): the readiness signals fold behind their title and fit a phone | GREEN | failure | stale / none | CI nepraėjo: signup-isolated |
-| [#3639](https://github.com/bandymuks1-stack/labourmarketai/pull/3639) | fix(structuring): read headcount number words in every locale (juodraštis) | GREEN | pending | none / none | konfliktas su main (reikia atnaujinti šaką) |
 
 #### 9. Administravimas, privatumas ir saugumas (3)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
 | [#2747](https://github.com/bandymuks1-stack/labourmarketai/pull/2747) | feat(privacy): free workers discoverable by default — one ledger, notice first, one-tap objection [RED] (juodraštis) | RED | success | none / none | konfliktas su main (reikia atnaujinti šaką) |
-| [#3632](https://github.com/bandymuks1-stack/labourmarketai/pull/3632) | fix(privacy): erase a confirmed deletion within one month (RED draft) (juodraštis) | RED | success | none / stale | laukia peržiūros |
+| [#3632](https://github.com/bandymuks1-stack/labourmarketai/pull/3632) | fix(privacy): erase a confirmed deletion within one month (RED draft) (juodraštis) | RED | success | none / no-block | laukia peržiūros |
 | [#3646](https://github.com/bandymuks1-stack/labourmarketai/pull/3646) | fix(privacy): never share a privacy request with an agency (RED draft) (juodraštis) | RED | success | none / none | laukia peržiūros |
 
-#### 10. Pagalbininkai ir dirbtinis intelektas (2)
+#### 10. Pagalbininkai ir dirbtinis intelektas (3)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
+| [#3683](https://github.com/bandymuks1-stack/labourmarketai/pull/3683) | docs(agents): one pre-build reuse check, one owner per capability | GREEN | success | no-block / none | kandidatas jungti (prieš jungimą tikrinama iš naujo) |
 | [#2970](https://github.com/bandymuks1-stack/labourmarketai/pull/2970) | fix(ops): ai-failing counts technical failures over attempted runs | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3166](https://github.com/bandymuks1-stack/labourmarketai/pull/3166) | feat(ai): monthly euro cap on AI vendor runs | GREEN | success | blocks / none | R peržiūra: blokuoja |
 
@@ -606,12 +550,13 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 |---|---|---|---|---|---|
 | [#3008](https://github.com/bandymuks1-stack/labourmarketai/pull/3008) | fix(reports): documents tile says unavailable, not a false 0 | GREEN | success | blocks / none | R peržiūra: blokuoja |
 
-#### 13. Infrastruktūra ir veikimas (15)
+#### 13. Infrastruktūra ir veikimas (18)
 
 | PR | Pavadinimas | Klasė | CI | R / R2 | Blokatorius |
 |---|---|---|---|---|---|
 | [#1577](https://github.com/bandymuks1-stack/labourmarketai/pull/1577) | feat(catalogue): office & professional professions — seed, mirror, lexicon (W6 G-D2, RED draft) (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
 | [#2420](https://github.com/bandymuks1-stack/labourmarketai/pull/2420) | perf(db): supply-count cron skips the full scan when nothing changed [RED, not applied] (juodraštis) | RED | failure | none / none | konfliktas su main (reikia atnaujinti šaką) |
+| [#3688](https://github.com/bandymuks1-stack/labourmarketai/pull/3688) | fix(db): revoke three superseded v1 write grants (RED draft) (juodraštis) | RED | success | none / none | laukia peržiūros |
 | [#1617](https://github.com/bandymuks1-stack/labourmarketai/pull/1617) | chore(ci): bump github/codeql-action/analyze from 4.37.3 to 4.37.9 | GREEN | failure | blocks / none | CI nepraėjo: Analyze (javascript-typescript) |
 | [#1619](https://github.com/bandymuks1-stack/labourmarketai/pull/1619) | chore(ci): bump github/codeql-action/init from 4.37.3 to 4.37.9 | GREEN | failure | blocks / none | CI nepraėjo: Analyze (javascript-typescript) |
 | [#1620](https://github.com/bandymuks1-stack/labourmarketai/pull/1620) | chore(ci): bump actions/upload-artifact from 4 to 7 | GREEN | success | blocks / none | R peržiūra: blokuoja |
@@ -624,7 +569,9 @@ PR sugrupuoti pagal funkcinę sritį; srities viduje pirmiausia RED, tada paruo�
 | [#3270](https://github.com/bandymuks1-stack/labourmarketai/pull/3270) | feat(nav): signed-in home on the shared goal navigator (Lane A2 on Lane A's components) (juodraštis) | GREEN | success | blocks / none | R peržiūra: blokuoja |
 | [#3271](https://github.com/bandymuks1-stack/labourmarketai/pull/3271) | ci(smoke): a short check of the main journeys after every production deploy (juodraštis) | GREEN | success | stale / blocks | R peržiūra ne dabartinei versijai (reikia naujos) |
 | [#3330](https://github.com/bandymuks1-stack/labourmarketai/pull/3330) | docs(governance): owner delegation through one coordinator (decision 0031) (juodraštis) | GREEN | success | blocks / unclear | R peržiūra: blokuoja |
-| [#3629](https://github.com/bandymuks1-stack/labourmarketai/pull/3629) | fix(agency): limit board reads and offers against floods and fakes (juodraštis) | GREEN | success | stale / none | R peržiūra ne dabartinei versijai (reikia naujos) |
+| [#3684](https://github.com/bandymuks1-stack/labourmarketai/pull/3684) | docs(architecture): platform function map (A, #3679) | GREEN | success | none / none | laukia peržiūros |
+| [#3686](https://github.com/bandymuks1-stack/labourmarketai/pull/3686) | docs(architecture): technical architecture map, measured (#3679 B) | GREEN | success | none / none | laukia peržiūros |
+| [#3689](https://github.com/bandymuks1-stack/labourmarketai/pull/3689) | test(prod-qa): ux-metrics matrix — tablet/1440, dark theme, 6 roles | GREEN | success | none / none | laukia peržiūros |
 
 ## A5. Realus produkto veikimas pagal sritis
 
@@ -801,8 +748,9 @@ Papildomos patikros, matuotos ne funkcijų eilutėse (paskutinis matavimas regis
 ### Naujai aptiktos ar patvirtintos funkcijos ir prognozė
 
 **Prognozė (sąlyginė, negarantuota):** pagrindinis produktas viešai – 2026 m. gruodžio vidurys; pilna istorinė apimtis – 2027 m. vasaris. Prognozė nepakeista. Pasirengimo bandymų langas baigiasi 2026-11-23. Liko:
-- profile-cv-history ir company-chain – 375 px;
-- learning-practice – telefonu.
+- company-chain 375 px;
+- learning-practice telefonu;
+- mobile-surfaces pakartojimas.
 
 ## A7. Pilnas vardinis funkcijų registras
 
@@ -1101,5 +1049,5 @@ Stulpeliai: Apimtyje · Kode · Sujungta su main · Įdiegta · CI · Patikrinta
 
 
 <!-- status-evidence-json
-{"schema":1,"walks":{"profile-cv-history|phone":{"spec":"profile-cv-history","device":"phone","run":44634343495,"result":"success","build":"7e517e32","at":"2026-11-19T23:26:23Z"},"profile-cv-history|phone-375":{"spec":"profile-cv-history","device":"phone-375","run":45051053618,"result":"failure","build":"ed4ecf85","at":"2026-11-22T17:54:43Z"},"company-chain|phone":{"spec":"company-chain","device":"phone","run":44859165488,"result":"success","build":"d447a639","at":"2026-11-21T03:10:53Z"},"company-chain|phone-375":{"spec":"company-chain","device":"phone-375","run":44859841951,"result":"failure","build":"d447a639","at":"2026-11-21T03:14:41Z"},"agency-chain|phone":{"spec":"agency-chain","device":"phone","run":44645924736,"result":"success","build":"7e517e32","at":"2026-11-20T00:33:13Z"},"agency-chain|phone-375":{"spec":"agency-chain","device":"phone-375","run":44646951459,"result":"success","build":"7e517e32","at":"2026-11-20T00:40:11Z"},"learning-practice|phone":{"spec":"learning-practice","device":"phone","run":43895965767,"result":"success","build":"bdfff68f","at":"2026-11-16T15:29:44Z"},"learning-practice|phone-375":{"spec":"learning-practice","device":"phone-375","run":43829421484,"result":"success","build":"a26004b3","at":"2026-11-16T08:16:57Z"},"cv-readonly|desktop":{"spec":"cv-readonly","device":"desktop","run":43833613507,"result":"success","build":"a8dfb015","at":"2026-11-16T08:46:45Z"},"company-governance|phone":{"spec":"company-governance","device":"phone","run":44243678287,"result":"success","build":"62903b2d","at":"2026-11-18T05:26:59Z"},"register-gaps|phone":{"spec":"register-gaps","device":"phone","run":44241539906,"result":"success","build":"62903b2d","at":"2026-11-18T05:05:47Z"},"agency-chain|desktop":{"spec":"agency-chain","device":"desktop","run":44644887648,"result":"success","build":"7e517e32","at":"2026-11-20T00:26:09Z"},"need-intake|phone-375":{"spec":"need-intake","device":"phone-375","run":44643949860,"result":"success","build":"7e517e32","at":"2026-11-20T00:18:35Z"},"need-intake|phone":{"spec":"need-intake","device":"phone","run":44643169770,"result":"success","build":"7e517e32","at":"2026-11-20T00:11:47Z"},"need-intake|desktop":{"spec":"need-intake","device":"desktop","run":44642526482,"result":"success","build":"7e517e32","at":"2026-11-20T00:05:45Z"},"company-chain|desktop":{"spec":"company-chain","device":"desktop","run":44858511879,"result":"success","build":"d447a639","at":"2026-11-21T03:02:55Z"},"profile-cv-history|desktop":{"spec":"profile-cv-history","device":"desktop","run":44632628432,"result":"success","build":"7e517e32","at":"2026-11-19T23:02:56Z"},"learning-practice|desktop":{"spec":"learning-practice","device":"desktop","run":44860184317,"result":"success","build":"d447a639","at":"2026-11-21T03:19:16Z"},"company-governance|desktop":{"spec":"company-governance","device":"desktop","run":44856477733,"result":"success","build":"d447a639","at":"2026-11-21T02:37:24Z"},"mobile-surfaces|phone":{"spec":"mobile-surfaces","device":"phone","run":44977749659,"result":"failure","build":"eed72052","at":"2026-11-22T02:59:47Z"},"public-org-locales|phone":{"spec":"public-org-locales","device":"phone","run":44977198005,"result":"success","build":"eed72052","at":"2026-11-22T02:46:48Z"},"staff-review-notice|desktop":{"spec":"staff-review-notice","device":"desktop","run":44976838568,"result":"success","build":"eed72052","at":"2026-11-22T02:39:01Z"},"worker-identity-split|desktop":{"spec":"worker-identity-split","device":"desktop","run":44976482806,"result":"success","build":"eed72052","at":"2026-11-22T02:33:35Z"},"company-talent-history|desktop":{"spec":"company-talent-history","device":"desktop","run":44975633092,"result":"success","build":"eed72052","at":"2026-11-22T02:28:52Z"},"search-support-privacy|desktop":{"spec":"search-support-privacy","device":"desktop","run":44974866504,"result":"success","build":"eed72052","at":"2026-11-22T02:18:34Z"},"documents-approvals|desktop":{"spec":"documents-approvals","device":"desktop","run":44974276075,"result":"success","build":"eed72052","at":"2026-11-22T02:09:35Z"},"ai-off-honesty|desktop":{"spec":"ai-off-honesty","device":"desktop","run":44973720651,"result":"success","build":"eed72052","at":"2026-11-22T02:01:47Z"},"mcp-agents|desktop":{"spec":"mcp-agents","device":"desktop","run":44973332549,"result":"success","build":"eed72052","at":"2026-11-22T01:54:39Z"},"mcp-chain|desktop":{"spec":"mcp-chain","device":"desktop","run":44972915546,"result":"success","build":"eed72052","at":"2026-11-22T01:48:33Z"},"manager-chat|desktop":{"spec":"manager-chat","device":"desktop","run":44972421825,"result":"success","build":"eed72052","at":"2026-11-22T01:43:06Z"},"chat-confirm-once|desktop":{"spec":"chat-confirm-once","device":"desktop","run":44972019714,"result":"success","build":"eed72052","at":"2026-11-22T01:37:04Z"},"buyer-workspace|desktop":{"spec":"buyer-workspace","device":"desktop","run":45003241107,"result":"failure","build":"9f587dd6","at":"2026-11-22T08:32:19Z"},"marketplace|desktop":{"spec":"marketplace","device":"desktop","run":44971191106,"result":"success","build":"eed72052","at":"2026-11-22T01:26:45Z"},"orders-bookings|phone":{"spec":"orders-bookings","device":"phone","run":45052181467,"result":"success","build":"ed4ecf85","at":"2026-11-22T18:12:17Z"},"orders-bookings|desktop":{"spec":"orders-bookings","device":"desktop","run":45049554634,"result":"success","build":"ed4ecf85","at":"2026-11-22T17:42:39Z"},"marketplace-goods-services|phone":{"spec":"marketplace-goods-services","device":"phone","run":44968374455,"result":"success","build":"eed72052","at":"2026-11-22T00:52:44Z"},"marketplace-goods-services|desktop":{"spec":"marketplace-goods-services","device":"desktop","run":44967795943,"result":"success","build":"eed72052","at":"2026-11-22T00:46:09Z"},"rota-repeat|desktop":{"spec":"rota-repeat","device":"desktop","run":44967288707,"result":"success","build":"eed72052","at":"2026-11-22T00:38:56Z"},"calendar-planning|desktop":{"spec":"calendar-planning","device":"desktop","run":44966863726,"result":"success","build":"eed72052","at":"2026-11-22T00:33:24Z"},"project-context|desktop":{"spec":"project-context","device":"desktop","run":44907816401,"result":"success","build":"eed72052","at":"2026-11-21T13:20:37Z"},"project-execution|desktop":{"spec":"project-execution","device":"desktop","run":44906961206,"result":"success","build":"eed72052","at":"2026-11-21T13:12:54Z"},"brigade-formation|desktop":{"spec":"brigade-formation","device":"desktop","run":44906216102,"result":"success","build":"eed72052","at":"2026-11-21T13:02:23Z"},"org-roster|phone":{"spec":"org-roster","device":"phone","run":44905801746,"result":"success","build":"eed72052","at":"2026-11-21T12:53:11Z"},"org-roster|desktop":{"spec":"org-roster","device":"desktop","run":44905313755,"result":"success","build":"eed72052","at":"2026-11-21T12:47:41Z"},"notifications-inapp|phone":{"spec":"notifications-inapp","device":"phone","run":44904905556,"result":"success","build":"eed72052","at":"2026-11-21T12:42:30Z"},"worker-records-exports|desktop":{"spec":"worker-records-exports","device":"desktop","run":44904394732,"result":"success","build":"eed72052","at":"2026-11-21T12:36:47Z"},"chat-continuity|phone":{"spec":"chat-continuity","device":"phone","run":44903881953,"result":"success","build":"eed72052","at":"2026-11-21T12:30:56Z"},"journal-confirm|phone":{"spec":"journal-confirm","device":"phone","run":44903366199,"result":"success","build":"eed72052","at":"2026-11-21T12:25:04Z"},"journal-confirm|desktop":{"spec":"journal-confirm","device":"desktop","run":44902949287,"result":"success","build":"eed72052","at":"2026-11-21T12:18:55Z"},"jobs-search|phone":{"spec":"jobs-search","device":"phone","run":44902549477,"result":"success","build":"eed72052","at":"2026-11-21T12:13:25Z"},"jobs-search|desktop":{"spec":"jobs-search","device":"desktop","run":44902071507,"result":"success","build":"eed72052","at":"2026-11-21T12:08:27Z"},"invited-worker|phone":{"spec":"invited-worker","device":"phone","run":45001807853,"result":"failure","build":"397710f1","at":"2026-11-22T08:14:34Z"},"fresh-activation|desktop":{"spec":"fresh-activation","device":"desktop","run":44901160408,"result":"success","build":"eed72052","at":"2026-11-21T11:59:09Z"},"role-routes|phone":{"spec":"role-routes","device":"phone","run":44900081769,"result":"success","build":"eed72052","at":"2026-11-21T11:51:50Z"},"role-routes|desktop":{"spec":"role-routes","device":"desktop","run":44899143018,"result":"success","build":"eed72052","at":"2026-11-21T11:37:54Z"}}}
+{"schema":1,"walks":{"profile-cv-history|phone":{"spec":"profile-cv-history","device":"phone","run":45097071365,"result":"success","build":"8bcda5be","at":"2026-11-23T02:06:10Z"},"profile-cv-history|phone-375":{"spec":"profile-cv-history","device":"phone-375","run":45091874326,"result":"success","build":"ee29a3b7","at":"2026-11-23T01:13:10Z"},"company-chain|phone":{"spec":"company-chain","device":"phone","run":44859165488,"result":"success","build":"d447a639","at":"2026-11-21T03:10:53Z"},"company-chain|phone-375":{"spec":"company-chain","device":"phone-375","run":44859841951,"result":"failure","build":"d447a639","at":"2026-11-21T03:14:41Z"},"agency-chain|phone":{"spec":"agency-chain","device":"phone","run":44645924736,"result":"success","build":"7e517e32","at":"2026-11-20T00:33:13Z"},"agency-chain|phone-375":{"spec":"agency-chain","device":"phone-375","run":44646951459,"result":"success","build":"7e517e32","at":"2026-11-20T00:40:11Z"},"learning-practice|phone":{"spec":"learning-practice","device":"phone","run":43895965767,"result":"success","build":"bdfff68f","at":"2026-11-16T15:29:44Z"},"learning-practice|phone-375":{"spec":"learning-practice","device":"phone-375","run":43829421484,"result":"success","build":"a26004b3","at":"2026-11-16T08:16:57Z"},"cv-readonly|desktop":{"spec":"cv-readonly","device":"desktop","run":43833613507,"result":"success","build":"a8dfb015","at":"2026-11-16T08:46:45Z"},"company-governance|phone":{"spec":"company-governance","device":"phone","run":44243678287,"result":"success","build":"62903b2d","at":"2026-11-18T05:26:59Z"},"register-gaps|phone":{"spec":"register-gaps","device":"phone","run":44241539906,"result":"success","build":"62903b2d","at":"2026-11-18T05:05:47Z"},"agency-chain|desktop":{"spec":"agency-chain","device":"desktop","run":44644887648,"result":"success","build":"7e517e32","at":"2026-11-20T00:26:09Z"},"need-intake|phone-375":{"spec":"need-intake","device":"phone-375","run":44643949860,"result":"success","build":"7e517e32","at":"2026-11-20T00:18:35Z"},"need-intake|phone":{"spec":"need-intake","device":"phone","run":44643169770,"result":"success","build":"7e517e32","at":"2026-11-20T00:11:47Z"},"need-intake|desktop":{"spec":"need-intake","device":"desktop","run":44642526482,"result":"success","build":"7e517e32","at":"2026-11-20T00:05:45Z"},"company-chain|desktop":{"spec":"company-chain","device":"desktop","run":44858511879,"result":"success","build":"d447a639","at":"2026-11-21T03:02:55Z"},"profile-cv-history|desktop":{"spec":"profile-cv-history","device":"desktop","run":45094839877,"result":"success","build":"8bcda5be","at":"2026-11-23T01:42:41Z"},"learning-practice|desktop":{"spec":"learning-practice","device":"desktop","run":44860184317,"result":"success","build":"d447a639","at":"2026-11-21T03:19:16Z"},"company-governance|desktop":{"spec":"company-governance","device":"desktop","run":44856477733,"result":"success","build":"d447a639","at":"2026-11-21T02:37:24Z"},"mobile-surfaces|phone":{"spec":"mobile-surfaces","device":"phone","run":45098478024,"result":"failure","build":"8bcda5be","at":"2026-11-23T02:17:04Z"},"public-org-locales|phone":{"spec":"public-org-locales","device":"phone","run":44977198005,"result":"success","build":"eed72052","at":"2026-11-22T02:46:48Z"},"staff-review-notice|desktop":{"spec":"staff-review-notice","device":"desktop","run":44976838568,"result":"success","build":"eed72052","at":"2026-11-22T02:39:01Z"},"worker-identity-split|desktop":{"spec":"worker-identity-split","device":"desktop","run":44976482806,"result":"success","build":"eed72052","at":"2026-11-22T02:33:35Z"},"company-talent-history|desktop":{"spec":"company-talent-history","device":"desktop","run":44975633092,"result":"success","build":"eed72052","at":"2026-11-22T02:28:52Z"},"search-support-privacy|desktop":{"spec":"search-support-privacy","device":"desktop","run":44974866504,"result":"success","build":"eed72052","at":"2026-11-22T02:18:34Z"},"documents-approvals|desktop":{"spec":"documents-approvals","device":"desktop","run":44974276075,"result":"success","build":"eed72052","at":"2026-11-22T02:09:35Z"},"ai-off-honesty|desktop":{"spec":"ai-off-honesty","device":"desktop","run":44973720651,"result":"success","build":"eed72052","at":"2026-11-22T02:01:47Z"},"mcp-agents|desktop":{"spec":"mcp-agents","device":"desktop","run":44973332549,"result":"success","build":"eed72052","at":"2026-11-22T01:54:39Z"},"mcp-chain|desktop":{"spec":"mcp-chain","device":"desktop","run":44972915546,"result":"success","build":"eed72052","at":"2026-11-22T01:48:33Z"},"manager-chat|desktop":{"spec":"manager-chat","device":"desktop","run":44972421825,"result":"success","build":"eed72052","at":"2026-11-22T01:43:06Z"},"chat-confirm-once|desktop":{"spec":"chat-confirm-once","device":"desktop","run":44972019714,"result":"success","build":"eed72052","at":"2026-11-22T01:37:04Z"},"buyer-workspace|desktop":{"spec":"buyer-workspace","device":"desktop","run":45094390854,"result":"success","build":"ee29a3b7","at":"2026-11-23T01:27:48Z"},"marketplace|desktop":{"spec":"marketplace","device":"desktop","run":44971191106,"result":"success","build":"eed72052","at":"2026-11-22T01:26:45Z"},"orders-bookings|phone":{"spec":"orders-bookings","device":"phone","run":45052181467,"result":"success","build":"ed4ecf85","at":"2026-11-22T18:12:17Z"},"orders-bookings|desktop":{"spec":"orders-bookings","device":"desktop","run":45049554634,"result":"success","build":"ed4ecf85","at":"2026-11-22T17:42:39Z"},"marketplace-goods-services|phone":{"spec":"marketplace-goods-services","device":"phone","run":44968374455,"result":"success","build":"eed72052","at":"2026-11-22T00:52:44Z"},"marketplace-goods-services|desktop":{"spec":"marketplace-goods-services","device":"desktop","run":44967795943,"result":"success","build":"eed72052","at":"2026-11-22T00:46:09Z"},"rota-repeat|desktop":{"spec":"rota-repeat","device":"desktop","run":44967288707,"result":"success","build":"eed72052","at":"2026-11-22T00:38:56Z"},"calendar-planning|desktop":{"spec":"calendar-planning","device":"desktop","run":44966863726,"result":"success","build":"eed72052","at":"2026-11-22T00:33:24Z"},"project-context|desktop":{"spec":"project-context","device":"desktop","run":44907816401,"result":"success","build":"eed72052","at":"2026-11-21T13:20:37Z"},"project-execution|desktop":{"spec":"project-execution","device":"desktop","run":44906961206,"result":"success","build":"eed72052","at":"2026-11-21T13:12:54Z"},"brigade-formation|desktop":{"spec":"brigade-formation","device":"desktop","run":44906216102,"result":"success","build":"eed72052","at":"2026-11-21T13:02:23Z"},"org-roster|phone":{"spec":"org-roster","device":"phone","run":44905801746,"result":"success","build":"eed72052","at":"2026-11-21T12:53:11Z"},"org-roster|desktop":{"spec":"org-roster","device":"desktop","run":44905313755,"result":"success","build":"eed72052","at":"2026-11-21T12:47:41Z"},"notifications-inapp|phone":{"spec":"notifications-inapp","device":"phone","run":44904905556,"result":"success","build":"eed72052","at":"2026-11-21T12:42:30Z"},"worker-records-exports|desktop":{"spec":"worker-records-exports","device":"desktop","run":44904394732,"result":"success","build":"eed72052","at":"2026-11-21T12:36:47Z"},"chat-continuity|phone":{"spec":"chat-continuity","device":"phone","run":44903881953,"result":"success","build":"eed72052","at":"2026-11-21T12:30:56Z"},"journal-confirm|phone":{"spec":"journal-confirm","device":"phone","run":44903366199,"result":"success","build":"eed72052","at":"2026-11-21T12:25:04Z"},"journal-confirm|desktop":{"spec":"journal-confirm","device":"desktop","run":44902949287,"result":"success","build":"eed72052","at":"2026-11-21T12:18:55Z"},"jobs-search|phone":{"spec":"jobs-search","device":"phone","run":44902549477,"result":"success","build":"eed72052","at":"2026-11-21T12:13:25Z"},"jobs-search|desktop":{"spec":"jobs-search","device":"desktop","run":44902071507,"result":"success","build":"eed72052","at":"2026-11-21T12:08:27Z"},"invited-worker|phone":{"spec":"invited-worker","device":"phone","run":45001807853,"result":"failure","build":"397710f1","at":"2026-11-22T08:14:34Z"},"fresh-activation|desktop":{"spec":"fresh-activation","device":"desktop","run":44901160408,"result":"success","build":"eed72052","at":"2026-11-21T11:59:09Z"},"role-routes|phone":{"spec":"role-routes","device":"phone","run":44900081769,"result":"success","build":"eed72052","at":"2026-11-21T11:51:50Z"},"role-routes|desktop":{"spec":"role-routes","device":"desktop","run":44899143018,"result":"success","build":"eed72052","at":"2026-11-21T11:37:54Z"}}}
 -->
