@@ -59,7 +59,10 @@ export function OrganizationDoors({
     const track = navRef.current?.querySelector<HTMLElement>('[data-rail-part="track"]');
     const current = track?.querySelector<HTMLElement>('[aria-current="true"]');
     if (!track || !current || track.scrollWidth <= track.clientWidth) return;
-    track.scrollLeft = Math.max(0, current.offsetLeft - track.offsetLeft - 16);
+    // Measured against the track, not offsetLeft: each card sits in its own
+    // positioned list item, so its offsetLeft is always 0.
+    const offset = current.getBoundingClientRect().left - track.getBoundingClientRect().left;
+    track.scrollLeft = Math.max(0, track.scrollLeft + offset - 16);
   }, [activeId]);
   if (doors.length === 0) return null;
   const cards: RailCard[] = doors.map((door) => ({

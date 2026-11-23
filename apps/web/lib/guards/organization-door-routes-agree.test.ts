@@ -75,4 +75,10 @@ describe("the doors are one row, the same size as the goal strip (N7 on N5)", ()
     expect(src).toMatch(/<CardRail[\s\S]*?size="strip"/);
     expect(src).not.toMatch(/size="(regular|compact)"/);
   });
+
+  it("the current door is scrolled into view by its position in the track (offsetLeft is 0 inside its list item)", () => {
+    const src = readFileSync(join(__dirname, "../../components/app/organization/organization-doors.tsx"), "utf8");
+    expect(src).not.toMatch(/current\.offsetLeft/);
+    expect(src).toMatch(/current\.getBoundingClientRect\(\)\.left - track\.getBoundingClientRect\(\)\.left/);
+  });
 });
