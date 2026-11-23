@@ -241,12 +241,12 @@ A fact that is recorded but not shown is FAIL. GAP means no walk checks it; it i
 
 | Step | Recorded | Next step | Living CV (of the placed worker) |
 |---|---|---|---|
-| 1. Identity | GAP in production (A-1 uses an existing account)<br>LOCAL: `agency-roles-isolated` A-1 (signs up, recorded as a staffing agency) | LOCAL: A-2, A-5 | n/a |
+| 1. Identity | GAP in production (A-1 uses an existing account)<br>LOCAL: `agency-roles-isolated` A-1 (signs up, recorded as a staffing agency)<br>LOCAL: Lane H's new-agency run N1 (sign-up, 1440 and 390 px) | LOCAL: A-2, A-5 | n/a |
 | 2. Historical experience | GAP | GAP | GAP |
 | 3. Competencies | PASS: agency-chain A-1b (saves an offer) 44644887648 | PASS: A-1b (finds it on its home) | n/a |
 | 4. Opportunities | PASS: A-4, A-5 (sees the shared need, offers its person) | PASS: A-6 (the client answers) | n/a |
-| 5. Agreements and projects | PASS: A-6, A-6b (the worker accepts) | PASS: A-7 (the decision and one thread) | GAP |
-| 6. Work, time and results | GAP: no walk records the placed worker's work | GAP | GAP |
+| 5. Agreements and projects | PASS: A-6, A-6b (the worker accepts)<br>LOCAL: Lane H N3 (connect, share, propose, client accepts, worker accepts, engagement; the worker is not named to the client before accepting) | PASS: A-7 (the decision and one thread) | GAP |
+| 6. Work, time and results | GAP: no walk records the placed worker's work<br>BLOCKED: after a client accepts a company offer, starting the work is not available (#3649, RED); #3715 says so to both sides | GAP | GAP |
 | 7. Confirmation | GAP | GAP | GAP |
 | 8. Living CV, automatically | GAP | n/a | GAP |
 | 9. Reuse | PASS: A-2b (reads its people) | PASS: A-5 (offers a roster person) | n/a |
