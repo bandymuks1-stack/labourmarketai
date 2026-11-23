@@ -442,7 +442,7 @@ export async function ProfileHubOverview({
         avatarUrl={avatarUrl}
         initials={playerInitials(personName)}
         heading={
-          <h2 className="truncate font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary max-sm:whitespace-normal max-sm:break-words sm:text-4xl">
+          <h2 className="break-words font-display text-2xl font-bold leading-tight tracking-tightest text-text-primary [overflow-wrap:anywhere] sm:text-4xl">
             {personName}
           </h2>
         }
@@ -596,12 +596,15 @@ export async function ProfileHubOverview({
               )}
               {/* Readiness signals with no setup step of their own — the
                   absorbed LiveProfileSection's missing-list, same copy. */}
-              {missingStepless.map((k) =>
+              {/* One list, one count: these rows continue the steps'
+                  numbers (the profile read "1. … 5." and then an unnumbered
+                  "Rašyti įrašą", design audit 2026-11-22). */}
+              {missingStepless.map((k, j) =>
                 row(
                   k,
                   `profile-hub-missing-${k}`,
                   PILLAR_HREF[k],
-                  tAction(k),
+                  `${missingSteps.length + j + 1}. ${tAction(k)}`,
                   null,
                   false,
                 ),

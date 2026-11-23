@@ -166,7 +166,7 @@ export function TeamOfferTerms({
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-rate`}>
                     {t("rate")}
-                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={form.rateText} placeholder={t("ratePlaceholder")}
+                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={form.rateText}
                       onChange={(e) => setForm((f) => ({ ...f, rateText: e.target.value }))} className={input} />
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-start`}>

@@ -22,6 +22,7 @@ import { PremiumActionDeck } from "@/components/ui/premium-action-card";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/bookings", "bookings.title");
@@ -71,7 +72,19 @@ export default async function BookingsPage({
   const tProposeForm = await getTranslations("scouting.booking");
   // The "read again" wording is the home regions' own (one retry, one wording).
   const tRetry = await getTranslations("homeRegions");
-  const result = await listMyBookings();
+  const [result, workspace] = await Promise.all([
+    listMyBookings(),
+    getWorkspaceContext().catch(() => null),
+  ]);
+  // Only an organization proposes bookings. A person with no organization
+  // has never sent one and cannot, so "Offers you sent — workers you offered
+  // work to" is an employer's section on a worker's page (design audit
+  // 2026-11-22). It stays whenever there is something in it, and whenever
+  // the memberships could not be read in full (UNKNOWN is not "no").
+  const mayHaveSent =
+    workspace === null ||
+    workspace.membershipsComplete === false ||
+    workspace.workspaces.some((w) => w.kind === "organization");
   // One consistent "now" for the whole render — the derived display states
   // (awaiting / stale) are computed against it, read-only.
   const nowIso = new Date().toISOString();
@@ -167,6 +180,7 @@ export default async function BookingsPage({
               ) : null
             }
           />
+          {result.outgoing.length > 0 || mayHaveSent ? (
           <Section
             title={t("outgoing.title")}
             help={t("outgoing.help")}
@@ -258,6 +272,7 @@ export default async function BookingsPage({
               ) : null
             }
           />
+          ) : null}
         </>
       )}
     </div>

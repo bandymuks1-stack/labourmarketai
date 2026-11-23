@@ -209,7 +209,6 @@
     "formLabelLabel": "Locatie",
     "formLabelPlaceholder": "Stad of regio",
     "formPriceLabel": "Prijs",
-    "formPricePlaceholder": "bijv. € 450/maand of in overleg",
     "priceHint": "Prijs is optioneel en beschrijvend. Er wordt hier geen betaling gedaan.",
     "save": "Opslaan",
     "saving": "Opslaan…",
@@ -2976,8 +2975,7 @@
           "label": "Hoeveel werknemers nodig"
         },
         "salary": {
-          "label": "Salaris (€)",
-          "placeholder": "Bijv. 2200"
+          "label": "Salaris (€)"
         },
         "countries": {
           "label": "Voorkeurslanden (ISO-codes)",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Uren per werknemer",
               "totalHours": "Totaal aantal uren (optionele overschrijving)",
               "rate": "Uur- / dagtarief",
-              "ratePlaceholder": "bijv. 20",
               "country": "Land / locatie",
               "materials": "Materialen",
               "equipment": "Apparatuur / gereedschap",
@@ -7168,7 +7165,6 @@
       "countryPlaceholder": "bijv. LT",
       "remoteLabel": "Kan op afstand worden gedaan",
       "rateLabel": "Tarief (optioneel)",
-      "ratePlaceholder": "bijv. ca. 25 EUR/u, bespreekbaar",
       "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief."
     },
     "save": "Opslaan",
@@ -19762,7 +19758,6 @@
       },
       "capacity": "Mensen",
       "rate": "Tarief",
-      "ratePlaceholder": "bijv. 32 €/u of vaste prijs",
       "period": "Periode",
       "start": "Begin",
       "end": "Einde",

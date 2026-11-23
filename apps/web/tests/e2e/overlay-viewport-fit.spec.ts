@@ -77,6 +77,29 @@ test.describe("language menu on a desktop (1280 × 800)", () => {
 });
 
 /**
+ * THE ABOUT PAGE FOLDS ITS LONG SECTIONS (coordinator decision 2026-11-22).
+ * At 390 px /about was 10,819 px. Each explanatory section keeps its heading
+ * and lead in view; its body opens in place. No copy is removed.
+ */
+test.describe("about page on a phone (390 × 844)", () => {
+  test.use({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true });
+
+  test("sections fold behind one label, stay complete when opened, and the page is shorter", async ({ page }) => {
+    await page.goto("/en/about");
+    await expect(page.getByTestId("about-page")).toBeVisible({ timeout: 30_000 });
+    const folds = page.getByTestId("about-fold");
+    expect(await folds.count(), "every long section folds").toBeGreaterThanOrEqual(5);
+    const closed = await page.evaluate(() => document.documentElement.scrollHeight);
+    expect(closed, "the folded page is far shorter than 10,819 px").toBeLessThan(7000);
+    // Opened, a section shows its body again.
+    const evidence = page.getByTestId("about-evidence");
+    await evidence.getByTestId("about-fold").locator(":scope > summary").tap();
+    await expect(evidence.locator("ol").first()).toBeVisible();
+    await expect(page.locator("h2")).not.toHaveCount(0);
+  });
+});
+
+/**
  * THE PRICING PLAN LISTS FOLD (coordinator decision 2026-11-22). Each plan's
  * feature list opens behind its own "Includes · n" row; the plan's name,
  * access state and statement stay in view. No price or legal text changes.
