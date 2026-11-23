@@ -27,6 +27,7 @@ import { getWorkerCoreRow, getWorkerSkillRows } from "../data/worker-core";
 import { countedOnce } from "../journal/counted-once";
 import { countConfirmedEntries, type ConfirmationRow } from "../journal/review-status";
 import { readWorkerEntrySkillLinks } from "../journal/entry-skill-link-read";
+import { cvSkillTier } from "../cv-export/skill-tiers";
 import { getWorkerJobRecommendations } from "../opportunities/recommendations";
 import {
   journalReportWindow,
@@ -168,12 +169,18 @@ export const getWeeklyPersonalIntelligence = cache(
       for (const row of skillRows) {
         const slug = row.skills?.slug;
         if (typeof slug !== "string" || !slug) continue;
-        // Backed = a durable journal link exists, OR a manager really
-        // confirmed it (a recorded event, not a link-dependent flag).
+        // Backed = THE canonical CV tier is above "declared" (duplication
+        // finding G-8 — no second reading of the row). `row.verified` is the
+        // STANDING confirmation (getWorkerSkillRows → withStandingConfirmation),
+        // so a withdrawn confirmation does not lift the skill; the durable
+        // link is the journal support.
         if (
-          (row.skill_id !== null && linkedSkillIds.has(row.skill_id)) ||
-          row.verified === true ||
-          row.source === "manager_confirmed"
+          cvSkillTier({
+            slug,
+            verified: row.verified,
+            source: row.source,
+            journalSupported: row.skill_id !== null && linkedSkillIds.has(row.skill_id),
+          }) !== "declared"
         ) {
           backed.add(slug);
         }

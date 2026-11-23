@@ -16,6 +16,8 @@
  * UNDER-state here (a verified skill is at least "supported"), never over-state.
  */
 
+import { cvSkillTier } from "@/lib/cv-export/skill-tiers";
+
 export type SkillEvidenceInput = {
   source?: string | null;
   verified?: boolean;
@@ -35,15 +37,20 @@ export type SkillEvidenceSummary = {
   unsupported: number;
 };
 
-const SUPPORTED_SOURCES = new Set(["work_journal", "manager_confirmed"]);
-
-/** True when a worker skill's stored provenance shows real work-journal
- *  backing. Not a verification claim — only "work entries back this". */
+/** True when a worker skill has real backing — read from THE canonical CV
+ *  tier (`cvSkillTier`, built on lib/evidence/evidence-tier.ts), never a
+ *  second interpretation of the row (duplication finding G-8): a skill is
+ *  supported exactly when the Living CV does not print it as "declared".
+ *  `verified` must be the STANDING confirmation (withStandingConfirmation),
+ *  never the stored flag. Not a verification claim — only "work backs this". */
 export function isSkillSupportedByWork(s: SkillEvidenceInput): boolean {
   return (
-    s.journalSupported === true ||
-    s.verified === true ||
-    SUPPORTED_SOURCES.has(s.source ?? "self_declared")
+    cvSkillTier({
+      slug: "",
+      verified: s.verified,
+      source: s.source,
+      journalSupported: s.journalSupported,
+    }) !== "declared"
   );
 }
 
