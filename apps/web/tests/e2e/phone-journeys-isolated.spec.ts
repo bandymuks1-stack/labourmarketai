@@ -621,6 +621,35 @@ for (const phone of PHONES) {
       const heardHere = [...(heard.get(od.page) ?? [])].filter((n) => n.startsWith("pageerror"));
       expect(heardHere, "no page error for the outsider").toEqual([]);
     });
+    test(`M-6c (${phone.name}). the experience records opened by their address stay open on the phone`, async ({ browser }) => {
+      // Twin of production profile-cv-history P-15, which failed at 375 × 667 on build 386f11a0:
+      // the result was rendered but hidden. A `?result=` address opens the phone's sheet by itself;
+      // the person asked to SEE it, so it must still be on screen once the page has settled.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const main = page.getByRole("main");
+      const shown = main
+        .getByTestId("experiences-result")
+        .or(main.getByTestId("experiences-result-unavailable").first())
+        .or(main.getByTestId("experiences-result-error"))
+        .first();
+      const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+      // Three loads in a row, each one the way production P-15 met it: as soon as
+      // the document is there, a "collapsed" chevron is tapped once. Before the
+      // fix the sheet opened one effect after mount, and that tap could toggle
+      // it back shut, leaving the result rendered inside a closed sheet.
+      for (const pass of [1, 2, 3]) {
+        await page.goto(`${BASE}/en/dashboard?result=experiences`, { waitUntil: "domcontentloaded" });
+        await toggle.waitFor({ state: "visible", timeout: 60_000 });
+        if ((await toggle.getAttribute("aria-expanded")) === "false") await toggle.click();
+        await expect(shown, `load ${pass}: the experience records are on screen`).toBeVisible({ timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+        await page.waitForTimeout(3_000);
+        const state = await toggle.getAttribute("aria-expanded");
+        await expect(shown, `load ${pass}: still on screen once the page settled (sheet aria-expanded=${state})`).toBeVisible();
+        await expect(main.getByTestId("experiences-result-error"), `load ${pass}: the records loaded`).toHaveCount(0);
+      }
+      await done();
+    });
     test(`M-7 (${phone.name}). the worker's work journal fits the phone`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await page.goto(`${BASE}/en/dashboard/journal`);
