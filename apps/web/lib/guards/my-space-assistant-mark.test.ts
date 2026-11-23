@@ -23,8 +23,10 @@ describe("My space carries the assistant mark", () => {
 
   it("the assistant icon key renders the assistant's own mark, not a second drawing", () => {
     expect(read("components/app/nav-icons.ts")).toMatch(/assistant: AssistantNavIcon,/);
-    const icon = read("components/app/assistant-nav-icon.tsx");
-    expect(icon).toMatch(/<AssistantMark size="sm"/);
+    // In the mark's own file: one identity, and no new "assistant" file for
+    // the product gate's second-AI rule to (rightly) question.
+    const icon = read("components/app/conversation/chat/assistant-identity.tsx");
+    expect(icon).toMatch(/export function AssistantNavIcon[\s\S]*?<AssistantMark size="sm"/);
     expect(icon).not.toMatch(/<svg|<img/);
   });
 

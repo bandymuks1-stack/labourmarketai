@@ -14,7 +14,7 @@ import type { ComponentType } from "react";
 
 import type { NavIconKey } from "@/lib/config/navigation";
 import { WORK_AREA_ICONS } from "@/components/app/work-area-icons";
-import { AssistantNavIcon } from "@/components/app/assistant-nav-icon";
+import { AssistantNavIcon } from "@/components/app/conversation/chat/assistant-identity";
 
 /**
  * ONE ICON PER DESTINATION, for every nav surface that renders the catalogue.
