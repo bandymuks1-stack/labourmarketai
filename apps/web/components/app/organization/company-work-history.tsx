@@ -14,6 +14,7 @@ import {
 import { isPeriodRecord, type PlaceGroup } from "@/lib/organization-evidence/company-work-history";
 import type { OrganizationProjects } from "@/lib/organization-evidence/organization-projects";
 import type { OrganizationJournal } from "@/lib/organization-evidence/organization-journal";
+import type { WorkForClient } from "@/lib/organization-evidence/work-for-client";
 import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 import { OpenWorkspaceButton } from "@/components/app/organization/open-workspace-button";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -110,6 +111,8 @@ export async function CompanyWorkHistory({
         {/* A company with no imported history can still have real projects
             and journal work. */}
         <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
+        <WorkForClientBlock work={load.forClient} unreadable={load.partnerWorkUnreadable} t={t} locale={locale} />
+        <ClientsBlock clients={load.clients} t={t} />
         <OrganizationProjectsBlock projects={load.projects} t={t} />
       </section>
     );
@@ -164,6 +167,10 @@ export async function CompanyWorkHistory({
         <Stat concept="time" value={`${nf(history.dayHours)} h`} label={t("stats.dayHours")} />
         <Stat concept="calendar" value={periodLabel ?? "—"} label={t("stats.period")} />
       </div>
+
+      <ClientsBlock clients={load.clients} t={t} />
+
+      <WorkForClientBlock work={load.forClient} unreadable={load.partnerWorkUnreadable} t={t} locale={locale} />
 
       <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
 
@@ -240,6 +247,83 @@ function OrganizationJournalBlock({
       <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-journal-basis">
         {t("journal.basis", { entries: journal.entries })}
       </p>
+    </section>
+  );
+}
+
+/** WORK PARTNERS DID FOR THIS ORGANIZATION (decision 0033): records in their
+ *  books naming it as client, as one aggregate. No person, place or partner
+ *  name; never added to the organization's own work. */
+function WorkForClientBlock({
+  work,
+  unreadable,
+  t,
+  locale,
+}: {
+  work: WorkForClient | null;
+  /** The partners' books could not be read: UNKNOWN, never "none" (SEP-7). */
+  unreadable: boolean;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  locale: string;
+}) {
+  const note = unreadable ? (
+    <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-for-client-unreadable">
+      {t("forClient.unreadable")}
+    </p>
+  ) : null;
+  if (!work) return note;
+  const when = span(work.firstDate, work.lastDate, locale);
+  return (
+    <section
+      className="flex flex-col gap-2"
+      data-testid="company-work-history-for-client"
+      data-records={work.records}
+      data-confirmed={work.confirmed}
+      aria-label={t("forClient.title")}
+    >
+      <h3 className="font-display text-lg font-semibold text-text-primary">{t("forClient.title")}</h3>
+      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat concept="time" value={`${nf(work.dayHours)} h`} label={t("stats.dayHours")} />
+        <Stat concept="calendar" value={when ?? "—"} label={t("stats.period")} />
+        <Stat concept="object" value={String(work.confirmed)} label={t("forClient.confirmed")} />
+        <Stat concept="object" value={String(work.unconfirmed)} label={t("forClient.unconfirmed")} />
+      </div>
+      {work.periodHours > 0 ? (
+        <p className="text-meta leading-relaxed text-text-muted">{t("forClient.periodHours", { hours: nf(work.periodHours) })}</p>
+      ) : null}
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-for-client-basis">
+        {t("forClient.basis", { count: work.records })}
+      </p>
+      {note}
+    </section>
+  );
+}
+
+/** WHO THIS ORGANIZATION WORKED FOR: the clients its own records name. */
+function ClientsBlock({
+  clients,
+  t,
+}: {
+  clients: Extract<CompanyWorkHistoryLoad, { kind: "ready" }>["clients"];
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  if (clients.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-2" data-testid="company-work-history-clients" aria-label={t("clients.title")}>
+      <h3 className="font-display text-lg font-semibold text-text-primary">{t("clients.title")}</h3>
+      <ul className="flex flex-col gap-1">
+        {clients.map((c) => (
+          <li
+            key={c.organizationId}
+            className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm"
+            data-testid="company-work-history-client"
+            data-records={c.records}
+          >
+            <span className="font-medium text-text-primary">{c.name ?? t("clients.unnamed")}</span>
+            <span className="tabular-nums text-text-secondary">{t("clients.records", { count: c.records })}</span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
