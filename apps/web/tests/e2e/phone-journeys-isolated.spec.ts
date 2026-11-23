@@ -621,6 +621,27 @@ for (const phone of PHONES) {
       const heardHere = [...(heard.get(od.page) ?? [])].filter((n) => n.startsWith("pageerror"));
       expect(heardHere, "no page error for the outsider").toEqual([]);
     });
+    test(`M-6c (${phone.name}). the experience records opened by their address stay open on the phone`, async ({ browser }) => {
+      // Twin of production profile-cv-history P-15, which failed at 375 × 667 on build 386f11a0:
+      // the result was rendered but hidden. A `?result=` address opens the phone's sheet by itself;
+      // the person asked to SEE it, so it must still be on screen once the page has settled.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      await page.goto(`${BASE}/en/dashboard?result=experiences`);
+      const main = page.getByRole("main");
+      const shown = main
+        .getByTestId("experiences-result")
+        .or(main.getByTestId("experiences-result-unavailable").first())
+        .or(main.getByTestId("experiences-result-error"))
+        .first();
+      await expect(shown, "the experience records are on screen").toBeVisible({ timeout: 60_000 });
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+      await page.waitForTimeout(5_000);
+      const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+      const state = (await toggle.count()) ? await toggle.getAttribute("aria-expanded") : "no toggle";
+      await expect(shown, `the experience records are still on screen once the page settled (sheet expanded: ${state})`).toBeVisible();
+      await expect(main.getByTestId("experiences-result-error"), "the records loaded").toHaveCount(0);
+      await done();
+    });
     test(`M-7 (${phone.name}). the worker's work journal fits the phone`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await page.goto(`${BASE}/en/dashboard/journal`);
