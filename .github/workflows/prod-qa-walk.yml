@@ -93,6 +93,10 @@ on:
           # Numbers-only UX/UI measurements (worker/owner/agency x desktop/phone + active-locale sweep, ~115 page
           # loads, read-only) for the per-function UX audit. Prints [ux] lines; no screenshots. Dispatch only.
           - ux-metrics
+          # Coordinator order 2026-11-23 (owner-approved read-only grant): the owner's eight Living CV
+          # screens, de-identified before rendering, published ONLY encrypted to the coordinator's key.
+          # Read-only; needs the owner-created qa.livingcv+read1 account and its grant. Dispatch only.
+          - living-cv-screens
           # Owner decision 2026-10-26 §5: locale vs server load behind the slow non-LT pages. Dispatch only.
           - lcp-locale-probe
           # Owner-approved 2026-10-26: two synthetic sessions at once vs one (read-only). Dispatch only.
@@ -473,6 +477,10 @@ jobs:
             mint_existing "qa.buyer+act1@labourmarket.ai" buyer \
               || echo "::warning::qa.buyer+act1 not mintable — the buyer role of ux-metrics is recorded BLOCKED"
           fi
+          if [ "${{ needs.debounce.outputs.spec }}" = "living-cv-screens" ]; then
+            # Owner-created, read-only, granted by the owner's side. Not mintable means no screens.
+            mint_existing "qa.livingcv+read1@labourmarket.ai" livingcv
+          fi
           if [ "${{ needs.debounce.outputs.spec }}" = "invited-worker" ] || [ "${{ needs.debounce.outputs.spec }}" = "alert-mail" ] || [ "${{ needs.debounce.outputs.spec }}" = "digest-setup" ] || [ "${{ needs.debounce.outputs.spec }}" = "digest-check" ]; then
             mint_existing "qa.invited@labourmarket.ai" invited
           fi
@@ -514,6 +522,8 @@ jobs:
           # light unless a person dispatched the walk in the dark scheme (a choice input: no free text).
           PROD_QA_THEME: ${{ github.event_name == 'workflow_dispatch' && inputs.theme || 'light' }}
           SR1_READINGS_FILE: ${{ github.workspace }}/sr1-readings.jsonl
+          # living-cv-screens only: the plaintext screens, outside the repository, destroyed below.
+          PROD_QA_LCV_DIR: ${{ runner.temp }}/lcv
         run: |
           set -uo pipefail
           echo "device: ${PROD_QA_DEVICE}" >> "$GITHUB_STEP_SUMMARY"
@@ -567,6 +577,7 @@ jobs:
             utilisation-planned-actual) SPEC=tests/e2e/prod-utilisation-planned-actual.spec.ts ;;
             lmc-csrf) SPEC=tests/e2e/prod-lmc-csrf.spec.ts ;;
             ux-metrics) SPEC=tests/e2e/prod-ux-metrics.spec.ts ;;
+            living-cv-screens) SPEC=tests/e2e/prod-living-cv-screens.spec.ts ;;
             lcp-locale-probe) SPEC=tests/e2e/prod-lcp-locale-probe.spec.ts ;;
             concurrency-probe) SPEC=tests/e2e/prod-concurrency-probe.spec.ts ;;
             fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
@@ -622,6 +633,51 @@ jobs:
             echo "::error::production walk failed (exit ${code}); see the prod-qa artefact"
           fi
           exit "${code}"
+
+      # living-cv-screens: the repository is public, so the screens are published ONLY encrypted.
+      # A random AES-256 key encrypts the zip; the coordinator's RSA public key encrypts that key.
+      # The plaintext PNGs, the zip and the key are destroyed on the runner whatever happens, and
+      # nothing is published unless all eight screens exist. Guard: lib/guards/living-cv-screens.test.ts.
+      - name: "Living CV screens: encrypt, then destroy the plaintext"
+        id: lcv
+        if: always() && needs.debounce.outputs.spec == 'living-cv-screens'
+        shell: bash
+        env:
+          LCV_DIR: ${{ runner.temp }}/lcv
+          LCV_OUT: ${{ runner.temp }}/lcv-out
+          LCV_TMP: ${{ runner.temp }}/lcv-tmp
+          LCV_PUBKEY: apps/web/tests/e2e/prod-living-cv-screens.public-key.txt
+        run: |
+          set -euo pipefail
+          destroy() {
+            for d in "$LCV_DIR" "$LCV_TMP"; do
+              [ -d "$d" ] && find "$d" -type f -exec shred -u {} + 2>/dev/null || true
+              rm -rf "$d"
+            done
+          }
+          trap destroy EXIT
+          mkdir -p "$LCV_OUT" "$LCV_TMP"
+          n=$(find "$LCV_DIR" -maxdepth 1 -type f -name '*.png' 2>/dev/null | wc -l)
+          if [ "${{ steps.walk.outcome }}" != "success" ] || [ "$n" -ne 8 ]; then
+            echo "::error::walk ${{ steps.walk.outcome }}, ${n} of 8 screens; nothing is published"
+            exit 1
+          fi
+          (cd "$LCV_DIR" && zip -q -X "$LCV_TMP/lcv.zip" ./*.png)
+          openssl rand -hex 32 > "$LCV_TMP/lcv.key"
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in "$LCV_TMP/lcv.zip" -out "$LCV_OUT/lcv.zip.enc" -pass "file:$LCV_TMP/lcv.key"
+          openssl pkeyutl -encrypt -pubin -inkey "$LCV_PUBKEY" -in "$LCV_TMP/lcv.key" -out "$LCV_OUT/lcv.key.enc"
+          echo "encrypted=true" >> "$GITHUB_OUTPUT"
+
+      - name: "Living CV screens: upload the two encrypted files only"
+        if: always() && steps.lcv.outputs.encrypted == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-qa-living-cv-screens-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/lcv-out/lcv.zip.enc
+            ${{ runner.temp }}/lcv-out/lcv.key.enc
 
       # The repository is PUBLIC, so its artifacts are readable by any signed-in
       # GitHub user. Screenshots of production pages can show real companies'
