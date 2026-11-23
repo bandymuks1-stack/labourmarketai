@@ -95,7 +95,7 @@ goes.
 | M12 | HIRE-3, then HIRE-1 | Two acceptance chains; two company → employee invitation writers | `accept_invitation_apply_v2`, then `invitations` | C (RED parts with F) | F12 |
 | M13 | HIRE-5, HIRE-7, HIRE-8, HIRE-9 | Booking accept without the engagement row; two writers of `team_assignments`; two engagement readers | Booking accept opens the engagement; one insert helper; one reader | C | M12 |
 | M14 | REG-1 | Two function registers, each called "the one" | Both kept, one fact each, linked by capability id | coordinator | — |
-| M15 | AUTH-1 | Phone sign-up drifted from web sign-up | One shared rules module for both clients | F | — |
+| M15 | AUTH-1 | Phone sign-up drifted from web sign-up | One shared rules module for both clients. **RED: auth-core logic** (draft, `needs-human-gate`, owner approval) | F | owner approval |
 | M16 | SQL-5, SQL-10, SQL-11, SQL-12 | Booking response v3/v4 copy; withdraw v1/v2; three accept bodies; 48 "object missing?" checks | Delegators and one helper | D (RED for SQL bodies) | owner approval |
 
 ## 4. Safe removal
@@ -158,9 +158,9 @@ when its PR merges.
 | Phase | Content | Gate |
 |---|---|---|
 | P1 — now | F1–F4 (PRs open), F5–F11, M2, M5, M9, R1, R3, R4, R6, D N1 + N2 + N7a + N11, S3 | GREEN; review on the current head; a production walk after deploy |
-| P2 — after P1 walks pass | M3, M4, M6, M7, M8, M10, M11, M14, M15, R2, D N7 | GREEN |
+| P2 — after P1 walks pass | M3, M4, M6, M7, M8, M10, M11, M14, R2, D N7 | GREEN |
 | P3 — after owner decisions | D N3–N6 and N10 (OD-1, OD-2), D N8 (OD-3), F12 → M12 → M13, R7 | GREEN, or RED where SQL |
-| P4 — RED, owner approval each | #3688 → R5, R8, R9, M16, F13, D N9 (OD-4) | `needs-human-gate`, exact SQL in the PR, apply via MCP after approval |
+| P4 — RED, owner approval each | #3688 → R5, R8, R9, M15 (auth core), M16, F13, D N9 (OD-4) | `needs-human-gate`, exact SQL in the PR, apply via MCP after approval |
 
 ## 9. Owner decisions this plan waits on
 
@@ -176,7 +176,7 @@ when its PR merges.
 | OFFER-1, OFFER-5 | The commercial record (proposals vs offer terms); which lane is the subcontract chain | C |
 | AI-4, AI-11 | Retire or re-route the no-op provider stack; `/match-preview` on the frozen fork | C |
 | HIRE-6 | The fold plan for governance invitations | C |
-| RED | #3688, #3620, #3632, #3649, #3651, #3657, #2996 and the R8/R9/M16 SQL | C §11, B §6 |
+| RED | #3688, #3620, #3632, #3649, #3651, #3657, #2996, the R8/R9/M16 SQL and the M15 auth-core change | C §11, B §6, `AGENTS.md` |
 
 ## 10. Not in this plan
 
