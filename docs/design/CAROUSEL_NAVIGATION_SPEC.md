@@ -23,7 +23,7 @@ public and signed-in surface:
 - No production walk was run for this spec, so nothing below is marked PROD.
 - The A2 browser audit (`docs/audits/A2_DESIGN_AUDIT_2026-11-22.md`) ran
   against a local stack, so its findings are MAIN.
-- Lane A's section is in §8.1. Lane M's has not arrived; §8.2 holds its place.
+- Lane A's section is in §8.1. Lane M's part 1 is in §8.2; part 2 is pending.
 
 ---
 
@@ -262,12 +262,14 @@ Steps marked RED stop for a human gate.
 | N4 | Signed-in goal rail on the home: mount `GoalNavigation` under the header in `today-screen` and `company-model-screen` **beside** the `AreaSwitcher` (no removal yet). Take #3270's server-rights filter, re-based on `main`, not its whole branch. | GREEN, A2 with A (worker home) and M (company home); after OD-1 | Additive | A role walk counting navigation actions (≤ 2 to the start of any function), from #3268's closed spec |
 | N5 | Inner pages: the same rail as a compact strip under the header in `dashboard-chrome` panel mode, collapsed to level 1. An earlier attempt rendered pages twice; it must mount once in the layout, not per page. | GREEN, A2; after N4 | Additive | A guard that `GoalNavigator` mounts once per page; e2e that no page renders twice |
 | N6 | Replace `AreaSwitcher` on the homes with level 2 of the rail, caller by caller: today-screen first, then company-model-screen | GREEN per caller; A or M review | Every station or area becomes a level-2 card of the same goal, the same route. Remove a caller only after N4 shows the same set. | A guard listing every former `AreaSwitcher` href as reachable from the rail |
-| N7 | `OrganizationDoors` on phones: render through `CardRail` instead of its own row (desktop unchanged) | GREEN, M review | Same doors, same server list | The existing doors guard plus the phone e2e |
+| N7 | `OrganizationDoors` rendered through `CardRail` (Option A, §8.2). One label key per route with the header areas (M1). Fix the stale doors docblock. | GREEN, M | Same doors, same server list, same routes | Update `page-pattern-consistency.test.ts:43-55`, `phone-journeys-isolated` doors block, `prod-mobile-surfaces` M-6 |
+| N7a | Mount the doors on `/dashboard/planning` and `/dashboard/service-requests` for an organisation context (M2) | GREEN, M | Additive | A guard: every door target mounts the doors |
+| N11 | Listings group tabs and scouting filter chips: through `CardRail`, or wrap (M3) | GREEN, M | Same tabs and filters | Add both to `page-pattern-consistency` |
 | N8 | Level 3 for further goals: only after the owner approves the categories | PLAN | — | — |
 | N9 | Pins: store, unpin, reorder | **RED** (new columns or table under RLS, decision 0024) | Pins only add a shortcut | Migration-safety, RLS tests, and a human gate |
 | N10 | Remove the code left with no caller after N6/N7 (`AreaSwitcher` if it has no caller, `phoneMore` and `goal-rail-more`) | GREEN; only with a caller-grep proof in the PR | No caller left | `e2e-testid-orphans.test.ts`, typecheck |
 
-Order: N1 → N2 → OD-1/OD-2 → N3 → N4 → N5 → N6 → N7 → N10; N8 and N9 when
+Order: N1 → N2 → N7a → N11 → OD-1/OD-2 → N3 → N4 → N5 → N6 → N7 → N10; N8 and N9 when
 decided. #3270 is not merged as is: N4 takes only its server-rights filter.
 
 ---
@@ -340,7 +342,106 @@ navigation systems. They stay as they are; none of them is a carousel.
 
 ### 8.2 Lane M (company and agency workspaces, need and service forms)
 
-Pending. Lane M sends its section to this session.
+Received 2026-11-23 05:24 UTC from Lane M, part 1 of 2 (session message).
+Class MAIN, base `125e21827`: code reading plus a local walk. Lane M
+re-checked four claims by hand; A2 re-checked the starred ones (★) by grep.
+
+**Count.** 30 navigation surfaces on employer and agency screens:
+- 11 inside the one header: back arrow, logo, workspace chip, place crumb,
+  core row, "More", phone sheet, search, language, bell, account menu;
+- 19 on pages.
+
+Four model files feed them:
+- `lib/config/navigation.ts`;
+- `lib/navigation/work-areas.ts`;
+- `lib/company/organization-doors.ts`;
+- `lib/navigation/command-registry.ts`.
+
+There is no sidebar and no bottom bar. `CardRail` has no signed-in
+importer ★.
+
+**Page surfaces beyond §2:**
+- `PageBack`;
+- "My spaces" (`company/page.tsx:281-287`);
+- `company-primary-actions` and `company-decisions-strip`;
+- `CompanyActionNextActions`;
+- `PremiumActionDeck` (a grid);
+- projects Active/Finished;
+- calendar views and filters;
+- roster timeline;
+- scouting need picker and filter chips;
+- reports window switch;
+- finance filters;
+- listings group tabs;
+- history neighbours;
+- chat chips;
+- My Space row.
+
+Most are in-page controls, not navigation systems. Three matter for this
+spec:
+
+| # | Finding | Evidence | Effect on the plan |
+|---|---|---|---|
+| M1 | Doors (S5) and header "More"/sheet list the same destinations on the same screen, with different labels and ids (`work` means projects in the doors, hours in the areas). The code calls it a duplicate pending "the P1 unification". | `lib/guards/organization-door-routes-agree.test.ts:8-13` ★; labels in §10, item 3 | N6/N7: one item model and one label key per route |
+| M2 | **The doors vanish behind two of their own doors.** `calendar` → `/dashboard/planning` and `market` → `/dashboard/service-requests` do not mount `OrganizationDoorsServer`. This breaks `company/layout.tsx:12-13` ("a person never loses the doors while standing inside one of them"). | grep count 0 in both pages ★ | New step N7a (GREEN, M) |
+| M3 | **Listings group tabs scroll sideways at every width**, with no snap and no guard (`marketplace-listings-section.tsx:427-430`, plus rows at 458 and 486). The scouting filter chips are a second sideways row on phones (`company/scouting/page.tsx:682`). | ★ both | New step N11 (GREEN, M): CardRail or wrap; add a guard |
+
+**More overlaps (code; not walked):**
+- **Up to five links home on `/dashboard/company`:** back arrow, logo, core
+  overview, `PageBack` and "My spaces" (`company/page.tsx:280-287`).
+- **No way back to the company hub from the home's menus:**
+  `/dashboard/company` (door `now`) is not in `ORGANIZATION_WORK_AREAS`, so
+  not in "More", the sheet or `AreaSwitcher`.
+- **Gate mismatch:**
+  - the doors use `resolveEmployerCompanyContext` (membership);
+  - the header areas use `actingRoleForWorkspace` (membership plus a held
+    role);
+  - so a manager without a held role gets the doors but no organisation areas
+    in "More".
+
+**The snap question, decided here (canonical component, freeze rule):**
+- Lane M offered two options:
+  - **Option A:** move the doors onto `CardRail`.
+  - **Option B:** widen the one-rail guard so the doors may snap on their own.
+- **This spec chooses Option A** for N7. `CardRail` is the canonical rail
+  (§3), and the brief forbids a new alternative. Option B would keep a second
+  snapping strip.
+
+What Option A changes:
+- `aria-current="true"` replaces `"page"`;
+- `data-card-id` replaces the `organization-door-*` test ids;
+- icon-on-top cards with dots and a swipe hint on phones;
+- an arrowed row instead of wrapping from `sm`.
+
+Tests to update:
+- `lib/guards/page-pattern-consistency.test.ts:43-55`;
+- `tests/e2e/phone-journeys-isolated.spec.ts:1826-1867`;
+- `prod-mobile-surfaces` M-6.
+
+`lib/guards/shared-ui-system.test.ts:69-82` needs no change. Lane M builds
+it after this spec merges.
+
+**Stale text, fixed together with N7:**
+- `organization-doors.tsx:33-35` still says "WRAPPING at every width".
+- `page-pattern-consistency.test.ts:5-15` says "no navigation strip scrolls
+  sideways", which M3 contradicts.
+
+**Contract versus code (`docs/launch/role-aware-navigation-contract-v1.md`):**
+- The six-item catalogue holds (`compact-nav-marketplace-ia.test.ts:39`).
+- No `BottomNav` or `DashboardTabs` exists; the rendered core row has 4
+  items.
+- `components/app/company-locations-section.tsx` does not exist; locations
+  are at `#company-locations`.
+- "No second calendar" holds.
+- This supports OD-5.
+
+**A2 audit items, as Lane M sees them on employer screens:**
+- Item 3 (no assistant control on inner pages) holds for employers too.
+- Item 10: the settings checkboxes are 13 × 13, but each sits inside a label
+  of 309 × 60–83 px, so the tap target is the label. Not a defect.
+- Item 11 (calendar prev/next 35–40 px) is shared with employers.
+
+Part 2 of 2 is pending.
 
 ---
 
