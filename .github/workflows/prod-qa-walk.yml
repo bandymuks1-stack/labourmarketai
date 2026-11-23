@@ -635,9 +635,13 @@ jobs:
           exit "${code}"
 
       # living-cv-screens: the repository is public, so the screens are published ONLY encrypted.
-      # A random AES-256 key encrypts the zip; the coordinator's RSA public key encrypts that key.
-      # The plaintext PNGs, the zip and the key are destroyed on the runner whatever happens, and
-      # nothing is published unless all twelve screens (4 pages x 1440/390/375 px) exist. Guard: lib/guards/living-cv-screens.test.ts.
+      # Owner 2026-11-23: every image passes its OWN privacy gate in the walk; one that fails is never
+      # written. The manifest lists all twelve screens with PASS or FAIL and the reason, and is
+      # encrypted with the images. A 375 px layout FAIL is still delivered, de-identified, and never
+      # blocks the others. Here: every PNG must be one the manifest lists as privacy PASS, else
+      # nothing is published. A random AES-256 key encrypts the zip; the coordinator's RSA public
+      # key encrypts that key. The plaintext is destroyed on the runner whatever happens.
+      # Guard: lib/guards/living-cv-screens.test.ts.
       - name: "Living CV screens: encrypt, then destroy the plaintext"
         id: lcv
         if: always() && needs.debounce.outputs.spec == 'living-cv-screens'
@@ -657,12 +661,23 @@ jobs:
           }
           trap destroy EXIT
           mkdir -p "$LCV_OUT" "$LCV_TMP"
-          n=$(find "$LCV_DIR" -maxdepth 1 -type f -name '*.png' 2>/dev/null | wc -l)
-          if [ "${{ steps.walk.outcome }}" != "success" ] || [ "$n" -ne 12 ]; then
-            echo "::error::walk ${{ steps.walk.outcome }}, ${n} of 12 screens; nothing is published"
+          if [ ! -f "$LCV_DIR/manifest.json" ]; then
+            echo "::error::no manifest (walk ${{ steps.walk.outcome }}); nothing is published"
             exit 1
           fi
-          (cd "$LCV_DIR" && zip -q -X "$LCV_TMP/lcv.zip" ./*.png)
+          # Every image on disk must be one the manifest lists as privacy PASS; the manifest must
+          # list twelve screens. Counts only.
+          node -e '
+            const fs = require("fs"), path = require("path"), dir = process.argv[1];
+            const m = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
+            const listed = new Set(m.screens.filter((s) => s.privacy === "PASS" && s.file).map((s) => s.file));
+            const pngs = fs.readdirSync(dir).filter((f) => f.endsWith(".png"));
+            const stray = pngs.filter((f) => !listed.has(f));
+            if (m.screens.length !== 12 || stray.length > 0) { console.error(`screens=${m.screens.length} stray=${stray.length}`); process.exit(1); }
+            const pass = m.screens.filter((s) => s.status === "PASS").length;
+            console.log(`images=${pngs.length} pass=${pass} fail=${m.screens.length - pass}`);
+          ' "$LCV_DIR" >> "$GITHUB_STEP_SUMMARY"
+          (cd "$LCV_DIR" && zip -q -X "$LCV_TMP/lcv.zip" manifest.json $(find . -maxdepth 1 -type f -name '*.png' -printf '%f\n'))
           openssl rand -hex 32 > "$LCV_TMP/lcv.key"
           openssl enc -aes-256-cbc -pbkdf2 -salt -in "$LCV_TMP/lcv.zip" -out "$LCV_OUT/lcv.zip.enc" -pass "file:$LCV_TMP/lcv.key"
           openssl pkeyutl -encrypt -pubin -inkey "$LCV_PUBKEY" -in "$LCV_TMP/lcv.key" -out "$LCV_OUT/lcv.key.enc"

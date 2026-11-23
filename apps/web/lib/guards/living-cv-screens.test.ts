@@ -14,8 +14,10 @@ import { describe, expect, it } from "vitest";
  *   - nothing that names a person or an organization reaches the log: no text locators, no text
  *     assertions, no console output, failures rethrown as the step name only;
  *   - the workflow publishes ONLY the two encrypted files, destroys the plaintext whatever
- *     happens, and publishes nothing unless all twelve screens exist (1440, 390 and 375 px);
- *   - at 375 px nothing overflows or sits off-screen;
+ *     happens, and publishes only images the manifest lists as privacy PASS;
+ *   - owner 2026-11-23: every image has its OWN privacy gate (a failed gate generates no image and
+ *     the others still run); at 375 px the layout check is never softened, and a layout FAIL is
+ *     still delivered de-identified, marked FAIL with its cause, without blocking 1440 or 390;
  *   - only the coordinator's PUBLIC key is in the repository.
  */
 const WEB = join(__dirname, "..", "..");
@@ -48,10 +50,14 @@ describe("the walk is read-only and prints no names", () => {
     expect(spec).toMatch(/ctx\.route\("\*\*\/\*"/);
     expect(spec).toMatch(/rewrite\(await res\.text\(\), p\)/);
     expect(spec).toMatch(/document\.documentElement\.outerHTML/);
-    const shoot = spec.slice(spec.indexOf("async function shoot"));
+    const shoot = spec.slice(spec.indexOf("async function shoot"), spec.indexOf("const SCREENS"));
+    // Per image: mask, scan, and on a failed scan return BEFORE any screenshot.
     expect(shoot.indexOf("maskRendered(")).toBeGreaterThan(-1);
-    expect(shoot.indexOf("maskRendered(")).toBeLessThan(shoot.indexOf("assertClean("));
-    expect(shoot.indexOf("assertClean(")).toBeLessThan(shoot.indexOf("page.screenshot("));
+    expect(shoot.indexOf("maskRendered(")).toBeLessThan(shoot.indexOf("isClean("));
+    const failBranch = shoot.slice(shoot.indexOf("if (!gate.clean)"), shoot.indexOf("const problems"));
+    expect(failBranch).toMatch(/file: null, privacy: "FAIL"/);
+    expect(failBranch).not.toMatch(/screenshot/);
+    expect(shoot.indexOf("if (!gate.clean)")).toBeLessThan(shoot.indexOf("page.screenshot("));
     expect(spec).toMatch(/stripPngMetadata\(/);
   });
 
@@ -62,6 +68,9 @@ describe("the walk is read-only and prints no names", () => {
     expect(spec).toMatch(/querySelectorAll<HTMLInputElement \| HTMLTextAreaElement>\("input, textarea"\)/);
     // The markup as sent, AND the visible text case-insensitively.
     expect(spec).toMatch(/leakCount\(html, p, false\) \+ leakCount\(visible, p, true\)/);
+    // Each image stands alone: a failure is recorded and the next screen still runs.
+    expect(spec).toMatch(/const attempt = async/);
+    expect(spec).toMatch(/writeFileSync\(join\(OUT, "manifest\.json"\)/);
     const lib = read("lib/testing/living-cv-deidentify.ts");
     expect(lib).toMatch(/redactContactData\(out\)/);
     expect(lib).toMatch(/LT_NAME_ENDINGS/);
@@ -73,14 +82,21 @@ describe("the walk is read-only and prints no names", () => {
     expect(spec).toMatch(/return route\.abort\(\)/);
   });
 
-  it("photographs 1440, 390 and 375 px, and at 375 px fails on any overflow or off-screen content", () => {
+  it("photographs 1440, 390 and 375 px; at 375 px every overflow or hidden block is a FAIL with its cause", () => {
     expect(spec).toMatch(/key: "1440"/);
     expect(spec).toMatch(/key: "390"/);
     expect(spec).toMatch(/key: "375", options: \{ viewport: \{ width: 375/);
-    const shoot = spec.slice(spec.indexOf("async function shoot"));
-    expect(shoot.indexOf("assertFits(")).toBeGreaterThan(-1);
-    expect(shoot.indexOf("assertFits(")).toBeLessThan(shoot.indexOf("page.screenshot("));
-    expect(spec).toMatch(/r\.right > innerWidth \+ 1 \|\| r\.left < -1/);
+    const layout = spec.slice(spec.indexOf("async function layoutProblems"), spec.indexOf("interface ScreenResult"));
+    expect(layout).toMatch(/page scrolls sideways/);
+    expect(layout).toMatch(/reaches past the right edge/);
+    expect(layout).toMatch(/starts past the left edge/);
+    expect(layout).toMatch(/hides content/);
+    // The cause names the element by tag, test id, id or class: never its text.
+    expect(layout).not.toMatch(/innerText|textContent/);
+    // A layout FAIL still delivers the de-identified image.
+    const shoot = spec.slice(spec.indexOf("async function shoot"), spec.indexOf("const SCREENS"));
+    expect(shoot.indexOf("layoutProblems(")).toBeLessThan(shoot.indexOf("page.screenshot("));
+    expect(shoot).toMatch(/status: problems\.length \? "FAIL" : "PASS"/);
   });
 
   it("writes the screens only outside the repository", () => {
@@ -94,8 +110,10 @@ describe("the workflow publishes only ciphertext", () => {
     expect(enc).toMatch(/if: always\(\) && needs\.debounce\.outputs\.spec == 'living-cv-screens'/);
     expect(enc).toMatch(/trap destroy EXIT/);
     expect(enc).toMatch(/shred -u/);
-    expect(enc).toMatch(/"\$n" -ne 12/);
-    expect(enc).toMatch(/steps\.walk\.outcome/);
+    expect(enc).toMatch(/no manifest/);
+    expect(enc).toMatch(/s\.privacy === "PASS" && s\.file/);
+    expect(enc).toMatch(/m\.screens\.length !== 12 \|\| stray\.length > 0/);
+    expect(enc).toMatch(/zip -q -X "\$LCV_TMP\/lcv\.zip" manifest\.json/);
     expect(enc).toMatch(/openssl rand -hex 32/);
     expect(enc).toMatch(/openssl enc -aes-256-cbc -pbkdf2 -salt/);
     expect(enc).toMatch(/openssl pkeyutl -encrypt -pubin -inkey "\$LCV_PUBKEY"/);

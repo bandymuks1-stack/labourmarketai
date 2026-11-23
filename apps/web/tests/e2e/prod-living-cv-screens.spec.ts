@@ -37,14 +37,19 @@ import { test } from "./prod-walk";
  *      every other capitalised word that is not a word of the product's own catalogues or one of
  *      the two chosen organizations ("[…]"; over-masking is accepted).
  *   4. Then the whole document is checked: the markup, scripts and hidden streamed copies for
- *      every roster form as sent, and the visible text and field values case-insensitively. One
- *      left means FAIL and no screenshot.
+ *      every roster form as sent, and the visible text and field values case-insensitively.
+ *   Steps 3 and 4 and the PNG metadata strip are each image's OWN privacy gate (owner,
+ *   2026-11-23): a failed gate generates no image, and the other screens still run.
+ *   At 375 px the layout is checked too and never softened: no sideways scroll, no element past an
+ *   edge, no block hiding content. A layout FAIL is still delivered, de-identified, marked FAIL with
+ *   its cause, and never blocks 1440 or 390.
  *
  * Nothing that names a person or an organization is printed: no text locators, no text
  * assertions, no logging, and every failure is rethrown as a fixed message naming only the step. Only
  * the count of leaked tokens is ever reported.
  *
- * Screens (each at 1440, 390 and 375 px — twelve files), written as metadata-free PNGs to PROD_QA_LCV_DIR (outside
+ * Screens (each at 1440, 390 and 375 px — twelve), with `manifest.json` (each screen PASS or FAIL and
+ * why, naming no one), written as metadata-free PNGs to PROD_QA_LCV_DIR (outside
  * the repository). The workflow zips, encrypts and destroys them; only the encrypted files are
  * uploaded.
  *   1. a worker's Living CV in the first organization, overview (the first screen);
@@ -224,27 +229,34 @@ async function maskRendered(page: Page): Promise<void> {
   });
 }
 
-/** Fail, without a screenshot, if any roster form is anywhere in the document. */
-async function assertClean(page: Page, p: Pseudonyms): Promise<void> {
+/** The privacy gate's scan: true only when no roster form is anywhere in the document. */
+async function isClean(page: Page, p: Pseudonyms): Promise<{ clean: boolean; leaks: number }> {
   const { html, visible } = await page.evaluate(() => ({
     html: `${document.title}\n${document.documentElement.outerHTML}`,
     visible: `${document.title}\n${document.body.innerText}\n${[...document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea")].map((f) => f.value).join("\n")}`,
   }));
   const leaks = leakCount(html, p, false) + leakCount(visible, p, true);
-  if (leaks > 0) {
-    step = `${step} (${leaks} original name tokens remain; no screenshot taken)`;
-    throw new Error("not de-identified");
-  }
+  return { clean: leaks === 0, leaks };
 }
 
 /**
- * At 375 px nothing may be wider than the screen: no sideways scroll, and no visible element whose
- * box reaches past either edge (content cut off or hidden off-screen). Counts only, never text.
+ * The 375 px layout check, never softened: no sideways scroll, no visible element past either edge,
+ * and no block that clips its own content (overflow hidden or clip with wider content). Each cause
+ * names the element by tag, test id, id or first class and the pixels: never its text.
  */
-async function assertFits(page: Page): Promise<void> {
-  const { scroll, inner, outside } = await page.evaluate(() => {
-    const innerWidth = window.innerWidth;
-    let n = 0;
+async function layoutProblems(page: Page): Promise<string[]> {
+  return page.evaluate(() => {
+    const inner = window.innerWidth;
+    const out: string[] = [];
+    const name = (el: Element) => {
+      const tid = el.getAttribute("data-testid");
+      if (tid) return `${el.tagName.toLowerCase()}[data-testid=${tid}]`;
+      if (el.id) return `${el.tagName.toLowerCase()}#${el.id}`;
+      const cls = (el.getAttribute("class") ?? "").split(/\s+/).filter(Boolean)[0];
+      return cls ? `${el.tagName.toLowerCase()}.${cls}` : el.tagName.toLowerCase();
+    };
+    const scroll = Math.max(document.documentElement.scrollWidth, document.body.scrollWidth);
+    if (scroll > inner + 1) out.push(`page scrolls sideways: ${scroll} px on a ${inner} px screen (+${scroll - inner})`);
     for (const el of document.querySelectorAll<HTMLElement>("body *")) {
       const r = el.getBoundingClientRect();
       if (r.width === 0 || r.height === 0) continue;
@@ -252,27 +264,45 @@ async function assertFits(page: Page): Promise<void> {
       if (cs.visibility === "hidden" || cs.display === "none" || cs.position === "fixed") continue;
       // A closed drawer or an accessibility-only label is not content on the screen.
       if (el.closest("[aria-hidden='true'], [hidden], [inert], .sr-only")) continue;
-      if (r.right > innerWidth + 1 || r.left < -1) n += 1;
+      if (r.right > inner + 1) out.push(`${name(el)} reaches past the right edge: right ${Math.round(r.right)} px (+${Math.round(r.right - inner)})`);
+      else if (r.left < -1) out.push(`${name(el)} starts past the left edge: left ${Math.round(r.left)} px`);
+      const clips = ["hidden", "clip"].includes(cs.overflowX) || ["hidden", "clip"].includes(cs.overflow);
+      if (clips && el.scrollWidth > el.clientWidth + 1) out.push(`${name(el)} hides content: ${el.scrollWidth} px inside ${el.clientWidth} px (+${el.scrollWidth - el.clientWidth})`);
     }
-    return {
-      scroll: Math.max(document.documentElement.scrollWidth, document.body.scrollWidth),
-      inner: innerWidth,
-      outside: n,
-    };
+    return out.slice(0, 20);
   });
-  if (scroll > inner + 1 || outside > 0) {
-    step = `${step} (375 px: page ${scroll} px wide on a ${inner} px screen, ${outside} elements past the edge)`;
-    throw new Error("does not fit");
-  }
 }
 
-async function shoot(page: Page, p: Pseudonyms, file: string, fullPage: boolean, fit = false): Promise<void> {
+interface ScreenResult {
+  readonly screen: string;
+  readonly viewport: string;
+  readonly file: string | null;
+  readonly privacy: "PASS" | "FAIL";
+  readonly layout: "PASS" | "FAIL" | "n/a";
+  readonly status: "PASS" | "FAIL";
+  readonly reasons: readonly string[];
+}
+
+/**
+ * One image, its own privacy gate. Names were rewritten before render; here the free text is masked,
+ * the DOM scanned and the metadata stripped. A failed gate: no image is generated. At 375 px the
+ * layout is checked too; a layout FAIL still generates the de-identified image, marked FAIL.
+ */
+async function shoot(page: Page, p: Pseudonyms, screen: string, viewport: string, fullPage: boolean, fit: boolean): Promise<ScreenResult> {
+  const file = `${screen}-${viewport}.png`;
   await maskRendered(page);
-  await assertClean(page, p);
-  if (fit) await assertFits(page);
+  const gate = await isClean(page, p);
+  if (!gate.clean) {
+    return { screen, viewport, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: [`privacy gate: ${gate.leaks} original name tokens remain; no image generated`] };
+  }
+  const problems = fit ? await layoutProblems(page) : [];
   const png = stripPngMetadata(await page.screenshot({ fullPage, animations: "disabled", caret: "hide" }));
   writeFileSync(join(OUT, file), png, { mode: 0o600 });
+  const layout = fit ? (problems.length ? "FAIL" : "PASS") : "n/a";
+  return { screen, viewport, file, privacy: "PASS", layout, status: problems.length ? "FAIL" : "PASS", reasons: problems };
 }
+
+const SCREENS = ["1-worker-overview", "2-worker-history", "3-company-1", "4-company-2"] as const;
 
 test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ browser }) => {
   if (!OUT || !isAbsolute(OUT) || resolve(OUT).startsWith(resolve(__dirname, "..", "..", ".."))) {
@@ -316,31 +346,55 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
   if (p.tokens.length === 0) throw new Error("living-cv-screens failed at: no names discovered; nothing to de-identify against");
   const allow = catalogue();
 
-  // 2. The screens, each viewport in its own rewritten context.
+  // 2. Twelve screens. Each image stands alone: a failure records its reason and the next one runs.
+  const results: ScreenResult[] = [];
+  const attempt = async (screen: string, viewport: string, go: () => Promise<ScreenResult>) => {
+    try {
+      results.push(await go());
+    } catch {
+      results.push({ screen, viewport, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: [`not generated: the page did not open (${step})`] });
+    }
+  };
   for (const vp of VIEWPORTS) {
+    const fit = "fit" in vp;
     const ctx = await context(browser, vp.options);
     await deidentify(ctx, p, allow);
     const view = await ctx.newPage();
     try {
-      await at(`${vp.key}: worker Living CV, overview`, async () => {
+      await attempt(SCREENS[0], vp.key, async () => {
+        step = `${vp.key}: worker overview`;
         await activate(view, orgs[0]!.id);
         await open(view, `/dashboard/company/people/${personId}`);
-        await shoot(view, p, `1-worker-overview-${vp.key}.png`, false, "fit" in vp);
+        return shoot(view, p, SCREENS[0], vp.key, false, fit);
       });
-      await at(`${vp.key}: worker Living CV, history`, () => shoot(view, p, `2-worker-history-${vp.key}.png`, true, "fit" in vp));
-      await at(`${vp.key}: first organization's company Living CV`, async () => {
+      await attempt(SCREENS[1], vp.key, async () => {
+        step = `${vp.key}: worker history`;
+        await activate(view, orgs[0]!.id);
+        await open(view, `/dashboard/company/people/${personId}`);
+        return shoot(view, p, SCREENS[1], vp.key, true, fit);
+      });
+      await attempt(SCREENS[2], vp.key, async () => {
+        step = `${vp.key}: first organization's company Living CV`;
+        await activate(view, orgs[0]!.id);
         await open(view, "/dashboard/company/history");
-        await shoot(view, p, `3-company-1-${vp.key}.png`, true, "fit" in vp);
+        return shoot(view, p, SCREENS[2], vp.key, true, fit);
       });
-      await at(`${vp.key}: second organization's company Living CV`, async () => {
+      await attempt(SCREENS[3], vp.key, async () => {
+        step = `${vp.key}: second organization's company Living CV`;
         await activate(view, orgs[1]!.id);
         await open(view, "/dashboard/company/history");
-        await shoot(view, p, `4-company-2-${vp.key}.png`, true, "fit" in vp);
+        return shoot(view, p, SCREENS[3], vp.key, true, fit);
       });
-    } catch {
-      throw new Error(`living-cv-screens failed at: ${step}`);
     } finally {
       await ctx.close();
     }
+  }
+
+  // 3. The manifest: every screen with PASS or FAIL and its reason. It names no person and no
+  //    organization, and it is encrypted together with the images.
+  writeFileSync(join(OUT, "manifest.json"), JSON.stringify({ screens: results }, null, 2), { mode: 0o600 });
+  const failed = results.filter((r) => r.status === "FAIL");
+  if (failed.length > 0) {
+    throw new Error(`living-cv-screens: ${failed.length} of ${results.length} screens FAIL: ${failed.map((r) => `${r.screen}-${r.viewport}`).join(", ")} (reasons in the encrypted manifest)`);
   }
 });
