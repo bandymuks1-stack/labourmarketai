@@ -2,7 +2,7 @@
 
 > **SUPERSEDED as the duplication register by [`DUPLICATION_AUDIT.md`](DUPLICATION_AUDIT.md) (2026-11-23, issue #3679).**
 > Kept here as evidence, unchanged apart from this note. Guards and code cite this file and its section numbers, so it is not moved or
-> renumbered. `DUPLICATION_AUDIT.md` §12 records the current state of each item below.
+> renumbered. `DUPLICATION_AUDIT.md` §13 records the current state of each item below.
 
 Owner-gated record of KEEP-FROZEN decisions from the duplication
 consolidation analysis (Train L; plan basis:

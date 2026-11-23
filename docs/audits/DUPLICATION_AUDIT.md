@@ -9,9 +9,9 @@ acts on it is deliverable E, `docs/architecture/SIMPLIFICATION_PLAN.md` (issue #
 |---|---|
 | Brief | Issue #3679, deliverable C (owner P0, 2026-11-23) |
 | Owner of this file | Lane E |
-| Code basis | `main` at `125e21827` (lane D read `f65c572`, lane H `8bcda5bed`; the lane rows say so) |
-| Production basis | Lane D, read-only catalogue reads (`pg_proc`, `has_function_privilege`, `prosrc` callers), 2026-11-23 05:11–05:16 UTC. Lane H, the production migration ledger, 2026-11-23. Nothing else here was verified in production. |
-| Supersedes as a register | `docs/audits/duplication-freeze-register-2026-08-17.md` and `docs/audits/canonical-paths-duplicate-flow-audit.md` (see §12). Both files stay where they are, because guards cite them by path and section. |
+| Code basis | `main` at `125e21827`. Lane D read `f65c572`, lane H `8bcda5bed` and lane F `6c6061a83`; §15 lists them. |
+| Production basis | Lane D: read-only catalogue reads (`pg_proc`, `has_function_privilege`, `prosrc` callers), 2026-11-23 05:11–05:16 UTC. Lane H: the production migration ledger, 2026-11-23. Lane S: read-only, on production build `430bd475`. Nothing else here was verified in production. |
+| Supersedes as a register | `docs/audits/duplication-freeze-register-2026-08-17.md` and `docs/audits/canonical-paths-duplicate-flow-audit.md` (see §13). Both files stay where they are, because guards cite them by path and section. |
 
 ## 1. How to read an entry
 
@@ -48,12 +48,12 @@ Every entry has the brief's seven fields:
 - by reachable routes;
 - or by SQL callers.
 
-A similar name was never taken as evidence. Where two things look alike but differ in rights or purpose, they are listed in §11.
+A similar name was never taken as evidence. Where two things look alike but differ in rights or purpose, they are listed in §14.
 
 **Sources:**
 
 - **Lane E's own sweep:** five read-only searches over `main` (navigation and pages; AI, chat and notifications; sign-up, search and hire; CV, skills and history; APIs, RPCs and dead code).
-- **Lane sections:** sent to Lane E by A, B, D and H (and M, C, G and S, see §13).
+- **Lane sections:** sent to Lane E by lanes A, A2, B, C, D, F, G, H, M and S (§15). Where two sources found the same thing, the entry names both; where they disagreed, the entry says which reading holds and why (for example SQL-5).
 
 Each entry names its source.
 
@@ -73,6 +73,9 @@ Each entry names its source.
 | NAV-9 | Phone vs web main destinations | SUSPECTED | MAIN | Owner decision |
 | NAV-10 | Routes nothing links to | CONFIRMED | UNUSED-OR-DUP | Link them or retire them |
 | NAV-11 | Stale navigation descriptions | CONFIRMED | PLAN | Update the contract and the comments |
+| NAV-12 | Three card systems for choosing | CONFIRMED | MAIN | Merge into `CardRail` (deliverable D) |
+| NAV-13 | Two header item models | SUSPECTED | MAIN | Decide after the carousel |
+| NAV-14 | Assist page vs activity centre | SUSPECTED | MAIN | A and M decide |
 | AI-1 | Chat actions vs capabilities | CONFIRMED (10 wired twice) | MAIN | Move the 10 hand-written capabilities onto the bridge, or share their mappers |
 | AI-2 | Demand create, chat vs MCP | CONFIRMED | MAIN | One mapper and one base schema; MCP loses start/end date and team split today |
 | AI-3 | Journal "log work" mapper | CONFIRMED | MAIN | One exported mapper |
@@ -80,6 +83,10 @@ Each entry names its source.
 | AI-5 | Phrase matchers: intent router vs command registry | SUSPECTED | MAIN | Measure the overlap first; do not merge yet |
 | AI-6 | MCP door module | CONFIRMED, resolved | PR #3164, #3219 | Merge #3164 before #3219 |
 | AI-7 | Vacancy translation at import | CONFIRMED unused | UNUSED-OR-DUP | Remove, or point it at the read-time runtime path |
+| AI-8 | Assign worker, web vs MCP | SUSPECTED | MAIN | Share one core (the funnel event) |
+| AI-9 | Number and relative-day words | CONFIRMED lexicons | MAIN | `parseWordNumber`; one day-word module |
+| AI-10 | Private text-folding copies | CONFIRMED | MAIN | Import `foldText` |
+| AI-11 | `/match-preview` on the frozen fork | CONFIRMED | MAIN | Remove or re-point (owner) |
 | MSG-1 | MCP conversation readers | CONFIRMED | MAIN | MCP calls the web inbox and thread readers |
 | MSG-2 | Contact permission, web vs MCP | CONFIRMED | MAIN | One resolver; the web rule is the superset |
 | MSG-3 | Work-instruction messages | CONFIRMED (no notification) | MAIN | Call the shared notify helper after the RPC |
@@ -89,12 +96,25 @@ Each entry names its source.
 | MSG-7 | Two message threads about one offer | SUSPECTED | PROD + PR #3647/#3657 | The messaging lane's anonymous thread replaces the named one before the client answers |
 | AUTH-1 | Phone sign-up vs web sign-up | CONFIRMED divergence | MAIN | One shared rules module for both clients |
 | AUTH-2 | Buyer setup vs company setup as client | SUSPECTED | MAIN | Owner chooses the canonical path |
+| AUTH-3 | No onboarding step in the phone app | CONFIRMED gap | MAIN | Send phone sign-ups to the web wizard, or build the step |
 | HIRE-1 | Company → employee invitation | CONFIRMED | MAIN | Merge onto `invitations`, after HIRE-3 and HIRE-4 |
 | HIRE-2 | Agency → worker legacy invitation | CONFIRMED unreachable writer | UNUSED-OR-DUP | Remove the writer; keep accept until 0 pending rows |
 | HIRE-3 | Two acceptance chains | CONFIRMED | MAIN | Merge into `accept_invitation_apply_v2` |
 | HIRE-4 | Project staffing authority | SUSPECTED gap | MAIN | Read the employee engagement row (security-relevant) |
 | HIRE-5 | Booking accept and employment shapes | CONFIRMED | MAIN | Booking accept also opens the engagement row |
 | HIRE-6 | Governance invitations (System C) | NOT A DUPLICATE | MAIN | Keep; the fold plan needs an owner decision |
+| HIRE-7 | Two writers of `team_assignments` | SUSPECTED | MAIN | A shared, ungranted insert helper |
+| HIRE-8 | Invitation `join_project` writes assignments | SUSPECTED | MAIN | Share the insert and the completed-project refusal |
+| HIRE-9 | Two readers of booking engagements | SUSPECTED | MAIN | One reader |
+| ORG-1 | Two project-create forms | CONFIRMED (one write) | MAIN | One form, both follow-up doors |
+| ORG-2 | Two team-assign forms | CONFIRMED (one write) | MAIN | One component, two doors |
+| ORG-3 | Company offer panel on two doors | CONFIRMED | MAIN | Keep the Services mount |
+| ORG-4 | Needs list: three readers | CONFIRMED | MAIN | One workspace-scoped reader |
+| ORG-5 | Need doors that bypass `NeedDoorLink` | CONFIRMED | MAIN | Route the empty states through the door |
+| ORG-6 | Two approvals cards, two counts | CONFIRMED | MAIN | One card, one view model |
+| ORG-7 | Review queue read three times | CONFIRMED (one hides failure) | MAIN | Shared reader; pass the unknown state through |
+| ORG-8 | Two "How this works" folds | CONFIRMED | MAIN | Use `extra`, or drop one |
+| ORG-9 | Hand-built chips and buttons | CONFIRMED | MAIN | `chipLinkClassName`, `ui/Button` |
 | OFFER-1 | Proposals vs offer terms | SUSPECTED | PROD | Owner decides which is the commercial record |
 | OFFER-2 | Agency candidates, two stores | SUSPECTED | PROD + PR #3651 | Keep the new one as the anonymous stage |
 | OFFER-3 | Three request/answer flows | SUSPECTED | PROD | Keep the team offer as the path to a project |
@@ -114,23 +134,35 @@ Each entry names its source.
 | CV-12 | Work card, two editors | CONFIRMED (one write) | MAIN | `WorkCardEditor` canonical in the chat |
 | CV-13 | Journal empty states | CONFIRMED | MAIN | One empty state when there are no entries |
 | CV-14 | `worker_skills` writers | CONFIRMED writers | MAIN | Later, one write core |
+| CV-15 | Player Card work history, own limit | CONFIRMED | MAIN | Derive it from the 0025 reader |
+| CV-16 | Three "declared skills" counts | CONFIRMED | MAIN | One count from `presentSkills` |
+| CV-17 | Dead CV pieces | CONFIRMED | UNUSED-OR-DUP | Remove |
+| CV-18 | Chat CV import drops skill inference | CONFIRMED | MAIN | One proposals hook for both flows |
+| CV-19 | ESCO prefix search twice | CONFIRMED | MAIN | Point the slow one at the RPC |
+| CV-20 | Copied period check; stated-hours sum | CONFIRMED | MAIN | Import `isPeriodRecord`; check the sum |
 | SQL-1 | Old RPC versions already closed | CONFIRMED | PROD | Drop in one reviewed migration, or leave |
 | SQL-2 | Old and new both executable, old as fallback | CONFIRMED | PROD | Revoke old, then remove the fallback, family by family |
 | SQL-3 | Old version executable, no caller | CONFIRMED | PROD | Revoke first (reversible), drop later |
 | SQL-4 | Two invitation-creating RPCs | SUSPECTED | MAIN | Merge into v2 |
-| SQL-5 | Three booking-response RPCs | SUSPECTED | MAIN | One function with optional arguments |
+| SQL-5 | Booking response: v4 copies v3 | CONFIRMED | MAIN | Merge v3 and v4 (RED) |
 | SQL-6 | Company setup v2/v1 branches | SUSPECTED unreachable | MAIN | Remove once production has v3 |
 | SQL-7 | Stale lists of unapplied tables and RPCs | CONFIRMED | PROD | Remove the stale entries |
 | SQL-8 | One-off backfill table | CONFIRMED | PROD | Owner decides keep or drop |
 | SQL-9 | Retired agency board RPCs | CONFIRMED | UNUSED-OR-DUP | Remove after the audit (RED) |
+| SQL-10 | Withdraw booking, two bodies | CONFIRMED | MAIN | v1 delegates to v2 |
+| SQL-11 | Invitation accept, three bodies | CONFIRMED | MAIN | v1 to delegators (owner-gated) |
+| SQL-12 | "Object missing?" check written 48 times | CONFIRMED | MAIN | One helper |
+| SQL-13 | Tables and functions unused in production | CONFIRMED / SUSPECTED | PROD | Check with F and L first |
+| SQL-14 | Two exits for the supply feed | SUSPECTED | MAIN | Keep the used one |
 | DEAD-1 | App and UI components with no importer | CONFIRMED | UNUSED-OR-DUP | Remove (one kept on purpose) |
 | DEAD-2 | Marketing components with no importer | CONFIRMED | UNUSED-OR-DUP | Remove after the landing guards |
 | DEAD-3 | `market-map-shell.tsx` guarded but not rendered | CONFIRMED | UNUSED-OR-DUP | Remove; point 16 guards at the live page |
 | DEAD-4 | Lib modules with test-only importers | SUSPECTED | MAIN | Case by case; many are guard infrastructure |
 | DEAD-5 | Translation namespaces never referenced | CONFIRMED (3) / SUSPECTED (7) | MAIN | Remove with their guards |
+| DEAD-7 | One route, two label keys | CONFIRMED | MAIN | One key per route |
 | DEAD-6 | Literal dashboard links | NOT A DUPLICATE (0 dead) | MAIN | Keep; template literals unchecked |
 | BYP-1 | Voice transcription outside the AI egress gate | SUSPECTED | MAIN | Record it in the egress register |
-| SEC-1..3 | Security items | handed to the owning lane | | §10 |
+| SEC-1..5 | Security items | handed to Lane F | | §11 |
 
 ## 3. Registers
 
@@ -309,6 +341,48 @@ Finding: CONFIRMED. Not duplicates, but they mislead the next audit. Class: PLAN
 | Risk | None. |
 | Evidence | Greps; `ls`. |
 
+### NAV-12 · Three horizontal card systems for choosing an area or goal
+
+Finding: CONFIRMED (the behaviour is duplicated). Class: MAIN. Source: Lane A2 (`docs/design/CAROUSEL_NAVIGATION_SPEC.md` §10, PR #3681).
+
+| Field | Content |
+|---|---|
+| Function | Choosing an area or a goal from horizontal cards |
+| Implementations | `components/navigation/card-rail.tsx` (through `goal-navigator.tsx`), a native scroll-snap rail.<br>`components/app/area-switcher.tsx`, a positioned 3D chooser.<br>`components/app/organization/organization-doors.tsx`, door chips. |
+| Usage | The card rail: the public home only. `AreaSwitcher`: `components/app/today/today-screen.tsx:244` and `components/app/organization/company-model-screen.tsx`. The doors: `app/[locale]/dashboard/company/layout.tsx` and `dashboard/projects/page.tsx`. |
+| Problem | Three ways to do one job, which overlap NAV-1 and NAV-2. `card-rail.tsx:51-60` has a pin prop with no caller and no storage. |
+| Proposal | Merge into `CardRail`, one caller at a time (spec §6, steps N6 and N7). Earlier attempts #3264, #3267, #3268, #3269 and #3270 (open draft, conflicting) did not land. |
+| Risk | Losing a station or a door. A guard that lists every former href guards the move. |
+| Evidence | Lane A2's count in the spec. |
+
+### NAV-13 · Two item models feed the one header
+
+Finding: SUSPECTED. Both are live. Class: MAIN. Source: Lane A2.
+
+| Field | Content |
+|---|---|
+| Function | The items the signed-in header shows |
+| Implementations | `lib/config/navigation.ts` (`getCoreNavItems` at `:155`, `getHeaderOverflowNavItems` at `:183`) and `lib/navigation/work-areas.ts` (`:161`, `:206`, `:242`) |
+| Usage | `components/app/conversation/chat/conversation-header.tsx` |
+| Problem | Two lists of header items; NAV-1 and NAV-3 are its symptoms. |
+| Proposal | Keep both for now, and decide after the carousel lands (deliverable D). |
+| Risk | The header in every role. |
+| Evidence | Lane A2. |
+
+### NAV-14 · `/dashboard/assist` and the activity centre read the same spine
+
+Finding: SUSPECTED. Class: MAIN. Source: Lane G (G-15).
+
+| Field | Content |
+|---|---|
+| Function | A summary of what needs the person's attention |
+| Implementations | `lib/assist/assist.ts` (`getAssistView`) and `lib/dashboard/activity-centre.ts`. Both read `getSpineCounts`, and both are registered in `dashboard-module-registry.ts:446/:463`. |
+| Usage | `/dashboard/assist` and the activity centre. |
+| Problem | Two attention summaries. `/dashboard/assist` makes no AI call, despite its name, and `getAssistView` builds the whole verified CV only to produce an evidence summary. |
+| Proposal | Lanes A and M decide whether to keep one. |
+| Risk | Low. |
+| Evidence | Lane G. |
+
 **Dead links.**
 
 - **Dashboard paths.** Every literal `/dashboard…` string in non-test code was matched against the real routes, and 15 did not match a page:
@@ -424,6 +498,62 @@ Finding: CONFIRMED (never produces a translation). Class: UNUSED-OR-DUP. Source:
 | Risk | The import report fields that record translation status. |
 | Evidence | Grep for `translationProvider:` and `translation-service"`. |
 
+### AI-8 · Assigning a worker: the web/chat action and the MCP capability
+
+Finding: SUSPECTED. The core is shared; the orchestration around it is repeated. Class: MAIN. Source: Lane C (B2).
+
+| Field | Content |
+|---|---|
+| Function | Assigning a worker to a project |
+| Implementations | `lib/projects/actions.ts:120-158`, which checks the workspace, emits the `projectAssigned` funnel event and records the reservation.<br>`lib/capabilities/employer-operations-capabilities.ts:927,1034`, which resolves the employer itself and calls the RPC directly. |
+| Usage | Both go through the same database gate, `assign_worker_to_project`. |
+| Problem | The MCP path emits no `projectAssigned` event. |
+| Proposal | Share one core, the way `setShortlistCore` is shared. |
+| Risk | Metrics only. |
+| Evidence | Lane C. |
+
+### AI-9 · Number words and relative-day words, read by several lexicons
+
+Finding: CONFIRMED that the lexicons are separate; SUSPECTED that the preview and the saved record disagree. Class: MAIN. Source: Lane G (G-11).
+
+| Field | Content |
+|---|---|
+| Function | Reading "two hours" or "yesterday" in a sentence |
+| Implementations | Number words: `lib/structuring/word-numbers.ts:21` (`WORD_NUMBERS`, 7 locales) and `lib/structuring/extract-journal-suggestions.ts:332-362` (`LT_NUMBER_WORDS`: Lithuanian only, unfolded, capped at 20, used by the duration readers at `:378/:408/:422`).<br>Relative days: `lib/conversation/worklog-extract.ts:316-330`, `correct-work-model.ts:45-48` (no "dziś") and `journal-period-phrase.ts:33-34` (no "day before yesterday"). They also handle word boundaries differently (`\b` vs `\p{L}`). |
+| Usage | The chat preview reads number words through `parseWordNumber`. The recorded duration goes through `intake-work-time` to the journal recognizer, which knows only Lithuanian words and two Russian idioms. |
+| Problem | For English, Polish and German word durations, and for unaccented Lithuanian, the preview can show a duration that the saved entry does not get. |
+| Proposal | Use `parseWordNumber` in the duration readers, as #3639 did elsewhere. Merge the relative-day words into one module. Run the `extract-journal-suggestions` and `sv-reader-parity` suites. |
+| Risk | Low; the 7-locale reader suites cover it. |
+| Evidence | Lane G. |
+
+### AI-10 · Private copies of the text-folding helper
+
+Finding: CONFIRMED. Class: MAIN. Source: Lane G (G-12).
+
+| Field | Content |
+|---|---|
+| Function | Folding text for matching (removing accents and case) |
+| Implementations | The canonical helpers are `lib/structuring/normalize.ts:52` (`foldText`) and `intent-router.ts:350` (`fold`).<br>Private copies: `lib/conversation/correct-work-model.ts:21`, `language-statement.ts:18`, `past-work-period.ts:31`, `pay-statement.ts:44`, `project-mention.ts:14` and `lib/journal/org-mention.ts:27`. |
+| Usage | The readers above. |
+| Problem | The copies do not fold ł, ø or ß, so the same word matches in one reader and not in another. |
+| Proposal | Import `foldText`. Keep the folds that strip punctuation on purpose (`organization-evidence` `time-semantics.ts:153`, `object-mapping.ts:41`). |
+| Risk | Low. |
+| Evidence | Lane G. |
+
+### AI-11 · `/match-preview` runs on a frozen legacy matching fork
+
+Finding: CONFIRMED (already frozen). Class: MAIN. Source: Lane G (G-14).
+
+| Field | Content |
+|---|---|
+| Function | A public match preview |
+| Implementations | `lib/staffing/match-preview-actions.ts` uses `lib/staffing/fit.ts`, which is marked a "FROZEN LEGACY FORK". The canonical engine is `lib/market/match-v1.ts`. |
+| Usage | The route `(marketing)/match-preview`, which appears only in `app/sitemap.ts:38` (NAV-10). |
+| Problem | Two matching engines; the public one is the frozen fork. |
+| Proposal | Remove the route or point it at `match-v1`. The route is public, so this is an owner decision. |
+| Risk | The sitemap entry. |
+| Evidence | The guard `staffing-fit-frozen.test.ts`. |
+
 ## 6. Chat, notifications and sending
 
 ### MSG-1 · MCP conversation readers re-implement the web inbox and thread readers
@@ -528,16 +658,16 @@ Finding: SUSPECTED. Class: PROD (the thread tables) plus PR #3647/#3657 (RED). S
 
 ### AUTH-1 · The phone app's sign-up has drifted from the web's
 
-Finding: CONFIRMED divergence. Class: MAIN. Source: Lane E sweep.
+Finding: CONFIRMED divergence. Class: MAIN. Sources: Lane E sweep and Lane F (auth), on `main` `6c6061a83`.
 
 | Field | Content |
 |---|---|
 | Function | Email-and-password sign-up and sign-in |
 | Implementations | Web: `components/app/signup-form.tsx:287` and `components/app/login-form.tsx:204`.<br>Phone: `apps/mobile/src/auth-context.tsx:259` (sign in) and `:281` (sign up), used by `apps/mobile/src/screens/credentials-form.tsx:39` through `app/sign-in.tsx` and `app/register.tsx`. |
 | Usage | One chain per client. |
-| Problem | The phone's `signUp` sends no `emailRedirectTo`, no locale and no first-touch metadata. It also lacks the web's check for an address that is already registered (`identities.length === 0`), so an existing address is told "confirmation required". No onboarding step was found in the app. |
-| Proposal | Keep both clients, but move the rules into one shared module: the redirect target, the metadata and the already-registered check. |
-| Risk | The confirmation link falls back to the Supabase Site URL. |
+| Problem | The phone's `signUp` (`auth-context.tsx:281-284`) sends no `emailRedirectTo`, no locale and no first-touch metadata; the web sends `{locale, attribution}` (`signup-form.tsx:296`). With no locale, the sign-up trigger stores the `lt` fallback (`supabase/migrations/0003_multi_role.sql:114`), and the funnel data is lost (Lane F). It also lacks the web's check for an address that is already registered (`identities.length === 0`), so an existing address is told "confirmation required". No onboarding step was found in the app. |
+| Proposal | Keep both clients, but give them one sign-up contract in `packages/client-core`: the metadata builder, the redirect target and the already-registered check. The phone's sign-in and register screens already share one `CredentialsForm` (`screens/credentials-form.tsx:14-15`). |
+| Risk | Medium: a wrong locale and lost funnel data. The fallback of the confirmation link to the Supabase Site URL is inferred, not tested (Lane F). |
 | Evidence | Both chains read. |
 
 ### AUTH-2 · Two ways to set up as a buying client
@@ -554,6 +684,33 @@ Finding: SUSPECTED; the full rights were not compared. Class: MAIN. Source: Lane
 | Risk | The buyer-only flows: `dashboard/buyer` and service requests. |
 | Evidence | Both paths read. |
 
+### AUTH-3 · The phone app has no onboarding step
+
+Finding: CONFIRMED gap, not a duplicate. Class: MAIN. Source: Lane F.
+
+| Field | Content |
+|---|---|
+| Function | Completing onboarding after sign-up |
+| Implementations | The web: `/onboarding` → `OnboardingWizard` → `completeOnboarding` (`lib/auth/actions.ts:74`) → RPC `complete_onboarding` (latest body `20260805090000_worker_display_name_write_path_v1.sql:164`; role rows at `:198-199`).<br>The phone: none. |
+| Usage | `apps/mobile/app/register.tsx` |
+| Problem | `complete_onboarding` never runs for a phone sign-up until the person opens the web's `/onboarding`. |
+| Proposal | Send phone sign-ups to the web wizard, or build the step on the same RPC, and record which one. |
+| Risk | Medium: an account that is not onboarded. |
+| Evidence | Grep of the phone app. |
+
+**Sign-up chains on `main` (Lane F).** No confirmed duplicate exists on the web: each chain runs one action per function into one onboarding.
+
+| Chain | Entry → action → effect → landing |
+|---|---|
+| Web email sign-up | `/auth/signup` → `signUp` (`components/app/signup-form.tsx:282`) → the `handle_new_user` trigger writes `profiles` (`0003_multi_role.sql:110-127`) → `on_profile_created_ensure_worker` (`0009_auth_role_architecture_v1.sql:60-81`) → `/onboarding`, through the callback when email confirmation is on |
+| Web sign-up from an addressed invitation | `/invite/[token]` → `/auth/signup` → server-side `signUp` (`lib/invitations/signup-accept-action.ts:86`) → `accept_invitation_v2` (`lib/invitations/actions.ts:517`) → `/onboarding` |
+| Web sign-in | `/auth/login` → `signInWithPassword` (`components/app/login-form.tsx:204`) → onboarding, or the safe `next` |
+| OAuth (Google, LinkedIn OIDC, Facebook) | One shared core, `components/app/google-button.tsx:238` (providers at `:86`) → the callback (`app/[locale]/auth/callback/route.ts:147,168`) → `/onboarding` or `next` |
+| Add a role later | `addRole` (`lib/auth/actions.ts:455`) → RPC `add_role` (`0026_customer_entity.sql:176`) |
+| Password reset | `forgot-password-form.tsx:36` → `reset-password-form.tsx:40` |
+| Phone | `apps/mobile/src/auth-context.tsx:259` (sign in) and `:281` (sign up); no onboarding (AUTH-3) |
+| Not account-creating | `signInWithOtp` with `shouldCreateUser:false` (`lib/auth/email-verification-actions.ts:99`) only proves an email address. `dashboard/start/*` sends anonymous visitors to login. QA tooling (`apps/web/scripts/prod-qa-*.ts`, `e2e-mint-session.ts`) is not a user chain. There is no magic-link sign-in. |
+
 ### HIRE-1 · Two company → employee invitation writers, both reachable from the People page
 
 Finding: CONFIRMED. Class: MAIN. Source: Lane E sweep.
@@ -566,7 +723,7 @@ Finding: CONFIRMED. Class: MAIN. Source: Lane E sweep.
 | Problem | One audience and one intent, but two stores and two kinds of delivery: the legacy path shows a share link to `/auth/signup` (`company-workers-section.tsx:310`), the canonical path sends a tokened email. They also produce two acceptance results (HIRE-3). The 2026-08-17 register planned to redirect the legacy writes; that has not happened. |
 | Proposal | Merge onto `invitations` and `createAndSendInvitations`: point the People-page form and `company.invite-worker` at `join_as_employee`. **Only after HIRE-3 and HIRE-4.** |
 | Risk | The legacy accept creates the `company_workers` row that project assignment depends on (HIRE-4). Redirecting the writes first would break staffing. |
-| Evidence | Grep of the RPC names and importers; migration bodies read. |
+| Evidence | Grep of the RPC names and importers; migration bodies read. Lane C confirms this independently (A6: legacy accept at `20261003151000…:497`; the guard allowlist `consolidation-no-new-truth.test.ts:234-246` keeps the legacy writer frozen). Lane M listed the overlap as SUSPECTED (M-7); the acceptance read in HIRE-3 settles it. |
 
 ### HIRE-2 · The legacy agency → worker invitation can no longer be sent, but can still be accepted
 
@@ -598,15 +755,15 @@ Finding: CONFIRMED. Class: MAIN. Source: Lane E sweep.
 
 ### HIRE-4 · Project staffing authority depends on the legacy roster
 
-Finding: SUSPECTED gap. The SQL shows it, but no other grant path was traced end to end. Class: MAIN. Source: Lane E sweep.
+Finding: CONFIRMED. Lane C re-checked the gate on `main`: it reads only the roster or a booking engagement. Class: MAIN. Sources: Lane E sweep and Lane C (A7).
 
 | Field | Content |
 |---|---|
 | Function | Assigning one person to a project |
 | Implementations | `lib/projects/actions.ts:120/140` → `assign_worker_to_project` (`20261002142000_manager_assigns_roster_worker_on_managed_project_v1.sql:72-98`). Its authority comes from `caller_manages_worker_by_roster` (`20260808150000…`, which reads `company_workers`/`agency_workers`), a booking engagement, or a manager branch that joins `company_workers` (`:81-84`). |
 | Usage | `components/app/project-assignment-manager.tsx:370/422` |
-| Problem | A worker who joined through a canonical `join_as_employee` invitation has an employee engagement row but no `company_workers` row. No path was found that lets a manager assign them by roster. This is the "three disjoint hire paths" gap of the 2026-08-17 register, §3, and it is still open. |
-| Proposal | Keep the RPC, and widen its authority check to read the employee engagement row (the register's train L4). |
+| Problem | Each hire path lands the person in a different store, and the assignment gate reads only two of them (Lane C):<br>- booking accept → `company_worker_engagements` only;<br>- legacy invitation → roster plus engagement row;<br>- canonical invitation → engagement row only;<br>- team → the engagement row of a team organization.<br>The projects page builds two pick lists from the roster and from booking engagements (`app/[locale]/dashboard/projects/page.tsx:274-279`), and `lib/company/booked-people.ts:7-18` says "nothing bridges them". A worker who joined through a canonical `join_as_employee` invitation has an employee engagement row but no `company_workers` row. No path was found that lets a manager assign them by roster. This is the "three disjoint hire paths" gap of the 2026-08-17 register, §3, and it is still open. |
+| Proposal | No fifth store. Either accept a company membership plus an employee engagement row as a basis in `assign_worker_to_project`, or provision the roster or the engagement row on accept (the register's train L4). Owner decision. The 2026-08-17 rule stays: authorization consults `company_memberships`, never an engagement row alone. |
 | Risk | Widening an authorization check is security-relevant. It goes through the RED process. |
 | Evidence | Migration bodies read. |
 
@@ -621,7 +778,7 @@ Finding: CONFIRMED. Class: MAIN. Source: Lane E sweep.
 | Usage | `lib/booking/booking-actions.ts:373` (v4, only when the person has acknowledged a calendar clash) and `:416` (v3). |
 | Problem | The 2026-08-17 register planned that v4 would also open the engagement row; v4 was used for acknowledging calendar clashes instead. A booked person therefore lives in a third employment store, which `lib/booking/engagement-invariant.ts` only checks. An agency placement opens a `collaborator` engagement row (`20261002142000…:123`), which is a fourth shape. The People page shows three of these side by side (`people/page.tsx:40-53`): booked people (`company_worker_engagements`), the roster (`company_workers`) and members (`engagement_contexts`). |
 | Proposal | Keep `company_worker_engagements` as the record of where a booking came from, and have booking accept also open the employee or collaborator engagement row as the canonical record. |
-| Risk | Counting a person twice on the People page. |
+| Risk | Counting a person twice on the People page. There are four "end relationship" doors to match: `end_company_worker_engagement_v2`, `end_roster_link_v1` (`20260919150000…:43`), `end_org_membership_v1` (`20260802160000…:131`) and the project and team assignment ends. They mirror the split; they are not copied code (Lane C, B6). |
 | Evidence | Migration bodies read. |
 
 ### HIRE-6 · Governance invitations (System C): not a duplicate
@@ -638,7 +795,179 @@ Finding: NOT A DUPLICATE. Class: MAIN. Source: Lane E sweep.
 | Risk | None now. |
 | Evidence | Code read. |
 
-## 8. Offers, proposals and the commercial chain
+### HIRE-7 · Two writers of `team_assignments`
+
+Finding: SUSPECTED. The split is deliberate; the copied part is not. Class: MAIN. Source: Lane C (B3).
+
+| Field | Content |
+|---|---|
+| Function | Putting a crew on a piece of work |
+| Implementations | `assign_team_to_work_v1` (`20261003150600…:175`, insert at `:255`) and `hand_off_team_demand_offer_v1` (`20261011200000…:660`, insert at `:753`) |
+| Usage | The team assignment forms (ORG-2) and the offer hand-off. |
+| Problem | The authorization differs on purpose (header `20261007150000…:633-637`), but the scope validation and the insert are copied. |
+| Proposal | A shared insert helper that is not granted to users. |
+| Risk | The two copies drift apart. |
+| Evidence | Lane C. |
+
+### HIRE-8 · The invitation's `join_project` arm writes project assignments itself
+
+Finding: SUSPECTED. Not verified further. Class: MAIN. Source: Lane C (B4).
+
+| Field | Content |
+|---|---|
+| Function | Adding a person to a project |
+| Implementations | `20261021094000…:290-310` (and the v1 copies), beside `assign_worker_to_project` |
+| Usage | Accepting a `join_project` invitation. |
+| Problem | The authorization differs (the invitation is the consent), but the upsert is a second copy. No refusal of a completed project, like `assign_worker_to_project:91-94`, was seen there. |
+| Proposal | Share the insert, including the completed-project refusal. |
+| Risk | Low. |
+| Evidence | Lane C. |
+
+### HIRE-9 · Two readers of active booking engagements
+
+Finding: SUSPECTED. They may differ in which names are visible. Class: MAIN. Source: Lane C (B5).
+
+| Field | Content |
+|---|---|
+| Function | Listing the people a company has booked |
+| Implementations | `lib/company/booked-people.ts` (a table read under RLS) and `lib/projects/booking-engagement-workers.ts:45` (an RPC) |
+| Usage | `company/people/page.tsx:40` and `projects/page.tsx:279` |
+| Problem | Two readers of one record. |
+| Proposal | Converge on one reader. |
+| Risk | Name visibility. |
+| Evidence | Lane C. |
+
+## 8. Employer and agency screens
+
+Source: Lane M, a read-only sweep of `main` at `125e21827`; importers proven by grep, the strongest claims re-checked by hand. Every entry is MAIN.
+
+### ORG-1 · Two forms create a project
+
+Finding: CONFIRMED. One write, two forms that end differently. Sources: Lane M (M-1) and Lane C (B1).
+
+| Field | Content |
+|---|---|
+| Function | Creating a project |
+| Implementations | (a) An inline form, `components/app/project-assignment-manager.tsx:484` (test id `project-create`), with hand-built inputs and buttons at `:154-156`. It calls `createProjectAction` (`lib/projects/actions.ts:81`).<br>(b) `components/app/project-context-create-form.tsx:70`, which uses `ui/Input` and `ui/Button`. It calls `createProjectContextAction` (`lib/company/project-context-actions.ts:57`), which can also save a client.<br>Both write through `insertProjectForCompany` (`lib/projects/create-project-core.ts:33`), behind the same gate. So do the chat (`company-executors.ts:398-404`) and MCP (`employer-operations-capabilities.ts:632`). |
+| Usage | (a) is rendered at `projects/page.tsx:644`, and the chat executor uses it (`company-executors.ts:14`). (b) is rendered at `app/[locale]/dashboard/company/projects/new/page.tsx:37`, which is linked from `projects/page.tsx:487,547`, `company/planning/page.tsx:296`, `company/page.tsx:254` and `components/app/company-home-field-section.tsx:671`.<br>`/dashboard/projects` alone has three ways in: a deck tile, a card link and form (a). |
+| Problem | (a) then opens `/dashboard/projects/{id}/operations`. (b) returns no id, goes back to `/dashboard/company` and says "journal linking disabled". The fields and the design system differ too. |
+| Proposal | One form: an optional client field, both follow-up doors, `ui/Button`. Keep the `/projects/new` route. The owner order of 2026-11-03 pins the card link, so drop the deck tile or the inline form, not the link. |
+| Risk | Medium. End-to-end tests pin both forms (`employer-journey-isolated` and 7 more; `prod-brigade-formation`, `integrated-product-chain`), and so do the guards `premium-action-card.test.ts:117-127`, `project-context-expansion.test.ts:52`, `project-context-create.test.ts` and `project-context-client-failure.test.ts`. |
+| Evidence | Lane M re-checked both actions and the shared core by hand. |
+
+### ORG-2 · Two forms assign a team to a project
+
+Finding: CONFIRMED. Source: Lane M (M-2).
+
+| Field | Content |
+|---|---|
+| Function | Assigning a team to work |
+| Implementations | `components/app/team-assign-form.tsx:21` (the whole project only) and `components/app/project-team-assignments.tsx:39` (project, task or object scope, plus replace and end). Both call `assignTeamToWorkAction` → `assign_team_to_work_v1` (`lib/projects/team-assignment.ts:83`). |
+| Usage | `components/app/team-brigades-panel.tsx:356` (on `company/people/page.tsx:406`) and `project-assignment-manager.tsx:742` (on `projects/page.tsx:644`) |
+| Problem | Two forms for one write; the People form is a subset. |
+| Proposal | Keep both doors and render one component: the team fixed on People, the project fixed on Projects. |
+| Risk | Low to medium; the action and the RPC do not change. |
+| Evidence | Guard `team-assignment-canonical.test.ts:116`; end-to-end `teams-projects-isolated`. |
+
+### ORG-3 · The "offer our company to an open need" panel is mounted on two doors
+
+Finding: CONFIRMED. Source: Lane M (M-3).
+
+| Field | Content |
+|---|---|
+| Function | An organization offers itself for an open need |
+| Implementations | One component, `components/app/team-demand-offer-form.tsx` with `kind="organization"`, mounted twice behind the same gate: `app/[locale]/dashboard/services/page.tsx:107` and `company/people/page.tsx:425` |
+| Usage | Those two pages; also the chat embed (`conversation-chat.tsx:7488`) and the team-level use (`team-brigades-panel.tsx:363`), which is not the organization offer. |
+| Problem | The same panel, with the same rights, on two employer doors. `memberCount` differs between the mounts, but the organization form never reads it (`team-demand-offer-form.tsx:131`). |
+| Proposal | Keep the Services mount, which the guard pins. Replace the People mount with a link, or drop it. |
+| Risk | Low. |
+| Evidence | Guard `team-demand-offer.test.ts:199-205` pins Services only. |
+
+### ORG-4 · The organization's needs list has three readers, and the agency one sees only its own rows
+
+Finding: CONFIRMED. Source: Lane M (M-4).
+
+| Field | Content |
+|---|---|
+| Function | Listing the organization's needs |
+| Implementations | `listOwnCustomerRequests` (`lib/buyer/customer-requests.ts:147`, workspace-filtered at `:187`).<br>`listCompanyDemands` (`lib/scouting/scouting.ts:116`, workspace-filtered).<br>`listAgencyDemands` (`lib/agency/clients.ts`, about `:85-115`), filtered by `profile_id = user.id` only.<br>`EMPLOYER_DEMAND_KINDS` is copied in `company/page.tsx:49` and `company/needs/page.tsx:37`. |
+| Usage | `company/needs/page.tsx:121` (readback `:299`), `company/page.tsx:180` and `lib/reports/reports-hub.ts:255`; `company/scouting/page.tsx:190`, `lib/conversation/client-bridge.ts:41` and `lib/agency/bridge-read.ts:470`; `company/partners/page.tsx:147,175,335`. |
+| Problem | On `/partners`, "Your demands" and the client's share-a-request picker leave out the needs a colleague recorded, while the chat share path includes them. For an agency that is also a client, the same read runs twice in one render (`:147`, `:175`). |
+| Proposal | Fold the agency reader into the workspace-scoped one, keeping the `agency_client_id` column and the privacy filter. Read once per render (`cache()`). Move `EMPLOYER_DEMAND_KINDS` into one constant. |
+| Risk | Medium: the scope changes which rows are visible, and `agency_client_id` can only be linked on the agency's own rows. |
+| Evidence | Guards `needs-list-workspace.test.ts:16-22`, `agency-client-management.test.ts:74` and `privacy-rows-off-commercial-surfaces.test.ts:28`. Lane M re-checked the `profile_id` filter. |
+
+### ORG-5 · "Describe a need" doors that bypass `NeedDoorLink`
+
+Finding: CONFIRMED. Source: Lane M (M-5).
+
+| Field | Content |
+|---|---|
+| Function | Opening the need form |
+| Implementations | The one door: `components/app/need-door-link.tsx:26` (`NEED_DOOR_HREF`, `lib/company/need-door.ts:24`, with a funnel event).<br>Hand-written copies of the address, with no event: `company/scouting/page.tsx:530`, `components/app/agency-clients-section.tsx:311,406`, `components/app/company-home-field-section.tsx:318` (a file that also uses the door at `:97,969`), `components/app/project-cost-calculator.tsx:713` and `components/app/demand-entry-lifecycle.tsx:56`. |
+| Usage | The door is used at `company/page.tsx:399`, `company-home-field-section.tsx:97,969`, `company-next-actions.tsx:154`, `organization/company-model-screen.tsx:78` and `company-setup-form.tsx:479`. |
+| Problem | The component exists "so the three things that drifted apart cannot drift again", and these doors drifted. The need funnel misses their clicks. |
+| Proposal | Route the scouting and agency-client empty states through `NeedDoorLink`, with new surface entries. Leave the edit, repeat and continue links alone. |
+| Risk | Low. |
+| Evidence | Guard `company-need-door.test.ts:131-140` checks only four surfaces. |
+
+### ORG-6 · Two "waiting for approval" cards, counted by two paths
+
+Finding: CONFIRMED. Source: Lane M (M-8).
+
+| Field | Content |
+|---|---|
+| Function | Showing how many entries wait for approval |
+| Implementations | `components/app/arena/confirm-pulse.tsx:135-175` and `components/app/organization/organization-today-view.tsx:93-104`, plus an inline link at `app/[locale]/dashboard/hours/page.tsx:45-59`. All use the `companyModel.approvals` copy and link to `/dashboard/inbox/quick`. The pulse and the hours link count with `countReviewablePendingEntries` (the active organization); the today view counts with `countReviewableEntriesEverywhere` (`lib/company/organization-today-view.ts:41`). |
+| Usage | `<ConfirmPulse />` at `projects/page.tsx:557`, `projects/[id]/page.tsx:641` and `projects/[id]/operations/page.tsx:585`; `<OrganizationTodayView>` at `company/page.tsx:154`. |
+| Problem | Two implementations of one summary, with two counts. |
+| Proposal | One approvals card fed by one view model. Keep the hours link. |
+| Risk | Medium. End-to-end `prod-organization-daily`, `prod-review-scope` and `phone-journeys-isolated` pin it, and so does the guard `card-forwards-data-attributes.test.ts`. |
+| Evidence | Lane M. |
+
+### ORG-7 · The review queue is read three times, and one read hides its failure
+
+Finding: CONFIRMED. The data read is duplicated; the two views are intentional. Source: Lane M (M-9).
+
+| Field | Content |
+|---|---|
+| Function | Reading the entries a manager may confirm |
+| Implementations | `app/[locale]/dashboard/inbox/page.tsx:68` calls the RPC `reviewable_journal_entry_ids` inline and runs its own entries query (`:102`).<br>`inbox/quick/page.tsx` uses `fetchQuickReviewQueue` (`lib/journal/review-queue.ts:82`), built on the shared, cached `readReviewableJournalEntryIds`.<br>`lib/journal/review-report.ts:75` is a third inline call. |
+| Usage | The two routes; `review-queue.ts` is also used by `lib/company/organization-today-view.ts`. |
+| Problem | The inbox shows "could not load" (`:71`). `fetchQuickReviewQueue` drops the error and returns an empty list (`:89-100`), against the quick page's own rule that failed is not empty. That collapses separation SEP-7 (UNKNOWN ≠ ZERO ≠ FAILED). |
+| Proposal | Keep both views. The inbox and the report use `readReviewableJournalEntryIds`, and `fetchQuickReviewQueue` passes the unknown state through. |
+| Risk | Low to medium. |
+| Evidence | End-to-end `phone-journeys-isolated` and `prod-review-scope`. |
+
+### ORG-8 · Two "How this works" folds on `/dashboard/candidates`
+
+Finding: CONFIRMED. Source: Lane M (M-10).
+
+| Field | Content |
+|---|---|
+| Function | Explaining the page |
+| Implementations | `components/app/candidate-drafts-manager.tsx:282` (`<Explain>`) and `components/app/company-action-next-actions.tsx:57` (`<ExplainMore>`), with the same default label |
+| Usage | Both on `candidates/page.tsx` (`:121`, `:128`). |
+| Problem | Two identical folds on one page. The component's own `extra` prop exists to prevent this, and `/projects` uses it (`projects/page.tsx:504`). `CompanyActionRoomKey` also declares rooms ("company", "agency") that no page renders. |
+| Proposal | Pass the honesty note as `extra`, or drop one fold (decision 0032, no interface noise). |
+| Risk | Low; keep the test id `candidate-drafts-honesty`. |
+| Evidence | Guards `candidate-provider-draft.test.ts` and `company-action-rooms.test.ts`. |
+
+### ORG-9 · Hand-built view chips and buttons beside the shared ones
+
+Finding: CONFIRMED. A design-system duplicate, not a function duplicate. Source: Lane M (M-11, M-12).
+
+| Field | Content |
+|---|---|
+| Function | View-switch chips and action buttons |
+| Implementations | The shared pieces are `components/ui/Chip.tsx:23` (`chipLinkClassName`) and `ui/Button`.<br>Hand-built chips: `projects/page.tsx:568-586`, `company/planning/page.tsx:571-574,590,597`, `company/needs/page.tsx:210-230` (no `min-h-11`) and `projects/[id]/page.tsx:340-350`.<br>Hand-built buttons: `components/app/project-assignment-manager.tsx` (6 raw buttons, 0 `Button`), `service-offerings-section.tsx` (4) and `candidate-drafts-manager.tsx` (2). |
+| Usage | Those pages. The scouting page already uses the shared chip, and finance moved to it in #3661. |
+| Problem | Several looks for one control. The needs-audience chips are under 44 px. Project create and assign render in one style, and the team block below them in the other. |
+| Proposal | Move them onto `chipLinkClassName`, `ui/Button` and `ui/Input`, keeping the test ids. |
+| Risk | Low. `premium-action-card.test.ts:110,124-127` pins the projects toggle markup and reads `const primary =`. |
+| Evidence | Grep counts on `125e21827`. |
+
+## 9. Offers, proposals and the commercial chain
 
 All five entries come from Lane H (sections D-1 to D-4) and Lane D (section E). Lane H's code basis is `8bcda5bed`. PROD means the object is in the production migration ledger (Lane H) or the production catalogue (Lane D).
 
@@ -650,11 +979,11 @@ Finding: SUSPECTED; the rights and direction differ. Class: PROD.
 |---|---|
 | Function | A supplier tells a client the price, scope and dates for one need |
 | Implementations | (a) `public.proposals` (`20260718190000_commercial_crm.sql`):<br>- an owner profile, an optional `customer_request_id`, the amount, the scope and a status;<br>- writer `create_proposal_v1`, through `lib/commercial/commercial-actions.ts:60`;<br>- reader `lib/commercial/commercial.ts:41`;<br>- the MCP tools `proposal_create` and `proposal_status_set_*`.<br>(b) `public.team_demand_offer_terms` (`20261011200000_supply_offer_negotiation_v1`):<br>- versioned capacity, rate text, dates and scope, agreed by both parties;<br>- writer `propose_team_demand_offer_terms_v1`, through `lib/company/team-offer.ts:265`;<br>- PR #3649 adds explicit confirmation by both sides, and a place. |
-| Usage | (a) is the supplier's own CRM record, which the client never sees. (b) is the two-party negotiation, which both parties see. Lane D's production count: 0 proposals, 0 contracts, 25 team offers, 48 terms versions. |
+| Usage | (a) is the supplier's own CRM record, which the client never sees. (b) is the two-party negotiation, which both parties see. Lane D: the personal lane's proposals and contracts are unused in production; the organization lane is used (production walk brigade-formation, run 44906216102). |
 | Problem | Both carry a supplier's commercial terms for one need. An accepted proposal does not reach the offer, and agreed offer terms do not appear in the CRM. |
 | Proposal | Keep both for now. The owner decides which one is the commercial record of an offer. One option: (a) reads (b) for proposals tied to an offer. |
 | Risk | The CRM reports and the MCP tools depend on (a). |
-| Evidence | Lane H read the ledger; Lane D counted production rows. |
+| Evidence | Lane H read the ledger; Lane D read production. |
 
 ### OFFER-2 · Named candidates proposed by an agency, in two stores
 
@@ -706,13 +1035,13 @@ Finding: SUSPECTED; this is two models of one business function, not a code dupl
 |---|---|
 | Function | The subcontract chain |
 | Implementations | Personal lane: `service_offerings`, `service_offering_requests`, `proposals` and `contracts`. These are keyed by profile; proposals and contracts are visible to their owner only.<br>Organization lane: `team_demand_offers` plus `team_demand_offer_terms`, with two parties and versioning. |
-| Usage | Production count: 0 proposals, 0 contracts, 25 team offers, 48 terms versions. |
+| Usage | The personal lane's proposals and contracts are unused in production; the organization lane is used (production walk brigade-formation, run 44906216102). |
 | Problem | Two lanes for one chain. |
 | Proposal | The simplification plan (deliverable E) decides which lane is the subcontract chain. |
 | Risk | Existing offers. |
 | Evidence | Lane D's production read. |
 
-## 9. CV, skills, journal and history
+## 10. CV, skills, journal and history
 
 **The decision-0025 rule holds:** every surface that states a person's own experience total reads
 `lib/journal/professional-experience.ts` (20 non-test importers). That covers the CV page, the profile, the
@@ -743,21 +1072,21 @@ Finding: CONFIRMED. Class: UNUSED-OR-DUP (product). Source: Lane E sweep.
 | Implementations | `lib/profile/skill-evidence-state.ts:30-40`, beside the canonical `lib/evidence/evidence-tier.ts` (`deriveEvidenceTier`) |
 | Usage | No product importer. It is used only by `apps/web/scripts/skills-evidence-report.ts` and its own test. |
 | Problem | Line 35 labels a manager-sourced row that has no verification "manager_confirmed". The canonical ladder never raises such a row, and the CV shows it as "evidence" (`lib/cv-export/skill-tiers.ts:33-44`). So the script's report can overstate. |
-| Proposal | Remove it, or rebuild it on `deriveEvidenceTier`. |
+| Proposal | Remove it, or rebuild it on `deriveEvidenceTier`. It was removed and then restored once before (`docs/launch/OWNER_RETURN_PACKAGE_2026-09-19_COMPLETION.md:481`), so decide it together with the script (Lane G, G-5). |
 | Risk | Low: only the script uses it. |
 | Evidence | Importer grep (0 product references, confirmed by Lane E); both files read. |
 
 ### CV-3 · "Supported by work" is worked out outside the canonical ladder
 
-Finding: SUSPECTED. The drift risk is real, but no divergence exists today. Class: MAIN. Source: Lane E sweep.
+Finding: CONFIRMED that the tier is re-derived in three places (Lane G, G-8); SUSPECTED that it diverges, because none was found today. Class: MAIN. Sources: Lane E sweep and Lane G.
 
 | Field | Content |
 |---|---|
 | Function | Deciding whether journal work backs a skill |
-| Implementations | `lib/profile/skill-evidence.ts:38-48` (`isSkillSupportedByWork`), with its own set of allowed sources |
-| Usage | `deriveSkillEvidence` is called from `app/[locale]/dashboard/profile/page.tsx:852`, `components/app/profile-hub-overview.tsx`, `lib/player-card/player-card.ts:666`, `evidence-visuals.ts` and `sample-card.ts`. |
-| Problem | It matches the CV's "confirmed or evidence" rule today, but nothing ties the two together. |
-| Proposal | Build it on `deriveEvidenceTier` plus the CV's rule. |
+| Implementations | `lib/profile/skill-evidence.ts:38-48` (`isSkillSupportedByWork`), with its own `SUPPORTED_SOURCES`.<br>`lib/worker/weekly-intelligence.ts:172-178`, which reads raw `verified` or the source.<br>`components/app/cv-engagement-cards.tsx:149-153`, in a dead component (CV-17). |
+| Usage | `deriveSkillEvidence` is called from `app/[locale]/dashboard/profile/page.tsx:852`, `components/app/profile-hub-overview.tsx`, `lib/player-card/player-card.ts:666`, `evidence-visuals.ts` and `sample-card.ts`. `weekly-intelligence` is used by the opportunities page and `lib/notifications/event-emitters.ts`. |
+| Problem | They match the CV's "confirmed or evidence" rule today, but nothing ties them together. A confirmation that was later withdrawn can still read as "backed" (Lane G). |
+| Proposal | Route all of them through the CV's rule, `cvSkillTier !== "declared"`, on top of `deriveEvidenceTier`. |
 | Risk | Low. |
 | Evidence | Both files read. |
 
@@ -915,7 +1244,91 @@ Finding: CONFIRMED that the writers exist; SUSPECTED that this is harmful duplic
 | Risk | Medium: evidence integrity. |
 | Evidence | Grep of `.from("worker_skills")` writes. |
 
-## 10. APIs, RPCs and SQL
+### CV-15 · The Player Card reads work history with its own limit
+
+Finding: CONFIRMED that the reads are duplicated; SUSPECTED that the history differs for real people. Class: MAIN. Source: Lane G (G-7).
+
+| Field | Content |
+|---|---|
+| Function | Reading a person's own relationships to organizations (`engagement_contexts`) |
+| Implementations | `lib/player-card/work-history.ts:50-72` (`getOwnWorkHistory`): limit 20, no manager role.<br>`lib/journal/professional-experience-read.ts:112-117` (`readOwnExperienceRelationships`): the decision-0025 reader; limit 200, with the manager role and the organizations the person led.<br>`lib/cv-export/verified-cv.ts:453` and `app/[locale]/dashboard/profile/page.tsx:512`: no limit. |
+| Usage | `getOwnWorkHistory` ← `player-card.ts:497` ← `profile-hub-overview`, the journal page, `today-server`, `conversation/profile-summary` and `personal-workspace-intro-server`. |
+| Problem | A person with more than 20 engagements, or a director, sees a different history on the Player Card than in Work in Numbers or on the CV. |
+| Proposal | Derive `getOwnWorkHistory` from the 0025 reader, and apply any limit when rendering. |
+| Risk | The card appears on many pages; re-run the Player Card end-to-end tests. |
+| Evidence | Lane G, `git grep` of importers. |
+
+### CV-16 · Three "declared skills" counts on the profile page
+
+Finding: CONFIRMED in code; SUSPECTED that the visible numbers differ. Class: MAIN. Source: Lane G (G-9).
+
+| Field | Content |
+|---|---|
+| Function | Counting the skills a person declared |
+| Implementations | `lib/player-card/player-card.ts:293-318` (`declaredSkillsUnionCount`): its local `norm` (`:298`) copies `normalizeClaimLabel` (`skill-claim-extractor.ts:1243`), and it dedups claim labels against catalogue slugs, so Lithuanian claims never match.<br>`lib/profile/skill-evidence.ts:57` (`deriveSkillEvidence`): no dedup.<br>`lib/cv-export/skill-presentation.ts:203` (`presentSkills`): folds the variants. |
+| Usage | All three feed `/dashboard/profile`. |
+| Problem | Three counts of one thing. |
+| Proposal | Take the count from `presentSkills`, and import `normalizeClaimLabel`. The displayed numbers may change; no data changes. |
+| Risk | Low. |
+| Evidence | Lane G. |
+
+### CV-17 · Dead CV pieces: the normalize stub and the engagement cards
+
+Finding: CONFIRMED. Class: UNUSED-OR-DUP. Source: Lane G (G-1, G-3).
+
+| Field | Content |
+|---|---|
+| Function | CV normalization; engagement cards |
+| Implementations | `lib/cv/normalize.ts:11` (`normalizeCv` throws "not implemented until M2"), with `lib/cv/types.ts`, which only `normalize.ts` imports. The real path is `lib/cv/structured-parse.ts` (`parseCvSections`, 6 importers).<br>`components/app/cv-engagement-cards.tsx:61` (`CvEngagementCards`), which is never mounted. `dashboard/profile/page.tsx:30` and `capability-profile-section.tsx:25` import only its types, `EngagementCard` and `SkillDot`, and `BIN_DOT` is copied from `:43` to `capability-profile-section.tsx:778` (the comment at `:775` says so). |
+| Usage | None, apart from the type imports. |
+| Problem | Dead code next to the live path. |
+| Proposal | Remove `normalize.ts` and `types.ts`. Move the two types into a model file and delete the component. |
+| Risk | None. |
+| Evidence | Lane G, importer grep. |
+
+### CV-18 · The chat's CV import drops skill inference
+
+Finding: CONFIRMED. It narrows inference, against decision 0023. Class: MAIN. Source: Lane G (G-10).
+
+| Field | Content |
+|---|---|
+| Function | Reading a pasted or uploaded CV into proposals |
+| Implementations | `components/app/profile-text-first-flow.tsx` runs claims (`:279`), sections (`:292`) and the optional AI step (`:334`).<br>`components/app/conversation/worker-cv-flow.tsx:51-59` runs `parseCvSections` only. |
+| Usage | The profile page and the chat. They share the primitives: `CvImportUpload`, `/api/cv/extract`, `CvImportSectionReview` and the `confirmCv*` actions. |
+| Problem | `CvSectionProposals` (`lib/cv/structured-parse.ts:99-113`) has no skills field, so a CV read in the chat proposes no skills. Decision 0023 forbids narrowing inference. |
+| Proposal | One hook, `useCvImportProposals(text)`, used by both flows. Re-run `cv-upload-authenticated.spec`. |
+| Risk | Low to medium. |
+| Evidence | Lane G. |
+
+### CV-19 · ESCO prefix search written twice
+
+Finding: CONFIRMED. Class: MAIN. Source: Lane G (G-6).
+
+| Field | Content |
+|---|---|
+| Function | Searching ESCO labels by prefix |
+| Implementations | `lib/taxonomy/esco-autocomplete.ts:40` (`searchEscoLabels`): the fast RPC `search_esco_labels_v1`, with an ILIKE fallback.<br>`lib/esco/esco-lookup.ts:93` (`lookupEscoConcepts`): a raw `.ilike` per locale (`:111`), the path `esco-autocomplete.ts:51-56` documents as taking 1.3–1.9 s per keystroke. |
+| Usage | `lookupEscoConcepts` is used only by `lib/esco/evidence-correspondence.ts`, which has no product importer (`capability-register.ts:445`). |
+| Problem | A slow second search, waiting for a consumer. |
+| Proposal | Point `lookupEscoConcepts` at the RPC when it gets a consumer. Keep `iscoGroupsForEscoUris` from `esco-lookup`, which `journal-occupation-path.ts:5` uses. |
+| Risk | Low. |
+| Evidence | Lane G. |
+
+### CV-20 · A copied period check, and a stated-hours sum that adds periods
+
+Finding: CONFIRMED that the code is copied; SUSPECTED that any screen shows the sum as one total. Class: MAIN. Source: Lane G (G-16).
+
+| Field | Content |
+|---|---|
+| Function | Organization-supplied history for one person |
+| Implementations | `lib/organization-evidence/person-history-summary.ts:42` (`isPeriod`) is identical to the exported `company-work-history.ts:93` (`isPeriodRecord`). Its `statedHours` (`:59`) adds period hours together, which the never-sum fix of 2026-10-05 in `person-hours.ts` forbids; `periodHours` is kept beside it. |
+| Usage | The company's view of a person. |
+| Problem | A copied helper, and a sum that the one-history rule (decision 0025) does not allow. |
+| Proposal | Import `isPeriodRecord`, and check whether any screen renders `statedHours` as one total. |
+| Risk | Low. |
+| Evidence | Lane G. |
+
+## 11. APIs, RPCs and SQL
 
 **Method (Lane D).** A *family* is a set of functions whose names differ only by a trailing `_vN`. Production has
 30 families in more than one version, 63 functions in total. Each row below states the rights, the SQL callers and
@@ -942,10 +1355,10 @@ Finding: CONFIRMED in the repo and, for the grants, in production. Class: PROD. 
 | Field | Content |
 |---|---|
 | Function | App fallbacks to an older RPC version when the newer one is missing |
-| Implementations | The `respond_booking_request` family: v1 at `lib/booking/booking-actions.ts:350,443,454`, v2 at `:336`, v3 at `:416` (2 SQL callers), v4 at `:373`.<br>`withdraw_booking_request`: v1 at `:499,509`.<br>`propose_booking_request`: v1 at `:275`.<br>`save_company_setup`: v1 at `lib/company/company-setup.ts:499`, v2 at `:488`.<br>`create_work_task`: v1 at `lib/tasks/create-task-core.ts:130`.<br>`update_work_task`: v1 at `lib/tasks/task-actions.ts:302`.<br>`get_invitation_preview`: v1 at `app/[locale]/invite/[token]/page.tsx:311` and `lib/invitations/my-decision.ts:19`.<br>`create_org_document`: v1 at `lib/documents/org-document-actions.ts:210`.<br>`list_team_offers_for_request`: v1 at `lib/company/team-offer.ts:126`.<br>`save_demand_draft`: v1 at `lib/company/claim-public-intake.ts:248`.<br>`save_worker_availability_prefs`: v1 at `lib/worker/availability-prefs-actions.ts:146`.<br>The marketplace listing family at `lib/marketplace/listings.ts:509/515, 583/588, 653/658`.<br>`external_referral_reprocess` v4 → v3 → v2 at `lib/invitations/external-referral-reprocess-run.ts:53/58/61`. |
-| Usage | Lane E counted 16 RPC base names called in two or more versions (grep `rpc("…_v[0-9]+"` over `app`, `lib` and `components`). |
+| Implementations | The `respond_booking_request` family: v1 at `lib/booking/booking-actions.ts:350,443,454`, v2 at `:336`, v3 at `:416` (2 SQL callers), v4 at `:373`.<br>`withdraw_booking_request`: v1 at `:499,509` (SQL-10).<br>`save_company_setup`: v1 at `lib/company/company-setup.ts:499`, v2 at `:488`.<br>`create_work_task`: v1 at `lib/tasks/create-task-core.ts:130`.<br>`update_work_task`: v1 at `lib/tasks/task-actions.ts:302`.<br>`get_invitation_preview`: v1 at `app/[locale]/invite/[token]/page.tsx:311` and `lib/invitations/my-decision.ts:19`.<br>`create_org_document`: v1 at `lib/documents/org-document-actions.ts:210`.<br>`list_team_offers_for_request`: v1 at `lib/company/team-offer.ts:126`.<br>`save_demand_draft`: v1 at `lib/company/claim-public-intake.ts:248`.<br>`save_worker_availability_prefs`: v1 at `lib/worker/availability-prefs-actions.ts:146`.<br>The marketplace listing family at `lib/marketplace/listings.ts:509/515, 583/588, 653/658`.<br>`external_referral_reprocess` v4 → v3 → v2 at `lib/invitations/external-referral-reprocess-run.ts:53/58/61`. |
+| Usage | Lane E counted 16 RPC base names called in two or more versions (grep `rpc("…_v[0-9]+"` over `app`, `lib` and `components`). Lane S counted 22 families whose old *and* new versions are both still executable in production (`TECHNICAL_ARCHITECTURE_MAP.md` §6.2, in its PR), and found that the newest version of every family exists in production, so these fallbacks never run there. |
 | Problem | Where production has the newer version, the fallback branch is dead, yet the old version stays callable. On the fallback paths behaviour silently gets weaker; for example `booking-actions.ts:443` accepts with `engagement: "needs_migration"`. Some old versions are still called *directly*, not only as a fallback (`get_invitation_preview_v1`, and possibly some booking decisions). Those are live uses: it must be checked whether v1 and v2 differ in rights before either is called a duplicate. |
-| Proposal | One family at a time, and only where production has the newer version: revoke `EXECUTE` on the old version from `authenticated` (reversible), then remove the app fallback. Three families are security-relevant and are handled under SEC (below), not here. |
+| Proposal | GREEN first: remove the fallbacks that name a version production has already closed (SQL-1; for example `lib/invitations/actions.ts:521,570,615` and `lib/marketplace/listings.ts:515,588,658`, per Lane S). Then, one family at a time and RED: revoke `EXECUTE` on the old version from `authenticated` (reversible), then drop it with a rollback, after checking the phone and MCP callers. Three families are security-relevant and are handled under SEC (below), not here. |
 | Risk | A stack where the newer version is not applied loses the function. Production has it, per Lane D's read. Local and preview stacks must be checked. |
 | Evidence | Lane D's production grants; Lane E's and Lane H's code greps. |
 
@@ -957,7 +1370,7 @@ Finding: CONFIRMED (strong). Class: PROD. Source: Lane D (section C).
 |---|---|
 | Function | Superseded versions with no runtime use |
 | Implementations | `create_finance_record_v1`, `update_finance_record_v1`, `create_work_plan_entry_v1`, `end_company_worker_engagement_v1`, `list_agency_offered_candidates_for_request_v1`, `my_historical_organization_names_v1`, `journal_entry_supersede` (v1; v2 has one SQL caller), `submit_demand_request` (the v1 name has one SQL caller, which must be checked first) |
-| Usage | None of them is called by `rpc(…)` or `readRows(…)` with that exact name anywhere in `apps/web` outside tests. Several are named in comments and types. |
+| Usage | None of them is called by `rpc(…)` or `readRows(…)` with that exact name anywhere in `apps/web` outside tests. Several are named in comments and types. For `end_company_worker_engagement_v1` (`20260723120000…:491`, grant `:532`), the app calls only v2 (`lib/engagements/end-engagement.ts:166`), and v1 appears only in guard tests (`booking-engagement-bridge.test.ts:205,258`) (Lane C, A8). |
 | Problem | Dead but still executable. |
 | Proposal | Revoke `EXECUTE` from `authenticated` first (reversible), drop later. |
 | Risk | Low, apart from the two names with an SQL caller. |
@@ -977,19 +1390,19 @@ Finding: SUSPECTED; the two call sites are CONFIRMED. Class: MAIN. Source: Lane 
 | Risk | Medium: the email-send path. |
 | Evidence | Migration grep; call sites read. |
 
-### SQL-5 · Three booking-response RPCs in use
+### SQL-5 · The booking-response RPCs: v4 is a full copy of v3
 
-Finding: SUSPECTED that their logic diverges; the call sites are CONFIRMED. Class: MAIN. Source: Lane E sweep.
+Finding: CONFIRMED that v4 is a forked copy of v3 (Lane C, A2). Class: MAIN. Sources: Lane E sweep and Lane C.
 
 | Field | Content |
 |---|---|
 | Function | Responding to a booking request |
 | Implementations | `respond_booking_request_v2` (`20260711290000`), `_v3` (`20260723120000`, patched in `20260802150000` and `20260807140000`) and `_v4` (`20260915180000`). |
 | Usage | `lib/booking/booking-actions.ts:336` (v2, decline with a reason), `:416` (v3, the default), `:373` (v4, after a calendar clash was acknowledged). Lane D found no app call to v4 in its grep; Lane E's sweep found the call at `:373`. Verify this before any change. |
-| Problem | One decision is written by three functions, each with its own feature. Decline-with-reason goes through v2, which predates the engagement and organization resolution that v3 gained in `20260807140000`. |
-| Proposal | One function with optional reason and acknowledgement arguments. Until then, v3 and v4 stay canonical. |
-| Risk | High: booking is a core flow. |
-| Evidence | Migrations and call sites read. |
+| Problem | v1 and v2 are thin delegators to v3 (`20260802150000…:347,373`), so they are not forks (Lane C). This corrects Lane E's sweep, which suspected that v2's decline skipped v3's logic. But v4 is a full copy of v3 plus the clash acknowledgement (`20260915180000_subject_contest_and_clash_receipt.sql:152`, insert at `:321`, grant at `:345`; v3 at `20260807140000_booking_engagement_org_resolution_v1.sql:138`, insert at `:327`). So two full bodies carry the accept, the double-booking lock and the engagement record, and every rule has to be written twice. `20261114100000_booking_refuses_closed_need_v1.sql` (header 17-23) used a trigger for exactly that reason. |
+| Proposal | Merge: v3 becomes `v4(…, false)`, or v4 delegates to v3 and adds a clash branch. Check first whether v4 is applied: the guard comment `consolidation-no-new-truth.test.ts:369-372` calls it "PREPARED not applied", while Lane D reports the newest version of every family present in production. |
+| Risk | High: booking is a core flow, and the `23P01` / overlap-not-recordable behaviour must stay the same. RED. |
+| Evidence | Migrations and call sites read; Lane C re-checked them on `125e21827`. |
 
 ### SQL-6 · The company setup v2 and v1 branches look unreachable
 
@@ -1047,14 +1460,90 @@ Finding: CONFIRMED. Class: UNUSED-OR-DUP. Source: Lane H (D-5).
 | Risk | None for users. |
 | Evidence | Lane H; the capability register. |
 
-### SEC-1..3 · Security items, handed to the owning lane
+### SQL-10 · `withdraw_booking_request` and `_v2`: two full bodies
 
-Three entries in this area are security-relevant. This repository is public, so the details are not written here
-(the rule in `docs/program/FUNCTION_REGISTER.md`, line 7). They were found independently by Lane D's production read
-and by Lane E's sweep. They are with Lane D and Lane E, to be handed to the auth/RLS lane (F) and the coordinator.
-Each fix is RED and owner-gated. Status: open.
+Finding: CONFIRMED. Class: MAIN. Source: Lane C (A3).
 
-## 11. Dead code, translations and links
+| Field | Content |
+|---|---|
+| Function | Withdrawing a booking request |
+| Implementations | `20260613100100_booking_requests.sql:252` and `20260711290000_booking_lifecycle_v2.sql:166`. They are parallel byte for byte (v2 adds a reason), and both are granted. |
+| Usage | `lib/booking/booking-actions.ts:486` (v2 with a reason), `:499` (v1 fallback) and `:509` (v1 without a reason). |
+| Problem | v1 was never made a delegator, so a future rule has to cover both. |
+| Proposal | Make v1 delegate to v2 with a null reason, as `20260802150000` did for `respond_booking_request`. |
+| Risk | Low. |
+| Evidence | Lane C. |
+
+### SQL-11 · Invitation accept: three bodies kept in step by hand
+
+Finding: CONFIRMED. Class: MAIN. Source: Lane C (A5).
+
+| Field | Content |
+|---|---|
+| Function | Accepting an invitation |
+| Implementations | `accept_invitation_apply_v2` (`20261021094000…:196`), `accept_invitation_v1` (`:388`) and `accept_invitation_by_id_v1` (`:517`). Each one inserts the engagement row and the project assignment itself (`:301`, `:476`, `:606`). |
+| Usage | `lib/invitations/actions.ts:517/521` and `:611/615` call v2 first, and v1 only when v2 is missing. |
+| Problem | Every authority fix edits three bodies. |
+| Proposal | Reduce v1 to delegators, or drop it (owner-gated), and remove the app fallbacks. Whether v1 can still be called is a security question (SEC). |
+| Risk | Low once v2 is confirmed in production. |
+| Evidence | Lane C. |
+
+### SQL-12 · The "is this schema object missing?" check is written 48 times
+
+Finding: CONFIRMED. Class: MAIN. Source: Lane S (S-2).
+
+| Field | Content |
+|---|---|
+| Function | Telling whether an RPC or table is not installed yet (`42883` / `PGRST202`) |
+| Implementations | 48 local functions in 43 files, for example `isAbsentFunction` (`lib/booking/booking-actions.ts:51`), `isMigrationMissingCode` (`finance-model.ts:114`, `task-model.ts:57`), `isMissingRpcCode` (`agency/clients-model.ts:71`) and `isMissingRpcError` (`privacy/deletion-cancel-model.ts:27`). 163 non-test files test the two codes directly. |
+| Usage | Throughout. |
+| Problem | No shared helper, so the fallbacks of SQL-2 are each detected differently. |
+| Proposal | One helper in `lib/supabase`, adopted family by family as the SQL-2 fallbacks are removed. |
+| Risk | Low. |
+| Evidence | Lane S (`docs/architecture/TECHNICAL_ARCHITECTURE_MAP.md` §13, in its PR). |
+
+### SQL-13 · Tables and functions with no use in production
+
+Finding: CONFIRMED for the tables; SUSPECTED for the functions, which must be checked with lanes F and L first. Class: PROD. Source: Lane S (S-5, S-6).
+
+| Field | Content |
+|---|---|
+| Function | Storage and functions that nothing uses |
+| Implementations | Tables never written in production and referenced by no app code: `assistant_message_attachments`, and `project_forecast_state`. The latter is granted for select, and a forecast-recompute VPS cron runs every 5 minutes, yet it is still empty.<br>Functions with no code, function, policy, trigger or cron reference in production: `erase_assistant_transcript` and `revoke_competency_recognition_v1`. |
+| Usage | None found. |
+| Problem | Dead objects, and a cron that writes nothing. |
+| Proposal | Check the two functions with lanes F (erasure) and L (recognition) before anything. Find out why the forecast cron writes no state (see the draft #2738 noted in `FUNCTION_REGISTER.md` row 3.34). |
+| Risk | Erasure and recognition are rights paths, so nothing is removed without those lanes. |
+| Evidence | Lane S, a production read on build `430bd475`. |
+
+### SQL-14 · Two exits for the first-party supply feed
+
+Finding: SUSPECTED. Class: MAIN. Source: Lane S (S-7).
+
+| Field | Content |
+|---|---|
+| Function | Publishing the first-party supply feed |
+| Implementations | The route `/api/internal/supply-feed/first-party-v1` and the script `apps/web/scripts/emit-first-party-supply-feed.ts` |
+| Usage | The route has no caller. |
+| Problem | Two exits for one feed. |
+| Proposal | Keep the one that is used, and record which. |
+| Risk | Low. |
+| Evidence | Lane S. |
+
+### SEC-1..5 · Security items, handed to the owning lane
+
+Five items found by this audit are security-relevant. This repository is public, so their details are not written
+here, following the rule at `docs/program/FUNCTION_REGISTER.md` line 7.
+
+- **SEC-1 to SEC-4** concern older versions of database functions. They were found independently by Lane D's
+  production read, Lane C and Lane E's sweep.
+- **SEC-5** is in the sign-up chain. It is owned by Lane F, and its fix is in an open RED PR that awaits the owner.
+
+Lane E sent the details of all five to Lane F (auth, roles, RLS) on 2026-11-23. Each fix is a RED, owner-gated change.
+
+Status: open. The entries above name those function families only for their duplication; their access questions are SEC items.
+
+## 12. Dead code, translations and links
 
 ### DEAD-1 · App and UI components with no importer
 
@@ -1068,7 +1557,7 @@ Finding: CONFIRMED. Class: UNUSED-OR-DUP. Sources: Lane E sweep and Lane A (A-6)
 | Problem | Dead code with no retirement marker. |
 | Proposal | Remove them, **except** `agency-workers-section.tsx`: it is kept on purpose (`lib/product-gate/capability-register.ts:625`), and the guard `agency-model-b-canonical-v1.test.ts` checks that it stays unused. |
 | Risk | Low. Tests that mention them must be updated in the same PR. |
-| Evidence | Every import, dynamic-import and require specifier in non-test source was compared with each file's base name, and a repo-wide grep for `['"/]<name>['".]` was run. Lane E spot-checked `feature-availability-grid` and `living-cv-story`: 0 product references each. |
+| Evidence | Every import, dynamic-import and require specifier in non-test source was compared with each file's base name, and a repo-wide grep for `['"/]<name>['".]` was run. Lane E spot-checked `feature-availability-grid` and `living-cv-story`: 0 product references each. Lane G found `living-cv-story` independently (G-2). Lane S counted 43 component files with no importer by the TypeScript import graph, also checking scripts, `tests/e2e`, `next.config` and the messages; that matches DEAD-1 and DEAD-2. |
 
 ### DEAD-2 · Marketing components with no importer
 
@@ -1077,8 +1566,8 @@ Finding: CONFIRMED. Class: UNUSED-OR-DUP. Source: Lane E sweep.
 | Field | Content |
 |---|---|
 | Function | Landing-page sections |
-| Implementations | `components/marketing/`: `proof-band`, `market-proof-band`, `product-chain-band`, `market-moment`, `starting-contexts-band`, `example-preview-frame`, `trust-band`, `landing-primary-actions`, `how-it-works-band`, `market-pulse`, `audience-value-sections`, `audience-page`, `draft-board`, `final-cta-band`, `public-market-map-band`, `service-offers`, `landing-three-ways`, `conversation-os-panel` and `two-sides-section` (`.tsx`) |
-| Usage | No non-test reference, for each file. Some are named by guards; `market-proof-band` is named by 4. |
+| Implementations | `components/marketing/`: `proof-band`, `market-proof-band`, `product-chain-band`, `market-moment`, `starting-contexts-band`, `example-preview-frame`, `trust-band`, `landing-primary-actions`, `how-it-works-band`, `market-pulse`, `audience-value-sections`, `audience-page`, `draft-board`, `final-cta-band`, `public-market-map-band`, `service-offers`, `landing-three-ways`, `conversation-os-panel`, `two-sides-section` and `living-worker-hero` (`.tsx`; the last one from Lane S) |
+| Usage | No non-test reference, for each file. Some are named by guards; `market-proof-band` is named by 4. `qa-owner-visual-acceptance.mjs:25` already lists `draft-board`, `market-pulse` and `conversation-os` as must be gone (Lane S). |
 | Problem | Dead copy and code that still have to be maintained. |
 | Proposal | Remove them after checking `lib/guards/landing-freeze.ts` and the other landing guards. |
 | Risk | The landing guards pin some of these files. |
@@ -1108,7 +1597,7 @@ Finding: CONFIRMED that only tests import them; SUSPECTED that they are dead, be
 | Implementations | `lib/lmc/wallet.ts`, `lib/lmc/compensation.ts`, `lib/employers/employer-identity.ts`, `lib/ai/runtime/run.ts`, `lib/ai/runtime/providers/adapter-contract.ts`, `lib/ops/control-authorization.ts`, `lib/planning/brigade-plan.ts`, `lib/journal/review-readiness.ts`, `lib/work-market/visual-concepts.ts`, `lib/staffing/contract-payment-readiness.ts`, `lib/staffing/service-model.ts`, `lib/config/suggestion-statuses.ts`, `lib/visual/industry-glyph.ts`, `lib/feedback/work-feedback-loop.ts`, `lib/intelligence/eurostat-activation-facts.ts`, `lib/player-card/sample-card.ts`, `lib/organization-evidence/object-mapping.ts`, `lib/migrations/parity-model.ts`, `lib/commercial/plan-adapters.ts`, `lib/forecast/forecast-demonstration.ts`, `lib/answer-engine/indexnow.ts`, `lib/eurostat-import/eurostat-importer.ts`, `lib/eurostat-import/eurostat-observation-writer.ts`, `lib/esco/evidence-correspondence.ts`, `lib/analytics/market-coverage-claims.ts`, `lib/structuring/language-packs/recognition-status.ts`, `lib/structuring/language-packs/core-slugs.ts`, `lib/product-gate/surface-registry.ts` and `lib/security/canonical-authenticated-rpcs.ts` |
 | Usage | No non-test specifier references, repo-wide. Excluded because they are used: `lib/supply-bridge/feed-file.ts`, `lib/profile/skill-evidence-state.ts` and `lib/seo/seo-indexing-audit.ts` (scripts); `lib/learning/signal-queue-producer.ts` (a multi-line dynamic import at `lib/conversation/opening-brief.ts:513`); `lib/billing/providers/stripe-test.ts`; `lib/i18n/request.ts`. |
 | Problem | Being test-only is not the same as being dead. The product-gate and security lists are guard infrastructure. |
-| Proposal | Review case by case. `lib/lmc/wallet.ts` and `compensation.ts` stay under the LMC freeze (§12). |
+| Proposal | Review case by case. `lib/lmc/wallet.ts` and `compensation.ts` stay under the LMC freeze (§13). `lib/agency/pool-actions.ts` also has no product importer: a guard bans importing it, yet it is still an anchor in `capability-register.ts:616` (Lane S). `lib/ai/runtime/run.ts` (`runAiCompletion`) is referenced only by a guard; everything runs through `lib/ai/run-agent-server.ts` (Lane G, G-4). |
 | Risk | Guards import these modules. |
 | Evidence | Specifier grep. |
 
@@ -1125,6 +1614,20 @@ Finding: CONFIRMED for three namespaces; SUSPECTED for seven. Class: MAIN. Sourc
 | Proposal | Remove them, together with the guards that list them. `landingJourney` needs a deliberate landing-freeze re-hash. |
 | Risk | A namespace built dynamically (`` t(`${x}`) ``) would be missed by this grep. |
 | Evidence | Only top-level namespaces were checked, not unused keys inside live namespaces. No guard checks for unused keys: the i18n guards police missing keys and parity. |
+
+### DEAD-7 · One route, two label keys
+
+Finding: CONFIRMED. Class: MAIN. Source: Lane A2.
+
+| Field | Content |
+|---|---|
+| Function | The name of an organization area |
+| Implementations | `companyModel.*` (used by `AreaSwitcher`) and `organizationDoors.*` (used by the doors) in `messages/en.json`:<br>- `/dashboard/company/people`: "People & team" vs "People";<br>- `/dashboard/projects`: "Projects & objects" vs "Work";<br>- `/dashboard/company/needs`: "What we need" vs "Needs";<br>- `/dashboard/company/partners`: "Clients & suppliers" vs "Clients & partners". |
+| Usage | NAV-1 and NAV-12. |
+| Problem | One page, two names, depending on where the person clicks. |
+| Proposal | One key per route in all 11 catalogues, as part of the carousel steps N6 and N7. |
+| Risk | The guards that pin the labels. |
+| Evidence | Lane A2. |
 
 ### DEAD-6 · Literal dashboard links: none dead
 
@@ -1162,7 +1665,7 @@ Finding: SUSPECTED. Not a duplicate, but a second way personal data leaves the p
 
 The other bypass-shaped findings are listed under their areas: MSG-3, MSG-4, MSG-5, CV-1, CV-4, CV-10 and CV-14.
 
-## 12. Earlier registers: superseded, with their current state
+## 13. Earlier registers: superseded, with their current state
 
 The two files stay at their paths: `lib/guards/consolidation-no-new-truth.test.ts:26` and several modules cite the
 2026-08-17 register by path and section number in their failure messages. Each file carries a "superseded by" note
@@ -1180,7 +1683,7 @@ at the top; its section numbers stay valid.
 | §2 | Fold System C into `create_invitation_v1` | Not done; it grants different rights | HIRE-6 |
 | §2 | No fourth invitation table | Still true. The guard allowlist (`consolidation-no-new-truth.test.ts:233-235`) still pins the two legacy writers. | — |
 | §3 | `company_worker_engagements` written only by booking accept | Still true (v3 and v4 only) | HIRE-5 |
-| §3 | Booking accept opens the engagement row (L4) | Not done; v4 was used for calendar clashes instead | HIRE-5 |
+| §3 | Booking accept opens the engagement row (L4) | Not done. The name `respond_booking_request_v4`, which the register planned for L4, now belongs to the clash fork (SQL-5), so L4 needs another name or a merged v3 (Lane C). | HIRE-5, SQL-5 |
 | §3 | `company_workers` roster as a frozen read-only duplicate | No longer accurate: it still gets rows from the legacy accept, and project authority depends on it | HIRE-3, HIRE-4 |
 | §3 | New since the register | Two more employment shapes: the `collaborator` engagement row from agency placement, and `team_assignments` | HIRE-5 |
 | §4 | Candidate stage derived, never stored | Still true. No migration matches `pipeline_stage\|candidate_stage\|pipeline_status`; `lib/pipeline/candidate-pipeline.ts` is imported by the scouting page, the employer workspace and `demand-journey-model.ts`. | — |
@@ -1207,8 +1710,11 @@ at the top; its section numbers stay valid.
 - **"Manual picker, single mount" fails.** There is now a second free-label add (CV-7).
 - **The chat has its own front doors** for the CV, skills, work history, education and the work card. They share the write actions, but some UIs are doubled (CV-8, CV-11, CV-12).
 - **Journal edit has two screens** (CV-9).
+- **The chat's CV import is a narrower second orchestrator** (CV-18).
+- **A stale guard.** `lib/guards/canonical-paths-integrity.test.ts:104` still lists `profession-skills-picker.tsx` as a `CvImportUpload` mount, but the only importers now are `cv-input-panel.tsx` and `worker-cv-flow.tsx`. Its staleness check (`:155`) only tests that the file exists. Proposal: assert the mount (Lane G, G-17).
+- **The rest of the CV upload.** Only the dead normalize stub (CV-17) is left of the "M2 placeholder". The real upload is covered by `cv-upload-authenticated.spec.ts` (Lane G).
 
-## 13. Checked, not duplicates
+## 14. Checked, not duplicates
 
 Each of these looks like a duplicate, but differs in purpose, rights or source. Do not merge them.
 
@@ -1245,6 +1751,43 @@ Each of these looks like a duplicate, but differs in purpose, rights or source. 
 - **Lane A's checks.** The consent card (`DiscoverabilityConsent`) and the consequence trace (`HomeTrace`) are each one component used on several pages.
 - **The journal calendar and the historical calendar** (Lane A, A-5): SUSPECTED only. One is the person's own journal; the other is organization-supplied history, with different data and rights. Trace both before any merge.
 
+**Sign-up (Lane F)**
+- **Plain vs addressed web sign-up.** The addressed path keeps the invited address on the server (`signup-accept-action.ts:49-70`), which is a different purpose, not a duplicate.
+- **Phone sign-in and register** already share one component (`credentials-form.tsx:14-15`).
+- **`complete_onboarding` vs `complete_onboarding_run_v1`.** The second one is the employee onboarding checklist (`20260817190000_employee_lifecycle_v1.sql:864-866`).
+- **`packages/client-core/src/session.ts`** only models session storage and makes no auth calls.
+
+**Hiring and projects (Lane C)**
+- **Direct booking vs agency placement.** The agency accept reuses booking: `respond_agency_candidate_offer_v1` calls `propose_booking_request_v3` (`20261008090000…:145`). A collaborator engagement row is opened only for an accepted agency placement (`20260928220000…:20-30`).
+- **A booking vs a team offer.** These have different subjects. The hand-off writes `team_assignments`, never `booking_requests` or the booking ledger.
+- **`project_worker_assignments` vs `team_assignments`.** One is a person, the other a crew. They are read together once, in `lib/projects/assigned-people.ts`.
+- **Shortlist, interest signal and booking** are three sides of one funnel. The stage is derived in `lib/pipeline/candidate-pipeline.ts`, and the web and MCP shortlist share `setShortlistCore` (`scouting.ts:728`).
+- **The four "people" pages:**
+  - `/dashboard/candidates`: manual drafts of people not yet on the platform;
+  - `/company/scouting`: the live demand funnel;
+  - `/dashboard/talent`: super-admin only;
+  - `/admin/candidate-pool`: admin only.
+- **MCP booking tools** call the same web actions (`domain-action-capabilities.ts:563-576`). `ProposeBookingButton` is one component mounted four times, on one action.
+- **Employer confirmation vs client counterparty review.** The rights differ: the client is not the employer.
+
+**Employer and agency screens (Lane M)**
+- **Assigning a person to a project** has one form (`project-assignment-manager.tsx:528`). The People and home "put on a project" items are only links.
+- **Posting a need** has one write, `submitDemandRequestAction`, used by the wizard (`demand-request-button.tsx:436`) and the chat (`company-executors.ts:210`).
+- **Agency offer vs company offer.** `submitOfferAction` offers one roster worker for a privately shared request. `offerTeamToDemandAction` offers the organization for an open need.
+- **Agency client invitation** reuses the canonical invitation primitive (`bridge-actions.ts:145`) and adds a connection row.
+- **`/dashboard/start/company`** is the only mount of `CompanySetupForm`.
+
+**CV, skills and AI (Lane G)**
+- **Work-history writes** all converge on `confirmCvWorkHistoryAction` → `save_self_declared_work_history_v1`.
+- **CV upload** is one primitive (`CvImportUpload` → `/api/cv/extract` → `lib/cv/extract.ts`), which the journal document import also reuses.
+- **The `/cv` templates** are views over one `buildVerifiedCv` read.
+- **`skill-claim-extractor` vs `skill-recognition`.** The person's own words as claims (decision 0023) vs catalogue slugs: two different contracts.
+- **Inferred vs declared skills.** `potential-skills.ts` (inferred) and `profile_skill_claims` / `worker_skills` (declared, recorded, confirmed) are separate evidence states.
+- **`lib/taxonomy/profession-skills.ts`** is a static mirror of the seed, kept in step by `matching-canonical.test.ts`.
+- **The headcount readers** are layered, and all of them use `word-numbers` since #3639.
+- **The `worker_profile` agent** has two entry points (the public `/worker-intake` and the signed-in CV structuring), with different authentication and throttling.
+- **`lib/trust/experience-*`** are counterparty reviews, not work history.
+
 **Other**
 - **The waitlist** has one writer (`app/api/waitlist/route.ts:76`).
 - **API routes.** None of the 30 `app/api/*/route.ts` files re-implements a server action.
@@ -1267,7 +1810,7 @@ Each of these looks like a duplicate, but differs in purpose, rights or source. 
 - **Language controls.** The avatar-menu language control (`md:hidden`) and the header `LocaleSwitcher` (`hidden md:flex`) complement each other.
 - **Not judged:** the public worker pages `/for-workers`, `/work-opportunities`, `/work-abroad`, `/create-cv` and `/worker-intake` overlap in audience, but look like separate search and funnel pages.
 
-## 14. Inputs and provenance
+## 15. Inputs and provenance
 
 | Lane | Area | Received (UTC) | Basis |
 |---|---|---|---|
@@ -1276,7 +1819,9 @@ Each of these looks like a duplicate, but differs in purpose, rights or source. 
 | H | Offers, proposals, team offers | 05:14 | `origin/main` `8bcda5bed`; production migration ledger |
 | D | SQL functions, RPCs, tables | 05:16 (read time corrected 05:17) | `origin/main` `f65c572`; production catalogue 05:11–05:16 |
 | B | AI assistants, tool registries, MCP | 05:17 | `main` `125e21827`; production build `430bd475` |
-| M | Employer and agency UI | promised before 09:00 | — |
-| C | Hiring | not yet received | — |
-| G | CV and AI | not yet received | — |
-| S | Technical architecture input | not yet received | — |
+| F | Sign-up and sign-in chains, security | 05:20 | `main` `6c6061a83` |
+| A2 | Navigation systems, label duplicates | 05:20 | `main` `125e21827`; spec PR #3681 |
+| C | Hiring, booking, engagement, project | 05:22 | `origin/main` `125e21827` |
+| G | CV, skills, history, AI | 05:23 | `origin/main` `125e218278` |
+| M | Employer and agency UI | 05:24 | `main` `125e21827` |
+| S | Versioned RPCs, dead code, production use | 05:28 | `main` `125e2182`; production build `430bd475` |
