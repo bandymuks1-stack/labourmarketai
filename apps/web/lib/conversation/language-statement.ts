@@ -1,5 +1,6 @@
 import type { WorkerLanguageCode, WorkerLanguageLevel } from "@/lib/worker/worker-languages-model";
 import { looksSwedish } from "@/lib/structuring/looks-swedish";
+import { foldText } from "@/lib/structuring/normalize";
 
 /**
  * LANGUAGES SAID IN WORDS (owner continuation 2026-09-29, PERSON chat walk).
@@ -13,13 +14,6 @@ import { looksSwedish } from "@/lib/structuring/looks-swedish";
 export interface StatedLanguage {
   readonly lang: WorkerLanguageCode;
   readonly level: WorkerLanguageLevel | null;
-}
-
-function fold(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
 }
 
 /** Stems, folded, in the served locales. Order matters only for display. */
@@ -71,7 +65,7 @@ const NATIVE = /(gimtoji|gimtąja|gimtaja|native|mother\s+tongue|родн|mutter
 const SV_NATIVE = /modersmal/u;
 
 export function readStatedLanguages(text: string): StatedLanguage[] {
-  const q = fold(text ?? "");
+  const q = foldText(text ?? "");
   const hits: { lang: WorkerLanguageCode; at: number; end: number }[] = [];
   for (const [lang, re] of STEMS) {
     const m = re.exec(q);

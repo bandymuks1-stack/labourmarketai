@@ -162,11 +162,14 @@ const otherCurrency = (sentence: string, currency: string): Intended[] => [
 ];
 const NOT_EUROS_IS_NOT_PREFILLED: readonly Intended[] = [
   ...otherCurrency("Salary 25000 kr per month", "kr"),
-  ...otherCurrency("Atlyginimas 3000 zł", "zł"),
+  // The currency is read from the folded sentence. Since the readers share
+  // `foldText` (DUPLICATION_AUDIT AI-10), "zł" folds to "zl". The label is
+  // internal: the chat asks for a euro figure for every other currency.
+  ...otherCurrency("Atlyginimas 3000 zł", "zl"),
   ...otherCurrency("Wynagrodzenie 5000 PLN", "pln"),
   ...otherCurrency("Lohn 30000 NOK", "nok"),
   ...otherCurrency("Pay is 4000 USD", "usd"),
-  ...otherCurrency("Chcę 6000 zł miesięcznie", "zł"),
+  ...otherCurrency("Chcę 6000 zł miesięcznie", "zl"),
   ...otherCurrency("Salary 3000 CHF", "chf"),
 ];
 

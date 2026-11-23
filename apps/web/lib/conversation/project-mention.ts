@@ -11,16 +11,11 @@
  * answer is a project only when EXACTLY ONE matches — otherwise nothing is
  * guessed and the person picks. Pure.
  */
-function fold(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-}
 
+import { foldText } from "@/lib/structuring/normalize";
 function coreWords(title: string): string[] {
   const core = title.replace(/\[[^\]]*\]/g, " ").split(/\s[-–—]\s/u)[0] ?? "";
-  return fold(core)
+  return foldText(core)
     .split(/[^\p{L}\p{N}]+/u)
     .filter((w) => w.length >= 3);
 }
@@ -33,7 +28,7 @@ export function projectNamedInSentence<P extends { readonly value: string; reado
   sentence: string,
   projects: readonly P[],
 ): P | null {
-  const words = fold(sentence ?? "")
+  const words = foldText(sentence ?? "")
     .split(/[^\p{L}\p{N}]+/u)
     .filter(Boolean);
   const hits = projects.filter((p) => {
