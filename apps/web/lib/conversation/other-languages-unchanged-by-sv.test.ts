@@ -311,7 +311,19 @@ const ENTITIES_IN_EVERY_LANGUAGE: readonly Intended[] = [
   { sentence: "Позавчера работал 8 часов.", reader: "route", now: ["log-work", 7] },
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...WORD_NUMBER_HEADCOUNT, ...ENTITIES_IN_EVERY_LANGUAGE];
+/**
+ * (j) A WRITTEN NUMBER IS A DURATION IN EVERY LANGUAGE (DUPLICATION_AUDIT AI-9).
+ *
+ * The journal's duration reader knew only Lithuanian number words, so "два
+ * дня" carried no time while "2 дня" carried two days. It now reads written
+ * numbers through the shared lexicon (`word-numbers.ts`) and the same digit
+ * readers.
+ */
+const WRITTEN_NUMBER_DURATIONS: readonly Intended[] = [
+  { sentence: "свободен два дня", reader: "journalTime", now: { value: 2, unitSlug: "days" } },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...WORD_NUMBER_HEADCOUNT, ...ENTITIES_IN_EVERY_LANGUAGE, ...WRITTEN_NUMBER_DURATIONS];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).

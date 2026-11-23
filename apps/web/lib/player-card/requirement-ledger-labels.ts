@@ -23,7 +23,13 @@ export async function buildRequirementLedgerLabels(): Promise<InstructionLedgerL
   const [t, tDocs, tSkills, tLm] = await Promise.all([
     getTranslations("instructions"),
     getTranslations("documents"),
-    getTranslations("skills"),
+    // The skill CATALOGUE (`messages/<locale>/skill-names.json`), the one
+    // every other surface names a skill from. This read `skills` — the
+    // skills section's UI copy, which holds no slug — so every skill fell
+    // through to its slug with the dashes removed: "arc welding",
+    // "welding blueprint" on a German or Lithuanian profile (owner P0
+    // 2026-11-23).
+    getTranslations("skillNames"),
     getTranslations("labourMarket"),
   ]);
   const countryName = (c: string | null): string =>

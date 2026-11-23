@@ -168,7 +168,7 @@ export function WorkspaceChip() {
         title={`${t("workspaceLabel")}: ${titleOf(active)}`}
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
-        <span className="text-left max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{nameOf(active)}</span>
+        <span className="text-left max-lg:line-clamp-2 max-lg:break-words max-lg:leading-tight lg:truncate">{nameOf(active)}</span>
       </span>
     );
   }
@@ -189,6 +189,10 @@ export function WorkspaceChip() {
     // The name may also take a second line there (2026-11-19): one line of
     // ~150px still cut names of 227–249px, so the person could not tell which
     // organization they act for. Two lines of meta text fit the 44px chip.
+    // The two lines hold up to `lg` (owner P0 2026-11-23): at 768 px the
+    // one-row header leaves the chip ~117px, and one truncated line read
+    // "Persönlicher Ber…" / "Личное простр…" in de, nl, pl and ru. From `lg`
+    // the row has room and the name truncates on one line, as before.
     <div className="relative flex min-w-0 flex-1 sm:flex-initial" data-testid="workspace-chip">
       <button
         ref={triggerRef}
@@ -203,7 +207,7 @@ export function WorkspaceChip() {
         className="flex min-h-11 min-w-0 flex-1 sm:max-w-56 sm:flex-initial cursor-pointer items-center gap-1.5 rounded-full border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary"
       >
         <span className={`size-2 flex-none rounded-full ${dotClass(active)}`} aria-hidden />
-        <span className="text-left max-sm:line-clamp-2 max-sm:break-words max-sm:leading-tight sm:truncate">{pending ? tSwitcher("switching") : nameOf(active)}</span>
+        <span className="text-left max-lg:line-clamp-2 max-lg:break-words max-lg:leading-tight lg:truncate">{pending ? tSwitcher("switching") : nameOf(active)}</span>
         <ChevronDown {...iconControl("flex-none")} aria-hidden />
       </button>
       {/* The ONE portal root (owner audit P0.3): the menu renders at
