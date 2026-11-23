@@ -51,7 +51,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           WINDOW_START: "2026-11-19T20:00:00Z"
-          WINDOW_END: "2026-11-24T00:00:00Z"
+          WINDOW_END: "2026-11-30T00:00:00Z"  # owner order 2026-11-23: keep verifying fixes in production; cap unchanged
           # Owner decision 2026-11-19: at most 6 plan walks per UTC day (Supabase Free log quota).
           # Owner decision 2026-11-21: the project is on Supabase Pro; up to 24 per UTC day until
           # 2026-11-23, while production stays stable (every prod-qa-walk brake still applies).
@@ -77,8 +77,11 @@ jobs:
           # Owner order 2026-11-23 (final stabilisation): one regression batch on the build with the
           # merged fixes #3720 #3725 #3711 #3715 #3712 #3726 #3717 (deployed as ff846126).
           # 14 of 24 walks used today; these 8 fit the cap.
-          RERUN: "mobile-surfaces:phone jobs-search:desktop jobs-search:phone journal-confirm:phone company-chain:desktop agency-chain:desktop learning-practice:desktop fresh-activation:desktop"
-          RERUN_START: "2026-11-23T17:55:00Z"
+          # Owner order 2026-11-23: an intermittent failure is fixed only after 3 consecutive passes.
+          # #3738 fixes the P-15 phone-375 race (context panel opens expanded); this re-runs the CV
+          # chain at 375 on the build with it. The other two passes follow on later ticks/days.
+          RERUN: "profile-cv-history:phone-375"
+          RERUN_START: "2026-11-23T20:45:00Z"
           # 2026-11-23 00:45 UTC: GitHub's schedule fired no tick after 22:35 UTC again; a push to
           # this file (the push trigger) starts the chain, which then hands over by itself.
         run: |
