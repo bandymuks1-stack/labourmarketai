@@ -112,10 +112,18 @@ export function DashboardChrome({
   children,
   headerTitle,
   nav,
+  goalStrip,
 }: {
   children: React.ReactNode;
   headerTitle: string;
   nav: ConversationNavLabels;
+  /**
+   * THE SIX GOALS ON EVERY INNER PAGE (owner P0 2026-11-23,
+   * CAROUSEL_NAVIGATION_SPEC N5): one compact row under the one header, the
+   * same navigator the homes show. Rendered here ONCE, by the layout — never
+   * by a page — and only in panel mode (the home carries the full navigator).
+   */
+  goalStrip?: React.ReactNode;
 }) {
   const pathname = usePathname();
   const mode = dashboardChromeMode(pathname);
@@ -146,6 +154,11 @@ export function DashboardChrome({
     return (
       <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple" data-surface={mode}>
         <ConversationHeader title={headerTitle} nav={nav} />
+        {goalStrip ? (
+          <div data-testid="inner-goal-strip" className="relative z-10 mx-auto w-full max-w-container px-4 pt-3 sm:px-12">
+            {goalStrip}
+          </div>
+        ) : null}
         <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 pt-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 sm:pt-6 md:pb-8">
           <SlotBoundary>
             {children}

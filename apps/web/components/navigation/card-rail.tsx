@@ -97,7 +97,9 @@ export function CardRail({
   label: string;
   cards: readonly RailCard[];
   /** `compact`: the phone goal card (no description below `sm`). */
-  size?: "compact" | "regular";
+  /** `strip`: one-line pills (icon + name, 44 px) for the inner pages' goal
+   *  strip under the header (CAROUSEL_NAVIGATION_SPEC N5). */
+  size?: "compact" | "regular" | "strip";
   activeId?: string | null;
   onSelect?: (card: RailCard) => void;
   swipeHint: string;
@@ -166,6 +168,7 @@ export function CardRail({
 
   if (cards.length === 0) return null;
   const compact = size === "compact";
+  const strip = size === "strip";
   const arrow =
     "hidden size-11 shrink-0 items-center justify-center rounded-full border border-ink-500 text-text-secondary transition-colors hover:border-brand-blue hover:text-text-primary disabled:cursor-default disabled:opacity-40 motion-reduce:transition-none md:inline-flex";
 
@@ -204,7 +207,7 @@ export function CardRail({
                 key={card.id}
                 className={cn(
                   "relative shrink-0 snap-start",
-                  compact ? "w-[6rem] sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44",
+                  strip ? "w-auto" : compact ? "w-[6rem] sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44",
                 )}
               >
                 <CardLink
@@ -215,8 +218,13 @@ export function CardRail({
                   onClick={(e) => onClick(e, card)}
                   onKeyDown={(e) => onKey(e, index)}
                   className={cn(
-                    "flex h-full flex-col gap-2 rounded-xl border p-3 outline-none transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:transition-none motion-reduce:hover:translate-y-0",
-                    compact ? "min-h-[6.5rem] items-center text-center max-sm:px-2 sm:items-start sm:p-4 sm:text-left" : "min-h-[7.5rem] sm:p-4",
+                    "flex h-full gap-2 border outline-none transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:transition-none motion-reduce:hover:translate-y-0",
+                    strip
+                      ? "min-h-11 flex-row items-center whitespace-nowrap rounded-full py-1 pl-1.5 pr-4"
+                      : cn(
+                          "flex-col rounded-xl p-3",
+                          compact ? "min-h-[6.5rem] items-center text-center max-sm:px-2 sm:items-start sm:p-4 sm:text-left" : "min-h-[7.5rem] sm:p-4",
+                        ),
                     active
                       ? "border-brand-blue bg-ink-800"
                       : "border-ink-600 bg-ink-800/50 hover:border-ink-500",
@@ -227,11 +235,12 @@ export function CardRail({
                   <span
                     aria-hidden
                     className={cn(
-                      "flex size-10 shrink-0 items-center justify-center rounded-lg",
+                      "flex shrink-0 items-center justify-center",
+                      strip ? "size-8 rounded-full" : "size-10 rounded-lg",
                       active ? "bg-brand-blue/15 text-brand-blue" : "bg-ink-700/70 text-text-secondary",
                     )}
                   >
-                    <Icon className="size-5" />
+                    <Icon className={strip ? "size-4" : "size-5"} />
                   </span>
                   <span className="flex min-w-0 flex-col gap-0.5">
                     {/* A compact (phone) card is narrow: four lines let the
@@ -240,12 +249,12 @@ export function CardRail({
                     <span
                       className={cn(
                         "hyphens-auto text-sm font-semibold leading-snug text-text-primary [overflow-wrap:anywhere]",
-                        compact ? "line-clamp-4" : "line-clamp-3",
+                        strip ? "" : compact ? "line-clamp-4" : "line-clamp-3",
                       )}
                     >
                       {card.label}
                     </span>
-                    {card.description && (
+                    {card.description && !strip && (
                       <span
                         className={cn(
                           "line-clamp-3 text-xs leading-snug text-text-muted",
@@ -298,8 +307,11 @@ export function CardRail({
           </button>
         )}
       </div>
-      {/* Touch widths: it must be obvious there is more. */}
-      {overflows && (
+      {/* Touch widths: it must be obvious there is more. The strip says it
+          with the pill cut at the edge alone: one row under the header,
+          never a second line of chrome on every inner page (Lane A review
+          of N5: header 121 px + strip). */}
+      {overflows && !strip && (
         <p
           aria-hidden
           data-rail-part="hint"

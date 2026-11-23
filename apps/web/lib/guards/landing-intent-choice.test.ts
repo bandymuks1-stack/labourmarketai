@@ -128,7 +128,8 @@ describe("one rail, one panel", () => {
     expect(rail).not.toMatch(/scrollTo\(|scrollLeft\s*=/);
     // Fade + dots + the word on touch widths; arrows only when it overflows.
     expect(rail).toMatch(/mask-image:linear-gradient/);
-    expect(rail).toMatch(/\{overflows && \(\s*<p[\s\S]{0,200}md:hidden/);
+    // The goal strip (N5) shows "more" by the cut pill alone: one row.
+    expect(rail).toMatch(/\{overflows && !strip && \(\s*<p[\s\S]{0,200}md:hidden/);
     expect(rail).toMatch(/\{overflows && \(\s*<button/);
     expect(rail).toMatch(/hidden size-11[^"]*md:inline-flex/);
   });
@@ -317,7 +318,9 @@ describe("icons: one per function, a distinct one per profession", () => {
   });
 
   it("the icon tile is a fixed square — the slot a photograph takes later", () => {
-    expect(rail).toMatch(/flex size-10 shrink-0 items-center justify-center rounded-lg/);
+    // A fixed square on every card; the inner pages' one-line strip (N5)
+    // keeps it square and round at a pill's size.
+    expect(rail).toMatch(/"flex shrink-0 items-center justify-center",\s*strip \? "size-8 rounded-full" : "size-10 rounded-lg"/);
   });
 });
 

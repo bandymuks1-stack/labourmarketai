@@ -11,6 +11,7 @@ import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widge
 import { SessionTelemetry } from "@/components/app/session-telemetry";
 import { SpineStream } from "@/components/app/spine-stream";
 import { DashboardChrome } from "@/components/app/dashboard-chrome";
+import { SignedInGoalNavigation } from "@/components/navigation/signed-in-goal-navigation";
 import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
 import { AuthProvider } from "@/lib/auth/context";
 import { type Role } from "@/lib/auth/actions";
@@ -311,6 +312,13 @@ export default async function DashboardLayout({
         <DashboardChrome
           nav={nav}
           headerTitle={tChat("headerTitle")}
+          // The six goals on every inner page, mounted ONCE here (N5). It
+          // streams behind a row of its own height, so the page never moves.
+          goalStrip={
+            <Suspense fallback={<div data-testid="inner-goal-strip-pending" className="min-h-12" aria-hidden />}>
+              <SignedInGoalNavigation variant="strip" />
+            </Suspense>
+          }
         >
           {/* Same reason: after a switch the shell and the chip commit as soon
               as the layout's own reads finish; the page streams in under the
