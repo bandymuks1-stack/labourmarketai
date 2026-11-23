@@ -48,7 +48,7 @@ onboarding, job search or the CV (A).
 | PR | What |
 |---|---|
 | #3610 (merged) | Education workspace and Learning page. Shared `SectionHead` with icon heads; redundant subtitles removed; privacy and honesty notes moved behind `Explain`. |
-| #3669 (draft) | 44 px targets: public language button; calculator step tabs; links on the about, for-companies, legal and questions pages; work abroad; 404 home button; invite self-start; cookie consent controls; network search; the shared verify-email button. |
+| #3669 (merged) | 44 px targets: public language button; calculator step tabs; links on the about, for-companies, legal and questions pages; work abroad; 404 home button; invite self-start; cookie consent controls; network search; the shared verify-email button. |
 
 ## Remaining
 
