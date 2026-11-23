@@ -1866,9 +1866,8 @@ belongs to. Each owner lane fixes its own entries; lane E keeps this register.
 - the Living CV reading, `loadWorkIntelligence` (`lib/journal/work-intelligence-read.ts`), counted once per correction chain (`lib/journal/counted-once.ts`);
 - live organization hours, `work_hour_allocations` that have not been superseded.
 
-Production volumes stay in the private record (`AGENTS.md`, lines 82-85), so only the conclusions are public.
-Much of production is synthetic QA data from the production walks, so these checks measure the code paths, not
-real people's use.
+Production measurements stay in the private record (`AGENTS.md`, lines 72-85). This section names only what
+exists and how to fix it, never how much of it there is.
 
 **What reaches the history (checked, not isolated):**
 - **Every journal entry reaches the Living CV.** The only live entries the reading leaves out are originals
@@ -1885,7 +1884,7 @@ Finding: CONFIRMED (production read). Owner lane: C, with M.
 | Function | Hours an organization records for a person, read per project |
 | Implementations | `work_hour_allocations` (`lib/work-hours/allocations.ts`); the per-project reading (`lib/projects/project-hours.ts`) |
 | Usage | Project hours, reports, the organization's history |
-| Problem | About half of the live allocations name no work object, or name an object that has no project. Those hours never appear on a project. |
+| Problem | Live allocations exist that name no work object, or name an object with no project. Those hours never appear on a project. |
 | Proposal | Link each allocation to its project when it is recorded (the work object → project link), and offer the existing records to be linked. Data is never invented. |
 | Risk | Project totals change once records are linked. |
 | Evidence | Lane S, production read 2026-11-23 (the counts are in the private record). |
@@ -1899,7 +1898,7 @@ Finding: CONFIRMED (production read). Owner lane: C, with A.
 | Function | Work time a person records in an organization's context, read per project |
 | Implementations | `journal_entries.project_id`; the per-project reading (`lib/projects/project-hours.ts:27,136`) |
 | Usage | Project hours; the organization's view of its people's work |
-| Problem | Most live journal entries that carry time and belong to an organization context name no project. They reach the person's Living CV (see above), but not the organization's projects. |
+| Problem | Live journal entries exist that carry time, belong to an organization context and name no project. They reach the person's Living CV (see above), but not the organization's projects. |
 | Proposal | When the organization has projects, the journal asks for or suggests the project, using the existing project mention reader (`lib/conversation/project-mention.ts`). Never guess silently: the owner rule of 2026-09-29 forbids it. |
 | Risk | A wrong project would be worse than none, so this needs a suggestion, never an automatic link. |
 | Evidence | Lane S, production read 2026-11-23. |
@@ -1955,7 +1954,7 @@ Finding: SUSPECTED. It may be no isolation at all, because a role without hours 
 | Function | A person's past employment relationship and its work |
 | Implementations | `engagement_contexts` with relationship `employee` and status `ended`; the 0025 reading (`lib/journal/professional-experience.ts`) |
 | Usage | The person's history |
-| Problem | Most ended employee contexts carry no live journal entry and no allocation. Decision 0025 allows a role without hours, and owner contexts are roles without hours by design. Whether these ones lost hours that were recorded elsewhere is not known. |
+| Problem | Ended employee contexts exist that carry no live journal entry and no allocation. Decision 0025 allows a role without hours, and owner contexts are roles without hours by design. Whether these ones lost hours that were recorded elsewhere is not known. |
 | Proposal | Measure first: for each such context, check whether the organization holds day or period records for the same person that were never linked (ISO-3). |
 | Risk | None from measuring. |
 | Evidence | Lane S, production read 2026-11-23. |
