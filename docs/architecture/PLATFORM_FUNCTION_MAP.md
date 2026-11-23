@@ -666,7 +666,7 @@ its FUNCTION_REGISTER row.
 | Billing portal | `app/api/billing/portal/route.ts` | PROD (register row 7.21) for a single payer | a second billing manager is unverified |
 | Refresh and reconcile | `app/api/billing/refresh/route.ts`, `app/api/billing/reconcile/route.ts` (superadmin, no UI caller) | MAIN | |
 | Billing-recovery cron | `app/api/cron/billing-recovery/route.ts` | MAIN | off; register row 7.6 BLOCKED |
-| Who pays | `lib/billing/billing-subject.ts`: a profile or an organization; an organization needs `manage-billing`, which is owner or admin (`lib/company/role-capabilities.ts:55-57`, `:82`) | MAIN | |
+| Who pays | `lib/billing/billing-subject.ts`: a profile or an organization; the payer is always a real person (permission detail: private Internal Brain) | MAIN | |
 | In-app invoices and payment history | none on main | PLAN | register row 7.20; RED PR #2682 |
 | Refunds and disputes | the webhook records them only | MAIN | |
 | VAT and terms | none on main | PLAN | RED #2685; register row 7.28 FAIL |
@@ -689,13 +689,11 @@ This is the settlement step of every group's chain.
 
 ### 10c. Who may touch money
 
-| Action | Who | Where |
-|---|---|---|
-| Checkout and plan | organization owner or admin, through `billingAuthority` | `lib/billing/billing-subject.ts`; `lib/company/role-capabilities.ts:55-57`, `:82` |
-| Billing portal | the caller's own customer only | `app/api/billing/portal/route.ts` |
-| Billing tables | read by owner or admin; no write policies; webhook events admin-only | `supabase/migrations/20260613200000_billing_test_mode_records.sql` |
-| Finance records | creator, admin, or organization owner or admin; managers excluded (`fr_select`) | `supabase/migrations/20260817123000_finance_org_authority_v1.sql` |
-| Service role | only the billing stores and the webhook | as above |
+Only people with billing authority over a subject can start a payment, and each payer reaches only
+their own billing records. The detailed permission rules (who reads which billing or finance rows,
+service-role boundaries) are kept in the private Internal Brain, as `AGENTS.md` requires for
+permission detail. This map records only that the rules exist and where the status is tracked
+(`docs/program/FUNCTION_REGISTER.md`, section 7).
 
 <!-- end section: payments -->
 
