@@ -27,188 +27,13 @@ name: Signup Isolated (local Supabase)
 
 on:
   workflow_dispatch:
+  # EVERY pull request (owner order 2026-11-23, regression protection). The
+  # `changes` job decides whether the core journeys must run: any change to
+  # the web app, the database, the shared packages, the lockfile or this
+  # workflow runs them. `core-journeys` always reports, so it can be the one
+  # required check. A per-file path list let a PR that changed shared
+  # components, navigation, auth, data or an API skip every journey.
   pull_request:
-    paths:
-      - ".github/workflows/signup-isolated.yml"
-      - "apps/web/tests/e2e/signup-isolated.spec.ts"
-      - "apps/web/tests/e2e/invite-join-isolated.spec.ts"
-      - "apps/web/tests/e2e/outsider-isolation-isolated.spec.ts"
-      - "apps/web/lib/onboarding/invited-worker-context.ts"
-      - "apps/web/app/*/auth/signup/**"
-      - "apps/web/tests/e2e/hiring-chain-isolated.spec.ts"
-      - "apps/web/tests/e2e/employer-journey-isolated.spec.ts"
-      - "apps/web/tests/e2e/former-employer-access-isolated.spec.ts"
-      - "supabase/migrations/20261118164500_former_employer_limited_access_v1.sql"
-      - "supabase/migrations/20261120190000_former_employer_chain_fixes_v1.sql"
-      - "apps/web/tests/e2e/sv-journey-isolated.spec.ts"
-      # Every public path reaches its last step without an auth page (Lane L).
-      - "apps/web/tests/e2e/public-paths-isolated.spec.ts"
-      - "apps/web/tests/e2e/public-paths-cases.ts"
-      - "apps/web/lib/navigation/public-intents.ts"
-      - "apps/web/app/*/(marketing)/**"
-      - "supabase/tests/20261114100000_booking_refuses_closed_need_*"
-      - "supabase/migrations/20261114100000_booking_refuses_closed_need_v1.sql"
-      - "supabase/migrations/20261115120000_journal_learning_access_follows_link_v1.sql"
-      - "supabase/migrations/20261118143000_training_assignment_engaged_groups_v1.sql"
-      - "apps/web/tests/e2e/training-groups-isolated.spec.ts"
-      - "apps/web/tests/e2e/journeys-coverage-isolated.spec.ts"
-      - "apps/web/tests/e2e/header-desktop-fit-isolated.spec.ts"
-      - "apps/web/components/app/marketplace-loop-section.tsx"
-      - "apps/web/components/app/service-offerings-section.tsx"
-      - "apps/web/components/app/business-public-profile-panel.tsx"
-      - "apps/web/lib/marketplace/service-requests*.ts"
-      - "apps/web/tests/e2e/acceptance-matrix-isolated.spec.ts"
-      - "apps/web/lib/training/**"
-      - "apps/web/components/app/training-register.tsx"
-      - "apps/web/lib/booking/**"
-      - "apps/web/lib/onboarding/**"
-      # The worker intake carried through sign-up (S-3d): its page, form,
-      # kept draft, return path and the builder that receives it.
-      - "apps/web/lib/marketing/worker-profile-door.ts"
-      - "apps/web/lib/staffing/worker-intake-draft.ts"
-      - "apps/web/app/*/(marketing)/worker-intake/**"
-      - "apps/web/components/app/worker-intake-form.tsx"
-      - "apps/web/components/app/profile-text-first-flow.tsx"
-      - "apps/web/components/app/intake-draft-sign-out-clear.tsx"
-      # ... and the header Sign up / Sign in, which carry the builder as
-      # `next` while on the intake (intake:worker).
-      - "apps/web/components/layouts/site-nav.tsx"
-      - "apps/web/components/layouts/header-auth-cta-link.tsx"
-      - "apps/web/components/app/onboarding-wizard.tsx"
-      - "apps/web/components/app/worker-education-section.tsx"
-      - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
-      - "apps/web/tests/e2e/experience-integration-isolated.spec.ts"
-      # Register 2.36, a profession journal template prefills an entry.
-      - "apps/web/tests/e2e/journal-template-isolated.spec.ts"
-      # The journal opens with the work day (owner P1 2026-11-21).
-      - "apps/web/tests/e2e/journal-day-choice-isolated.spec.ts"
-      - "apps/web/tests/e2e/journal-reach-isolated.spec.ts"
-      - "apps/web/tests/e2e/pay-placeholder-isolated.spec.ts"
-      - "apps/web/app/*/dashboard/journal/**"
-      - "apps/web/lib/journal/day-choice.ts"
-      - "apps/web/lib/journal/journal-templates*.ts"
-      - "apps/web/components/app/journal-entry-composer.tsx"
-      # ... and reaches the Living CV's journal-entry figure (T-4).
-      - "apps/web/lib/profile/trust-signals.ts"
-      # The code experience-integration-isolated.spec.ts guards (#3354, decision 0025).
-      - "apps/web/app/*/cv/**"
-      - "apps/web/app/*/dashboard/work-in-numbers/**"
-      - "apps/web/app/*/dashboard/company/history/**"
-      - "apps/web/app/*/dashboard/company/people/**"
-      - "apps/web/lib/journal/professional-experience*.ts"
-      - "apps/web/components/app/work-in-numbers/**"
-      - "apps/web/components/app/organization/company-work-history.tsx"
-      - "apps/web/components/app/organization/organizations-leadership.tsx"
-      - "apps/web/components/app/organization-roster-section.tsx"
-      - "apps/web/components/app/roster-link-offer-form.tsx"
-      - "apps/web/lib/organization-evidence/**"
-      - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
-      - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
-      # Each skill and each job listed once on the Living CV (owner P0 2026-11-23).
-      - "apps/web/tests/e2e/cv-shown-twice-isolated.spec.ts"
-      - "apps/web/components/app/cv/**"
-      - "apps/web/lib/cv-export/**"
-      - "apps/web/tests/e2e/recognition-chain-isolated.spec.ts"
-      - "apps/web/tests/e2e/phone-journeys-isolated.spec.ts"
-      # The signed-in header and main screens at 320-390 px in seven languages
-      # (owner phone report 2026-11-20).
-      - "apps/web/tests/e2e/phone-header-fit-isolated.spec.ts"
-      - "apps/web/components/app/conversation/chat/conversation-header.tsx"
-      - "apps/web/components/app/conversation/chat/workspace-chip.tsx"
-      - "apps/web/components/app/dashboard-chrome.tsx"
-      # The phone confirmation path the C walk measures (worker entry -> the
-      # organization's approval -> the Living CV): the approval surfaces.
-      - "apps/web/app/*/dashboard/inbox/**"
-      - "apps/web/components/app/quick-confirm-*.tsx"
-      - "apps/web/components/app/journal-inbox-entry.tsx"
-      - "apps/web/components/app/arena/confirm-pulse.tsx"
-      - "apps/web/components/app/org-members-panel.tsx"
-      - "apps/web/components/app/entry-review-panel.tsx"
-      - "apps/web/components/app/counterparty-review-card.tsx"
-      # Client confirmation on phone and desktop, direct counterparty (decision 0033).
-      - "apps/web/tests/e2e/client-review-isolated.spec.ts"
-      - "apps/web/components/app/counterparty-link-panel.tsx"
-      - "apps/web/lib/journal/counterparty-*"
-      - "apps/web/tests/e2e/teams-projects-isolated.spec.ts"
-      - "apps/web/app/*/dashboard/projects/**"
-      - "apps/web/components/app/team-*.tsx"
-      - "apps/web/components/app/project-team-assignments.tsx"
-      - "apps/web/lib/projects/project-page-teams.ts"
-      - "apps/web/lib/projects/team-assignment*"
-      - "apps/web/lib/company/team-brigade*"
-      - "apps/web/lib/journal/entry-skill-retraction.ts"
-      - "apps/web/lib/journal/journal-entry-skills-actions.ts"
-      - "apps/web/lib/journal/skill-pipeline-actions.ts"
-      - "apps/web/lib/today/today-server.ts"
-      - "apps/web/lib/today/today-model.ts"
-      - "apps/web/lib/journal/work-intelligence-read.ts"
-      - "apps/web/app/*/dashboard/company/people/**"
-      - "apps/web/app/*/dashboard/company/settings/**"
-      - "apps/web/app/*/dashboard/network/**"
-      - "apps/web/components/app/organization-members-section.tsx"
-      - "apps/web/components/app/membership-invitations-panel.tsx"
-      - "apps/web/components/app/company-workers-section.tsx"
-      - "apps/web/components/app/company-next-actions.tsx"
-      - "apps/web/components/app/conversation/chat/workspace-chip.tsx"
-      - "apps/web/lib/company/*authority*"
-      - "apps/web/lib/company/*membership*"
-      - "apps/web/lib/company/role-capabilities.ts"
-      - "apps/web/lib/company/employer-company-context.ts"
-      - "apps/web/lib/company/active-organization.ts"
-      - "apps/web/components/app/signup-form.tsx"
-      - "apps/web/components/app/onboarding-wizard.tsx"
-      - "apps/web/components/app/company-setup-form.tsx"
-      - "apps/web/app/*/auth/**"
-      - "apps/web/app/*/onboarding/**"
-      - "apps/web/app/*/dashboard/start/**"
-      - "apps/web/lib/onboarding/**"
-      # The worker intake carried through sign-up (S-3d): its page, form,
-      # kept draft, return path and the builder that receives it.
-      - "apps/web/lib/marketing/worker-profile-door.ts"
-      - "apps/web/lib/staffing/worker-intake-draft.ts"
-      - "apps/web/app/*/(marketing)/worker-intake/**"
-      - "apps/web/components/app/worker-intake-form.tsx"
-      - "apps/web/components/app/profile-text-first-flow.tsx"
-      - "apps/web/lib/invitations/signup-*"
-      - "apps/web/components/app/login-form.tsx"
-      - "apps/web/components/app/invite-panel.tsx"
-      - "apps/web/app/*/invite/**"
-      - "apps/web/components/app/reset-password-form.tsx"
-      - "apps/web/app/*/dashboard/journal/**"
-      # The worker's "submit for review" panel and the client's review queue.
-      - "apps/web/components/app/entry-review-panel.tsx"
-      - "apps/web/components/app/counterparty-review-card.tsx"
-      - "apps/web/app/*/dashboard/inbox/counterparty/**"
-      - "supabase/config.toml"
-      - "apps/web/tests/e2e/*-isolated-web-a.spec.ts"
-      - "apps/web/tests/e2e/isolated-web-a-helpers.ts"
-      - "apps/web/lib/notifications/**"
-      - "apps/web/lib/email/**"
-      - "apps/web/app/api/cron/weekly-digest/**"
-      - "apps/web/lib/opportunities/saved-search*"
-      - "apps/web/components/app/saved-searches-strip.tsx"
-      - "apps/web/components/app/notification-preferences-section.tsx"
-      - "apps/web/components/app/company-need-form.tsx"
-      - "apps/web/lib/staffing/company-need-*"
-      - "apps/web/lib/demand/demand-lifecycle*"
-      - "apps/web/tests/e2e/job-fit-evidence-isolated.spec.ts"
-      - "apps/web/tests/e2e/job-fit-main-compat-isolated.spec.ts"
-      - "apps/web/lib/opportunities/opportunity-need.ts"
-      - "apps/web/lib/opportunities/formal-requirements.ts"
-      - "apps/web/lib/market/need-skills*"
-      - "apps/web/lib/demand/demand-request.ts"
-      - "supabase/migrations/20261029190000_worker_board_need_skill_slugs_v1.sql"
-      # The assistant's sentence → real action (owner P1 2026-11-21): the
-      # deterministic router and the flows its acceptance phrases open.
-      - "apps/web/tests/e2e/assistant-intent-isolated.spec.ts"
-      - "apps/web/lib/conversation/intent-router.ts"
-      - "apps/web/lib/conversation/intent-registry.ts"
-      - "apps/web/lib/conversation/worklog-extract.ts"
-      - "apps/web/components/app/conversation/worker-worklog-flow.tsx"
-      - "apps/web/components/app/conversation/chat/conversation-chat.tsx"
-      - "apps/web/components/app/team-demand-offer-form.tsx"
-      - "apps/web/lib/communication/chat-open-conversation.ts"
-      - "apps/web/lib/marketplace/service-requests.ts"
 
 permissions:
   contents: read
@@ -218,8 +43,51 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  signup-isolated:
+  changes:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Does this change reach the web app, the database or the shared packages?
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != "pull_request" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          base="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
+          git diff --name-only "$base" "$HEAD_SHA" > "$RUNNER_TEMP/changed.txt"
+          # Markdown alone never runs the journeys; everything else under these roots does.
+          if grep -vE '\.md$' "$RUNNER_TEMP/changed.txt" \
+            | grep -qE '^(apps/web/|supabase/|packages/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|package\.json$|\.github/workflows/signup-isolated\.yml$)'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No web app, database or package change: the core journeys are not needed." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  signup-isolated:
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    name: signup-isolated (shard ${{ matrix.shard }}/2)
+    runs-on: ubuntu-latest
+    # TWO SHARDS, each with its own throwaway stack: the whole walk on one
+    # runner took ~45 min of the 60 (run 45230577152). The split is by measured
+    # time per spec file (~17 min each) and is FIXED, not Playwright's --shard:
+    # the compatibility walk below needs the stack job-fit-evidence migrated, so
+    # both run in shard 2. lib/guards/signup-isolated-core-gate.test.ts keeps the
+    # two lists disjoint and keeps every core journey in one of them.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
     # 45 stopped the walk at test 442 of 452 (2026-11-22, one worker, ~7 min of
     # setup before it): the job was cancelled by its own limit, not by a
     # failure. Room for the whole walk; no test is skipped or shortened.
@@ -234,7 +102,9 @@ jobs:
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
       # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts tests/e2e/pay-placeholder-isolated.spec.ts tests/e2e/hiring-chain-isolated.spec.ts tests/e2e/employer-journey-isolated.spec.ts
+      # Shard 1 and shard 2 (see the strategy above). Together they are the whole walk.
+      SPEC_1: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts
+      SPEC_2: tests/e2e/sv-journey-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts tests/e2e/pay-placeholder-isolated.spec.ts tests/e2e/hiring-chain-isolated.spec.ts tests/e2e/employer-journey-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -443,7 +313,9 @@ jobs:
           E2E_LOCAL_STACK: "1"
           MAIL_APP_BASE: http://127.0.0.1:3001
           APP_MAIL_API: http://127.0.0.1:54334
-        run: pnpm exec playwright test $SPEC $SPEC_P0 --reporter=list --trace=off
+        run: |
+          if [ "${{ matrix.shard }}" = "1" ]; then set -- $SPEC_1; else set -- $SPEC_2 $SPEC_P0; fi
+          pnpm exec playwright test "$@" --reporter=list --trace=off
 
       # One continuous professional history across organizations
       # (experience-integration-isolated.spec.ts, issue #3354): synthetic
@@ -452,7 +324,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: experience-integration
+          name: experience-integration-shard-${{ matrix.shard }}
           path: |
             apps/web/test-results/experience-integration/
             apps/web/test-results/experience-integration-iso*/error-context.md
@@ -466,7 +338,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: cv-shown-twice
+          name: cv-shown-twice-shard-${{ matrix.shard }}
           path: apps/web/test-results/cv-shown-twice/
           if-no-files-found: warn
           retention-days: 14
@@ -478,7 +350,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
-          name: journal-day-choice
+          name: journal-day-choice-shard-${{ matrix.shard }}
           path: apps/web/test-results/journal-day-choice/
           if-no-files-found: warn
           retention-days: 14
@@ -491,6 +363,7 @@ jobs:
       # migration stays applied. Pinned, because origin/main now contains #2887
       # and reads the new columns by design. Local-only; nothing leaves the runner.
       - name: App-rollback compatibility — build the pre-#2887 app against the migrated stack
+        if: matrix.shard == 2
         env:
           PRE_JOBFIT_SHA: 88a60b567edbe5c6894d087d0c679da54c90ea67
         run: |
@@ -509,6 +382,7 @@ jobs:
           curl -fsS -o /dev/null "http://127.0.0.1:3002/en"
 
       - name: Run the compatibility walk (pre-#2887 app, migrated database)
+        if: matrix.shard == 2
         working-directory: apps/web
         env:
           SIGNUP_ISOLATED: "1"
@@ -544,3 +418,24 @@ jobs:
           if [ -f "$RUNNER_TEMP/next-main.pid" ]; then kill "$(cat "$RUNNER_TEMP/next-main.pid")" 2>/dev/null || true; fi
           docker rm -f ci_app_mailpit >/dev/null 2>&1 || true
           supabase stop --no-backup || true
+
+  # THE ONE REQUIRED CHECK. It always runs: it passes when the change reaches
+  # no journey (docs only) or when both shards passed, and fails otherwise,
+  # including a cancelled or skipped shard on a change that needed them.
+  core-journeys:
+    if: always()
+    needs: [changes, signup-isolated]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Core journeys verdict
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          RUN: ${{ needs.changes.outputs.run }}
+          WALK: ${{ needs.signup-isolated.result }}
+        run: |
+          set -euo pipefail
+          if [ "$CHANGES" != "success" ]; then echo "::error::the change filter did not finish ($CHANGES)"; exit 1; fi
+          if [ "$RUN" != "true" ]; then echo "No web app, database or package change: the core journeys are not needed."; exit 0; fi
+          if [ "$WALK" != "success" ]; then echo "::error::core journeys: $WALK"; exit 1; fi
+          echo "core journeys passed on both shards"
