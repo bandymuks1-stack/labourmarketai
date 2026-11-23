@@ -357,7 +357,7 @@ export const PRODUCT_GRAPH: readonly GraphNode[] = [
       "Where spare capacity meets an unmet need — the commercial end of the flywheel, for the platform and for its actors.",
     worldElement: "market_world_map",
     domains: ["marketplace", "demand_supply"],
-    capabilities: ["MKT-1", "MKT-7", "MKT-8", "DEM-9"],
+    capabilities: ["MKT-1", "MKT-7", "MKT-8", "MKT-9", "DEM-9"],
   },
 ];
 

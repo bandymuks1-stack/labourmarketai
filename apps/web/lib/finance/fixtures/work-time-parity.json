@@ -1,0 +1,129 @@
+{
+  "_doc": "ONE definition of 'which hours / quantities does a journal entry contribute'. Consumed by lib/finance/invoice-evidence-parity.test.ts (the TypeScript rule in lib/journal/work-time.ts) AND by scripts/db-proof/project-invoice-lifecycle-v1.sh (the SQL rule in _invoice_period_evidence_v1). Metrics are listed in creation order (created_at increases by one second per metric). `key` is the source key: f<n> fragment hours, e entry-level hours, q:<unit> output quantity (days included, never converted to hours).",
+  "cases": [
+    {
+      "id": "fragments-hours-and-minutes",
+      "createdAt": "2026-09-02T12:00:00Z",
+      "metrics": [
+        { "slug": "fragment_time", "text": "1", "value": 5, "unit": "hours" },
+        { "slug": "fragment_time", "text": "2", "value": 180, "unit": "minutes" }
+      ],
+      "expected": { "day": "2026-09-02", "rows": [
+        { "key": "f1", "kind": "hours", "unit": "hours", "hours": 5 },
+        { "key": "f2", "kind": "hours", "unit": "hours", "hours": 3 }
+      ] }
+    },
+    {
+      "id": "entry-minutes",
+      "createdAt": "2026-09-03T12:00:00Z",
+      "metrics": [ { "slug": "quantity", "value": 90, "unit": "minutes" } ],
+      "expected": { "day": "2026-09-03", "rows": [ { "key": "e", "kind": "hours", "unit": "hours", "hours": 1.5 } ] }
+    },
+    {
+      "id": "minutes-round-to-two-decimals",
+      "createdAt": "2026-09-03T12:00:00Z",
+      "metrics": [ { "slug": "quantity", "value": 100, "unit": "minutes" } ],
+      "expected": { "day": "2026-09-03", "rows": [ { "key": "e", "kind": "hours", "unit": "hours", "hours": 1.67 } ] }
+    },
+    {
+      "id": "hours-and-output-quantity-never-summed",
+      "createdAt": "2026-09-04T12:00:00Z",
+      "metrics": [
+        { "slug": "quantity", "value": 4, "unit": "hours" },
+        { "slug": "quantity", "value": 40, "unit": "square_meters" }
+      ],
+      "expected": { "day": "2026-09-04", "rows": [
+        { "key": "e", "kind": "hours", "unit": "hours", "hours": 4 },
+        { "key": "q:square_meters", "kind": "quantity", "unit": "square_meters", "quantity": 40 }
+      ] }
+    },
+    {
+      "id": "fragments-suppress-entry-level",
+      "createdAt": "2026-09-05T12:00:00Z",
+      "metrics": [
+        { "slug": "quantity", "value": 8, "unit": "hours" },
+        { "slug": "fragment_time", "text": "1", "value": 2, "unit": "hours" }
+      ],
+      "expected": { "day": "2026-09-05", "rows": [ { "key": "f1", "kind": "hours", "unit": "hours", "hours": 2 } ] }
+    },
+    {
+      "id": "days-fragment-claims-its-index",
+      "createdAt": "2026-09-06T12:00:00Z",
+      "metrics": [
+        { "slug": "fragment_time", "text": "1", "value": 2, "unit": "days" },
+        { "slug": "fragment_time", "text": "1", "value": 6, "unit": "hours" },
+        { "slug": "fragment_time", "text": "2", "value": 2, "unit": "hours" }
+      ],
+      "expected": { "day": "2026-09-06", "rows": [ { "key": "f2", "kind": "hours", "unit": "hours", "hours": 2 } ] }
+    },
+    {
+      "id": "latest-entry-level-is-days",
+      "createdAt": "2026-09-07T12:00:00Z",
+      "metrics": [
+        { "slug": "quantity", "value": 4, "unit": "hours" },
+        { "slug": "quantity", "value": 1, "unit": "days" }
+      ],
+      "expected": { "day": "2026-09-07", "rows": [ { "key": "q:days", "kind": "quantity", "unit": "days", "quantity": 1 } ] }
+    },
+    {
+      "id": "latest-entry-level-is-hours-days-kept-as-quantity",
+      "createdAt": "2026-09-08T12:00:00Z",
+      "metrics": [
+        { "slug": "quantity", "value": 1, "unit": "days" },
+        { "slug": "quantity", "value": 6, "unit": "hours" }
+      ],
+      "expected": { "day": "2026-09-08", "rows": [
+        { "key": "e", "kind": "hours", "unit": "hours", "hours": 6 },
+        { "key": "q:days", "kind": "quantity", "unit": "days", "quantity": 1 }
+      ] }
+    },
+    {
+      "id": "days-only-is-never-hours",
+      "createdAt": "2026-09-09T12:00:00Z",
+      "metrics": [ { "slug": "quantity", "value": 3, "unit": "days" } ],
+      "expected": { "day": "2026-09-09", "rows": [ { "key": "q:days", "kind": "quantity", "unit": "days", "quantity": 3 } ] }
+    },
+    {
+      "id": "non-positive-ignored",
+      "createdAt": "2026-09-10T12:00:00Z",
+      "metrics": [
+        { "slug": "quantity", "value": 0, "unit": "hours" },
+        { "slug": "quantity", "value": -2, "unit": "hours" },
+        { "slug": "quantity", "value": 0, "unit": "square_meters" }
+      ],
+      "expected": { "day": "2026-09-10", "rows": [] }
+    },
+    {
+      "id": "work-date-wins-over-created-day",
+      "createdAt": "2026-09-11T23:30:00Z",
+      "metrics": [
+        { "slug": "work_date", "text": "2026-09-09" },
+        { "slug": "quantity", "value": 2, "unit": "hours" }
+      ],
+      "expected": { "day": "2026-09-09", "rows": [ { "key": "e", "kind": "hours", "unit": "hours", "hours": 2 } ] }
+    },
+    {
+      "id": "latest-per-output-unit",
+      "createdAt": "2026-09-12T12:00:00Z",
+      "metrics": [
+        { "slug": "quantity", "value": 30, "unit": "square_meters" },
+        { "slug": "quantity", "value": 10, "unit": "pieces" },
+        { "slug": "quantity", "value": 40, "unit": "square_meters" }
+      ],
+      "expected": { "day": "2026-09-12", "rows": [
+        { "key": "q:pieces", "kind": "quantity", "unit": "pieces", "quantity": 10 },
+        { "key": "q:square_meters", "kind": "quantity", "unit": "square_meters", "quantity": 40 }
+      ] }
+    },
+    {
+      "id": "malformed-fragment-index-ignored",
+      "createdAt": "2026-09-13T12:00:00Z",
+      "metrics": [
+        { "slug": "fragment_time", "text": "x", "value": 9, "unit": "hours" },
+        { "slug": "fragment_time", "text": "01", "value": 9, "unit": "hours" },
+        { "slug": "fragment_time", "text": "2", "value": 1.5, "unit": "hours" }
+      ],
+      "expected": { "day": "2026-09-13", "rows": [ { "key": "f2", "kind": "hours", "unit": "hours", "hours": 1.5 } ] }
+    }
+  ]
+}

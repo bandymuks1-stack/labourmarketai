@@ -246,6 +246,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261020040457_",
       "20261025045152_",
       "20261025050302_",
+      // 2026-10-08 project-to-invoice lifecycle (RED, needs-human-gate, draft; not applied).
+      "20261008150000_",
       // 2026-11-18 (RED, needs-human-gate, NOT applied): registry 11.8 — assign_training_v1 admits the four
       // owner-decided groups (members, interns, learners, invited external people) while their link is active.
       "20261118143000_",
