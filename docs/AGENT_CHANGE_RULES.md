@@ -18,9 +18,9 @@ kitų darbą."*
 | # | Step | Where | What the PR body must show |
 |---|---|---|---|
 | 1 | Find the function in the registers | `docs/program/FUNCTION_REGISTER.md` (per-function status, owner order 2026-10-28) and `apps/web/lib/product-gate/capability-register.ts` + `docs/CAPABILITY_INVENTORY.md` §6 (machine-checked capabilities); `node .github/scripts/product-truth.mjs` | The function row(s) and capability id(s) touched, or "none — new" |
-| 2 | Find similar existing implementations | `git grep` for the user action, route segment, component name, RPC/SQL name and i18n keys; `docs/audits/DUPLICATION_AUDIT.md`; `docs/architecture/TECHNICAL_ARCHITECTURE_MAP.md` | The files found and why each one does or does not fit |
-| 3 | Check open PRs and other lanes' work | Open PRs touching the same paths (`gh api repos/<repo>/pulls?state=open` or the PR list), `docs/program/COORDINATION_REGISTER.md` and the active coordination issue (currently #3679; lane register #3265) | The overlapping PRs, or "none found" with the query used |
-| 4 | Check approved decisions | `docs/OWNER_TARGET_ARCHITECTURE_V1.md`, `docs/DECISIONS/*.md`, `docs/PLATFORM_DOCTRINE.md`; for navigation `docs/design/CAROUSEL_NAVIGATION_SPEC.md` | The decision(s) that govern the change |
+| 2 | Find similar existing implementations | `git grep` for the user action, route segment, component name, RPC/SQL name and i18n keys; `docs/audits/DUPLICATION_AUDIT.md` and `docs/architecture/TECHNICAL_ARCHITECTURE_MAP.md` (to be added: #3679 items C and B; until they land, `docs/audits/duplication-freeze-register-2026-08-17.md` and `docs/architecture/SCHEMA_INVENTORY.md`) | The files found and why each one does or does not fit |
+| 3 | Check open PRs and other lanes' work | Open PRs touching the same paths (`gh api --paginate 'repos/<repo>/pulls?state=open&per_page=100'`, then each PR's `/files`), `docs/program/COORDINATION_REGISTER.md` and the active coordination issue (currently #3679; lane register #3265) | The overlapping PRs, or "none found" with the query used |
+| 4 | Check approved decisions | `docs/OWNER_TARGET_ARCHITECTURE_V1.md`, `docs/DECISIONS/*.md`, `docs/PLATFORM_DOCTRINE.md`; for navigation `docs/design/CAROUSEL_NAVIGATION_SPEC.md` (to be added: #3679 item D; until then `docs/launch/role-aware-navigation-contract-v1.md`) | The decision(s) that govern the change |
 | 5 | Decide extend vs new | Classification from `AGENTS.md`: `CONNECT` · `FIX` · `EXTEND` · `REPLACE` · `NEW` | The class, and for `EXTEND` the existing module extended |
 | 6 | `NEW` only with proof | — | Why each existing implementation from step 2 cannot be extended without degrading UX, architecture or security (decision 0016), and the new row/capability added to the registers **in the same PR** |
 
@@ -53,14 +53,14 @@ the reason:
 | Structure | The one place | Source |
 |---|---|---|
 | Architecture | `docs/OWNER_TARGET_ARCHITECTURE_V1.md` | CLAUDE.md, ARCH precedence |
-| Function status | `docs/program/FUNCTION_REGISTER.md` (per function) with `lib/product-gate/capability-register.ts` + `CAPABILITY_INVENTORY.md` §6 (machine-checked capabilities). Two registers exist today; their reconciliation into one source is item 1 of `docs/audits/DUPLICATION_AUDIT.md` — until then, update both | owner order 2026-10-28; AGENTS.md |
+| Function status | `docs/program/FUNCTION_REGISTER.md` (per function) with `lib/product-gate/capability-register.ts` + `CAPABILITY_INVENTORY.md` §6 (machine-checked capabilities). Two registers exist today; their reconciliation into one source is item 1 of `docs/audits/DUPLICATION_AUDIT.md` (to be added: #3679 item C) — until it lands, update both | owner order 2026-10-28; AGENTS.md |
 | Coordination (who does what) | `docs/program/COORDINATION_REGISTER.md` + the active coordination issue | owner order 2026-10-28 |
-| Main navigation | the three-level carousel system in `docs/design/CAROUSEL_NAVIGATION_SPEC.md` | owner design principle, #3679 item 4 |
+| Main navigation | the three-level carousel system in `docs/design/CAROUSEL_NAVIGATION_SPEC.md` (to be added: #3679 item D) | owner design principle, #3679 item 4 |
 | Long-term memory / AI context | canonical tables under RLS | decision 0024 |
 | A person's professional history | `lib/journal/professional-experience.ts` | decision 0025 |
-| Living CV inference | the Living CV readers | decision 0023 |
-| Production acceptance evidence | `docs/qa/PRODUCTION_ACCEPTANCE_MATRIX.md` | #3679 item 10F |
-| Duplicate register | `docs/audits/DUPLICATION_AUDIT.md` | #3679 item 10C |
+| Living CV inference | `apps/web/lib/skills/potential-skills.ts` (guarded by `lib/guards/living-cv-potential-inference.test.ts`) | decision 0023 |
+| Production acceptance evidence | `docs/qa/PRODUCTION_ACCEPTANCE_MATRIX.md` (to be added: #3679 item F, from `docs/qa/LAUNCH_MATRIX_2026-11-23.md`) | #3679 item 10F |
+| Duplicate register | `docs/audits/DUPLICATION_AUDIT.md` (to be added: #3679 item C) | #3679 item 10C |
 | Internal authority term | `lib/authority/internal-authority-validity.mjs` | owner P0 2026-10-22 |
 
 ## 4. Removing or merging something
