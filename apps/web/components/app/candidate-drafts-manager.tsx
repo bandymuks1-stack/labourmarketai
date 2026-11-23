@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { Explain } from "@/components/app/premium/grammar";
 import { useState, useTransition } from "react";
@@ -159,15 +160,16 @@ function CreateForm({ labels }: { labels: CandidateDraftsLabels }) {
         </label>
       </div>
       <div className="flex flex-wrap items-center gap-2">
-        <button
+        <Button
           type="button"
           onClick={submit}
           disabled={pending || form.nameOrTitle.trim() === ""}
-          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-on-brand hover:bg-brand-champagne disabled:bg-ink-700 disabled:text-text-muted disabled:hover:bg-ink-700"
+          size="sm"
+          className="min-h-11 disabled:cursor-not-allowed disabled:opacity-50"
           data-testid="draft-create-submit"
         >
           {pending ? labels.creating : labels.create}
-        </button>
+        </Button>
         {msg ? <span className="text-meta text-text-secondary">{msg}</span> : null}
       </div>
     </section>
@@ -250,15 +252,17 @@ function DraftCard({ draft, labels }: { draft: CandidateDraft; labels: Candidate
       </dl>
       <p className="text-meta leading-relaxed text-text-muted">{labels.notAssignableNote}</p>
       <div className="flex items-center gap-3">
-        <button
+        <Button
           type="button"
           onClick={remove}
           disabled={pending}
-          className="text-meta text-text-secondary hover:text-state-danger disabled:opacity-50"
+          variant="ghost"
+          size="sm"
+          className="min-h-11 px-0 text-meta hover:text-state-danger disabled:opacity-50"
           data-testid="draft-delete"
         >
           {labels.delete}
-        </button>
+        </Button>
         {msg ? <span className="text-meta text-text-secondary">{msg}</span> : null}
       </div>
     </article>
