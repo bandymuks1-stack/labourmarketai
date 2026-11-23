@@ -23,7 +23,7 @@ public and signed-in surface:
 - No production walk was run for this spec, so nothing below is marked PROD.
 - The A2 browser audit (`docs/audits/A2_DESIGN_AUDIT_2026-11-22.md`) ran
   against a local stack, so its findings are MAIN.
-- Lane A's section is in §8.1. Lane M's part 1 is in §8.2; part 2 is pending.
+- Lane A's section is in §8.1. Lane M's parts 1 and 2 are in §8.2.
 
 ---
 
@@ -441,7 +441,54 @@ it after this spec merges.
   of 309 × 60–83 px, so the tap target is the label. Not a defect.
 - Item 11 (calendar prev/next 35–40 px) is shared with employers.
 
-Part 2 of 2 is pending.
+**Part 2 of 2** (received 05:24 UTC): Lane M's design audit of 2026-11-22.
+- **Coverage:** 1,160 screens, 29 routes, employer and agency accounts.
+- **Base:** `f65c5721`, on the local stack. Not production.
+- **Evidence:** a private artifact page owned by the owner, shared on request.
+- **Already merged:** #3660, #3661, #3662, #3665, #3666, #3613 and #3678.
+  These are local-verified only.
+
+**Subcontractor.**
+- There is no separate subcontractor workspace. A subcontractor is an
+  organisation acting as a provider through the same company workspace:
+  `/dashboard/services`, service-requests, listings, commercial.
+- Those screens were audited under the employer and agency accounts.
+- No subcontractor-only account was seeded, so subcontractor gating was
+  **not walked**.
+
+**Remaining defects.** Cause codes:
+- OLD/NEW: an older and a newer component do the same job on one screen.
+- NAV: competing navigation.
+- LOCAL: a single-component defect.
+
+A2 spot-checked ★ items. The others are Lane M's, not re-checked here.
+
+| # | Defect | Where | Cause | Navigation-relevant |
+|---|---|---|---|---|
+| 1 | Three ways to start a project; "no projects yet" said twice | `dashboard/projects/page.tsx:487`, `:547-551` ★, `project-assignment-manager.tsx:484` | OLD/NEW; owner decision on which way stays | C5 (one action, one entry) |
+| 2 | The agency home leads with the employer's actions: "Describe a need" and the "What we need" card first | `company-model-screen.tsx:78` ★ (`NeedDoorLink`), `ORGANIZATION_WORK_AREAS` order | LOCAL; the role order is not applied (product decision) | **C5: FAIL for agency** |
+| 3 | Approvals card reads as a contradiction ("0 … no employees" beside 12 linked people); duplicated with `arena/confirm-pulse.tsx` | `organization-today-view.tsx:180` | LOCAL copy plus OLD/NEW | no |
+| 4 | Status legend shown on an empty queue; the empty state said twice | `dashboard/inbox/page.tsx:308` → `evidence-status-strip.tsx` | LOCAL | no |
+| 5 | Two "How this works" folds on candidate drafts | `candidate-drafts-manager.tsx:282`, `company-action-next-actions.tsx:57` | OLD/NEW | no |
+| 6 | Workforce planning stat labels wrap to 4 lines on phones | `organization-today-panel.tsx` | LOCAL | no |
+| 7 | Commercial add rows cramped on phones; the placeholder is cut | `commercial-panel.tsx` | LOCAL | no |
+| 8 | Many available-workforce rows read "Work type not stated" | `available-supply-section.tsx` | LOCAL copy or data | no |
+| 9 | "Assign to a project" wraps under a long name (+23 px per card) | `identity/person-identity-card.tsx` | LOCAL | no |
+| 10 | Pricing notice repeated in every plan | `marketing/pricing-table.tsx` | LOCAL; price and legal text, owner's call (A2 audit item 6 too) | no |
+| 11 | The worker "visible to employers" consent block shows on a company owner's privacy page | `dashboard/privacy/page.tsx:214` | LOCAL role gate; consent text, owner's call | C5 |
+| 12 | Connected apps failed to load (local only) | `connected-apps-section.tsx:35` | unknown; not checked in production | no |
+| 13 | Consent banner on top until answered | — | by design | no |
+
+The NAV-cause defects are M1, M2 and M3 above, plus the five links home and
+the missing hub entry.
+
+Lane M checked these and found no defect:
+- 0 screens scroll sideways at page level;
+- 0 script errors and 0 raw keys;
+- every small-target hit is a checkbox inside a label at least 40 px tall.
+
+Under the freeze, Lane M fixes items 1–13 only with the coordinator's OK.
+They go to the simplification plan (E).
 
 ---
 
@@ -481,8 +528,8 @@ The signed-out state is the same for every role: the public home.
 | Worker, signed in | **FAIL**: no goal rail; home shows `AreaSwitcher` stations instead (`today-screen.tsx:244`; A2 `goalNav`=False) | **FAIL**: no level 2; stations are single links (LA 6/6 open) | **FAIL**: none | Home: PASS (the home is the chat). Inner pages: **FAIL**, unmarked "My space" only (A2) | Partly: "More" re-ordered by role (`work-areas.ts:242`); LA 8/8 sheet, 4/4 More | **FAIL** | **FAIL** (different component) |
 | Student, signed in | **FAIL**: same as worker (A2 `student-dashboard-*`) | **FAIL** | **FAIL** | Home PASS; 5 inner pages **FAIL** (A2 `aiVisible`=False on learning, network, inbox, planning, profile) | Partly: same as worker | **FAIL** | **FAIL** |
 | Employer, signed in | **FAIL**: no goal rail; organisation `AreaSwitcher` (`company-model-screen.tsx`) and `OrganizationDoors` | **FAIL** | **FAIL** | Home: not measured by A2. Inner pages: "My space" only (code) | Partly: doors decided server-side (`organization-doors.ts`); "More" by acting role (`work-areas.ts:161`) | **FAIL** | **FAIL** |
-| Agency, signed in | **FAIL**: same components as employer | **FAIL** | **FAIL** | As employer | As employer; agency doors **not measured** (Lane M) | **FAIL** | **FAIL** |
-| Subcontractor, signed in | Not measured. No separate navigation found: an organisation with the provider capability uses the employer components. | Not measured | Not measured | As employer | **Not measured** (Lane M) | **FAIL** | **FAIL** |
+| Agency, signed in | **FAIL**: same components as employer | **FAIL** | **FAIL** | As employer | **FAIL**: the agency home leads with the employer's actions (§8.2, defect 2) | **FAIL** | **FAIL** |
+| Subcontractor, signed in | As employer: no separate subcontractor workspace exists; a provider uses the company workspace (§8.2) | As employer | As employer | As employer | **Not walked**: no subcontractor-only account (§8.2) | **FAIL** | **FAIL** |
 | Institution, signed in | **FAIL**: organisation `AreaSwitcher` plus `OrganizationDoors` with Learning (A2 `institution-dashboard-*`, `institution-dashboard_company_education-*`) | **FAIL** | **FAIL** | Home PASS (A2 `aiVisible`=True); 8 inner pages **FAIL** (A2) | Partly: the education door only with the capability (`work-areas.ts:115-120`) | **FAIL** | **FAIL** |
 
 ### 9.3 Click script (for lane L)
