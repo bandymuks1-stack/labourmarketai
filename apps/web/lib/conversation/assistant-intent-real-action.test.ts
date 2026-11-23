@@ -276,3 +276,46 @@ describe("close LT/EN/RU variants reach the same doors", () => {
     },
   );
 });
+
+/**
+ * FIND WORK / POST A NEED / LOG WORK IN SEVEN LOCALES (owner P0 2026-11-23:
+ * "the AI assistant must answer real actions"). Measured on main before this
+ * slice: nl "werk zoeken", de "Arbeit finden" and en "post a need" were
+ * `unknown`. Each phrase below must reach the ONE existing handler.
+ */
+describe("the three real-use goals reach their handler in every active locale", () => {
+  it.each([
+    ["find work", "find-work"],
+    ["ieškau darbo", "find-work"],
+    ["найти работу", "find-work"],
+    ["werk zoeken", "find-work"],
+    ["een baan vinden", "find-work"],
+    ["Arbeit finden", "find-work"],
+    ["einen Job suchen", "find-work"],
+    ["szukam pracy", "find-work"],
+    ["hitta jobb", "find-work"],
+    ["post a need", "need-workers"],
+    ["publish a vacancy", "need-workers"],
+    ["I need 3 welders", "need-workers"],
+    ["reikia 3 suvirintojų", "need-workers"],
+    ["нужны 3 сварщика", "need-workers"],
+    ["ik heb 3 lassers nodig", "need-workers"],
+    ["ich brauche 3 Schweißer", "need-workers"],
+    ["potrzebuję 3 spawaczy", "need-workers"],
+    ["vi behöver 3 svetsare", "need-workers"],
+    ["log work", "log-work"],
+    ["I worked 8 hours today", "log-work"],
+    ["šiandien dirbau 8 valandas", "log-work"],
+    ["сегодня работал 8 часов", "log-work"],
+    ["vandaag 8 uur gewerkt", "log-work"],
+    ["heute 8 Stunden gearbeitet", "log-work"],
+    ["dziś pracowałem 8 godzin", "log-work"],
+    ["idag jobbade jag 8 timmar", "log-work"],
+  ])('"%s" → %s', (phrase, intent) => {
+    expect(classifyIntent(phrase).intent).toBe(intent);
+  });
+
+  it('"post my work" is not a need: the object must be a need or a vacancy', () => {
+    expect(classifyIntent("post my work").intent).not.toBe("need-workers");
+  });
+});
