@@ -150,6 +150,23 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
       "Discloses the exact count and publication-date distribution of the live corpus by allowing full enumeration of public job URLs. Those URLs are intended to be public and indexed, so this is the requirement rather than a side effect. `last_modified` is `published_at` and never an ingestion timestamp, so the sitemap cannot make a false freshness claim.",
   },
   {
+    name: "list_public_vacancy_sitemap_after_v1",
+    identityArgs: "p_after_published_at timestamp with time zone, p_after_id uuid, p_limit integer",
+    mutates: false,
+    publicCaller:
+      "The public job sitemap (app/jobs-sitemap.xml + app/jobs-sitemap/[shard]) — the keyset successor of list_public_vacancy_sitemap_v1 (P0 2026-11-03: deep OFFSET shards exceeded anon's 3 s statement timeout). Read by anonymous crawlers.",
+    authorization:
+      "Identical projection to list_public_vacancy_sitemap_v1: RETURNS TABLE exposes only `id` (the public /jobs/[id] URL) and `last_modified` (the publisher's published_at). Same live-row filter (`is_active` AND not expired). Only the paging differs: rows after a (published_at, id) key instead of after N rows.",
+    inputValidation:
+      "`p_limit` clamped to 1..50000 inside the body; the cursor is typed timestamptz + uuid, so malformed input is rejected before the body runs. A NULL cursor reads the first page.",
+    abuseControls:
+      "No DB-level rate limit. Read-only and idempotent. Each call is one index seek on public_vacancies_active_board_cover_idx (19 ms measured for a deep page vs 4.2 s by OFFSET), so it is cheaper than the function it replaces. Enumerates only opaque uuids and dates, as v1 does.",
+    definerJustification:
+      "`public_vacancies` has no anon SELECT grant and no anon RLS policy. DEFINER narrows anon access to the two sitemap columns instead of opening the table — same as v1.",
+    residualRisk:
+      "Same as list_public_vacancy_sitemap_v1: full enumeration of public job URLs and publication dates, which the sitemap exists to publish.",
+  },
+  {
     name: "get_public_business_profile_v1",
     identityArgs: "p_slug text",
     mutates: false,

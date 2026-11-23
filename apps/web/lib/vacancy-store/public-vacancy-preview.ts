@@ -507,3 +507,37 @@ export async function listPublicVacancySitemapEntries(
     entries: rows.map((r) => ({ id: r.id, lastModified: r.last_modified })),
   };
 }
+
+/** The last row of a sitemap page: where the next page starts. */
+export interface PublicVacancySitemapCursor {
+  readonly publishedAt: string;
+  readonly id: string;
+}
+
+/**
+ * KEYSET sitemap page (P0 2026-11-03): the live rows AFTER `after` in the
+ * sitemap order, via `list_public_vacancy_sitemap_after_v1`. Same projection
+ * as the OFFSET reader above; a deep page costs ~19 ms instead of ~4 s.
+ * `not_provisioned` while the function is not applied (or rolled back) — the
+ * caller then pages with the OFFSET reader.
+ */
+export async function listPublicVacancySitemapAfter(
+  after: PublicVacancySitemapCursor | null,
+  suppliedClient?: SupabaseClient,
+): Promise<PublicVacancySitemapPage> {
+  const supabase = suppliedClient ?? (await createClient());
+  const { data, error } = await asAny(supabase).rpc("list_public_vacancy_sitemap_after_v1", {
+    p_after_published_at: after?.publishedAt ?? null,
+    p_after_id: after?.id ?? null,
+    p_limit: PUBLIC_VACANCY_SITEMAP_SHARD_SIZE,
+  });
+  if (error) {
+    if (isNotProvisioned(error.code)) return { status: "not_provisioned", entries: [] };
+    throw error;
+  }
+  const rows = (data ?? []) as { id: string; last_modified: string | null }[];
+  return {
+    status: "ok",
+    entries: rows.map((r) => ({ id: r.id, lastModified: r.last_modified })),
+  };
+}
