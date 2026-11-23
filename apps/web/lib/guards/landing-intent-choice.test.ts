@@ -56,9 +56,11 @@ describe("the choice is the first screen", () => {
     expect(landing).not.toMatch(/<h1\b/);
     expect(body.indexOf("<LandingIntentChoice")).toBeLessThan(body.indexOf("<PublicEntry"));
     expect(navigator).toMatch(/\{lead && \(\s*<p\s+data-testid="goal-lead"/);
-    // On a phone the first four goals show whole, two across; the other two
-    // sit under one "more" control — never a carousel.
-    expect(body).toMatch(/phoneMore=\{\{ ids: \["partners", "agencies"\], label: tV3\("moreChoices"\) \}\}/);
+    // All six goals in ONE rail on every width (owner P0 2026-11-23,
+    // CAROUSEL_NAVIGATION_SPEC N1): no "More options" part on a phone, no
+    // phone grid — the rail itself peeks, fades and shows the swipe hint.
+    expect(body).toMatch(/<LandingIntentChoice lead=\{tV3\("lead"\)\} \/>/);
+    expect(landing + choice).not.toMatch(/phoneMore|moreChoices|phoneLayout="grid"/);
   });
 
   it("the sentence entry and the request doors stay", () => {
@@ -86,9 +88,7 @@ describe("the choice is the first screen", () => {
   });
 
   it("the home mounts the one navigator; no second goal view or page exists", () => {
-    expect(choice).toMatch(
-      /<GoalNavigation headingLevel="h1" phoneLayout="grid" lead=\{lead\} phoneMore=\{phoneMore\} \/>/,
-    );
+    expect(choice).toMatch(/<GoalNavigation headingLevel="h1" lead=\{lead\} \/>/);
     expect(existsSync(join(APP_ROOT, "components/navigation/goal-rail.tsx"))).toBe(false);
     // A new public screen is an owner decision (constitution A-09): the goal
     // state is a fragment of this page, not a route.
@@ -134,7 +134,7 @@ describe("one rail, one panel", () => {
   });
 
   it("phone goal cards are compact with no description; wide cards carry it", () => {
-    expect(rail).toMatch(/phoneGrid \? "w-auto" : "w-\[5\.75rem\]", "sm:w-auto sm:min-w-40 sm:flex-1"/);
+    expect(rail).toMatch(/phoneGrid \? "w-auto" : "w-\[6rem\]", "sm:w-auto sm:min-w-40 sm:flex-1"/);
     // The grid is phones only: from `sm` the track is the same flex rail.
     expect(rail).toMatch(/phoneGrid \? "grid grid-cols-3 sm:flex" : "flex"/);
     expect(rail).toMatch(/compact && "hidden sm:\[display:-webkit-box\]"/);
