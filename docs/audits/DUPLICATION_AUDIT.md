@@ -125,7 +125,7 @@ Each entry names its source.
 | CV-3 | "Supported by work" rule | SUSPECTED | MAIN | Build on `deriveEvidenceTier` |
 | CV-4 | Per-organization hours on the CV | SUSPECTED | MAIN | Take the hours from the one reading |
 | CV-5 | CV narrative hours | SUSPECTED (confusing) | MAIN | Optionally cite the total |
-| CV-6 | Living CV shows skills and history twice | CONFIRMED | MAIN | One on-screen place; print keeps its sections |
+| CV-6 | Living CV shows skills and history twice | CONFIRMED (cause proven) | MAIN; fix PR #3690 | Remove the hero lists; the sections are the one listing |
 | CV-7 | Three ways to add a skill | CONFIRMED | MAIN | Fold the capability-section add into the text-first flow |
 | CV-8 | Two journal composers | CONFIRMED (one write) | MAIN | Keep both doors; extract the shared steps |
 | CV-9 | Two editors for an existing entry | CONFIRMED | MAIN | The compact editor is canonical |
@@ -1121,17 +1121,17 @@ Finding: SUSPECTED that it confuses readers; it does not break the rule. Class: 
 
 ### CV-6 · The Living CV shows skills twice and work history twice
 
-Finding: CONFIRMED. Class: MAIN. Source: Lane A (A-1, A-2), on `main` at `125e2182`.
+Finding: CONFIRMED, cause proven: one page mounted two renderings of the same rows. Class: MAIN; the fix is in PR #3690. Sources: Lane A (A-1, A-2), on `main` at `125e2182`, and Lane G (G-18).
 
 | Field | Content |
 |---|---|
 | Function | Showing the person's skills and work history on the Living CV |
 | Implementations | Skills: `components/app/cv/premium-living-cv.tsx` (its capabilities block; empty text at `:115`) and the document section `app/[locale]/cv/page.tsx:1469` (`#cv-skills`).<br>Work history: the `experience` block of `premium-living-cv.tsx` (props at `cv/page.tsx:1091-1094`), `cv/page.tsx:1286` (`#cv-work-history`) and `cv/page.tsx:1830` (`#cv-proof`). |
 | Usage | `<PremiumLivingCv>` at `cv/page.tsx:1073`, on the same page as the document sections. |
-| Problem | One screen shows skills twice ("Gebėjimai · Ką mokate", then "Įgūdžiai"), each with its own empty text. Work history likewise appears in the hero block and again in the document sections. |
-| Proposal | One on-screen place for each. Print and PDF keep the document sections, so hide the duplicates on screen only. |
+| Problem | One screen shows skills twice ("Gebėjimai · Ką mokate", then "Įgūdžiai"), each with its own empty text. Work history likewise appears in the hero block and again in the document sections.<br>Lane G traced the cause. The hero's lists come from `premiumCapsAll` (`cv/page.tsx:672-692`) and `premiumExperience` (`:737-796`), rendered in `premium-living-cv.tsx:113-178`. The hero's skill list also skipped `presentSkills`, so it did no claim folding and stopped at 8 items.<br>Ruled out:<br>- two readers: both use the same `buildVerifiedCv` fields and the one 0025 reading;<br>- duplicate rows: `worker_skills` is unique per worker and skill, and `save_self_declared_work_history_v1` returns the existing row for an identical statement (`20260714161000:91-103`). |
+| Proposal | Done in #3690: remove the hero lists. The document sections stay, on screen and in print, as the one listing (`presentSkills` plus potential skills under decision 0023, and the 0025 reading). The per-role leadership entries move into `cv-organizations-roles`. |
 | Risk | Print and PDF output and the `eu` template use the document sections. `#cv-proof` is also a jump target (`cv/page.tsx:433`). |
-| Evidence | Local browser screenshot `cv__lt__390__light.png` (design audit 2026-11-22, branch `assets/cc/button-is-action-shots`). |
+| Evidence | Local browser screenshot `cv__lt__390__light.png` (design audit 2026-11-22, branch `assets/cc/button-is-action-shots`).<br>Lane G, #3690:<br>- isolated spec CV2-2 shows 2 listings before the fix and 1 after, at 375, 390, 768 and 1440 px;<br>- CI run 45121151244;<br>- the guard `lib/guards/cv-each-item-once.test.ts` fails 4 of its 8 checks before the fix;<br>- screenshots in `docs/evidence/cv-shown-twice/`. |
 
 ### CV-7 · Three ways to add a skill on the profile page, writing two stores
 
@@ -1770,6 +1770,8 @@ Each of these looks like a duplicate, but differs in purpose, rights or source. 
 - **The avatar** has one uploader.
 - **Languages** use one RPC.
 - **Lane A's checks.** The consent card (`DiscoverabilityConsent`) and the consequence trace (`HomeTrace`) are each one component used on several pages.
+- **A current governing membership** appears in the CV's leadership block (on screen only) and in `cv-organizations-roles`. The test EX-1 pins this, and it is unchanged from `main` (Lane G).
+- **`live-profile-history` and `capability-experience-row`** on `/dashboard/profile`. One reads the history; the other is the editor, with a remove control. Their purposes and rights differ (Lane G).
 - **The journal calendar and the historical calendar** (Lane A, A-5): SUSPECTED only. One is the person's own journal; the other is organization-supplied history, with different data and rights. Trace both before any merge.
 
 **Sign-up (Lane F)**
@@ -1843,6 +1845,6 @@ Each of these looks like a duplicate, but differs in purpose, rights or source. 
 | F | Sign-up and sign-in chains, security | 05:20 | `main` `6c6061a83` |
 | A2 | Navigation systems, label duplicates | 05:20 | `main` `125e21827`; spec PR #3681 |
 | C | Hiring, booking, engagement, project | 05:22 | `origin/main` `125e21827` |
-| G | CV, skills, history, AI | 05:23 | `origin/main` `125e218278` |
+| G | CV, skills, history, AI | 05:23; G-18 at 06:55 | `origin/main` `125e218278` |
 | M | Employer and agency UI | 05:24 | `main` `125e21827` |
 | S | Versioned RPCs, dead code, production use | 05:28 | `main` `125e2182`; production build `430bd475` |
