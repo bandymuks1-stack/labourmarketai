@@ -159,6 +159,31 @@ describe("shortlist: role, not membership, admits a colleague", () => {
     expect(shortlistWrite.mock.calls[0][2]).toMatchObject({ requestId: REQ, workerId: WORKER, status: "interested" });
   });
 
+  it("AI-1: an explicit null note CLEARS it, an absent note KEEPS it — the chat's rule — and the token tells them apart", async () => {
+    const caller = makeCaller(colleaguesNeed());
+    shortlistWrite.mockClear();
+    const clearDraft = await cap("shortlist.add_draft").run(caller, { requestId: REQ, workerId: WORKER, note: null });
+    expect(clearDraft.ok && (clearDraft.data as { preview: { noteChange: string } }).preview.noteChange).toBe("clear");
+    const clearToken = clearDraft.ok ? (clearDraft.data as { confirmationToken: string }).confirmationToken : "";
+
+    // A "keep" confirm cannot spend a "clear" token.
+    const swapped = await cap("shortlist.add_confirm").run(caller, { requestId: REQ, workerId: WORKER, confirmationToken: clearToken });
+    expect(swapped.ok === false && swapped.code).toBe("confirmation_rejected");
+    expect(shortlistWrite).not.toHaveBeenCalled();
+
+    const cleared = await cap("shortlist.add_confirm").run(caller, { requestId: REQ, workerId: WORKER, note: null, confirmationToken: clearToken });
+    expect(cleared.ok).toBe(true);
+    expect(shortlistWrite.mock.calls[0][2]).toMatchObject({ note: null });
+
+    shortlistWrite.mockClear();
+    const keepDraft = await cap("shortlist.add_draft").run(caller, { requestId: REQ, workerId: WORKER });
+    expect(keepDraft.ok && (keepDraft.data as { preview: { noteChange: string } }).preview.noteChange).toBe("keep");
+    const keepToken = keepDraft.ok ? (keepDraft.data as { confirmationToken: string }).confirmationToken : "";
+    const kept = await cap("shortlist.add_confirm").run(caller, { requestId: REQ, workerId: WORKER, confirmationToken: keepToken });
+    expect(kept.ok).toBe(true);
+    expect((shortlistWrite.mock.calls[0][2] as { note?: unknown }).note).toBeUndefined();
+  });
+
   it("remove needs the person to be on the shortlist, and writes not_fit with the reason", async () => {
     const script = colleaguesNeed();
     const r1 = await cap("shortlist.remove_draft").run(makeCaller(script), { requestId: REQ, workerId: WORKER, reason: "no licence" });

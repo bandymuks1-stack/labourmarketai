@@ -1469,7 +1469,9 @@ const workCardSaveDraft: CapabilityDescriptor = {
     "available-from date, salary range, location country, preferred " +
     "countries) and returns a preview of exactly what would change plus a " +
     "one-time confirmation token. NOTHING is saved. Omitted fields keep " +
-    "their current values; a field sent as null clears it. Confirming " +
+    "their current values, and so does a field sent as null (the canonical " +
+    "save keeps a null value). To empty the preferred countries send an " +
+    "empty list []. Confirming " +
     "requires work_card.save_confirm with this exact draft and token.",
   exposed: true,
   // Read-only is HONEST: the draft reads the current card and mints a token —
