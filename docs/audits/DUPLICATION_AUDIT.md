@@ -10,7 +10,7 @@ acts on it is deliverable E, `docs/architecture/SIMPLIFICATION_PLAN.md` (issue #
 | Brief | Issue #3679, deliverable C (owner P0, 2026-11-23) |
 | Owner of this file | Lane E |
 | Code basis | `main` at `125e21827`. Lane D read `f65c572`, lane H `8bcda5bed` and lane F `6c6061a83`; §15 lists them. |
-| Production basis | Lane D: read-only catalogue reads (`pg_proc`, `has_function_privilege`, `prosrc` callers), 2026-11-23 05:11–05:16 UTC. Lane H: the production migration ledger, 2026-11-23. Lane S: read-only, on production build `430bd475`. Nothing else here was verified in production. |
+| Production basis | Lane D: read-only reads of the production catalogue (which functions exist, and which functions call them), 2026-11-23 05:11–05:16 UTC. Lane H: the production migration ledger, 2026-11-23. Lane S: read-only, on production build `430bd475`. Nothing else here was verified in production. |
 | Supersedes as a register | `docs/audits/duplication-freeze-register-2026-08-17.md` and `docs/audits/canonical-paths-duplicate-flow-audit.md` (see §13). Both files stay where they are, because guards cite them by path and section. |
 
 ## 1. How to read an entry
@@ -103,7 +103,7 @@ Each entry names its source.
 | HIRE-4 | Project staffing authority | SUSPECTED gap | MAIN | Read the employee engagement row (security-relevant) |
 | HIRE-5 | Booking accept and employment shapes | CONFIRMED | MAIN | Booking accept also opens the engagement row |
 | HIRE-6 | Governance invitations (System C) | NOT A DUPLICATE | MAIN | Keep; the fold plan needs an owner decision |
-| HIRE-7 | Two writers of `team_assignments` | SUSPECTED | MAIN | A shared, ungranted insert helper |
+| HIRE-7 | Two writers of `team_assignments` | SUSPECTED | MAIN | A shared internal insert helper |
 | HIRE-8 | Invitation `join_project` writes assignments | SUSPECTED | MAIN | Share the insert and the completed-project refusal |
 | HIRE-9 | Two readers of booking engagements | SUSPECTED | MAIN | One reader |
 | ORG-1 | Two project-create forms | CONFIRMED (one write) | MAIN | One form, both follow-up doors |
@@ -141,9 +141,9 @@ Each entry names its source.
 | CV-19 | ESCO prefix search twice | CONFIRMED | MAIN | Point the slow one at the RPC |
 | CV-20 | Copied period check; stated-hours sum | CONFIRMED | MAIN | Import `isPeriodRecord`; check the sum |
 | CV-21 | Skill names from two catalogues | CONFIRMED | PR #3685 | One catalogue; one slug-name fallback |
-| SQL-1 | Old RPC versions already closed | CONFIRMED | PROD | Drop in one reviewed migration, or leave |
-| SQL-2 | Old and new both executable, old as fallback | CONFIRMED | PROD | Revoke old, then remove the fallback, family by family |
-| SQL-3 | Old version executable, no caller | CONFIRMED | PROD | Revoke first (reversible), drop later |
+| SQL-1 | Old versions named only by dead fallbacks | CONFIRMED | PROD | Remove the dead fallbacks (GREEN) |
+| SQL-2 | Old version kept as a fallback | CONFIRMED | PROD | Remove fallbacks, then retire old versions family by family (RED) |
+| SQL-3 | Old versions with no caller | CONFIRMED | PROD | Retire in one reviewed step (RED) |
 | SQL-4 | Two invitation-creating RPCs | SUSPECTED | MAIN | Merge into v2 |
 | SQL-5 | Booking response: v4 copies v3 | CONFIRMED | MAIN | Merge v3 and v4 (RED) |
 | SQL-6 | Company setup v2/v1 branches | SUSPECTED unreachable | MAIN | Remove once production has v3 |
@@ -806,7 +806,7 @@ Finding: SUSPECTED. The split is deliberate; the copied part is not. Class: MAIN
 | Implementations | `assign_team_to_work_v1` (`20261003150600…:175`, insert at `:255`) and `hand_off_team_demand_offer_v1` (`20261011200000…:660`, insert at `:753`) |
 | Usage | The team assignment forms (ORG-2) and the offer hand-off. |
 | Problem | The authorization differs on purpose (header `20261007150000…:633-637`), but the scope validation and the insert are copied. |
-| Proposal | A shared insert helper that is not granted to users. |
+| Proposal | A shared internal insert helper. |
 | Risk | The two copies drift apart. |
 | Evidence | Lane C. |
 
@@ -1349,35 +1349,35 @@ Finding: CONFIRMED that the code is copied; SUSPECTED that any screen shows the 
 30 families in more than one version, 63 functions in total. Each row below states the rights, the SQL callers and
 the app callers. A similar name alone proves nothing.
 
-### SQL-1 · Old versions already closed
+### SQL-1 · Old versions that the app names only in dead fallbacks
 
-Finding: CONFIRMED. Class: PROD. Source: Lane D (section A).
+Finding: CONFIRMED. Class: PROD. Sources: Lane D (section A) and Lane S (S-1).
 
 | Field | Content |
 |---|---|
 | Function | Superseded versions of live functions |
 | Implementations | `accept_invitation_v1`, `accept_invitation_by_id_v1`, `decline_invitation_v1`, `decide_organization_claim_v1`, `create_marketplace_listing_v1`, `update_marketplace_listing_v1`, `set_marketplace_listing_status_v1` (v2 is live for each), and `external_referral_reprocess_candidates_v1`, `_v2` and `_v4` (another SQL function calls v3; the family runs on a cron or service path) |
-| Usage | In production, neither `authenticated` nor `anon` may execute them, and no SQL function calls them. A few code lines still name them, mostly comments or "needs migration" fallbacks. Those fail closed. |
-| Problem | Dead versions. |
-| Proposal | Drop them in one reviewed migration with a recreate rollback, or leave them. The risk is zero either way. |
-| Risk | None. |
+| Usage | No SQL function calls them, and the app's fallbacks to them never run in production, where the newer versions exist. A few code lines still name them, mostly comments or "needs migration" fallbacks, for example `lib/invitations/actions.ts:521,570,615` and `lib/marketplace/listings.ts:515,588,658` (Lane S). |
+| Problem | Dead versions, and dead code paths that name them. |
+| Proposal | GREEN: remove the dead fallback branches. Retiring the functions themselves is a separate reviewed migration with a recreate rollback, or they can be left. |
+| Risk | None for the app. |
 | Evidence | Lane D, production catalogue read 05:11–05:16 UTC. |
 
-### SQL-2 · Old and new versions both callable, the old one kept as a "not installed yet" fallback
+### SQL-2 · An old version kept as a "not installed yet" fallback
 
-Finding: CONFIRMED in the repo and, for the grants, in production. Class: PROD. Sources: Lane D (section B), Lane H (D-6), Lane E sweep.
+Finding: CONFIRMED in the repo; production has the newest version of every family. Class: PROD. Sources: Lane D (section B), Lane H (D-6), Lane E sweep.
 
 | Field | Content |
 |---|---|
 | Function | App fallbacks to an older RPC version when the newer one is missing |
 | Implementations | The `respond_booking_request` family: v1 at `lib/booking/booking-actions.ts:350,443,454`, v2 at `:336`, v3 at `:416` (2 SQL callers), v4 at `:373`.<br>`withdraw_booking_request`: v1 at `:499,509` (SQL-10).<br>`save_company_setup`: v1 at `lib/company/company-setup.ts:499`, v2 at `:488`.<br>`create_work_task`: v1 at `lib/tasks/create-task-core.ts:130`.<br>`update_work_task`: v1 at `lib/tasks/task-actions.ts:302`.<br>`get_invitation_preview`: v1 at `app/[locale]/invite/[token]/page.tsx:311` and `lib/invitations/my-decision.ts:19`.<br>`create_org_document`: v1 at `lib/documents/org-document-actions.ts:210`.<br>`list_team_offers_for_request`: v1 at `lib/company/team-offer.ts:126`.<br>`save_demand_draft`: v1 at `lib/company/claim-public-intake.ts:248`.<br>`save_worker_availability_prefs`: v1 at `lib/worker/availability-prefs-actions.ts:146`.<br>The marketplace listing family at `lib/marketplace/listings.ts:509/515, 583/588, 653/658`.<br>`external_referral_reprocess` v4 → v3 → v2 at `lib/invitations/external-referral-reprocess-run.ts:53/58/61`. |
-| Usage | Lane E counted 16 RPC base names called in two or more versions (grep `rpc("…_v[0-9]+"` over `app`, `lib` and `components`). Lane S counted 22 families whose old *and* new versions are both still executable in production (`TECHNICAL_ARCHITECTURE_MAP.md` §6.2, in its PR), and found that the newest version of every family exists in production, so these fallbacks never run there. |
-| Problem | Where production has the newer version, the fallback branch is dead, yet the old version stays callable. On the fallback paths behaviour silently gets weaker; for example `booking-actions.ts:443` accepts with `engagement: "needs_migration"`. Some old versions are still called *directly*, not only as a fallback (`get_invitation_preview_v1`, and possibly some booking decisions). Those are live uses: it must be checked whether v1 and v2 differ in rights before either is called a duplicate. |
-| Proposal | GREEN first: remove the fallbacks that name a version production has already closed (SQL-1; for example `lib/invitations/actions.ts:521,570,615` and `lib/marketplace/listings.ts:515,588,658`, per Lane S). Then, one family at a time and RED: revoke `EXECUTE` on the old version from `authenticated` (reversible), then drop it with a rollback, after checking the phone and MCP callers. Three families are security-relevant and are handled under SEC (below), not here. |
+| Usage | Lane E counted 16 RPC base names called in two or more versions (grep `rpc("…_v[0-9]+"` over `app`, `lib` and `components`). Lane D found 30 function families in more than one version in production. Lane S found that the newest version of every family exists in production, so these fallbacks never run there (`TECHNICAL_ARCHITECTURE_MAP.md` §6, in its PR). |
+| Problem | Where production has the newer version, the fallback branch is dead code, and the old function is kept alongside the new one. On the fallback paths behaviour silently gets weaker; for example `booking-actions.ts:443` accepts with `engagement: "needs_migration"`. Some old versions are still called *directly*, not only as a fallback (`get_invitation_preview_v1`, and possibly some booking decisions). Those are live uses: it must be checked whether v1 and v2 differ in rights before either is called a duplicate. |
+| Proposal | GREEN first: remove the fallback branches whose newer version exists in production. Then, one family at a time and RED: retire the old function with a rollback, after checking the phone and MCP callers. The access side of each step is reviewed in the private record, not here (see SEC). |
 | Risk | A stack where the newer version is not applied loses the function. Production has it, per Lane D's read. Local and preview stacks must be checked. |
-| Evidence | Lane D's production grants; Lane E's and Lane H's code greps. |
+| Evidence | Lane D's and Lane S's production catalogue reads; Lane E's and Lane H's code greps. |
 
-### SQL-3 · Old versions callable but with no caller
+### SQL-3 · Old versions with no caller
 
 Finding: CONFIRMED (strong). Class: PROD. Source: Lane D (section C).
 
@@ -1385,11 +1385,11 @@ Finding: CONFIRMED (strong). Class: PROD. Source: Lane D (section C).
 |---|---|
 | Function | Superseded versions with no runtime use |
 | Implementations | `create_finance_record_v1`, `update_finance_record_v1`, `create_work_plan_entry_v1`, `end_company_worker_engagement_v1`, `list_agency_offered_candidates_for_request_v1`, `my_historical_organization_names_v1`, `journal_entry_supersede` (v1; v2 has one SQL caller), `submit_demand_request` (the v1 name has one SQL caller, which must be checked first) |
-| Usage | None of them is called by `rpc(…)` or `readRows(…)` with that exact name anywhere in `apps/web` outside tests. Several are named in comments and types. For `end_company_worker_engagement_v1` (`20260723120000…:491`, grant `:532`), the app calls only v2 (`lib/engagements/end-engagement.ts:166`), and v1 appears only in guard tests (`booking-engagement-bridge.test.ts:205,258`) (Lane C, A8). |
-| Problem | Dead but still executable. |
-| Proposal | Revoke `EXECUTE` from `authenticated` first (reversible), drop later. |
+| Usage | None of them is called by `rpc(…)` or `readRows(…)` with that exact name anywhere in `apps/web` outside tests. Several are named in comments and types. For `end_company_worker_engagement_v1` (`20260723120000…:491`), the app calls only v2 (`lib/engagements/end-engagement.ts:166`), and v1 appears only in guard tests (`booking-engagement-bridge.test.ts:205,258`) (Lane C, A8). |
+| Problem | Dead versions kept beside the live ones. |
+| Proposal | Retire them in one reviewed step (RED), after the access review in the private record. |
 | Risk | Low, apart from the two names with an SQL caller. |
-| Evidence | Lane D, production catalogue and code grep. |
+| Evidence | Lane D: the production catalogue and a code grep. |
 
 ### SQL-4 · Two invitation-creating RPCs live side by side
 
@@ -1454,7 +1454,7 @@ Finding: CONFIRMED. Class: PROD. Source: Lane D (section D).
 | Field | Content |
 |---|---|
 | Function | A record of the display-name backfill |
-| Implementations | `worker_display_name_backfill_20260805` (RLS on, no policy) |
+| Implementations | `worker_display_name_backfill_20260805` |
 | Usage | Referenced only by `lib/privacy/personal-relations.ts` and the generated types. |
 | Problem | A one-off object that outlived its job. |
 | Proposal | The owner decides: keep it as an audit trail, or drop it after confirming that no personal data needs to stay. |
@@ -1470,7 +1470,7 @@ Finding: CONFIRMED. Class: UNUSED-OR-DUP. Source: Lane H (D-5).
 | Function | The old agency board |
 | Implementations | `list_open_demand_for_agencies` and `mark_agency_can_offer`; reader `lib/agency/pool.ts:298` |
 | Usage | The route `/dashboard/agency/pool` has redirected since W1. The owner retired the board on 2026-09-14 (`lib/product-gate/capability-register.ts:622`). |
-| Problem | The database objects are still in place. PR #3657 (messaging lane) revokes their execute grant. |
+| Problem | The database objects are still in place; PR #3657 (messaging lane) touches them. |
 | Proposal | Remove after this audit, as a RED step. |
 | Risk | None for users. |
 | Evidence | Lane H; the capability register. |
@@ -1482,7 +1482,7 @@ Finding: CONFIRMED. Class: MAIN. Source: Lane C (A3).
 | Field | Content |
 |---|---|
 | Function | Withdrawing a booking request |
-| Implementations | `20260613100100_booking_requests.sql:252` and `20260711290000_booking_lifecycle_v2.sql:166`. They are parallel byte for byte (v2 adds a reason), and both are granted. |
+| Implementations | `20260613100100_booking_requests.sql:252` and `20260711290000_booking_lifecycle_v2.sql:166`. They are parallel byte for byte (v2 adds a reason). |
 | Usage | `lib/booking/booking-actions.ts:486` (v2 with a reason), `:499` (v1 fallback) and `:509` (v1 without a reason). |
 | Problem | v1 was never made a delegator, so a future rule has to cover both. |
 | Proposal | Make v1 delegate to v2 with a null reason, as `20260802150000` did for `respond_booking_request`. |
@@ -1499,7 +1499,7 @@ Finding: CONFIRMED. Class: MAIN. Source: Lane C (A5).
 | Implementations | `accept_invitation_apply_v2` (`20261021094000…:196`), `accept_invitation_v1` (`:388`) and `accept_invitation_by_id_v1` (`:517`). Each one inserts the engagement row and the project assignment itself (`:301`, `:476`, `:606`). |
 | Usage | `lib/invitations/actions.ts:517/521` and `:611/615` call v2 first, and v1 only when v2 is missing. |
 | Problem | Every authority fix edits three bodies. |
-| Proposal | Reduce v1 to delegators, or drop it (owner-gated), and remove the app fallbacks. Whether v1 can still be called is a security question (SEC). |
+| Proposal | Reduce v1 to delegators, or drop it (owner-gated), and remove the app fallbacks. |
 | Risk | Low once v2 is confirmed in production. |
 | Evidence | Lane C. |
 
@@ -1524,7 +1524,7 @@ Finding: CONFIRMED for the tables; SUSPECTED for the functions, which must be ch
 | Field | Content |
 |---|---|
 | Function | Storage and functions that nothing uses |
-| Implementations | Tables never written in production and referenced by no app code: `assistant_message_attachments`, and `project_forecast_state`. The latter is granted for select, and a forecast-recompute VPS cron runs every 5 minutes, yet it is still empty.<br>Functions with no code, function, policy, trigger or cron reference in production: `erase_assistant_transcript` and `revoke_competency_recognition_v1`. |
+| Implementations | Tables never written in production and referenced by no app code: `assistant_message_attachments`, and `project_forecast_state`. A forecast-recompute job runs on a schedule, yet the latter is still empty.<br>Functions with no code, function, policy, trigger or cron reference in production: `erase_assistant_transcript` and `revoke_competency_recognition_v1`. |
 | Usage | None found. |
 | Problem | Dead objects, and a cron that writes nothing. |
 | Proposal | Check the two functions with lanes F (erasure) and L (recognition) before anything. Find out why the forecast cron writes no state (see the draft #2738 noted in `FUNCTION_REGISTER.md` row 3.34). |
@@ -1556,7 +1556,7 @@ here, following the rule at `docs/program/FUNCTION_REGISTER.md` line 7.
 
 Lane E sent the details of all five to Lane F (auth, roles, RLS) on 2026-11-23. Each fix is a RED, owner-gated change.
 
-Status: open. The entries above name those function families only for their duplication; their access questions are SEC items.
+Status: open. Per `AGENTS.md` (lines 82-85), production permission detail is kept in the private record, not here: the SQL entries above state only duplication and use, never which version is open to which role.
 
 ## 12. Dead code, translations and links
 
