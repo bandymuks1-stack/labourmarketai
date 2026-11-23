@@ -82,11 +82,15 @@ const R2_NAME = `Synthetic Roster Unlinked ${RUN}`;
 const R3_NAME = `Synthetic Roster Invited ${RUN}`;
 
 /** Journal texts: plain sentences with one stated duration, no "including". */
+// The marks go into journal TEXT, which the work-log reader parses for
+// hours: a base-36 run tag such as "…5std3…" reads as "5 hours" before the
+// stated hours. The marks therefore carry the run tag in letters only.
+const TAG = RUN.replace(/\d/g, (d) => "qrstuvwxyz"[Number(d)]!);
 const MARK = {
-  w1a: `QA-SYNTHETIC w1a ${RUN}`,
-  w2a: `QA-SYNTHETIC w2a ${RUN}`,
-  w2b: `QA-SYNTHETIC w2b ${RUN}`,
-  oa: `QA-SYNTHETIC oa ${RUN}`,
+  w1a: `QA-SYNTHETIC w1a ${TAG}`,
+  w2a: `QA-SYNTHETIC w2a ${TAG}`,
+  w2b: `QA-SYNTHETIC w2b ${TAG}`,
+  oa: `QA-SYNTHETIC oa ${TAG}`,
 };
 const TEXT = {
   w1a: `${MARK.w1a}: plastered the hallway walls, 8 hours`,
