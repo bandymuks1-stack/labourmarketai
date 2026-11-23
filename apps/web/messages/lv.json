@@ -7137,6 +7137,18 @@
       "period": "Ierakstīts",
       "basis": "No {entries} žurnāla ierakstiem, ko cilvēki veica šajā organizācijā. Skaitīts atsevišķi no augstāk redzamās importētās vēstures un nekad tai nepieskaitīts.",
       "unavailable": "Šobrīd neizdevās nolasīt šajā organizācijā žurnālā ierakstīto darbu."
+    },
+    "forClient": {
+      "title": "Jūsu apakšuzņēmēju darbs",
+      "confirmed": "Apstiprinātie ieraksti",
+      "unconfirmed": "Neapstiprinātie ieraksti",
+      "periodHours": "{hours} st. norādītas kā perioda summa, nav pieskaitītas atsevišķām dienām.",
+      "basis": "No {count, plural, zero {# ierakstiem} one {# ieraksta} other {# ierakstiem}} jūsu apakšuzņēmēju uzskaitē. Skaitīts atsevišķi no jūsu pašu darba."
+    },
+    "clients": {
+      "title": "Pasūtītāji",
+      "unnamed": "Pasūtītāja organizācija",
+      "records": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
     }
   },
   "workLifecycle": {

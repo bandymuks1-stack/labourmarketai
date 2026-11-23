@@ -21,7 +21,13 @@ import type { DomainCaller } from "@/lib/domain/caller";
 import type { BusinessHistoryIdentity } from "./business-history-header";
 import { resolveEvidenceOrganization } from "./evidence-org-context";
 import { untypedClient } from "./evidence-store";
-import { listEvidenceRecords, listRecordIdsAttributedTo } from "./import-core";
+import {
+  CLIENT_PARTY_ROLE,
+  listEvidenceRecords,
+  listRecordIdsAttributedTo,
+  PERFORMING_PARTY_ROLES,
+} from "./import-core";
+import { clientsOfRecords, summarizeWorkForClient, type WorkForClient } from "./work-for-client";
 import { listAllEvidenceRecords, readAllPages } from "./evidence-pagination";
 import {
   buildBusinessHistory,
@@ -79,6 +85,13 @@ export type CompanyWorkHistoryLoad =
       readonly ownPeople: Readonly<Record<string, true>>;
       /** Records stored in ANOTHER organization's books that name this one as the performing company. */
       readonly attributedCount: number;
+      /** Work partners did FOR this organization (records in their books naming it as
+       *  `client`), as one aggregate with no names (decision 0033). Null: none, or
+       *  unreadable — it is never folded into this organization's own work. */
+      readonly forClient: WorkForClient | null;
+      /** The clients this organization's own records name, most records first. `name`
+       *  is null when the caller cannot read that organization (never guessed). */
+      readonly clients: readonly { readonly organizationId: string; readonly name: string | null; readonly records: number }[];
       /** A safety ceiling was reached while reading: the totals cover only
        *  what was read and the surface MUST say so (never a silent cap). */
       readonly truncated: boolean;
@@ -200,25 +213,35 @@ export async function loadCompanyWorkHistory(
       linkedWorkers[p.id] = p.linked_worker_id;
   }
 
-  // Work stored in another organization's books but attributed HERE (a party
-  // row naming this organization). The records SELECT policy already admits
-  // them; they are read, never copied.
-  let attributed: readonly (typeof recs.records)[number][] = [];
-  const attributedIds = await listRecordIdsAttributedTo(caller, org.organizationId);
-  if (attributedIds.kind === "ok") {
-    const own = new Set(recs.records.map((r) => r.id));
-    const wanted = attributedIds.recordIds.filter((id) => !own.has(id));
+  // Work stored in another organization's books that names this one as a
+  // party. The records SELECT policy already admits them; they are read, never
+  // copied. Only a PERFORMING role makes it this organization's own work. A
+  // `client` row is work a partner did FOR this organization (decision 0033):
+  // it is summed apart, with no person, place or partner name.
+  const own = new Set(recs.records.map((r) => r.id));
+  const readElsewhere = async (roles: readonly string[]) => {
+    const ids = await listRecordIdsAttributedTo(caller, org.organizationId, roles);
+    if (ids.kind !== "ok") return null;
+    const wanted = ids.recordIds.filter((id) => !own.has(id));
     const found: (typeof recs.records)[number][] = [];
     for (let i = 0; i < wanted.length; i += ID_CHUNK) {
       const extra = await listEvidenceRecords(caller, {
         recordIds: wanted.slice(i, i + ID_CHUNK),
         limit: ID_CHUNK,
       });
-      if (extra.kind === "ok") found.push(...extra.records.filter((r) => r.organizationId !== org.organizationId));
+      if (extra.kind !== "ok") return null;
+      found.push(...extra.records.filter((r) => r.organizationId !== org.organizationId));
     }
-    attributed = found;
-  }
+    return found;
+  };
+  const [performedHere, doneForHere] = await Promise.all([
+    readElsewhere(PERFORMING_PARTY_ROLES),
+    readElsewhere([CLIENT_PARTY_ROLE]),
+  ]);
+  const attributed = performedHere ?? [];
+  const forClient = doneForHere ? summarizeWorkForClient(doneForHere) : null;
   const history = buildCompanyWorkHistory([...recs.records, ...attributed], objects);
+  const clients = await nameClients(supabase, clientsOfRecords(recs.records, org.organizationId));
 
   const [business, identity] = await Promise.all([
     readBusinessHistory(supabase, org.organizationId, recs.records, objects),
@@ -255,8 +278,35 @@ export async function loadCompanyWorkHistory(
     journal,
     ownPeople,
     attributedCount: attributed.length,
+    forClient,
+    clients,
     truncated: recs.truncated,
   };
+}
+
+/**
+ * The client organizations' names, under the caller's own RLS: a client the
+ * caller is not a member of stays unnamed (null), never guessed or widened.
+ */
+async function nameClients(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  clients: readonly { readonly organizationId: string; readonly records: number }[],
+): Promise<{ organizationId: string; name: string | null; records: number }[]> {
+  if (clients.length === 0) return [];
+  const names = new Map<string, string>();
+  try {
+    const res = await db(supabase)
+      .from("organizations")
+      .select("id, legal_name, display_name")
+      .in("id", clients.map((c) => c.organizationId));
+    for (const o of (res.data ?? []) as { id: string; legal_name: string | null; display_name: string | null }[]) {
+      const name = (o.display_name ?? o.legal_name ?? "").trim();
+      if (name) names.set(o.id, name);
+    }
+  } catch {
+    /* unnamed, never guessed */
+  }
+  return clients.map((c) => ({ ...c, name: names.get(c.organizationId) ?? null }));
 }
 
 /**

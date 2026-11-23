@@ -3,7 +3,9 @@ import { describe, expect, it } from "vitest";
 import { MemoryEvidenceDb } from "./testing/memory-store";
 import {
   attributeRecordsToPerformingOrganization,
+  CLIENT_PARTY_ROLE,
   listRecordIdsAttributedTo,
+  PERFORMING_PARTY_ROLES,
 } from "./import-core";
 
 // SYNTHETIC ids only.
@@ -95,5 +97,24 @@ describe("attributeRecordsToPerformingOrganization — additive, idempotent, nev
     expect(
       await attributeRecordsToPerformingOrganization(db.as(actor), { recordIds: ["nope"], performingOrganizationId: ORG_B }),
     ).toMatchObject({ kind: "invalid" });
+  });
+});
+
+describe("a client is not the performing company (decision 0033)", () => {
+  it("lists records by party role: performing roles and the client role apart", async () => {
+    const db = seed();
+    await attributeRecordsToPerformingOrganization(db.as(actor), { recordIds: ["rec-1"], performingOrganizationId: ORG_B });
+    db.tables.parties.push({
+      id: "party-client",
+      organization_id: ORG_A,
+      record_id: "rec-2",
+      party_role: "client",
+      party_organization_id: ORG_B,
+    });
+    const ids = async (roles?: readonly string[]) =>
+      [...((await listRecordIdsAttributedTo(db.as(actor), ORG_B, roles)) as unknown as { recordIds: string[] }).recordIds].sort();
+    expect(await ids()).toEqual(["rec-1", "rec-2"]);
+    expect(await ids(PERFORMING_PARTY_ROLES)).toEqual(["rec-1"]);
+    expect(await ids([CLIENT_PARTY_ROLE])).toEqual(["rec-2"]);
   });
 });

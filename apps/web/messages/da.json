@@ -7137,6 +7137,18 @@
       "period": "Registreret",
       "basis": "Fra {entries} journalposter, som personer registrerede under denne organisation. Talt adskilt fra den importerede historik ovenfor og aldrig lagt til den.",
       "unavailable": "Arbejdet registreret i journalen under denne organisation kunne ikke læses lige nu."
+    },
+    "forClient": {
+      "title": "Arbejde udført af jeres underleverandører",
+      "confirmed": "Bekræftede poster",
+      "unconfirmed": "Ikke-bekræftede poster",
+      "periodHours": "{hours} t angivet som periodesum, ikke lagt til enkelte dage.",
+      "basis": "Fra {count, plural, one {# post} other {# poster}} i jeres underleverandørers egne registre. Talt adskilt fra jeres eget arbejde."
+    },
+    "clients": {
+      "title": "Kunder",
+      "unnamed": "Kundeorganisation",
+      "records": "{count, plural, one {# post} other {# poster}}"
     }
   },
   "workLifecycle": {

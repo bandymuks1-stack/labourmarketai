@@ -3323,6 +3323,8 @@ export async function correctSessionDateProvenance(
 
 /** Roles a performing company can be named in (the party role vocabulary). */
 export const PERFORMING_PARTY_ROLES = ["employer", "subcontractor", "agency", "other"] as const;
+/** The role naming the organization the work was done FOR (decision 0033). */
+export const CLIENT_PARTY_ROLE = "client";
 export type PerformingPartyRole = (typeof PERFORMING_PARTY_ROLES)[number];
 
 /**
@@ -3406,13 +3408,19 @@ export async function attributeRecordsToPerformingOrganization(
   return { kind: "ok", attributed: res.data.length, skipped };
 }
 
-/** The records (any organization's books) that name this organization as a party. */
+/**
+ * The records (any organization's books) that name this organization as a party.
+ * `roles` narrows it: a CLIENT is not the company that performed the work
+ * (decision 0033), so a caller folding records into its own work history asks
+ * for `PERFORMING_PARTY_ROLES` only.
+ */
 export async function listRecordIdsAttributedTo(
   caller: EvidenceCaller,
   organizationId: string,
+  roles?: readonly string[],
 ): Promise<EvidenceImportResult<{ recordIds: readonly string[] }>> {
   const store = storeOf(caller);
-  const res = await store.readRecordIdsNamingOrganization(organizationId);
+  const res = await store.readRecordIdsNamingOrganization(organizationId, roles);
   if (res.error) return classify(res.error);
   return { kind: "ok", recordIds: res.data };
 }

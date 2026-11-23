@@ -19391,6 +19391,18 @@
       "period": "Recorded",
       "basis": "From {entries} journal entries people recorded under this organization. Counted apart from the imported history above and never added to it.",
       "unavailable": "The journal work recorded under this organization could not be read just now."
+    },
+    "forClient": {
+      "title": "Work by your subcontractors",
+      "confirmed": "Records confirmed",
+      "unconfirmed": "Records not confirmed",
+      "periodHours": "{hours} h stated as period totals, not added to single days.",
+      "basis": "From {count, plural, one {# record} other {# records}} in your subcontractors' own books. Counted apart from your own work."
+    },
+    "clients": {
+      "title": "Clients",
+      "unnamed": "Client organization",
+      "records": "{count, plural, one {# record} other {# records}}"
     }
   },
   "workPlan": {

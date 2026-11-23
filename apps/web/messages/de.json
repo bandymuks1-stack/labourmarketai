@@ -19391,6 +19391,18 @@
       "period": "Erfasst",
       "basis": "Aus {entries} Journaleinträgen, die Personen unter dieser Organisation erfasst haben. Getrennt von der importierten Historie oben gezählt und nie zu ihr addiert.",
       "unavailable": "Die unter dieser Organisation im Journal erfasste Arbeit konnte gerade nicht gelesen werden."
+    },
+    "forClient": {
+      "title": "Arbeit Ihrer Subunternehmer",
+      "confirmed": "Bestätigte Einträge",
+      "unconfirmed": "Nicht bestätigte Einträge",
+      "periodHours": "{hours} Std. als Zeitraumsumme angegeben, nicht zu einzelnen Tagen addiert.",
+      "basis": "Aus {count, plural, one {# Eintrag} other {# Einträgen}} in den eigenen Unterlagen Ihrer Subunternehmer. Getrennt von Ihrer eigenen Arbeit gezählt."
+    },
+    "clients": {
+      "title": "Auftraggeber",
+      "unnamed": "Auftraggebende Organisation",
+      "records": "{count, plural, one {# Eintrag} other {# Einträge}}"
     }
   },
   "workPlan": {
