@@ -66,9 +66,11 @@ describe("organization doors — every door is a real, classified, declared dest
     }
   }
 
-  it("the strip renders every door id with a data-testid and aria-current", () => {
-    expect(doorsStrip).toMatch(/data-testid=\{`organization-door-\$\{door\.id\}`\}/);
-    expect(doorsStrip).toMatch(/aria-current=\{active \? "page" : undefined\}/);
+  it("the strip renders every door id on the one rail, and marks the current one", () => {
+    // CardRail gives each card `data-card-id` and the current one aria-current (spec N7).
+    expect(doorsStrip).toMatch(/id: door\.id,/);
+    expect(doorsStrip).toMatch(/activeId=\{activeId\}/);
+    expect(doorsStrip).toMatch(/<CardRail\b/);
   });
 
   it("the company layout mounts the doors once for every organization route", () => {

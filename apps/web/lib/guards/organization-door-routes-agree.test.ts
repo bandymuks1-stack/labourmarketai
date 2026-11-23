@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ORGANIZATION_DOOR_ROUTES } from "@/lib/company/organization-doors";
+import { ORGANIZATION_DOOR_ROUTES, organizationDoorLabelKey } from "@/lib/company/organization-doors";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
@@ -41,6 +41,21 @@ describe("the two organization door lists agree", () => {
   it("every area is either a shared door or a declared area-only capability", () => {
     for (const a of ORGANIZATION_WORK_AREAS) {
       expect(a.id in SAME_DOOR || AREA_ONLY.has(a.id), a.id).toBe(true);
+    }
+  });
+
+  // ONE LABEL KEY PER ROUTE (spec N7, M1): a destination is never named two
+  // ways on one screen, in the doors and in the header's "More".
+  for (const [areaId, doorId] of Object.entries(SAME_DOOR)) {
+    it(`${doorId} (door) is named by the ${areaId} area's own key`, () => {
+      const areaKey = ORGANIZATION_WORK_AREAS.find((a) => a.id === areaId)?.labelKey;
+      expect(organizationDoorLabelKey(doorId)).toBe(areaKey);
+    });
+  }
+
+  it("a door with no area keeps its own key", () => {
+    for (const id of ["now", "education", "settings"] as const) {
+      expect(organizationDoorLabelKey(id)).toBe(`organizationDoors.${id}`);
     }
   });
 

@@ -412,8 +412,9 @@ test("N-3 (#3002). Alfa's door strip: Kalendorius opens the one calendar, Rinka 
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await page.goto("/lt/dashboard/company");
-  await expect(page.getByTestId("organization-door-calendar").first()).toHaveAttribute("href", "/lt/dashboard/planning", { timeout: 30_000 });
-  await expect(page.getByTestId("organization-door-market").first()).toHaveAttribute("href", "/lt/dashboard/service-requests");
+  const doors = page.getByTestId("organization-doors").first();
+  await expect(doors.locator('a[data-card-id="calendar"]')).toHaveAttribute("href", "/lt/dashboard/planning", { timeout: 30_000 });
+  await expect(doors.locator('a[data-card-id="market"]')).toHaveAttribute("href", "/lt/dashboard/service-requests");
   await ctx.close();
 });
 

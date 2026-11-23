@@ -1,5 +1,5 @@
 import {
-  Armchair, BarChart3, Blocks, BrickWall, Briefcase, Building2, CalendarCheck, Car, ChefHat,
+  Activity, Armchair, CalendarDays, History, Settings2, BarChart3, Blocks, BrickWall, Briefcase, Building2, CalendarCheck, Car, ChefHat,
   ClipboardCheck, ClipboardList, Clock, Code, Coffee, Compass, ConciergeBell, Construction, Croissant,
   Factory, FileSignature, FileText, Flame, Flower2, FolderKanban, Globe, GraduationCap, Grid3x3, Hammer, Hand,
   HandPlatter, Handshake, HardHat, Headset, HeartHandshake, Home, IdCard, Inbox, Info, Languages,
@@ -27,5 +27,6 @@ export const NAV_CARD_ICONS: Record<NavCardIconKey, LucideIcon> = {
   showerHead: ShowerHead, shovel: Shovel, sparkles: Sparkles, sprayCan: SprayCan, store: Store,
   tractor: Tractor, truck: Truck, userSearch: UserSearch, users: Users, utensils: Utensils,
   notebook: NotebookPen, clock: Clock, folder: FolderKanban,
+  activity: Activity, calendarDays: CalendarDays, history: History, settings: Settings2,
   warehouse: Warehouse, washingMachine: WashingMachine, wheat: Wheat, wrench: Wrench, zap: Zap,
 };

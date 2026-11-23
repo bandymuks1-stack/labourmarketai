@@ -282,16 +282,17 @@ test("M-5. hydration claims the server HTML once: no #418, no hidden S:n copy", 
 // overlapping header controls, the core nav labels visible from 1280 px, and
 // the area switcher's cards are real links.
 //
-// ONE approved exception (owner orders 2026-11-21/22, coordinator decision
-// 2026-11-22 item 1, #3613): on a PHONE the organisation doors are one
-// horizontal row with the next door peeking. That strip is checked
-// positively (one row, next door peeks, 44 px targets, keyboard-reachable
-// links, no page-level sideways scroll). Every OTHER sideways strip still
-// fails, and the doors strip fails too from 640 px up, where it wraps.
+// The ONE rail, CardRail, is the approved sideways row (spec N7: the
+// organisation doors are drawn on it, docs/design/CAROUSEL_NAVIGATION_SPEC.md
+// §8.2). Its track is not a stray strip; the doors on it are checked
+// positively instead (one row, the next door peeks on a phone, 44 px targets,
+// keyboard-reachable links, no page-level sideways scroll). Every OTHER
+// sideways strip still fails, at every width.
 async function navReading(page: Page, where: string): Promise<{ strips: string[]; overlaps: number; labels: string[] }> {
   const r = await page.evaluate(() => {
     const strips = [...document.querySelectorAll("header *, main *")]
       .filter((e) => {
+        if (e.closest('[data-rail-part="track"]')) return false;
         const cs = getComputedStyle(e);
         const h = e.getBoundingClientRect().height;
         return (cs.overflowX === "auto" || cs.overflowX === "scroll") && e.scrollWidth > e.clientWidth + 1 && h > 0 && h < 120;
@@ -319,13 +320,13 @@ async function navReading(page: Page, where: string): Promise<{ strips: string[]
 
 const DOORS_STRIP = "organization-doors";
 
-/** The approved doors row on a phone, measured: one row, the next door
- *  peeking past the edge, 44 px targets, focusable links, and the page itself
- *  not wider than the phone. */
+/** The doors on the one rail, measured: one row, the next door peeking past
+ *  the track's edge, 44 px targets, focusable links, and the page itself not
+ *  wider than the screen. */
 async function doorsRow(page: Page): Promise<{ rows: number; peeks: boolean; minTarget: number; keyboard: boolean; pageScrollsSideways: boolean }> {
   return page.getByTestId(DOORS_STRIP).first().evaluate((nav) => {
-    const doors = [...nav.querySelectorAll<HTMLElement>('[data-testid^="organization-door-"]')];
-    const box = nav.getBoundingClientRect();
+    const doors = [...nav.querySelectorAll<HTMLElement>("a[data-card-id]")];
+    const box = (nav.querySelector('[data-rail-part="track"]') ?? nav).getBoundingClientRect();
     const rects = doors.map((d) => d.getBoundingClientRect());
     return {
       rows: new Set(rects.map((r) => Math.round(r.top))).size,
@@ -356,12 +357,11 @@ test("M-6. one navigation system: no sideways strips, no header overlap, labels 
         await settle(page);
         const r = await navReading(page, `${slot} ${path} @${vp.width}`);
         const phone = vp.width < 640;
-        const others = phone ? r.strips.filter((s) => s !== DOORS_STRIP) : r.strips;
-        expect(others, `${path} @${vp.width}: no sideways-scrolling navigation strip`).toEqual([]);
-        if (phone && r.strips.includes(DOORS_STRIP)) {
+        expect(r.strips, `${path} @${vp.width}: no sideways-scrolling navigation strip`).toEqual([]);
+        if (await page.getByTestId(DOORS_STRIP).count()) {
           const d = await doorsRow(page);
           expect(d.rows, `${path} @${vp.width}: the doors are one row`).toBe(1);
-          expect(d.peeks, `${path} @${vp.width}: the next door visibly peeks at the edge`).toBe(true);
+          if (phone) expect(d.peeks, `${path} @${vp.width}: the next door visibly peeks at the edge`).toBe(true);
           expect(d.minTarget, `${path} @${vp.width}: every door is at least 44 px`).toBeGreaterThanOrEqual(43.5);
           expect(d.keyboard, `${path} @${vp.width}: every door is a focusable link`).toBe(true);
           expect(d.pageScrollsSideways, `${path} @${vp.width}: the page itself does not scroll sideways`).toBe(false);

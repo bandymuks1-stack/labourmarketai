@@ -1823,10 +1823,11 @@ test.describe("popups on a short phone screen", () => {
   });
 });
 
-// ── THE ORGANISATION DOORS ARE ONE ROW ON A PHONE (2026-11-22) ──────────────
+// ── THE ORGANISATION DOORS ARE ONE ROW ON A PHONE (2026-11-22, N7) ──────────
 // Coordinator decision on the owner's orders of 2026-11-21/22: horizontal
 // card rows with the next card peeking. Wrapped, 8–9 doors took three or four
-// rows (150–200 px) above every organisation page (UX gap SH-6).
+// rows (150–200 px) above every organisation page (UX gap SH-6). Since spec
+// N7 the doors are drawn on the one rail, CardRail.
 test.describe("organisation doors on a phone", () => {
   test.describe.configure({ mode: "serial" });
   const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
@@ -1839,25 +1840,26 @@ test.describe("organisation doors on a phone", () => {
     const nav = page.getByTestId("organization-doors");
     await expect(nav).toBeVisible({ timeout: 60_000 });
     const row = await nav.evaluate((el) => {
-      const doors = [...el.querySelectorAll<HTMLElement>('[data-testid^="organization-door-"]')];
-      const r = el.getBoundingClientRect();
+      const doors = [...el.querySelectorAll<HTMLElement>("a[data-card-id]")];
+      const track = el.querySelector<HTMLElement>('[data-rail-part="track"]')!;
+      const r = track.getBoundingClientRect();
       return {
         count: doors.length,
         tops: new Set(doors.map((d) => Math.round(d.getBoundingClientRect().top))).size,
         height: r.height,
-        scrolls: el.scrollWidth > el.clientWidth,
+        scrolls: track.scrollWidth > track.clientWidth,
         peek: doors.some((d) => { const b = d.getBoundingClientRect(); return b.left < r.right - 8 && b.right > r.right + 2; }),
         minHeight: Math.min(...doors.map((d) => d.getBoundingClientRect().height)),
       };
     });
     expect(row.count, "the doors render").toBeGreaterThan(5);
     expect(row.tops, "all doors sit in one row").toBe(1);
-    expect(row.height, "the row is one door high").toBeLessThanOrEqual(60);
+    expect(row.height, "the row is one rail card high").toBeLessThanOrEqual(160);
     expect(row.scrolls, "the row scrolls sideways inside itself").toBe(true);
     expect(row.peek, "the next door shows at the edge").toBe(true);
     expect(row.minHeight, "doors keep the 44 px floor").toBeGreaterThanOrEqual(43.5);
     await fitsTheScreen(page, "the organisation doors row");
-    const last = nav.locator('[data-testid^="organization-door-"]').last();
+    const last = nav.locator("a[data-card-id]").last();
     const href = await last.getAttribute("href");
     await last.scrollIntoViewIfNeeded();
     await last.tap();

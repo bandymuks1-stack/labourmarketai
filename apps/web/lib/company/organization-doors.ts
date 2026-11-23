@@ -7,6 +7,7 @@ import { readOrganizationCapabilities } from "@/lib/organizations/capability-rea
 import { isEducationInstitution } from "@/lib/organizations/capabilities";
 import { actsAsAgency } from "@/lib/company/agency-capability";
 import { listMyClientBridgeConnections } from "@/lib/agency/bridge-read";
+import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
  * THE ORGANIZATION'S DOORS (owner IA correction 2026-09-16, design/final/03 §2).
@@ -64,6 +65,29 @@ export const ORGANIZATION_DOOR_ROUTES: Readonly<
   history: "/dashboard/company/history",
   settings: "/dashboard/company/settings",
 };
+
+/**
+ * ONE LABEL KEY PER ROUTE (spec N7, M1). A door that leads where a header area
+ * leads (`ORGANIZATION_WORK_AREAS`, the header's "More" and the phone sheet)
+ * is named by THAT area's key, so one destination never carries two names on
+ * one screen. Ids differ between the lists (`work` is the projects here, the
+ * hours there), so the pairing is by route and is pinned by
+ * `organization-door-routes-agree.test.ts`. Doors with no area keep their own.
+ */
+const AREA_OF_DOOR: Readonly<Partial<Record<OrganizationDoorId, string>>> = {
+  people: "people",
+  work: "projects",
+  needs: "need",
+  market: "market",
+  calendar: "calendar",
+  partners: "clients",
+  history: "history",
+};
+
+export function organizationDoorLabelKey(id: OrganizationDoorId): string {
+  const area = ORGANIZATION_WORK_AREAS.find((a) => a.id === AREA_OF_DOOR[id]);
+  return area?.labelKey ?? `organizationDoors.${id}`;
+}
 
 /** The order the strip renders — the organization's operating rhythm, not
  *  the order the code was written in. */
