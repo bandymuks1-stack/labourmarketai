@@ -90,6 +90,10 @@ export type MarketplaceLabels = {
   /** Accepted rows are never a dead end — the next step is the conversation
    *  (audit PR4: "the loop dies at acceptance"). */
   messageCta: string;
+  /** Honest line under an accepted request: agreeing terms together, the
+   *  execution and a shared work report are not built for this lane yet
+   *  (owner P0 2026-11-23: unbuilt steps say so plainly). */
+  acceptedNextNotYet: string;
   errorGeneric: string;
   duplicate: string;
   requesterMessage: string;
@@ -283,17 +287,22 @@ export function MarketplaceLoopSection({
   // Next step for an ACCEPTED request — opens (or reopens) the buyer↔provider
   // conversation; the granting fact is re-verified server-side by the action.
   const MessageCta = ({ requestId, testId }: { requestId: string; testId: string }) => (
-    <form action={openServiceRequestConversationAction}>
-      <input type="hidden" name="requestId" value={requestId} />
-      <input type="hidden" name="locale" value={locale} />
-      <button
-        type="submit"
-        data-testid={testId}
-        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-50"
-      >
-        <MessageSquare className="h-3 w-3" /> {labels.messageCta}
-      </button>
-    </form>
+    <div className="flex flex-col gap-1.5">
+      <form action={openServiceRequestConversationAction}>
+        <input type="hidden" name="requestId" value={requestId} />
+        <input type="hidden" name="locale" value={locale} />
+        <button
+          type="submit"
+          data-testid={testId}
+          className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-50"
+        >
+          <MessageSquare className="h-3 w-3" /> {labels.messageCta}
+        </button>
+      </form>
+      <p className="text-xs text-text-muted" data-testid={`${testId}-next-not-yet`}>
+        {labels.acceptedNextNotYet}
+      </p>
+    </div>
   );
 
   // Offerings the caller already has an OPEN ('sent') request for — derived from

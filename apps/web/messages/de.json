@@ -7044,6 +7044,7 @@
     "decline": "Ablehnen",
     "withdraw": "Zurückziehen",
     "messageCta": "Nachricht senden",
+    "acceptedNextNotYet": "Gemeinsames Vereinbaren der Bedingungen, das Verfolgen der Arbeit und ein gemeinsamer Arbeitsbericht sind für diese Anfrage noch nicht verfügbar. Klären Sie die Details im Gespräch.",
     "errorGeneric": "Etwas ist schiefgelaufen. Bitte versuchen Sie es erneut.",
     "duplicate": "Sie haben bereits eine offene Anfrage für diese Dienstleistung.",
     "requestAgain": "Erneut anfragen",

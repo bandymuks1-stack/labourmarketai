@@ -7044,6 +7044,7 @@
     "decline": "Decline",
     "withdraw": "Withdraw",
     "messageCta": "Send a message",
+    "acceptedNextNotYet": "Agreeing terms together, tracking the work and a shared work report for this request are not available yet. Agree the details in the conversation.",
     "errorGeneric": "Something went wrong. Please try again.",
     "duplicate": "You already have an open request for this service.",
     "requestAgain": "Request again",

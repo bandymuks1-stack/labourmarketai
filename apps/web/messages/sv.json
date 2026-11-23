@@ -7044,6 +7044,7 @@
     "decline": "Avböj",
     "withdraw": "Dra tillbaka",
     "messageCta": "Skicka ett meddelande",
+    "acceptedNextNotYet": "Att komma överens om villkor, följa arbetet och en gemensam arbetsrapport finns ännu inte för den här förfrågan. Kom överens om detaljerna i samtalet.",
     "errorGeneric": "Något gick fel. Försök igen.",
     "duplicate": "Du har redan en öppen förfrågan om den här tjänsten.",
     "requestAgain": "Skicka förfrågan igen",
