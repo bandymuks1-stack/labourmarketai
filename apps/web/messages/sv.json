@@ -19736,7 +19736,7 @@
       "message": "Skicka meddelande till teamet",
       "messageCompany": "Skicka meddelande till företaget",
       "kindOrganization": "Företagserbjudande",
-      "orgNext": "Överenskommet i princip (inget avtal). Kom överens om detaljerna och vilka personer som ska arbeta i samtalet."
+      "orgNext": "Överenskommet i princip (inget avtal). Att starta arbetet från ett företagserbjudande är inte tillgängligt än: kom överens om detaljer och personer i samtalet."
     },
     "orgHeading": "Erbjud vårt företag till ett öppet behov",
     "orgIntro": "Erbjud själva företaget – era personer, er tjänst eller som underentreprenör – mot ett öppet behov. Inget arbetslag behöver skapas först.",

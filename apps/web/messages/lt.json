@@ -19736,7 +19736,7 @@
       "message": "Rašyti komandai",
       "messageCompany": "Rašyti įmonei",
       "kindOrganization": "Įmonės pasiūlymas",
-      "orgNext": "Sutarta iš esmės (ne sutartis). Detales ir dirbsiančius žmones suderinkite pokalbyje."
+      "orgNext": "Sutarta iš esmės (ne sutartis). Pradėti darbą pagal įmonės pasiūlymą kol kas negalima: detales ir žmones suderinkite pokalbyje."
     },
     "orgHeading": "Pasiūlyti savo įmonę atviram poreikiui",
     "orgIntro": "Pasiūlykite pačią įmonę — savo žmones, paslaugą ar kaip subrangovą — vienam atviram poreikiui. Brigados kurti nereikia.",
