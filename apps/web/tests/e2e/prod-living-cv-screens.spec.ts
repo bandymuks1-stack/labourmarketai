@@ -1,12 +1,14 @@
-import { mkdirSync, writeFileSync } from "node:fs";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 
 import type { Browser, BrowserContext, Page } from "@playwright/test";
 
 import {
   buildPseudonyms,
+  catalogueWords,
   isRewritableContentType,
   leakCount,
+  maskFreeText,
   rewrite,
   stripPngMetadata,
   type Pseudonyms,
@@ -28,8 +30,15 @@ import { test } from "./prod-walk";
  *   2. Every same-origin document, RSC and fetch body is rewritten on the way to the browser:
  *      people become "Darbuotojas A/B/…", other organizations "Uzsakovas 1/2/…". The two chosen
  *      organizations stay. Photos and other images from storage are not loaded at all.
- *   3. Before each screenshot the whole document (text, attributes, scripts, hidden streamed
- *      copies) is checked for every original token. One left means FAIL and no screenshot.
+ *      Each name is matched with its Lithuanian endings (Linas, Lino, Linui), and e-mail
+ *      addresses, international phones and personal codes are masked, all at the same byte length.
+ *   3. Before each screenshot every visible text and field value is masked again,
+ *      case-insensitively: roster names, contact data (`redactContactData`), personal codes, and
+ *      every other capitalised word that is not a word of the product's own catalogues or one of
+ *      the two chosen organizations ("[…]"; over-masking is accepted).
+ *   4. Then the whole document is checked: the markup, scripts and hidden streamed copies for
+ *      every roster form as sent, and the visible text and field values case-insensitively. One
+ *      left means FAIL and no screenshot.
  *
  * Nothing that names a person or an organization is printed: no text locators, no text
  * assertions, no logging, and every failure is rethrown as a fixed message naming only the step. Only
@@ -57,6 +66,15 @@ const VIEWPORTS = [
   { key: "1440", options: { viewport: { width: 1440, height: 900 } } },
   { key: "390", options: { viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true } },
 ] as const;
+
+/** Words that are never names: the product's own LT and EN catalogues (interface, professions, skills). */
+function catalogue(): Set<string> {
+  const dir = resolve(__dirname, "..", "..", "messages");
+  const files = ["lt.json", "en.json", ...readdirSync(join(dir, "lt")).map((f) => join("lt", f)), ...readdirSync(join(dir, "en")).map((f) => join("en", f))];
+  const words = new Set<string>();
+  for (const f of files.filter((f) => f.endsWith(".json"))) catalogueWords(JSON.parse(readFileSync(join(dir, f), "utf8")), words);
+  return words;
+}
 
 test.describe.configure({ mode: "serial" });
 test.setTimeout(15 * 60_000);
@@ -157,7 +175,8 @@ async function organizationsOnPage(page: Page): Promise<string[]> {
 }
 
 /** Rewrite every same-origin text body before the page sees it; load no stored images. */
-async function deidentify(ctx: BrowserContext, p: Pseudonyms): Promise<void> {
+async function deidentify(ctx: BrowserContext, p: Pseudonyms, allow: ReadonlySet<string>): Promise<void> {
+  await ctx.exposeBinding("__lcvMask", (_source, texts: string[]) => texts.map((t) => maskFreeText(t, p, allow)));
   await ctx.route("**/*", async (route) => {
     const req = route.request();
     const url = new URL(req.url());
@@ -178,10 +197,38 @@ async function deidentify(ctx: BrowserContext, p: Pseudonyms): Promise<void> {
   });
 }
 
-/** Fail, without a screenshot, if any original token is anywhere in the document. */
+/** Mask every visible text node and field value through the Node-side `maskFreeText`. */
+async function maskRendered(page: Page): Promise<void> {
+  await page.evaluate(async () => {
+    const skip = new Set(["SCRIPT", "STYLE", "NOSCRIPT", "TEMPLATE"]);
+    const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    const nodes: Text[] = [];
+    while (walker.nextNode()) {
+      const n = walker.currentNode as Text;
+      if (n.parentElement && skip.has(n.parentElement.tagName)) continue;
+      if (/\S/.test(n.data)) nodes.push(n);
+    }
+    const fields = [...document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea")];
+    const mask = (window as unknown as { __lcvMask: (t: string[]) => Promise<string[]> }).__lcvMask;
+    const out = await mask([...nodes.map((n) => n.data), ...fields.map((f) => f.value), document.title]);
+    nodes.forEach((n, i) => {
+      if (out[i] !== n.data) n.data = out[i]!;
+    });
+    fields.forEach((f, i) => {
+      const v = out[nodes.length + i]!;
+      if (v !== f.value) f.value = v;
+    });
+    document.title = out[out.length - 1]!;
+  });
+}
+
+/** Fail, without a screenshot, if any roster form is anywhere in the document. */
 async function assertClean(page: Page, p: Pseudonyms): Promise<void> {
-  const html = await page.evaluate(() => `${document.title}\n${document.documentElement.outerHTML}`);
-  const leaks = leakCount(html, p.tokens);
+  const { html, visible } = await page.evaluate(() => ({
+    html: `${document.title}\n${document.documentElement.outerHTML}`,
+    visible: `${document.title}\n${document.body.innerText}\n${[...document.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea")].map((f) => f.value).join("\n")}`,
+  }));
+  const leaks = leakCount(html, p, false) + leakCount(visible, p, true);
   if (leaks > 0) {
     step = `${step} (${leaks} original name tokens remain; no screenshot taken)`;
     throw new Error("not de-identified");
@@ -189,6 +236,7 @@ async function assertClean(page: Page, p: Pseudonyms): Promise<void> {
 }
 
 async function shoot(page: Page, p: Pseudonyms, file: string, fullPage: boolean): Promise<void> {
+  await maskRendered(page);
   await assertClean(page, p);
   const png = stripPngMetadata(await page.screenshot({ fullPage, animations: "disabled", caret: "hide" }));
   writeFileSync(join(OUT, file), png, { mode: 0o600 });
@@ -234,11 +282,12 @@ test("LCV. eight de-identified Living CV screens", async ({ browser }) => {
   const keep = orgs.map((o) => o.name);
   const p = buildPseudonyms(people, companies.filter((c) => !keep.includes(c)), keep);
   if (p.tokens.length === 0) throw new Error("living-cv-screens failed at: no names discovered; nothing to de-identify against");
+  const allow = catalogue();
 
   // 2. The screens, each viewport in its own rewritten context.
   for (const vp of VIEWPORTS) {
     const ctx = await context(browser, vp.options);
-    await deidentify(ctx, p);
+    await deidentify(ctx, p, allow);
     const view = await ctx.newPage();
     try {
       await at(`${vp.key}: worker Living CV, overview`, async () => {

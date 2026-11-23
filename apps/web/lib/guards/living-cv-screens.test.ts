@@ -48,8 +48,23 @@ describe("the walk is read-only and prints no names", () => {
     expect(spec).toMatch(/rewrite\(await res\.text\(\), p\)/);
     expect(spec).toMatch(/document\.documentElement\.outerHTML/);
     const shoot = spec.slice(spec.indexOf("async function shoot"));
+    expect(shoot.indexOf("maskRendered(")).toBeGreaterThan(-1);
+    expect(shoot.indexOf("maskRendered(")).toBeLessThan(shoot.indexOf("assertClean("));
     expect(shoot.indexOf("assertClean(")).toBeLessThan(shoot.indexOf("page.screenshot("));
     expect(spec).toMatch(/stripPngMetadata\(/);
+  });
+
+  it("masks free text in every visible text and field (owner condition 4) and fails closed", () => {
+    // Names, contact data, personal codes and unknown capitalised words, through the Node-side masker.
+    expect(spec).toMatch(/exposeBinding\("__lcvMask", \(_source, texts: string\[\]\) => texts\.map\(\(t\) => maskFreeText\(t, p, allow\)\)\)/);
+    expect(spec).toMatch(/createTreeWalker\(document\.body, NodeFilter\.SHOW_TEXT\)/);
+    expect(spec).toMatch(/querySelectorAll<HTMLInputElement \| HTMLTextAreaElement>\("input, textarea"\)/);
+    // The markup as sent, AND the visible text case-insensitively.
+    expect(spec).toMatch(/leakCount\(html, p, false\) \+ leakCount\(visible, p, true\)/);
+    const lib = read("lib/testing/living-cv-deidentify.ts");
+    expect(lib).toMatch(/redactContactData\(out\)/);
+    expect(lib).toMatch(/LT_NAME_ENDINGS/);
+    expect(lib).toMatch(/\[3-6\]\\d\{10\}/);
   });
 
   it("loads no stored photos or documents", () => {
