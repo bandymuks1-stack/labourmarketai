@@ -6,7 +6,7 @@
 
 Required when this PR adds a function, page, route, component, navigation, store, API/RPC, SQL function, table, agent tool or AI assistant. Otherwise write "No new structure".
 
-- Capability id(s) in `lib/product-gate/capability-register.ts`:
+- Function row(s) in `docs/program/FUNCTION_REGISTER.md` and capability id(s) in `lib/product-gate/capability-register.ts`:
 - Existing implementations found (paths) and why they do or do not fit:
 - Overlapping open PRs / lane work (query used):
 - Governing decision(s):

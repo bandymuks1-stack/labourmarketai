@@ -6,8 +6,8 @@
 > makes `AGENTS.md` → "Before you modify or create a material product
 > capability", step 10 ("search for an existing implementation before creating
 > a new one"), concrete and reviewable. It is **not** a second coordination
-> system: it uses the existing capability register, the existing lane register,
-> the existing reviewers and the existing PR flow.
+> system: it uses the existing function registers, the existing coordination
+> register, the existing reviewers and the existing PR flow.
 
 Owner order 2026-11-23 (P0 architecture audit, issue #3679, item 8): *"Skirtingiems
 agentams draudžiama nepriklausomai kurti tos pačios funkcijos, nežinant apie
@@ -17,12 +17,12 @@ kitų darbą."*
 
 | # | Step | Where | What the PR body must show |
 |---|---|---|---|
-| 1 | Find the capability in the function register | `apps/web/lib/product-gate/capability-register.ts` (executable) + `docs/CAPABILITY_INVENTORY.md` §6 (reasoning); `node .github/scripts/product-truth.mjs` | The capability id(s) touched, or "none — new capability" |
+| 1 | Find the function in the registers | `docs/program/FUNCTION_REGISTER.md` (per-function status, owner order 2026-10-28) and `apps/web/lib/product-gate/capability-register.ts` + `docs/CAPABILITY_INVENTORY.md` §6 (machine-checked capabilities); `node .github/scripts/product-truth.mjs` | The function row(s) and capability id(s) touched, or "none — new" |
 | 2 | Find similar existing implementations | `git grep` for the user action, route segment, component name, RPC/SQL name and i18n keys; `docs/audits/DUPLICATION_AUDIT.md`; `docs/architecture/TECHNICAL_ARCHITECTURE_MAP.md` | The files found and why each one does or does not fit |
-| 3 | Check open PRs and other lanes' work | Open PRs touching the same paths (`gh api repos/<repo>/pulls?state=open` or the PR list) and the active coordination issue (currently #3679; lane register #3265) | The overlapping PRs, or "none found" with the query used |
+| 3 | Check open PRs and other lanes' work | Open PRs touching the same paths (`gh api repos/<repo>/pulls?state=open` or the PR list), `docs/program/COORDINATION_REGISTER.md` and the active coordination issue (currently #3679; lane register #3265) | The overlapping PRs, or "none found" with the query used |
 | 4 | Check approved decisions | `docs/OWNER_TARGET_ARCHITECTURE_V1.md`, `docs/DECISIONS/*.md`, `docs/PLATFORM_DOCTRINE.md`; for navigation `docs/design/CAROUSEL_NAVIGATION_SPEC.md` | The decision(s) that govern the change |
 | 5 | Decide extend vs new | Classification from `AGENTS.md`: `CONNECT` · `FIX` · `EXTEND` · `REPLACE` · `NEW` | The class, and for `EXTEND` the existing module extended |
-| 6 | `NEW` only with proof | — | Why each existing implementation from step 2 cannot be extended without degrading UX, architecture or security (decision 0016), and the new capability id added to the register **in the same PR** |
+| 6 | `NEW` only with proof | — | Why each existing implementation from step 2 cannot be extended without degrading UX, architecture or security (decision 0016), and the new row/capability added to the registers **in the same PR** |
 
 A PR that adds a structure of the kinds listed in the heading and has no
 completed "Reuse check" section (`.github/pull_request_template.md`) is not
@@ -53,7 +53,8 @@ the reason:
 | Structure | The one place | Source |
 |---|---|---|
 | Architecture | `docs/OWNER_TARGET_ARCHITECTURE_V1.md` | CLAUDE.md, ARCH precedence |
-| Function register | `lib/product-gate/capability-register.ts` + `CAPABILITY_INVENTORY.md` §6 | AGENTS.md |
+| Function status | `docs/program/FUNCTION_REGISTER.md` (per function) with `lib/product-gate/capability-register.ts` + `CAPABILITY_INVENTORY.md` §6 (machine-checked capabilities). Two registers exist today; their reconciliation into one source is item 1 of `docs/audits/DUPLICATION_AUDIT.md` — until then, update both | owner order 2026-10-28; AGENTS.md |
+| Coordination (who does what) | `docs/program/COORDINATION_REGISTER.md` + the active coordination issue | owner order 2026-10-28 |
 | Main navigation | the three-level carousel system in `docs/design/CAROUSEL_NAVIGATION_SPEC.md` | owner design principle, #3679 item 4 |
 | Long-term memory / AI context | canonical tables under RLS | decision 0024 |
 | A person's professional history | `lib/journal/professional-experience.ts` | decision 0025 |
