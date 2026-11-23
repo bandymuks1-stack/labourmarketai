@@ -38,17 +38,36 @@ const SIZE = {
 export function AssistantMark({
   size = "md",
   className = "",
+  testId = "assistant-mark",
 }: {
   size?: keyof typeof SIZE;
   className?: string;
+  /** The header's "My space" wears the mark too (owner P0 2026-11-23, N3);
+   *  it carries its own id so the stream's turns stay countable. */
+  testId?: string;
 }) {
   return (
     <span
       aria-hidden
-      data-testid="assistant-mark"
+      data-testid={testId}
       className={`flex flex-none items-center justify-center border border-ink-500 bg-ink-800 ${SIZE[size]} ${className}`}
     >
       <LmLogo title="" className="size-full" />
     </span>
   );
+}
+
+/**
+ * "My space" in the one header wears the ASSISTANT'S MARK, not a house
+ * (owner P0 2026-11-23: the AI assistant clearly visible and reachable;
+ * CAROUSEL_NAVIGATION_SPEC OD-2 (a), step N3). `/dashboard` IS the
+ * conversation with the assistant, so the item that leads there carries the
+ * mark every assistant turn shows — one identity, no new control.
+ *
+ * It takes the icon props the header spreads on every nav icon
+ * (`iconControl()`): the size class is kept, the stroke is not used (the mark
+ * is the brand vector, not a stroke icon).
+ */
+export function AssistantNavIcon({ className = "" }: { className?: string; strokeWidth?: number }) {
+  return <AssistantMark size="sm" className={className} testId="nav-assistant-mark" />;
 }
