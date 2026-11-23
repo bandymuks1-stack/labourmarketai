@@ -71,7 +71,7 @@ async function openOfferForm(p: Page) {
   await p.goto(`${B}/en/dashboard/services`); await p.waitForLoadState("networkidle").catch(() => {});
   const sec = p.locator('[data-testid^="team-demand-offer-section-"]').first();
   await expect(sec).toBeVisible({ timeout: 30_000 });
-  if (!(await sec.getAttribute("open").then((v) => v !== null))) await sec.locator("summary").click();
+  if (!(await sec.getAttribute("open").then((v) => v !== null))) await sec.locator(":scope > summary").click();
   await expect(p.locator('[data-testid^="team-offer-demand-"]').first()).toBeVisible({ timeout: 30_000 });
   return sec;
 }
