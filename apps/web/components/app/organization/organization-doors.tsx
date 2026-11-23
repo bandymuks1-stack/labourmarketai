@@ -12,6 +12,7 @@ import {
   UserSearch,
   UsersRound,
 } from "lucide-react";
+import { useEffect, useRef } from "react";
 import { Link, usePathname } from "@/lib/i18n/navigation";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
 import type { OrganizationDoorId } from "@/lib/company/organization-doors";
@@ -74,13 +75,30 @@ export function OrganizationDoors({
   className?: string;
 }) {
   const pathname = usePathname();
+  const navRef = useRef<HTMLElement>(null);
+  // On a phone the doors are one row that scrolls sideways; the current door
+  // is brought into it without moving the page.
+  useEffect(() => {
+    const nav = navRef.current;
+    const current = nav?.querySelector<HTMLElement>('[aria-current="page"]');
+    if (!nav || !current || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollLeft = Math.max(0, current.offsetLeft - nav.offsetLeft - 16);
+  }, [pathname]);
   if (doors.length === 0) return null;
   return (
     <nav
+      ref={navRef}
       aria-label={ariaLabel}
       data-testid="organization-doors"
       className={cn(
-        "flex flex-wrap gap-1.5 pb-1",
+        // PHONE: one row of doors that scrolls sideways, the next door showing
+        // at the edge (no scroll-snap: the one snapping rail is CardRail —
+        // shared-ui-system "there is one rail") (owner orders 2026-11-21/22 via the
+        // coordinator, 2026-11-22: 8–9 doors had wrapped into three or four
+        // rows, 150–200 px above every organisation page — UX gap SH-6). It
+        // replaces the 2026-10-25 "wrap, never scroll" rule for this strip.
+        // From `sm` the doors wrap as before.
+        "flex gap-1.5 pb-1 max-sm:flex-nowrap max-sm:overflow-x-auto max-sm:overscroll-x-contain max-sm:scroll-px-4 max-sm:[scrollbar-width:none] max-sm:[&::-webkit-scrollbar]:hidden sm:flex-wrap",
         className,
       )}
     >
