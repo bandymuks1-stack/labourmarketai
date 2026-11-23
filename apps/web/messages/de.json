@@ -19635,7 +19635,8 @@
       "heading": "Ihre Angebote",
       "none": "Noch keine Angebote.",
       "withdraw": "Zurückziehen",
-      "message": "Dem Auftraggeber schreiben"
+      "message": "Dem Auftraggeber schreiben",
+      "orgNext": "Der Auftraggeber hat grundsätzlich zugestimmt (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
     },
     "status": {
       "offered": "Wartet auf Antwort",
@@ -19736,7 +19737,7 @@
       "message": "Dem Team schreiben",
       "messageCompany": "Dem Unternehmen schreiben",
       "kindOrganization": "Unternehmensangebot",
-      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Details und die arbeitenden Personen klären Sie im Gespräch."
+      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
     },
     "orgHeading": "Unser Unternehmen für einen offenen Bedarf anbieten",
     "orgIntro": "Bieten Sie Ihr Unternehmen selbst an — Ihre Leute, Ihre Leistung oder als Subunternehmer — für einen offenen Bedarf. Kein Team muss zuerst angelegt werden.",

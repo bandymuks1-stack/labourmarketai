@@ -19635,7 +19635,8 @@
       "heading": "Jūsų pasiūlymai",
       "none": "Pasiūlymų dar nėra.",
       "withdraw": "Atšaukti",
-      "message": "Rašyti užsakovui"
+      "message": "Rašyti užsakovui",
+      "orgNext": "Užsakovas iš esmės sutiko (tai nėra sutartis). Pradėti darbus pagal įmonės pasiūlymą per platformą dar negalima: detales ir dirbsiančius žmones suderinkite pokalbyje."
     },
     "status": {
       "offered": "Laukiama atsakymo",
@@ -19736,7 +19737,7 @@
       "message": "Rašyti komandai",
       "messageCompany": "Rašyti įmonei",
       "kindOrganization": "Įmonės pasiūlymas",
-      "orgNext": "Sutarta iš esmės (ne sutartis). Detales ir dirbsiančius žmones suderinkite pokalbyje."
+      "orgNext": "Iš esmės sutarta (tai nėra sutartis). Pradėti darbus pagal įmonės pasiūlymą per platformą dar negalima: detales ir dirbsiančius žmones suderinkite pokalbyje."
     },
     "orgHeading": "Pasiūlyti savo įmonę atviram poreikiui",
     "orgIntro": "Pasiūlykite pačią įmonę — savo žmones, paslaugą ar kaip subrangovą — vienam atviram poreikiui. Brigados kurti nereikia.",
