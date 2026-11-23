@@ -140,6 +140,7 @@ Each entry names its source.
 | CV-18 | Chat CV import drops skill inference | CONFIRMED | MAIN | One proposals hook for both flows |
 | CV-19 | ESCO prefix search twice | CONFIRMED | MAIN | Point the slow one at the RPC |
 | CV-20 | Copied period check; stated-hours sum | CONFIRMED | MAIN | Import `isPeriodRecord`; check the sum |
+| CV-21 | Skill names from two catalogues | CONFIRMED | PR #3685 | One catalogue; one slug-name fallback |
 | SQL-1 | Old RPC versions already closed | CONFIRMED | PROD | Drop in one reviewed migration, or leave |
 | SQL-2 | Old and new both executable, old as fallback | CONFIRMED | PROD | Revoke old, then remove the fallback, family by family |
 | SQL-3 | Old version executable, no caller | CONFIRMED | PROD | Revoke first (reversible), drop later |
@@ -1225,7 +1226,7 @@ Finding: CONFIRMED. Class: MAIN. Source: Lane A (A-3).
 | Function | Telling a worker with no entries that the journal is empty |
 | Implementations | `components/app/journal/journal-calendar.tsx:237,333` (`dayEmpty`, `periodEmpty`); `app/[locale]/dashboard/journal/page.tsx:1786-1796` (`journal-day-empty`); `journal/page.tsx:1802` (`EmptyState`, `listEmptyTitle`); and the numbers card at `journal/page.tsx:1566`. |
 | Usage | All on `/dashboard/journal`. |
-| Problem | Up to four "nothing here yet" messages on one screen. |
+| Problem | Up to four "nothing here yet" messages on one screen. Lane A traced it further: there is no competing component or data path. Three blocks each report the same zero, so this is a screen duplicate, not a code duplicate. |
 | Proposal | One empty state for a worker with no entries. Each block keeps its own message once entries exist. |
 | Risk | Low. |
 | Evidence | Local screenshot `journal__lt__390__light.png` (Lane A). |
@@ -1243,6 +1244,20 @@ Finding: CONFIRMED that the writers exist; SUSPECTED that this is harmful duplic
 | Proposal | Keep for now. Later, one `worker_skills` write core that enforces the source and verified rules. |
 | Risk | Medium: evidence integrity. |
 | Evidence | Grep of `.from("worker_skills")` writes. |
+
+### CV-21 · Skill names looked up in two catalogues
+
+Finding: CONFIRMED. Class: PR #3685 (the fix). Source: Lane A (A-8), on `main` `125e2182`.
+
+| Field | Content |
+|---|---|
+| Function | Turning a skill slug into its name |
+| Implementations | Canonical: the `skillNames` namespace (`messages/<locale>/skill-names.json`, 161 names), read by `lib/player-card/labels.ts:50`, `components/app/learning-compass-section.tsx:39` and `app/[locale]/dashboard/profile/page.tsx:196`.<br>Competing: `lib/player-card/requirement-ledger-labels.ts`, which read `getTranslations("skills")`. That is the skills section's interface copy, which holds no slugs. |
+| Usage | `buildRequirementLedgerLabels()` is called by `dashboard/profile/page.tsx:664`, `dashboard/opportunities/page.tsx:758` and `dashboard/instructions/page.tsx:193`. |
+| Problem | The lookup always missed, so every non-English locale showed the slug with its dashes removed ("arc welding"). Separately, the same fallback that makes a slug readable is written five times: `labels.ts:257,312`, `skill-evidence-chart.tsx:150`, `learning-compass-section.tsx:45` and `company/scouting/page.tsx:723`. |
+| Proposal | One catalogue: done in #3685, one line. Make the five fallbacks one helper. |
+| Risk | Low. |
+| Evidence | Code read; the guard `lib/guards/requirement-ledger-skill-names.test.ts` (in #3685). |
 
 ### CV-15 · The Player Card reads work history with its own limit
 
@@ -1815,7 +1830,7 @@ Each of these looks like a duplicate, but differs in purpose, rights or source. 
 | Lane | Area | Received (UTC) | Basis |
 |---|---|---|---|
 | E | Own sweep (five read-only searches) and REG-1 | 05:15–05:30 | `main` `125e21827` |
-| A | Worker UI | 05:13 (#3679 comment 7092221320) | `main` `125e2182` |
+| A | Worker UI | 05:13 (#3679 comment 7092221320); A-8 at 05:35 | `main` `125e2182` |
 | H | Offers, proposals, team offers | 05:14 | `origin/main` `8bcda5bed`; production migration ledger |
 | D | SQL functions, RPCs, tables | 05:16 (read time corrected 05:17) | `origin/main` `f65c572`; production catalogue 05:11–05:16 |
 | B | AI assistants, tool registries, MCP | 05:17 | `main` `125e21827`; production build `430bd475` |
