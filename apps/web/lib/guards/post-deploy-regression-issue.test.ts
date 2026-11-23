@@ -34,6 +34,14 @@ describe("the report job", () => {
     expect(report).toMatch(/DEPLOY_SHA: \$\{\{ github\.event_name == 'workflow_run' && github\.event\.workflow_run\.head_sha \|\| github\.sha \}\}/);
   });
 
+  it("a run whose build changed underneath it reports a window, and the green build is kept", () => {
+    expect(wf).toMatch(/window: \$\{\{ steps\.record\.outputs\.window \}\}/);
+    expect(wf).toMatch(/window: \$\{\{ steps\.after\.outputs\.window \}\}/);
+    expect(report).toMatch(/SMOKE_WINDOW: \$\{\{ needs\.smoke\.outputs\.window \}\}/);
+    expect(report).toContain("SIGNED_IN_WINDOW: ${{ needs.signed-in.outputs.window }}");
+    expect(report).toMatch(/if: steps\.report\.outputs\.green == 'true'\n\s+uses: actions\/upload-artifact@[0-9a-f]+ # v4\n\s+with:\n\s+name: verified-build/);
+  });
+
   it("the script never rolls back and keeps one issue", () => {
     expect(script).toMatch(/set -euo pipefail/);
     expect(script).not.toMatch(/\bgit (revert|reset|push|checkout)\b|\bgh (workflow run|run rerun|pr merge)\b/);
@@ -95,6 +103,28 @@ describe("the issue body lists the pull requests merged since the last green smo
         env: { ...process.env, REGRESSION_ISSUE_DRY_RUN: "1", LAST_GREEN_SHA: green, SMOKE: "success", SIGNED_IN: "success", DEPLOY_SHA: deploy, RUN_URL: "x" },
       });
       expect(ok.trim()).toBe(`GREEN ${deploy.slice(0, 8)}`);
+      // A green run keeps the commit it verified, for the next red run's baseline.
+      expect(readFileSync(join(dir, "verified-build.txt"), "utf8").trim()).toBe(deploy);
+
+      // The range ends at the BUILD production served, not at a newer main
+      // commit the deploy run carried (Codex review on #3271).
+      const later = commit("feat(e): merged after the deploy started (#104)");
+      const body = execFileSync("bash", [SCRIPT], {
+        cwd: dir,
+        encoding: "utf8",
+        env: { ...process.env, REGRESSION_ISSUE_DRY_RUN: "1", LAST_GREEN_SHA: green, SMOKE: "failure", SIGNED_IN: "skipped", BUILD: deploy.slice(0, 9), DEPLOY_SHA: later, RUN_URL: "x" },
+      });
+      expect(body).toContain("- #103 fix(d): the deploy that broke");
+      expect(body).not.toContain("#104");
+
+      // Production moved to another build during the run: no claim, issue untouched.
+      const moved = execFileSync("bash", [SCRIPT], {
+        cwd: dir,
+        encoding: "utf8",
+        env: { ...process.env, REGRESSION_ISSUE_DRY_RUN: "1", LAST_GREEN_SHA: green, SMOKE: "failure", SIGNED_IN: "skipped", SMOKE_WINDOW: "changed", DEPLOY_SHA: deploy, RUN_URL: "x" },
+      });
+      expect(moved).toContain("WINDOW CHANGED");
+      expect(moved).not.toContain("Pull requests merged");
     } finally {
       rmSync(dir, { recursive: true, force: true });
     }

@@ -68,6 +68,9 @@ jobs:
     timeout-minutes: 20
     outputs:
       build: ${{ steps.build.outputs.build }}
+      # `changed` when production moved to another build during the run: the run
+      # proves nothing about either build, and `report` leaves the issue alone.
+      window: ${{ steps.record.outputs.window }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -145,10 +148,12 @@ jobs:
           node apps/web/scripts/public-cta-crawl.mjs --origin https://labourmarket.ai --locales lt,en --only "$pages" --no-discover --out smoke.json | tee smoke.log
 
       - name: Record the result against the build
+        id: record
         if: always()
         run: |
           set -euo pipefail
           after=$(curl -sS --max-time 30 https://labourmarket.ai/api/health | jq -r 'if .ok == true then .build else empty end' || true)
+          if [ -n "${{ steps.build.outputs.build }}" ] && [ -n "$after" ] && [ "$after" != "${{ steps.build.outputs.build }}" ]; then echo "window=changed" >> "$GITHUB_OUTPUT"; fi
           {
             if [ "$after" != "${{ steps.build.outputs.build }}" ]; then echo "**The build changed during the smoke (now \`${after:-unreadable or not ok}\`): this run records nothing.**"; fi
             echo '```'
@@ -180,6 +185,8 @@ jobs:
     concurrency:
       group: post-deploy-smoke-signed-in
       cancel-in-progress: false
+    outputs:
+      window: ${{ steps.after.outputs.window }}
     permissions:
       contents: read
       actions: read # the deploy brake reads deploy-vps.yml runs
@@ -278,10 +285,12 @@ jobs:
         run: rm -f apps/web/tests/e2e/.storage-state.prod-qa*.json
 
       - name: The build did not change under the smoke
+        id: after
         if: always()
         run: |
           set -euo pipefail
           after=$(curl -sS --max-time 30 https://labourmarket.ai/api/health | jq -r 'if .ok == true then .build else empty end' || true)
+          if [ -n "$after" ] && [ "$after" != "${{ needs.smoke.outputs.build }}" ]; then echo "window=changed" >> "$GITHUB_OUTPUT"; fi
           if [ "$after" != "${{ needs.smoke.outputs.build }}" ]; then
             echo "**The build changed during the signed-in smoke (now \`${after:-unreadable or not ok}\`): this run records nothing.**" >> "$GITHUB_STEP_SUMMARY"
             exit 1
@@ -316,4 +325,18 @@ jobs:
           BUILD: ${{ needs.smoke.outputs.build }}
           DEPLOY_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          SMOKE_WINDOW: ${{ needs.smoke.outputs.window }}
+          SIGNED_IN_WINDOW: ${{ needs.signed-in.outputs.window }}
+        id: report
         run: bash .github/scripts/post-deploy-regression-issue.sh
+
+      # The build a GREEN smoke verified: the next red run lists the merges after it.
+      # A run's own head SHA is the newest main commit, not the build it tested.
+      - name: Keep the verified build (90 days)
+        if: steps.report.outputs.green == 'true'
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: verified-build
+          path: verified-build.txt
+          if-no-files-found: error
+          retention-days: 90
