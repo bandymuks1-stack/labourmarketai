@@ -269,19 +269,26 @@ export function CandidateDraftsManager({
   drafts,
   labels,
   needsMigration,
+  honestyInPageFold = false,
 }: {
   drafts: CandidateDraft[];
   labels: CandidateDraftsLabels;
   needsMigration: boolean;
+  /** The page's own "How this works" fold carries the honesty note
+   *  (`CompanyActionNextActions` `extra`), so this one is not drawn: a page
+   *  never shows two identical folds (duplication audit ORG-8). */
+  honestyInPageFold?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-6" data-testid="candidate-drafts-manager">
       <header className="flex flex-col gap-1">
         <PageTitle>{labels.title}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{labels.intro}</p>
-        <Explain summary={labels.howItWorks}>
-          <p data-testid="candidate-drafts-honesty">{labels.honestyNote}</p>
-        </Explain>
+        {honestyInPageFold ? null : (
+          <Explain summary={labels.howItWorks}>
+            <p data-testid="candidate-drafts-honesty">{labels.honestyNote}</p>
+          </Explain>
+        )}
       </header>
 
       {needsMigration ? (
