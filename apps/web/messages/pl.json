@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Reprezentuję instytucję edukacyjną",
-            "desc": "Zapraszanie uczących się, wgląd w ich udział i łączenie ich z praktykami i pracą."
+            "desc": "Zapraszanie uczących się, prowadzenie programów i śledzenie ich praktyk oraz wyników."
           }
         },
         "heading": "Zaczynają Państwo jako osoba czy jako firma?",
@@ -19634,7 +19634,8 @@
       "heading": "Państwa oferty",
       "none": "Brak ofert.",
       "withdraw": "Wycofaj",
-      "message": "Napisz do zleceniodawcy"
+      "message": "Napisz do zleceniodawcy",
+      "orgNext": "Zleceniodawca wstępnie się zgodził (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
     },
     "status": {
       "offered": "Czeka na odpowiedź",
@@ -19735,7 +19736,7 @@
       "message": "Napisz do zespołu",
       "messageCompany": "Napisz do firmy",
       "kindOrganization": "Oferta firmy",
-      "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, proszę ustalić w rozmowie."
+      "orgNext": "Uzgodnione wstępnie (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
     },
     "orgHeading": "Zaoferuj naszą firmę do otwartej potrzeby",
     "orgIntro": "Proszę zaoferować samą firmę — swoich ludzi, swoją usługę lub jako podwykonawca — do jednej otwartej potrzeby. Nie trzeba najpierw tworzyć brygady.",

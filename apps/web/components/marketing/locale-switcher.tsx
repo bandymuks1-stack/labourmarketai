@@ -67,6 +67,7 @@ export const NATIVE_LOCALE_NAMES: Record<string, string> = {
 export function LocaleSwitcher({
   className,
   compactBelowSm = false,
+  compactBelowLg = false,
   compactUntilWide = false,
   inline = false,
 }: {
@@ -93,6 +94,12 @@ export function LocaleSwitcher({
    * the full name.
    */
   compactBelowSm?: boolean;
+  /**
+   * With `compactBelowSm`: keep the CODE up to `lg` too, where the public
+   * header also carries the assistant entry (owner P0 2026-11-23,
+   * CAROUSEL_NAVIGATION_SPEC N2) and has no room for the native name.
+   */
+  compactBelowLg?: boolean;
   /**
    * Show the locale CODE until the host bar is wide enough for every label
    * (≥1800px), then the native name. OPT-IN for the ONE authenticated header,
@@ -170,10 +177,10 @@ export function LocaleSwitcher({
           </>
         ) : compactBelowSm ? (
           <>
-            <span className="hidden sm:inline">
+            <span className={compactBelowLg ? "hidden lg:inline" : "hidden sm:inline"}>
               {NATIVE_LOCALE_NAMES[active] ?? active.toUpperCase()}
             </span>
-            <span className="sm:hidden">{active.toUpperCase()}</span>
+            <span className={compactBelowLg ? "lg:hidden" : "sm:hidden"}>{active.toUpperCase()}</span>
           </>
         ) : (
           <span>{NATIVE_LOCALE_NAMES[active] ?? active.toUpperCase()}</span>
