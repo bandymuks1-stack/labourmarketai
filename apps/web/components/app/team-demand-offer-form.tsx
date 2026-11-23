@@ -257,6 +257,14 @@ export function TeamDemandOfferForm({
                         </Button>
                       ) : null}
                       </div>
+                      {org && o.status === "accepted" ? (
+                        // Owner P0 2026-11-23: what is not built says so. A company
+                        // offer cannot yet be handed off to a project (a crew is
+                        // needed: #3649, RED, not applied) — never imply it can.
+                        <p className="text-text-secondary" data-testid={`team-offer-sent-org-next-${o.offerId}`}>
+                          {t("sent.orgNext")}
+                        </p>
+                      ) : null}
                       {o.status === "offered" || o.status === "accepted" || o.status === "assigned" ? (
                         <TeamOfferTerms offerId={o.offerId} offerOpen={o.status === "offered"} canAgree />
                       ) : null}

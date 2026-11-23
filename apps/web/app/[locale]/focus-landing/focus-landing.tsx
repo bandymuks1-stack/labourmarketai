@@ -99,10 +99,7 @@ export async function FocusLanding({
           <div className="mx-auto max-w-container px-4 pb-10 pt-5 sm:px-12 sm:pt-10">
             {/* 1. THE GOAL CENTRE */}
             <section className="flex min-w-0 flex-col gap-4">
-              <LandingIntentChoice
-                lead={tV3("lead")}
-                phoneMore={{ ids: ["partners", "agencies"], label: tV3("moreChoices") }}
-              />
+              <LandingIntentChoice lead={tV3("lead")} />
               <p
                 className="flex items-center gap-3 text-xs font-medium uppercase tracking-label text-text-muted"
                 data-testid="landing-or"

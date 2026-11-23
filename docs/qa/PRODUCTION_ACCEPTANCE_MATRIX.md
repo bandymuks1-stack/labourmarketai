@@ -60,6 +60,7 @@ Lane C supplied this section for #3679 on 2026-11-23 at about 05:20 UTC, read fr
 | Order (buyer workspace) | PASS | buyer-workspace desktop · 45094390854 · ee29a3b7 · 14 | Two earlier failures are superseded. 44971584269 failed because the walk never chose the required country (fixed by #3589). 45003241107 was stopped by the deploy-quiet brake, and no test ran. |
 | Project | PASS / LOCAL | project-execution desktop · 44906961206 · eed72052 · 94 (E-1 to E-6)<br>project-context desktop · 44907816401 · eed72052 · 94 | E-1 to E-6 create the project, stages and tasks, assign a worker and issue the clash receipt. LOCAL: `employer-journey-isolated` E-9 (project and assignment); `hiring-chain-isolated` (direct hire → project, #3611). |
 | Work accounting | PASS / LOCAL | journal-confirm desktop · 44902949287 · eed72052 · 94<br>journal-confirm phone · 44903366199 · eed72052 · 94<br>org-roster desktop · 44905313755 · 94<br>org-roster phone · 44905801746 · 94 | journal-confirm: the worker records the day, the employer approves it, and the worker sees it confirmed. org-roster: roster import, on- and offboarding, instruction, asset and isolation. LOCAL: `employer-journey-isolated` E-10 (a journal day accepted by the company as the client). |
+| Work instruction to the hired worker | FAIL (fixed in #3704, not merged) | none: no production walk sends an instruction | A new company's direct hire is on the project but not on the roster, so `/dashboard/instructions` showed no assigned workers. Instructions also raised no new-message notification (MSG-3). #3704 (draft, app code only) fixes both. LOCAL: `employer-journey-isolated` E-1 to E-10 and E-9b at 1440 and 390 px, 22/22; E-9b checks the `message_received` notification. Source: Lane C, 2026-11-23. |
 
 Also in open PRs, RED and not applied: agency named candidates (#3651), messaging on an open need (#3647) and provider pseudonyms (#3657).
 
@@ -160,6 +161,161 @@ Each cell is the newest production run for that step: spec · run · behind. GAP
 | Institution | GAP (L-1 declares training on an existing organization) | GAP | learning-practice L-12 (education home on a phone) · 5 | learning-practice L-1, L-2, L-4 · 44860184317 · 96 | learning-practice L-1, L-4 · 96 | GAP | as for Worker |
 
 Gaps to close: step 2 for every group (dispatch request-doors and public-market-direction); step 1 for agency, subcontractor and institution; step 6 for student and institution; step 5 for student. Step 7 is partly covered until ux-metrics runs on this build.
+
+Further gaps from Lane D (2026-11-23):
+
+- The personal service lane has nothing after a request is accepted: no terms, execution or report. #3697 (draft) states this under accepted requests.
+- No production walk moves a learner into a worker profile with the learning history kept. This adds to the student's step 6 gap.
+- The education sign-up choice promised that the institution connects learners to internships and jobs, but no such door exists. #3700 corrects the line in every locale.
+
+D's result files also confirm two per-step counts: marketplace-goods-services desktop 44967795943 passed 14/14 (G-1 to G-9, S-1 to S-5), and buyer-workspace desktop 45094390854 passed 10/10 (B-0 to B-8).
+
+## Chain — owner addendum 2026-11-23
+
+The owner's chain, the same for every role:
+
+1. identity
+2. historical experience
+3. competencies
+4. opportunities
+5. agreements and projects
+6. work, time and results
+7. confirmation
+8. Living CV, automatically
+9. reuse
+
+For each step, the table gives:
+- **Recorded:** whether the fact is recorded.
+- **Next step:** whether the following step shows it.
+- **Living CV:** whether it shows there.
+
+A fact that is recorded but not shown is FAIL. GAP means no walk checks it; it is not a PASS.
+
+**Sources:**
+- Production runs are named by spec · run; their build and "behind" count are in the sections above.
+- LOCAL means the isolated local stack: `signup-isolated` run 45116196998 (#3670 head 2bb90eb, main plus #3670) runs every isolated spec named here.
+
+**Run ids:**
+
+| Run id | Walk |
+|---|---|
+| 45094839877 | profile-cv-history desktop |
+| 44901160408 | fresh-activation desktop |
+| 44902949287, 44903366199 | journal-confirm desktop, phone |
+| 45052181467 | orders-bookings phone |
+| 44858511879 | company-chain desktop |
+| 44644887648 | agency-chain desktop |
+| 44906216102 | brigade-formation desktop |
+| 45141893755 | learning-practice phone |
+| 44860184317 | learning-practice desktop |
+
+### Worker
+
+| Step | Recorded | Next step | Living CV |
+|---|---|---|---|
+| 1. Identity | PASS: fresh-activation (first visit, onboarding) 44901160408 | PASS: profile-cv-history P-2 (not sent back into onboarding) 45094839877 | PASS: the Living CV opens as the person (P-7) |
+| 2. Historical experience | PASS: profile-cv-history P-7, P-9, P-24 (employment, education; save, reload, remove) | PASS: P-18 (one total, every hour once) | PASS: P-7, P-9, P-25 |
+| 3. Competencies | PASS: P-11, P-13 (catalogue and own skills) | LOCAL: `job-fit-evidence-isolated` F-5 (fit band on the board comes from the work) | PASS: P-12, P-13 (evidence tiers; self-declared kept apart)<br>LOCAL: `skills-chain-isolated` K-3, K-6 |
+| 4. Opportunities | PASS: jobs-search 44902071507<br>PASS: company-chain C-1 (raise a hand) 44858511879 | PASS: C-2 (the company sees the person who raised a hand) | GAP: no walk checks that an application leaves a trace on the CV |
+| 5. Agreements and projects | PASS: orders-bookings O-5 (accepts the booking) 45052181467 | PASS: O-7, O-10 (the booking and the engagement in Personal space)<br>LOCAL: `hiring-chain-isolated` H-5 (the worker sees the project) | GAP: no walk checks the engagement on the Living CV |
+| 6. Work, time and results | PASS: journal-confirm 1 (records the day) 44902949287 | PASS: journal-confirm 2 (the employer finds it in the queue) | PASS: fresh-activation (the first journal entry reaches the Living CV) 44901160408 |
+| 7. Confirmation | PASS: journal-confirm 2 (employer approves) | PASS: journal-confirm 3 (the worker sees it confirmed) 44903366199 | PASS: journal-confirm 3 (trust rises, hours do not) |
+| 8. Living CV, automatically | PASS: P-18 (one continuous history) | n/a | PASS: P-18<br>LOCAL: `cv-shown-twice-isolated` CV2-2 (each skill and job once; #3690) |
+| 9. Reuse | STALE: cv-readonly R-1, R-2 43833613507 (240 behind) | LOCAL: `job-fit-evidence-isolated` F-5 (the history scores new needs) | as for Recorded |
+
+### Employer
+
+| Step | Recorded | Next step | Living CV (of the people it hires) |
+|---|---|---|---|
+| 1. Identity | PASS: fresh-activation (fresh company) 44901160408<br>LOCAL: `employer-journey-isolated` E-1, E-2 | PASS: fresh-activation (the described need is visible where the company lands) | n/a |
+| 2. Historical experience | PASS: profile-cv-history P-20 (the company history) 45094839877 | STALE: cv-readonly R-3 (people link to their page only on a confirmed link) 43833613507 | GAP |
+| 3. Competencies | PASS: marketplace-goods-services S-1 to S-5 (service offered, findable) 44967795943 | PASS: S-1 to S-5 (the buyer finds it) | n/a |
+| 4. Opportunities | PASS: company-chain C-0b (posts a need) | PASS: C-2, C-3 (sees the hand-raiser, opens a thread) | n/a |
+| 5. Agreements and projects | PASS: orders-bookings O-1 to O-6<br>PASS: project-execution E-1 to E-6 44906961206 | PASS: O-9 (the booked worker on its people page and in engagements) | GAP on main: a direct hire's day is accepted only through client review (`employer-journey-isolated` E-10, 45077346479)<br>LOCAL with #3722 (RED, migration not applied): E-10 goes from hire to project to 8 h confirmed by the company, shown on the project's operations page and on the worker's Living CV; 20/20 at 1440 and 390 px (Lane C); CI signup-isolated run 45164858556 (#3722 head 40d68eae6) passed. It becomes PASS only after the owner applies `20261123113700` and a production walk runs. |
+| 6. Work, time and results | PASS: company-chain H-1, H-2 (hours recorded against a site) | **FAIL (LOCAL fix #3704, not merged):** a new company's direct hire is on the project but not on the roster, so `/dashboard/instructions` shows no workers; an instruction raises no notification | as for Worker step 6 |
+| 7. Confirmation | PASS: journal-confirm 2 44902949287 | PASS: journal-confirm 3 | PASS: journal-confirm 3 |
+| 8. Living CV, automatically | PASS: journal-confirm 3 (the confirmed entry on the worker's side) | n/a | PASS |
+| 9. Reuse | PASS: company-talent-history K-1 to K-5 (shortlist) 44975633092<br>PASS: P-21 (company report exported) | PASS: K-1 to K-5 | n/a |
+
+### Agency
+
+| Step | Recorded | Next step | Living CV (of the placed worker) |
+|---|---|---|---|
+| 1. Identity | GAP in production (A-1 uses an existing account)<br>LOCAL: `agency-roles-isolated` A-1 (signs up, recorded as a staffing agency)<br>LOCAL: Lane H's new-agency run N1 (sign-up, 1440 and 390 px) | LOCAL: A-2, A-5 | n/a |
+| 2. Historical experience | GAP | GAP | GAP |
+| 3. Competencies | PASS: agency-chain A-1b (saves an offer) 44644887648 | PASS: A-1b (finds it on its home) | n/a |
+| 4. Opportunities | PASS: A-4, A-5 (sees the shared need, offers its person) | PASS: A-6 (the client answers) | n/a |
+| 5. Agreements and projects | PASS: A-6, A-6b (the worker accepts)<br>LOCAL: Lane H N3 (connect, share, propose, client accepts, worker accepts, engagement; the worker is not named to the client before accepting) | PASS: A-7 (the decision and one thread) | GAP |
+| 6. Work, time and results | GAP: no walk records the placed worker's work<br>BLOCKED: after a client accepts a company offer, starting the work is not available (#3649, RED); #3715 says so to both sides | GAP | GAP |
+| 7. Confirmation | GAP | GAP | GAP |
+| 8. Living CV, automatically | GAP | n/a | GAP |
+| 9. Reuse | PASS: A-2b (reads its people) | PASS: A-5 (offers a roster person) | n/a |
+
+All agency production runs are on 7e517e32, 112 behind.
+
+### Subcontractor
+
+| Step | Recorded | Next step | Living CV (of brigade members) |
+|---|---|---|---|
+| 1. Identity | GAP in production (the brigade owner is an existing account) | GAP | n/a |
+| 2. Historical experience | GAP | GAP | GAP |
+| 3. Competencies | PASS: brigade-formation 1-9 (brigade formed, members joined) 44906216102<br>LOCAL: `journeys-coverage-isolated` SC-1, SC-2 (public profile, findable service) | PASS: B2B-2 (offers against the need) | n/a |
+| 4. Opportunities | PASS: B2B-1, B2B-2 | PASS: B2B-3 (the buyer sees the offer) | n/a |
+| 5. Agreements and projects | PASS: B2B-4 to B2B-7 (terms v1, v2, agreed; one team assignment)<br>BLOCKED: the personal service lane has nothing after acceptance (#3697) | PASS: B2B-8, B2B-9 (each side sees the other) | GAP |
+| 6. Work, time and results | PASS: B2B-9, B2B-9b (the buyer reads the same hours) | PASS: B2B-9 | GAP |
+| 7. Confirmation | LOCAL: `subcontractor-chain-isolated` (reports accepted or disputed; #3670, not on main) | LOCAL | GAP |
+| 8. Living CV, automatically | GAP | n/a | GAP |
+| 9. Reuse | PASS: brigade-formation 14 (a new owner session still shows the brigade) | GAP: no walk offers the same brigade to a second need | n/a |
+
+### Student
+
+| Step | Recorded | Next step | Living CV |
+|---|---|---|---|
+| 1. Identity | PASS: learning-practice L-3 (joins by link) 45141893755 | PASS: L-5 (sees the cohort on the learning compass) | n/a |
+| 2. Historical experience | PASS: profile-cv-history P-9, P-22 (education row) 45094839877 | PASS: P-22 (save, reload) | PASS: P-9 |
+| 3. Competencies | LOCAL: `recognition-chain-isolated` I-6, I-7 (a recognition citing a signed-off day) | LOCAL: I-7 | LOCAL: I-7 |
+| 4. Opportunities | PASS: L-11 (board narrowed to internships) 45141893755<br>LOCAL: `journeys-coverage-isolated` ST-2 (applies) | LOCAL: ST-4 (the company sees the hand-raiser) | GAP |
+| 5. Agreements and projects | LOCAL: `recognition-chain-isolated` I-9 (the employer invites the intern; accepted) | LOCAL: I-10 | LOCAL: I-13 |
+| 6. Work, time and results | LOCAL: I-4, I-11 (practice days; production must not write them) | LOCAL: I-5, I-12 | LOCAL: I-13 |
+| 7. Confirmation | LOCAL: I-12 (the employer confirms the intern) | LOCAL: I-13 | LOCAL: I-13b |
+| 8. Living CV, automatically | LOCAL: I-13b (the practice period stands as confirmed) | n/a | LOCAL: I-13b |
+| 9. Reuse | LOCAL: `recognition-chain-isolated` I-16 (#3716, signup-isolated run 45163600144): the same employer hires the learner as an employee; the employment is added beside the intern relationship | LOCAL: I-16 (the practice day stays in the intern relationship) | LOCAL: I-16 (the confirmed practice stays under practice; the employment is listed under work) |
+
+### Education institution
+
+| Step | Recorded | Next step | Living CV (of its learners) |
+|---|---|---|---|
+| 1. Identity | GAP in production (L-1 uses an existing organization)<br>LOCAL: `recognition-chain-isolated` I-1 (signs up through its own door) | PASS: L-12 (the education home on a phone) 45141893755 | n/a |
+| 2. Historical experience | GAP | GAP | n/a |
+| 3. Competencies | PASS: L-1 (declares it trains; runs a programme) 44860184317 | PASS: L-2 (invites a learner) | n/a |
+| 4. Opportunities | PASS: L-2, L-3 (invite and join by link) | PASS: L-4 (sees the joined learner) | n/a |
+| 5. Agreements and projects | PASS: L-4 (cohort placement)<br>BLOCKED: no institution-arranged placement door (owner decision) | PASS: L-5 (the learner sees the cohort) | GAP |
+| 6. Work, time and results | PASS: L-9 (outcomes counted, never naming one person) | PASS: L-10 (programme report) | n/a |
+| 7. Confirmation | PASS (review): L-6, L-7<br>LOCAL (sign-off): I-5 | LOCAL: I-6 (recognition cites the signed-off day) | LOCAL: I-7 |
+| 8. Living CV, automatically | LOCAL: I-7 (the recognition among the learner's own) | n/a | LOCAL: I-7 |
+| 9. Reuse | PASS: L-10 (programme report CSV)<br>LOCAL: `signup-isolated` E-4 (access ends with the link; records kept) | LOCAL: E-4 | n/a |
+
+**Chain breaks to close:**
+
+| Kind | Where |
+|---|---|
+| FAIL | Employer step 6, a new company's hire is missing from instructions (#3704) |
+| BLOCKED | Personal service lane after acceptance (#3697)<br>Institution-arranged placement (owner decision) |
+| GAP | Worker and employer steps 4 to 5: the CV trace of an application or engagement<br>Agency steps 6 to 8<br>Subcontractor steps 8 and 9, and identity<br>Identity in production for agency, subcontractor and institution<br>History for organizations |
+
+## Owner's Living CV screens (#3736)
+
+`prod-living-cv-screens` photographs the Living CV in production. It uses a read-only synthetic account, de-identifies the pages before they render and encrypts the screenshots. It has not run; it waits for the read-only grant and for review.
+
+| Screen | Page | Status |
+|---|---|---|
+| Company Living CV, both organizations | `/lt/dashboard/company/history`, one per active workspace | BLOCKED until the grant is live |
+| Worker, as the employer sees them | `/lt/dashboard/company/people/<personId>` | BLOCKED until the grant is live |
+| Worker, as the worker sees their own CV | `/lt/cv`, `/lt/dashboard/profile#organization-history` | GAP |
+
+**The employer's view is not the worker's own CV.** Under decision 0033 the employer sees only records tied to its own relationship with the person. Records from other organizations and the worker's own journal entries are not on that page, by design. The worker's own CV can only be shown through the worker's own session. A walk must never mint one for a real person, so this stays a GAP until there is either a consenting synthetic worker with real history or the person's own walk.
+
+When the walk first runs, its screens are the before-state for #3732 (one-spine reads) and the party-role fold.
 
 ## Walk plan for today
 

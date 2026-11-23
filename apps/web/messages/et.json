@@ -456,7 +456,7 @@
           },
           "education": {
             "title": "Esindan õppeasutust",
-            "desc": "Kutsu õppijaid, näe nende osalust ning ühenda nad praktika ja tööga."
+            "desc": "Kutsu õppijaid, vii läbi programme ning jälgi nende praktikat ja tulemusi."
           }
         },
         "agency": {
@@ -4813,7 +4813,6 @@
     },
     "v3": {
       "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine ja põhivajaduse avaldamine on tasuta.",
-      "moreChoices": "Rohkem valikuid",
       "or": "või kirjeldage oma sõnadega",
       "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
       "market": {
