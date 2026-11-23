@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import { OVERRIDE_REASON_CODES } from "@/lib/projects/override-receipt-model";
+import { PROJECT_CITY_MAX, PROJECT_TITLE_MAX, PROJECT_TITLE_MIN } from "@/lib/projects/project-title-limits";
 
 /**
  * Zod input schemas for the executable EMPLOYER-side conversation actions
@@ -209,8 +210,9 @@ export const educationAssignLearnerSchema = z.object({
  *  `createProjectAction` → `insertProjectForCompany` validates the title and
  *  RLS `projects_insert` (owns_company) gates the row. */
 export const companyCreateProjectSchema = z.object({
-  title: z.string().trim().min(2).max(120),
-  city: z.string().trim().max(120).nullable().optional(),
+  // The SAME limits as the canonical core and MCP (AI-1 sweep).
+  title: z.string().trim().min(PROJECT_TITLE_MIN).max(PROJECT_TITLE_MAX),
+  city: z.string().trim().max(PROJECT_CITY_MAX).nullable().optional(),
 });
 
 /** CLIENT: the decision on an agency's candidate offer (canonical:
