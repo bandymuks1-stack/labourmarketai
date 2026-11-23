@@ -3,15 +3,14 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * A CLIENT IS NOT THE COMPANY THAT DID THE WORK (decision 0033, owner order
- * 2026-11-23 after the Nonstop / LM ai move).
+ * A CLIENT IS NOT THE COMPANY THAT DID THE WORK (decision 0033).
  *
  * The company history folded EVERY record in another organization's books that
  * named this one as a party into this organization's own places, people and
- * hours. After the move, 2,353 records in a subcontractor's books name its
- * client: they showed up as the client's own work, with the subcontractor's
- * workers by name. Only a performing role is folded now; the client role is one
- * aggregate with no names, and the subcontractor sees its client.
+ * hours. Records a subcontractor keeps that name its client then showed up as
+ * the client's own work, with the subcontractor's workers by name. Only a
+ * performing role is folded now; the client role is one aggregate with no
+ * names, and the subcontractor sees its client.
  */
 const WEB = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(WEB, rel), "utf8");
