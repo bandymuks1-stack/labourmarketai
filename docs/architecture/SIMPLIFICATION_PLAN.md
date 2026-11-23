@@ -2,7 +2,9 @@
 
 > **SUPPORTING — NOT THE CANONICAL ARCHITECTURE.** The architecture is
 > [`docs/OWNER_TARGET_ARCHITECTURE_V1.md`](../OWNER_TARGET_ARCHITECTURE_V1.md).
-> This is deliverable E of the owner's P0 audit (issue #3679). It orders the
+> This is deliverable E of the owner's P0 audit (issue #3679). Security and
+> permission items carry only their id, owner and state here; their detail
+> stays in the private record (`AGENTS.md`, lines 82-85). It orders the
 > proven findings of the other deliverables into small, safe steps. It adds no
 > finding of its own and decides nothing the owner has not decided.
 
@@ -62,15 +64,15 @@ duplicates fold into, and no step below rewrites them.
 | F3 | CV-21 | German profile shows English skill names (two catalogues) | One catalogue, one slug-name fallback | A | locale skill-name test | PR #3685 |
 | F4 | — | Workspace name cut at 768 px (de/nl/pl/ru) | Wrap, not truncate | A | 768 contact-sheet metric | PR #3685 |
 | F5 | MSG-3 | Work-instruction messages send no "new message" notification | Call the shared notify helper after the RPC | C | notification e2e | open |
-| F6 | MSG-2 | Two contact-permission resolvers answer differently, web vs MCP | One resolver, with the web rule as the superset | B | a parity test web vs MCP | open |
+| F6 | MSG-2 | Contact rules differ between two doors (permission-relevant; detail in the private record) | One resolver | B with F | a parity test | open |
 | F7 | AI-2 | MCP demand-create loses the start/end date and the team split | One mapper and one base schema | B | a mapper parity test | open |
 | F8 | CV-18 | The chat CV import drops skill inference | One proposals hook for both flows | G | an import-to-proposals test | open |
 | F9 | CV-10 | The CV import skips the education row cap | The import calls the form's core | G | a row-cap test | open |
 | F10 | ORG-7 | One of three review-queue reads hides its failure | A shared reader that passes the unknown state through (SEP-7) | M | an unknown-not-zero guard | open |
 | F11 | CV-1 | Employers see `workers.experience_years`, which nothing writes | A consented figure from the one 0025 reading | G | a 0025 reader guard | open |
-| F12 | HIRE-4 | Project staffing authority reads the legacy roster (security-relevant, SUSPECTED) | Measure, then read the employee engagement row | F, then C | an RLS or authority test | measure first |
+| F12 | HIRE-4 | Security-relevant (SUSPECTED); detail in the private record | Measure first; fix per the private record | F, then C | an authority test | open |
 | F13 | — | Public-vacancy reads (sitemap, search, counts) hit statement timeouts in production (B §12.1) | Keyset sitemap function | D | migration-safety, a timing walk | RED #2996 |
-| F14 | BYP-1 | Voice transcription sends audio outside the AI egress gate (SUSPECTED) | Measure, then record it in the egress register or route it through the gate | B | `ai-data-egress.test.ts` | measure first |
+| F14 | BYP-1 | Privacy-relevant (SUSPECTED); detail in the private record | Measure first; fix per the private record | B with F | `ai-data-egress.test.ts` | open |
 
 ## 3. Merge into one implementation
 
@@ -118,7 +120,7 @@ zero-caller assertion and a reversible recreate.
 
 1. **#3688 apply (owner) → R5.** The GREEN removal of app fallbacks comes only after the old versions are revoked in production.
 2. **#3164 before #3219** (AI-6).
-3. **F12 (HIRE-4 measured) → M12 → M13.** Do not merge invitation writers while the staffing authority still reads the legacy roster.
+3. **F12 → M12 → M13.** The hiring merges wait until F12 is measured and closed.
 4. **F7 → M6.** Fix the drifting demand-create mapper before folding the chat and MCP wiring.
 5. **OD-1 and OD-2 (owner) → D N3–N6.** N1, N2, N7a and N11 need no decision and go first.
 6. **F1 → M10, F11 → M11 → R2.** One CV listing and one 0025 reading before folding the CV editors and ladders.
