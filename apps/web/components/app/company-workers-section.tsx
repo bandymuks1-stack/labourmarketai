@@ -95,7 +95,7 @@ export interface CompanyWorkersSectionLabels {
   readonly coordinationNextAction: string;
   readonly operations: OpsCellLabels;
   /** Identity-card copy: the worker's own stated availability, by status. */
-  readonly identity: { readonly availability: Record<string, string> };
+  readonly identity: { readonly unnamed: string; readonly availability: Record<string, string> };
   /** Team-at-a-glance copy: the state of each person and the one action it asks for. */
   readonly team: {
     readonly free: string;
@@ -400,7 +400,7 @@ export function CompanyWorkersSection({
                     ? labels.operations.notAssigned
                     : (labels.operations.roleLabels[ctx.operationsRole] ??
                       labels.operations.notAssigned);
-                const personName = w.displayName?.trim() || w.email || "\u2014";
+                const personName = w.displayName?.trim() || w.email || labels.identity.unnamed;
                 const availabilityText = w.availabilityStatus
                   ? (labels.identity.availability[w.availabilityStatus] ?? null)
                   : null;

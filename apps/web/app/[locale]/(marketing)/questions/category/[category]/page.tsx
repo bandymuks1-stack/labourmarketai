@@ -81,12 +81,12 @@ export default async function CategoryPage({
         <h1 className="font-display text-2xl font-semibold tracking-tight text-text-primary">{label}</h1>
       </header>
 
-      <ul className="flex flex-col gap-2">
+      <ul className="flex flex-col">
         {items.map(({ question, answer }) => (
           <li key={question.canonicalQuestionId}>
             <Link
               href={`/questions/${answer.localizedSlug}`}
-              className="text-base text-brand-blue hover:underline"
+              className="flex min-h-11 items-center py-1 text-base text-brand-blue hover:underline"
             >
               {answer.h1}
             </Link>

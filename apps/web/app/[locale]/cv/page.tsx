@@ -1108,7 +1108,16 @@ export default async function VerifiedCvPage({
           </div>
         ) : null}
 
-        <header className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"}`}>
+        {/* On screen the name and professions live in the hero above (this
+            header keeps them for PRINT); with no tailored basis and no
+            figures, the screen was left an empty bordered box reading only
+            "Mano CV" (design audit 2026-11-22). It is then print-only. */}
+        <header
+          className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"} ${
+            template !== "eu" && !tailoredOk && !summaryHasFigures ? "hidden print:block" : ""
+          }`}
+          data-testid="cv-document-header"
+        >
           <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
             {t("pageTitle")}
           </p>

@@ -34,6 +34,7 @@ on:
       - "apps/web/lib/onboarding/invited-worker-context.ts"
       - "apps/web/app/*/auth/signup/**"
       - "apps/web/tests/e2e/hiring-chain-isolated.spec.ts"
+      - "apps/web/tests/e2e/employer-journey-isolated.spec.ts"
       - "apps/web/tests/e2e/former-employer-access-isolated.spec.ts"
       - "supabase/migrations/20261118164500_former_employer_limited_access_v1.sql"
       - "supabase/migrations/20261120190000_former_employer_chain_fixes_v1.sql"
@@ -220,7 +221,10 @@ concurrency:
 jobs:
   signup-isolated:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # 45 stopped the walk at test 442 of 452 (2026-11-22, one worker, ~7 min of
+    # setup before it): the job was cancelled by its own limit, not by a
+    # failure. Room for the whole walk; no test is skipped or shortened.
+    timeout-minutes: 60
     env:
       APP_ORIGIN: http://127.0.0.1:3000
       # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
@@ -231,12 +235,12 @@ jobs:
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
       # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts tests/e2e/pay-placeholder-isolated.spec.ts tests/e2e/hiring-chain-isolated.spec.ts tests/e2e/agency-placement-terms-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts tests/e2e/pay-placeholder-isolated.spec.ts tests/e2e/hiring-chain-isolated.spec.ts tests/e2e/employer-journey-isolated.spec.ts tests/e2e/agency-placement-terms-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
       SKIP_MIGRATION: 20261025120000_business_history_periods_vivatrex_lmai_bounds_v1.sql
-      SKIP_MIGRATION_SHA256: e4dea150dbd1c344ab7319af74066f12090f764ccdb5511571be65e8244b233e
+      SKIP_MIGRATION_SHA256: 43f04f60b120bdd0b8be10044163012b7f65033508d3e1eb94bca2cc968a1f45
       PAYMENTS_ENABLED: "false"
       BILLING_PROVIDER: none
       AI_PROVIDER_MODE: disabled

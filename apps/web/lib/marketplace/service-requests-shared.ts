@@ -82,7 +82,8 @@ export interface DiscoverableOfferingRow {
   readonly locationCountry: string | null;
   readonly remote: boolean;
   readonly rateText: string | null;
-  readonly providerId: string;
+  // No provider id (decision 0033): a request goes by offeringId, and a
+  // stable profile id would tie a provider's offerings together.
   readonly createdAt: string;
 }
 
