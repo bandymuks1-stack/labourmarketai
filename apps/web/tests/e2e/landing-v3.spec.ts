@@ -92,7 +92,6 @@ for (const locale of LOCALES) {
           expect(box.x + box.width, `${id} ends on screen`).toBeLessThanOrEqual(size.width + 0.5);
           expect(box.y + box.height, `${id} is on the first screen`).toBeLessThan(size.height);
         }
-        await expect(page.getByTestId("goal-more-choices")).toHaveCount(0);
         if (size.phone) {
           await expect(rail.locator('[data-rail-part="hint"]')).toBeVisible();
         } else {
@@ -204,7 +203,6 @@ for (const locale of LOCALES) {
     const first = (await rail.locator('[data-card-id="work"]').boundingBox())!;
     expect(first.x, "the first goal starts on screen").toBeGreaterThanOrEqual(0);
     expect(await cutTexts(page, "goal-rail"), "a goal card text is cut").toEqual([]);
-    await expect(page.getByTestId("goal-more-choices")).toHaveCount(0);
     const signUp = (await page.getByTestId("landing-signup").getByRole("link").boundingBox())!;
     expect(signUp.y + signUp.height, "Sign up is within 60px of the fold").toBeLessThan(height + 60);
     expect(await overflow(page), "the page scrolls sideways").toBeLessThanOrEqual(1);

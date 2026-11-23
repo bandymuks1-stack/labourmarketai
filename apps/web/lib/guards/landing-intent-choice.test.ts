@@ -41,7 +41,7 @@ const landing = read("app/[locale]/focus-landing/focus-landing.tsx");
 const choice = read("components/marketing/landing-intent-choice.tsx");
 const navigator = read("components/navigation/goal-navigator.tsx");
 /** CardRail mounts in the navigator: goals, functions, professions. */
-const navigatorRails = 5;
+const navigatorRails = 4;
 const server = read("components/navigation/goal-navigation.tsx");
 const rail = read("components/navigation/card-rail.tsx");
 
@@ -100,9 +100,7 @@ describe("one rail, one panel", () => {
   it("goals, functions and professions all use the one card rail", () => {
     // Goals, the live panel's functions and professions, and the functions of
     // the early (pre-script) panels.
-    // … plus the phone's "more" part, which shows the remaining goals in the
-    // same cards (Landing V3).
-    expect(navigator.match(/<CardRail\b/g)).toHaveLength(5);
+    expect(navigator.match(/<CardRail\b/g)).toHaveLength(4);
     expect(navigator).toMatch(/testId="goal-rail"/);
     expect(navigator).toMatch(/testId="function-rail"/);
     expect(navigator).toMatch(/testId="profession-rail"/);
@@ -114,7 +112,9 @@ describe("one rail, one panel", () => {
     expect(navigator).toMatch(/\{showProfessions && \(/);
     // (On a phone in the no-swipe layout the profession rail is replaced by
     // the list, so the rail sits in a wrapper that hides it there.)
-    expect(navigator).toMatch(/\{!fullList && \(\s*<div className=\{phoneMore \? "max-sm:hidden" : undefined\}>\s*<CardRail/);
+    // One rail per level on every width: no phone-only wrapper or list swap.
+    expect(navigator).toMatch(/\{!fullList && \(\s*<CardRail\s+label=\{labels\.professions\}/);
+    expect(navigator + rail).not.toMatch(/phoneMore|phoneGrid|phoneHiddenIds|phoneLayout|goal-more-choices/);
   });
 
   it("the switch appears only for a goal with a catalogue; Close is a named button", () => {
@@ -134,9 +134,9 @@ describe("one rail, one panel", () => {
   });
 
   it("phone goal cards are compact with no description; wide cards carry it", () => {
-    expect(rail).toMatch(/phoneGrid \? "w-auto" : "w-\[6rem\]", "sm:w-auto sm:min-w-40 sm:flex-1"/);
-    // The grid is phones only: from `sm` the track is the same flex rail.
-    expect(rail).toMatch(/phoneGrid \? "grid grid-cols-3 sm:flex" : "flex"/);
+    expect(rail).toMatch(/compact \? "w-\[6rem\] sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44"/);
+    // A flex rail on every width (no phone grid since N1).
+    expect(rail).not.toMatch(/grid grid-cols-3 sm:flex/);
     expect(rail).toMatch(/compact && "hidden sm:\[display:-webkit-box\]"/);
   });
 

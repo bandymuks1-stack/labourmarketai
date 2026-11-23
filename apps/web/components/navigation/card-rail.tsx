@@ -86,8 +86,6 @@ export function CardRail({
   label,
   cards,
   size = "regular",
-  phoneGrid = false,
-  phoneHiddenIds,
   activeId,
   onSelect,
   swipeHint,
@@ -100,16 +98,6 @@ export function CardRail({
   cards: readonly RailCard[];
   /** `compact`: the phone goal card (no description below `sm`). */
   size?: "compact" | "regular";
-  /** Cards left out below `sm` (shown elsewhere there, e.g. under "more
-   *  choices"). From `sm` up they are in the rail as usual. */
-  phoneHiddenIds?: readonly string[];
-  /**
-   * Below `sm`, lay the cards out as a three-column grid instead of a
-   * scroller, so a short list (the goals) is all on the first screen with no
-   * swipe. From `sm` up nothing changes. For a list of up to about nine
-   * cards; a long list (professions) stays a rail.
-   */
-  phoneGrid?: boolean | 2;
   activeId?: string | null;
   onSelect?: (card: RailCard) => void;
   swipeHint: string;
@@ -203,7 +191,7 @@ export function CardRail({
           data-more={!edge.end || undefined}
           className={cn(
             "min-w-0 flex-1 snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain py-1 [scrollbar-width:none] sm:gap-3 [&::-webkit-scrollbar]:hidden",
-            phoneGrid === 2 ? "grid grid-cols-2 sm:flex" : phoneGrid ? "grid grid-cols-3 sm:flex" : "flex",
+            "flex",
             // The right edge fades while there is more to the right.
             "data-[more]:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)]",
           )}
@@ -216,12 +204,7 @@ export function CardRail({
                 key={card.id}
                 className={cn(
                   "relative shrink-0 snap-start",
-                  phoneHiddenIds?.includes(card.id) && "max-sm:hidden",
-                  compact
-                    ? cn(phoneGrid ? "w-auto" : "w-[6rem]", "sm:w-auto sm:min-w-40 sm:flex-1")
-                    : phoneGrid
-                      ? "w-auto sm:w-44"
-                      : "w-36 sm:w-44",
+                  compact ? "w-[6rem] sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44",
                 )}
               >
                 <CardLink

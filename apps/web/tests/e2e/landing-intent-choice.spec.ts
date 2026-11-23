@@ -109,9 +109,6 @@ for (const vp of [
         }
         expect(peeking, "one card peeks at the right edge").toBe(1);
         await expect(part(page, "goal-rail", "hint")).toBeVisible();
-        await expect(page.getByTestId("goal-more-choices")).toHaveCount(0);
-      } else {
-        await expect(page.getByTestId("goal-more-choices")).toHaveCount(0);
       }
       if (vp.width >= 1440) {
         // Wide: all six in one row, no arrows.
