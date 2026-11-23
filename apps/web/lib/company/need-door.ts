@@ -45,6 +45,8 @@ export const NEED_DOOR_SURFACES = [
   "company_settings",
   /** The success state of the company setup form. */
   "company_setup",
+  /** Scouting's empty state, when the company has no need to scout for. */
+  "company_scouting_empty",
 ] as const;
 
 export type NeedDoorSurface = (typeof NEED_DOOR_SURFACES)[number];

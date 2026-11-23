@@ -40,6 +40,7 @@ const SETTINGS_CARD = "components/app/company-next-actions.tsx";
 const SETUP = "components/app/company-setup-form.tsx";
 const NEEDS = "app/[locale]/dashboard/company/needs/page.tsx";
 const CANDIDATES = "components/app/workspace/candidates-result.tsx";
+const SCOUTING = "app/[locale]/dashboard/company/scouting/page.tsx";
 
 /** Which file carries each door. Every surface the registry names is here. */
 const DOOR_FILES: Record<(typeof NEED_DOOR_SURFACES)[number], string> = {
@@ -51,6 +52,7 @@ const DOOR_FILES: Record<(typeof NEED_DOOR_SURFACES)[number], string> = {
   company_needs_repeat: READBACK,
   company_settings: SETTINGS_CARD,
   company_setup: SETUP,
+  company_scouting_empty: SCOUTING,
 };
 
 function walk(dir: string, out: string[] = []): string[] {
