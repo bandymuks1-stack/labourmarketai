@@ -12,6 +12,7 @@ import { DarkListbox } from "@/components/ui/DarkListbox";
 import {
   getOwnLastDemandPrefillAction,
   getDemandPrefillByIdAction,
+  findOwnJustSubmittedDemandAction,
   submitDemandRequestAction,
 } from "@/lib/demand/demand-request-actions";
 import {
@@ -432,23 +433,42 @@ export function DemandRequestButton({
       return;
     }
     setState("sending");
+    const sentAt = new Date().toISOString();
     try {
-      const res = await submitDemandRequestAction(intent, {
-        role,
-        description,
-        location,
-        skills,
-        urgency,
-        notes,
-        workType: workType || undefined,
-        country: country || undefined,
-        teamSize: teamSize.trim() ? Number(teamSize) : undefined,
-        accommodation: accommodation || undefined,
-        transport: transport || undefined,
-        requiredTools: requiredTools.length > 0 ? requiredTools : undefined,
-        estimate: estimateEngaged ? estimate : undefined,
-        structuredV2: withTeam(advWire),
-      }, { expectedOrganizationId: organizationId });
+      let res: Awaited<ReturnType<typeof submitDemandRequestAction>> | undefined;
+      try {
+        res = await submitDemandRequestAction(intent, {
+          role,
+          description,
+          location,
+          skills,
+          urgency,
+          notes,
+          workType: workType || undefined,
+          country: country || undefined,
+          teamSize: teamSize.trim() ? Number(teamSize) : undefined,
+          accommodation: accommodation || undefined,
+          transport: transport || undefined,
+          requiredTools: requiredTools.length > 0 ? requiredTools : undefined,
+          estimate: estimateEngaged ? estimate : undefined,
+          structuredV2: withTeam(advWire),
+        }, { expectedOrganizationId: organizationId });
+      } catch {
+        res = undefined;
+      }
+      // THE ANSWER WAS LOST (production run 45241051644): the request failed
+      // in transit or came back unreadable, yet the need may be saved. Ask
+      // before saying "could not send" — a retry would post it twice.
+      if (!res || typeof res !== "object" || typeof res.ok !== "boolean") {
+        const savedId = await findOwnJustSubmittedDemandAction(intent, { role, description }, sentAt).catch(() => null);
+        setSavedRequestId(savedId);
+        setState(savedId ? "done" : "error");
+        if (savedId && draftSource) {
+          await deleteDemandDraftAction(intent === "hire_workers" ? "company_request" : "agency_offer").catch(() => undefined);
+        }
+        if (savedId) router.refresh();
+        return;
+      }
       // The server is the rule (web, chat and MCP share it): a refused country
       // sends the person back to the picker with the reason beside it.
       if (!res.ok && res.code === "country_required") {
