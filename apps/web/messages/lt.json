@@ -19390,6 +19390,19 @@
       "period": "Įrašyta",
       "basis": "Iš {entries} žurnalo įrašų, kuriuos žmonės įrašė šioje organizacijoje. Skaičiuojama atskirai nuo aukščiau esančios importuotos istorijos ir niekada su ja nesumuojama.",
       "unavailable": "Šiuo metu nepavyko perskaityti šioje organizacijoje žurnale įrašyto darbo."
+    },
+    "forClient": {
+      "title": "Subrangovų atlikti darbai",
+      "confirmed": "Patvirtinti įrašai",
+      "unconfirmed": "Nepatvirtinti įrašai",
+      "periodHours": "{hours} val. nurodyta kaip laikotarpio suma, nepridėta prie atskirų dienų.",
+      "basis": "Iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} jūsų subrangovų apskaitoje. Skaičiuojama atskirai nuo jūsų pačių darbų.",
+      "unreadable": "Partnerių apskaitoje užfiksuotų darbų šiuo metu nepavyko perskaityti. Tai nereiškia, kad jų nėra."
+    },
+    "clients": {
+      "title": "Užsakovai",
+      "unnamed": "Užsakovo organizacija",
+      "records": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
     }
   },
   "workPlan": {

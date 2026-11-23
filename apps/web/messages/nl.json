@@ -19390,6 +19390,19 @@
       "period": "Vastgelegd",
       "basis": "Uit {entries} logboekregels die mensen onder deze organisatie vastlegden. Apart geteld van de geïmporteerde geschiedenis hierboven en daar nooit bij opgeteld.",
       "unavailable": "Het werk dat onder deze organisatie in het logboek is vastgelegd, kon nu niet worden gelezen."
+    },
+    "forClient": {
+      "title": "Werk van uw onderaannemers",
+      "confirmed": "Bevestigde registraties",
+      "unconfirmed": "Niet-bevestigde registraties",
+      "periodHours": "{hours} u opgegeven als periodetotaal, niet opgeteld bij losse dagen.",
+      "basis": "Uit {count, plural, one {# registratie} other {# registraties}} in de eigen administratie van uw onderaannemers. Apart geteld van uw eigen werk.",
+      "unreadable": "Het werk in de administratie van partners kon nu niet worden gelezen. Dat betekent niet dat er geen is."
+    },
+    "clients": {
+      "title": "Opdrachtgevers",
+      "unnamed": "Opdrachtgevende organisatie",
+      "records": "{count, plural, one {# registratie} other {# registraties}}"
     }
   },
   "workPlan": {
