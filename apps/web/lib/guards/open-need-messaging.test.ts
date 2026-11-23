@@ -104,12 +104,25 @@ describe("migration — one channel, the client hidden until it discloses", () =
     expect(f).toMatch(/then 'client ' \|\| upper\(left\(regexp_replace\(c\.source_id::text/);
   });
 
-  it("the board stops naming the client and keeps its signature", () => {
-    const start = UP.indexOf("create or replace function public.list_open_demand_for_team_offer_v1");
-    const b = UP.slice(start, UP.indexOf("create or replace function", start + 10));
-    expect(b).toMatch(/company_name text/);
-    expect(b).toMatch(/null::text,/);
-    expect(b).not.toMatch(/coalesce\(nullif\(trim\(c\.display_name\)/);
+  it("the board readers are #3630's: not replaced here, and the migration refuses without them", () => {
+    // R2 2026-11-23: #3630 (20261122170000) owns list_open_demand_for_team_offer_v1 and
+    // list_team_demand_offers_for_team_v1; two bodies of each would undo each other.
+    expect(UP).not.toMatch(/create or replace function public\.list_open_demand_for_team_offer_v1/);
+    expect(UP).not.toMatch(/create or replace function public\.list_team_demand_offers_for_team_v1/);
+    expect(UP).toMatch(/if to_regprocedure\('public\.list_open_needs_for_offer_v2\(uuid\)'\) is null then\s+raise exception/);
+    expect(UP.indexOf("to_regprocedure('public.list_open_needs_for_offer_v2(uuid)')")).toBeLessThan(
+      UP.indexOf("alter table public.conversations drop constraint"),
+    );
+    expect(DOWN).not.toMatch(/list_open_demand_for_team_offer_v1|list_team_demand_offers_for_team_v1/);
+  });
+
+  it("an open-need thread never uses the need's free-text title (#3630's rule)", () => {
+    expect(fnBody(UP, "open_need_thread_ensure_v1")).toMatch(/left\(nullif\(btrim\(cr\.role_or_work_type\), ''\), 120\)/);
+    expect(fnBody(UP, "open_need_thread_ensure_v1")).not.toMatch(/cr\.title/);
+    const ctx = fnBody(UP, "conversation_source_context");
+    const branch = ctx.split("union all").find((part) => part.includes("c.source_type = 'open_need'")) ?? "";
+    expect(branch).toMatch(/nullif\(btrim\(cr\.role_or_work_type\), ''\) as source_title/);
+    expect(branch).not.toMatch(/cr\.title/);
   });
 
   it("is RED: no approval marker; the rollback refuses while a hidden client could be revealed", () => {
@@ -145,7 +158,6 @@ describe("the other doors (independent review R2) — narrowed, nothing else", (
 
   it("an offer names the client to the supplier only once the client accepted", () => {
     expect(UP).toMatch(/then case when o\.status in \('accepted', 'assigned'\)/);
-    expect(UP).toMatch(/case when o\.status in \('accepted', 'assigned'\)\s+then coalesce\(nullif\(trim\(c\.display_name\)/);
     const app = read("lib/company/team-offer-conversation.ts");
     expect(app).toMatch(/rpc\("team_offer_thread_v1"/);
     expect(fnBody(UP, "team_offer_thread_v1")).toMatch(/open_need_thread_ensure_v1\(o\.request_id, o\.team_org_id, o\.offered_by, 'offer'\)/);
@@ -167,7 +179,6 @@ describe("the other doors (independent review R2) — narrowed, nothing else", (
       "revoke_conversation_participant",
       "my_direct_conversations_with_workers_v1",
       "team_offer_thread_party_v1",
-      "list_team_demand_offers_for_team_v1",
       "send_work_instruction",
       "send_work_instruction_to_project",
     ]) {
@@ -214,7 +225,8 @@ describe("the provider's door and the client's control", () => {
 
   it("the board writes about the selected need and no longer prints the client", () => {
     expect(BOARD).toMatch(/action=\{openNeedConversationAction\}/);
-    expect(BOARD).toMatch(/d\.companyName\]\.filter\(Boolean\)/);
+    // The board's need row names no client; only a sent offer the client accepted does (#3630).
+    expect(BOARD).not.toMatch(/d\.companyName/);
   });
 
   it("the client pseudonym is localized, real names pass through", () => {

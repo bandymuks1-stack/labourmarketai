@@ -1,18 +1,24 @@
 -- Rollback for 20261122223000_provider_need_pseudonyms_v1
--- Restores the 20261122214700 bodies of the seven changed functions byte for
--- byte, re-keys open-need threads to the need id (the 20261122214700 shape),
+-- REFUSES while any open-need thread exists. Otherwise restores #3630's
+-- 20261122170000 bodies of the three provider readers and the 20261122214700
+-- bodies of the other changed functions byte for byte,
 -- restores the team_demand_offers.request_id column grant and the retired pair's
 -- execute grant, then drops the alias functions, and the alias table when it is empty.
 -- Apply via Supabase MCP apply_migration.
 
 begin;
 
-update public.conversations c
-   set source_id = t.request_id
-  from public.open_need_threads t
- where t.conversation_id = c.id
-   and c.source_type = 'open_need';
+-- REFUSES while any open-need thread exists (R2 P3-1, 2026-11-23): keying a
+-- thread back to the real need id would hand the provider the very id this
+-- migration withholds. Such threads are business records; forward-fix instead.
+do $$
+begin
+  if exists (select 1 from public.conversations where source_type = 'open_need') then
+    raise exception 'open-need threads exist - forward-fix, do not roll back';
+  end if;
+end $$;
 
+-- The three provider readers back to #3630's 20261122170000 bodies, byte for byte.
 CREATE OR REPLACE FUNCTION public.list_open_demand_for_team_offer_v1(p_team_org_id uuid)
  RETURNS TABLE(request_id uuid, role_text text, country text, team_size integer, start_period text, company_name text, created_at timestamp with time zone, open_offer_id uuid, open_offer_status text)
  LANGUAGE plpgsql
@@ -36,6 +42,8 @@ begin
      ), false) then
     return;
   end if;
+  -- A synthetic viewer (QA identity, or a team / organization that is itself
+  -- a fixture) keeps seeing fixtures; everyone else does not (20261028123000).
   v_sees_fixtures := public.is_synthetic_viewer_v1()
     or exists (select 1 from public.organizations o
                 where o.id = p_team_org_id
@@ -43,12 +51,150 @@ begin
 
   return query
   select cr.id,
-         coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')),
+         nullif(btrim(cr.role_or_work_type), ''),
          cr.country,
          cr.team_size,
          cr.start_period,
-         -- OPEN NEED (20261122160000): the client is not named on the board.
+         -- NO CLIENT IDENTITY ON THE OPEN BOARD (owner decision 2026-11-22):
+         -- the column stays for compatibility and is always empty.
          null::text,
+         cr.created_at,
+         o.id,
+         o.status
+    from public.customer_requests cr
+    join public.companies c
+      on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
+     and c.verification_status = 'verified'
+    left join public.team_demand_offers o
+      on o.request_id = cr.id and o.team_org_id = p_team_org_id
+     and o.status in ('offered', 'accepted')
+   where cr.status = 'submitted'
+     and (cr.kind is null or cr.kind in ('company_request', 'buyer_request'))
+     and cr.profile_id <> uid
+     and not coalesce(public.has_org_demand_access(cr.organization_id), false)
+     and cr.organization_id is distinct from p_team_org_id
+     -- SYNTHETIC QA FIXTURES (20261028123000): another organization's fixture
+     -- need is not market reality. Kept for the need's own people and for a
+     -- synthetic viewer (lib/qa/synthetic-fixture.ts).
+     and (v_sees_fixtures
+          or not public.demand_is_synthetic_fixture_v1(cr.organization_id, cr.profile_id)
+          or cr.profile_id = uid
+          or coalesce(public.has_org_demand_access(cr.organization_id), false))
+   order by cr.created_at desc
+   limit 100;
+end;
+$function$;
+revoke all on function public.list_open_demand_for_team_offer_v1(uuid) from public;
+revoke all on function public.list_open_demand_for_team_offer_v1(uuid) from anon;
+grant execute on function public.list_open_demand_for_team_offer_v1(uuid) to authenticated;
+
+CREATE OR REPLACE FUNCTION public.list_team_demand_offers_for_team_v1(p_team_org_id uuid)
+ RETURNS TABLE(offer_id uuid, request_id uuid, role_text text, country text, company_name text, status text, offered_at timestamp with time zone, responded_at timestamp with time zone, assignment_id uuid)
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  uid uuid := auth.uid();
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  if not coalesce(
+       public.manages_organization(p_team_org_id)
+       or exists (select 1 from public.organizations g
+                   where g.id = p_team_org_id and g.owner_profile_id = uid),
+       false) then
+    return;
+  end if;
+  return query
+  select o.id, o.request_id,
+         nullif(btrim(cr.role_or_work_type), ''),
+         cr.country,
+         -- The client is named to the offerer only once the client has
+         -- answered yes (agreed in principle, or assigned the unit); before
+         -- that, and after a no or a withdrawal, the need stays anonymous.
+         case when o.status in ('accepted', 'assigned')
+              then coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), ''))
+         end,
+         o.status, o.offered_at, o.responded_at, o.assignment_id
+    from public.team_demand_offers o
+    join public.customer_requests cr on cr.id = o.request_id
+    left join public.companies c on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
+   where o.team_org_id = p_team_org_id
+   order by o.offered_at desc
+   limit 100;
+end;
+$function$;
+revoke all on function public.list_team_demand_offers_for_team_v1(uuid) from public;
+revoke all on function public.list_team_demand_offers_for_team_v1(uuid) from anon;
+grant execute on function public.list_team_demand_offers_for_team_v1(uuid) to authenticated;
+
+CREATE OR REPLACE FUNCTION public.list_open_needs_for_offer_v2(p_team_org_id uuid)
+ RETURNS TABLE(request_id uuid, role_text text, country text, team_size integer, start_period text, duration text, language_requirement text, need_skill_slugs text[], required_tools text[], created_at timestamp with time zone, open_offer_id uuid, open_offer_status text)
+ LANGUAGE plpgsql
+ STABLE SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  uid uuid := auth.uid();
+  v_sees_fixtures boolean;
+begin
+  if uid is null then
+    raise exception 'Not authenticated' using errcode = '42501';
+  end if;
+  -- The same caller rule as list_open_demand_for_team_offer_v1: a manager or
+  -- the owner of the team / company / agency that would make the offer.
+  if not coalesce((
+       exists (select 1 from public.organizations o
+                where o.id = p_team_org_id
+                  and o.organization_type in ('team', 'company', 'agency'))
+       and (public.manages_organization(p_team_org_id)
+            or exists (select 1 from public.organizations o
+                        where o.id = p_team_org_id and o.owner_profile_id = uid))
+     ), false) then
+    return;
+  end if;
+  v_sees_fixtures := public.is_synthetic_viewer_v1()
+    or exists (select 1 from public.organizations o
+                where o.id = p_team_org_id
+                  and public.is_synthetic_fixture_label_v1(o.display_name, o.legal_name));
+
+  -- WHAT THE NEED IS, NEVER WHOSE IT IS: profession, country, size, start,
+  -- duration, language, required skills (active catalogue slugs) and tools
+  -- (closed list). No company, no person, no free text (a summary or a note
+  -- can name the client).
+  return query
+  select cr.id,
+         nullif(btrim(cr.role_or_work_type), ''),
+         cr.country,
+         cr.team_size,
+         cr.start_period,
+         nullif(btrim(cr.duration), ''),
+         nullif(btrim(cr.language_requirement), ''),
+         (select array_agg(distinct v order by v)
+            from jsonb_array_elements_text(
+                   case
+                     when jsonb_typeof(cr.payload -> 'structured_need' -> 'skill_slugs') = 'array'
+                       then cr.payload -> 'structured_need' -> 'skill_slugs'
+                     when jsonb_typeof(cr.payload -> 'need_skills' -> 'slugs') = 'array'
+                       then cr.payload -> 'need_skills' -> 'slugs'
+                     else '[]'::jsonb
+                   end) as v
+           where exists (select 1 from public.skills s
+                          where s.slug = v and s.is_active is not false)),
+         case
+           when jsonb_typeof(cr.payload -> 'required_tools') = 'array' then
+             (select array_agg(v order by v)
+                from jsonb_array_elements_text(cr.payload -> 'required_tools') as v
+               where v in (
+                 'bulldozer-operator', 'compactor-operator', 'crane-operator',
+                 'equipment-operation', 'excavator-operator',
+                 'forklift-operator', 'grader-operator', 'hand-tools',
+                 'loader-operator', 'scaffolding'
+               ))
+           else null
+         end,
          cr.created_at,
          o.id,
          o.status
@@ -72,47 +218,9 @@ begin
    limit 100;
 end;
 $function$;
-revoke all on function public.list_open_demand_for_team_offer_v1(uuid) from public, anon;
-grant execute on function public.list_open_demand_for_team_offer_v1(uuid) to authenticated, service_role;
-
-CREATE OR REPLACE FUNCTION public.list_team_demand_offers_for_team_v1(p_team_org_id uuid)
- RETURNS TABLE(offer_id uuid, request_id uuid, role_text text, country text, company_name text, status text, offered_at timestamp with time zone, responded_at timestamp with time zone, assignment_id uuid)
- LANGUAGE plpgsql
- STABLE SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
-declare
-  uid uuid := auth.uid();
-begin
-  if uid is null then
-    raise exception 'Not authenticated' using errcode = '42501';
-  end if;
-  if not coalesce(
-       public.manages_organization(p_team_org_id)
-       or exists (select 1 from public.organizations g
-                   where g.id = p_team_org_id and g.owner_profile_id = uid),
-       false) then
-    return;
-  end if;
-  return query
-  select o.id, o.request_id,
-         coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')),
-         cr.country,
-         -- OPEN NEED (20261122160000): named only once the client accepted.
-         case when o.status in ('accepted', 'assigned')
-              then coalesce(nullif(trim(c.display_name), ''), nullif(trim(c.legal_name), ''))
-         end,
-         o.status, o.offered_at, o.responded_at, o.assignment_id
-    from public.team_demand_offers o
-    join public.customer_requests cr on cr.id = o.request_id
-    left join public.companies c on c.id = public.demand_company_id_v1(cr.organization_id, cr.profile_id)
-   where o.team_org_id = p_team_org_id
-   order by o.offered_at desc
-   limit 100;
-end;
-$function$;
-revoke all on function public.list_team_demand_offers_for_team_v1(uuid) from public, anon;
-grant execute on function public.list_team_demand_offers_for_team_v1(uuid) to authenticated, service_role;
+revoke all on function public.list_open_needs_for_offer_v2(uuid) from public;
+revoke all on function public.list_open_needs_for_offer_v2(uuid) from anon;
+grant execute on function public.list_open_needs_for_offer_v2(uuid) to authenticated;
 
 CREATE OR REPLACE FUNCTION public.offer_team_to_demand_v1(p_team_org_id uuid, p_request_id uuid, p_note text DEFAULT NULL::text)
  RETURNS jsonb
@@ -212,12 +320,13 @@ $function$;
 revoke all on function public.offer_team_to_demand_v1(uuid, uuid, text) from public, anon;
 grant execute on function public.offer_team_to_demand_v1(uuid, uuid, text) to authenticated, service_role;
 
-CREATE OR REPLACE FUNCTION public.open_need_conversation_open_v1(p_request_id uuid, p_org_id uuid)
- RETURNS uuid
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'pg_temp'
-AS $function$
+create or replace function public.open_need_conversation_open_v1(p_request_id uuid, p_org_id uuid)
+returns uuid
+language plpgsql
+volatile
+security definer
+set search_path = public, pg_temp
+as $$
 declare
   uid uuid := auth.uid();
 begin
@@ -233,23 +342,25 @@ begin
     raise exception 'not allowed' using errcode = '42501';
   end if;
   return public.open_need_thread_ensure_v1(p_request_id, p_org_id, uid, 'board');
-end $function$;
+end $$;
 revoke all on function public.open_need_conversation_open_v1(uuid, uuid) from public, anon;
 grant execute on function public.open_need_conversation_open_v1(uuid, uuid) to authenticated, service_role;
 
-CREATE OR REPLACE FUNCTION public.open_need_thread_ensure_v1(p_request_id uuid, p_org_id uuid, p_provider uuid, p_via text)
- RETURNS uuid
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'pg_temp'
-AS $function$
+create or replace function public.open_need_thread_ensure_v1(
+  p_request_id uuid, p_org_id uuid, p_provider uuid, p_via text
+) returns uuid
+language plpgsql
+volatile
+security definer
+set search_path = public, pg_temp
+as $$
 declare
   v_owner uuid;
   v_title text;
   v_id    uuid;
 begin
   select cr.profile_id,
-         left(coalesce(nullif(btrim(cr.role_or_work_type), ''), nullif(btrim(cr.title), '')), 120)
+         left(nullif(btrim(cr.role_or_work_type), ''), 120)
     into v_owner, v_title
     from public.customer_requests cr
    where cr.id = p_request_id;
@@ -287,15 +398,17 @@ begin
   values (coalesce(auth.uid(), p_provider), 'open_need_conversation_opened_v1', 'conversations', v_id,
           jsonb_build_object('request_id', p_request_id, 'org_id', p_org_id, 'via', p_via));
   return v_id;
-end $function$;
+end $$;
 revoke all on function public.open_need_thread_ensure_v1(uuid, uuid, uuid, text) from public, anon, authenticated;
 
-CREATE OR REPLACE FUNCTION public.conversation_source_context(p_conversation_ids uuid[])
- RETURNS TABLE(conversation_id uuid, source_type text, source_title text, source_route_hint text)
- LANGUAGE sql
- STABLE SECURITY DEFINER
- SET search_path TO 'public'
-AS $function$
+create or replace function public.conversation_source_context(p_conversation_ids uuid[])
+returns table (
+  conversation_id   uuid,
+  source_type       text,
+  source_title      text,
+  source_route_hint text
+)
+language sql security definer set search_path = public stable as $$
   select
     c.id,
     c.source_type,
@@ -311,10 +424,11 @@ AS $function$
     where c.source_type in ('scouting', 'demand_interest')
       and cr.id = c.source_id
     union all
-    -- open_need (20261122160000) → the need's role or title; the need owner
-    -- gets the route to its needs, the provider gets no route.
+    -- open_need (20261122214700) → the need's role only, never its free-text
+    -- title (a title can name the client; #3630's rule). The need owner gets
+    -- the route to its needs, the provider gets no route.
     select
-      coalesce(nullif(btrim(cr.role_or_work_type), ''), cr.title) as source_title,
+      nullif(btrim(cr.role_or_work_type), '') as source_title,
       case when cr.profile_id = auth.uid() then 'company_needs' end
         as source_route_hint
     from public.customer_requests cr
@@ -341,16 +455,17 @@ AS $function$
     and c.source_id is not null
     and nullif(btrim(coalesce(src.source_title, '')), '') is not null
     and public.is_conversation_participant(c.id);
-$function$;
+$$;
 revoke all on function public.conversation_source_context(uuid[]) from public, anon;
 grant execute on function public.conversation_source_context(uuid[]) to authenticated, service_role;
 
-CREATE OR REPLACE FUNCTION public.disclose_open_need_identity_v1(p_conversation_id uuid)
- RETURNS boolean
- LANGUAGE plpgsql
- SECURITY DEFINER
- SET search_path TO 'public', 'pg_temp'
-AS $function$
+create or replace function public.disclose_open_need_identity_v1(p_conversation_id uuid)
+returns boolean
+language plpgsql
+volatile
+security definer
+set search_path = public, pg_temp
+as $$
 declare
   uid uuid := auth.uid();
   v_new integer;
@@ -380,7 +495,7 @@ begin
     values (uid, 'open_need_identity_disclosed_v1', 'conversations', p_conversation_id, '{}'::jsonb);
   end if;
   return true;
-end $function$;
+end $$;
 revoke all on function public.disclose_open_need_identity_v1(uuid) from public, anon;
 grant execute on function public.disclose_open_need_identity_v1(uuid) to authenticated, service_role;
 

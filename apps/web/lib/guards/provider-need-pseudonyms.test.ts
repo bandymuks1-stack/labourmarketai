@@ -44,6 +44,20 @@ describe("provider order pseudonyms — the mapping never leaves the server", ()
     expect(fnBody(UP, "list_team_demand_offers_for_team_v1")).toMatch(
       /select o\.id, public\.provider_need_alias_v1\(p_team_org_id, o\.request_id\)/,
     );
+    // #3630's reader v2 carries the same rule (R2 2026-11-23).
+    const v2 = fnBody(UP, "list_open_needs_for_offer_v2");
+    expect(v2).toMatch(/select public\.provider_need_alias_v1\(p_team_org_id, cr\.id\)/);
+    expect(v2).toMatch(/date_trunc\('day', cr\.created_at\)/);
+  });
+
+  it("one body per reader: #3630's bodies, aliased, never the free-text title; order guard first", () => {
+    for (const f of ["list_open_demand_for_team_offer_v1", "list_team_demand_offers_for_team_v1", "list_open_needs_for_offer_v2"]) {
+      const b = fnBody(UP, f);
+      expect(b, f).toMatch(/volatile security definer/);
+      expect(b, f).not.toMatch(/cr\.title/);
+    }
+    expect(fnBody(UP, "open_need_thread_ensure_v1")).not.toMatch(/cr\.title/);
+    expect(UP).toMatch(/to_regprocedure\('public\.list_open_needs_for_offer_v2\(uuid\)'\) is null\s+or to_regclass\('public\.open_need_threads'\) is null then\s+raise exception/);
   });
 
   it("every provider action resolves the alias for the caller's organization; a real id resolves to nothing", () => {
@@ -75,7 +89,9 @@ describe("provider order pseudonyms — the mapping never leaves the server", ()
   });
 
   it("the rollback restores the earlier shape and never drops a table holding rows", () => {
-    expect(DOWN).toMatch(/set source_id = t\.request_id/);
+    // R2 P3-1: never re-key threads to the real need id; refuse while any exists.
+    expect(DOWN).not.toMatch(/set source_id = t\.request_id/);
+    expect(DOWN).toMatch(/if exists \(select 1 from public\.conversations where source_type = 'open_need'\) then\s+raise exception/);
     expect(DOWN).toMatch(/grant select \(request_id\) on public\.team_demand_offers to authenticated;/);
     expect(DOWN).toMatch(/if not v_rows then\s+execute 'drop table public\.provider_need_aliases'/);
     expect(DOWN).not.toMatch(/provider_need_alias_v1\(p_team_org_id/);

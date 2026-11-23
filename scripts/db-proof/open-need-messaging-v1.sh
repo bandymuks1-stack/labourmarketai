@@ -137,7 +137,7 @@ cat <<SQL
 select public._onm_take('before');
 \\echo __PHASE|BEFORE
 SQL
-check "control: before, the board names the client" "Client Co,Client Co" "$AGENT" "select coalesce(string_agg(company_name, ',' order by company_name), '') from public.list_open_demand_for_team_offer_v1('$OA') where request_id in ('$N1','$N2')"
+check "control: before this migration (with #3630), the board already names no client" "" "$AGENT" "select coalesce(string_agg(company_name, ',' order by company_name), '') from public.list_open_demand_for_team_offer_v1('$OA') where request_id in ('$N1','$N2')"
 cat <<SQL
 insert into public.conversations(id, subject, kind, created_by) values ('0e0e0000-0000-4000-8000-0000000000e9', 'control', 'direct', '$AGENT');
 insert into public.conversation_participants(conversation_id, profile_id) values ('0e0e0000-0000-4000-8000-0000000000e9','$AGENT'), ('0e0e0000-0000-4000-8000-0000000000e9','$CLIENT');
