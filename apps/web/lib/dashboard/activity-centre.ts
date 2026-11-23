@@ -118,3 +118,24 @@ export function filterActivityRows(
       (filters.state === "all" || r.count > 0),
   );
 }
+
+/**
+ * The source chips worth offering (design audit 2026-11-22): a worker saw
+ * eleven chips — company actions, leave and absence, review… — over one
+ * notification. In the default "needs attention" view a source is offered
+ * only when it has something waiting; in "all signals" every source with a
+ * row is. The selected source always stays, so a filter can be cleared.
+ */
+export function activitySourceChips(
+  rows: readonly ActivityRow[],
+  ids: readonly DashboardModuleId[],
+  filters: {
+    readonly moduleId: DashboardModuleId | null;
+    readonly state: ActivityStateFilter;
+  },
+): readonly DashboardModuleId[] {
+  const offered = new Set(
+    rows.filter((r) => filters.state === "all" || r.count > 0).map((r) => r.moduleId),
+  );
+  return ids.filter((id) => id === filters.moduleId || offered.has(id));
+}
