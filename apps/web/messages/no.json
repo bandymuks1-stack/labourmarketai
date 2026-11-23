@@ -7137,6 +7137,19 @@
       "period": "Registrert",
       "basis": "Fra {entries} journalinnføringer som personer registrerte under denne organisasjonen. Telt atskilt fra den importerte historikken ovenfor og aldri lagt til den.",
       "unavailable": "Arbeidet registrert i journalen under denne organisasjonen kunne ikke leses akkurat nå."
+    },
+    "forClient": {
+      "title": "Arbeid utført av underleverandørene deres",
+      "confirmed": "Bekreftede poster",
+      "unconfirmed": "Ikke bekreftede poster",
+      "periodHours": "{hours} t oppgitt som periodesum, ikke lagt til enkeltdager.",
+      "basis": "Fra {count, plural, one {# post} other {# poster}} i underleverandørenes egne registre. Telt separat fra deres eget arbeid.",
+      "unreadable": "Arbeid i partneres registre kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes."
+    },
+    "clients": {
+      "title": "Oppdragsgivere",
+      "unnamed": "Oppdragsgivers organisasjon",
+      "records": "{count, plural, one {# post} other {# poster}}"
     }
   },
   "workLifecycle": {

@@ -7137,6 +7137,19 @@
       "period": "Kirja pandud",
       "basis": "{entries} päevikukirjest, mille inimesed selle organisatsiooni all tegid. Loetakse eraldi ülaltoodud imporditud ajaloost ja sellele kunagi ei liideta.",
       "unavailable": "Selle organisatsiooni all päevikusse kirja pandud tööd ei õnnestunud praegu lugeda."
+    },
+    "forClient": {
+      "title": "Teie alltöövõtjate töö",
+      "confirmed": "Kinnitatud kirjed",
+      "unconfirmed": "Kinnitamata kirjed",
+      "periodHours": "{hours} h on märgitud perioodi summana, üksikute päevade hulka lisamata.",
+      "basis": "{count, plural, one {# kirjest} other {# kirjest}} teie alltöövõtjate enda arvestuses. Loetud eraldi teie enda tööst.",
+      "unreadable": "Partnerite arvestuses olevat tööd ei õnnestunud praegu lugeda. See ei tähenda, et seda pole."
+    },
+    "clients": {
+      "title": "Tellijad",
+      "unnamed": "Tellija organisatsioon",
+      "records": "{count, plural, one {# kirje} other {# kirjet}}"
     }
   },
   "workLifecycle": {

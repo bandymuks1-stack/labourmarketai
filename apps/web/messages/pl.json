@@ -19392,6 +19392,19 @@
       "period": "Zapisano",
       "basis": "Z {entries} wpisów w dzienniku, które osoby zapisały w tej organizacji. Liczone osobno od zaimportowanej historii powyżej i nigdy do niej nie dodawane.",
       "unavailable": "Nie udało się teraz odczytać pracy zapisanej w dzienniku w tej organizacji."
+    },
+    "forClient": {
+      "title": "Prace podwykonawców",
+      "confirmed": "Potwierdzone wpisy",
+      "unconfirmed": "Niepotwierdzone wpisy",
+      "periodHours": "{hours} h podano jako sumę za okres; nie dodano do pojedynczych dni.",
+      "basis": "Z {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}} w ewidencji podwykonawców. Liczone osobno od własnej pracy organizacji.",
+      "unreadable": "Nie udało się teraz odczytać prac zapisanych w ewidencji partnerów. Nie oznacza to, że ich nie ma."
+    },
+    "clients": {
+      "title": "Klienci",
+      "unnamed": "Organizacja klienta",
+      "records": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
     }
   },
   "workPlan": {

@@ -19392,6 +19392,19 @@
       "period": "Registrerat",
       "basis": "Från {entries} journalposter som personer registrerade under den här organisationen. Räknas separat från den importerade historiken ovan och läggs aldrig till den.",
       "unavailable": "Arbetet som registrerats i journalen under den här organisationen kunde inte läsas just nu."
+    },
+    "forClient": {
+      "title": "Arbete av era underentreprenörer",
+      "confirmed": "Bekräftade poster",
+      "unconfirmed": "Ej bekräftade poster",
+      "periodHours": "{hours} h angivna som periodsumma, inte lagda till enskilda dagar.",
+      "basis": "Från {count, plural, one {# post} other {# poster}} i era underentreprenörers egna register. Räknas separat från ert eget arbete.",
+      "unreadable": "Arbete i partners register kunde inte läsas just nu. Det betyder inte att det saknas."
+    },
+    "clients": {
+      "title": "Beställare",
+      "unnamed": "Beställande organisation",
+      "records": "{count, plural, one {# post} other {# poster}}"
     }
   },
   "workPlan": {
