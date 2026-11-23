@@ -64,6 +64,13 @@ describe("signup-isolated runs the core journeys on every relevant pull request"
     }
   });
 
+  it("the filter never pipes into grep -q (SIGPIPE under pipefail would skip a large change)", () => {
+    const step = wf.slice(wf.indexOf("id: filter"), wf.indexOf("\n  signup-isolated:"));
+    expect(step).toMatch(/set -euo pipefail/);
+    expect(step).not.toMatch(/\|\s*grep -q/);
+    expect(step).not.toMatch(/\\\n\s*\|\s*grep/);
+  });
+
   it("the walk needs the filter, runs in two shards and fails one shard without cancelling the other", () => {
     expect(wf).toMatch(/signup-isolated:\n {4}needs: changes\n {4}if: needs\.changes\.outputs\.run == 'true'/);
     expect(wf).toMatch(/fail-fast: false\n\s+matrix:\n\s+shard: \[1, 2\]/);

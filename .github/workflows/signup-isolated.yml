@@ -65,8 +65,11 @@ jobs:
           base="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
           git diff --name-only "$base" "$HEAD_SHA" > "$RUNNER_TEMP/changed.txt"
           # Markdown alone never runs the journeys; everything else under these roots does.
-          if grep -vE '\.md$' "$RUNNER_TEMP/changed.txt" \
-            | grep -qE '^(apps/web/|supabase/|packages/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|package\.json$|\.github/workflows/signup-isolated\.yml$)'; then
+          # Two steps through a file, never a pipe into a quiet grep: it exits on its first
+          # match, the upstream grep then dies of SIGPIPE, and pipefail would turn a
+          # large web change into run=false (Codex review on #3744).
+          grep -vE '\.md$' "$RUNNER_TEMP/changed.txt" > "$RUNNER_TEMP/not-markdown.txt" || true
+          if grep -qE '^(apps/web/|supabase/|packages/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|package\.json$|\.github/workflows/signup-isolated\.yml$)' "$RUNNER_TEMP/not-markdown.txt"; then
             echo "run=true" >> "$GITHUB_OUTPUT"
           else
             echo "run=false" >> "$GITHUB_OUTPUT"
