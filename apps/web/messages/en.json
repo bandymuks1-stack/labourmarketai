@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "I represent an education provider",
-            "desc": "Invite learners, see their participation and connect them to internships and jobs."
+            "desc": "Invite learners, run programmes and follow their practice and results."
           }
         },
         "heading": "Are you starting as a person or a company?",
@@ -19634,7 +19634,8 @@
       "heading": "Your offers",
       "none": "No offers yet.",
       "withdraw": "Withdraw",
-      "message": "Message the client"
+      "message": "Message the client",
+      "orgNext": "The client agreed in principle (not a contract). Starting the work from a company offer through the platform is not available yet: settle the details and the people who will work in the conversation."
     },
     "status": {
       "offered": "Waiting for an answer",
@@ -19735,7 +19736,7 @@
       "message": "Message the team",
       "messageCompany": "Message the company",
       "kindOrganization": "Company offer",
-      "orgNext": "Agreed in principle (not a contract). Settle the details and the people who will work in the conversation."
+      "orgNext": "Agreed in principle (not a contract). Starting the work from a company offer through the platform is not available yet: settle the details and the people who will work in the conversation."
     },
     "orgHeading": "Offer our company to an open need",
     "orgIntro": "Offer your company itself — your people, your service, or as a subcontractor — against one open need. No brigade to set up first.",

@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Ik vertegenwoordig een onderwijsinstelling",
-            "desc": "Nodig lerenden uit, zie hun deelname en verbind ze met stages en banen."
+            "desc": "Nodig lerenden uit, voer programma's uit en volg hun stage en resultaten."
           }
         },
         "heading": "Begint u als persoon of als bedrijf?",
@@ -19634,7 +19634,8 @@
       "heading": "Uw aanbiedingen",
       "none": "Nog geen aanbiedingen.",
       "withdraw": "Intrekken",
-      "message": "Bericht aan de opdrachtgever"
+      "message": "Bericht aan de opdrachtgever",
+      "orgNext": "De opdrachtgever ging in principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
     },
     "status": {
       "offered": "Wacht op antwoord",
@@ -19735,7 +19736,7 @@
       "message": "Bericht aan het team",
       "messageCompany": "Bericht aan het bedrijf",
       "kindOrganization": "Bedrijfsaanbod",
-      "orgNext": "In principe akkoord (geen contract). Spreek de details en de mensen die het werk doen af in het gesprek."
+      "orgNext": "In principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
     },
     "orgHeading": "Ons bedrijf aanbieden voor een open behoefte",
     "orgIntro": "Bied uw bedrijf zelf aan — uw mensen, uw dienst of als onderaannemer — voor één open behoefte. Eerst een ploeg aanmaken is niet nodig.",
