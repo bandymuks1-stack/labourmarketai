@@ -163,7 +163,7 @@ Each entry names its source.
 | DEAD-7 | One route, two label keys | CONFIRMED | MAIN | One key per route |
 | DEAD-6 | Literal dashboard links | NOT A DUPLICATE (0 dead) | MAIN | Keep; template literals unchecked |
 | BYP-1 | Voice transcription outside the AI egress gate | SUSPECTED | MAIN | Record it in the egress register |
-| SEC-1..5 | Security items | handed to Lane F | | §11 |
+| SEC-1..5 | Security items | 4 open (RED PRs), 1 closed | | §11 |
 
 ## 3. Registers
 
@@ -1554,9 +1554,15 @@ here, following the rule at `docs/program/FUNCTION_REGISTER.md` line 7.
   production read, Lane C and Lane E's sweep.
 - **SEC-5** is in the sign-up chain. It is owned by Lane F, and its fix is in an open RED PR that awaits the owner.
 
-Lane E sent the details of all five to Lane F (auth, roles, RLS) on 2026-11-23. Each fix is a RED, owner-gated change.
+Lane E sent the details of all five to Lane F (auth, roles, RLS) on 2026-11-23. Lane F checked them read-only that day:
 
-Status: open. Per `AGENTS.md` (lines 82-85), production permission detail is kept in the private record, not here: the SQL entries above state only duplication and use, never which version is open to which role.
+| Item | State | Fix |
+|---|---|---|
+| SEC-1, SEC-2, SEC-4 | Open | Covered by RED draft #3688 (needs a human gate; not applied). The app fallbacks go in a GREEN follow-up after the apply. |
+| SEC-3 | Closed in production (Lane F's production read) | None needed |
+| SEC-5 | Open | Covered by an open RED PR that awaits the owner's apply |
+
+Per `AGENTS.md` (lines 82-85), production permission detail is kept in the private record, not here: the SQL entries above state only duplication and use, never which version is open to which role.
 
 ## 12. Dead code, translations and links
 
