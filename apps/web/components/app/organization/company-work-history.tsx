@@ -161,7 +161,7 @@ export async function CompanyWorkHistory({
         locale={locale}
       />
 
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Stat concept="object" value={String(placed.length)} label={t("stats.places")} />
         <Stat concept="person" value={String(history.peopleCount)} label={t("stats.people")} />
         <Stat concept="time" value={`${nf(history.dayHours)} h`} label={t("stats.dayHours")} />
@@ -176,9 +176,9 @@ export async function CompanyWorkHistory({
 
       <OrganizationProjectsBlock projects={load.projects} t={t} />
 
-      <ul id="company-work-history-places" className="grid scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
+      <ul id="company-work-history-places" className="grid grid-cols-1 scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
         {placed.map((p) => (
-          <li key={p.key}>
+          <li key={p.key} className="min-w-0">
             <PlaceTile p={p} t={t} locale={locale} maxHours={maxHours} organizationId={organizationId} />
           </li>
         ))}
@@ -238,7 +238,7 @@ function OrganizationJournalBlock({
       aria-label={t("journal.title")}
     >
       <h3 className="font-display text-lg font-semibold text-text-primary">{t("journal.title")}</h3>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Stat concept="time" value={`${nf(journal.hours)} h`} label={t("journal.hours")} />
         <Stat concept="time" value={`${nf(journal.confirmedHours)} h`} label={t("journal.confirmed")} />
         <Stat concept="person" value={String(journal.people)} label={t("journal.people")} />
@@ -282,7 +282,7 @@ function WorkForClientBlock({
       aria-label={t("forClient.title")}
     >
       <h3 className="font-display text-lg font-semibold text-text-primary">{t("forClient.title")}</h3>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Stat concept="time" value={`${nf(work.dayHours)} h`} label={t("stats.dayHours")} />
         <Stat concept="calendar" value={when ?? "—"} label={t("stats.period")} />
         <Stat concept="object" value={String(work.confirmed)} label={t("forClient.confirmed")} />
@@ -347,12 +347,12 @@ function OrganizationProjectsBlock({
           {t("projects.counts", { running: projects.running, completed: projects.completed })}
         </p>
       </header>
-      <ul className="grid gap-2 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {projects.items.map((p) => (
-          <li key={p.id}>
+          <li key={p.id} className="min-w-0">
             <Link
               href={`/dashboard/projects/${p.id}` as "/dashboard"}
-              className="flex min-h-11 items-center justify-between gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-2.5 transition-colors hover:border-brand-blue"
+              className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-2.5 transition-colors hover:border-brand-blue"
               data-testid="company-work-history-project"
               data-project={p.id}
             >
@@ -410,7 +410,7 @@ function PlaceTile({
       href={placeHref(p.key, organizationId) as "/dashboard"}
       data-testid="company-work-history-place"
       data-place={p.key}
-      className="group flex h-full flex-col gap-3 rounded-card border border-ink-600 bg-ink-800/40 p-4 transition-colors hover:border-brand-blue"
+      className="group flex h-full min-w-0 flex-col gap-3 rounded-card border border-ink-600 bg-ink-800/40 p-4 transition-colors hover:border-brand-blue"
     >
       <span className="flex items-start justify-between gap-3">
         <span className="flex min-w-0 items-center gap-2">
@@ -440,7 +440,7 @@ function PlaceTile({
         ) : null}
       </span>
       {latest ? (
-        <span className="line-clamp-2 text-sm leading-relaxed text-text-secondary">{latest.text}</span>
+        <span className="line-clamp-2 break-words text-sm leading-relaxed text-text-secondary">{latest.text}</span>
       ) : null}
       <span className="mt-auto text-meta font-semibold text-brand-blue">{t("open")} →</span>
     </Link>
@@ -508,7 +508,7 @@ export async function CompanyPlaceHistory({
         ) : null}
       </header>
 
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <Stat concept="time" value={`${nf(place.dayHours)} h`} label={t("stats.dayHours")} />
         <Stat concept="person" value={String(place.people.length)} label={t("stats.people")} />
         <Stat concept="calendar" value={when ?? "—"} label={t("stats.period")} />
@@ -520,7 +520,7 @@ export async function CompanyPlaceHistory({
       ) : null}
 
       <Card compact data-testid="company-place-facts">
-        <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
           {(
             [
               ["customer", false],
@@ -612,7 +612,7 @@ export async function CompanyPlaceHistory({
                 <li
                   key={r.id}
                   data-testid="company-place-entry"
-                  className="grid gap-x-4 gap-y-1 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3 sm:grid-cols-[8rem_1fr_auto]"
+                  className="grid grid-cols-1 gap-x-4 gap-y-1 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3 sm:grid-cols-[8rem_1fr_auto]"
                 >
                   <span className="font-mono text-meta text-text-muted">{recordWhen(r, locale) ?? "—"}</span>
                   <span className="flex min-w-0 flex-col gap-0.5">

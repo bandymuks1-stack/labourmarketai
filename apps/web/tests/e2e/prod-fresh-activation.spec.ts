@@ -7,6 +7,7 @@ import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 import { FIRST_VISIT_CAMPAIGN, refuseOnFirstVisit } from "./first-visit-consent";
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { watchNeedSubmit } from "./need-submit-trail";
 
 /**
  * PRODUCTION — A BRAND-NEW WORKER AND A BRAND-NEW COMPANY, FROM ONBOARDING TO
@@ -55,6 +56,7 @@ const NEED_ROLE = `QA-SYNTHETIC mūrininkas ${RUN}`;
 const NEED_TEXT = "[QA-SYNTHETIC] Testinis poreikis: 2 mūrininkai objektui Vilniuje, nuo kito mėnesio.";
 
 const inMain = (page: Page): Locator => page.getByRole("main");
+
 
 /** The signed-in synthetic identity's own auth user id (from its own token). */
 function subOf(slot: string): string {
@@ -384,11 +386,18 @@ test("fresh company: onboarding, the company, a described need, visible where th
     await chooseDemandCountryIfEmpty(page);
     await inMain(page).getByTestId("demand-next").click();
     clicks += 1;
+    const trail = watchNeedSubmit(page);
     await inMain(page).getByTestId("demand-create").click();
     clicks += 1;
     const saved = inMain(page).getByTestId("demand-done");
     const limit = inMain(page).getByTestId("demand-open-need-limit");
-    await expect(saved.or(limit)).toBeVisible({ timeout: 30_000 });
+    await expect(saved.or(limit))
+      .toBeVisible({ timeout: 30_000 })
+      .catch(async (e: unknown) => {
+        console.info(`[fresh] need not confirmed: ${await trail.report()}`);
+        throw e;
+      });
+    trail.stop();
     expect(await limit.isVisible(), "a brand-new company was refused its first need").toBe(false);
     console.info(`[fresh] need saved; clicks from saved company to saved need=${clicks}`);
     expect(doorShown, "setup does not offer 'describe a need'").toBe(true);
