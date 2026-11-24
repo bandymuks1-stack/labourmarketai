@@ -1217,6 +1217,9 @@ export default async function JournalPage({
           organizationPeriodRecords,
         })
       : null;
+  // The person has no journal entry at all (the model's own signal, the one
+  // the numbers lead reads) — the screen then carries ONE empty state.
+  const journalHasNoEntries = dominantAnswer(workIntelligence, []).kind === "no_entries";
   // THE STRIP'S MONTH IS THE MODEL'S (issue #1689, lane B). This counted
   // entries by the `created_at` CALENDAR month while the section's "30
   // days" tile counted by the work day over a rolling window — two numbers
@@ -1559,6 +1562,12 @@ export default async function JournalPage({
         const period = wi ? focusPeriod(wi) : null;
         const scope = wi ? scopeText(wi, locale, tIntel) : tIntel("numbers.scope.all");
         const openChecks = wi ? splitChecks(wi.checks).open.length : 0;
+        // ONE EMPTY STATE (owner P0 2026-11-23). A journal with no entries
+        // at all said so three times in a row: under the calendar, in the
+        // list's empty state and here. The list's empty state is the one
+        // that carries the action, so it speaks alone; this card returns
+        // with the first entry.
+        if (answer.kind === "no_entries") return null;
         return (
           <section
             id="work-intelligence"
@@ -1662,6 +1671,7 @@ export default async function JournalPage({
           locale={locale as ActiveLocale}
           selected={selectedDate}
           carry={calendarCarry}
+          quietWhenEmpty={journalHasNoEntries}
         />
         {/* THE SELECTED DAY'S ACTIONS. What a person wants on a day they
             tapped: record work on that day, and see that same day on the one

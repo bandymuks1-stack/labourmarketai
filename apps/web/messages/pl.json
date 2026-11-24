@@ -209,7 +209,6 @@
     "formLabelLabel": "Lokalizacja",
     "formLabelPlaceholder": "Miasto lub region",
     "formPriceLabel": "Cena",
-    "formPricePlaceholder": "np. 450 €/miesiąc lub do uzgodnienia",
     "priceHint": "Cena jest opcjonalna i opisowa. Płatności nie są tu realizowane.",
     "save": "Zapisz",
     "saving": "Zapisywanie…",
@@ -2976,8 +2975,7 @@
           "label": "Ilu pracowników jest potrzebnych"
         },
         "salary": {
-          "label": "Wynagrodzenie (€)",
-          "placeholder": "np. 2200"
+          "label": "Wynagrodzenie (€)"
         },
         "countries": {
           "label": "Preferowane kraje (kody ISO)",
@@ -4394,7 +4392,7 @@
           },
           "education": {
             "title": "Reprezentuję instytucję edukacyjną",
-            "desc": "Zapraszanie uczących się, wgląd w ich udział i łączenie ich z praktykami i pracą."
+            "desc": "Zapraszanie uczących się, prowadzenie programów i śledzenie ich praktyk oraz wyników."
           }
         },
         "heading": "Zaczynają Państwo jako osoba czy jako firma?",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Godziny na pracownika",
               "totalHours": "Łączne godziny (opcjonalne nadpisanie)",
               "rate": "Stawka godzinowa / dniówka",
-              "ratePlaceholder": "np. 20",
               "country": "Kraj / lokalizacja",
               "materials": "Materiały",
               "equipment": "Sprzęt / narzędzia",
@@ -7168,7 +7165,6 @@
       "countryPlaceholder": "np. LT",
       "remoteLabel": "Można wykonać zdalnie",
       "rateLabel": "Stawka (opcjonalnie)",
-      "ratePlaceholder": "np. ok. 25 EUR/godz., do negocjacji",
       "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa."
     },
     "save": "Zapisz",
@@ -13088,6 +13084,7 @@
     },
     "goToRoster": "Przejdź do listy",
     "invalidLabel": "Proszę sprawdzić adres e-mail — zaproszenie nie zostało wysłane.",
+    "offerLimitLabel": "Zbyt wiele ofert. Proszę spróbować później.",
     "deliveryHeading": "Link zaproszenia",
     "deliveryCreated": "Nie wysłano e-mailem — wysyłka e-maili nie jest skonfigurowana. Proszę skopiować link i wysłać go klientowi samodzielnie.",
     "deliverySent": "E-mail z zaproszeniem został wysłany. Nadal można skopiować link.",
@@ -15973,7 +15970,6 @@
     },
     "v3": {
       "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
-      "moreChoices": "Więcej opcji",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
       "market": {
@@ -19394,6 +19390,19 @@
       "period": "Zapisano",
       "basis": "Z {entries} wpisów w dzienniku, które osoby zapisały w tej organizacji. Liczone osobno od zaimportowanej historii powyżej i nigdy do niej nie dodawane.",
       "unavailable": "Nie udało się teraz odczytać pracy zapisanej w dzienniku w tej organizacji."
+    },
+    "forClient": {
+      "title": "Prace podwykonawców",
+      "confirmed": "Potwierdzone wpisy",
+      "unconfirmed": "Niepotwierdzone wpisy",
+      "periodHours": "{hours} h podano jako sumę za okres; nie dodano do pojedynczych dni.",
+      "basis": "Z {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}} w ewidencji podwykonawców. Liczone osobno od własnej pracy organizacji.",
+      "unreadable": "Nie udało się teraz odczytać prac zapisanych w ewidencji partnerów. Nie oznacza to, że ich nie ma."
+    },
+    "clients": {
+      "title": "Klienci",
+      "unnamed": "Organizacja klienta",
+      "records": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
     }
   },
   "workPlan": {
@@ -19638,7 +19647,8 @@
       "heading": "Państwa oferty",
       "none": "Brak ofert.",
       "withdraw": "Wycofaj",
-      "message": "Napisz do zleceniodawcy"
+      "message": "Napisz do zleceniodawcy",
+      "orgNext": "Zleceniodawca wstępnie się zgodził (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
     },
     "status": {
       "offered": "Czeka na odpowiedź",
@@ -19739,7 +19749,7 @@
       "message": "Napisz do zespołu",
       "messageCompany": "Napisz do firmy",
       "kindOrganization": "Oferta firmy",
-      "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, proszę ustalić w rozmowie."
+      "orgNext": "Uzgodnione wstępnie (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
     },
     "orgHeading": "Zaoferuj naszą firmę do otwartej potrzeby",
     "orgIntro": "Proszę zaoferować samą firmę — swoich ludzi, swoją usługę lub jako podwykonawca — do jednej otwartej potrzeby. Nie trzeba najpierw tworzyć brygady.",
@@ -19761,7 +19771,6 @@
       },
       "capacity": "Osób",
       "rate": "Stawka",
-      "ratePlaceholder": "np. 32 €/h lub cena ryczałtowa",
       "period": "Okres",
       "start": "Początek",
       "end": "Koniec",

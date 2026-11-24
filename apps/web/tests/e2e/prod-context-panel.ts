@@ -1,4 +1,4 @@
-import type { Page } from "@playwright/test";
+import { expect, type Page } from "@playwright/test";
 
 /**
  * THE CONTEXT PANEL ON A PHONE.
@@ -15,9 +15,24 @@ import type { Page } from "@playwright/test";
  * assertion is changed by this: the element a step looks for must still be visible.
  */
 export async function contextPanel(page: Page, want: "open" | "closed"): Promise<void> {
+  // Desktop: the panel is a column, the button is never shown (`lg:hidden`).
+  if ((page.viewportSize()?.width ?? 0) >= LG) return;
   const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
-  if ((await toggle.count()) === 0) return; // a desktop, or a page without the panel
-  const expanded = (await toggle.getAttribute("aria-expanded")) === "true";
-  if (expanded === (want === "open")) return;
-  await toggle.click();
+  // A phone renders the button after the page settles; one immediate look
+  // took "not there yet" for "no panel" and left the sheet closed.
+  const shown = await toggle.waitFor({ state: "visible", timeout: TOGGLE_WAIT_MS }).then(
+    () => true,
+    () => false,
+  );
+  if (!shown) return; // a page without the panel
+  const wanted = want === "open" ? "true" : "false";
+  // A click before hydration does nothing: press until the sheet says so.
+  await expect(async () => {
+    if ((await toggle.getAttribute("aria-expanded")) !== wanted) await toggle.click({ timeout: 5_000 });
+    await expect(toggle).toHaveAttribute("aria-expanded", wanted, { timeout: 2_000 });
+  }, `the context panel is ${want}`).toPass({ timeout: 30_000 });
 }
+
+/** Tailwind's `lg` breakpoint, where the panel becomes a column. */
+const LG = 1024;
+const TOGGLE_WAIT_MS = 15_000;

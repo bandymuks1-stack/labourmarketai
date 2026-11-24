@@ -301,7 +301,7 @@ test("B2B-2. the brigade (2 members) offers itself against exactly that need", a
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
   // The offer form is folded; opening it loads the offerable needs.
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const select = page.getByTestId(`team-offer-demand-${teamId}`);
   await expect(select).toBeVisible({ timeout: 20_000 });
   // The free-text role is normalised to a profession slug, so the need is
@@ -354,7 +354,7 @@ test("B2B-4. supplier proposes terms v1 (people, rate, dates, scope)", async ({ 
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const box = await terms(page, offerId);
   const form = box.getByTestId(`team-offer-terms-form-${offerId}`);
   await form.locator('input[type="number"]').fill("2");
@@ -384,7 +384,7 @@ test("B2B-6. supplier agrees to v2: agreed in principle, history kept, message v
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const box = await terms(page, offerId);
   await box.getByTestId(`team-offer-terms-agree-${offerId}`).click();
   const history = box.getByTestId(`team-offer-terms-history-${offerId}`);

@@ -90,7 +90,7 @@ export function placeKeyOf(r: Pick<EvidenceRecordView, "workObjectId" | "context
   return label ? `l:${label}` : "none";
 }
 
-export const isPeriodRecord = (r: EvidenceRecordView) =>
+export const isPeriodRecord = (r: Pick<EvidenceRecordView, "activityDate" | "periodStart" | "periodEnd">) =>
   r.activityDate === null && r.periodStart !== null && r.periodEnd !== null;
 
 function minMax(dates: readonly (string | null)[]): [string | null, string | null] {

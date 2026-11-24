@@ -387,21 +387,25 @@ test("K-2. a welder (another trade) records a day of work; same honest evidence 
 test("K-3. the Living CV shows the skills as recorded work, with their basis", async ({ browser }) => {
   const tiler = await as(browser, TILER);
   await tiler.page.goto(`${BASE}/en/cv`);
-  const caps = tiler.page.getByTestId("premium-cv-capabilities");
-  await expect(caps).toBeVisible({ timeout: 60_000 });
-  const tiling = caps.locator("li", { hasText: /^\s*Tiling/ }).first();
-  await expect(tiling, "tiling is on the Living CV").toBeVisible();
-  await expect(tiling, "at the recorded level — not confirmed").toHaveAttribute("data-level", "recorded");
-  await expect(caps.locator('li[data-level="confirmed"]'), "nothing reads as confirmed").toHaveCount(0);
+  // The Living CV lists each skill ONCE, in its skills section (owner P0
+  // 2026-11-23: the hero no longer repeats them).
+  const skills = tiler.page.getByTestId("cv-skills");
+  await expect(skills).toBeVisible({ timeout: 60_000 });
+  const tiling = skills.locator("[data-magnitude]", { hasText: /^\s*Tiling/ });
+  await expect(tiling, "tiling is on the Living CV, once").toHaveCount(1);
+  await expect(
+    skills.getByTestId("cv-tier-evidence").locator("[data-magnitude]", { hasText: /^\s*Tiling/ }),
+    "at the recorded level — not confirmed",
+  ).toHaveCount(1);
+  await expect(skills.getByTestId("cv-tier-confirmed"), "nothing reads as confirmed").toHaveCount(0);
   // The basis is said on the line: the recorded hours when the entry's time
   // can be given to this skill; since #2894 (P0-B) a session shared by
-  // several skills says "Involved in N h, not attributed to it alone" (one
-  // total is never split by guesswork, #1689); otherwise "shown by your
-  // records" — never the "you say so" line of a bare declaration.
+  // several skills says it was involved in N h not attributed to it alone
+  // (one total is never split by guesswork, #1689) — never "no records yet".
   await expect(tiling, "the basis is stated").toContainText(
-    /\d+(\.\d+)? h recorded|Involved in \d+(\.\d+)? h, not attributed to it alone|Shown by your records/,
+    /\d+(\.\d+)? h, (your own record|\d+(\.\d+)? h of it confirmed)|involved in \d+(\.\d+)? h of work not attributed/,
   );
-  await expect(tiling).not.toContainText(/nothing shows it yet/);
+  await expect(tiling).not.toContainText(/no records yet/);
   await tiler.close();
 });
 
@@ -582,9 +586,10 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
 
   // The Living CV follows: flooring is no longer shown as recorded work.
   await page.goto(`${BASE}/en/cv`);
-  const caps = page.getByTestId("premium-cv-capabilities");
-  await expect(caps).toBeVisible({ timeout: 60_000 });
-  await expect(caps.locator('li[data-level="recorded"]', { hasText: /^\s*Flooring/ })).toHaveCount(0);
-  await expect(caps.locator('li[data-level="recorded"]', { hasText: /^\s*Tiling/ })).toHaveCount(1);
+  const cvSkills = page.getByTestId("cv-skills");
+  await expect(cvSkills).toBeVisible({ timeout: 60_000 });
+  const recorded = cvSkills.getByTestId("cv-tier-evidence");
+  await expect(recorded.locator("[data-magnitude]", { hasText: /^\s*Flooring/ })).toHaveCount(0);
+  await expect(recorded.locator("[data-magnitude]", { hasText: /^\s*Tiling/ })).toHaveCount(1);
   await tiler.close();
 });
