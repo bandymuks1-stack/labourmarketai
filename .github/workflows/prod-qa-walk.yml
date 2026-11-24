@@ -97,6 +97,10 @@ on:
           # screens, de-identified before rendering, published ONLY encrypted to the coordinator's key.
           # Read-only; needs the owner-created qa.livingcv+read1 account and its grant. Dispatch only.
           - living-cv-screens
+          # Owner order 2026-11-24: production showcase screenshots on the SYNTHETIC QA accounts only
+          # (worker, company, agency, buyer, learner), 1440 and 390 px, published only encrypted like
+          # living-cv-screens. Read-only. Dispatch only (a ONE-SHOT pair).
+          - showcase-screens
           # Owner decision 2026-10-26 §5: locale vs server load behind the slow non-LT pages. Dispatch only.
           - lcp-locale-probe
           # Owner-approved 2026-10-26: two synthetic sessions at once vs one (read-only). Dispatch only.
@@ -501,6 +505,11 @@ jobs:
             mint_existing "qa.freshworker+act1@labourmarket.ai" freshworker \
               || echo "::warning::qa.freshworker+act1 not mintable — the J-13 steps of buyer-workspace will skip"
           fi
+          if [ "${{ needs.debounce.outputs.spec }}" = "showcase-screens" ]; then
+            # The buyer of the showcase. Owner-created only: absent, its screens are recorded FAIL.
+            mint_existing "qa.buyer+act1@labourmarket.ai" buyer \
+              || echo "::warning::qa.buyer+act1 not mintable — the buyer screens of showcase-screens are recorded FAIL"
+          fi
           if [ "${{ needs.debounce.outputs.spec }}" = "ux-metrics" ]; then
             # The buyer role of the UX matrix. Owner-created only: absent, the role is recorded BLOCKED.
             mint_existing "qa.buyer+act1@labourmarket.ai" buyer \
@@ -608,6 +617,7 @@ jobs:
             lmc-csrf) SPEC=tests/e2e/prod-lmc-csrf.spec.ts ;;
             ux-metrics) SPEC=tests/e2e/prod-ux-metrics.spec.ts ;;
             living-cv-screens) SPEC=tests/e2e/prod-living-cv-screens.spec.ts ;;
+            showcase-screens) SPEC=tests/e2e/prod-showcase-screens.spec.ts ;;
             lcp-locale-probe) SPEC=tests/e2e/prod-lcp-locale-probe.spec.ts ;;
             concurrency-probe) SPEC=tests/e2e/prod-concurrency-probe.spec.ts ;;
             fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
@@ -674,7 +684,7 @@ jobs:
       # Guard: lib/guards/living-cv-screens.test.ts.
       - name: "Living CV screens: encrypt, then destroy the plaintext"
         id: lcv
-        if: always() && needs.debounce.outputs.spec == 'living-cv-screens'
+        if: always() && (needs.debounce.outputs.spec == 'living-cv-screens' || needs.debounce.outputs.spec == 'showcase-screens')
         shell: bash
         env:
           LCV_DIR: ${{ runner.temp }}/lcv
@@ -703,7 +713,10 @@ jobs:
             const listed = new Set(m.screens.filter((s) => s.privacy === "PASS" && s.file).map((s) => s.file));
             const pngs = fs.readdirSync(dir).filter((f) => f.endsWith(".png"));
             const stray = pngs.filter((f) => !listed.has(f));
-            if (m.screens.length !== 12 || stray.length > 0) { console.error(`screens=${m.screens.length} stray=${stray.length}`); process.exit(1); }
+            // living-cv-screens: 12 (no `expected` field); showcase-screens: 30 (15 synthetic-account
+            // screens x 2 sizes), stated in the manifest's `expected`.
+            const want = m.expected === 30 ? 30 : 12;
+            if (m.screens.length !== want || stray.length > 0) { console.error(`screens=${m.screens.length} want=${want} stray=${stray.length}`); process.exit(1); }
             const pass = m.screens.filter((s) => s.status === "PASS").length;
             console.log(`images=${pngs.length} pass=${pass} fail=${m.screens.length - pass}`);
           ' "$LCV_DIR" >> "$GITHUB_STEP_SUMMARY"
@@ -717,7 +730,7 @@ jobs:
         if: always() && steps.lcv.outputs.encrypted == 'true'
         uses: actions/upload-artifact@v4
         with:
-          name: prod-qa-living-cv-screens-${{ github.run_id }}
+          name: prod-qa-${{ needs.debounce.outputs.spec }}-encrypted-${{ github.run_id }}
           retention-days: 7
           if-no-files-found: error
           path: |

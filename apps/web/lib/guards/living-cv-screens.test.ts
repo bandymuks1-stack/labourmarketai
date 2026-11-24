@@ -116,12 +116,13 @@ describe("the walk is read-only and prints no names", () => {
 describe("the workflow publishes only ciphertext", () => {
   it("encrypts with a random key and the coordinator's public key, and destroys the plaintext", () => {
     const enc = stepBlock("Living CV screens: encrypt, then destroy the plaintext");
-    expect(enc).toMatch(/if: always\(\) && needs\.debounce\.outputs\.spec == 'living-cv-screens'/);
+    expect(enc).toMatch(/if: always\(\) && \(needs\.debounce\.outputs\.spec == 'living-cv-screens' \|\| needs\.debounce\.outputs\.spec == 'showcase-screens'\)/);
     expect(enc).toMatch(/trap destroy EXIT/);
     expect(enc).toMatch(/shred -u/);
     expect(enc).toMatch(/no manifest/);
     expect(enc).toMatch(/s\.privacy === "PASS" && s\.file/);
-    expect(enc).toMatch(/m\.screens\.length !== 12 \|\| stray\.length > 0/);
+    expect(enc).toMatch(/const want = m\.expected === 30 \? 30 : 12;/);
+    expect(enc).toMatch(/m\.screens\.length !== want \|\| stray\.length > 0/);
     expect(enc).toMatch(/zip -q -X "\$LCV_TMP\/lcv\.zip" manifest\.json/);
     expect(enc).toMatch(/openssl rand -hex 32/);
     expect(enc).toMatch(/openssl enc -aes-256-cbc -pbkdf2 -salt/);
