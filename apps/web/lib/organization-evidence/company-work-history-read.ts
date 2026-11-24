@@ -19,7 +19,7 @@ import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
 import type { BusinessHistoryIdentity } from "./business-history-header";
-import { resolveEvidenceOrganization } from "./evidence-org-context";
+import { resolveHistoryReadOrganization } from "./history-read-grant";
 import { untypedClient } from "./evidence-store";
 import {
   CLIENT_PARTY_ROLE,
@@ -123,11 +123,9 @@ export async function loadCompanyWorkHistory(
     locale,
   });
 
-  const org = await resolveEvidenceOrganization(caller, requestedOrganizationId);
+  const org = await resolveHistoryReadOrganization(caller, requestedOrganizationId);
   if (!org.ok) {
-    return org.reason === "error" || org.reason === "needs-migration"
-      ? { kind: "unavailable" }
-      : { kind: "hidden" };
+    return org.reason === "unavailable" ? { kind: "unavailable" } : { kind: "hidden" };
   }
 
   // Every read is PAGED to the end (the server answers at most 1000 rows):
