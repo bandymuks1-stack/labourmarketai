@@ -40,7 +40,7 @@
 -- Rollback: supabase/rollbacks/20261124053000_history_read_grant_v1.down.sql
 -- ============================================================================
 
-create table public.organization_history_read_grants_v1 (
+create table if not exists public.organization_history_read_grants_v1 (
   id uuid primary key default gen_random_uuid(),
   organization_id uuid not null references public.organizations(id) on delete cascade,
   profile_id uuid not null references public.profiles(id) on delete cascade,
@@ -85,13 +85,13 @@ stable
 security definer
 set search_path = public
 as $$
-  select g.organization_id, o.name, min(g.expires_at)
+  select g.organization_id, coalesce(nullif(btrim(o.display_name), ''), o.legal_name), min(g.expires_at)
     from public.organization_history_read_grants_v1 g
     join public.organizations o on o.id = g.organization_id
    where g.profile_id = auth.uid()
      and g.revoked_at is null
      and now() < g.expires_at
-   group by g.organization_id, o.name
+   group by g.organization_id, o.display_name, o.legal_name
 $$;
 
 revoke all on function public.my_history_read_grants_v1() from public, anon;
@@ -118,7 +118,7 @@ create policy organization_evidence_events_history_read_grant_select
   on public.organization_evidence_events for select to authenticated
   using (public.has_history_read_grant_v1(organization_id));
 
-create policy organization_evidence_competency_signals_history_read_grant_select
+create policy oe_competency_signals_history_read_grant_select
   on public.organization_evidence_competency_signals for select to authenticated
   using (public.has_history_read_grant_v1(organization_id));
 

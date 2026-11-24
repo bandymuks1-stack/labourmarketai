@@ -17,7 +17,7 @@ $$;
 drop policy if exists projects_history_read_grant_select on public.projects;
 drop policy if exists work_objects_history_read_grant_select on public.work_objects;
 drop policy if exists organization_history_periods_history_read_grant_select on public.organization_history_periods;
-drop policy if exists organization_evidence_competency_signals_history_read_grant_select on public.organization_evidence_competency_signals;
+drop policy if exists oe_competency_signals_history_read_grant_select on public.organization_evidence_competency_signals;
 drop policy if exists organization_evidence_events_history_read_grant_select on public.organization_evidence_events;
 drop policy if exists organization_evidence_parties_history_read_grant_select on public.organization_evidence_parties;
 drop policy if exists organization_evidence_records_history_read_grant_select on public.organization_evidence_records;
