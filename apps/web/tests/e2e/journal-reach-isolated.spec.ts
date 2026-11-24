@@ -183,6 +183,17 @@ test("R-3. the entry survives a validation error, in the readback, after a reloa
   const form = main.getByTestId("journal-compose-full");
   await expect(form).toBeVisible({ timeout: 60_000 });
   const text = form.locator("textarea").first();
+  // Fill only once React owns the form: a fill and save that land before
+  // hydration submit natively and the re-rendered form has no text (the same
+  // check journal-day-choice D-3 and integrated-fixes use).
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector('[data-testid="journal-compose-full"] textarea');
+      return !!el && Object.keys(el).some((k) => k.startsWith("__reactProps"));
+    },
+    undefined,
+    { timeout: 30_000 },
+  );
   await text.fill(WORDS);
   await main.getByTestId("journal-save-entry").first().click();
   await expect(main.getByTestId("journal-save-error"), "R-3: the detailed form refuses the future day").toBeVisible({ timeout: 30_000 });
