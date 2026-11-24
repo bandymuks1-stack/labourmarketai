@@ -3,6 +3,8 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { agencyBoardBurstLimited } from "@/lib/agency/board-abuse-guard";
+import { decideAgencyOffer } from "@/lib/agency/board-abuse-limits";
 import { parseSharePercent, partnershipErrorCode, type PartnershipErrorCode } from "./partnerships-model";
 
 /**
@@ -118,7 +120,67 @@ export async function forwardPartnerCandidateAction(
   const note = field(form, "note");
   if (!UUID.test(id)) return { status: "error", code: "proposal_not_open" };
   if (note.length > 500) return { status: "error", code: "invalid_note" };
+  // A forward makes a candidate offer to the lead's client, so it is under the
+  // same limits as the lead's own offers (owner decision 2026-11-22, item 1):
+  // burst per account, then the caps counted from the LEAD's real offer rows.
+  // Read under the lead's own session; a count that could not be read refuses.
+  if (!(await forwardWithinOfferLimits(id))) return { status: "error", code: "rate_limited" };
   return call("forward_partner_candidate_v1", { p_proposal_id: id, p_note: note || null });
+}
+
+async function forwardWithinOfferLimits(proposalId: string): Promise<boolean> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+  const counts = await (async () => {
+    try {
+      const { data: proposal } = await db(supabase)
+        .from("agency_partner_candidate_proposals")
+        .select("partner_share_id, worker_id")
+        .eq("id", proposalId)
+        .maybeSingle();
+      if (!proposal?.partner_share_id) return null;
+      const { data: share } = await db(supabase)
+        .from("agency_partner_request_shares")
+        .select("client_share_id, partnership_id")
+        .eq("id", proposal.partner_share_id)
+        .maybeSingle();
+      if (!share?.client_share_id || !share.partnership_id) return null;
+      const { data: partnership } = await db(supabase)
+        .from("agency_partnerships")
+        .select("lead_company_id")
+        .eq("id", share.partnership_id)
+        .maybeSingle();
+      if (typeof partnership?.lead_company_id !== "string") return null;
+      const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+      const [onNeed, today] = await Promise.all([
+        db(supabase)
+          .from("agency_candidate_offers")
+          .select("id", { count: "exact", head: true })
+          .eq("request_share_id", share.client_share_id)
+          .eq("status", "offered")
+          .neq("worker_id", proposal.worker_id),
+        db(supabase)
+          .from("agency_candidate_offers")
+          .select("id", { count: "exact", head: true })
+          .eq("agency_company_id", partnership.lead_company_id)
+          .gte("created_at", since),
+      ]);
+      return {
+        openOnNeed: !onNeed.error && typeof onNeed.count === "number" ? (onNeed.count as number) : null,
+        last24h: !today.error && typeof today.count === "number" ? (today.count as number) : null,
+      };
+    } catch {
+      return null;
+    }
+  })();
+  return decideAgencyOffer({
+    burstLimited: await agencyBoardBurstLimited("offer", user.id),
+    openOnNeed: counts?.openOnNeed ?? null,
+    last24h: counts?.last24h ?? null,
+  }).allowed;
 }
 
 /** LEAD: return a partner candidate to the partner, optionally saying why. */

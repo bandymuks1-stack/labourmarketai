@@ -8293,7 +8293,8 @@
       "needs_migration": "Partnerbürood pole veel saadaval.",
       "error": "See ei õnnestunud. Proovige uuesti.",
       "proposal_not_open": "See kandidaat ei oota enam ülevaatust.",
-      "already_offered": "See töötaja on sellele vajadusele juba pakutud."
+      "already_offered": "See töötaja on sellele vajadusele juba pakutud.",
+      "rate_limited": "Praegu liiga palju pakkumisi. Proovige hiljem uuesti."
     },
     "proposalStatus": {
       "proposed": "Ootab juhtiva agentuuri ülevaatust",

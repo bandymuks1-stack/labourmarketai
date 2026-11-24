@@ -8293,7 +8293,8 @@
       "needs_migration": "Partneraģentūras vēl nav pieejamas.",
       "error": "Neizdevās. Mēģiniet vēlreiz.",
       "proposal_not_open": "Šis kandidāts vairs negaida izvērtējumu.",
-      "already_offered": "Šis darbinieks jau ir piedāvāts šai vajadzībai."
+      "already_offered": "Šis darbinieks jau ir piedāvāts šai vajadzībai.",
+      "rate_limited": "Pārāk daudz piedāvājumu. Lūdzu, mēģiniet vēlāk."
     },
     "proposalStatus": {
       "proposed": "Gaida vadošās aģentūras izvērtējumu",

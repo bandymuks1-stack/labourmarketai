@@ -20928,7 +20928,8 @@
       "needs_migration": "Partnerės agentūros dar neįjungtos.",
       "error": "Nepavyko. Bandykite dar kartą.",
       "proposal_not_open": "Šis kandidatas nebelaukia peržiūros.",
-      "already_offered": "Šis darbuotojas jau pasiūlytas šiam poreikiui."
+      "already_offered": "Šis darbuotojas jau pasiūlytas šiam poreikiui.",
+      "rate_limited": "Per daug pasiūlymų. Bandykite vėliau."
     },
     "proposalStatus": {
       "proposed": "Laukia pagrindinės agentūros peržiūros",

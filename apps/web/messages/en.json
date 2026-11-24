@@ -20928,7 +20928,8 @@
       "needs_migration": "Partner agencies are not available yet.",
       "error": "This did not work. Try again.",
       "proposal_not_open": "This candidate is no longer awaiting review.",
-      "already_offered": "This worker is already offered on this need."
+      "already_offered": "This worker is already offered on this need.",
+      "rate_limited": "Too many offers for now. Try again later."
     },
     "proposalStatus": {
       "proposed": "Awaiting the lead's review",

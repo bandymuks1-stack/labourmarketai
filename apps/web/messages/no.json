@@ -8293,7 +8293,8 @@
       "needs_migration": "Partnerbyråer er ikke tilgjengelige ennå.",
       "error": "Det gikk ikke. Prøv igjen.",
       "proposal_not_open": "Kandidaten venter ikke lenger på gjennomgang.",
-      "already_offered": "Denne personen er allerede tilbudt til dette behovet."
+      "already_offered": "Denne personen er allerede tilbudt til dette behovet.",
+      "rate_limited": "For mange tilbud akkurat nå. Prøv igjen senere."
     },
     "proposalStatus": {
       "proposed": "Venter på det ledende byråets gjennomgang",

@@ -20928,7 +20928,8 @@
       "needs_migration": "Agencje partnerskie nie są jeszcze dostępne.",
       "error": "Nie udało się. Proszę spróbować ponownie.",
       "proposal_not_open": "Ten kandydat nie oczekuje już na sprawdzenie.",
-      "already_offered": "Ten pracownik jest już zaproponowany do tej potrzeby."
+      "already_offered": "Ten pracownik jest już zaproponowany do tej potrzeby.",
+      "rate_limited": "Zbyt wiele ofert. Proszę spróbować później."
     },
     "proposalStatus": {
       "proposed": "Oczekuje na sprawdzenie przez agencję wiodącą",

@@ -8293,7 +8293,8 @@
       "needs_migration": "Partnerbureauer er ikke tilgængelige endnu.",
       "error": "Det lykkedes ikke. Prøv igen.",
       "proposal_not_open": "Kandidaten afventer ikke længere gennemgang.",
-      "already_offered": "Denne medarbejder er allerede tilbudt til dette behov."
+      "already_offered": "Denne medarbejder er allerede tilbudt til dette behov.",
+      "rate_limited": "For mange tilbud lige nu. Prøv igen senere."
     },
     "proposalStatus": {
       "proposed": "Afventer det ledende bureaus gennemgang",

@@ -23,6 +23,7 @@ export const PARTNERSHIP_ERROR_CODES = [
   "invalid_note",
   "proposal_not_open",
   "already_offered",
+  "rate_limited",
   "needs_migration",
   "error",
 ] as const;

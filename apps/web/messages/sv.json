@@ -20928,7 +20928,8 @@
       "needs_migration": "Partnerbyråer är inte tillgängliga än.",
       "error": "Det gick inte. Försök igen.",
       "proposal_not_open": "Kandidaten väntar inte längre på granskning.",
-      "already_offered": "Den här personen är redan erbjuden för det här behovet."
+      "already_offered": "Den här personen är redan erbjuden för det här behovet.",
+      "rate_limited": "För många erbjudanden. Försök igen senare."
     },
     "proposalStatus": {
       "proposed": "Väntar på den ledande byråns granskning",

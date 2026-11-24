@@ -20928,7 +20928,8 @@
       "needs_migration": "Partneragenturen sind noch nicht verfügbar.",
       "error": "Das hat nicht geklappt. Versuchen Sie es erneut.",
       "proposal_not_open": "Dieser Kandidat wartet nicht mehr auf Prüfung.",
-      "already_offered": "Diese Arbeitskraft ist für diesen Bedarf bereits angeboten."
+      "already_offered": "Diese Arbeitskraft ist für diesen Bedarf bereits angeboten.",
+      "rate_limited": "Zu viele Angebote. Bitte später erneut versuchen."
     },
     "proposalStatus": {
       "proposed": "Wartet auf Prüfung durch die Hauptagentur",

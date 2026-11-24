@@ -20928,7 +20928,8 @@
       "needs_migration": "Partnerbureaus zijn nog niet beschikbaar.",
       "error": "Dat is niet gelukt. Probeer het opnieuw.",
       "proposal_not_open": "Deze kandidaat wacht niet meer op beoordeling.",
-      "already_offered": "Deze medewerker is al aangeboden voor deze behoefte."
+      "already_offered": "Deze medewerker is al aangeboden voor deze behoefte.",
+      "rate_limited": "Te veel aanbiedingen. Probeer het later opnieuw."
     },
     "proposalStatus": {
       "proposed": "Wacht op beoordeling door het hoofdbureau",
