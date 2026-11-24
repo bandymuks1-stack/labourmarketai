@@ -197,10 +197,12 @@ const MASK = "[…]";
  * Lithuanian and Polish forms; over-masking is accepted.
  */
 const HOUSE_NO = String.raw`(?:\s*\d+[a-z]?(?:\s*[-/]\s*\d+[a-z]?)?)?`;
-const STREET_SUFFIX = String.raw`(?:straat|str\.|laan|weg|gracht|plein|kade|dreef|singel|steeg|hof|strasse|straße|gatvė|gatve|takas|aikštė|skveras)`;
+const STREET_SUFFIX = String.raw`(?:straat|str\.|laan|weg|gracht|plein|kade|dreef|singel|steeg|hof|dijk|pad|strasse|straße|gatvė|gatve|takas|aikštė|skveras)`;
 const ADDRESS_PATTERNS: readonly RegExp[] = [
-  // "Van Eedenlaan 12", "Keizersgracht35", "Vredenburgstraat 7a", "Kade 3", "Gedimino gatvė 9".
-  new RegExp(String.raw`(?<![\p{L}\p{N}])[\p{L}'’-]*${STREET_SUFFIX}${HOUSE_NO}(?![\p{L}\p{N}])`, "giu"),
+  // "Van Eedenlaan 12", "Keizersgracht35", "Placenameweg118", "Kade 3", "Gedimino gatvė 9", and the
+  // word written directly before the street word ("jan steenlaan", "van xstraat35"): a two-word
+  // street name is often a first name before a surname-street. Over-masking is accepted.
+  new RegExp(String.raw`(?<![\p{L}\p{N}])(?:[\p{L}'’-]+\s+)?[\p{L}'’-]*${STREET_SUFFIX}${HOUSE_NO}(?![\p{L}\p{N}])`, "giu"),
   // "ul. Marszałkowska 102/4", "ulica Długa 5", "al. Jerozolimskie 1".
   new RegExp(String.raw`(?<![\p{L}\p{N}])(?:ul\.|ulica|al\.|aleja|os\.|pl\.)\s*[\p{L}'’.-]+(?:\s+[\p{L}'’.-]+)?${HOUSE_NO}(?![\p{L}\p{N}])`, "giu"),
   // "Vilniaus g. 12", "Laisvės al. 5", "Konstitucijos pr. 7".
