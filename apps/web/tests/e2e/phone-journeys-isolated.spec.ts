@@ -840,7 +840,7 @@ for (const phone of PHONES) {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await addInPlace(page, claim, `${phone.name} px`);
       await fitsTheScreen(page, "the profile with a new skill chip");
-      await page.goto(`${BASE}/en/cv`);
+      await page.goto(`${BASE}/en/cv?tab=experience`);
       await expect(
         page.getByRole("main").locator('[data-testid="cv-tier-declared"]', { hasText: claim }).first(),
         "a claim nobody has evidenced stays in the declared tier",
@@ -1591,6 +1591,9 @@ for (const phone of PHONES) {
       const { page, done } = await signedInOnPhone(browser, phone, STUDENT);
       await accountMenu(page, "account-menu-cv-link");
       await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      // Study sits in the CV's Documents block (decision 0034): one tap.
+      await page.getByTestId("cv-tab-documents").tap();
+      await page.waitForURL(/tab=documents/, { timeout: 30_000 });
       await expect(page.getByTestId("cv-education-row").first(), "the study is on the CV").toBeVisible({ timeout: 30_000 });
       await fitsTheScreen(page, "the student's CV");
       await done();

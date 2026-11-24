@@ -1133,7 +1133,8 @@ test("ST-1. a student signs up, keeps one worker record with no company, and the
   await expect(page.getByTestId("worker-education-self-stated")).toBeVisible();
 
   // CV with zero work history: the education block is there, labelled the same way.
-  await page.goto(`${BASE}/en/cv`);
+  // Education sits in the CV's Documents block (decision 0034).
+  await page.goto(`${BASE}/en/cv?tab=documents`);
   await expect(page.getByTestId("cv-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("cv-education-self-stated")).toBeVisible();
 

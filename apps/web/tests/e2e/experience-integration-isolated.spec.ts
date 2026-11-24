@@ -398,7 +398,7 @@ function wiOrgRow(exp: Locator, orgId: string): Locator {
 }
 
 async function openCv(page: Page): Promise<Locator> {
-  await page.goto(`${BASE}/en/cv`);
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   const main = page.getByRole("main").first();
   await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });
   return main;
