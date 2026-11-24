@@ -179,10 +179,15 @@ export function organizationHeaderAreas(
   return withEducation.map((a) => ({
     id: `area:${a.id}` as const,
     href: a.href,
-    tabLabelKey: a.labelKey,
+    // SEP-4 (DEMAND ≠ SUPPLY): an agency's intake declares what it OFFERS, so
+    // its "need" area is named for supply, the same key as its door.
+    tabLabelKey: role === "agency" && a.id === "need" ? AGENCY_NEED_AREA_LABEL_KEY : a.labelKey,
     iconKey: a.iconKey,
   }));
 }
+
+/** The agency's name for the need area: the same key as its organization door. */
+export const AGENCY_NEED_AREA_LABEL_KEY = "organizationDoors.needsAgency";
 
 /**
  * THE CUSTOMER'S OWN DOOR in the one header (owner P0-2, coordinator ruling

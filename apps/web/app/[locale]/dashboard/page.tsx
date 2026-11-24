@@ -417,6 +417,7 @@ export default async function DashboardHomePage({
             ? workspace.organizationId
             : null
         }
+        agency={agencyWorkspace}
       />
     ) : null;
   // The pilot pass pointer leads it — the employer home is where an owner
