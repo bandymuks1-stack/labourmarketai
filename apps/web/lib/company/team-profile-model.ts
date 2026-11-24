@@ -284,6 +284,8 @@ export interface OrganizationLivingRecord {
   readonly gallery: readonly { readonly id: string; readonly url: string; readonly caption: string | null }[];
   /** Named clients of its own records (one plain line at most). */
   readonly clients: readonly string[];
+  /** Named clients beyond `clients`, said as a count so a cut list never reads as whole. */
+  readonly clientsMore: number;
 }
 
 const CAPABILITY_ORDER = [
@@ -352,6 +354,10 @@ export function buildOrganizationLivingRecord(input: OrganizationLivingInput): O
       .map((p) => ({ id: p.id, title: text(p.title), city: text(p.city) }))
       .filter((p): p is { id: string; title: string; city: string | null } => p.title !== null);
 
+  const namedClients = [
+    ...new Set(input.clients.map((c) => text(c)).filter((c): c is string => c !== null)),
+  ];
+
   return {
     figures,
     peopleWorked: people > 0 ? people : null,
@@ -370,9 +376,8 @@ export function buildOrganizationLivingRecord(input: OrganizationLivingInput): O
       .filter((m) => !m.personLinked && m.url)
       .slice(0, ORGANIZATION_GALLERY_LIMIT)
       .map(({ id, url, caption }) => ({ id, url, caption: text(caption) })),
-    clients: [
-      ...new Set(input.clients.map((c) => text(c)).filter((c): c is string => c !== null)),
-    ].slice(0, ORGANIZATION_CLIENTS_LIMIT),
+    clients: namedClients.slice(0, ORGANIZATION_CLIENTS_LIMIT),
+    clientsMore: Math.max(0, namedClients.length - ORGANIZATION_CLIENTS_LIMIT),
   };
 }
 

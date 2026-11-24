@@ -184,7 +184,7 @@
       "living": {
         "eyebrow": "Gyvas CV",
         "figures": {
-          "years": "{count, plural, one {metai} few {metai} other {metų}}",
+          "years": "{count, plural, one {veiklos metai} few {veiklos metai} other {veiklos metų}}",
           "hours": "dirbtų valandų",
           "people": "{count, plural, one {žmogus dirbo} few {žmonės dirbo} other {žmonių dirbo}}",
           "projects": "{count, plural, one {projektas} few {projektai} other {projektų}}",
@@ -212,7 +212,8 @@
         },
         "pendingLabel": "Laukia patvirtinimo",
         "ringLabel": "Patvirtinta {share}% žurnalo valandų",
-        "open": "Atverti Gyvą CV"
+        "open": "Atverti Gyvą CV",
+        "clientsMore": "Darbai atlikti užsakovui: {names} ir dar {count}"
       }
     }
   },

@@ -184,7 +184,7 @@
       "living": {
         "eyebrow": "Levande CV",
         "figures": {
-          "years": "{count, plural, one {år} other {år}}",
+          "years": "{count, plural, one {år i verksamhet} other {år i verksamhet}}",
           "hours": "arbetade timmar",
           "people": "{count, plural, one {person har arbetat här} other {personer har arbetat här}}",
           "projects": "{count, plural, one {projekt} other {projekt}}",
@@ -212,7 +212,8 @@
         },
         "pendingLabel": "Väntar på godkännande",
         "ringLabel": "{share} % av journaltimmarna bekräftade",
-        "open": "Öppna Levande CV"
+        "open": "Öppna Levande CV",
+        "clientsMore": "Arbete utfört åt: {names} och {count} till"
       }
     }
   },

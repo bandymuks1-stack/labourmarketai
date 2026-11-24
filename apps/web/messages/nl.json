@@ -184,7 +184,7 @@
       "living": {
         "eyebrow": "Levend cv",
         "figures": {
-          "years": "{count, plural, one {jaar} other {jaar}}",
+          "years": "{count, plural, one {jaar actief} other {jaar actief}}",
           "hours": "gewerkte uren",
           "people": "{count, plural, one {persoon werkte hier} other {personen werkten hier}}",
           "projects": "{count, plural, one {project} other {projecten}}",
@@ -212,7 +212,8 @@
         },
         "pendingLabel": "Wacht op goedkeuring",
         "ringLabel": "{share}% van de journaaluren bevestigd",
-        "open": "Levend cv openen"
+        "open": "Levend cv openen",
+        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}"
       }
     }
   },

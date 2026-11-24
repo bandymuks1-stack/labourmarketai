@@ -184,7 +184,7 @@
       "living": {
         "eyebrow": "Living CV",
         "figures": {
-          "years": "{count, plural, one {year} other {years}}",
+          "years": "{count, plural, one {year active} other {years active}}",
           "hours": "hours worked",
           "people": "{count, plural, one {person worked here} other {people worked here}}",
           "projects": "{count, plural, one {project} other {projects}}",
@@ -212,7 +212,8 @@
         },
         "pendingLabel": "Waiting for approval",
         "ringLabel": "{share}% of journal hours confirmed",
-        "open": "Open the Living CV"
+        "open": "Open the Living CV",
+        "clientsMore": "Work done for: {names} and {count} more"
       }
     }
   },

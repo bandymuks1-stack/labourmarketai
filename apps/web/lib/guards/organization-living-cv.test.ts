@@ -157,8 +157,20 @@ describe("organization Living CV — model", () => {
     );
   });
 
-  it("the structure is one plain line: named clients only, once each", () => {
+  it("the structure is one plain line: named clients only, once each; a cut list says how many more", () => {
     expect(buildOrganizationLivingRecord(FULL).clients).toEqual(["UAB Nonstop Group"]);
+    expect(buildOrganizationLivingRecord(FULL).clientsMore).toBe(0);
+    const many = buildOrganizationLivingRecord({ ...FULL, clients: ["A", "B", "C", "D", "E"] });
+    expect(many.clients).toEqual(["A", "B", "C"]);
+    expect(many.clientsMore).toBe(2);
+    const html = renderToStaticMarkup(
+      createElement(CompanyTeamProfile, {
+        view: buildOrganizationLivingCv(IDENTITY, { ...FULL, clients: ["A", "B", "C", "D", "E"] }, "en"),
+        t: translator("en"),
+        member: { locale: "en", tab: "experience", tabHref },
+      }),
+    );
+    expect(html).toContain("Work done for: A, B, C and 2 more");
   });
 });
 

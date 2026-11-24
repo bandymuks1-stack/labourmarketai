@@ -184,7 +184,7 @@
       "living": {
         "eyebrow": "Живое резюме",
         "figures": {
-          "years": "{count, plural, one {год} few {года} many {лет} other {лет}}",
+          "years": "{count, plural, one {год работы} few {года работы} many {лет работы} other {лет работы}}",
           "hours": "отработанных часов",
           "people": "{count, plural, one {человек работал} few {человека работали} many {человек работали} other {человек работали}}",
           "projects": "{count, plural, one {проект} few {проекта} many {проектов} other {проектов}}",
@@ -212,7 +212,8 @@
         },
         "pendingLabel": "Ждут утверждения",
         "ringLabel": "Подтверждено {share}% часов журнала",
-        "open": "Открыть Живое резюме"
+        "open": "Открыть Живое резюме",
+        "clientsMore": "Работы выполнены для: {names} и ещё {count}"
       }
     }
   },

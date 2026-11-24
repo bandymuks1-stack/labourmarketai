@@ -184,7 +184,7 @@
       "living": {
         "eyebrow": "Lebendiger Lebenslauf",
         "figures": {
-          "years": "{count, plural, one {Jahr} other {Jahre}}",
+          "years": "{count, plural, one {Jahr aktiv} other {Jahre aktiv}}",
           "hours": "geleistete Stunden",
           "people": "{count, plural, one {Person hat hier gearbeitet} other {Personen haben hier gearbeitet}}",
           "projects": "{count, plural, one {Projekt} other {Projekte}}",
@@ -212,7 +212,8 @@
         },
         "pendingLabel": "Wartet auf Freigabe",
         "ringLabel": "{share}% der Journalstunden bestätigt",
-        "open": "Lebendigen Lebenslauf öffnen"
+        "open": "Lebendigen Lebenslauf öffnen",
+        "clientsMore": "Arbeiten ausgeführt für: {names} und {count} weitere"
       }
     }
   },

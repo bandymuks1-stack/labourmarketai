@@ -184,7 +184,7 @@
       "living": {
         "eyebrow": "Żywe CV",
         "figures": {
-          "years": "{count, plural, one {rok} few {lata} many {lat} other {lat}}",
+          "years": "{count, plural, one {rok działalności} few {lata działalności} many {lat działalności} other {lat działalności}}",
           "hours": "przepracowanych godzin",
           "people": "{count, plural, one {osoba pracowała} few {osoby pracowały} many {osób pracowało} other {osób pracowało}}",
           "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
@@ -212,7 +212,8 @@
         },
         "pendingLabel": "Czeka na zatwierdzenie",
         "ringLabel": "Potwierdzono {share}% godzin z dziennika",
-        "open": "Otwórz Żywe CV"
+        "open": "Otwórz Żywe CV",
+        "clientsMore": "Prace wykonane dla: {names} i {count} więcej"
       }
     }
   },

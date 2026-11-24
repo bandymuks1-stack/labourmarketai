@@ -623,7 +623,9 @@ function OrganizationLivingCv({
           ) : null}
           {living.clients.length > 0 ? (
             <p className="text-support text-text-secondary [overflow-wrap:anywhere]" data-testid="org-living-clients">
-              {t(`${LIVING}.clients`, { names: living.clients.join(", ") })}
+              {living.clientsMore > 0
+                ? t(`${LIVING}.clientsMore`, { names: living.clients.join(", "), count: living.clientsMore })
+                : t(`${LIVING}.clients`, { names: living.clients.join(", ") })}
             </p>
           ) : null}
         </div>
