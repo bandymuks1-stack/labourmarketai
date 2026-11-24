@@ -107,6 +107,34 @@ describe("rendered-text layer", () => {
     expect(maskFreeText("Jonas dirbo", q, ALLOW)).toBe("[…] dirbo");
   });
 
+  it("masks street addresses with their house numbers (run 45401396990)", () => {
+    const q = buildPseudonyms(PEOPLE, COMPANIES, KEEP);
+    // Synthetic addresses only.
+    const cases = [
+      "darbai: van eedenlaan 12, objektas",
+      "plytelės keizersgracht35 vonioje",
+      "Vredenburgstraat 7a",
+      "prie kade 3",
+      "gedimino gatvė 9-14",
+      "Vilniaus g. 12",
+      "Laisvės al. 5",
+      "ul. Marszałkowska 102/4",
+      "ulica Długa 5",
+      "Hauptstraße 3",
+      "Oude Dreef 4",
+    ];
+    for (const c of cases) {
+      const out = maskFreeText(c, q, ALLOW);
+      expect(out, c).toContain("[…]");
+      expect(out, c).not.toMatch(/laan|gracht|straat|kade|gatvė|g\. 12|al\. 5|Marszałkowska|Długa|straße|Dreef|\d/i);
+    }
+  });
+
+  it("does not mask ordinary work text without an address", () => {
+    const q = buildPseudonyms(PEOPLE, COMPANIES, KEEP);
+    expect(maskFreeText("plytelių klojimas, 8 h, darbo istorija", q, ALLOW)).toBe("plytelių klojimas, 8 h, darbo istorija");
+  });
+
   it("leaves the network pseudonyms alone", () => {
     const q = buildPseudonyms(PEOPLE, COMPANIES, KEEP);
     const replaced = rewrite("Linas", q);
