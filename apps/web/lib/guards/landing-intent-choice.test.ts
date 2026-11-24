@@ -381,3 +381,22 @@ describe("the first screen carries no helper text", () => {
     expect(read("components/marketing/public-entry.tsx")).toMatch(/quietLabel \? "sr-only"/);
   });
 });
+
+/**
+ * Owner decision 0032, coordinator 2026-11-24 evening: the market block is
+ * the count line and the cards. Where the figures come from stays in the
+ * document, one tap away; the "you can browse without an account" line goes.
+ */
+describe("the market block is the count and the cards", () => {
+  const v3 = readFileSync(join(APP_ROOT, "components/marketing/landing-v3.tsx"), "utf8");
+
+  it("the count line opens its own source; the source is never dropped", () => {
+    expect(v3).toMatch(/<details className="group mt-2" data-testid="landing-market-provenance">/);
+    expect(v3).toContain('data-testid="landing-market-line"');
+    expect(v3).toContain('{t("market.source", { date })}');
+  });
+
+  it("no helper line above the advert cards", () => {
+    expect(v3).not.toContain('t("adverts.sub")');
+  });
+});

@@ -323,7 +323,9 @@ export function WorkLifecycleGraph({
                   </div>
                   {isCurrent ? (
                     <div className="mt-2 flex flex-col gap-2 pl-7 sm:flex-row sm:items-center sm:justify-between">
-                      <p className="text-sm text-text-secondary">{current.detail}</p>
+                      {/* A recorded chain explains its step; a public page
+                          names it and offers the action (decision 0032). */}
+                      {hasFacts ? <p className="text-sm text-text-secondary">{current.detail}</p> : <span />}
                       <div className="flex shrink-0 flex-col items-start gap-1 sm:items-end">
                         <TrackedCta
                           href={!signedIn && current.guestHref ? current.guestHref : current.href}

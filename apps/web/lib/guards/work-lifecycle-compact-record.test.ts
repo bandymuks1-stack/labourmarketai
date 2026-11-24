@@ -19,9 +19,9 @@ describe("work lifecycle — the record is compact when there is nothing recorde
     expect(graph).toContain("const hasFacts = stages.some((st) => Boolean(st.fact));");
   });
 
-  it("without facts only the chosen stage is drawn; its detail and its action stay", () => {
+  it("without facts only the chosen stage is drawn, with its action; the explaining sentence needs facts", () => {
     expect(graph).toContain("if (!hasFacts && !isCurrent) return null;");
-    expect(graph).toContain("{current.detail}");
+    expect(graph).toMatch(/\{hasFacts \? <p [^>]*>\{current\.detail\}<\/p> : <span \/>\}/);
     expect(graph).toContain("ctaId={`lifecycle_${current.key}`}");
   });
 

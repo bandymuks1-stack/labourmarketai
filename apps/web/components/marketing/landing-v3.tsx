@@ -101,14 +101,23 @@ export async function LandingMarketFacts({
           were refreshed. Without a refresh date there is nothing to vouch
           for them, so the block says the data is unavailable. */}
       {market && date ? (
-        <>
-          <p className="mt-2 text-base font-medium leading-snug text-text-primary" data-testid="landing-market-line">
-            {t("market.line", { adverts: n.format(market.adverts), employers: n.format(market.employers) })}
-          </p>
-          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-text-secondary" data-testid="landing-market-source">
+        // The count is the line; where the figures come from and when they
+        // were refreshed opens on a tap (decision 0032) and stays in the
+        // document, so the figures are never printed without their source.
+        <details className="group mt-2" data-testid="landing-market-provenance">
+          <summary className="flex min-h-11 cursor-pointer list-none items-center gap-2 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue [&::-webkit-details-marker]:hidden">
+            <span className="min-w-0 text-base font-medium leading-snug text-text-primary" data-testid="landing-market-line">
+              {t("market.line", { adverts: n.format(market.adverts), employers: n.format(market.employers) })}
+            </span>
+            <ChevronDown
+              aria-hidden
+              className="size-4 shrink-0 text-text-muted transition-transform group-open:rotate-180 motion-reduce:transition-none"
+            />
+          </summary>
+          <p className="max-w-3xl pb-1 text-sm leading-relaxed text-text-secondary" data-testid="landing-market-source">
             {t("market.source", { date })}
           </p>
-        </>
+        </details>
       ) : (
         <p className="mt-2 text-sm text-text-secondary" data-testid="landing-market-none">
           {t("market.none")}
@@ -117,7 +126,6 @@ export async function LandingMarketFacts({
       {adverts ? (
         <div className="mt-5">
           <h3 className="font-display text-base font-semibold text-text-primary">{t("adverts.title")}</h3>
-          <p className="mt-1 max-w-3xl text-sm leading-relaxed text-text-secondary">{t("adverts.sub")}</p>
           {adverts}
         </div>
       ) : (
