@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it, vi } from "vitest";
@@ -94,5 +95,103 @@ describe("chooseGrant", () => {
   });
   it("no grant → none", () => {
     expect(chooseGrant([], null)).toBeNull();
+  });
+});
+
+// ── The two pages a grant opens, read-only (coordinator 2026-11-24, #3736/#3759) ──
+import { isHistoryGrantPath } from "@/lib/organization-evidence/history-grant-paths";
+
+const APP = (p: string) => readFileSync(join(ROOT, "apps/web", p), "utf8");
+const LAYOUT = APP("app/[locale]/dashboard/layout.tsx");
+const HISTORY_PAGE = APP("app/[locale]/dashboard/company/history/page.tsx");
+const PERSON_PAGE = APP("app/[locale]/dashboard/company/people/[personId]/page.tsx");
+const ACCESS = APP("lib/organization-evidence/history-read-access.ts");
+
+describe("a history read grant opens exactly two pages", () => {
+  it("only the company history and one person's page", () => {
+    expect(isHistoryGrantPath("/dashboard/company/history")).toBe(true);
+    expect(isHistoryGrantPath("/dashboard/company/history/")).toBe(true);
+    expect(isHistoryGrantPath("/dashboard/company/people/abc-123")).toBe(true);
+    for (const p of [
+      "/dashboard/company",
+      "/dashboard/company/people",
+      "/dashboard/company/people/abc/edit",
+      "/dashboard/company/history/import",
+      "/dashboard/company/settings",
+      "/dashboard/hours",
+      "/dashboard",
+      "/dashboard/admin",
+      "",
+      null,
+    ]) {
+      expect(isHistoryGrantPath(p as string), String(p)).toBe(false);
+    }
+  });
+
+  it("the layout admits a grant only inside the company refusal arm, only on those paths, only with a live grant", () => {
+    expect(LAYOUT).toMatch(
+      /const historyGrantPage =\s*companyMembershipArm && isHistoryGrantPath\(gatedPath\) && \(await hasLiveHistoryReadGrant\(\)\);/,
+    );
+    expect(LAYOUT).toMatch(
+      /if \(companyMembershipArm && requirement && !workspaceOpensCompanySpace\(workspace\) && !historyGrantPage\)/,
+    );
+    // No other refusal (admin, worker, buyer) consults the grant.
+    expect((LAYOUT.match(/hasLiveHistoryReadGrant\(/g) ?? []).length).toBe(1);
+  });
+
+  it("the page gate: company space first, then a live grant, else the unchanged redirect", () => {
+    const body = ACCESS.slice(ACCESS.indexOf("export async function requireCompanyOrHistoryGrant"));
+    const full = body.indexOf('return "full";');
+    const grant = body.indexOf('if (await hasLiveHistoryReadGrant()) return "grant";');
+    const fallback = body.indexOf('await requireRoleOrRedirect(locale, "company");');
+    expect(full).toBeGreaterThan(-1);
+    expect(grant).toBeGreaterThan(full);
+    expect(fallback).toBeGreaterThan(grant);
+    expect(ACCESS).toMatch(/rpc\("my_history_read_grants_v1"\)/);
+    expect(ACCESS).not.toMatch(/createAdminClient|service_role|SUPABASE_SERVICE/i);
+  });
+
+  it("only these two pages use the grant gate", () => {
+    const hits = execFileSync("git", ["grep", "-l", "-F", "await requireCompanyOrHistoryGrant(", "--", "apps/web/app"], {
+      cwd: ROOT,
+      encoding: "utf8",
+    })
+      .trim()
+      .split("\n")
+      .sort();
+    expect(hits).toEqual(
+      [
+        "apps/web/app/[locale]/dashboard/company/history/page.tsx",
+        "apps/web/app/[locale]/dashboard/company/people/[personId]/page.tsx",
+      ].sort(),
+    );
+  });
+
+  it("the history page renders no write control for a grant", () => {
+    const grantBranch = HISTORY_PAGE.slice(
+      HISTORY_PAGE.indexOf('if (access === "grant") {'),
+      HISTORY_PAGE.indexOf('data-testid="company-history">'),
+    );
+    expect(grantBranch).toContain('data-access="read-grant"');
+    expect(grantBranch).toContain("<CompanyWorkHistory");
+    for (const write of [
+      "EvidenceImportSection",
+      "EvidenceImportSessions",
+      "HistoryDuplicateReview",
+      "HistoryQualitySection",
+      "HistoricalPhotoImport",
+      "PerformingCompanyPanel",
+      "/dashboard/hours",
+    ]) {
+      expect(grantBranch, write).not.toContain(write);
+    }
+  });
+
+  it("the person page hides the profile link, photos and documents for a grant and keeps ?org=", () => {
+    expect(PERSON_PAGE).toContain('const readGrant = access === "grant";');
+    expect(PERSON_PAGE).toContain("loadCompanyPerson(locale, personId, org)");
+    expect(PERSON_PAGE).toMatch(/person\.linkedWorkerId && !readGrant \?/);
+    expect(PERSON_PAGE).toMatch(/\{readGrant \? null : \(\s*<EvidenceMediaStrip/);
+    expect(PERSON_PAGE).toMatch(/\{readGrant \? null : person\.linkedWorkerId \? \(\s*<LinkedDocuments/);
   });
 });

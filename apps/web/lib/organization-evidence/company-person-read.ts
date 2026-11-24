@@ -200,14 +200,19 @@ export async function readCompanyPerson(input: {
   };
 }
 
-export async function loadCompanyPerson(locale: string, personId: string): Promise<CompanyPersonLoad> {
+export async function loadCompanyPerson(
+  locale: string,
+  personId: string,
+  /** `?org=` - an organization the caller governs or holds a live read grant for. */
+  requestedOrganizationId: string | null = null,
+): Promise<CompanyPersonLoad> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "hidden" };
   const caller = await withSessionWorkspacePointer({ supabase, userId: user.id, locale });
-  const org = await resolveHistoryReadOrganization(caller, null);
+  const org = await resolveHistoryReadOrganization(caller, requestedOrganizationId);
   if (!org.ok) {
     return org.reason === "unavailable" ? { kind: "unavailable" } : { kind: "hidden" };
   }

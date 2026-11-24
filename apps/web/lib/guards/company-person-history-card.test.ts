@@ -26,7 +26,7 @@ const pagination = read("lib/organization-evidence/evidence-pagination.ts");
 describe("route and authority", () => {
   it("is keyed on the roster row (organization_people.id), not on a worker", () => {
     expect(page).toMatch(/params: Promise<\{ locale: string; personId: string \}>/);
-    expect(page).toMatch(/loadCompanyPerson\(locale, personId\)/);
+    expect(page).toMatch(/loadCompanyPerson\(locale, personId, org\)/);
   });
 
   it("another organization's manager gets notFound, never data", () => {
@@ -35,7 +35,7 @@ describe("route and authority", () => {
     expect(reader).toMatch(/\.eq\("id", personId\)\s*\.eq\("organization_id", organizationId\)/);
     // The GOVERNED organization first; only then an owner-granted, time-boxed
     // read-only grant (20261124053000) — never a write door.
-    expect(reader).toMatch(/resolveHistoryReadOrganization\(caller, null\)/);
+    expect(reader).toMatch(/resolveHistoryReadOrganization\(caller, requestedOrganizationId\)/);
     expect(grant).toMatch(/const governed = await resolveEvidenceOrganization\(caller, requestedOrganizationId\);\s*if \(governed\.ok\)/);
     expect(grant).toMatch(/rpc\("my_history_read_grants_v1"\)/);
     expect(reader).not.toMatch(/createAdminClient|service_role|SUPABASE_SERVICE/i);

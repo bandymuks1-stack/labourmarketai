@@ -29,6 +29,10 @@ import {
  *   HG-3 the grant opens nothing outside the history: the organization's
  *        memberships stay invisible and manages_organization stays false.
  *   HG-4 a revoked grant and an expired grant read nothing again.
+ *   HG-5 in the browser: a WORKER with a live grant opens the company history and
+ *        one person's page read-only (no import / duplicate / photo / document
+ *        controls) and nothing else of the company space; without the grant the
+ *        same pages redirect exactly as before.
  */
 
 test.skip(!isolatedStack(), "local stack only (SIGNUP_ISOLATED=1, app and Supabase on 127.0.0.1)");
@@ -155,4 +159,45 @@ test("HG-4. a revoked or expired grant reads nothing", async () => {
              values (${lit(state.orgId)}, ${lit(state.qaId)}, 'qa_living_cv_screenshots', now() + interval '5 hours')`),
   ).toThrow();
   sqlExec(`update public.organization_history_read_grants_v1 set revoked_at = now() where id = ${lit(g)}`);
+});
+
+test("HG-5. a worker with a grant opens the two history pages read-only, and nothing else", async ({ browser }) => {
+  const WORKER = `hg-worker-${RUN}@example.test`;
+  const p = await fresh(browser);
+  await signUp(p, BASE, WORKER);
+  await onboard(p, "work", "Synthetic History Reader");
+  const workerId = await userId(WORKER);
+  const [person] = sql<{ id: string }>(
+    `select id from public.organization_people where organization_id = ${lit(state.orgId)} order by display_name limit 1`,
+  );
+  const history = `${BASE}/en/dashboard/company/history?org=${state.orgId}`;
+  const personPage = `${BASE}/en/dashboard/company/people/${person!.id}?org=${state.orgId}`;
+
+  // No grant: the company pages refuse exactly as before.
+  await p.goto(history);
+  await expect(p).not.toHaveURL(/\/dashboard\/company\/history/);
+
+  sqlExec(`insert into public.organization_history_read_grants_v1 (organization_id, profile_id, purpose, granted_by, expires_at)
+           values (${lit(state.orgId)}, ${lit(workerId)}, 'qa_living_cv_screenshots', ${lit(state.ownerId)}, now() + interval '1 hour')`);
+
+  await p.goto(history);
+  await expect(p.getByTestId("company-history")).toHaveAttribute("data-access", "read-grant");
+  for (const write of ["evidence-import-zone", "history-quality-fold", "history-duplicates-fold", "company-history-neighbours"]) {
+    await expect(p.locator(`#${write}, [data-testid="${write}"]`), write).toHaveCount(0);
+  }
+
+  await p.goto(personPage);
+  await expect(p.getByTestId("company-person")).toBeVisible();
+  await expect(p.getByTestId("linked-documents-not-linked")).toHaveCount(0);
+  await expect(p.getByTestId("company-person-open-profile")).toHaveCount(0);
+  await expect(p.getByTestId("company-person-back")).toHaveAttribute("href", /\/dashboard\/company\/history\?org=/);
+
+  // Every other company page stays closed.
+  await p.goto(`${BASE}/en/dashboard/company/people`);
+  await expect(p).not.toHaveURL(/\/dashboard\/company\/people$/);
+
+  // Revoked: back to the refusal.
+  sqlExec(`update public.organization_history_read_grants_v1 set revoked_at = now() where profile_id = ${lit(workerId)}`);
+  await p.goto(history);
+  await expect(p).not.toHaveURL(/\/dashboard\/company\/history/);
 });
