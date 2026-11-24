@@ -1814,7 +1814,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
       // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261120190000_former_employer_chain_fixes_v1.sql",
-]);
+      // 2026-11-24: time-boxed read-only history grant (owner request 2026-11-23; RED draft, needs-human-gate, NOT applied).
+      "20261124053000_history_read_grant_v1.sql",
+    ]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {

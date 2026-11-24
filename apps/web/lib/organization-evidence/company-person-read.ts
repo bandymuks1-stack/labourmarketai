@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
-import { resolveEvidenceOrganization } from "./evidence-org-context";
+import { resolveHistoryReadOrganization } from "./history-read-grant";
 import { listAllEvidenceRecords } from "./evidence-pagination";
 import { untypedClient } from "./evidence-store";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
@@ -207,11 +207,9 @@ export async function loadCompanyPerson(locale: string, personId: string): Promi
   } = await supabase.auth.getUser();
   if (!user) return { kind: "hidden" };
   const caller = await withSessionWorkspacePointer({ supabase, userId: user.id, locale });
-  const org = await resolveEvidenceOrganization(caller, null);
+  const org = await resolveHistoryReadOrganization(caller, null);
   if (!org.ok) {
-    return org.reason === "error" || org.reason === "needs-migration"
-      ? { kind: "unavailable" }
-      : { kind: "hidden" };
+    return org.reason === "unavailable" ? { kind: "unavailable" } : { kind: "hidden" };
   }
   const base = await readCompanyPerson({
     caller,
