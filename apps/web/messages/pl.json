@@ -14496,7 +14496,7 @@
       "navCalendar": "Kalendarz",
       "navProfile": "Profil",
       "clarifyWorkLog": "Którego dnia i jak długo Państwo pracowali? Na przykład: „Dziś od 8 do 17, 30 minut przerwy, montaż okien”.",
-      "calendarHint": "Swój plan znajdą Państwo w zakładce „Kalendarz”. Tutaj mogę pomóc zapisać czas pracy lub przejrzeć oferty.",
+      "calendarHint": "Swój plan znajdą Państwo w zakładce „Kalendarz”.",
       "messagesHint": "Oto Państwa wiadomości — poniższy link je otwiera.",
       "reminderBlocked": "Nie mogę jeszcze wysyłać przypomnień — nie ma mechanizmu przypomnień, więc nie stworzę fałszywego. Dodam tę funkcję, gdy zostanie włączona.",
       "switchContextPersonal": "przestrzeń osobista",
@@ -18973,7 +18973,8 @@
       "heading": "Zaproszenia od organizacji",
       "explainer": "Skierowane do Państwa zaproszenia do zarządu. Po przyjęciu organizacja pojawi się w przełączniku przestrzeni.",
       "accept": "Przyjmij",
-      "decline": "Odrzuć"
+      "decline": "Odrzuć",
+      "invitedBy": "Zaproszenie od {name}"
     },
     "members": {
       "heading": "Członkowie organizacji",
@@ -19704,6 +19705,14 @@
     "noDemand": "Obecnie nie ma otwartego zapotrzebowania, do którego można złożyć ofertę.",
     "demandLabel": "Zapotrzebowanie",
     "demandPlaceholder": "Wybierz zapotrzebowanie",
+    "need": {
+      "people": "Osoby",
+      "start": "Początek",
+      "duration": "Czas trwania",
+      "language": "Język",
+      "skills": "Umiejętności",
+      "tools": "Narzędzia"
+    },
     "alreadyOffered": "już zaproponowano",
     "noteLabel": "Wiadomość do firmy (opcjonalnie)",
     "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",

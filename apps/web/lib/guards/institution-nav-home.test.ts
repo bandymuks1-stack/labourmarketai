@@ -78,14 +78,15 @@ describe("I-2 — an education institution's home leads with the learner invite"
   const screen = read("components/app/organization/company-model-screen.tsx");
   const page = read("app/[locale]/dashboard/page.tsx");
 
-  it("the one primary is the learner invite for an institution, the need door otherwise", () => {
+  it("the one primary is the learner invite for an institution, the offer for an agency, the need door otherwise", () => {
     expect(page).toMatch(
       /isEducationInstitution\(\{ roleSlugs: workspace\.signals\.capabilities \}\)\s*\?\s*workspace\.organizationId\s*:\s*null/,
     );
     expect(screen).toMatch(/learnerInviteHref\(learnerInviteOrganizationId\)/);
     expect(screen).toMatch(/roleDashboards\.company\.learners\.invite/);
     expect(screen).toMatch(/<NeedDoorLink surface="company_model" testId="company-model-primary"/);
-    expect(screen.match(/data-testid="company-model-primary"|testId="company-model-primary"/g)).toHaveLength(2);
+    // Three exclusive branches (institution, agency, everyone else); exactly one renders.
+    expect(screen.match(/data-testid="company-model-primary"|testId="company-model-primary"/g)).toHaveLength(3);
   });
 
   it("every learner invite uses the ONE address", () => {

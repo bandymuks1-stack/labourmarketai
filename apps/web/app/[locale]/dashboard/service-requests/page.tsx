@@ -106,6 +106,10 @@ export default async function ServiceRequestsPage({
     category: category ?? "",
     active: country !== null || category !== null,
   };
+  // ONE "manage the services you offer" link on the page (owner P0 2026-11-24,
+  // decision 0032): the empty discover list carries it when it shows; else the
+  // empty incoming list when you have no active service; else the quiet line.
+  const discoverCarriesServicesLink = discoverable.length === 0 && !filter.active;
 
   const labels: MarketplaceLabels = {
     notAvailable: t("notAvailable"),
@@ -133,7 +137,7 @@ export default async function ServiceRequestsPage({
       ownActive === 0
         ? t("incomingEmptyNoActive")
         : t("incomingEmptyHasActive", { count: ownActive }),
-    incomingEmptyCta: ownActive === 0 ? t("linkToServices") : null,
+    incomingEmptyCta: ownActive === 0 && !discoverCarriesServicesLink ? t("linkToServices") : null,
     filterCountry: t("filterCountry"),
     filterCategory: t("filterCategory"),
     filterApply: t("filterApply"),
@@ -199,14 +203,16 @@ export default async function ServiceRequestsPage({
       />
       {/* Cross-link to the other half of the loop — manage / activate the
           services that make you discoverable here. Quiet, secondary affordance. */}
-      <Link
-        href={"/dashboard/services" as "/dashboard"}
-        data-testid="requests-to-services-link"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
-      >
-        {t("linkToServices")}
-        <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-      </Link>
+      {!discoverCarriesServicesLink && ownActive > 0 ? (
+        <Link
+          href={"/dashboard/services" as "/dashboard"}
+          data-testid="requests-to-services-link"
+          className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
+        >
+          {t("linkToServices")}
+          <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+        </Link>
+      ) : null}
 
       {/* Marketplace connections (§8.4): a request is not a dead end — it links
           onward to matching (find the right people), planning (bookings live

@@ -14496,7 +14496,7 @@
       "navCalendar": "Kalender",
       "navProfile": "Profil",
       "clarifyWorkLog": "An welchem Tag und wie lange haben Sie gearbeitet? Zum Beispiel: „Heute von 8 bis 17, 30 Min Pause, Fenster montiert“.",
-      "calendarHint": "Ihren Plan finden Sie im Tab „Kalender“. Hier kann ich beim Erfassen der Arbeitszeit helfen oder Angebote zeigen.",
+      "calendarHint": "Ihren Plan finden Sie im Tab „Kalender“.",
       "messagesHint": "Hier sind Ihre Nachrichten — der Link unten öffnet sie.",
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "switchContextPersonal": "persönlicher Bereich",
@@ -18973,7 +18973,8 @@
       "heading": "Einladungen von Organisationen",
       "explainer": "An Sie gerichtete Einladungen in die Leitung. Nach der Annahme erscheint die Organisation in Ihrer Bereichsauswahl.",
       "accept": "Annehmen",
-      "decline": "Ablehnen"
+      "decline": "Ablehnen",
+      "invitedBy": "Eingeladen von {name}"
     },
     "members": {
       "heading": "Mitglieder der Organisation",
@@ -19704,6 +19705,14 @@
     "noDemand": "Derzeit gibt es keinen offenen Bedarf, für den sich ein Angebot lohnt.",
     "demandLabel": "Bedarf",
     "demandPlaceholder": "Bedarf wählen",
+    "need": {
+      "people": "Personen",
+      "start": "Beginn",
+      "duration": "Dauer",
+      "language": "Sprache",
+      "skills": "Fähigkeiten",
+      "tools": "Werkzeuge"
+    },
     "alreadyOffered": "bereits angeboten",
     "noteLabel": "Hinweis an das Unternehmen (optional)",
     "notePlaceholder": "Zum Beispiel: Trupp von 3, Start in zwei Wochen möglich",

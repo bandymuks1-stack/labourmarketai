@@ -3993,7 +3993,7 @@ export function ConversationChat({
                   },
           );
           assistant(
-            `${res.text}\n\n${labels.calendarHint}`,
+            res.text,
             chips.length > 0 ? chips : undefined,
           );
           // The panel holds the CURRENT visual plan while the thread keeps

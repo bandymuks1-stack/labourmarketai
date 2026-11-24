@@ -14496,7 +14496,7 @@
       "navCalendar": "Kalender",
       "navProfile": "Profil",
       "clarifyWorkLog": "Vilken dag och hur länge arbetade du? Till exempel: ”I dag 8–17, 30 min rast, monterade fönster”.",
-      "calendarHint": "Du hittar din plan under fliken ”Kalender”. Här kan jag hjälpa dig att registrera arbetstid eller granska erbjudanden.",
+      "calendarHint": "Du hittar din plan under fliken ”Kalender”.",
       "messagesHint": "Här är dina meddelanden – länken nedan öppnar dem.",
       "reminderBlocked": "Jag kan inte skicka påminnelser ännu – det finns ingen påminnelsefunktion på plats, så jag skapar ingen låtsad påminnelse. Jag lägger till det när det aktiveras.",
       "switchContextPersonal": "personligt utrymme",
@@ -18973,7 +18973,8 @@
       "heading": "Inbjudningar från organisationer",
       "explainer": "Ledningsinbjudningar riktade till dig. När du accepterar visas organisationen i din arbetsyteväljare.",
       "accept": "Acceptera",
-      "decline": "Avböj"
+      "decline": "Avböj",
+      "invitedBy": "Inbjuden av {name}"
     },
     "members": {
       "heading": "Organisationens medlemmar",
@@ -19704,6 +19705,14 @@
     "noDemand": "Det finns inget öppet behov att erbjuda mot just nu.",
     "demandLabel": "Behov",
     "demandPlaceholder": "Välj ett behov",
+    "need": {
+      "people": "Personer",
+      "start": "Början",
+      "duration": "Varaktighet",
+      "language": "Språk",
+      "skills": "Färdigheter",
+      "tools": "Verktyg"
+    },
     "alreadyOffered": "redan erbjudet",
     "noteLabel": "Meddelande till företaget (valfritt)",
     "notePlaceholder": "Till exempel: arbetslag på 3, kan börja om två veckor",
