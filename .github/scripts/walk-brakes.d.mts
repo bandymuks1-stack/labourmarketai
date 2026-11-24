@@ -22,6 +22,10 @@ export declare function judgeHealthSamples(
   t?: typeof THRESHOLDS,
 ): { ok: boolean; reasons: string[] };
 
+export declare function runShippedFromJobs(
+  jobs: readonly { name: string; conclusion?: string | null; steps?: readonly { name: string; conclusion?: string | null }[] }[],
+): boolean;
+
 export declare function judgeDeployBrake(
   runs: readonly { id: number; status: string; updated_at: string | null; deploySkipped?: boolean }[],
   now?: Date,

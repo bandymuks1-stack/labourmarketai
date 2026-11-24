@@ -6,6 +6,7 @@ import {
   THRESHOLDS,
   gapRemainingSeconds,
   judgeDeployBrake,
+  runShippedFromJobs,
   judgeErrorBrake,
   judgeHealth,
   judgeHealthSamples,
@@ -65,6 +66,25 @@ describe("health brake", () => {
     expect(judgeHealthSamples([good, { status: 503, report: { ...healthy, ok: false } }, good]).ok).toBe(false);
     expect(judgeHealthSamples([good, good, { status: 0, report: null }]).ok).toBe(false);
     expect(judgeHealthSamples([good, good]).ok).toBe(false);
+  });
+});
+
+describe("a deploy run holds the quiet period only if it shipped (run 45472560135)", () => {
+  const ship = (conclusion: string | null) => ({ name: "deploy", conclusion: "success", steps: [{ name: "Ship + activate on the VPS (forced-command receiver)", conclusion }] });
+  it("a run cancelled while pending, or with every job skipped, shipped nothing", () => {
+    expect(runShippedFromJobs([])).toBe(false);
+    expect(runShippedFromJobs([{ name: "gate", conclusion: "failure" }, { name: "deploy", conclusion: "skipped", steps: [] }])).toBe(false);
+    expect(runShippedFromJobs([ship("skipped")])).toBe(false); // never-backwards skip
+  });
+  it("a ship step that ran counts, whatever its outcome", () => {
+    expect(runShippedFromJobs([ship("success")])).toBe(true);
+    expect(runShippedFromJobs([ship("failure")])).toBe(true);
+    expect(runShippedFromJobs([ship("cancelled")])).toBe(true);
+  });
+  it("the brake reads every job and step of each recent run, and an unreadable run still counts as a deploy", () => {
+    const src = readFileSync(resolve(__dirname, "../../../../.github/scripts/walk-brakes.mjs"), "utf8");
+    expect(src).toContain("r.deploySkipped = !runShippedFromJobs(jobs);");
+    expect(src).toMatch(/\} catch \{\n\s+r\.deploySkipped = false;/);
   });
 });
 

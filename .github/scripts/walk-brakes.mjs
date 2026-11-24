@@ -122,6 +122,21 @@ export function judgeHealthSamples(samples, t = THRESHOLDS) {
 const DEPLOY_ACTIVE = new Set(["in_progress", "queued", "waiting", "requested", "pending"]);
 
 /**
+ * Did a finished deploy-vps.yml run actually touch production? Only when its `deploy` job's
+ * "Ship + activate" step ran (any outcome but skipped: a failed or cancelled ship may still have
+ * switched builds). A run cancelled while pending (GitHub keeps one pending run per concurrency
+ * group, so every merge burst cancels several), a run whose gate refused or was skipped, a
+ * docs-only run and a never-backwards skip all shipped nothing and hold no quiet period
+ * (deploy run 45472560135: eleven such cancelled runs kept restarting the 5-minute window).
+ * @param {readonly { name: string, conclusion?: string | null, steps?: readonly { name: string, conclusion?: string | null }[] }[]} jobs
+ */
+export function runShippedFromJobs(jobs) {
+  const deploy = (jobs ?? []).find((j) => j.name === "deploy");
+  const ship = (deploy?.steps ?? []).find((st) => /^Ship \+ activate/.test(st.name));
+  return !!ship && ship.conclusion !== "skipped" && ship.conclusion != null;
+}
+
+/**
  * The deploy brake: `runs` = the latest deploy-vps.yml runs ({ id, status,
  * updated_at }). Refuse while one is running or queued, or within
  * `deployQuietMinutes` of the latest one ending.
@@ -399,8 +414,8 @@ async function cmdDeploy() {
   for (const r of runs) {
     if (r.status !== "completed" || Date.now() - Date.parse(r.updated_at) >= THRESHOLDS.deployQuietMinutes * 60_000) continue;
     try {
-      const jobs = ghJson(`repos/${REPO}/actions/runs/${r.id}/jobs`).jobs ?? [];
-      r.deploySkipped = jobs.find((j) => j.name === "deploy")?.conclusion === "skipped";
+      const jobs = ghJson(`repos/${REPO}/actions/runs/${r.id}/jobs?filter=all&per_page=100`).jobs ?? [];
+      r.deploySkipped = !runShippedFromJobs(jobs);
     } catch {
       r.deploySkipped = false;
     }
