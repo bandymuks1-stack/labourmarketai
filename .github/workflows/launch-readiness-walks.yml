@@ -150,9 +150,11 @@ jobs:
             # consecutive passes (owner 2026-11-23: an intermittent failure is fixed only after 3).
             for id in $ids; do
               c=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
-              # A walk job that failed BEFORE its Provision step (a brake re-checked inside the walk job,
-              # e.g. production health) never reached production: it is not a run of the pair.
-              if [ "$c" = failure ]; then
+              # A walk job that ended BEFORE its Provision step (a brake re-checked inside the walk job,
+              # e.g. production health) never reached production: it is not a run of the pair. Since a
+              # brake refusal is NOT RUN (the walk job then succeeds and the run is cancelled), a
+              # success counts only when Provision started too.
+              if [ "$c" = failure ] || [ "$c" = success ]; then
                 reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
                   --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
                 [ "${reached:-0}" -gt 0 ] || continue
