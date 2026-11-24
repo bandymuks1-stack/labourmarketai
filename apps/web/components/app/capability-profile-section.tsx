@@ -469,7 +469,9 @@ export function CapabilityProfileSection({
                       </p>
                       <p className="mt-0.5 text-meta text-text-secondary">
                         {tRel(c.relationship)}
-                        {c.title ? ` · ${c.title}` : ""}
+                        {/* A job with no organization already carries its title as
+                            the heading (orgName falls back to it): never twice. */}
+                        {c.title && c.title !== c.orgName ? ` · ${c.title}` : ""}
                       </p>
                     </div>
                     {c.isPrimary && (
