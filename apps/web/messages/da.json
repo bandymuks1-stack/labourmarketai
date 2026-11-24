@@ -4147,6 +4147,9 @@
       "readFailed": "Jeg kunne ikke læse det lige nu — fejlen er hos os. Intet er ændret. Prøv igen om lidt.",
       "taskStatusAsk": "Hvilken status skal opgaven have: startet, færdig eller blokeret?",
       "stageStatusAsk": "Hvilken status skal etapen have: startet, færdig eller blokeret?",
+      "chipStatusStarted": "Startet",
+      "chipStatusDone": "Færdig",
+      "chipStatusBlocked": "Blokeret",
       "professionAsk": "Hvilket fag eller håndværk mener du?",
       "crossSpace": {
         "personal": {

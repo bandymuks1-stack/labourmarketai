@@ -54,7 +54,7 @@ function me(): Page {
 }
 
 async function openCapabilities(p: Page) {
-  await p.goto(`${BASE}/en/dashboard/profile#capabilities`);
+  await p.goto(`${BASE}/en/dashboard/profile?tab=skills#capabilities`);
   const main = p.getByRole("main");
   await expect(main.locator("#capabilities").first()).toBeVisible({ timeout: 60_000 });
   await clickUntilVisible(main.locator("#capabilities > summary").first(), main.getByTestId("capability-profile-manual-add"), {

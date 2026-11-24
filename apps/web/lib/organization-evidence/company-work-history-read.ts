@@ -116,6 +116,10 @@ export async function loadCompanyWorkHistory(
   /** An organization the caller names (`?org=`), checked against the caller's
    *  OWN memberships by `resolveEvidenceOrganization`; absent → the active one. */
   requestedOrganizationId: string | null = null,
+  /** How many projects the summary lists (its counts always cover all). The
+   *  history page keeps the default preview; the organization's Living CV
+   *  asks for its whole Projects block. */
+  options: { readonly projectLimit?: number } = {},
 ): Promise<CompanyWorkHistoryLoad> {
   const supabase = await createClient();
   const {
@@ -192,6 +196,7 @@ export async function loadCompanyWorkHistory(
           status: r.status,
           createdAt: r.created_at,
         })),
+        options.projectLimit,
       )
     : null;
 

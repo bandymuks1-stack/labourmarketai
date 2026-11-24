@@ -548,7 +548,7 @@ test("M-1. seed: a synthetic worker for the isolated mobile CV forms journey", a
   // The booking journey: the company finds this worker only with their own
   // consent (employer visibility), and offers a start only to someone available.
   await grantEmployerVisibility(page);
-  await page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+  await page.goto(`${BASE}/en/dashboard/profile?tab=details#work-card-editor-section`);
   const toggle = page.getByRole("main").getByTestId("work-card-editor-toggle");
   await expect(toggle, "the work card editor is on the worker's profile").toBeVisible({ timeout: 60_000 });
   const editor = page.getByRole("main").getByTestId("work-card-editor");
@@ -1121,7 +1121,7 @@ test("ST-1. a student signs up, keeps one worker record with no company, and the
   // beside <main> and the row resolved twice (lib/auth/context.tsx).
   const profileErrors: string[] = [];
   page.on("pageerror", (e) => profileErrors.push(String(e.message).slice(0, 300)));
-  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.goto(`${BASE}/en/dashboard/profile?tab=background#cv-education`);
   await page.reload();
   await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
@@ -1341,7 +1341,7 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
   // details; the page's own hash opener unfolds it for #cv-education (as ST-1
   // and prod P-9 reach it). A real load, never a click on the fold: a click can
   // race the opener and close it again, leaving the row counted but hidden.
-  await page.goto(`${BASE}/en/dashboard/profile#cv-education`);
+  await page.goto(`${BASE}/en/dashboard/profile?tab=background#cv-education`);
   await page.reload();
   const main = page.getByRole("main");
   await expect(main.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });

@@ -57,7 +57,7 @@ import {
   isEducationQuestionKind,
   type EducationQuestionKind,
 } from "@/lib/conversation/education-question";
-import { readStatedProgress } from "@/lib/conversation/progress-status-phrase";
+import { readStatedProgress, type StatedProgress } from "@/lib/conversation/progress-status-phrase";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
@@ -1571,6 +1571,25 @@ export function ConversationChat({
       personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
     );
   }, [assistant, auth?.workspaces, t]);
+
+  /**
+   * "Which state?" with the three states as the answer (Codex P2 on #3783):
+   * the question alone could not be answered — the next sentence lost the
+   * task or stage it was about. Each chip re-runs the SAME handler on the
+   * SAME sentence with the state picked; nothing is written by the question.
+   */
+  const pendingStatusRef = useRef<{ kind: "task" | "stage"; sentence: string } | null>(null);
+  const askStatus = useCallback(
+    (kind: "task" | "stage", sentence: string) => {
+      pendingStatusRef.current = { kind, sentence };
+      assistant(t(kind === "task" ? "taskStatusAsk" : "stageStatusAsk"), [
+        { id: "pstatus:in_progress", label: t("chipStatusStarted") },
+        { id: "pstatus:done", label: t("chipStatusDone") },
+        { id: "pstatus:blocked", label: t("chipStatusBlocked") },
+      ]);
+    },
+    [assistant, t],
+  );
 
   const openForm = useCallback(
     (
@@ -5112,14 +5131,15 @@ export function ConversationChat({
    *  and, for a company, its projects'): one match runs it, several ask with
    *  one chip each, none is said honestly. Both identities. */
   const startTaskStatus = useCallback(
-    (sentence: string) => {
+    (sentence: string, picked?: StatedProgress) => {
       const lower = sentence.toLowerCase();
       // The state the sentence SAYS — never a default. A sentence that names a
       // task and states no state ("Was ist mit der Aufgabe Malen?") writes
-      // nothing: it used to be recorded as done.
-      const status: WorkTaskStatus | null = readStatedProgress(sentence, "task");
+      // nothing: it used to be recorded as done. The question offers the three
+      // states; a tap runs THIS handler again on the SAME sentence.
+      const status: WorkTaskStatus | null = picked ?? readStatedProgress(sentence, "task");
       if (status === null) {
-        askToClarify(t("taskStatusAsk"));
+        askStatus("task", sentence);
         return;
       }
       setTyping(true);
@@ -5150,7 +5170,7 @@ export function ConversationChat({
           assistant(labels.taskUnavailable);
         });
     },
-    [identity, assistant, labels, runTaskStatus, t, askToClarify],
+    [identity, assistant, labels, runTaskStatus, askStatus],
   );
 
   /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
@@ -5281,7 +5301,7 @@ export function ConversationChat({
    *  against the company's REAL stages: one match runs it, several ask with
    *  one chip each, none is said honestly. Company identity only. */
   const startStageStatus = useCallback(
-    (sentence: string) => {
+    (sentence: string, picked?: StatedProgress) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
         else answerNeedsOrganization();
@@ -5290,9 +5310,9 @@ export function ConversationChat({
       const lower = sentence.toLowerCase();
       // The state the sentence SAYS — never a default. "Erkläre die Etappe
       // Fundament" is a question; a stage is not marked done by one.
-      const status: StageStatus | null = readStatedProgress(sentence, "stage");
+      const status: StageStatus | null = picked ?? readStatedProgress(sentence, "stage");
       if (status === null) {
-        askToClarify(t("stageStatusAsk"));
+        askStatus("stage", sentence);
         return;
       }
       setTyping(true);
@@ -5321,7 +5341,7 @@ export function ConversationChat({
           assistant(labels.projectsUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, runStageStatus, answerNeedsOrganization, askToClarify, t],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, runStageStatus, answerNeedsOrganization, askStatus],
   );
 
   const startAgencyInvite = useCallback(
@@ -6054,6 +6074,16 @@ export function ConversationChat({
             if (target) {
               user(chip.label);
               performContextSwitch(target, pendingCrossSpaceSentenceRef.current || undefined);
+            }
+          } else if (chip.id.startsWith("pstatus:")) {
+            // The state picked for the task or stage the question was about.
+            const picked = chip.id.slice(8) as StatedProgress;
+            const pending = pendingStatusRef.current;
+            if (pending && (picked === "in_progress" || picked === "done" || picked === "blocked")) {
+              pendingStatusRef.current = null;
+              user(chip.label);
+              if (pending.kind === "task") startTaskStatus(pending.sentence, picked);
+              else startStageStatus(pending.sentence, picked);
             }
           } else if (chip.id.startsWith("oc:")) {
             // "Which Jonas?" — the chip carries an id and nothing else; the

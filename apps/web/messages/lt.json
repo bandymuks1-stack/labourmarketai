@@ -180,7 +180,41 @@
       "actionPhone": "Skambinti",
       "actionWebsite": "Atidaryti įmonės svetainę",
       "heroContact": "Kaip susisiekti",
-      "provenance": "Šį puslapį užpildė pati įmonė."
+      "provenance": "Šį puslapį užpildė pati įmonė.",
+      "living": {
+        "eyebrow": "Gyvas CV",
+        "figures": {
+          "years": "{count, plural, one {veiklos metai} few {veiklos metai} other {veiklos metų}}",
+          "hours": "dirbtų valandų",
+          "people": "{count, plural, one {žmogus dirbo} few {žmonės dirbo} other {žmonių dirbo}}",
+          "projects": "{count, plural, one {projektas} few {projektai} other {projektų}}",
+          "places": "{count, plural, one {objektas} few {objektai} other {objektų}}",
+          "team": "{count, plural, one {komandos narys} few {komandos nariai} other {komandos narių}}"
+        },
+        "doTitle": "Kompetencijos",
+        "team": "{count, plural, one {Komandoje # žmogus} few {Komandoje # žmonės} other {Komandoje # žmonių}}",
+        "experienceTitle": "Dirbtos valandos",
+        "confirmedLabel": "Patvirtinta",
+        "confirmedSource": "Įrašė darbuotojas, patvirtino organizacija",
+        "recordedLabel": "Savi įrašai",
+        "recordedSource": "Organizacijos įrašai, kitos šalies nepatvirtinti",
+        "pending": "{hours} laukia patvirtinimo",
+        "hours": "{hours} val.",
+        "running": "Vykdomi",
+        "completed": "Užbaigti",
+        "clients": "Darbai atlikti užsakovui: {names}",
+        "tabs": {
+          "overview": "Apžvalga",
+          "projects": "Projektai",
+          "experience": "Patirtis",
+          "gallery": "Galerija",
+          "team": "Komanda"
+        },
+        "pendingLabel": "Laukia patvirtinimo",
+        "ringLabel": "Patvirtinta {share}% žurnalo valandų",
+        "open": "Atverti Gyvą CV",
+        "clientsMore": "Darbai atlikti užsakovui: {names} ir dar {count}"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1186,7 @@
     "calendar": "Kalendorius",
     "addEntry": "Pridėti įrašą",
     "details": "Asmens duomenys",
+    "background": "Kalbos ir išsilavinimas",
     "improve": "Ką dar pagerinti",
     "capabilities": "Įgūdžiai ir darbo istorija",
     "fullRecordsInCv": "Visi darbo įrašai",
@@ -14732,6 +14767,9 @@
       "readFailed": "Dabar to nuskaityti nepavyko — klaida mūsų pusėje. Niekas nepakeista. Pabandykite po akimirkos.",
       "taskStatusAsk": "Kokią būseną nustatyti užduočiai: pradėta, atlikta ar užblokuota?",
       "stageStatusAsk": "Kokią būseną nustatyti etapui: pradėtas, atliktas ar užblokuotas?",
+      "chipStatusStarted": "Pradėta",
+      "chipStatusDone": "Atlikta",
+      "chipStatusBlocked": "Užblokuota",
       "professionAsk": "Kurią profesiją ar amatą turite omenyje?",
       "crossSpace": {
         "personal": {
