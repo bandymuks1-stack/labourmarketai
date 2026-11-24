@@ -7,6 +7,9 @@ run-name: prod-qa-fresh-provision ${{ inputs.action }} ${{ inputs.who }}
 #   who=fresh-pair  qa.freshworker+act2@labourmarket.ai   a brand-new worker (act1 pair, 2026-10-26, is onboarded)
 #                   qa.freshcompany+act2@labourmarket.ai  a brand-new company
 #   who=buyer       qa.buyer+act1@labourmarket.ai         one buyer (customer role) for 6.4
+#   who=livingcv    qa.livingcv+read1@labourmarket.ai     the read-only Living CV screens account
+#                   (coordinator order 2026-11-23, owner-approved). It holds no organization until the
+#                   owner-approved, time-boxed read grant adds it; revoke bans it afterwards.
 #
 # Creating an account is an owner action: an agent does not dispatch this
 # workflow. `prod-qa-walk.yml` (spec=fresh-activation) only SIGNS IN to these
@@ -44,6 +47,7 @@ on:
         options:
           - fresh-pair
           - buyer
+          - livingcv
 
 permissions:
   contents: read
@@ -80,6 +84,8 @@ jobs:
           [ "${ACTION}" = "revoke" ] && flag="--revoke"
           if [ "${WHO}" = "buyer" ]; then
             targets="qa.buyer+act1@labourmarket.ai"
+          elif [ "${WHO}" = "livingcv" ]; then
+            targets="qa.livingcv+read1@labourmarket.ai"
           else
             targets="qa.freshworker+act2@labourmarket.ai qa.freshcompany+act2@labourmarket.ai"
           fi
