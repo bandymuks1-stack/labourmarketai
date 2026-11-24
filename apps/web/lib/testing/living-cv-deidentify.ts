@@ -90,7 +90,13 @@ interface Entry {
   readonly stem: string;
   readonly label: string;
   readonly tag: string;
+  /** who the token belongs to: the n-th person or the n-th other organization (1-based). */
+  readonly kind: "person" | "company";
+  readonly n: number;
 }
+
+/** The identity a network placeholder stands for; null when two identities share one placeholder. */
+export type PlaceholderOwner = { readonly kind: "person" | "company"; readonly n: number } | null;
 
 export interface Pseudonyms {
   readonly entries: readonly Entry[];
@@ -98,8 +104,9 @@ export interface Pseudonyms {
   readonly tokens: readonly string[];
   /** the tokens of the organizations the owner chose to show, lower-cased. */
   readonly kept: ReadonlySet<string>;
-  /** every replacement the rewrite has produced, so the text pass leaves them alone. */
-  readonly emitted: Set<string>;
+  /** every replacement the rewrite has produced → whom it stands for (the text pass turns runs of
+   *  them into one readable label, "Darbuotojas Nr. 1"). */
+  readonly emitted: Map<string, PlaceholderOwner>;
 }
 
 /**
@@ -112,19 +119,19 @@ export function buildPseudonyms(people: readonly string[], companies: readonly s
   const kept = new Set(keep.flatMap(nameTokens).map((t) => t.toLocaleLowerCase("lt")));
   const entries: Entry[] = [];
   const seen = new Set<string>();
-  const add = (token: string, label: string, tag: string) => {
+  const add = (token: string, label: string, tag: string, kind: "person" | "company", n: number) => {
     const key = token.toLocaleLowerCase("lt");
     if (seen.has(key) || kept.has(key)) return;
     seen.add(key);
-    entries.push({ token, stem: stemOf(token), label, tag });
+    entries.push({ token, stem: stemOf(token), label, tag, kind, n });
   };
   [...new Set(people.map((p) => p.trim()).filter(Boolean))].forEach((name, i) => {
-    for (const t of nameTokens(name)) add(t, "Darbuotojas", letterOf(i));
+    for (const t of nameTokens(name)) add(t, "Darbuotojas", letterOf(i), "person", i + 1);
   });
   [...new Set(companies.map((c) => c.trim()).filter(Boolean))].forEach((name, i) => {
-    for (const t of nameTokens(name)) add(t, "Uzsakovas", String(i + 1));
+    for (const t of nameTokens(name)) add(t, "Uzsakovas", String(i + 1), "company", i + 1);
   });
-  return { entries, tokens: entries.map((e) => e.token), kept, emitted: new Set() };
+  return { entries, tokens: entries.map((e) => e.token), kept, emitted: new Map() };
 }
 
 function escapeRegExp(s: string): string {
@@ -180,7 +187,10 @@ export function rewrite(body: string, p: Pseudonyms): string {
       const e = entryFor(p, m);
       if (!e) return m;
       const r = sameBytes(e.label, e.tag, Buffer.byteLength(m, "utf8"));
-      p.emitted.add(r);
+      const owner = { kind: e.kind, n: e.n } as const;
+      const had = p.emitted.get(r);
+      // Two identities that land on one placeholder keep it, but without a number.
+      p.emitted.set(r, had === undefined ? owner : had && had.kind === owner.kind && had.n === owner.n ? had : null);
       return r;
     });
   }
@@ -209,21 +219,57 @@ const ADDRESS_PATTERNS: readonly RegExp[] = [
   new RegExp(String.raw`(?<![\p{L}\p{N}])[\p{L}'’-]+\s+(?:g\.|al\.|pr\.|skg\.|pl\.)${HOUSE_NO}(?![\p{L}\p{N}])`, "giu"),
 ];
 const PERSONAL_CODE = /(?<!\d)[3-6]\d{10}(?!\d)/g;
+/** The readable labels (owner, 2026-11-24): "Darbuotojas Nr. 1"; "Worker No. 1" in English. */
+const LABELS = {
+  lt: { person: "Darbuotojas Nr.", company: "Užsakovas Nr.", unnumbered: { person: "Darbuotojas", company: "Užsakovas" } },
+  en: { person: "Worker No.", company: "Client No.", unnumbered: { person: "Worker", company: "Client" } },
+} as const;
+const LABEL_WORDS = new Set(["Darbuotojas", "Užsakovas", "Nr", "Worker", "Client", "No"]);
+
+/**
+ * Turn each run of one identity's network placeholders ("DarbA DarbuotojA") into ONE readable
+ * label ("Darbuotojas Nr. 1"). Render time only: the source data is never changed. A placeholder
+ * two identities share becomes the unnumbered label.
+ */
+export function readableLabels(text: string, p: Pseudonyms, locale: "lt" | "en" = "lt"): string {
+  if (p.emitted.size === 0) return text;
+  const alternation = [...p.emitted.keys()].sort((a, b) => b.length - a.length).map(escapeRegExp).join("|");
+  const one = String.raw`(?:${alternation})`;
+  const run = new RegExp(String.raw`(?<![\p{L}\p{N}_])${one}(?:\s+${one})*(?![\p{L}\p{N}_])`, "gu");
+  const single = new RegExp(String.raw`(?<![\p{L}\p{N}_])${one}(?![\p{L}\p{N}_])`, "gu");
+  const L = LABELS[locale];
+  const label = (o: PlaceholderOwner, kind: "person" | "company") => (o ? `${L[o.kind]} ${o.n}` : L.unnumbered[kind]);
+  return text.replace(run, (m) => {
+    const parts = [...m.matchAll(single)].map((x) => x[0]);
+    const owners = parts.map((t) => p.emitted.get(t) ?? null);
+    // Split the run where the identity changes; each piece becomes one label.
+    const out: string[] = [];
+    let prev: string | null = null;
+    owners.forEach((o, i) => {
+      const kind = o?.kind ?? (parts[i]!.startsWith("U") ? "company" : "person");
+      const key = o ? `${o.kind}:${o.n}` : `?:${parts[i]}`;
+      if (key !== prev) out.push(label(o, kind));
+      prev = key;
+    });
+    return out.join(" ");
+  });
+}
+
 const CAPITALISED = /(?<![\p{L}\p{N}])\p{Lu}[\p{L}'’-]{2,}(?![\p{L}\p{N}])/gu;
 
 /**
  * Rendered-text layer, for one visible text or field value. `allow` holds lower-cased words that
  * are never names: the product's own catalogue words.
  */
-export function maskFreeText(text: string, p: Pseudonyms, allow: ReadonlySet<string>): string {
-  let out = text;
+export function maskFreeText(text: string, p: Pseudonyms, allow: ReadonlySet<string>, locale: "lt" | "en" = "lt"): string {
+  let out = readableLabels(text, p, locale);
   const re = rosterPattern(p, true);
   if (re) out = out.replace(re, (m) => (p.emitted.has(m) || p.kept.has(m.toLocaleLowerCase("lt")) ? m : MASK));
   out = redactContactData(out).text.replace(/\[\[\d+\]\]/g, MASK);
   for (const re of ADDRESS_PATTERNS) out = out.replace(re, MASK);
   out = out.replace(PERSONAL_CODE, MASK);
   out = out.replace(CAPITALISED, (w) => {
-    if (p.emitted.has(w)) return w;
+    if (p.emitted.has(w) || LABEL_WORDS.has(w)) return w;
     const lower = w.toLocaleLowerCase("lt");
     if (allow.has(lower) || p.kept.has(lower)) return w;
     // Hyphenated words are fine when every part is a catalogue word.

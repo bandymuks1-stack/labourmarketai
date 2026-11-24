@@ -145,10 +145,23 @@ describe("rendered-text layer", () => {
     expect(maskFreeText("plytelių klojimas, 8 h, darbo istorija", q, ALLOW)).toBe("plytelių klojimas, 8 h, darbo istorija");
   });
 
-  it("leaves the network pseudonyms alone", () => {
+  it("shows each person and organization as one readable numbered label (owner, 2026-11-24)", () => {
+    const q = buildPseudonyms(PEOPLE, COMPANIES, KEEP);
+    const sent = rewrite("Linas Testauskas ir Ramūnas Bandomasis dirbo pas UAB Kitas Klientas; Linui padėjo.", q);
+    const lt = maskFreeText(sent, q, ALLOW, "lt");
+    expect(lt).toBe("Darbuotojas Nr. 1 ir Darbuotojas Nr. 2 dirbo pas Užsakovas Nr. 1; Darbuotojas Nr. 1 padėjo.");
+    expect(maskFreeText(sent, q, ALLOW, "en")).toBe("Worker No. 1 ir Worker No. 2 dirbo pas Client No. 1; Worker No. 1 padėjo.");
+    expect(lt).not.toMatch(/Darbuoto[A-Z_]|DarbA|Uzsak/);
+    expect(leakCount(lt, q, true)).toBe(0);
+  });
+
+  it("turns a network placeholder into its readable label and never masks the label", () => {
     const q = buildPseudonyms(PEOPLE, COMPANIES, KEEP);
     const replaced = rewrite("Linas", q);
-    expect(maskFreeText(replaced, q, ALLOW)).toBe(replaced);
+    expect(replaced).not.toBe("Linas");
+    expect(maskFreeText(replaced, q, ALLOW)).toBe("Darbuotojas Nr. 1");
+    // Running the text pass twice changes nothing more.
+    expect(maskFreeText(maskFreeText(replaced, q, ALLOW), q, ALLOW)).toBe("Darbuotojas Nr. 1");
   });
 
   it("reads only text bodies", () => {

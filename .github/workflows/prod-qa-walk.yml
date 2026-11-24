@@ -524,6 +524,9 @@ jobs:
           SR1_READINGS_FILE: ${{ github.workspace }}/sr1-readings.jsonl
           # living-cv-screens only: the plaintext screens, outside the repository, destroyed below.
           PROD_QA_LCV_DIR: ${{ runner.temp }}/lcv
+          # living-cv-screens only: the minted synthetic slot whose OWN /cv is photographed, chosen by
+          # the owner as a repository variable. Empty: the worker screens are recorded as not chosen.
+          PROD_QA_LCV_WORKER_SLOT: ${{ needs.debounce.outputs.spec == 'living-cv-screens' && vars.PROD_QA_LCV_WORKER_SLOT || '' }}
         run: |
           set -uo pipefail
           echo "device: ${PROD_QA_DEVICE}" >> "$GITHUB_STEP_SUMMARY"
