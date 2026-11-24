@@ -37,6 +37,7 @@ import {
 } from "./business-history";
 import {
   buildCompanyWorkHistory,
+  placeKeyOf,
   type CompanyWorkHistory,
   type PlaceObjectFacts,
 } from "./company-work-history";
@@ -92,6 +93,10 @@ export type CompanyWorkHistoryLoad =
       /** The clients this organization's own records name, most records first. `name`
        *  is null when the caller cannot read that organization (never guessed). */
       readonly clients: readonly { readonly organizationId: string; readonly name: string | null; readonly records: number }[];
+      /** The organization's own records name IT as `subcontractor`: only then
+       *  may the page call it a subcontractor (a `client` party alone proves
+       *  only whom the work was for). */
+      readonly performedAsSubcontractor: boolean;
       /** A read of the work stored in partners' books failed: the surface says so,
        *  and an absent aggregate then means UNKNOWN, never "none" (SEP-7). */
       readonly partnerWorkUnreadable: boolean;
@@ -281,6 +286,9 @@ export async function loadCompanyWorkHistory(
     attributedCount: attributed.length,
     forClient,
     clients,
+    performedAsSubcontractor: recs.records.some((r) =>
+      r.parties.some((p) => p.role === "subcontractor" && p.organizationId === org.organizationId),
+    ),
     partnerWorkUnreadable: performedHere === null || doneForHere === null,
     truncated: recs.truncated,
   };
@@ -433,6 +441,7 @@ async function readBusinessHistory(
     periodStart: string | null;
     periodEnd: string | null;
     hours: number | null;
+    contextLabel: string | null;
     withdrawn: boolean;
     superseded: boolean;
   }[],
@@ -492,6 +501,9 @@ async function readBusinessHistory(
         periodEnd: r.periodEnd,
         hours: r.hours,
         sourceLabel: labelOf.get(r.id) ?? null,
+        // The place exactly as the place list groups it: one meaning of
+        // "place" on the whole page (owner P0 2026-11-24).
+        placeKey: placeKeyOf(r),
       })),
     statements,
   );

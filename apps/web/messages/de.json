@@ -19400,7 +19400,11 @@
         "open": "Arbeitsbereich {name} öffnen",
         "opening": "Wird geöffnet…",
         "error": "Der Arbeitsbereich konnte nicht geöffnet werden."
-      }
+      },
+      "structure": "Frühere Arbeit wurde unter {names} erbracht.",
+      "structureLater": ", später ",
+      "structureForClient": "Frühere Arbeit unter {names} für den Auftraggeber {client}.",
+      "structureAsSubcontractor": "Subunternehmer: {names} → Auftraggeber {client}."
     },
     "projects": {
       "title": "Projekte auf der Plattform",
@@ -19431,7 +19435,8 @@
       "title": "Auftraggeber",
       "unnamed": "Auftraggebende Organisation",
       "records": "{count, plural, one {# Eintrag} other {# Einträge}}"
-    }
+    },
+    "descriptionNotInSource": "Keine Arbeitsbeschreibung in der Quelle"
   },
   "workPlan": {
     "title": "Geplante Arbeit",

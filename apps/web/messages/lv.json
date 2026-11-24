@@ -7108,7 +7108,8 @@
       "places": "Vietas",
       "people": "Cilvēki",
       "hours": "Ierakstītās stundas",
-      "period": "Periods"
+      "period": "Periods",
+      "dayHours": "Stundas atsevišķās dienās"
     },
     "place": "Vieta",
     "noPlaceName": "Vieta nav norādīta",
@@ -7145,7 +7146,8 @@
       "progress": "{attributed} no {total} piešķirti: {name}",
       "done": "Piešķirti ieraksti: {count}; jau bija piešķirti: {skipped}.",
       "refused": "Neizdevās saglabāt. Nekas nav mainīts.",
-      "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
+      "person": "{hours} h, {count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}",
+      "personPeriod": "{hours} h perioda kopsumma (netiek pieskaitīta atsevišķām dienām)"
     },
     "truncated": "Ierakstu ir vairāk, nekā nolasa viens skats. Rāda nolasītos {count}; kopsummas ietver tikai tos.",
     "projects": {
@@ -7177,7 +7179,74 @@
       "title": "Pasūtītāji",
       "unnamed": "Pasūtītāja organizācija",
       "records": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
-    }
+    },
+    "periodShort": "{hours} h perioda kopsumma",
+    "business": {
+      "unavailable": "Uzņēmuma vēsturi pašlaik neizdevās nolasīt. Nekas nav zaudēts — mēģiniet vēlāk vēlreiz.",
+      "eyebrow": "Uzņēmuma vēsture",
+      "title": "{name}: viena nepārtraukta vēsture",
+      "subtitle": "Katrs tālāk redzamais skaitlis vienreiz ieskaita organizācijas pašas ierakstīto darbu. Periodi parāda, kas norādīts par iepriekšējām juridiskajām personām un uz ko šī norāde balstās.",
+      "titleHeld": "{name}: glabātie darba ieraksti pa periodiem",
+      "subtitleHeld": "Darbs, kas veikts iepriekšējās juridiskās personas laikā, pieder šai juridiskajai personai un cilvēkiem, kas to veica. {name} glabā šos ierakstus kā dokumentētu nepārtrauktību; tie netiek rādīti kā {name} paša darbs.",
+      "headerOwn": "{name} paša periods",
+      "headerEarlier": "Iepriekšējā juridiskā persona: {name}",
+      "headerUnstated": "Periods “{label}” — juridiskā persona nav norādīta",
+      "headerNotPlaced": "Ieraksti, kas nav iekļauti nevienā norādītā periodā",
+      "continuityNotSuccession": "Nepārtrauktība dokumentēta; tiesību pārņemšana netiek apgalvota.",
+      "totalsHeld": "Visi {name} glabātie ieraksti visos periodos, katrs ieskaitīts vienreiz — ne viss ir {name} paša darbs.",
+      "figures": "{records} ieraksti · {hours} h · {people} cilvēki · {places} vietas",
+      "totals": {
+        "records": "Ieraksti",
+        "hours": "Stundas",
+        "people": "Cilvēki",
+        "places": "Vietas",
+        "projects": "Projekti",
+        "span": "Laika posms"
+      },
+      "spanUnknown": "datumi nav ierakstīti",
+      "periodsTitle": "Uzņēmuma periodi",
+      "noPeriods": "Šim uzņēmumam vēl nav norādīts neviens periods. Ja darbs sākās iepriekšējās juridiskās personas laikā, to var ierakstīt kā norādītu periodu — paši ieraksti paliek nemainīgi.",
+      "bounds": "{from} – {to}",
+      "notDocumented": "nav dokumentēts",
+      "boundsNotDocumented": "Datumi nav dokumentēti",
+      "legalEntity": "Juridiskā persona tajā laikā: {name}",
+      "relation": {
+        "not_asserted": "Nav norādīts, ka tā ir tā pati juridiskā persona — viena nepārtraukta uzņēmuma vēsture.",
+        "same_entity": "Norādīts, ka tā ir tā pati juridiskā persona.",
+        "renamed": "Norādīts, ka tā ir tā pati juridiskā persona ar iepriekšējo nosaukumu.",
+        "successor": "Norādīts kā tiesību priekštecis.",
+        "sold_and_continued_by_new_entity": "Iepriekšējā juridiskā persona tika pārdota; uzņēmējdarbība turpinājās ar jaunu juridisko personu.",
+        "other": "Cita dokumentēta saistība starp juridiskajām personām."
+      },
+      "basis": {
+        "owner_statement": "Īpašnieka apliecinājums",
+        "registry_extract": "Reģistra izraksts",
+        "contract": "Līgums",
+        "other_document": "Dokuments"
+      },
+      "periodNoRecords": "Šajā periodā vēl nav iekļauts neviens ieraksts.",
+      "placedBy": "Iekļauti pēc avota etiķetes {labels}: {byLabel} ieraksti; pēc dokumentētiem datumiem: {byDate}.",
+      "notPlaced": "Nav iekļauti norādītā periodā (avotā nav perioda etiķetes): {figures} · {span}.",
+      "yearsTitle": "Darbs pa gadiem",
+      "undated": "{count, plural, zero {# ierakstiem} one {# ierakstam} other {# ierakstiem}} nav datuma, un {count, plural, zero {tie ir ieskaitīti} one {tas ir ieskaitīts} other {tie ir ieskaitīti}} tikai kopsummās.",
+      "doorsLabel": "Atvērt tos pašus ierakstus",
+      "doors": {
+        "people": "Cilvēki",
+        "projects": "Projekti",
+        "places": "Vietas"
+      },
+      "workspace": {
+        "note": "Jūs atvērāt {name} vēsturi ārpus tās darbvietas. Cilvēki un projekti tiek atvērti aktīvajā darbvietā.",
+        "open": "Atvērt darbvietu {name}",
+        "opening": "Atver…",
+        "error": "Darbvietu neizdevās atvērt."
+      },
+      "structure": "Iepriekšējais darbs tika veikts ar {names}.",
+      "structureLater": ", vēlāk ",
+      "structureForClient": "Iepriekšējais darbs, ko veica {names} pasūtītājam {client}.",
+      "structureAsSubcontractor": "Apakšuzņēmējs: {names} → pasūtītājs {client}."
+    },
+    "descriptionNotInSource": "Avotā nav darba apraksta"
   },
   "workLifecycle": {
     "pending": "Vēl nav",

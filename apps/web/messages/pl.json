@@ -19400,7 +19400,11 @@
         "open": "Otwórz przestrzeń {name}",
         "opening": "Otwieranie…",
         "error": "Nie udało się otworzyć przestrzeni roboczej."
-      }
+      },
+      "structure": "Wcześniejsza praca była wykonywana w ramach {names}.",
+      "structureLater": ", później ",
+      "structureForClient": "Wcześniejsza praca w ramach {names} dla zleceniodawcy {client}.",
+      "structureAsSubcontractor": "Podwykonawca: {names} → zleceniodawca {client}."
     },
     "projects": {
       "title": "Projekty na platformie",
@@ -19431,7 +19435,8 @@
       "title": "Klienci",
       "unnamed": "Organizacja klienta",
       "records": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
-    }
+    },
+    "descriptionNotInSource": "Brak opisu pracy w źródle"
   },
   "workPlan": {
     "title": "Zaplanowana praca",

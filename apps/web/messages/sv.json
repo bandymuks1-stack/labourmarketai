@@ -19400,7 +19400,11 @@
         "open": "Öppna arbetsytan {name}",
         "opening": "Öppnar …",
         "error": "Arbetsytan kunde inte öppnas."
-      }
+      },
+      "structure": "Tidigare arbete utfördes genom {names}.",
+      "structureLater": ", senare ",
+      "structureForClient": "Tidigare arbete genom {names} för beställaren {client}.",
+      "structureAsSubcontractor": "Underleverantör: {names} → beställare {client}."
     },
     "projects": {
       "title": "Projekt på plattformen",
@@ -19431,7 +19435,8 @@
       "title": "Beställare",
       "unnamed": "Beställande organisation",
       "records": "{count, plural, one {# post} other {# poster}}"
-    }
+    },
+    "descriptionNotInSource": "Ingen arbetsbeskrivning i källan"
   },
   "workPlan": {
     "title": "Planerat arbete",

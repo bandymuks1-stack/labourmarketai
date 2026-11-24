@@ -19400,7 +19400,11 @@
         "open": "Atverti {name} darbo erdvę",
         "opening": "Atveriama…",
         "error": "Darbo erdvės atverti nepavyko."
-      }
+      },
+      "structure": "Ankstesnis darbas atliktas per {names}.",
+      "structureLater": ", vėliau ",
+      "structureForClient": "Ankstesnis darbas atliktas per {names} užsakovui {client}.",
+      "structureAsSubcontractor": "Subrangovas: {names} → užsakovas {client}."
     },
     "projects": {
       "title": "Projektai platformoje",
@@ -19431,7 +19435,8 @@
       "title": "Užsakovai",
       "unnamed": "Užsakovo organizacija",
       "records": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
-    }
+    },
+    "descriptionNotInSource": "Darbo aprašymo šaltinyje nėra"
   },
   "workPlan": {
     "title": "Suplanuotas darbas",
