@@ -148,9 +148,18 @@ describe("(a) recipient scope", () => {
     const submit = bridge.slice(bridge.indexOf("export async function submitOfferAction"));
     expect(submit).toContain('.from("agency_candidate_offers").select("request_id").eq("id", offerId)');
     expect(submit).toContain('.from("customer_requests").select("profile_id").eq("id", requestId)');
-    // Candidate answered: the offer's own `created_by`.
+    // Candidate answered: the offer's own `created_by`. Signed-in callers cannot
+    // read that column (20261118100000: the client sees only its own agency), so
+    // the notification module resolves it, for the recorded decider only.
     const respond = bridge.slice(bridge.indexOf("export async function respondCandidateOfferAction"));
-    expect(respond).toContain('.from("agency_candidate_offers").select("created_by").eq("id", offerId)');
+    expect(respond).toContain("await emitCandidateOfferAnsweredNotification({ offerId, actorProfileId: auth.user.id, decision });");
+    expect(respond).not.toMatch(/select\("created_by"\)/);
+    const emitters = read("lib", "notifications", "event-emitters.ts");
+    const answered = emitters.slice(emitters.indexOf("export async function emitCandidateOfferAnsweredNotification"));
+    expect(answered).toContain('.from("agency_candidate_offers")');
+    expect(answered).toContain('.select("created_by")');
+    expect(answered).toContain('.eq("decided_by", facts.actorProfileId)');
+    expect(answered).toContain('.not("decided_at", "is", null)');
     expect(bridge).not.toMatch(/createAdminClient/);
   });
 });

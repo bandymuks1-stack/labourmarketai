@@ -9,7 +9,7 @@ import { proposalLimitOf, type ProposalLimit } from "@/lib/booking/proposal-limi
 import { resolveCountryCode } from "@/lib/location/country-model";
 import { notifyBooking } from "@/lib/booking/booking-notify";
 import {
-  emitOfferAnsweredNotification,
+  emitCandidateOfferAnsweredNotification,
   emitOfferReceivedNotification,
 } from "@/lib/notifications/event-emitters";
 import {
@@ -416,12 +416,9 @@ export async function respondCandidateOfferAction(
     return { status: "error", reason: "placement_term_not_accepted" };
   }
   const supabase = await createClient();
-  // Who proposed the candidate — read BEFORE the answer, under the client's
-  // own RLS (owns_company(client_company_id)), so the agency can hear it.
-  const [{ data: auth }, { data: offerRow }] = await Promise.all([
-    supabase.auth.getUser(),
-    rpc(supabase).from("agency_candidate_offers").select("created_by").eq("id", offerId).maybeSingle(),
-  ]);
+  // Who answers. The proposer is resolved AFTER the answer by the notification
+  // module (the client cannot read the offer's `created_by` since 20261118100000).
+  const { data: auth } = await supabase.auth.getUser();
   const { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v2", {
     p_offer_id: offerId,
     p_decision: decision,
@@ -451,13 +448,7 @@ export async function respondCandidateOfferAction(
   }
   emitFirstRealAction("company", "offer_" + decision, "agency_candidate_offer");
   if (auth.user) {
-    await emitOfferAnsweredNotification({
-      kind: "candidate",
-      offerId,
-      recipientProfileId: (offerRow as { created_by?: string | null } | null)?.created_by ?? null,
-      actorProfileId: auth.user.id,
-      decision,
-    });
+    await emitCandidateOfferAnsweredNotification({ offerId, actorProfileId: auth.user.id, decision });
   }
   revalidatePath("/[locale]/dashboard/company/scouting", "page");
   revalidatePath("/[locale]/dashboard/company", "page");
