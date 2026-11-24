@@ -165,6 +165,11 @@ async function findInMarket(page: Page, l: string, group: string, title: string)
   await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
   await main.getByTestId(`market-group-${group}`).click().catch(() => undefined);
   const card = main.getByTestId("market-browse-row").filter({ hasText: title }).first();
+  // The list folds after its first rows (decision 0034): open the fold when the row is below it.
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  if (!(await card.isVisible().catch(() => false))) {
+    await main.getByTestId("market-browse-more").locator("summary").click().catch(() => undefined);
+  }
   await expect(card, `"${group}" shows the row`).toBeVisible({ timeout: 30_000 });
   return card;
 }

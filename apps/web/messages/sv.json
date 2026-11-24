@@ -14462,7 +14462,7 @@
       "navCalendar": "Kalender",
       "navProfile": "Profil",
       "clarifyWorkLog": "Vilken dag och hur länge arbetade du? Till exempel: ”I dag 8–17, 30 min rast, monterade fönster”.",
-      "calendarHint": "Du hittar din plan under fliken ”Kalender”. Här kan jag hjälpa dig att registrera arbetstid eller granska erbjudanden.",
+      "calendarHint": "Du hittar din plan under fliken ”Kalender”.",
       "messagesHint": "Här är dina meddelanden – länken nedan öppnar dem.",
       "reminderBlocked": "Jag kan inte skicka påminnelser ännu – det finns ingen påminnelsefunktion på plats, så jag skapar ingen låtsad påminnelse. Jag lägger till det när det aktiveras.",
       "switchContextPersonal": "personligt utrymme",
@@ -14718,6 +14718,26 @@
       "findWorkInCompanyContext": "Att söka jobb är din egen handling — i företagsutrymmet kör jag den inte. Byt till ditt personliga utrymme och fråga igen.",
       "findWorkInCompanyWhy": "En person söker jobb, inte ett företag — jag svarar från ditt personliga utrymme.",
       "personalOnlyInCompany": "Det är en personlig åtgärd — i ett företagsutrymme utför jag den inte. Byt till ditt personliga utrymme och fortsätt där.",
+      "crossSpace": {
+        "personal": {
+          "cv": "Ditt CV finns i ditt personliga utrymme, inte i organisationen.",
+          "journal": "Din egen arbetsdagbok finns i ditt personliga utrymme.",
+          "profile": "Din profil finns i ditt personliga utrymme.",
+          "calendar": "Din egen kalender finns i ditt personliga utrymme."
+        },
+        "open": {
+          "cv": "Byt och öppna mitt CV",
+          "journal": "Byt och öppna min dagbok",
+          "profile": "Byt och öppna min profil",
+          "calendar": "Byt och öppna min kalender"
+        },
+        "askWhoseCv": "Ditt eget CV eller en kandidats?",
+        "organizationHistory": "Organisationens underlag är dess arbetshistorik.",
+        "openOrganizationHistory": "Öppna organisationens historik",
+        "organization": "Det görs i organisationens utrymme: {name}.",
+        "switchTo": "Byt till {name} och fortsätt",
+        "whichOrganization": "Det görs i en organisations utrymme. Vilket?"
+      },
       "newJobsIntro": "Nya annonser som passar dina önskemål: {count}.",
       "newJobsAll": "Alla möjligheter",
       "newJobsNone": "Inga nya annonser som passar dina önskemål har kommit de senaste dagarna. Alla möjligheter hittar du på sidan för möjligheter.",
@@ -19380,7 +19400,11 @@
         "open": "Öppna arbetsytan {name}",
         "opening": "Öppnar …",
         "error": "Arbetsytan kunde inte öppnas."
-      }
+      },
+      "structure": "Tidigare arbete utfördes genom {names}.",
+      "structureLater": ", senare ",
+      "structureForClient": "Tidigare arbete genom {names} för beställaren {client}.",
+      "structureAsSubcontractor": "Underleverantör: {names} → beställare {client}."
     },
     "projects": {
       "title": "Projekt på plattformen",
@@ -19411,7 +19435,8 @@
       "title": "Beställare",
       "unnamed": "Beställande organisation",
       "records": "{count, plural, one {# post} other {# poster}}"
-    }
+    },
+    "descriptionNotInSource": "Ingen arbetsbeskrivning i källan"
   },
   "workPlan": {
     "title": "Planerat arbete",

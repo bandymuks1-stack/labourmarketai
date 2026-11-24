@@ -14462,7 +14462,7 @@
       "navCalendar": "Calendar",
       "navProfile": "Profile",
       "clarifyWorkLog": "Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
-      "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "calendarHint": "You'll find your plan in the “Calendar” tab.",
       "messagesHint": "Here are your messages — the link below opens them.",
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "switchContextPersonal": "personal space",
@@ -14718,6 +14718,26 @@
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
       "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
+      "crossSpace": {
+        "personal": {
+          "cv": "Your CV is in your personal space, not in the organization.",
+          "journal": "Your own work journal is in your personal space.",
+          "profile": "Your profile is in your personal space.",
+          "calendar": "Your own calendar is in your personal space."
+        },
+        "open": {
+          "cv": "Switch and open my CV",
+          "journal": "Switch and open my journal",
+          "profile": "Switch and open my profile",
+          "calendar": "Switch and open my calendar"
+        },
+        "askWhoseCv": "Your own CV, or a candidate's?",
+        "organizationHistory": "The organization's record is its work history.",
+        "openOrganizationHistory": "Open the organization's history",
+        "organization": "This is done in the organization space: {name}.",
+        "switchTo": "Switch to {name} and continue",
+        "whichOrganization": "This is done in an organization space. Which one?"
+      },
       "newJobsIntro": "New postings that fit your preferences: {count}.",
       "newJobsAll": "All opportunities",
       "newJobsNone": "No new postings fitting your preferences appeared in the last few days. You will find every opportunity on the opportunities page.",
@@ -19380,7 +19400,11 @@
         "open": "Open {name} workspace",
         "opening": "Opening…",
         "error": "The workspace could not be opened."
-      }
+      },
+      "structure": "Earlier work was done under {names}.",
+      "structureLater": ", later ",
+      "structureForClient": "Earlier work under {names}, for client {client}.",
+      "structureAsSubcontractor": "Subcontractor: {names} → client {client}."
     },
     "projects": {
       "title": "Projects on the platform",
@@ -19411,7 +19435,8 @@
       "title": "Clients",
       "unnamed": "Client organization",
       "records": "{count, plural, one {# record} other {# records}}"
-    }
+    },
+    "descriptionNotInSource": "No work description in the source"
   },
   "workPlan": {
     "title": "Planned work",

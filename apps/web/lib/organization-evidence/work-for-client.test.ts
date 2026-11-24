@@ -9,7 +9,10 @@ const CLIENT = "0b000000-0000-4000-8000-00000000000b";
 const OTHER = "0c000000-0000-4000-8000-00000000000c";
 
 type Facts = Parameters<typeof summarizeWorkForClient>[0][number];
+let seq = 0;
 const rec = (over: Partial<EvidenceRecordView>): Facts => ({
+  id: `r${++seq}`,
+  personId: "p1",
   organizationId: SUB,
   parties: [{ role: "client", organizationId: CLIENT, label: null }],
   withdrawn: false,
@@ -23,10 +26,11 @@ const rec = (over: Partial<EvidenceRecordView>): Facts => ({
 });
 
 describe("summarizeWorkForClient: one aggregate, no names", () => {
-  it("counts confirmed and unconfirmed apart and keeps period totals out of single days", () => {
+  it("counts confirmed and unconfirmed apart and every hour once (one total)", () => {
     const work = summarizeWorkForClient([
       rec({ state: "CLIENT_ATTESTED" }),
       rec({ state: "SELF_ATTESTED", activityDate: "2025-04-01" }),
+      // The only account of January: counted.
       rec({ activityDate: null, periodStart: "2025-01-01", periodEnd: "2025-01-31", hours: 160 }),
       rec({ withdrawn: true, hours: 99 }),
       rec({ superseded: true, hours: 99 }),
@@ -35,15 +39,25 @@ describe("summarizeWorkForClient: one aggregate, no names", () => {
       records: 3,
       confirmed: 1,
       unconfirmed: 2,
-      dayHours: 16,
-      periodHours: 160,
+      hours: 176,
       firstDate: "2025-01-01",
       lastDate: "2025-04-01",
     });
     // The aggregate carries no person, place or partner field.
     expect(Object.keys(work!).sort()).toEqual(
-      ["confirmed", "dayHours", "firstDate", "lastDate", "periodHours", "records", "unconfirmed"].sort(),
+      ["confirmed", "firstDate", "hours", "lastDate", "records", "unconfirmed"].sort(),
     );
+  });
+
+  it("a period total over days already recorded for the same person is not added again", () => {
+    const work = summarizeWorkForClient([
+      rec({ activityDate: "2025-03-03", hours: 8 }),
+      rec({ activityDate: "2025-03-04", hours: 8 }),
+      rec({ activityDate: null, periodStart: "2025-03-01", periodEnd: "2025-03-31", hours: 16 }),
+      // Another person's period over the same month is that person's only account.
+      rec({ personId: "p2", activityDate: null, periodStart: "2025-03-01", periodEnd: "2025-03-31", hours: 40 }),
+    ]);
+    expect(work?.hours).toBe(56);
   });
 
   it("is null when nothing live was done for the client", () => {

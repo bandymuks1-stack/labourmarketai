@@ -337,6 +337,13 @@ export default async function JournalPage({
       (r as { journal_review_enabled?: boolean }).journal_review_enabled ===
       true,
   );
+  // The "review is not switched on yet, the organization's owner switches it
+  // on" note only means something to a worker who HAS an organization context.
+  // A worker with only their own personal space has no owner to ask; showing
+  // it to them was noise (worker path walk 2026-11-24, decision 0032).
+  const anyOrganizationContext = (ecRows ?? []).some(
+    (r) => ((r as { organization_id?: string | null }).organization_id ?? null) !== null,
+  );
 
   // WHICH CONTEXT DOES THIS WORK BELONG TO? (audit v1 FIRST_BROKEN_LINK)
   //
@@ -1430,7 +1437,7 @@ export default async function JournalPage({
           a confirmed-id is silently ignored so the worker can't be tricked
           into "editing" a confirmed entry — they would need the explicit
           correction-request UI for that. */}
-      {!anyReviewEnabled && (
+      {anyOrganizationContext && !anyReviewEnabled && (
         <p
           className="order-5 text-meta leading-relaxed text-text-muted"
           data-testid="journal-review-not-enabled-note"

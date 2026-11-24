@@ -10,15 +10,25 @@
  *
  * Pure: the readers pass the records they already read under the caller's RLS.
  * Confirmed and unconfirmed are counted apart; a self-attestation is never a
- * confirmation; hours of period totals are never added to single days.
+ * confirmation; every hour is counted once (`hours-counted-once.ts`).
  */
 import { ATTESTED_EVIDENCE_STATES, INDEPENDENTLY_VERIFIED } from "./evidence-state";
 import type { EvidenceRecordView } from "./import-core";
-import { isPeriodRecord } from "./company-work-history";
+import { hoursCountedOnce } from "./hours-counted-once";
 
 type RecordFacts = Pick<
   EvidenceRecordView,
-  "withdrawn" | "superseded" | "state" | "hours" | "activityDate" | "periodStart" | "periodEnd" | "parties" | "organizationId"
+  | "id"
+  | "personId"
+  | "withdrawn"
+  | "superseded"
+  | "state"
+  | "hours"
+  | "activityDate"
+  | "periodStart"
+  | "periodEnd"
+  | "parties"
+  | "organizationId"
 >;
 
 export type WorkForClient = {
@@ -26,10 +36,9 @@ export type WorkForClient = {
   /** Attested by someone with standing other than the person themself, or independently verified. */
   readonly confirmed: number;
   readonly unconfirmed: number;
-  /** Hours of dated single-day records. */
-  readonly dayHours: number;
-  /** Hours stated as period totals, kept apart. */
-  readonly periodHours: number;
+  /** THE one total: day hours + period hours that no day of the same person
+   *  already covers (decision 0025, `hours-counted-once.ts`). */
+  readonly hours: number;
   readonly firstDate: string | null;
   readonly lastDate: string | null;
 };
@@ -51,8 +60,6 @@ function span(records: readonly RecordFacts[]): [string | null, string | null] {
   return ds.length ? [ds[0]!, ds[ds.length - 1]!] : [null, null];
 }
 
-const round = (n: number) => Math.round(n * 100) / 100;
-
 /** The aggregate a client sees of the work partners did for it. No names. */
 export function summarizeWorkForClient(records: readonly RecordFacts[]): WorkForClient | null {
   const rows = live(records);
@@ -63,8 +70,7 @@ export function summarizeWorkForClient(records: readonly RecordFacts[]): WorkFor
     records: rows.length,
     confirmed,
     unconfirmed: rows.length - confirmed,
-    dayHours: round(rows.filter((r) => !isPeriodRecord(r)).reduce((s, r) => s + (r.hours ?? 0), 0)),
-    periodHours: round(rows.filter(isPeriodRecord).reduce((s, r) => s + (r.hours ?? 0), 0)),
+    hours: hoursCountedOnce(rows).hours,
     firstDate,
     lastDate,
   };

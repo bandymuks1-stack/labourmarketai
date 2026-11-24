@@ -14462,7 +14462,7 @@
       "navCalendar": "Kalender",
       "navProfile": "Profil",
       "clarifyWorkLog": "An welchem Tag und wie lange haben Sie gearbeitet? Zum Beispiel: „Heute von 8 bis 17, 30 Min Pause, Fenster montiert“.",
-      "calendarHint": "Ihren Plan finden Sie im Tab „Kalender“. Hier kann ich beim Erfassen der Arbeitszeit helfen oder Angebote zeigen.",
+      "calendarHint": "Ihren Plan finden Sie im Tab „Kalender“.",
       "messagesHint": "Hier sind Ihre Nachrichten — der Link unten öffnet sie.",
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "switchContextPersonal": "persönlicher Bereich",
@@ -14718,6 +14718,26 @@
       "findWorkInCompanyContext": "Die Jobsuche ist Ihre eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechseln Sie in Ihren persönlichen Bereich und fragen Sie noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus Ihrem persönlichen Bereich.",
       "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechseln Sie in Ihren persönlichen Bereich und machen Sie dort weiter.",
+      "crossSpace": {
+        "personal": {
+          "cv": "Ihr Lebenslauf liegt in Ihrem persönlichen Bereich, nicht in der Organisation.",
+          "journal": "Ihr eigenes Arbeitstagebuch liegt in Ihrem persönlichen Bereich.",
+          "profile": "Ihr Profil liegt in Ihrem persönlichen Bereich.",
+          "calendar": "Ihr eigener Kalender liegt in Ihrem persönlichen Bereich."
+        },
+        "open": {
+          "cv": "Wechseln und meinen Lebenslauf öffnen",
+          "journal": "Wechseln und mein Tagebuch öffnen",
+          "profile": "Wechseln und mein Profil öffnen",
+          "calendar": "Wechseln und meinen Kalender öffnen"
+        },
+        "askWhoseCv": "Ihr eigener Lebenslauf oder der eines Kandidaten?",
+        "organizationHistory": "Die Aufzeichnung der Organisation ist ihre Arbeitshistorie.",
+        "openOrganizationHistory": "Historie der Organisation öffnen",
+        "organization": "Das geschieht im Bereich der Organisation: {name}.",
+        "switchTo": "Zu {name} wechseln und fortfahren",
+        "whichOrganization": "Das geschieht im Bereich einer Organisation. In welchem?"
+      },
       "newJobsIntro": "Neue Stellen nach Ihren Vorgaben: {count}.",
       "newJobsAll": "Alle Möglichkeiten",
       "newJobsNone": "In den letzten Tagen sind keine neuen Stellen zu Ihren Vorgaben erschienen. Alle Möglichkeiten finden Sie auf der Seite der Möglichkeiten.",
@@ -19380,7 +19400,11 @@
         "open": "Arbeitsbereich {name} öffnen",
         "opening": "Wird geöffnet…",
         "error": "Der Arbeitsbereich konnte nicht geöffnet werden."
-      }
+      },
+      "structure": "Frühere Arbeit wurde unter {names} erbracht.",
+      "structureLater": ", später ",
+      "structureForClient": "Frühere Arbeit unter {names} für den Auftraggeber {client}.",
+      "structureAsSubcontractor": "Subunternehmer: {names} → Auftraggeber {client}."
     },
     "projects": {
       "title": "Projekte auf der Plattform",
@@ -19411,7 +19435,8 @@
       "title": "Auftraggeber",
       "unnamed": "Auftraggebende Organisation",
       "records": "{count, plural, one {# Eintrag} other {# Einträge}}"
-    }
+    },
+    "descriptionNotInSource": "Keine Arbeitsbeschreibung in der Quelle"
   },
   "workPlan": {
     "title": "Geplante Arbeit",

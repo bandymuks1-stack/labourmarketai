@@ -25,6 +25,31 @@ name: Deploy to VPS
 #   - workflow_dispatch: manual deploy / redeploy of a sha on main (rollback path).
 # It never deploys a tree whose Quality Gates did not pass (checked below for both).
 #
+# ONE DEPLOY QUEUE (owner P0 2026-11-24). A deploy and its production checks are
+# ONE run, so ONE sequential process in the `deploy-vps` concurrency group:
+#   gate -> build -> deploy -> checks (post-deploy-smoke.yml, called with
+#   `workflow_call`: public smoke, signed-in smoke, regression report).
+# The next deploy cannot start until this deploy's checks have finished, so a
+# check never measures another deploy. cancel-in-progress is false: a started
+# deploy and its checks always finish. GitHub keeps at most ONE pending run per
+# group, so a newer pending deploy supersedes an older pending one — intended:
+# main's newest head deploys and gets checked. This is the ONLY workflow that
+# ships or rolls back production (guard: lib/guards/deploy-queue.test.ts).
+#
+# REGRESSION FREEZE. A check that genuinely FAILS opens the regression issue with
+# the `deploy-freeze` label (.github/scripts/post-deploy-regression-issue.sh).
+# While such an issue is open, `gate` refuses every deploy, automatic or manual,
+# as BLOCKED with the issue link. Closing the issue lifts the freeze; the next
+# deploy and its checks must pass. A check that did NOT run (BLOCKED) never
+# freezes anything. While frozen, no normal deploy can ship a fix: the owner
+# closes the issue once the fix is merged, or dispatches an emergency.
+#   Emergency security fix: workflow_dispatch with `emergency=true` and a
+#   `reason`. The gate checks only that the actor is the repository owner's
+#   ACCOUNT, which agent sessions also use, so it cannot tell an agent from the
+#   owner. Binding policy (AGENTS.md, CLAUDE.md "Deploy freeze emergency"):
+#   agents never dispatch it; only the owner does, in person. It bypasses the
+#   freeze, still runs every check, and is logged on the freeze issue.
+#
 # Secrets (owner-created, names only):
 #   VPS_DEPLOY_SSH_KEY     private key whose public half is in the VPS
 #                          authorized_keys with a forced command (see
@@ -53,6 +78,14 @@ on:
         description: "Owner only: deploy even if no successful Quality Gates run exists for the sha"
         type: boolean
         default: false
+      emergency:
+        description: "Deploy through an open deploy-freeze (emergency security fix); the checks still run. Policy: the owner in person only, never an agent (agents use the owner's account; the workflow cannot tell them apart)"
+        type: boolean
+        default: false
+      reason:
+        description: "Required with emergency: why this deploy cannot wait for the freeze to lift"
+        required: false
+        default: ""
 
 concurrency:
   group: deploy-vps
@@ -63,11 +96,37 @@ permissions:
   actions: read
 
 jobs:
-  build:
-    # Automatic path: only a SUCCESSFUL Quality Gates run that came from a push to main.
+  # The freeze check, before anything is built or shipped. BLOCKED (red, with the
+  # issue link) while an open freeze issue exists, unless this is an emergency
+  # dispatch from the owner's account with a reason, which is then logged on
+  # that issue. The account check is not an identity check (agents use the same
+  # account); "owner in person only" is a binding policy, not something enforced here.
+  gate:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write # read the freeze, log an emergency on it
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - name: "Deploy freeze: refuse while a deploy-freeze issue is open (owner emergency excepted)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EMERGENCY: ${{ github.event_name == 'workflow_dispatch' && inputs.emergency || false }}
+          REASON: ${{ inputs.reason }}
+          ACTOR: ${{ github.actor }}
+          OWNER: ${{ github.repository_owner }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash .github/scripts/deploy-freeze-gate.sh
+
+  build:
+    needs: gate
     runs-on: ubuntu-latest
     timeout-minutes: 40
     outputs:
@@ -197,6 +256,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: production-vps
+    outputs:
+      # true only when this run shipped a build (never-backwards may skip it).
+      shipped: ${{ steps.order.outputs.go }}
     env:
       SHA: ${{ needs.build.outputs.sha }}
       SHA256: ${{ needs.build.outputs.sha256 }}
@@ -260,3 +322,17 @@ jobs:
             sleep 10
           done
           echo "::error::public /api/health does not serve build ${SHA:0:8} yet"; exit 1
+
+  # The production checks of THIS deploy, inside this run and so inside the
+  # `deploy-vps` group: post-deploy-smoke.yml reused, never copied.
+  checks:
+    needs: [build, deploy]
+    if: needs.deploy.result == 'success' && needs.deploy.outputs.shipped == 'true'
+    permissions:
+      contents: read
+      actions: read # the deploy brake and the last green run
+      issues: write # the one regression issue (deploy-freeze)
+    uses: ./.github/workflows/post-deploy-smoke.yml
+    with:
+      deploy_sha: ${{ needs.build.outputs.sha }}
+    secrets: inherit
