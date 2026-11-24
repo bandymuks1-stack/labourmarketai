@@ -5830,9 +5830,9 @@
       "confirmedTitle": "Verwijdering bevestigd",
       "confirmedBody": "Het systeem verwijdert het account binnen enkele minuten en stuurt een bevestiging naar het e-mailadres van uw account. Moet iets worden beoordeeld, dan laten we het u weten.",
       "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. U ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt uw profiel niet getoond in zoekresultaten.",
-      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens 30 dagen na bevestiging onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
-      "confirmStepBodyWaiting": "Uw verzoek om uw account te verwijderen is ingediend. Bevestig het — het account blijft nog 30 dagen bestaan en in die tijd kunt u op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt u een bevestiging per e-mail.",
-      "confirmedBodyWaiting": "Het account wordt over 30 dagen verwijderd. Tot die tijd kunt u op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van uw account.",
+      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens uiterlijk 30 dagen na bevestiging, en uiterlijk een maand na mijn verzoek, onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
+      "confirmStepBodyWaiting": "Uw verzoek om uw account te verwijderen is ingediend. Bevestig het — het account blijft nog ten hoogste 30 dagen bestaan (nooit langer dan een maand na uw verzoek) en in die tijd kunt u op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt u een bevestiging per e-mail.",
+      "confirmedBodyWaiting": "Het account wordt binnen 30 dagen verwijderd, en uiterlijk een maand na uw verzoek. Tot die tijd kunt u op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van uw account.",
       "status": {
         "pending": "Uw verzoek om uw account te verwijderen is ingediend.",
         "pendingConfirmed": "Het verwijderen van uw account is bevestigd en ingepland.",
@@ -5840,7 +5840,7 @@
         "inProgress": "Uw account wordt al verwijderd — dit kan niet meer worden geannuleerd.",
         "done": "Het account is verwijderd.",
         "submittedAt": "Ingediend: {date}",
-        "scheduledAt": "Het account wordt verwijderd op {date} (na een wachttijd van 30 dagen).",
+        "scheduledAt": "Het account wordt verwijderd op {date}.",
         "cancelUntil": "Tot die tijd kunt u annuleren.",
         "loadError": "De status van het verwijderen van uw account kon niet worden geladen. Vernieuw de pagina en probeer het opnieuw."
       },

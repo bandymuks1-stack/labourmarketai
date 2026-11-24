@@ -5830,9 +5830,9 @@
       "confirmedTitle": "Ištrynimas patvirtintas",
       "confirmedBody": "Sistema paskyrą ištrins per artimiausias kelias minutes ir atsiųs patvirtinimą paskyros el. paštu. Jei kažką reikės peržiūrėti, apie tai pranešime.",
       "inReview": "Automatinis ištrynimas sustabdytas peržiūrai: paskyroje yra duomenų, kuriuos gali tekti saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis. Sprendimą ir priežastis gausite el. paštu per vieną mėnesį. Tuo metu jūsų profilis nerodomas paieškoje.",
-      "confirmLabelWaiting": "Suprantu, kad paskyra ir jos duomenys bus ištrinti negrįžtamai po 30 dienų nuo patvirtinimo, nebent iki tol atšauksiu.",
-      "confirmStepBodyWaiting": "Jūsų paskyros šalinimo užklausa pateikta. Patvirtinkite ją — paskyra bus išlaikyta 30 dienų, per tą laiką galite atšaukti šiame puslapyje. Po to sistema paskyrą ištrins automatiškai ir atsiųs patvirtinimą el. paštu.",
-      "confirmedBodyWaiting": "Paskyra bus ištrinta po 30 dienų. Iki tol galite atšaukti šiame puslapyje. Ištrynus atsiųsime patvirtinimą į paskyros el. paštą.",
+      "confirmLabelWaiting": "Suprantu, kad paskyra ir jos duomenys bus ištrinti negrįžtamai ne vėliau kaip po 30 dienų nuo patvirtinimo ir ne vėliau kaip per mėnesį nuo mano prašymo, nebent iki tol atšauksiu.",
+      "confirmStepBodyWaiting": "Jūsų paskyros šalinimo užklausa pateikta. Patvirtinkite ją — paskyra bus išlaikyta iki 30 dienų (ne ilgiau kaip mėnesį nuo prašymo), per tą laiką galite atšaukti šiame puslapyje. Po to sistema paskyrą ištrins automatiškai ir atsiųs patvirtinimą el. paštu.",
+      "confirmedBodyWaiting": "Paskyra bus ištrinta per 30 dienų, bet ne vėliau kaip per mėnesį nuo prašymo. Iki tol galite atšaukti šiame puslapyje. Ištrynus atsiųsime patvirtinimą į paskyros el. paštą.",
       "status": {
         "pending": "Paskyros ištrynimo užklausa pateikta.",
         "pendingConfirmed": "Paskyros ištrynimas patvirtintas ir suplanuotas.",
@@ -5840,7 +5840,7 @@
         "inProgress": "Paskyros ištrynimas jau vyksta — jo atšaukti nebegalima.",
         "done": "Paskyra ištrinta.",
         "submittedAt": "Pateikta: {date}",
-        "scheduledAt": "Paskyra bus ištrinta {date} (po 30 dienų laukimo).",
+        "scheduledAt": "Paskyra bus ištrinta {date}.",
         "cancelUntil": "Iki tol galite atšaukti.",
         "loadError": "Nepavyko įkelti paskyros ištrynimo būsenos. Atnaujinkite puslapį ir pabandykite dar kartą."
       },
