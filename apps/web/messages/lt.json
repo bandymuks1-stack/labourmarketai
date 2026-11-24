@@ -19382,7 +19382,8 @@
         "error": "Darbo erdvės atverti nepavyko."
       },
       "structure": "Ankstesnis darbas atliktas per {names}.",
-      "structureLater": ", vėliau "
+      "structureLater": ", vėliau ",
+      "structureForClient": "Subrangovas: {names} → užsakovas {client}."
     },
     "projects": {
       "title": "Projektai platformoje",

@@ -7222,7 +7222,8 @@
         "error": "Darbvietu neizdevās atvērt."
       },
       "structure": "Iepriekšējais darbs tika veikts ar {names}.",
-      "structureLater": ", vēlāk "
+      "structureLater": ", vēlāk ",
+      "structureForClient": "Apakšuzņēmējs: {names} → pasūtītājs {client}."
     },
     "descriptionNotInSource": "Avotā nav darba apraksta"
   },

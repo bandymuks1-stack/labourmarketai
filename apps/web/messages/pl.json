@@ -19382,7 +19382,8 @@
         "error": "Nie udało się otworzyć przestrzeni roboczej."
       },
       "structure": "Wcześniejsza praca była wykonywana w ramach {names}.",
-      "structureLater": ", później "
+      "structureLater": ", później ",
+      "structureForClient": "Podwykonawca: {names} → zleceniodawca {client}."
     },
     "projects": {
       "title": "Projekty na platformie",

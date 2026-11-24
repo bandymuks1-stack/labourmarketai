@@ -7,6 +7,9 @@
  * period record with no day record of that person inside its span is the only
  * account of that time and is counted.
  *
+ * The span test itself (`spanHoldsAnyDay`) is THE one predicate: the
+ * person rule in `organization-all-time.ts` calls it too.
+ *
  * One total therefore means day hours + non-overlapping period hours, and no
  * surface shows period sums as a second, competing figure. Pure, no IO.
  */
@@ -19,6 +22,14 @@ export type HoursRecord = {
   readonly periodEnd: string | null;
   readonly hours: number | null;
 };
+
+import { isPeriodRecord } from "./company-work-history";
+
+/** Does a stated span [start, end] (ISO days, inclusive) hold any of these days? */
+export function spanHoldsAnyDay(start: string, end: string, days: Iterable<string>): boolean {
+  for (const d of days) if (d >= start && d <= end) return true;
+  return false;
+}
 
 const positive = (h: number | null) => (h !== null && Number.isFinite(h) && h > 0 ? h : 0);
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -34,9 +45,9 @@ export function overlappingPeriodRecordIds(records: readonly HoursRecord[]): Rea
   }
   const out = new Set<string>();
   for (const r of records) {
-    if (r.activityDate !== null || !r.periodStart || !r.periodEnd || !r.personId) continue;
+    if (!isPeriodRecord(r) || !r.personId) continue;
     const days = daysOf.get(r.personId);
-    if (days?.some((d) => d >= r.periodStart! && d <= r.periodEnd!)) out.add(r.id);
+    if (days && spanHoldsAnyDay(r.periodStart!, r.periodEnd!, days)) out.add(r.id);
   }
   return out;
 }

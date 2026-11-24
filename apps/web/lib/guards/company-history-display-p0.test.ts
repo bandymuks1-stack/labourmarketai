@@ -95,6 +95,7 @@ describe("2. no importer English in the UI", () => {
       expect(m.descriptionNotInSource, l).toBeTruthy();
       expect(m.business?.structure, l).toMatch(/\{names\}/);
       expect(typeof m.business?.structureLater, l).toBe("string");
+      expect(m.business?.structureForClient, l).toMatch(/\{names\}[\s\S]*\{client\}/);
       expect(m.business?.title, `${l}: business block present`).toBeTruthy();
       if (l !== "en") expect(m.descriptionNotInSource, l).not.toBe("No work description in the source");
     }
@@ -213,6 +214,11 @@ describe("5. one short statement of the structure, never a legal line per card",
     expect(h.split).toBe(true);
     const same = statement({ id: "s1", legalEntityLabel: "Vivat Rex", legalEntityRelation: "same_entity" });
     expect(buildBusinessHistory([], [VIVAT_B, same]).periods).toHaveLength(2);
+  });
+
+  it("the subcontractor → client line comes from the records' own client party, only when there is one", () => {
+    expect(OVERVIEW).toMatch(/clients\.length === 1 && clients\[0\]!\.name\s*\?\s*t\("structureForClient"/);
+    expect(HISTORY).toMatch(/clients=\{load\.clients\}/);
   });
 
   it("the overview prints the relation once at most, and never per card or per header row", () => {

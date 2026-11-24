@@ -7222,7 +7222,8 @@
         "error": "Tööruumi ei õnnestunud avada."
       },
       "structure": "Varasem töö tehti juriidilise isiku {names} all.",
-      "structureLater": ", hiljem "
+      "structureLater": ", hiljem ",
+      "structureForClient": "Alltöövõtja: {names} → tellija {client}."
     },
     "descriptionNotInSource": "Allikas puudub töö kirjeldus"
   },

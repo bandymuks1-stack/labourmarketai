@@ -19382,7 +19382,8 @@
         "error": "De werkomgeving kon niet worden geopend."
       },
       "structure": "Eerder werk werd uitgevoerd onder {names}.",
-      "structureLater": ", daarna "
+      "structureLater": ", daarna ",
+      "structureForClient": "Onderaannemer: {names} → opdrachtgever {client}."
     },
     "projects": {
       "title": "Projecten op het platform",

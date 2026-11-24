@@ -7222,7 +7222,8 @@
         "error": "Arbejdsområdet kunne ikke åbnes."
       },
       "structure": "Tidligere arbejde blev udført gennem {names}.",
-      "structureLater": ", senere "
+      "structureLater": ", senere ",
+      "structureForClient": "Underleverandør: {names} → ordregiver {client}."
     },
     "descriptionNotInSource": "Ingen arbejdsbeskrivelse i kilden"
   },

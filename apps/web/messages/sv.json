@@ -19382,7 +19382,8 @@
         "error": "Arbetsytan kunde inte öppnas."
       },
       "structure": "Tidigare arbete utfördes genom {names}.",
-      "structureLater": ", senare "
+      "structureLater": ", senare ",
+      "structureForClient": "Underleverantör: {names} → beställare {client}."
     },
     "projects": {
       "title": "Projekt på plattformen",

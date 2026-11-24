@@ -29,6 +29,7 @@ export async function BusinessHistoryOverview({
   organizationId,
   organizationName,
   identity,
+  clients = [],
   locale,
 }: {
   readonly business: BusinessHistory | null;
@@ -36,6 +37,9 @@ export async function BusinessHistoryOverview({
   readonly organizationName: string;
   /** Legal identity for the own-vs-earlier split; absent = the display name only. */
   readonly identity?: BusinessHistoryIdentity;
+  /** The clients this organization's OWN records name (`client` parties,
+   *  decision 0033: its direct counterparty only). */
+  readonly clients?: readonly { readonly name: string | null }[];
   readonly locale: string;
 }) {
   const t = await getTranslations("companyWorkHistory.business");
@@ -79,7 +83,11 @@ export async function BusinessHistoryOverview({
   const structure =
     entityNames.length > 0
       ? [
-          t("structure", { names: entityNames.join(t("structureLater")) }),
+          // The relation is read from the records' own client party, never
+          // assumed: one named direct client → "subcontractor → client".
+          clients.length === 1 && clients[0]!.name
+            ? t("structureForClient", { names: entityNames.join(t("structureLater")), client: clients[0]!.name })
+            : t("structure", { names: entityNames.join(t("structureLater")) }),
           ...asserted.map((x) => t(`relation.${x}`)),
         ].join(" ")
       : null;
