@@ -14723,6 +14723,26 @@
       "taskStatusAsk": "Kokią būseną nustatyti užduočiai: pradėta, atlikta ar užblokuota?",
       "stageStatusAsk": "Kokią būseną nustatyti etapui: pradėtas, atliktas ar užblokuotas?",
       "professionAsk": "Kurią profesiją ar amatą turite omenyje?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Jūsų CV yra asmeninėje erdvėje, ne organizacijos.",
+          "journal": "Jūsų darbo žurnalas yra asmeninėje erdvėje.",
+          "profile": "Jūsų profilis yra asmeninėje erdvėje.",
+          "calendar": "Jūsų kalendorius yra asmeninėje erdvėje."
+        },
+        "open": {
+          "cv": "Persijungti ir atidaryti mano CV",
+          "journal": "Persijungti ir atidaryti mano žurnalą",
+          "profile": "Persijungti ir atidaryti mano profilį",
+          "calendar": "Persijungti ir atidaryti mano kalendorių"
+        },
+        "askWhoseCv": "Jūsų CV ar kandidato?",
+        "organizationHistory": "Organizacijos įrašas yra jos darbų istorija.",
+        "openOrganizationHistory": "Atidaryti organizacijos istoriją",
+        "organization": "Tai atliekama organizacijos erdvėje: {name}.",
+        "switchTo": "Persijungti į {name} ir tęsti",
+        "whichOrganization": "Tai atliekama organizacijos erdvėje. Kurioje?"
+      },
       "newJobsIntro": "Naujų skelbimų pagal jūsų nuostatas: {count}.",
       "newJobsAll": "Visos galimybės",
       "newJobsNone": "Per paskutines dienas naujų skelbimų pagal jūsų nuostatas neatsirado. Visas galimybes rasite galimybių puslapyje.",

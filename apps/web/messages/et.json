@@ -4097,6 +4097,26 @@
       "taskStatusAsk": "Millise oleku ülesanne saab: alustatud, tehtud või blokeeritud?",
       "stageStatusAsk": "Millise oleku etapp saab: alustatud, tehtud või blokeeritud?",
       "professionAsk": "Millist ametit või oskust mõtlete?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Teie CV on isiklikus ruumis, mitte organisatsioonis.",
+          "journal": "Teie enda tööpäevik on isiklikus ruumis.",
+          "profile": "Teie profiil on isiklikus ruumis.",
+          "calendar": "Teie enda kalender on isiklikus ruumis."
+        },
+        "open": {
+          "cv": "Lülita ümber ja ava minu CV",
+          "journal": "Lülita ümber ja ava minu päevik",
+          "profile": "Lülita ümber ja ava minu profiil",
+          "calendar": "Lülita ümber ja ava minu kalender"
+        },
+        "askWhoseCv": "Teie enda CV või kandidaadi oma?",
+        "organizationHistory": "Organisatsiooni kirje on tema tööajalugu.",
+        "openOrganizationHistory": "Ava organisatsiooni ajalugu",
+        "organization": "Seda tehakse organisatsiooni ruumis: {name}.",
+        "switchTo": "Lülita ümber: {name} ja jätka",
+        "whichOrganization": "Seda tehakse organisatsiooni ruumis. Millises?"
+      },
       "newJobsIntro": "Uusi sinu eelistustele sobivaid kuulutusi: {count}.",
       "newJobsAll": "Kõik võimalused",
       "newJobsNone": "Viimastel päevadel pole sinu eelistustele sobivaid uusi kuulutusi ilmunud. Kõik võimalused leiad võimaluste lehelt.",

@@ -4097,6 +4097,26 @@
       "taskStatusAsk": "Kādu statusu piešķirt uzdevumam: sākts, izpildīts vai bloķēts?",
       "stageStatusAsk": "Kādu statusu piešķirt posmam: sākts, izpildīts vai bloķēts?",
       "professionAsk": "Kuru profesiju vai amatu jūs domājat?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Jūsu CV atrodas personīgajā telpā, nevis organizācijā.",
+          "journal": "Jūsu darba žurnāls atrodas personīgajā telpā.",
+          "profile": "Jūsu profils atrodas personīgajā telpā.",
+          "calendar": "Jūsu kalendārs atrodas personīgajā telpā."
+        },
+        "open": {
+          "cv": "Pārslēgties un atvērt manu CV",
+          "journal": "Pārslēgties un atvērt manu žurnālu",
+          "profile": "Pārslēgties un atvērt manu profilu",
+          "calendar": "Pārslēgties un atvērt manu kalendāru"
+        },
+        "askWhoseCv": "Jūsu CV vai kandidāta?",
+        "organizationHistory": "Organizācijas ieraksts ir tās darbu vēsture.",
+        "openOrganizationHistory": "Atvērt organizācijas vēsturi",
+        "organization": "To dara organizācijas telpā: {name}.",
+        "switchTo": "Pārslēgties uz {name} un turpināt",
+        "whichOrganization": "To dara organizācijas telpā. Kurā?"
+      },
       "newJobsIntro": "Jauni sludinājumi pēc jūsu kritērijiem: {count}.",
       "newJobsAll": "Visas iespējas",
       "newJobsNone": "Pēdējās dienās jaunu sludinājumu pēc jūsu kritērijiem nav. Visas iespējas atradīsiet iespēju lapā.",

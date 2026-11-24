@@ -4097,6 +4097,26 @@
       "taskStatusAsk": "Hvilken status skal opgaven have: startet, færdig eller blokeret?",
       "stageStatusAsk": "Hvilken status skal etapen have: startet, færdig eller blokeret?",
       "professionAsk": "Hvilket fag eller håndværk mener du?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Dit CV ligger i dit personlige område, ikke i organisationen.",
+          "journal": "Din egen arbejdsdagbog ligger i dit personlige område.",
+          "profile": "Din profil ligger i dit personlige område.",
+          "calendar": "Din egen kalender ligger i dit personlige område."
+        },
+        "open": {
+          "cv": "Skift og åbn mit CV",
+          "journal": "Skift og åbn min dagbog",
+          "profile": "Skift og åbn min profil",
+          "calendar": "Skift og åbn min kalender"
+        },
+        "askWhoseCv": "Dit eget CV eller en kandidats?",
+        "organizationHistory": "Organisationens optegnelse er dens arbejdshistorik.",
+        "openOrganizationHistory": "Åbn organisationens historik",
+        "organization": "Det gøres i organisationens område: {name}.",
+        "switchTo": "Skift til {name} og fortsæt",
+        "whichOrganization": "Det gøres i en organisations område. Hvilket?"
+      },
       "newJobsIntro": "Nye opslag, der passer til dine ønsker: {count}.",
       "newJobsAll": "Alle muligheder",
       "newJobsNone": "Der er ikke kommet nye opslag, der passer til dine ønsker, de seneste dage. Alle muligheder finder du på siden med muligheder.",
