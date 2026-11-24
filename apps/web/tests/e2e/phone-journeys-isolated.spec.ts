@@ -21,6 +21,15 @@ import {
   onboardInvited,
 } from "./isolated-web-a-helpers";
 
+/** The profile's block that holds a section (decision 0034: one block per screen, `?tab=`). */
+function profileTabOf(hash: string): string {
+  if (hash === "profile-edit") return "edit";
+  if (hash === "capabilities" || hash === "candidate-skills") return "skills";
+  if (hash === "profile-about") return "about";
+  return "details";
+}
+
+
 /**
  * A SIGNED-IN PERSON ON A PHONE, at 375 and at 390 px, on a THROWAWAY LOCAL Supabase stack
  * (.github/workflows/signup-isolated.yml). Owner 2026-11-14: "Patikrinti prisijungusio naudotojo
@@ -351,7 +360,7 @@ for (const phone of PHONES) {
       await expect(page.getByTestId("profile-destinations")).toBeVisible({ timeout: 30_000 });
       await fitsTheScreen(page, "the profile");
       // The public summary sits in the collapsed CV details; its hash opens them.
-      await page.goto(`${BASE}/en/dashboard/profile#profile-public-summary`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=details#profile-public-summary`);
       await page.reload();
       const section = page.getByTestId("profile-public-summary");
       await expect(section).toBeVisible({ timeout: 30_000 });
@@ -477,7 +486,7 @@ for (const phone of PHONES) {
       await tapUntil(vis.getByTestId("discoverability-open"), vis.getByTestId("discoverability-grant"));
       await vis.getByTestId("discoverability-grant").tap();
       await expect(vis.getByTestId("discoverability-granted"), "employers may now find them").toBeVisible({ timeout: 30_000 });
-      await w.page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+      await w.page.goto(`${BASE}/en/dashboard/profile?tab=details#work-card-editor-section`);
       const toggle = w.page.getByRole("main").getByTestId("work-card-editor-toggle");
       await expect(toggle, "the work card editor is offered on the worker's profile").toBeVisible({ timeout: 60_000 });
       const editor = w.page.getByRole("main").getByTestId("work-card-editor");
@@ -772,7 +781,7 @@ for (const phone of PHONES) {
       // The experience form lives in the capabilities section, which the profile
       // opens only when the address names it (DetailsHashOpener; the
       // production walk P-7 opens it the same way).
-      await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=skills#capabilities`);
       const profile = page.getByRole("main");
       await expect(profile.locator("details#capabilities").first(), "the capabilities section is open").toHaveAttribute("open", "", {
         timeout: 30_000,
@@ -786,7 +795,7 @@ for (const phone of PHONES) {
         "the current-job row",
       );
       // The licence toggles are in the CV-details section, opened the same way.
-      await page.goto(`${BASE}/en/dashboard/profile#cv-details`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=details#cv-details`);
       await expect(profile.locator("details#cv-details").first(), "the CV-details section is open").toHaveAttribute("open", "", {
         timeout: 30_000,
       });
@@ -804,7 +813,7 @@ for (const phone of PHONES) {
       // chip must show WITHOUT a reload, from the save's own answer, then persist on a real reload.
       // The same add at a desktop width follows, so a phone-only fault names itself.
       const addInPlace = async (page: Page, claim: string, where: string): Promise<void> => {
-        await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
+        await page.goto(`${BASE}/en/dashboard/profile?tab=skills#capabilities`);
         const main = page.getByRole("main");
         await expect(main.locator("details#capabilities").first(), `${where}: the capabilities section is open`).toHaveAttribute("open", "", {
           timeout: 30_000,
@@ -861,7 +870,7 @@ for (const phone of PHONES) {
       // `x-nextjs-action-not-found`, StaleBuildRecovery reloaded the page, and no answer ever showed
       // (the typed text was gone too). Here the third save meets the same answer, made locally.
       const { page, done } = await signedInOnPhone(browser, phone, worker);
-      await page.goto(`${BASE}/en/dashboard/profile#profile-public-summary`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=details#profile-public-summary`);
       await page.reload();
       const section = page.getByRole("main").getByTestId("profile-public-summary");
       await expect(section).toBeVisible({ timeout: 30_000 });
@@ -942,7 +951,7 @@ for (const phone of PHONES) {
     // edit again (change, or remove) → stored → a reload shows that. The summary is M-10, the
     // free-label skill M-9. One step per section, so one section's fault hides no other.
     const profileAt = async (page: Page, hash: string): Promise<Locator> => {
-      await page.goto(`${BASE}/en/dashboard/profile#${hash}`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=${profileTabOf(hash)}#${hash}`);
       await page.reload();
       const main = page.getByRole("main");
       const target = main.locator(`#${hash}`).first();

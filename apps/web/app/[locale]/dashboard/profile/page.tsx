@@ -25,6 +25,7 @@ import {
 import { RecognisedByBlock } from "@/components/app/recognised-by-block";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
+import { HashTabRedirect } from "@/components/app/hash-tab-redirect";
 import { SkillClarifySection } from "@/components/app/skill-clarify-section";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
@@ -148,12 +149,45 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
 /** Worker "Profession & skills" page — profession + skills + CV preview.
  *  The CV preview is a read model of SAVED data fetched here, so its counts
  *  always equal what is persisted (refreshed after each save). */
+/**
+ * ONE FUNCTIONAL BLOCK PER SCREEN (decision 0034, owner 2026-11-24). The page
+ * is five blocks, each with its own address (`?tab=`); nothing was removed —
+ * every mount below still renders, on its own tab. Links written before the
+ * split (`#capabilities`, `#cv-availability`, …) reach the right tab through
+ * `HashTabRedirect`, and the tab's own `DetailsHashOpener` still opens and
+ * scrolls to the section.
+ */
+const PROFILE_TABS = ["overview", "edit", "details", "skills", "about"] as const;
+type ProfileTab = (typeof PROFILE_TABS)[number];
+const PROFILE_TAB_BY_ANCHOR: Readonly<Record<string, ProfileTab>> = {
+  "profile-edit": "edit",
+  "cv-details": "details",
+  "profile-identity": "details",
+  "profile-public-summary": "details",
+  "cv-availability": "details",
+  "work-card-editor-section": "details",
+  "cv-languages": "details",
+  "cv-education": "details",
+  "cv-achievements": "details",
+  capabilities: "skills",
+  "candidate-skills": "skills",
+  "profile-about": "about",
+};
+
 export default async function ProfilePage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ tab?: string | string[] }>;
 }) {
-  const { locale } = await params;
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
+  const rawTab = query?.tab;
+  const tab: ProfileTab = (PROFILE_TABS as readonly string[]).includes(
+    typeof rawTab === "string" ? rawTab : "",
+  )
+    ? (rawTab as ProfileTab)
+    : "overview";
   setRequestLocale(locale);
 
   /**
@@ -1084,10 +1118,39 @@ export default async function ProfilePage({
           </details>
           </div>
         </div>
-        <p className="mt-2 text-sm text-text-secondary">
-          {t("pageSubtitle")}
-        </p>
       </header>
+
+      <nav aria-label={t("pageTitle")} data-testid="profile-tabs" className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+        {PROFILE_TABS.map((id) => {
+          const label =
+            id === "overview"
+              ? tQuick("identity")
+              : id === "edit"
+                ? t("editDisclosure")
+                : id === "details"
+                  ? tQuick("details")
+                  : id === "skills"
+                    ? tQuick("capabilities")
+                    : t("aboutDisclosure");
+          const active = id === tab;
+          return (
+            <Link
+              key={id}
+              href={(id === "overview" ? "/dashboard/profile" : `/dashboard/profile?tab=${id}`) as "/dashboard"}
+              aria-current={active ? "page" : undefined}
+              data-testid={`profile-tab-${id}`}
+              className={
+                active
+                  ? "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-brand-blue bg-ink-800 px-4 text-sm font-semibold text-text-primary"
+                  : "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-ink-600 bg-ink-800/50 px-4 text-sm font-medium text-text-secondary hover:border-ink-500 hover:text-text-primary"
+              }
+            >
+              {label}
+            </Link>
+          );
+        })}
+      </nav>
+      <HashTabRedirect tabByAnchor={PROFILE_TAB_BY_ANCHOR} current={tab} />
 
       {/* NO QUICK-NAV STRIP HERE ANY MORE (worker mobile IA 2026-09-13 §4:
           PageQuickNav "REMOVE (worker)"; owner P0/P1 §17). The strip existed
@@ -1101,6 +1164,8 @@ export default async function ProfilePage({
           `#learning-compass` stands open above the fold. `/cv` keeps its own
           strip. */}
 
+      {tab === "overview" ? (
+        <>
       {/* W7-S5b: when the account holds NO person identity (identity truth =
           `profile_roles`, the same set the RoleSwitcher offers "add person"
           from), this page is worker-framed copy around person sections that
@@ -1299,6 +1364,8 @@ export default async function ProfilePage({
       {/* Organizations the person owns or manages + their business history
           (owner request 2026-10-09) - a relationship, never personal hours. */}
       <OrganizationsLeadership locale={locale} variant="profile" />
+        </>
+      ) : null}
 
       {/* The avatar EDITOR moved into `#cv-details` (summary first,
           2026-09-23): the hub above already shows the avatar, so a second
@@ -1354,9 +1421,12 @@ export default async function ProfilePage({
           arrival and on every later in-page hash change. A worker with no
           primary profession lands straight in the profession picker (the
           flow's `manual` stage), which is what that chip promised. */}
+      {tab === "edit" ? (
+        <>
       <DetailsHashOpener targetId="profile-edit" />
       <details
         id="profile-edit"
+        open
         className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
         data-testid="profile-edit-disclosure"
       >
@@ -1394,6 +1464,10 @@ export default async function ProfilePage({
         </div>
       </details>
 
+        </>
+      ) : null}
+      {tab === "overview" ? (
+        <>
       {/* PER-13 role context: "what do I have and what is missing to work as
           my profession in the countries I aim at" — the SAME ledger rows and
           copy as the project and opportunity surfaces. */}
@@ -1418,6 +1492,8 @@ export default async function ProfilePage({
             ))}
         </section>
       ) : null}
+        </>
+      ) : null}
 
       {/* IA (profile hierarchy): these five CV detail editors — work
           preferences, languages, education, achievements and external
@@ -1431,9 +1507,12 @@ export default async function ProfilePage({
           `DetailsHashOpener` opens this wrapper for `#cv-details` AND for a
           hash targeting a section INSIDE it (`#cv-availability` is a hub
           readiness step's deep link), so no deep link lands on a closed bar. */}
+      {tab === "details" ? (
+        <>
       <DetailsHashOpener targetId="cv-details" />
       <details
         id="cv-details"
+        open
         className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
       >
         <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary">
@@ -1675,6 +1754,8 @@ export default async function ProfilePage({
       ) : null}
         </div>
       </details>
+        </>
+      ) : null}
 
 
       {/* Unified CAPABILITY surface — the canonical home for self-declared
@@ -1694,6 +1775,8 @@ export default async function ProfilePage({
       {/* Deep links (#capabilities) must land on an OPEN disclosure — six
           senders across work-card, journal composer, player card and readiness
           steps link this anchor (audit PR4). */}
+      {tab === "skills" ? (
+        <>
       {recordReadUnavailable ? (
         <p
           role="status"
@@ -1704,7 +1787,7 @@ export default async function ProfilePage({
         </p>
       ) : null}
       <DetailsHashOpener targetId="capabilities" />
-      <details id="capabilities" className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
+      <details id="capabilities" open className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40">
         <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary">
           <span className="inline-flex items-center gap-2">
             <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
@@ -1741,6 +1824,8 @@ export default async function ProfilePage({
           ) : null}
         </div>
       </details>
+        </>
+      ) : null}
 
       {/* HOW TO READ THIS PROFILE — one closed bar at the end (summary first,
           2026-09-23). The trust counts (Workstream C: verified skills,
@@ -1752,9 +1837,12 @@ export default async function ProfilePage({
           W7-S5b rule kept: the note is keyed on identity (roles), not
           `workerId` — a non-worker identity gets the two-identities model
           note. */}
+      {tab === "about" ? (
+        <>
       <DetailsHashOpener targetId="profile-about" />
       <details
         id="profile-about"
+        open
         className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
         data-testid="profile-about-disclosure"
       >
@@ -1786,6 +1874,8 @@ export default async function ProfilePage({
           </FeatureNote>
         </div>
       </details>
+        </>
+      ) : null}
     </div>
   );
 }
