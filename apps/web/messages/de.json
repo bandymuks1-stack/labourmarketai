@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktuelle Marktnachfrage",
-    "subtitleAgency": "Was der öffentliche Markt gerade verlangt — derselbe Pool, den Ihre Kandidaten auf der Übersicht sehen.",
-    "subtitleInstitution": "Was der öffentliche Markt gerade verlangt — die Richtungen, in die Ihre Lernenden gehen.",
     "active": "{count} aktive Stellen",
     "employers": "{count} Arbeitgeber",
     "filtered": "{profession}: {count} Stellen",
@@ -211,7 +209,6 @@
     "formLabelLabel": "Standort",
     "formLabelPlaceholder": "Stadt oder Region",
     "formPriceLabel": "Preis",
-    "formPricePlaceholder": "z. B. 450 €/Monat oder nach Vereinbarung",
     "priceHint": "Der Preis ist optional und beschreibend. Zahlungen werden hier nicht abgewickelt.",
     "save": "Speichern",
     "saving": "Speichern…",
@@ -2082,7 +2079,6 @@
       "eyebrow": "UNTERNEHMENSBEREICH",
       "programs": {
         "title": "Studiengänge und Kohorten",
-        "subtitle": "Was Sie lehren, ausgerichtet auf eine Arbeitsmarktrichtung, und die Lerngruppen darin. Nachfrage zeigt aktuelle öffentliche Stellen für diese Richtung.",
         "empty": "Noch keine Studiengänge. Fügen Sie den ersten hinzu und richten Sie ihn auf die Arbeitsrichtung aus, zu der er führt.",
         "addProgram": "Studiengang hinzufügen",
         "noDirection": "Keine Arbeitsrichtung festgelegt",
@@ -2979,8 +2975,7 @@
           "label": "Wie viele Arbeitskräfte benötigt werden"
         },
         "salary": {
-          "label": "Gehalt (€)",
-          "placeholder": "Z. B. 2200"
+          "label": "Gehalt (€)"
         },
         "countries": {
           "label": "Bevorzugte Länder (ISO-Codes)",
@@ -4276,6 +4271,9 @@
         "admin": "Administrator"
       },
       "subcopy": "Ein Profil für Ihre Berufserfahrung und Chancen — im nächsten Schritt sagen Sie, wofür Sie hier sind.",
+      "inviteFrom": "{inviter} lädt Sie ein, {organization} beizutreten.",
+      "inviteTo": "Sie sind eingeladen, {organization} beizutreten.",
+      "inviteNext": "Mit der Registrierung treten Sie {organization} bei.",
       "google_label": "Mit Google fortfahren",
       "google_redirecting": "Weiterleitung...",
       "divider": "oder",
@@ -4286,7 +4284,6 @@
       "confirm_password_label": "Passwort bestätigen",
       "submit_label": "Registrieren",
       "signing": "Wird erstellt...",
-      "disclaimer": "Ihr Feedback prägt das Produkt — sagen Sie uns, was funktioniert und was fehlt.",
       "has_account": "Bereits ein Konto?",
       "login_link": "Anmelden",
       "error_generic": "Etwas ist schiefgelaufen. Bitte versuchen Sie es gleich erneut.",
@@ -4395,7 +4392,7 @@
           },
           "education": {
             "title": "Ich vertrete eine Bildungseinrichtung",
-            "desc": "Laden Sie Lernende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit Praktika und Jobs."
+            "desc": "Laden Sie Lernende ein, führen Sie Programme durch und verfolgen Sie Praxis und Ergebnisse."
           }
         },
         "heading": "Starten Sie als Person oder als Unternehmen?",
@@ -4644,7 +4641,6 @@
               "hoursPerWorker": "Stunden pro Arbeitskraft",
               "totalHours": "Gesamtstunden (optionale Übersteuerung)",
               "rate": "Stunden-/Tagessatz",
-              "ratePlaceholder": "z. B. 20",
               "country": "Land/Ort",
               "materials": "Materialien",
               "equipment": "Ausrüstung/Werkzeuge",
@@ -5826,9 +5822,9 @@
       "confirmedTitle": "Löschung bestätigt",
       "confirmedBody": "Das System löscht das Konto in den nächsten Minuten und sendet eine Bestätigung an Ihre Konto-E-Mail-Adresse. Muss etwas geprüft werden, informieren wir Sie.",
       "inReview": "Die automatische Löschung ist zur Prüfung angehalten: Das Konto enthält Daten, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen könnten. Entscheidung und Gründe erhalten Sie innerhalb eines Monats per E-Mail. Bis dahin wird Ihr Profil in der Suche nicht angezeigt.",
-      "confirmLabelWaiting": "Ich verstehe, dass das Konto und seine Daten 30 Tage nach der Bestätigung unwiderruflich gelöscht werden, sofern ich nicht vorher storniere.",
-      "confirmStepBodyWaiting": "Ihr Antrag auf Kontolöschung ist gestellt. Bestätigen Sie ihn — das Konto bleibt 30 Tage erhalten, in dieser Zeit können Sie auf dieser Seite stornieren. Danach löscht das System das Konto automatisch und sendet Ihnen eine Bestätigung per E-Mail.",
-      "confirmedBodyWaiting": "Das Konto wird in 30 Tagen gelöscht. Bis dahin können Sie auf dieser Seite stornieren. Nach der Löschung senden wir eine Bestätigung an Ihre Konto-E-Mail-Adresse.",
+      "confirmLabelWaiting": "Ich verstehe, dass das Konto und seine Daten spätestens 30 Tage nach der Bestätigung und spätestens einen Monat nach meinem Antrag unwiderruflich gelöscht werden, sofern ich nicht vorher storniere.",
+      "confirmStepBodyWaiting": "Ihr Antrag auf Kontolöschung ist gestellt. Bestätigen Sie ihn — das Konto bleibt höchstens 30 Tage erhalten (nie länger als einen Monat ab Ihrem Antrag), in dieser Zeit können Sie auf dieser Seite stornieren. Danach löscht das System das Konto automatisch und sendet Ihnen eine Bestätigung per E-Mail.",
+      "confirmedBodyWaiting": "Das Konto wird innerhalb von 30 Tagen gelöscht, spätestens einen Monat nach Ihrem Antrag. Bis dahin können Sie auf dieser Seite stornieren. Nach der Löschung senden wir eine Bestätigung an Ihre Konto-E-Mail-Adresse.",
       "status": {
         "pending": "Ihr Antrag auf Kontolöschung ist gestellt.",
         "pendingConfirmed": "Die Kontolöschung ist bestätigt und geplant.",
@@ -5836,7 +5832,7 @@
         "inProgress": "Die Kontolöschung läuft bereits — sie kann nicht mehr storniert werden.",
         "done": "Das Konto wurde gelöscht.",
         "submittedAt": "Gestellt: {date}",
-        "scheduledAt": "Das Konto wird am {date} gelöscht (nach einer Wartezeit von 30 Tagen).",
+        "scheduledAt": "Das Konto wird am {date} gelöscht.",
         "cancelUntil": "Bis dahin können Sie stornieren.",
         "loadError": "Der Status der Kontolöschung konnte nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
       },
@@ -5987,6 +5983,8 @@
             "Stripe — Zahlungsabwicklung für kostenpflichtige Plattformleistungen. Wenn eine Organisation einen Checkout beginnt, erhält Stripe die E-Mail-Adresse des zahlenden Nutzers und eine interne Kontokennung; Kartendaten werden auf Stripes eigener Zahlungsseite eingegeben und von der Plattform nicht gespeichert.",
             "Google, Facebook (Meta) und LinkedIn — nur wenn Sie sich mit ihnen anmelden, wie oben beschrieben.",
             "Google (Gemini-API) — nur wie unten im Abschnitt über KI beschrieben.",
+            "Cloudflare (Workers AI) — erst nach der Aktivierung: 1) um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern; 2) wenn die Plattform eine im Chat eingegebene Anfrage nicht selbst versteht, um vorzuschlagen, welche bestehende Plattformaktion gemeint ist. Vor dem Senden werden Namen, Kontaktdaten, Zahlen und alle Wörter entfernt, die nicht auf einer festen Liste von Aktionswörtern stehen; eine Anfrage mit Gesundheits- oder anderen sensiblen Angaben wird überhaupt nicht gesendet. Cloudflare nutzt diese Inhalte nicht zum Trainieren von Modellen und speichert sie nach der Anfrage nicht.",
+            "Mistral AI und Groq — erst nach der Aktivierung und nur, um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern. Es werden ihnen keine Nachrichtentexte und keine personenbezogenen Daten übermittelt.",
             "Die vollständige Liste der Infrastrukturanbieter steht auf der Seite „Datenschutz“."
           ]
         },
@@ -6125,6 +6123,8 @@
             "Cloudflare — das Netzwerk vor der Website: Domain-Namensdienst, Verschlüsselung bei der Übertragung, Caching und Schutz vor Angriffen. Jede Anfrage an die Website läuft darüber.",
             "GitHub — Speicherung des Quellcodes. Nutzerdaten werden dort nicht gespeichert.",
             "Google (Gemini-API) — KI-Verarbeitung zum Übersetzen von Nachrichten und Stellenanzeigen und zum Vorschlagen, worum ein im Chat eingegebener Satz bittet. Gesendet wird nur der Text, den die Aufgabe braucht.",
+            "Cloudflare (Workers AI) — erst nach der Aktivierung: 1) um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern; 2) wenn die Plattform eine im Chat eingegebene Anfrage nicht selbst versteht, um vorzuschlagen, welche bestehende Plattformaktion gemeint ist. Vor dem Senden werden Namen, Kontaktdaten, Zahlen und alle Wörter entfernt, die nicht auf einer festen Liste von Aktionswörtern stehen; eine Anfrage mit Gesundheits- oder anderen sensiblen Angaben wird überhaupt nicht gesendet. Cloudflare nutzt diese Inhalte nicht zum Trainieren von Modellen und speichert sie nach der Anfrage nicht.",
+            "Mistral AI und Groq — erst nach der Aktivierung und nur, um öffentliche, zusammengefasste Arbeitsmarktstatistiken zu erläutern. Es werden ihnen keine Nachrichtentexte und keine personenbezogenen Daten übermittelt.",
             "Stripe — Zahlungsabwicklung. Ein Kundendatensatz entsteht nur, wenn eine Organisation einen Abonnement-Checkout beginnt.",
             "Kein weiterer E-Mail-, KI-, Übersetzungs- oder Zahlungsanbieter ist aktiv. Wird einer aktiviert, wird zuerst diese Liste aktualisiert."
           ]
@@ -7107,7 +7107,6 @@
   "learning": {
     "pageTitle": "Lernen & Überprüfung",
     "pageLead": "Vorschläge aus echter Arbeitsaktivität, die zur Überprüfung durch eine Person aufbewahrt werden. Nichts hier gilt für sich allein als bewiesen.",
-    "title": "Überprüfungswarteschlange",
     "lead": "Signale werden zu Vorschlägen, und eine Person entscheidet. Lernen entscheidet niemals etwas von selbst.",
     "notAvailable": "Derzeit nicht verfügbar.",
     "empty": "Noch nichts zu überprüfen.",
@@ -7166,7 +7165,6 @@
       "countryPlaceholder": "z. B. LT",
       "remoteLabel": "Kann remote erledigt werden",
       "rateLabel": "Preis (optional)",
-      "ratePlaceholder": "z. B. ca. 25 EUR/h, verhandelbar",
       "rateHint": "Nur Freitext — zum Beispiel ein Richtwert für den Stundensatz."
     },
     "save": "Speichern",
@@ -12837,7 +12835,7 @@
         "invite_to_demand": "Ein Arbeitgeber hat Sie zu einem Arbeitsbedarf eingeladen"
       },
       "from": "Eingeladen von {name}",
-      "organization": "Unternehmen: {name}",
+      "organization": "Organisation: {name}",
       "project": "Projekt: {name}",
       "role": "Vorgeschlagene Rolle: {role}",
       "accept": "Einladung annehmen",
@@ -12866,10 +12864,9 @@
       "capacity": "Beziehung: {capacity}",
       "capacityNotEmployment": "Dies ist kein Stellenangebot und begründet kein Arbeitsverhältnis.",
       "selfStart": "Eigenes Konto anlegen",
-      "anonExplainer": "Registrieren Sie sich oder melden Sie sich an, um diese Einladung zu beantworten. Konto, Profil und Arbeitsgeschichte bleiben Ihre — die einladende Person stellt nur die Verbindung her.",
+      "anonExplainer": "Registrieren Sie sich oder melden Sie sich an, um diese Einladung zu beantworten. Konto, Profil und Arbeitsgeschichte bleiben Ihre: Das Annehmen stellt nur die Verbindung her, nie eine verifizierte Fähigkeit, ein Arbeitsverhältnis oder eine Zuweisung.",
       "register": "Registrieren und fortfahren",
       "signIn": "Ich habe bereits ein Konto",
-      "youOwnYourIdentity": "Ihre berufliche Identität bleibt Ihre. Das Annehmen einer Einladung erzeugt für sich keine verifizierte Fähigkeit, kein Arbeitsverhältnis und keine Zuweisung.",
       "referredVia": "Vermittelt über {source}",
       "campaign": "Einladung: {label}",
       "seats": "{used} von {max} Plätzen belegt",
@@ -13087,6 +13084,7 @@
     },
     "goToRoster": "Zum Team",
     "invalidLabel": "Prüfen Sie die E-Mail-Adresse — die Einladung wurde nicht gesendet.",
+    "offerLimitLabel": "Zu viele Angebote. Bitte später erneut versuchen.",
     "deliveryHeading": "Einladungslink",
     "deliveryCreated": "Nicht per E-Mail gesendet — der E-Mail-Versand ist nicht eingerichtet. Kopieren Sie den Link und senden Sie ihn dem Kunden selbst.",
     "deliverySent": "Die Einladungs-E-Mail wurde gesendet. Sie können den Link trotzdem kopieren.",
@@ -14292,9 +14290,7 @@
         "preferredCountries": "Wunschländer",
         "preferredCountriesPlaceholder": "z. B. NL, DE",
         "salaryMin": "Lohn ab (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Lohn bis (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Umzugsbereit?",
         "hasTransport": "Können Sie selbstständig zur Arbeit kommen?",
         "needsAccommodation": "Unterkunft nötig?",
@@ -15974,7 +15970,6 @@
     },
     "v3": {
       "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
-      "moreChoices": "Weitere Optionen",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
       "market": {
@@ -18839,8 +18834,7 @@
         "invitationAccepted": "Einladung angenommen. Bestätigen Sie unten die Verbindungsanfrage der Agentur mit Ihrem Unternehmen."
       },
       "education": {
-        "title": "Ausbildung und Programme",
-        "subtitle": "Programme, Lernende und die Marktnachfrage nach ihren Richtungen."
+        "title": "Ausbildung und Programme"
       },
       "history": {
         "title": "Datenimport und Verlauf",
@@ -19396,6 +19390,19 @@
       "period": "Erfasst",
       "basis": "Aus {entries} Journaleinträgen, die Personen unter dieser Organisation erfasst haben. Getrennt von der importierten Historie oben gezählt und nie zu ihr addiert.",
       "unavailable": "Die unter dieser Organisation im Journal erfasste Arbeit konnte gerade nicht gelesen werden."
+    },
+    "forClient": {
+      "title": "Arbeit Ihrer Subunternehmer",
+      "confirmed": "Bestätigte Einträge",
+      "unconfirmed": "Nicht bestätigte Einträge",
+      "periodHours": "{hours} Std. als Zeitraumsumme angegeben, nicht zu einzelnen Tagen addiert.",
+      "basis": "Aus {count, plural, one {# Eintrag} other {# Einträgen}} in den eigenen Unterlagen Ihrer Subunternehmer. Getrennt von Ihrer eigenen Arbeit gezählt.",
+      "unreadable": "Die in den Unterlagen der Partner erfasste Arbeit konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt."
+    },
+    "clients": {
+      "title": "Auftraggeber",
+      "unnamed": "Auftraggebende Organisation",
+      "records": "{count, plural, one {# Eintrag} other {# Einträge}}"
     }
   },
   "workPlan": {
@@ -19623,6 +19630,7 @@
     "heading": "Dieses Team für einen Bedarf anbieten",
     "intro": "Bieten Sie das Team als eine Einheit für einen offenen Bedarf eines verifizierten Unternehmens an.",
     "privacy": "Das Unternehmen sieht nur Fakten auf Teamebene: Größe, Fähigkeiten, Verfügbarkeit. Das Angebot nennt kein Mitglied und zeigt kein Mitgliedsprofil. Mitglieder erscheinen erst in einem Projekt, nachdem das Unternehmen das Team angenommen und dort zugewiesen hat.",
+    "orgPrivacy": "Das Unternehmen sieht den Namen Ihres Unternehmens, Ihren Hinweis und Ihre Bedingungen. Niemand wird genannt, bis Sie vereinbaren, wer arbeitet.",
     "tooSmall": "Ein Team kann nur angeboten werden, wenn es mindestens 2 aktive Mitglieder hat.",
     "loading": "Wird geladen…",
     "unavailable": "Der offene Bedarf konnte gerade nicht geladen werden.",
@@ -19633,12 +19641,14 @@
     "noteLabel": "Hinweis an das Unternehmen (optional)",
     "notePlaceholder": "Zum Beispiel: Trupp von 3, Start in zwei Wochen möglich",
     "submit": "Team anbieten",
+    "orgSubmit": "Unser Unternehmen anbieten",
     "submitting": "Wird angeboten…",
     "sent": {
       "heading": "Ihre Angebote",
       "none": "Noch keine Angebote.",
       "withdraw": "Zurückziehen",
-      "message": "Dem Auftraggeber schreiben"
+      "message": "Dem Auftraggeber schreiben",
+      "orgNext": "Der Auftraggeber hat grundsätzlich zugestimmt (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
     },
     "status": {
       "offered": "Wartet auf Antwort",
@@ -19711,8 +19721,14 @@
       },
       "blockers": "Das Team als Ganzes erfüllt nicht: {list}",
       "missing": "Nicht angegeben: {list}",
+      "missingData": {
+        "need_not_structured": "die Anforderungen des Bedarfs",
+        "no_team_members": "aktive Mitglieder",
+        "team_skills_not_stated": "die Fähigkeiten des Teams"
+      },
       "noNeedStructure": "Dieser Bedarf ist noch nicht strukturiert, daher kann das Team nicht damit abgeglichen werden.",
       "note": "Hinweis des Teams",
+      "noteCompany": "Hinweis des Unternehmens",
       "accept": "Grundsätzlich zustimmen",
       "decline": "Ablehnen",
       "noProjects": "Sie haben noch kein offenes Projekt, dem Sie das Team zuweisen können.",
@@ -19731,8 +19747,9 @@
       },
       "createProject": "Projekt anlegen",
       "message": "Dem Team schreiben",
+      "messageCompany": "Dem Unternehmen schreiben",
       "kindOrganization": "Unternehmensangebot",
-      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Details und die arbeitenden Personen klären Sie im Gespräch."
+      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
     },
     "orgHeading": "Unser Unternehmen für einen offenen Bedarf anbieten",
     "orgIntro": "Bieten Sie Ihr Unternehmen selbst an — Ihre Leute, Ihre Leistung oder als Subunternehmer — für einen offenen Bedarf. Kein Team muss zuerst angelegt werden.",
@@ -19754,7 +19771,6 @@
       },
       "capacity": "Personen",
       "rate": "Preis",
-      "ratePlaceholder": "z. B. 32 €/Std. oder Festpreis",
       "period": "Zeitraum",
       "start": "Beginn",
       "end": "Ende",

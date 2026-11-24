@@ -124,17 +124,20 @@ describe("5. a fresh worker lands in the conversation; other identities keep the
   });
 });
 
-describe("6. signup: one legal notice, the pilot line under the action", () => {
+describe("6. signup: one legal notice and no pilot-feedback line", () => {
   const signup = read("components/app/signup-form.tsx");
   it("the legal notice renders exactly once", () => {
     expect(signup.match(/<AuthLegalNotice variant="signup"/g)).toHaveLength(1);
   });
-  it("the pilot-feedback line sits after the submit row, as one quiet line", () => {
-    const submit = signup.indexOf('type="submit"');
-    const pilot = signup.indexOf('data-testid="signup-pilot-line"');
-    expect(submit).toBeGreaterThan(-1);
-    expect(pilot).toBeGreaterThan(submit);
-    expect(signup).not.toMatch(/border-state-warning[^\n]*\n\s*\{t\("disclaimer"\)\}/);
+  // The pilot-feedback line ("Your feedback shapes the product") was noise, not
+  // a legal text: removed in every locale (decision 0032; coordinator decision
+  // 2026-11-22 13:05 UTC on the owner's orders of 2026-11-21/22, decision 0022).
+  it("the pilot-feedback line is gone from the form and from every catalog", () => {
+    expect(signup).not.toMatch(/signup-pilot-line/);
+    expect(signup).not.toMatch(/t\("disclaimer"\)/);
+    for (const locale of activeLocales) {
+      expect(messages(locale).auth.signup, locale).not.toHaveProperty("disclaimer");
+    }
   });
   for (const locale of activeLocales) {
     it(`${locale}: the subcopy no longer promises a "role" step`, () => {

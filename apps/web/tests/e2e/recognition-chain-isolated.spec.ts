@@ -1,5 +1,6 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 import { clickUntilVisible } from "./click-until-visible";
+import { onboardInvited } from "./isolated-web-a-helpers";
 
 /**
  * A POSITIVE RECOGNITION FROM REAL EVIDENCE — THE WRITE PATH, on a THROWAWAY LOCAL Supabase stack
@@ -34,6 +35,10 @@ import { clickUntilVisible } from "./click-until-visible";
  *   I-14 least privilege: the institution's evidence list does not offer the employer's day;
  *   I-15 EDU-5: a skill the learner accepted reaches the reviewer's learning queue through the
  *        brief's door, and a human decision is recorded.
+ *   I-16 the same employer then hires the learner as an employee: the employment is added
+ *        beside the intern relationship, and the Living CV keeps the confirmed practice period
+ *        under practice while it lists the employment under work (owner addendum 2026-11-23,
+ *        chain step 9: reuse; decision 0025: one person, one continuous history).
  *
  * It refuses to run anywhere but the local stack (owner decision 2026-10-28: no synthetic accounts in
  * production). Outcomes are read back from that local database — the page saying "done" is not the
@@ -263,7 +268,7 @@ test("I-2. the institution invites a person as a learner by link; they register 
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(page.url())) await onboard(page, "work", LEARNER_NAME);
+  if (/\/onboarding/.test(page.url())) await onboardInvited(page, LEARNER_NAME);
   await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(page.url())) {
     const accept = page.getByTestId("invite-accept");
@@ -807,3 +812,72 @@ test("I-15. EDU-5: the learner's accepted skill reaches the reviewer's learning 
   await close();
 });
 
+test("I-16. the employer hires the learner: the employment is added and the confirmed practice stays on the CV", async ({ browser }) => {
+  // The same employer, the same invitation door, now in the employee capacity.
+  const employer = await as(browser, EMPLOYER);
+  await employer.page.goto(
+    `${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${s.employerOrgId}&relationship=employee#network-invite`,
+  );
+  const panel = employer.page.getByTestId("invite-panel");
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+  const preset = panel.getByTestId("invite-preset");
+  await expect(preset).toBeVisible({ timeout: 30_000 });
+  await expect(preset).toHaveAttribute("data-organization", s.employerOrgId);
+  await expect(preset, "the employer now offers employment").toHaveAttribute("data-relationship", "employee");
+  await expect(panel.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
+  const name = panel.getByTestId("invite-name");
+  if (await name.isVisible().catch(() => false)) await name.fill(LEARNER_NAME);
+  await panel.getByTestId("invite-submit").click();
+  const copy = panel.getByTestId("invite-copy-link").first();
+  await expect(copy, "the invitation link is handed to the employer").toBeVisible({ timeout: 30_000 });
+  const raw = await copy.getAttribute("data-invite-link");
+  expect(raw, "an invitation link").toBeTruthy();
+  const u = new URL(raw!);
+  await employer.close();
+
+  const learner = await as(browser, LEARNER);
+  await learner.page.goto(`${BASE}${u.pathname}${u.search}`);
+  await expect(learner.page.getByTestId("invite-page")).toBeVisible({ timeout: 30_000 });
+  const accept = learner.page.getByTestId("invite-accept");
+  await expect(accept, "the person is asked to accept the employment").toBeVisible({ timeout: 30_000 });
+  await accept.click();
+  await learner.page.waitForURL((url) => !url.pathname.includes("/invite/"), { timeout: 30_000 }).catch(() => undefined);
+
+  // The employment is a second relationship; the intern one, and its confirmed day, are untouched.
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ relationship_slug: string; status: string }>>(
+            `engagement_contexts?profile_id=eq.${s.learnerId}&organization_id=eq.${s.employerOrgId}&select=relationship_slug,status`,
+          )
+        )
+          .map((e) => `${e.relationship_slug}:${e.status}`)
+          .sort(),
+      { message: "accepting adds the employment beside the intern relationship", timeout: 30_000 },
+    )
+    .toEqual(["employee:active", "intern:active"]);
+  const kept = await db<Array<{ engagement_context_id: string | null }>>(
+    `journal_entries?id=eq.${s.internEntryId}&select=engagement_context_id`,
+  );
+  expect(kept.map((r) => r.engagement_context_id), "the practice day stays in the intern relationship").toEqual([
+    s.internEngagementId,
+  ]);
+
+  // One continuous history on the Living CV: the practice period stays practice, confirmed; the
+  // employment is listed as work. Nothing is moved, merged or lost.
+  const main = await openCv(learner.page);
+  const practice = main.getByTestId("cv-practice-history").getByTestId("cv-history-node").filter({ hasText: EMPLOYER_ORG });
+  await expect(practice, "the practice period at the employer is still on the CV, once").toHaveCount(1, { timeout: 30_000 });
+  await expect(practice, "it still stands as confirmed by the employer").toHaveAttribute("data-standing", "confirmed");
+  const work = main.getByTestId("cv-work-history");
+  await expect(work, "the CV now has a work history").toBeVisible({ timeout: 30_000 });
+  await expect(work.getByTestId("cv-history-node").filter({ hasText: EMPLOYER_ORG }), "the employment is listed as work").toHaveCount(
+    1,
+  );
+  // The institution's practice, signed off in I-5, is still there too.
+  await expect(
+    main.getByTestId("cv-practice-history").getByTestId("cv-history-node").filter({ hasText: SCHOOL_ORG }),
+  ).toHaveAttribute("data-standing", "confirmed");
+  await learner.close();
+});

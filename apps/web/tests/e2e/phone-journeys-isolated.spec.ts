@@ -1,12 +1,16 @@
 import { expect, test, type Browser, type BrowserContext, type Locator, type Page } from "@playwright/test";
 
 import {
+  accessToken,
   BASE,
   isolatedStack,
   lit,
   onboard,
   PASSWORD,
   publishNeed,
+  SB_ANON,
+  SB_SERVICE,
+  SB_URL,
   setUpCompany,
   signIn,
   signUp,
@@ -14,6 +18,7 @@ import {
   sqlExec,
   userId,
   verifyCompanyAsLocalAdmin,
+  onboardInvited,
 } from "./isolated-web-a-helpers";
 
 /**
@@ -37,6 +42,10 @@ import {
  *   M-9 SKILL    adds a free-label skill on the profile: the chip shows in place (no reload), is
  *                stored once, persists on a reload and is declared on the Living CV; then the same
  *                add at a desktop width (production walk P-13, run 44637832323 at 375 px).
+ *   M-10 SUMMARY saves the public summary again and again, the same value twice, and once while
+ *                the server answers as during a deploy: every save answers on screen (P-26).
+ *   M-11 SECTIONS the work card, a language, education, an achievement, experience and an own
+ *                profession: save, answer, stored, back after a reload, edited or removed again.
  *
  * M-2 runs LAST in each group (first run 2026-11-14: the CV page stopped answering at 375 px), so a
  * CV fault cannot hide search, applying and messages; if it stops answering again, the step says
@@ -521,6 +530,126 @@ for (const phone of PHONES) {
       await expect.poll(() => rows().map((r) => r.status), { message: "the booking is accepted", timeout: 30_000 }).toEqual(["accepted"]);
       await w2.done();
     });
+    test(`M-6b (${phone.name}). the booked hire is visible to both sides after a reload, and to nobody else`, async ({ browser }) => {
+      // Chain link L5/L6a: the accept (respond_booking_request_v4) makes ONE active engagement
+      // between the company and the worker. The company finds the person on its people page, and
+      // both sides read the engagement in the engagements result ("who works for us" / "who do I
+      // work for"), at a desktop and on the phone, after a reload. A company that booked nobody
+      // sees neither. Twin of production orders-bookings O-9..O-11.
+      const engagements = sql<{ id: string; status: string }>(
+        `select id, status from public.company_worker_engagements where company_id = ${lit(shared.companyId)} and worker_id = ${lit(s.workerId)}`,
+      );
+      expect(engagements.map((e) => e.status), "the accept made exactly one active engagement").toEqual(["active"]);
+      const engagementId = engagements[0]!.id;
+      const desktop = async (address: string) => {
+        const saved = sessions.get(address);
+        const ctx = await browser.newContext({ ...(saved ? { storageState: saved } : {}), viewport: { width: 1440, height: 900 }, timezoneId: "UTC" });
+        const page = await ctx.newPage();
+        watch(page);
+        if (!saved) await signIn(page, BASE, address);
+        return {
+          page,
+          done: async () => {
+            sessions.set(address, await ctx.storageState());
+            await ctx.close();
+          },
+        };
+      };
+      /** The company's people page lists the booked person, also after a reload. */
+      const bookedOnPeople = async (page: Page, where: string) => {
+        await page.goto(`${BASE}/en/dashboard/company/people`);
+        for (const pass of ["first load", "reload"]) {
+          if (pass === "reload") await page.reload();
+          const row = page.getByRole("main").getByTestId(`booked-person-${engagementId}`);
+          await expect(row, `${where}, ${pass}: the booked person is on the company's people page`).toBeVisible({ timeout: 60_000 });
+          await expect(row).toContainText(workerName);
+        }
+      };
+      /** The engagements result, opened by its address, shows this engagement active after a reload. */
+      const engagementActive = async (page: Page, where: string, counterparty: string) => {
+        await page.goto(`${BASE}/en/dashboard?result=engagements`);
+        for (const pass of ["first load", "reload"]) {
+          if (pass === "reload") await page.reload();
+          const status = page.getByTestId(`engagement-status-${engagementId}`).filter({ visible: true }).first();
+          await expect(status, `${where}, ${pass}: the engagement is listed`).toBeVisible({ timeout: 60_000 });
+          await expect(status).toHaveAttribute("data-status", "active");
+          await expect(page.getByTestId(`engagement-${engagementId}`).filter({ visible: true }).first()).toContainText(counterparty);
+        }
+      };
+
+      const cd = await desktop(COMPANY);
+      await bookedOnPeople(cd.page, "company at a desktop");
+      await engagementActive(cd.page, "company at a desktop", workerName);
+      await cd.done();
+      const cp = await signedInOnPhone(browser, phone, COMPANY);
+      await bookedOnPeople(cp.page, "company on the phone");
+      await fitsTheScreen(cp.page, "the company's people page");
+      await engagementActive(cp.page, "company on the phone", workerName);
+      await cp.done();
+
+      const wp = await signedInOnPhone(browser, phone, worker);
+      await engagementActive(wp.page, "worker on the phone", COMPANY_ORG);
+      await fitsTheScreen(wp.page, "the worker's engagements");
+      await wp.done();
+      const wd = await desktop(worker);
+      await engagementActive(wd.page, "worker at a desktop", COMPANY_ORG);
+      await wd.done();
+
+      // Another company: its people page and its engagements carry neither this person nor this
+      // engagement, and its own session reads no row of it.
+      const outsider = email(`outsider${phone.name}`);
+      await newOrganisation(browser, outsider, "hire", `Synthetic Outsider ${phone.name} ${RUN}`, `Synthetic Outsider Org ${phone.name} ${RUN}`);
+      const od = await desktop(outsider);
+      await od.page.goto(`${BASE}/en/dashboard/company/people`);
+      await expect(od.page.getByRole("main").getByRole("heading").first()).toBeVisible({ timeout: 60_000 });
+      await od.page.reload();
+      await expect(od.page.getByRole("main").getByRole("heading").first()).toBeVisible({ timeout: 60_000 });
+      await expect(od.page.getByTestId(`booked-person-${engagementId}`), "another company's people page").toHaveCount(0);
+      await expect(od.page.getByRole("main")).not.toContainText(workerName);
+      await od.page.goto(`${BASE}/en/dashboard?result=engagements`);
+      await expect(
+        od.page.getByTestId("engagements-empty").or(od.page.getByTestId("engagements-list")).filter({ visible: true }).first(),
+        "another company's engagements answer",
+      ).toBeVisible({ timeout: 60_000 });
+      await expect(od.page.getByTestId(`engagement-${engagementId}`), "another company's engagements").toHaveCount(0);
+      await od.done();
+      const own = await fetch(`${SB_URL}/rest/v1/company_worker_engagements?id=eq.${engagementId}&select=id`, {
+        headers: { apikey: SB_ANON, Authorization: `Bearer ${await accessToken(outsider)}` },
+      });
+      expect(own.ok, "another company's own read answers").toBe(true);
+      expect(await own.json(), "another company's own session reads no row of this engagement").toEqual([]);
+      const heardHere = [...(heard.get(od.page) ?? [])].filter((n) => n.startsWith("pageerror"));
+      expect(heardHere, "no page error for the outsider").toEqual([]);
+    });
+    test(`M-6c (${phone.name}). the experience records opened by their address stay open on the phone`, async ({ browser }) => {
+      // Twin of production profile-cv-history P-15, which failed at 375 × 667 on build 386f11a0:
+      // the result was rendered but hidden. A `?result=` address opens the phone's sheet by itself;
+      // the person asked to SEE it, so it must still be on screen once the page has settled.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const main = page.getByRole("main");
+      const shown = main
+        .getByTestId("experiences-result")
+        .or(main.getByTestId("experiences-result-unavailable").first())
+        .or(main.getByTestId("experiences-result-error"))
+        .first();
+      const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+      // Three loads in a row, each one the way production P-15 met it: as soon as
+      // the document is there, a "collapsed" chevron is tapped once. Before the
+      // fix the sheet opened one effect after mount, and that tap could toggle
+      // it back shut, leaving the result rendered inside a closed sheet.
+      for (const pass of [1, 2, 3]) {
+        await page.goto(`${BASE}/en/dashboard?result=experiences`, { waitUntil: "domcontentloaded" });
+        await toggle.waitFor({ state: "visible", timeout: 60_000 });
+        if ((await toggle.getAttribute("aria-expanded")) === "false") await toggle.click();
+        await expect(shown, `load ${pass}: the experience records are on screen`).toBeVisible({ timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+        await page.waitForTimeout(3_000);
+        const state = await toggle.getAttribute("aria-expanded");
+        await expect(shown, `load ${pass}: still on screen once the page settled (sheet aria-expanded=${state})`).toBeVisible();
+        await expect(main.getByTestId("experiences-result-error"), `load ${pass}: the records loaded`).toHaveCount(0);
+      }
+      await done();
+    });
     test(`M-7 (${phone.name}). the worker's work journal fits the phone`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await page.goto(`${BASE}/en/dashboard/journal`);
@@ -724,6 +853,293 @@ for (const phone of PHONES) {
       watch(dp);
       await addInPlace(dp, `QA-SYNTHETIC skill desktop ${phone.name} ${RUN}`, "desktop");
       await desk.close();
+    });
+
+    test(`M-10 (${phone.name}). every summary save answers on screen: repeated, the same value twice, and one cut off by a deploy`, async ({ browser }) => {
+      // The production walk P-26 (2.1), run 45047648320 at 375 px: tries 1 and 2 answered "saved" in
+      // about a second; try 3 was sent while a deploy activated, the action was answered
+      // `x-nextjs-action-not-found`, StaleBuildRecovery reloaded the page, and no answer ever showed
+      // (the typed text was gone too). Here the third save meets the same answer, made locally.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      await page.goto(`${BASE}/en/dashboard/profile#profile-public-summary`);
+      await page.reload();
+      const section = page.getByRole("main").getByTestId("profile-public-summary");
+      await expect(section).toBeVisible({ timeout: 30_000 });
+      const input = section.getByTestId("profile-public-headline");
+      const save = section.getByTestId("profile-public-summary-save");
+      const saved = section.getByTestId("profile-public-summary-saved");
+      const error = section.getByTestId("profile-public-summary-error");
+      const stored = () =>
+        sql<{ headline: string | null }>(`select headline from public.workers where profile_id = ${lit(s.profileId)}`)[0]?.headline ?? null;
+      /** Types a value until the page takes it (a fill before hydration is not seen by React). */
+      const type = async (value: string, where: string) => {
+        await expect(async () => {
+          await input.fill(value);
+          await expect(save).toBeEnabled({ timeout: 2_000 });
+        }, `${where}: the typed value is taken`).toPass({ timeout: 30_000 });
+        await expect(saved, `${where}: no old answer is left on screen`).toHaveCount(0);
+      };
+
+      const first = `Summary save one ${phone.name} ${RUN}`;
+      const second = `Summary save two ${phone.name} ${RUN}`;
+      const values = [first, second, first, second];
+      const saving = section.getByTestId("profile-public-summary-saving");
+      const isAction = (r: { method(): string; headers(): Record<string, string> }) => r.method() === "POST" && Boolean(r.headers()["next-action"]);
+      for (const [i, value] of values.entries()) {
+        const where = `save ${i + 1}`;
+        await type(value, where);
+        // The second save is held for 3 s on its way, so its "Saving…" is seen, not guessed.
+        const slow = i === 1;
+        if (slow) {
+          await page.route(/\/en\/dashboard\/profile/, async (route) => {
+            if (isAction(route.request())) await new Promise((r) => setTimeout(r, 3_000));
+            await route.fallback();
+          });
+        }
+        await save.tap();
+        if (slow) await expect(saving, `${where}: "Saving…" shows while the save is on its way`).toBeVisible({ timeout: 3_000 });
+        await expect(saved, `${where}: the save answers "saved" on screen`).toBeVisible({ timeout: 30_000 });
+        await expect(saving, `${where}: "Saving…" is gone once answered`).toHaveCount(0);
+        if (slow) await page.unroute(/\/en\/dashboard\/profile/);
+        await expect.poll(stored, { message: `${where}: the headline is stored`, timeout: 30_000 }).toBe(value);
+        await page.reload();
+        await expect(input, `${where}: a reload shows the saved text`).toHaveValue(value, { timeout: 30_000 });
+        console.info(`[summary-save] ${phone.name} px ${where}: answered saved, stored, back after a reload`);
+      }
+
+      // A save cut off by a deploy: the server no longer knows the page's action.
+      const cutOff = `Summary save cut off ${phone.name} ${RUN}`;
+      let answered = 0;
+      await page.route(/\/en\/dashboard\/profile/, async (route) => {
+        if (isAction(route.request()) && answered === 0) {
+          answered += 1;
+          await route.fulfill({ status: 404, headers: { "x-nextjs-action-not-found": "1", "content-type": "text/plain" }, body: "" });
+          return;
+        }
+        await route.fallback();
+      });
+      await type(cutOff, "cut-off save");
+      const reloaded = page.waitForEvent("load", { timeout: 30_000 });
+      await save.tap();
+      await reloaded;
+      await expect(error, "cut-off save: the page answers on screen after its reload").toBeVisible({ timeout: 30_000 });
+      expect(answered, "cut-off save: the action met the deploy's answer").toBe(1);
+      await expect(input, "cut-off save: the typed text is still there").toHaveValue(cutOff);
+      expect(stored(), "cut-off save: nothing was stored").toBe(second);
+      await page.unroute(/\/en\/dashboard\/profile/);
+      await save.tap();
+      await expect(saved, "the save after it answers \"saved\"").toBeVisible({ timeout: 30_000 });
+      await expect.poll(stored, { message: "the save after it is stored", timeout: 30_000 }).toBe(cutOff);
+      await page.reload();
+      await expect(input, "the save after it: a reload shows the saved text").toHaveValue(cutOff, { timeout: 30_000 });
+      console.info(`[summary-save] ${phone.name} px cut-off save: answered error, stored nothing, text kept; the save after it stored`);
+      await fitsTheScreen(page, "the profile after repeated summary saves");
+      await done();
+    });
+
+    // M-11: EVERY PROFILE AND CV SECTION THE PRODUCTION WALK TOUCHES (profile-cv-history), on this
+    // phone: input → save → the answer on screen → the stored row read back → a reload shows it →
+    // edit again (change, or remove) → stored → a reload shows that. The summary is M-10, the
+    // free-label skill M-9. One step per section, so one section's fault hides no other.
+    const profileAt = async (page: Page, hash: string): Promise<Locator> => {
+      await page.goto(`${BASE}/en/dashboard/profile#${hash}`);
+      await page.reload();
+      const main = page.getByRole("main");
+      const target = main.locator(`#${hash}`).first();
+      await expect(target, `#${hash} is on the page`).toBeVisible({ timeout: 30_000 });
+      // A hash naming a disclosure opens it (DetailsHashOpener); wait for that, as M-9 does.
+      if ((await target.evaluate((el) => el.tagName)) === "DETAILS") await expect(target, `#${hash} is open`).toHaveAttribute("open", "", { timeout: 30_000 });
+      return main;
+    };
+    const pickOption = async (page: Page, scope: Locator, testId: string, option: string): Promise<void> => {
+      await scope.getByTestId(testId).tap();
+      await page.getByRole("option", { name: option, exact: true }).first().tap();
+    };
+    const workerIdOf = () => sql<{ id: string }>(`select id from public.workers where profile_id = ${lit(s.profileId)}`)[0]!.id;
+    const proof = (section: string, what: string) => console.info(`[profile-loop] ${phone.name} px ${section}: ${what}`);
+
+    test(`M-11a (${phone.name}). the work card: availability and countries saved, stored, back after a reload, changed again`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const openCard = async (): Promise<Locator> => {
+        const main = await profileAt(page, "cv-availability");
+        const toggle = main.getByTestId("work-card-editor-toggle");
+        const form = main.getByTestId("work-card-editor");
+        await expect(async () => {
+          if ((await toggle.getAttribute("aria-expanded")) !== "true") await toggle.tap();
+          await expect(form).toBeVisible({ timeout: 2_000 });
+        }, "the work card editor opens").toPass({ timeout: 30_000 });
+        return form;
+      };
+      const stored = () =>
+        sql<{ status: string | null; countries: string | null }>(
+          `select availability_status as status, array_to_string(preferred_countries, ',') as countries from public.workers where profile_id = ${lit(s.profileId)}`,
+        )[0] ?? { status: null, countries: null };
+      for (const [status, countries] of [
+        ["available", "LT, NO"],
+        ["busy", "LT"],
+      ] as const) {
+        const form = await openCard();
+        await form.locator('select[name="availability_status"]').selectOption(status);
+        await form.locator('input[name="preferred_countries"]').fill(countries);
+        await form.getByTestId("work-card-save").tap();
+        await expect(form.getByTestId("work-card-saved").or(form.getByTestId("work-card-error")), `${status}: the save answers`).toBeVisible({
+          timeout: 30_000,
+        });
+        await expect(form.getByTestId("work-card-error"), `${status}: the save is not refused`).toHaveCount(0);
+        await expect.poll(stored, { message: `${status}: stored`, timeout: 30_000 }).toEqual({ status, countries: countries.replace(/\s/g, "") });
+        const again = await openCard();
+        await expect(again.locator('select[name="availability_status"]'), `${status}: back after a reload`).toHaveValue(status);
+        await expect(again.locator('input[name="preferred_countries"]')).toHaveValue(new RegExp(countries.replace(", ", ",\\s*")));
+        proof("work card", `${status} ${countries}: answered, stored, back after a reload`);
+      }
+      await fitsTheScreen(page, "the work card");
+      await done();
+    });
+
+    test(`M-11b (${phone.name}). a language: added, stored, back after a reload, its level changed, removed`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const section = async () => {
+        const main = await profileAt(page, "cv-languages");
+        const sec = main.getByTestId("worker-languages");
+        await expect(sec).toBeVisible({ timeout: 30_000 });
+        return sec;
+      };
+      const stored = () =>
+        sql<{ level: string }>(`select level from public.worker_languages where worker_id = ${lit(workerIdOf())} and lang = 'uk'`).map((r) => r.level);
+      for (const level of ["B1", "C1"]) {
+        const sec = await section();
+        const form = sec.getByTestId("worker-languages-add-form");
+        await pickOption(page, form, "worker-languages-lang", "Українська");
+        await pickOption(page, form, "worker-languages-level", level);
+        await form.getByTestId("worker-languages-add").tap();
+        await expect(sec.getByTestId("worker-languages-status").and(page.locator('[data-state="added"]')).or(sec.getByTestId("worker-languages-error")), `${level}: the save answers`).toBeVisible({
+          timeout: 30_000,
+        });
+        await expect(sec.getByTestId("worker-languages-error"), `${level}: the save is not refused`).toHaveCount(0);
+        await expect(sec.getByTestId("worker-language-uk"), `${level}: the row shows`).toContainText(level, { timeout: 30_000 });
+        await expect.poll(stored, { message: `${level}: stored once`, timeout: 30_000 }).toEqual([level]);
+        await expect((await section()).getByTestId("worker-language-uk"), `${level}: back after a reload`).toContainText(level, { timeout: 30_000 });
+        proof("language", `uk ${level}: answered, stored once, back after a reload`);
+      }
+      const sec = await section();
+      await sec.getByTestId("worker-language-remove-uk").tap();
+      await expect(sec.getByTestId("worker-language-uk"), "the removed language is gone").toHaveCount(0, { timeout: 30_000 });
+      await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
+      await expect((await section()).getByTestId("worker-language-uk"), "stays removed after a reload").toHaveCount(0);
+      proof("language", "removed, gone from the store and after a reload");
+      await done();
+    });
+
+    for (const c of [
+      { key: "c", name: "education", hash: "cv-education", prefix: "worker-education", field: "institution", table: "worker_education", column: "institution_name", type: "Vocational", remove: '[data-testid^="worker-education-remove-"]' },
+      { key: "d", name: "achievement", hash: "cv-achievements", prefix: "worker-achievements", field: "title", table: "worker_achievements", column: "title", type: null, remove: '[data-testid^="worker-achievements-remove-"]' },
+    ] as const) {
+      test(`M-11${c.key} (${phone.name}). ${c.name}: added, stored, back after a reload, edited, removed`, async ({ browser }) => {
+        const { page, done } = await signedInOnPhone(browser, phone, worker);
+        const section = async () => {
+          const sec = (await profileAt(page, c.hash)).getByTestId(c.prefix);
+          await expect(sec).toBeVisible({ timeout: 30_000 });
+          return sec;
+        };
+        const stored = () =>
+          sql<{ v: string }>(`select ${c.column} as v from public.${c.table} where profile_id = ${lit(s.profileId)} order by v`).map((r) => r.v);
+        const first = `QA-SYNTHETIC ${c.name} ${phone.name} ${RUN}`;
+        const edited = `${first} edited`;
+        const rowOf = (sec: Locator, text: string) => sec.getByTestId(`${c.prefix}-row`).filter({ hasText: text });
+
+        let sec = await section();
+        await sec.getByTestId(`${c.prefix}-add-open`).tap();
+        let form = sec.getByTestId(`${c.prefix}-form`);
+        await form.getByTestId(`${c.prefix}-${c.field}`).fill(first);
+        if (c.type) await pickOption(page, form, `${c.prefix}-type`, c.type);
+        await form.getByTestId(`${c.prefix}-save`).tap();
+        await expect(rowOf(sec, first).or(sec.getByTestId(`${c.prefix}-error`)).first(), "the save answers").toBeVisible({ timeout: 30_000 });
+        await expect(sec.getByTestId(`${c.prefix}-error`), "the save is not refused").toHaveCount(0);
+        await expect.poll(stored, { message: "stored once", timeout: 30_000 }).toEqual([first]);
+        sec = await section();
+        await expect(rowOf(sec, first), "back after a reload, once").toHaveCount(1, { timeout: 30_000 });
+        proof(c.name, "added: answered, stored once, back after a reload");
+
+        await rowOf(sec, first).getByRole("button", { name: "Edit", exact: true }).tap();
+        form = sec.getByTestId(`${c.prefix}-form`);
+        await expect(form.getByTestId(`${c.prefix}-${c.field}`), "the edit opens with the saved text").toHaveValue(first);
+        await form.getByTestId(`${c.prefix}-${c.field}`).fill(edited);
+        await form.getByTestId(`${c.prefix}-save`).tap();
+        await expect(rowOf(sec, edited).or(sec.getByTestId(`${c.prefix}-error`)).first(), "the edit answers").toBeVisible({ timeout: 30_000 });
+        await expect(sec.getByTestId(`${c.prefix}-error`), "the edit is not refused").toHaveCount(0);
+        await expect.poll(stored, { message: "the edit replaced the row", timeout: 30_000 }).toEqual([edited]);
+        sec = await section();
+        await expect(rowOf(sec, edited), "the edit is back after a reload, once").toHaveCount(1, { timeout: 30_000 });
+        proof(c.name, "edited: answered, stored in place, back after a reload");
+
+        await rowOf(sec, edited).locator(c.remove).first().tap();
+        await expect(rowOf(sec, edited), "the removed row is gone").toHaveCount(0, { timeout: 30_000 });
+        await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
+        await expect(rowOf(await section(), edited), "stays removed after a reload").toHaveCount(0);
+        proof(c.name, "removed: gone from the store and after a reload");
+        await done();
+      });
+    }
+
+    test(`M-11e (${phone.name}). experience: added, stored, back after a reload, removed`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const title = `QA-SYNTHETIC experience ${phone.name} ${RUN}`;
+      const stored = () =>
+        sql<{ title: string }>(
+          `select title from public.engagement_contexts where profile_id = ${lit(s.profileId)} and organization_id is null and title = ${lit(title)}`,
+        ).map((r) => r.title);
+      const rowsIn = (m: Locator) => m.getByTestId("capability-experience-row").filter({ hasText: title });
+      let main = await profileAt(page, "capabilities");
+      await main.getByTestId("add-experience-open").tap();
+      const form = main.getByTestId("add-experience-form");
+      await form.getByTestId("add-experience-title").fill(title);
+      await form.getByTestId("add-experience-start-year").fill("2019");
+      await form.getByTestId("add-experience-current").check();
+      await form.getByTestId("add-experience-save").tap();
+      await expect(rowsIn(main).or(form.getByTestId("add-experience-error")).first(), "the save answers").toBeVisible({ timeout: 30_000 });
+      await expect(form.getByTestId("add-experience-error"), "the save is not refused").toHaveCount(0);
+      await expect.poll(stored, { message: "stored once", timeout: 30_000 }).toEqual([title]);
+      main = await profileAt(page, "capabilities");
+      await expect(rowsIn(main), "back after a reload, once").toHaveCount(1, { timeout: 30_000 });
+      proof("experience", "added: answered, stored once, back after a reload");
+      await rowsIn(main).first().locator('[data-testid^="capability-experience-remove-"]').tap();
+      await expect(rowsIn(main), "the removed row is gone").toHaveCount(0, { timeout: 30_000 });
+      await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
+      await expect(rowsIn(await profileAt(page, "capabilities")), "stays removed after a reload").toHaveCount(0);
+      proof("experience", "removed: gone from the store and after a reload");
+      await done();
+    });
+
+    test(`M-11f (${phone.name}). an own profession: added, stored, back after a reload, removed`, async ({ browser }) => {
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const profession = `QA-SYNTHETIC profession ${phone.name} ${RUN}`;
+      const stored = () =>
+        sql<{ label: string }>(`select label from public.worker_professions where worker_id = ${lit(workerIdOf())} and label = ${lit(profession)}`).map(
+          (r) => r.label,
+        );
+      const own = async (): Promise<Locator> => {
+        const main = await profileAt(page, "profile-edit");
+        const box = main.getByTestId("worker-own-professions");
+        if (!(await box.isVisible().catch(() => false))) await main.getByTestId("text-first-composer-manual").first().tap();
+        await expect(box).toBeVisible({ timeout: 30_000 });
+        return box;
+      };
+      const chipIn = (box: Locator) => box.getByTestId("worker-own-profession").filter({ hasText: profession });
+      let box = await own();
+      await box.getByTestId("worker-own-profession-input").fill(profession);
+      await box.getByTestId("worker-own-profession-add").tap();
+      await expect(chipIn(box), "the save answers with the chip").toBeVisible({ timeout: 30_000 });
+      await expect.poll(stored, { message: "stored once, verbatim", timeout: 30_000 }).toEqual([profession]);
+      box = await own();
+      await expect(chipIn(box), "back after a reload, once").toHaveCount(1, { timeout: 30_000 });
+      proof("own profession", "added: answered, stored once, back after a reload");
+      await chipIn(box).locator('[data-testid^="worker-own-profession-remove-"]').first().tap();
+      await chipIn(box).locator('[data-testid$="-yes"]').first().tap();
+      await expect(chipIn(box), "the removed profession is gone").toHaveCount(0, { timeout: 30_000 });
+      await expect.poll(stored, { message: "removed from the store", timeout: 30_000 }).toEqual([]);
+      await expect(chipIn(await own()), "stays removed after a reload").toHaveCount(0);
+      proof("own profession", "removed: gone from the store and after a reload");
+      await done();
     });
 
     test(`M-2 (${phone.name}). the worker opens the Living CV from the avatar menu and switches it to the EU format`, async ({ browser }) => {
@@ -955,7 +1371,7 @@ for (const phone of PHONES) {
       if (await repeat.count()) await repeat.fill(PASSWORD);
       await wp.locator('form button[type="submit"]').click();
       await wp.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-      if (/\/onboarding/.test(wp.url())) await onboard(wp, "work", `Synthetic Confirmed Worker ${phone.name} ${RUN}`);
+      if (/\/onboarding/.test(wp.url())) await onboardInvited(wp, `Synthetic Confirmed Worker ${phone.name} ${RUN}`);
       await wp.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
       if (/\/invite\//.test(wp.url())) {
         const accept = wp.getByTestId("invite-accept");
@@ -1276,3 +1692,285 @@ for (const phone of PHONES) {
   });
 
 }
+
+// ── AN ORGANISATION WITH VOLUME STAYS SHORT (responsive pass 2026-11-22) ─────
+// Measured on this stack at 390 px with 18 needs and 15 people: the agency's
+// Needs page was 9,883 px (about 400 px a need), its People page 7,500 px
+// (285 px a person) and the company workspace 5,080 px (the home listed up to
+// 20 open needs). A need now keeps its next step on the row and folds the
+// rest; the home names five open needs and folds the others.
+test.describe("an organisation with many needs on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("volume-agency");
+  const org = { profileId: "", orgId: "" };
+
+  test("seven open needs: the home names five, a need row stays short, its extras are one tap away", async ({ browser }) => {
+    Object.assign(org, await newOrganisation(browser, OWNER, "agency", `Synthetic Volume Owner ${RUN}`, `Synthetic Volume Staffing ${RUN}`));
+    // Synthetic needs written straight to the local stack (a volume, not a flow under test).
+    sqlExec(
+      `insert into public.customer_requests (profile_id, title, need_summary, role_or_work_type, team_size, status, kind, payload, organization_id)
+       select ${lit(org.profileId)}, 'Synthetic volume need ' || g, 'Two people for three weeks.', 'Synthetic role ' || g, 2, 'submitted',
+              'company_request', jsonb_build_object('intent', 'hire_workers', 'role', 'Synthetic role ' || g), ${lit(org.orgId)}
+       from generate_series(1, 7) g`,
+    );
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+
+    await page.goto(`${BASE}/en/dashboard/company`);
+    const home = page.getByTestId("company-home-missing");
+    await expect(home).toBeVisible({ timeout: 60_000 });
+    await expect(home.locator('[data-testid="company-home-need"]:visible')).toHaveCount(5);
+    const rest = home.getByTestId("company-home-needs-rest");
+    await expect(rest.locator(":scope > summary")).toContainText("7");
+    await rest.locator(":scope > summary").tap();
+    await expect(home.locator('[data-testid="company-home-need"]:visible')).toHaveCount(7);
+
+    await page.goto(`${BASE}/en/dashboard/company/needs`);
+    const rows = page.getByTestId("demand-readback-row");
+    await expect(rows.first()).toBeVisible({ timeout: 60_000 });
+    const heights = await rows.evaluateAll((els) => els.map((e) => e.getBoundingClientRect().height));
+    expect(heights.length).toBeGreaterThanOrEqual(7);
+    for (const h of heights) expect(h, "a need row stays compact on a phone").toBeLessThanOrEqual(300);
+    // The newest five are listed; the rest open in place.
+    await expect(page.locator('[data-testid="demand-readback-row"]:visible')).toHaveCount(5);
+    const listRest = page.getByTestId("demand-readback-rest");
+    await expect(listRest.locator(":scope > summary")).toContainText("7");
+    await listRest.locator(":scope > summary").tap();
+    await expect(page.locator('[data-testid="demand-readback-row"]:visible')).toHaveCount(7);
+    // Every function of the row is still there, one tap away.
+    const row = rows.first();
+    await expect(row.getByTestId("demand-readback-scout-link")).toBeVisible();
+    await expect(row.getByTestId("demand-location-capture-open")).toBeHidden();
+    await row.getByTestId("demand-readback-more").locator("summary").tap();
+    await expect(row.getByTestId("demand-location-capture-open")).toBeVisible();
+    await expect(row.getByTestId("demand-readback-details")).toBeVisible();
+    await fitsTheScreen(page, "the needs page with many needs");
+    await done();
+  });
+});
+
+// ── POPUPS STAY ON THE SCREEN (responsive sweep 2026-11-21) ──────────────────
+// Measured on this stack before the fix: at 320 × 568 the onboarding country
+// list opened from y = 423 to 721, under the fixed Finish bar and past the
+// screen; on a phone on its side (568 × 320) the account menu ran from y = 162
+// to 622 and the command dialog from 32 to 368, with no way to reach their
+// last controls. The shared components now keep every popup on the screen
+// (components/ui/anchored-overlay.tsx, components/ui/DarkListbox.tsx,
+// components/app/header-search.tsx; rule in lib/ui/overlay-placement.ts).
+// The public language menu is held by overlay-viewport-fit.spec.ts.
+test.describe("popups on a short phone screen", () => {
+  test.describe.configure({ mode: "serial" });
+  let ctx: BrowserContext;
+  let page: Page;
+  const address = email("overlay");
+
+  test.beforeAll(async ({ browser }: { browser: Browser }) => {
+    ctx = await browser.newContext({
+      viewport: { width: 320, height: 568 },
+      deviceScaleFactor: 2,
+      isMobile: true,
+      hasTouch: true,
+      userAgent: USER_AGENT,
+    });
+    page = await ctx.newPage();
+  });
+  test.afterAll(async () => {
+    await ctx?.close();
+  });
+
+  /** The open popup's box, and whether its last control can be brought on screen and hit. */
+  const fit = (panel: Locator) =>
+    panel.evaluate((el) => {
+      const vh = window.innerHeight;
+      const vw = document.documentElement.clientWidth;
+      const items = [...el.querySelectorAll<HTMLElement>("a[href], button, [role=option]")].filter(
+        (x) => x.getBoundingClientRect().height > 0,
+      );
+      const last = items.at(-1);
+      let lastReachable = false;
+      if (last) {
+        last.scrollIntoView({ block: "nearest" });
+        const q = last.getBoundingClientRect();
+        const hit = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2);
+        lastReachable = q.top >= 0 && q.bottom <= vh && !!hit && (last === hit || last.contains(hit));
+      }
+      const r = el.getBoundingClientRect();
+      return { top: r.top, bottom: r.bottom, left: r.left, right: r.right, vh, vw, lastReachable };
+    });
+
+  test("the country list just above the Finish bar opens above its field", async () => {
+    await signUp(page, BASE, address);
+    await page.getByTestId("onboarding-intent-work").tap();
+    await page.getByTestId("onboarding-intents-continue").tap();
+    await page.getByTestId("onboarding-display-name").fill("Synthetic Overlay Worker");
+    const field = page.getByTestId("onboarding-country");
+    const bar = page.getByTestId("onboarding-action-bar");
+    // The field's bottom edge sits just above the fixed bar, as a person meets it while scrolling.
+    await field.evaluate((el) => {
+      const barTop = document.querySelector('[data-testid="onboarding-action-bar"]')?.getBoundingClientRect().top ?? window.innerHeight;
+      window.scrollBy(0, el.getBoundingClientRect().bottom - (barTop - 6));
+    });
+    await field.tap();
+    const panel = page.locator("[data-listbox-side]");
+    await expect(panel).toBeVisible();
+    const barTop = (await bar.boundingBox())?.y ?? 568;
+    const f = await fit(panel);
+    expect(f.top).toBeGreaterThanOrEqual(0);
+    expect(f.bottom).toBeLessThanOrEqual(barTop);
+    await page.getByRole("option", { name: /Lithuania/ }).first().tap();
+    await page.getByTestId("onboarding-submit").tap();
+    await page.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+  });
+
+  test("on a phone on its side the account menu and the command dialog stay reachable", async () => {
+    await page.setViewportSize({ width: 568, height: 320 });
+    await page.goto(`${BASE}/en/dashboard`);
+    const trigger = page.getByTestId("account-menu-trigger");
+    const menu = page.locator("[data-overlay-root]").last();
+    await expect(async () => {
+      if (!(await menu.isVisible())) await trigger.tap({ timeout: 3_000 });
+      await expect(menu).toBeVisible({ timeout: 2_000 });
+    }).toPass({ timeout: 30_000 });
+    const m = await fit(menu);
+    expect(m.top).toBeGreaterThanOrEqual(0);
+    expect(m.bottom).toBeLessThanOrEqual(m.vh);
+    expect(m.right).toBeLessThanOrEqual(m.vw);
+    expect(m.lastReachable).toBe(true);
+    await page.keyboard.press("Escape");
+
+    await page.getByTestId("chat-command-search").tap();
+    const dialog = page.getByTestId("header-search-dialog");
+    await expect(dialog).toBeVisible();
+    const d = await fit(dialog);
+    expect(d.lastReachable).toBe(true);
+    // the dialog's own bottom edge can be scrolled onto the screen
+    const bottom = await dialog.evaluate((el) => {
+      el.parentElement?.scrollTo(0, el.parentElement.scrollHeight);
+      return el.getBoundingClientRect().bottom;
+    });
+    expect(bottom).toBeLessThanOrEqual(320);
+  });
+});
+
+// ── THE ORGANISATION DOORS ARE ONE ROW ON A PHONE (2026-11-22) ──────────────
+// Coordinator decision on the owner's orders of 2026-11-21/22: horizontal
+// card rows with the next card peeking. Wrapped, 8–9 doors took three or four
+// rows (150–200 px) above every organisation page (UX gap SH-6).
+test.describe("organisation doors on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("doors-agency");
+
+  test("one row that scrolls sideways, the next door peeking, every door reachable", async ({ browser }) => {
+    await newOrganisation(browser, OWNER, "agency", `Synthetic Doors Owner ${RUN}`, `Synthetic Doors Staffing ${RUN}`);
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company`);
+    const nav = page.getByTestId("organization-doors");
+    await expect(nav).toBeVisible({ timeout: 60_000 });
+    const row = await nav.evaluate((el) => {
+      const doors = [...el.querySelectorAll<HTMLElement>('[data-testid^="organization-door-"]')];
+      const r = el.getBoundingClientRect();
+      return {
+        count: doors.length,
+        tops: new Set(doors.map((d) => Math.round(d.getBoundingClientRect().top))).size,
+        height: r.height,
+        scrolls: el.scrollWidth > el.clientWidth,
+        peek: doors.some((d) => { const b = d.getBoundingClientRect(); return b.left < r.right - 8 && b.right > r.right + 2; }),
+        minHeight: Math.min(...doors.map((d) => d.getBoundingClientRect().height)),
+      };
+    });
+    expect(row.count, "the doors render").toBeGreaterThan(5);
+    expect(row.tops, "all doors sit in one row").toBe(1);
+    expect(row.height, "the row is one door high").toBeLessThanOrEqual(60);
+    expect(row.scrolls, "the row scrolls sideways inside itself").toBe(true);
+    expect(row.peek, "the next door shows at the edge").toBe(true);
+    expect(row.minHeight, "doors keep the 44 px floor").toBeGreaterThanOrEqual(43.5);
+    await fitsTheScreen(page, "the organisation doors row");
+    const last = nav.locator('[data-testid^="organization-door-"]').last();
+    const href = await last.getAttribute("href");
+    await last.scrollIntoViewIfNeeded();
+    await last.tap();
+    await page.waitForURL((u) => !!href && u.pathname === href, { timeout: 30_000 });
+    await done();
+  });
+});
+
+// ── THE PEOPLE PAGE'S READINESS TABLE FOLDS AND FITS (2026-11-22) ────────────
+// Coordinator decision 2026-11-22, item 3: the readiness table repeated the
+// people listed just above (a second 600 px list at 390 px) and its third
+// column was cut. It now folds behind its title and fits the phone when open.
+test.describe("the people page's readiness signals on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("readiness-company");
+
+  test("folded behind its title; opened, no column runs past the card", async ({ browser }) => {
+    const org = await newOrganisation(browser, OWNER, "hire", `Synthetic Readiness Owner ${RUN}`, `Synthetic Readiness Co ${RUN}`);
+    // Three synthetic people on the roster (local stack only): the table shows when the roster has people.
+    for (let i = 1; i <= 3; i += 1) {
+      const res = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+        method: "POST",
+        headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email(`readiness-person${i}`), password: PASSWORD, email_confirm: true }),
+      });
+      expect(res.ok, "the synthetic person is created on the local stack").toBe(true);
+    }
+    const company = sql<{ id: string }>(`select legacy_company_id as id from public.organizations where id = ${lit(org.orgId)}`)[0]!.id;
+    sqlExec(
+      `insert into public.company_workers (company_id, worker_id, status)
+       select ${lit(company)}, w.id, 'active' from public.workers w join auth.users u on u.id = w.profile_id
+       where u.email like ${lit(`phone.readiness-person%.${RUN}@local.test`)}`,
+    );
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company/people`);
+    const card = page.getByTestId("worker-readiness-summary");
+    await expect(card).toBeVisible({ timeout: 60_000 });
+    await expect(card.getByTestId("worker-readiness-row").first()).toBeHidden();
+    await card.getByTestId("worker-readiness-fold").locator(":scope > summary").tap();
+    await expect(card.getByTestId("worker-readiness-row").first()).toBeVisible();
+    const fit = await card.evaluate((el) => {
+      const table = el.querySelector("table")!;
+      return { table: table.getBoundingClientRect().right, card: el.getBoundingClientRect().right };
+    });
+    expect(fit.table, "the table ends inside the card on a 390 px phone").toBeLessThanOrEqual(fit.card + 1);
+    await fitsTheScreen(page, "the people page with the readiness signals open");
+    await done();
+  });
+});
+
+// ── THE NEED FORM'S OPTIONAL DETAIL STARTS FOLDED (2026-11-22) ──────────────
+// Coordinator decision 2026-11-22, item 2: step 2 opened to ~2,700 px of
+// optional clusters at 390 px. Every cluster now starts closed; the launch-path
+// clusters (time, pay, requirements) are emphasised rows, and a closed row says
+// how many of its fields are filled.
+test.describe("the need form's optional detail on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("need-form-company");
+
+  test("step 2 starts with every cluster closed; a filled field shows on its closed row", async ({ browser }) => {
+    await newOrganisation(browser, OWNER, "hire", `Synthetic Form Owner ${RUN}`, `Synthetic Form Co ${RUN}`);
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company/needs`);
+    const main = page.getByRole("main");
+    await expect(main.getByTestId("demand-role")).toBeVisible({ timeout: 60_000 });
+    await main.getByTestId("demand-role").fill("Synthetic welder");
+    await main.getByTestId("demand-description").fill("Two people for three weeks.");
+    await main.getByTestId("demand-next").tap();
+    const sections = main.locator('[data-testid^="sdv2-section-"][aria-expanded]');
+    await expect(sections.first()).toBeVisible({ timeout: 30_000 });
+    const states = await sections.evaluateAll((els) => els.map((e) => e.getAttribute("aria-expanded")));
+    expect(states.length, "the clusters render").toBeGreaterThanOrEqual(7);
+    expect(states.every((s) => s === "false"), "every cluster starts closed").toBe(true);
+    const formHeight = await main.getByTestId("demand-form").evaluate((el) => el.getBoundingClientRect().height);
+    // 4,341 px with the clusters open (2026-11-22); about 2,140 folded.
+    expect(formHeight, "step 2 stays short on a phone").toBeLessThanOrEqual(2400);
+    await expect(main.locator('[data-testid="sdv2-section-time"][data-launch-path]')).toBeVisible();
+    await main.getByTestId("sdv2-section-time").tap();
+    await main.getByTestId("sdv2-start-earliest").fill("2026-12-01");
+    await main.getByTestId("sdv2-section-time").tap();
+    await expect(main.getByTestId("sdv2-section-time-filled")).toContainText("1");
+    await fitsTheScreen(page, "need form step 2");
+    await done();
+  });
+});

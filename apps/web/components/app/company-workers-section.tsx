@@ -95,7 +95,7 @@ export interface CompanyWorkersSectionLabels {
   readonly coordinationNextAction: string;
   readonly operations: OpsCellLabels;
   /** Identity-card copy: the worker's own stated availability, by status. */
-  readonly identity: { readonly availability: Record<string, string> };
+  readonly identity: { readonly unnamed: string; readonly availability: Record<string, string> };
   /** Team-at-a-glance copy: the state of each person and the one action it asks for. */
   readonly team: {
     readonly free: string;
@@ -122,8 +122,6 @@ export interface CompanyWorkersTeamView {
 
 const PRIMARY_ACTION =
   "inline-flex min-h-11 items-center rounded-control border border-ink-500 px-3 py-2 text-xs font-semibold text-text-primary transition-colors hover:border-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
-const QUIET_ACTION =
-  "inline-flex min-h-11 items-center rounded-control px-2.5 py-2 text-xs font-medium text-text-secondary underline-offset-4 hover:text-text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-cyan";
 
 export interface OpsCellLabels {
   readonly columnHeading: string;
@@ -402,7 +400,7 @@ export function CompanyWorkersSection({
                     ? labels.operations.notAssigned
                     : (labels.operations.roleLabels[ctx.operationsRole] ??
                       labels.operations.notAssigned);
-                const personName = w.displayName?.trim() || w.email || "\u2014";
+                const personName = w.displayName?.trim() || w.email || labels.identity.unnamed;
                 const availabilityText = w.availabilityStatus
                   ? (labels.identity.availability[w.availabilityStatus] ?? null)
                   : null;
@@ -469,6 +467,11 @@ export function CompanyWorkersSection({
                         journal controls open as a layer. */}
                     <PersonIdentityCard
                       variant="team-member"
+                      // Compact (responsive pass 2026-11-22): a roster of 15 was
+                      // 4,400 px at 390 px — an 88 px portrait and four actions per
+                      // person. One line per person; the one primary action sits
+                      // beside the name, the rest one tap away in the layer below.
+                      density="compact"
                       testid={`company-worker-identity-${w.workerId}`}
                       name={personName}
                       initials={personMonogram(personName)}
@@ -477,14 +480,12 @@ export function CompanyWorkersSection({
                       professions={tradeNames.length > 0 ? [...tradeNames] : roleText ? [roleText] : []}
                       meta={meta}
                       status={
-                        w.status && w.status !== "active" ? (
-                          <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
-                            {statusWord(labels, w.status)}
-                          </span>
-                        ) : null
-                      }
-                      actions={
-                        <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                        <>
+                          {w.status && w.status !== "active" ? (
+                            <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-meta text-text-secondary">
+                              {statusWord(labels, w.status)}
+                            </span>
+                          ) : null}
                           {primary === "assign" ? (
                             <Link
                               href={"/dashboard/projects" as "/dashboard"}
@@ -503,32 +504,10 @@ export function CompanyWorkersSection({
                               {labels.team.openCalendar}
                             </Link>
                           ) : null}
-                          <MessageButton
-                            profileId={w.profileId}
-                            labelKey="messageWorker"
-                            variant={primary === "message" ? "primary" : "quiet"}
-                          />
-                          <Link
-                            href={`/dashboard/people/${w.workerId}`}
-                            className={QUIET_ACTION}
-                            data-testid={`company-worker-open-${w.workerId}`}
-                          >
-                            {labels.openProfile}
-                          </Link>
-                          {/* R-9: the owner ends the relationship through the one
-                              gated write (the RPC re-derives ownership). Destructive,
-                              so it is the quietest control on the card. */}
-                          {canAssignRoles && w.companyId ? (
-                            <span className="ml-auto">
-                              <RosterLinkEndControl
-                                kind="company"
-                                orgLegacyId={w.companyId}
-                                workerId={w.workerId}
-                                side="owner"
-                              />
-                            </span>
+                          {primary === "message" ? (
+                            <MessageButton profileId={w.profileId} labelKey="messageWorker" variant="primary" />
                           ) : null}
-                        </div>
+                        </>
                       }
                     >
                       <IdentityDisclosure
@@ -575,6 +554,24 @@ export function CompanyWorkersSection({
                         <span className="font-mono text-meta uppercase tracking-label text-text-muted">
                           {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
                         </span>
+                        <div className="flex flex-wrap items-center gap-x-1 gap-y-1">
+                          {primary !== "message" ? (
+                            <MessageButton profileId={w.profileId} labelKey="messageWorker" variant="quiet" />
+                          ) : null}
+                          {/* R-9: the owner ends the relationship through the one
+                              gated write (the RPC re-derives ownership). Destructive,
+                              so it is the quietest control, inside the layer. */}
+                          {canAssignRoles && w.companyId ? (
+                            <span className="ml-auto">
+                              <RosterLinkEndControl
+                                kind="company"
+                                orgLegacyId={w.companyId}
+                                workerId={w.workerId}
+                                side="owner"
+                              />
+                            </span>
+                          ) : null}
+                        </div>
                       </IdentityDisclosure>
                     </PersonIdentityCard>
                   </li>

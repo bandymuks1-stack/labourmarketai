@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
-    "subtitleAgency": "Wat de publieke markt nu vraagt — dezelfde pool die uw kandidaten op het bord zien.",
-    "subtitleInstitution": "Wat de publieke markt nu vraagt — de richtingen waar uw lerenden naartoe gaan.",
     "active": "{count} actuele vacatures",
     "employers": "{count} werkgevers",
     "filtered": "{profession}: {count} vacatures",
@@ -211,7 +209,6 @@
     "formLabelLabel": "Locatie",
     "formLabelPlaceholder": "Stad of regio",
     "formPriceLabel": "Prijs",
-    "formPricePlaceholder": "bijv. € 450/maand of in overleg",
     "priceHint": "Prijs is optioneel en beschrijvend. Er wordt hier geen betaling gedaan.",
     "save": "Opslaan",
     "saving": "Opslaan…",
@@ -2082,7 +2079,6 @@
       "eyebrow": "BEDRIJFSWERKRUIMTE",
       "programs": {
         "title": "Opleidingen en cohorten",
-        "subtitle": "Wat u onderwijst, gericht op een richting op de arbeidsmarkt, en de groepen lerenden daarbinnen. Vraag toont actuele publieke vacatures voor die richting.",
         "empty": "Nog geen opleidingen. Voeg de eerste toe en richt die op de werkrichting waar ze toe leidt.",
         "addProgram": "Opleiding toevoegen",
         "noDirection": "Geen werkrichting ingesteld",
@@ -2979,8 +2975,7 @@
           "label": "Hoeveel werknemers nodig"
         },
         "salary": {
-          "label": "Salaris (€)",
-          "placeholder": "Bijv. 2200"
+          "label": "Salaris (€)"
         },
         "countries": {
           "label": "Voorkeurslanden (ISO-codes)",
@@ -4276,6 +4271,9 @@
         "admin": "Beheerder"
       },
       "subcopy": "Eén profiel voor uw werkervaring en kansen — in de volgende stap geeft u aan waarvoor u komt.",
+      "inviteFrom": "{inviter} nodigt u uit om lid te worden van {organization}.",
+      "inviteTo": "U bent uitgenodigd om lid te worden van {organization}.",
+      "inviteNext": "Na het aanmelden wordt u lid van {organization}.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -4286,7 +4284,6 @@
       "confirm_password_label": "Bevestig wachtwoord",
       "submit_label": "Registreren",
       "signing": "Aanmaken...",
-      "disclaimer": "Uw feedback vormt het product — vertel ons wat werkt en wat er mist.",
       "has_account": "Heeft u al een account?",
       "login_link": "Inloggen",
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw.",
@@ -4395,7 +4392,7 @@
           },
           "education": {
             "title": "Ik vertegenwoordig een onderwijsinstelling",
-            "desc": "Nodig lerenden uit, zie hun deelname en verbind ze met stages en banen."
+            "desc": "Nodig lerenden uit, voer programma's uit en volg hun stage en resultaten."
           }
         },
         "heading": "Begint u als persoon of als bedrijf?",
@@ -4644,7 +4641,6 @@
               "hoursPerWorker": "Uren per werknemer",
               "totalHours": "Totaal aantal uren (optionele overschrijving)",
               "rate": "Uur- / dagtarief",
-              "ratePlaceholder": "bijv. 20",
               "country": "Land / locatie",
               "materials": "Materialen",
               "equipment": "Apparatuur / gereedschap",
@@ -5826,9 +5822,9 @@
       "confirmedTitle": "Verwijdering bevestigd",
       "confirmedBody": "Het systeem verwijdert het account binnen enkele minuten en stuurt een bevestiging naar het e-mailadres van uw account. Moet iets worden beoordeeld, dan laten we het u weten.",
       "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. U ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt uw profiel niet getoond in zoekresultaten.",
-      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens 30 dagen na bevestiging onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
-      "confirmStepBodyWaiting": "Uw verzoek om uw account te verwijderen is ingediend. Bevestig het — het account blijft nog 30 dagen bestaan en in die tijd kunt u op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt u een bevestiging per e-mail.",
-      "confirmedBodyWaiting": "Het account wordt over 30 dagen verwijderd. Tot die tijd kunt u op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van uw account.",
+      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens uiterlijk 30 dagen na bevestiging, en uiterlijk een maand na mijn verzoek, onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
+      "confirmStepBodyWaiting": "Uw verzoek om uw account te verwijderen is ingediend. Bevestig het — het account blijft nog ten hoogste 30 dagen bestaan (nooit langer dan een maand na uw verzoek) en in die tijd kunt u op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt u een bevestiging per e-mail.",
+      "confirmedBodyWaiting": "Het account wordt binnen 30 dagen verwijderd, en uiterlijk een maand na uw verzoek. Tot die tijd kunt u op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van uw account.",
       "status": {
         "pending": "Uw verzoek om uw account te verwijderen is ingediend.",
         "pendingConfirmed": "Het verwijderen van uw account is bevestigd en ingepland.",
@@ -5836,7 +5832,7 @@
         "inProgress": "Uw account wordt al verwijderd — dit kan niet meer worden geannuleerd.",
         "done": "Het account is verwijderd.",
         "submittedAt": "Ingediend: {date}",
-        "scheduledAt": "Het account wordt verwijderd op {date} (na een wachttijd van 30 dagen).",
+        "scheduledAt": "Het account wordt verwijderd op {date}.",
         "cancelUntil": "Tot die tijd kunt u annuleren.",
         "loadError": "De status van het verwijderen van uw account kon niet worden geladen. Vernieuw de pagina en probeer het opnieuw."
       },
@@ -5987,6 +5983,8 @@
             "Stripe — betalingsverwerking voor betaalde platformdiensten. Wanneer een organisatie een betaling start, ontvangt Stripe het e-mailadres van de betalende gebruiker en een interne accountidentificatie; kaartgegevens worden ingevoerd op de eigen betaalpagina van Stripe en niet door het platform opgeslagen.",
             "Google, Facebook (Meta) en LinkedIn — alleen als je ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
             "Google (Gemini API) — alleen zoals hieronder beschreven in het onderdeel over AI.",
+            "Cloudflare (Workers AI) — pas na activering: 1) om openbare, geaggregeerde arbeidsmarktstatistieken toe te lichten; 2) wanneer het platform een in de chat getypt verzoek niet zelf begrijpt, om voor te stellen welke bestaande platformactie ermee bedoeld wordt. Vóór verzending worden namen, contactgegevens, getallen en alle woorden die niet op een vaste lijst van actiewoorden staan verwijderd; een verzoek met gezondheids- of andere gevoelige informatie wordt helemaal niet verzonden. Cloudflare gebruikt deze inhoud niet om modellen te trainen en bewaart haar niet na het verzoek.",
+            "Mistral AI en Groq — pas na activering en alleen om openbare, geaggregeerde arbeidsmarktstatistieken toe te lichten. Er worden geen berichtteksten en geen persoonsgegevens naar hen gestuurd.",
             "De volledige lijst van infrastructuurleveranciers staat op de pagina „Gegevensbescherming”."
           ]
         },
@@ -6125,6 +6123,8 @@
             "Cloudflare — het netwerk vóór de website: domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen. Elk verzoek aan de website loopt erdoorheen.",
             "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
             "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
+            "Cloudflare (Workers AI) — pas na activering: 1) om openbare, geaggregeerde arbeidsmarktstatistieken toe te lichten; 2) wanneer het platform een in de chat getypt verzoek niet zelf begrijpt, om voor te stellen welke bestaande platformactie ermee bedoeld wordt. Vóór verzending worden namen, contactgegevens, getallen en alle woorden die niet op een vaste lijst van actiewoorden staan verwijderd; een verzoek met gezondheids- of andere gevoelige informatie wordt helemaal niet verzonden. Cloudflare gebruikt deze inhoud niet om modellen te trainen en bewaart haar niet na het verzoek.",
+            "Mistral AI en Groq — pas na activering en alleen om openbare, geaggregeerde arbeidsmarktstatistieken toe te lichten. Er worden geen berichtteksten en geen persoonsgegevens naar hen gestuurd.",
             "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start.",
             "Geen andere e-mail-, AI-, vertaal- of betalingsleverancier is actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
           ]
@@ -7107,7 +7107,6 @@
   "learning": {
     "pageTitle": "Leren en beoordelen",
     "pageLead": "Suggesties op basis van echte werkactiviteit, bewaard zodat een persoon ze kan beoordelen. Niets hier wordt op zichzelf als bewezen behandeld.",
-    "title": "Beoordelingswachtrij",
     "lead": "Signalen worden suggesties, en een persoon beslist. Leren beslist nooit iets op zichzelf.",
     "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog niets om te beoordelen.",
@@ -7166,7 +7165,6 @@
       "countryPlaceholder": "bijv. LT",
       "remoteLabel": "Kan op afstand worden gedaan",
       "rateLabel": "Tarief (optioneel)",
-      "ratePlaceholder": "bijv. ca. 25 EUR/u, bespreekbaar",
       "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief."
     },
     "save": "Opslaan",
@@ -12837,7 +12835,7 @@
         "invite_to_demand": "Een werkgever nodigde u uit voor een werkbehoefte"
       },
       "from": "Uitgenodigd door {name}",
-      "organization": "Bedrijf: {name}",
+      "organization": "Organisatie: {name}",
       "project": "Project: {name}",
       "role": "Voorgestelde rol: {role}",
       "accept": "Uitnodiging accepteren",
@@ -12866,10 +12864,9 @@
       "capacity": "Relatie: {capacity}",
       "capacityNotEmployment": "Dit is geen vacature-aanbod en schept geen dienstverband.",
       "selfStart": "Eigen account aanmaken",
-      "anonExplainer": "Registreer of log in om deze uitnodiging te beantwoorden. Uw account, profiel en werkgeschiedenis blijven van u — wie u uitnodigt legt alleen de verbinding.",
+      "anonExplainer": "Registreer of log in om deze uitnodiging te beantwoorden. Uw account, profiel en werkgeschiedenis blijven van u: aannemen legt alleen de verbinding, nooit een geverifieerde vaardigheid, dienstverband of toewijzing.",
       "register": "Registreren en doorgaan",
       "signIn": "Ik heb al een account",
-      "youOwnYourIdentity": "Uw professionele identiteit blijft van u. Een uitnodiging aannemen maakt op zichzelf geen geverifieerde vaardigheid, dienstverband of toewijzing aan.",
       "referredVia": "Doorverwezen via {source}",
       "campaign": "Uitnodiging: {label}",
       "seats": "{used} van {max} plaatsen bezet",
@@ -13087,6 +13084,7 @@
     },
     "goToRoster": "Naar het team",
     "invalidLabel": "Controleer het e-mailadres — de uitnodiging is niet verzonden.",
+    "offerLimitLabel": "Te veel aanbiedingen. Probeer het later opnieuw.",
     "deliveryHeading": "Uitnodigingslink",
     "deliveryCreated": "Niet gemaild — e-mailbezorging is niet ingesteld. Kopieer de link en stuur die zelf naar de klant.",
     "deliverySent": "De uitnodigingsmail is verzonden. U kunt de link nog steeds kopiëren.",
@@ -14292,9 +14290,7 @@
         "preferredCountries": "Voorkeurslanden",
         "preferredCountriesPlaceholder": "Bijv. NL, DE",
         "salaryMin": "Loon vanaf (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Loon tot (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Bereid te verhuizen?",
         "hasTransport": "Kunt u zelfstandig naar het werk komen?",
         "needsAccommodation": "Huisvesting nodig?",
@@ -15974,7 +15970,6 @@
     },
     "v3": {
       "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en de basisplaatsing van een behoefte zijn gratis.",
-      "moreChoices": "Meer opties",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
       "market": {
@@ -18839,8 +18834,7 @@
         "invitationAccepted": "Uitnodiging geaccepteerd. Bevestig hieronder het verbindingsverzoek van het bureau met uw bedrijf."
       },
       "education": {
-        "title": "Opleiding en programma's",
-        "subtitle": "Programma's, lerenden en de marktvraag naar hun richtingen."
+        "title": "Opleiding en programma's"
       },
       "history": {
         "title": "Gegevens importeren en geschiedenis",
@@ -19396,6 +19390,19 @@
       "period": "Vastgelegd",
       "basis": "Uit {entries} logboekregels die mensen onder deze organisatie vastlegden. Apart geteld van de geïmporteerde geschiedenis hierboven en daar nooit bij opgeteld.",
       "unavailable": "Het werk dat onder deze organisatie in het logboek is vastgelegd, kon nu niet worden gelezen."
+    },
+    "forClient": {
+      "title": "Werk van uw onderaannemers",
+      "confirmed": "Bevestigde registraties",
+      "unconfirmed": "Niet-bevestigde registraties",
+      "periodHours": "{hours} u opgegeven als periodetotaal, niet opgeteld bij losse dagen.",
+      "basis": "Uit {count, plural, one {# registratie} other {# registraties}} in de eigen administratie van uw onderaannemers. Apart geteld van uw eigen werk.",
+      "unreadable": "Het werk in de administratie van partners kon nu niet worden gelezen. Dat betekent niet dat er geen is."
+    },
+    "clients": {
+      "title": "Opdrachtgevers",
+      "unnamed": "Opdrachtgevende organisatie",
+      "records": "{count, plural, one {# registratie} other {# registraties}}"
     }
   },
   "workPlan": {
@@ -19623,6 +19630,7 @@
     "heading": "Dit team aanbieden voor een vraag",
     "intro": "Bied het team als één eenheid aan voor één openstaande vraag van een geverifieerd bedrijf.",
     "privacy": "Het bedrijf ziet alleen feiten op teamniveau: omvang, vaardigheden, beschikbaarheid. Het aanbod noemt geen enkel lid en toont geen ledenprofiel. Leden verschijnen pas in een project nadat het bedrijf het team heeft geaccepteerd en daar heeft ingedeeld.",
+    "orgPrivacy": "Het bedrijf ziet de naam van uw bedrijf, uw bericht en uw voorwaarden. Er wordt niemand genoemd totdat u afspreekt wie het werk doet.",
     "tooSmall": "Een team kan alleen worden aangeboden met minstens 2 actieve leden.",
     "loading": "Laden…",
     "unavailable": "De openstaande vraag kon nu niet worden geladen.",
@@ -19633,12 +19641,14 @@
     "noteLabel": "Bericht aan het bedrijf (optioneel)",
     "notePlaceholder": "Bijvoorbeeld: ploeg van 3, kan over twee weken starten",
     "submit": "Team aanbieden",
+    "orgSubmit": "Ons bedrijf aanbieden",
     "submitting": "Aanbieden…",
     "sent": {
       "heading": "Uw aanbiedingen",
       "none": "Nog geen aanbiedingen.",
       "withdraw": "Intrekken",
-      "message": "Bericht aan de opdrachtgever"
+      "message": "Bericht aan de opdrachtgever",
+      "orgNext": "De opdrachtgever ging in principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
     },
     "status": {
       "offered": "Wacht op antwoord",
@@ -19711,8 +19721,14 @@
       },
       "blockers": "Het team als geheel voldoet niet aan: {list}",
       "missing": "Niet opgegeven: {list}",
+      "missingData": {
+        "need_not_structured": "de eisen van de behoefte",
+        "no_team_members": "actieve leden",
+        "team_skills_not_stated": "de vaardigheden van het team"
+      },
       "noNeedStructure": "Deze vraag is nog niet gestructureerd, dus het team kan er niet mee worden vergeleken.",
       "note": "Bericht van het team",
+      "noteCompany": "Bericht van het bedrijf",
       "accept": "In principe akkoord",
       "decline": "Afwijzen",
       "noProjects": "U heeft nog geen open project om het team aan toe te wijzen.",
@@ -19731,8 +19747,9 @@
       },
       "createProject": "Project aanmaken",
       "message": "Bericht aan het team",
+      "messageCompany": "Bericht aan het bedrijf",
       "kindOrganization": "Bedrijfsaanbod",
-      "orgNext": "In principe akkoord (geen contract). Spreek de details en de mensen die het werk doen af in het gesprek."
+      "orgNext": "In principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
     },
     "orgHeading": "Ons bedrijf aanbieden voor een open behoefte",
     "orgIntro": "Bied uw bedrijf zelf aan — uw mensen, uw dienst of als onderaannemer — voor één open behoefte. Eerst een ploeg aanmaken is niet nodig.",
@@ -19754,7 +19771,6 @@
       },
       "capacity": "Mensen",
       "rate": "Tarief",
-      "ratePlaceholder": "bijv. 32 €/u of vaste prijs",
       "period": "Periode",
       "start": "Begin",
       "end": "Einde",

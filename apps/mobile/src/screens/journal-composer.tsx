@@ -15,6 +15,7 @@ import { Body, Button, Divider, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
 import { traceTestId, useRequestTrace } from "../request-trace";
 import { CapabilityFailureNotice } from "./capability-failure";
+import { useKeptDraft } from "../use-kept-draft";
 
 /**
  * WRITING A WORK JOURNAL ENTRY FROM THE PHONE.
@@ -109,6 +110,11 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   const [workDate, setWorkDate] = useState(() => deviceDay(0));
   const [notes, setNotes] = useState("");
   const [siteName, setSiteName] = useState("");
+  // UNSENT WORDS SURVIVE A SIGN-IN AGAIN (owner P0 2026-11-22).
+  const kept = useKeptDraft("journal-composer", { notes, siteName }, (d) => {
+    setNotes((now) => (now.trim() === "" ? d.notes ?? "" : now));
+    setSiteName((now) => (now.trim() === "" ? d.siteName ?? "" : now));
+  });
   const [state, setState] = useState<ComposerState>({
     kind: "writing",
     localError: null,
@@ -205,6 +211,7 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         setState({ kind: "save_failed", preview, token, failure: result.failure });
         return;
       }
+      kept.clear();
       setState({ kind: "saved", preview, result: result.data });
     },
     [accessToken, locale],

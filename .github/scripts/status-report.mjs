@@ -33,6 +33,7 @@ import {
   prBlocker,
   privacyFindings,
   staleOverwriteReason,
+  WALK_DEVICES,
 } from "./status-report-lib.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
@@ -489,11 +490,11 @@ const countedFns = fns.filter((f) => f.state !== "PAPILDOMAS TESTAS");
 const total = countStates(countedFns);
 const live = total["VEIKIA PRODUKCIJOJE"];
 
-const DEVICE_LT = { desktop: "kompiuteris", phone: "telefonas 390 px", "phone-375": "telefonas 375 px" };
+const DEVICE_LT = { desktop: "kompiuteris", phone: "telefonas 390 px", "phone-375": "telefonas 375 px", "tablet-768": "planšetė 768 px", "desktop-1440": "kompiuteris 1440 px" };
 const RESULT_LT = { success: "sėkmingas", failure: "nepavyko", cancelled: "atšauktas", timed_out: "baigėsi laikas" };
 const ledgerRows = Object.values(ledger.walks).sort((a, b) => a.spec.localeCompare(b.spec) || walkDeviceOrder(a) - walkDeviceOrder(b));
 function walkDeviceOrder(e) {
-  return ["desktop", "phone", "phone-375"].indexOf(e.device);
+  return WALK_DEVICES.indexOf(e.device);
 }
 
 P(

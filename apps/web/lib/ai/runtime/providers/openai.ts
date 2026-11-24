@@ -70,6 +70,13 @@ export interface OpenAiCompatibleBinding {
    * than at the vendor with an opaque 404.
    */
   readonly strictModels: boolean;
+  /**
+   * Vendor-documented request fields for ONE resolved model, merged into the
+   * body after the common fields (it can never replace `model`, the token cap
+   * or `messages`). Undefined = nothing extra. Only fields the vendor's own
+   * model schema documents belong here: an unknown field is a 400 on some.
+   */
+  readonly modelRequestFields?: (model: string) => Readonly<Record<string, unknown>> | undefined;
 }
 
 /** Resolve the model: the routed tier alias → this provider's candidate;
@@ -132,6 +139,7 @@ export function createOpenAiCompatibleProvider(
             authorization: `Bearer ${apiKey}`,
           },
           body: JSON.stringify({
+            ...(binding.modelRequestFields?.(model) ?? {}),
             model,
             [binding.tokenParam]: maxTokens,
             ...(binding.jsonObjectMode

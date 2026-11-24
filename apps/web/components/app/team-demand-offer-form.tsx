@@ -1,8 +1,9 @@
 "use client";
 
-import { useId, useState, useTransition } from "react";
+import { useEffect, useId, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
+import { Explain } from "@/components/app/premium/grammar";
 import { MessageSquare } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -35,13 +36,18 @@ export function TeamDemandOfferForm({
   teamId,
   memberCount,
   kind = "team",
+  defaultOpen = false,
 }: {
   teamId: string;
   memberCount: number;
   /** "organization" = a company / agency offers ITSELF (no brigade needed). */
   kind?: "team" | "organization";
+  /** Opened and loaded at once — the conversation shows it because it was
+   *  asked for ("Noriu pasiūlyti savo komandą"), not folded on a page. */
+  defaultOpen?: boolean;
 }) {
   const t = useTranslations("teamDemandOffer");
+  const tDisclosure = useTranslations("common.disclosure");
   const locale = useLocale();
   const router = useRouter();
   const uid = useId();
@@ -58,6 +64,12 @@ export function TeamDemandOfferForm({
       setData(await loadTeamOfferPanelAction({ teamId, kind }));
     });
   }
+
+  useEffect(() => {
+    if (defaultOpen) load();
+    // Once, on mount: `load` reads nothing that changes before it runs.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function refusalText(status: TeamOfferRefusal): string {
     return t(`refusal.${status}`);
@@ -99,6 +111,7 @@ export function TeamDemandOfferForm({
 
   return (
     <details
+      open={defaultOpen || undefined}
       className="rounded-md border border-ink-600 bg-ink-800/30 p-3"
       data-testid={`team-demand-offer-section-${teamId}`}
       onToggle={(e) => {
@@ -109,8 +122,11 @@ export function TeamDemandOfferForm({
         {org ? t("orgHeading") : t("heading")}
       </summary>
       <div className="flex flex-col gap-3 pt-3">
-        <p className="text-xs text-text-secondary">{org ? t("orgIntro") : t("intro")}</p>
-        <p className="text-meta leading-relaxed text-text-muted">{t("privacy")}</p>
+        {/* One row, the detail one tap away (coordinator decision 2026-11-22, item 5). */}
+        <Explain summary={tDisclosure("details")} testId="team-demand-offer-explain">
+          <p>{org ? t("orgIntro") : t("intro")}</p>
+          <p>{org ? t("orgPrivacy") : t("privacy")}</p>
+        </Explain>
 
         {!org && memberCount < 2 ? (
           <p className="text-xs text-text-muted" data-testid={`team-offer-too-small-${teamId}`}>
@@ -174,7 +190,7 @@ export function TeamDemandOfferForm({
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-rate`}>
                     {t("terms.rate")}
-                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText} placeholder={t("terms.ratePlaceholder")}
+                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={terms.rateText}
                       onChange={(e) => setTerms((v) => ({ ...v, rateText: e.target.value }))}
                       className="min-h-11 sm:min-h-9 max-sm:text-base" />
                   </label>
@@ -200,7 +216,7 @@ export function TeamDemandOfferForm({
                     onClick={submit}
                     data-testid={`team-offer-submit-${teamId}`}
                   >
-                    {pending ? t("submitting") : t("submit")}
+                    {pending ? t("submitting") : org ? t("orgSubmit") : t("submit")}
                   </Button>
                 </div>
               </div>
@@ -241,6 +257,14 @@ export function TeamDemandOfferForm({
                         </Button>
                       ) : null}
                       </div>
+                      {org && o.status === "accepted" ? (
+                        // Owner P0 2026-11-23: what is not built says so. A company
+                        // offer cannot yet be handed off to a project (a crew is
+                        // needed: #3649, RED, not applied) — never imply it can.
+                        <p className="text-text-secondary" data-testid={`team-offer-sent-org-next-${o.offerId}`}>
+                          {t("sent.orgNext")}
+                        </p>
+                      ) : null}
                       {o.status === "offered" || o.status === "accepted" || o.status === "assigned" ? (
                         <TeamOfferTerms offerId={o.offerId} offerOpen={o.status === "offered"} canAgree />
                       ) : null}

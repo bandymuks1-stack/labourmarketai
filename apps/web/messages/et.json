@@ -456,7 +456,7 @@
           },
           "education": {
             "title": "Esindan õppeasutust",
-            "desc": "Kutsu õppijaid, näe nende osalust ning ühenda nad praktika ja tööga."
+            "desc": "Kutsu õppijaid, vii läbi programme ning jälgi nende praktikat ja tulemusi."
           }
         },
         "agency": {
@@ -513,7 +513,6 @@
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
-      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
       "divider": "[EN] or",
       "email_label": "[EN] Work email",
       "email_placeholder": "[EN] name@company.com",
@@ -540,6 +539,9 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Üks profiil sinu töökogemuse ja võimaluste jaoks — järgmises sammus täpsustad, miks tulid.",
+      "inviteFrom": "{inviter} kutsub teid liituma organisatsiooniga {organization}.",
+      "inviteTo": "Teid kutsutakse liituma organisatsiooniga {organization}.",
+      "inviteNext": "Registreerudes liitute organisatsiooniga {organization}.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Saada link uuesti",
       "resend_sent": "Uuesti saadetud. Kontrolli postkasti ja rämpsposti kausta.",
@@ -3823,9 +3825,7 @@
         "preferredCountries": "[EN] Preferred countries",
         "preferredCountriesPlaceholder": "[EN] e.g. NL, DE",
         "salaryMin": "[EN] Salary from (€)",
-        "salaryMinPlaceholder": "[EN] 1500",
         "salaryMax": "[EN] Salary to (€)",
-        "salaryMaxPlaceholder": "[EN] 2500",
         "willingToRelocate": "[EN] Willing to relocate?",
         "hasTransport": "[EN] Can you get to work on your own?",
         "needsAccommodation": "[EN] Need accommodation?",
@@ -4813,7 +4813,6 @@
     },
     "v3": {
       "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine ja põhivajaduse avaldamine on tasuta.",
-      "moreChoices": "Rohkem valikuid",
       "or": "või kirjeldage oma sõnadega",
       "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
       "market": {
@@ -7137,6 +7136,19 @@
       "period": "Kirja pandud",
       "basis": "{entries} päevikukirjest, mille inimesed selle organisatsiooni all tegid. Loetakse eraldi ülaltoodud imporditud ajaloost ja sellele kunagi ei liideta.",
       "unavailable": "Selle organisatsiooni all päevikusse kirja pandud tööd ei õnnestunud praegu lugeda."
+    },
+    "forClient": {
+      "title": "Teie alltöövõtjate töö",
+      "confirmed": "Kinnitatud kirjed",
+      "unconfirmed": "Kinnitamata kirjed",
+      "periodHours": "{hours} h on märgitud perioodi summana, üksikute päevade hulka lisamata.",
+      "basis": "{count, plural, one {# kirjest} other {# kirjest}} teie alltöövõtjate enda arvestuses. Loetud eraldi teie enda tööst.",
+      "unreadable": "Partnerite arvestuses olevat tööd ei õnnestunud praegu lugeda. See ei tähenda, et seda pole."
+    },
+    "clients": {
+      "title": "Tellijad",
+      "unnamed": "Tellija organisatsioon",
+      "records": "{count, plural, one {# kirje} other {# kirjet}}"
     }
   },
   "workLifecycle": {

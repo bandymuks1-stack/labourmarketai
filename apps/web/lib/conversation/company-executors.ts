@@ -141,6 +141,8 @@ function mapBridge(r: BridgeActionState): ExecResult {
   const code =
     r.status === "needs-migration"
       ? "needs_migration"
+      : r.status === "rate-limited"
+        ? "rate_limited"
       : r.status === "forbidden"
         ? "not_authorized"
         : r.status === "not-found"

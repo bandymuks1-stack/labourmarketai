@@ -256,8 +256,13 @@ async function registerThroughLink(browser: Browser, link: string, address: stri
   await w.locator('form button[type="submit"]').click();
   await w.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
   if (/\/onboarding/.test(w.url())) {
-    await w.getByTestId("onboarding-intent-work").click();
-    await w.getByTestId("onboarding-intents-continue").click();
+    // An invitation into an existing organization asks no "what did you
+    // come for" question (owner P0 2026-11-22); older links still may.
+    const intent = w.getByTestId("onboarding-intent-work");
+    if (await intent.waitFor({ state: "visible", timeout: 5_000 }).then(() => true, () => false)) {
+      await intent.click();
+      await w.getByTestId("onboarding-intents-continue").click();
+    }
     await w.getByTestId("onboarding-display-name").fill(name);
     await w.getByTestId("onboarding-country").click();
     await w.getByRole("option", { name: /Lithuania/ }).first().click();
