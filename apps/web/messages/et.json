@@ -7013,7 +7013,8 @@
       "heading": "Organisatsioonide kutsed",
       "explainer": "Sulle suunatud juhtimiskutsed. Vastuvõtmisel ilmub organisatsioon sinu tööruumide valijasse.",
       "accept": "Võta vastu",
-      "decline": "Lükka tagasi"
+      "decline": "Lükka tagasi",
+      "invitedBy": "Kutsuja: {name}"
     },
     "members": {
       "heading": "Organisatsiooni liikmed",
