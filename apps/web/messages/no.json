@@ -4092,6 +4092,11 @@
       "findWorkInCompanyContext": "Å søke jobb er din egen handling — i bedriftsområdet kjører jeg det ikke. Bytt til ditt personlige område og spør igjen.",
       "findWorkInCompanyWhy": "En person søker jobb, ikke en bedrift — jeg svarer fra ditt personlige område.",
       "personalOnlyInCompany": "Det er en personlig handling — i en virksomhetsplass utfører jeg den ikke. Bytt til ditt personlige rom og fortsett der.",
+      "needsOrganization": "Det gjøres for en organisasjon, og ingen av dine områder kan gjøre det ennå.",
+      "readFailed": "Jeg kunne ikke lese det akkurat nå — feilen ligger hos oss. Ingenting er endret. Prøv igjen om litt.",
+      "taskStatusAsk": "Hvilken status skal oppgaven få: startet, ferdig eller blokkert?",
+      "stageStatusAsk": "Hvilken status skal etappen få: startet, ferdig eller blokkert?",
+      "professionAsk": "Hvilket yrke eller fag mener du?",
       "crossSpace": {
         "personal": {
           "cv": "CV-en din ligger i ditt personlige område, ikke i organisasjonen.",
@@ -7013,7 +7018,8 @@
       "heading": "Invitasjoner fra organisasjoner",
       "explainer": "Ledelsesinvitasjoner adressert til deg. Når du godtar, vises organisasjonen i arbeidsområdevelgeren din.",
       "accept": "Godta",
-      "decline": "Avslå"
+      "decline": "Avslå",
+      "invitedBy": "Invitert av {name}"
     },
     "members": {
       "heading": "Organisasjonens medlemmer",

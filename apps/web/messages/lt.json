@@ -14718,6 +14718,11 @@
       "findWorkInCompanyContext": "Darbo paieška yra jūsų asmeninis veiksmas — įmonės erdvėje jos nevykdau. Persijunkite į asmeninę erdvę ir paklauskite dar kartą.",
       "findWorkInCompanyWhy": "Darbo ieško žmogus, ne įmonė — atsakau iš jūsų asmeninės erdvės.",
       "personalOnlyInCompany": "Tai jūsų asmeninis veiksmas — įmonės erdvėje jo nevykdau. Persijunkite į asmeninę erdvę ir tęskite ten.",
+      "needsOrganization": "Tai atliekama organizacijai, o nė viena jūsų erdvė to dar negali.",
+      "readFailed": "Dabar to nuskaityti nepavyko — klaida mūsų pusėje. Niekas nepakeista. Pabandykite po akimirkos.",
+      "taskStatusAsk": "Kokią būseną nustatyti užduočiai: pradėta, atlikta ar užblokuota?",
+      "stageStatusAsk": "Kokią būseną nustatyti etapui: pradėtas, atliktas ar užblokuotas?",
+      "professionAsk": "Kurią profesiją ar amatą turite omenyje?",
       "crossSpace": {
         "personal": {
           "cv": "Jūsų CV yra asmeninėje erdvėje, ne organizacijos.",
@@ -18939,7 +18944,8 @@
       "heading": "Pakvietimai į organizacijas",
       "explainer": "Jums adresuoti valdymo pakvietimai. Priėmus organizacija atsiras erdvių perjungiklyje.",
       "accept": "Priimti",
-      "decline": "Atmesti"
+      "decline": "Atmesti",
+      "invitedBy": "Kvietė: {name}"
     },
     "members": {
       "heading": "Organizacijos nariai",
@@ -19670,6 +19676,14 @@
     "noDemand": "Šiuo metu nėra atviros paklausos, kuriai galima siūlyti.",
     "demandLabel": "Paklausa",
     "demandPlaceholder": "Pasirinkite paklausą",
+    "need": {
+      "people": "Žmonių",
+      "start": "Pradžia",
+      "duration": "Trukmė",
+      "language": "Kalba",
+      "skills": "Įgūdžiai",
+      "tools": "Įrankiai"
+    },
     "alreadyOffered": "jau pasiūlyta",
     "noteLabel": "Pastaba įmonei (nebūtina)",
     "notePlaceholder": "Pavyzdžiui: 3 žmonių brigada, galime pradėti po dviejų savaičių",

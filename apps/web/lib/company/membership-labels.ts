@@ -71,6 +71,8 @@ export async function getMembershipLabels(): Promise<MembershipLabels> {
       roleLabels,
       accept: t("invitations.accept"),
       decline: t("invitations.decline"),
+      // Raw template: the panel fills {name} on the client.
+      invitedBy: t.raw("invitations.invitedBy") as string,
       outcomes,
     },
     members: {

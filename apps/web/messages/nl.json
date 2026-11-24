@@ -14718,6 +14718,11 @@
       "findWorkInCompanyContext": "Werk zoeken is uw eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit uw persoonlijke ruimte.",
       "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en ga daar verder.",
+      "needsOrganization": "Dat gebeurt voor een organisatie, en geen van uw ruimtes kan dat nog.",
+      "readFailed": "Dat kon ik nu niet lezen — de fout ligt bij ons. Er is niets gewijzigd. Probeer het zo opnieuw.",
+      "taskStatusAsk": "Welke status moet de taak krijgen: gestart, klaar of geblokkeerd?",
+      "stageStatusAsk": "Welke status moet de fase krijgen: gestart, klaar of geblokkeerd?",
+      "professionAsk": "Welk beroep of vak bedoelt u?",
       "crossSpace": {
         "personal": {
           "cv": "Uw cv staat in uw persoonlijke ruimte, niet in de organisatie.",
@@ -18939,7 +18944,8 @@
       "heading": "Uitnodigingen van organisaties",
       "explainer": "Bestuursuitnodigingen die aan u zijn gericht. Na acceptatie verschijnt de organisatie in uw werkruimtekiezer.",
       "accept": "Accepteren",
-      "decline": "Afwijzen"
+      "decline": "Afwijzen",
+      "invitedBy": "Uitgenodigd door {name}"
     },
     "members": {
       "heading": "Leden van de organisatie",
@@ -19670,6 +19676,14 @@
     "noDemand": "Er is nu geen openstaande vraag om een aanbod op te doen.",
     "demandLabel": "Vraag",
     "demandPlaceholder": "Kies een vraag",
+    "need": {
+      "people": "Mensen",
+      "start": "Aanvang",
+      "duration": "Duur",
+      "language": "Taal",
+      "skills": "Vaardigheden",
+      "tools": "Gereedschap"
+    },
     "alreadyOffered": "al aangeboden",
     "noteLabel": "Bericht aan het bedrijf (optioneel)",
     "notePlaceholder": "Bijvoorbeeld: ploeg van 3, kan over twee weken starten",
