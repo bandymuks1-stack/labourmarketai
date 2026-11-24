@@ -70,6 +70,13 @@ import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
 import { aiStateMessageKey, understand } from "@/lib/conversation/utterance-understanding";
 import { asksForPersonalWorkspace, matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import {
+  crossSpaceRequest,
+  ORGANIZATION_HISTORY_PATH,
+  PERSONAL_TARGET_PATH,
+  type CrossSpaceDecision,
+  type PersonalTarget,
+} from "@/lib/conversation/cross-space";
 import { readRenameTarget } from "@/lib/conversation/organization-rename-phrase";
 import { readRenameTargetForChat } from "@/lib/conversation/organization-rename-chat";
 import {
@@ -2476,12 +2483,13 @@ export function ConversationChat({
    * re-validates.
    */
   const performContextSwitch = useCallback(
-    (workspace: WorkspaceInfo, continueSentence?: string) => {
+    (workspace: WorkspaceInfo, continueSentence?: string, thenOpen?: string) => {
       // The chip's own label: an unnamed organization says so, never "".
       const displayName =
         workspace.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(workspace);
       if (auth?.activeWorkspaceId === workspace.id) {
-        assistant(t("switchContextAlready", { name: displayName }));
+        if (thenOpen) router.push(thenOpen);
+        else assistant(t("switchContextAlready", { name: displayName }));
         return;
       }
       // THE SAME TASK CONTINUES ACROSS THE SWITCH (owner 2026-10-01). The
@@ -2513,6 +2521,9 @@ export function ConversationChat({
               ? t("switchContextDone", { name: displayName })
               : t("switchContextFailed"),
           );
+          // SWITCH AND OPEN (decision 0034 rule 3): the page asked for lives in
+          // the space just entered; it opens only once the server accepted.
+          if (accepted && thenOpen) router.push(thenOpen);
           if (!accepted && continueSentence) {
             try {
               window.sessionStorage.removeItem(CONTINUE_AFTER_SWITCH_KEY);
@@ -2526,7 +2537,56 @@ export function ConversationChat({
           assistant(t("switchContextFailed"));
         });
     },
-    [assistant, auth, t, workspaceLabelOf],
+    [assistant, auth, router, t, workspaceLabelOf],
+  );
+
+  /**
+   * A REQUEST THAT BELONGS TO THE OTHER SPACE (decision 0034 rule 3, owner P0
+   * 2026-11-24). One short line and ONE action that switches through the
+   * same server-validated switch and opens the target; or, when it is not
+   * clear whose thing is meant, ONE question with the real options. Never the
+   * other space's generic menu (see `lib/conversation/cross-space.ts`).
+   */
+  const pendingCrossSpaceSentenceRef = useRef("");
+  const presentCrossSpace = useCallback(
+    (decision: NonNullable<CrossSpaceDecision>, sentence: string) => {
+      const workspaces = auth?.workspaces ?? [];
+      const openChip = (target: PersonalTarget): ChoiceChip =>
+        workspaces.some((w) => w.kind === "personal")
+          ? { id: `xs:${target}`, label: t(`crossSpace.open.${target}`) }
+          : { id: `link:${PERSONAL_TARGET_PATH[target]}`, label: t(`crossSpace.open.${target}`) };
+      if (decision.kind === "to-personal") {
+        assistant(t(`crossSpace.personal.${decision.target}`), [openChip(decision.target)]);
+        return;
+      }
+      if (decision.kind === "organization-history") {
+        assistant(t("crossSpace.organizationHistory"), [
+          { id: `link:${ORGANIZATION_HISTORY_PATH}`, label: t("crossSpace.openOrganizationHistory") },
+        ]);
+        return;
+      }
+      if (decision.kind === "ask-whose-cv") {
+        assistant(t("crossSpace.askWhoseCv"), [
+          openChip("cv"),
+          { id: "candidates", label: labels.chipCandidates },
+        ]);
+        return;
+      }
+      const organizations = workspaces.filter((w) => w.kind !== "personal");
+      pendingCrossSpaceSentenceRef.current = sentence;
+      if (organizations.length === 1) {
+        const name = workspaceLabelOf(organizations[0]);
+        assistant(t("crossSpace.organization", { name }), [
+          { id: `xso:${organizations[0].id}`, label: t("crossSpace.switchTo", { name }) },
+        ]);
+        return;
+      }
+      assistant(
+        t("crossSpace.whichOrganization"),
+        organizations.map((w) => ({ id: `xso:${w.id}`, label: workspaceLabelOf(w) })),
+      );
+    },
+    [assistant, auth, labels.chipCandidates, t, workspaceLabelOf],
   );
 
   /**
@@ -5954,6 +6014,25 @@ export function ConversationChat({
               // The goal in flight continues in the workspace picked.
               performContextSwitch(target, goalContinuation());
             }
+          } else if (chip.id.startsWith("xs:")) {
+            // Switch to the personal space and open the person's own thing
+            // there (decision 0034 rule 3). Only the target's NAME rides on the
+            // chip; the path comes from the fixed map, never from input.
+            const target = chip.id.slice(3) as PersonalTarget;
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            const path = PERSONAL_TARGET_PATH[target];
+            if (personal && path) {
+              user(chip.label);
+              performContextSwitch(personal, undefined, path);
+            }
+          } else if (chip.id.startsWith("xso:")) {
+            // An organization request said in the personal space: switch to the
+            // organization picked, then continue the SAME sentence there.
+            const target = (auth?.workspaces ?? []).find((w) => w.id === chip.id.slice(4));
+            if (target) {
+              user(chip.label);
+              performContextSwitch(target, pendingCrossSpaceSentenceRef.current || undefined);
+            }
           } else if (chip.id.startsWith("oc:")) {
             // "Which Jonas?" — the chip carries an id and nothing else; the
             // conversation system re-checks access before anything opens.
@@ -8011,6 +8090,16 @@ export function ConversationChat({
       // NOT UNDERSTOOD → one clarifying question + the ONE context-derived
       // door, never the greeting's starter row (see `askToClarify`).
       const fallback = () => askToClarify(t("notUnderstood"));
+      // EVERY routed request passes the space check first (decision 0034 rule
+      // 3): a request for the OTHER space is said as such, never answered
+      // with this space's menu or a different object.
+      const hasOrganization = (auth?.workspaces ?? []).some((w) => w.kind !== "personal");
+      const crossSpaceAnswered = (routed: Parameters<typeof dispatchIntent>[0]): boolean => {
+        const cross = crossSpaceRequest({ intent: routed, text, identity, hasOrganization });
+        if (!cross) return false;
+        withTyping(() => presentCrossSpace(cross, text));
+        return true;
+      };
       // The model half could not answer because of ITS state (not switched
       // on, allowance spent, a vendor fault, too many requests) — said as
       // that state, never as "I did not understand you" (owner 2026-09-23).
@@ -8041,6 +8130,7 @@ export function ConversationChat({
       }
 
       if (intent !== "unknown") {
+        if (crossSpaceAnswered(intent)) return;
         lastRoutedRef.current = { intent, text };
         routedTextRef.current = text;
         dispatchIntent(intent, handlers, withTyping, fallback);
@@ -8083,6 +8173,7 @@ export function ConversationChat({
             switch (res.kind) {
               case "intent":
                 trackResolution(res.intent, "llm");
+                if (crossSpaceAnswered(res.intent)) return;
                 dispatchIntent(res.intent, handlers, withTyping, fallback);
                 return;
               case "plan": {
@@ -8091,6 +8182,7 @@ export function ConversationChat({
                 // when tapped. Every step is an existing handler; a write is
                 // only ever the last step and only opens its confirm card.
                 trackResolution(res.steps[0].intent, "llm");
+                if (crossSpaceAnswered(res.steps[0].intent)) return;
                 const total = res.steps.length;
                 const rest = res.steps.slice(1);
                 planRef.current = {
@@ -8146,7 +8238,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, workspaceChips, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [presentCrossSpace, noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, workspaceChips, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
   );
 
   /**

@@ -14718,6 +14718,26 @@
       "findWorkInCompanyContext": "Werk zoeken is uw eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit uw persoonlijke ruimte.",
       "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en ga daar verder.",
+      "crossSpace": {
+        "personal": {
+          "cv": "Uw cv staat in uw persoonlijke ruimte, niet in de organisatie.",
+          "journal": "Uw eigen werkdagboek staat in uw persoonlijke ruimte.",
+          "profile": "Uw profiel staat in uw persoonlijke ruimte.",
+          "calendar": "Uw eigen agenda staat in uw persoonlijke ruimte."
+        },
+        "open": {
+          "cv": "Overschakelen en mijn cv openen",
+          "journal": "Overschakelen en mijn dagboek openen",
+          "profile": "Overschakelen en mijn profiel openen",
+          "calendar": "Overschakelen en mijn agenda openen"
+        },
+        "askWhoseCv": "Uw eigen cv of dat van een kandidaat?",
+        "organizationHistory": "Het overzicht van de organisatie is haar werkgeschiedenis.",
+        "openOrganizationHistory": "Geschiedenis van de organisatie openen",
+        "organization": "Dit gebeurt in de ruimte van de organisatie: {name}.",
+        "switchTo": "Overschakelen naar {name} en doorgaan",
+        "whichOrganization": "Dit gebeurt in de ruimte van een organisatie. Welke?"
+      },
       "newJobsIntro": "Nieuwe vacatures die bij uw voorkeuren passen: {count}.",
       "newJobsAll": "Alle mogelijkheden",
       "newJobsNone": "De afgelopen dagen zijn er geen nieuwe vacatures verschenen die bij uw voorkeuren passen. Alle mogelijkheden vindt u op de pagina met mogelijkheden.",
