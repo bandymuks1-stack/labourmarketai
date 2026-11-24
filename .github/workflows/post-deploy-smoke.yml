@@ -118,9 +118,10 @@ jobs:
             sleep 10
           done
           if [ "$same" -lt 2 ]; then
+            if [ -n "$want" ]; then target="the build of this deploy ($want)"; else target="one build"; fi
             echo "state=blocked" >> "$GITHUB_OUTPUT"
-            echo "**BLOCKED: production did not give three healthy answers from ${want:+the deploy's build \`$want\`}${want:-one build}. The smoke did NOT run.**" >> "$GITHUB_STEP_SUMMARY"
-            echo "::error::BLOCKED: production did not settle on ${want:-one build}; the smoke did not run"
+            echo "**BLOCKED: production did not give three healthy answers from $target. The smoke did NOT run.**" >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::BLOCKED: production did not settle on $target; the smoke did not run"
             exit 1
           fi
           echo "state=ran" >> "$GITHUB_OUTPUT"

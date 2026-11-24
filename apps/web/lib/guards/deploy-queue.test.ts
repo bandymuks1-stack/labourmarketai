@@ -190,3 +190,42 @@ describe("BLOCKED is never PASS or FAIL; a real FAIL freezes", () => {
     expect(brakes).toMatch(/deployQuietMinutes: 5,/);
   });
 });
+
+/** Every `run: |` block of a workflow, by indentation, with `${{ … }}` replaced by a plain word. */
+function runBlocks(wf: string): { at: number; body: string }[] {
+  const lines = wf.split("\n");
+  const out: { at: number; body: string }[] = [];
+  for (let i = 0; i < lines.length; i++) {
+    const m = /^(\s*)(?:- )?run: \|\s*$/.exec(lines[i]!);
+    if (!m) continue;
+    const keyIndent = m[1]!.length + (lines[i]!.trimStart().startsWith("- ") ? 2 : 0);
+    const body: string[] = [];
+    let j = i + 1;
+    for (; j < lines.length; j++) {
+      const l = lines[j]!;
+      if (l.trim() !== "" && l.length - l.trimStart().length <= keyIndent) break;
+      body.push(l);
+    }
+    out.push({ at: i + 1, body: body.join("\n").replace(/\$\{\{[^}]*\}\}/g, "X") });
+    i = j - 1;
+  }
+  return out;
+}
+
+describe("every shell step of the queue parses (a quote inside ${var:+…} broke the first PR run)", () => {
+  for (const f of ["deploy-vps.yml", "post-deploy-smoke.yml"]) {
+    it(f, () => {
+      const blocks = runBlocks(read(f));
+      expect(blocks.length).toBeGreaterThan(5);
+      for (const b of blocks) {
+        let err = "";
+        try {
+          execFileSync("bash", ["-n"], { input: b.body, encoding: "utf8", stdio: ["pipe", "pipe", "pipe"] });
+        } catch (e) {
+          err = String((e as { stderr?: string }).stderr ?? e);
+        }
+        expect(err, `${f}:${b.at}`).toBe("");
+      }
+    });
+  }
+});
