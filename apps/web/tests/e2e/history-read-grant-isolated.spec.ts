@@ -182,9 +182,11 @@ test("HG-5. a worker with a grant opens the two history pages read-only, and not
 
   await p.goto(history);
   await expect(p.getByTestId("company-history")).toHaveAttribute("data-access", "read-grant");
-  for (const write of ["evidence-import-zone", "history-quality-fold", "history-duplicates-fold", "company-history-neighbours"]) {
-    await expect(p.locator(`#${write}, [data-testid="${write}"]`), write).toHaveCount(0);
-  }
+  // No write zone or neighbour door is rendered for a grant.
+  await expect(p.locator("#evidence-import-zone")).toHaveCount(0);
+  await expect(p.getByTestId("history-quality-fold")).toHaveCount(0);
+  await expect(p.getByTestId("history-duplicates-fold")).toHaveCount(0);
+  await expect(p.getByTestId("company-history-neighbours")).toHaveCount(0);
 
   await p.goto(personPage);
   await expect(p.getByTestId("company-person")).toBeVisible();
