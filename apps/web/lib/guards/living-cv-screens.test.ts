@@ -63,7 +63,7 @@ describe("the walk is read-only and prints no names", () => {
 
   it("masks free text in every visible text and field (owner condition 4) and fails closed", () => {
     // Names, contact data, personal codes and unknown capitalised words, through the Node-side masker.
-    expect(spec).toMatch(/exposeBinding\("__lcvMask", \(_source, texts: string\[\]\) => texts\.map\(\(t\) => maskFreeText\(t, p, allow\)\)\)/);
+    expect(spec).toMatch(/exposeBinding\("__lcvMask", \(_source, texts: string\[\]\) => texts\.map\(\(t\) => maskFreeText\(t, p, allow, "lt"\)\)\)/);
     expect(spec).toMatch(/createTreeWalker\(document\.body, NodeFilter\.SHOW_TEXT\)/);
     expect(spec).toMatch(/querySelectorAll<HTMLInputElement \| HTMLTextAreaElement>\("input, textarea"\)/);
     // The markup as sent, AND the visible text case-insensitively.
@@ -83,10 +83,17 @@ describe("the walk is read-only and prints no names", () => {
     expect(lib).toMatch(/\[3-6\]\\d\{10\}/);
   });
 
-  it("reads only the two grant-aware pages, naming the organization, with no workspace chip or people list", () => {
+  it("shoots the worker's OWN Living CV with a chosen worker session, and the organization through the grant", () => {
     expect(spec).toMatch(/rpc\/my_history_read_grants_v1/);
     expect(spec).toMatch(/\/dashboard\/company\/history\?org=\$\{encodeURIComponent\(orgId\)\}/);
-    expect(spec).toMatch(/\/dashboard\/company\/people\/\$\{personId\}\?org=\$\{encodeURIComponent\(orgId\)\}/);
+    // Owner 2026-11-24: the worker screens are /cv, never the historical person card.
+    expect(spec).toMatch(/served\(wview, "\/cv", "cv-document-header"\)/);
+    expect(spec).not.toMatch(/\/dashboard\/company\/people\/\$\{personId\}/);
+    // The worker is a parameter (a minted synthetic slot), never minted for a real person.
+    expect(spec).toMatch(/PROD_QA_LCV_WORKER_SLOT/);
+    // Disabled by default (owner 2026-11-24): unset, no worker screen is taken or recorded.
+    expect(spec).toMatch(/if \(!WORKER_SLOT\) \{\n\s+\/\/ Disabled by default/);
+    expect(spec).toMatch(/const expected = VIEWPORTS\.length \* \(WORKER_SLOT \? 4 : 2\)/);
     expect(spec).not.toMatch(/workspace-chip|workspace-option|"\/dashboard\/company\/people"\)/);
     // A page the grant was not served (redirect, hidden) is a FAIL without an image.
     expect(spec).toMatch(/redirected: the page was not served to the grant/);
@@ -127,7 +134,8 @@ describe("the workflow publishes only ciphertext", () => {
     expect(enc).toMatch(/shred -u/);
     expect(enc).toMatch(/no manifest/);
     expect(enc).toMatch(/s\.privacy === "PASS" && s\.file/);
-    expect(enc).toMatch(/m\.screens\.length !== 12 \|\| stray\.length > 0/);
+    expect(enc).toMatch(/\(m\.expected === 6 \|\| m\.expected === 12\) && m\.screens\.length === m\.expected/);
+    expect(enc).toMatch(/!ok \|\| stray\.length > 0/);
     expect(enc).toMatch(/zip -q -X "\$LCV_TMP\/lcv\.zip" manifest\.json/);
     expect(enc).toMatch(/openssl rand -hex 32/);
     expect(enc).toMatch(/openssl enc -aes-256-cbc -pbkdf2 -salt/);

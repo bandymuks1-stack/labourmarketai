@@ -1,4 +1,4 @@
-import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
 import { isAbsolute, join, resolve } from "node:path";
 
 import type { Browser, BrowserContext, Page } from "@playwright/test";
@@ -67,6 +67,15 @@ import { test } from "./prod-walk";
 const OUT = process.env.PROD_QA_LCV_DIR ?? "";
 const SLOT = "livingcv";
 const STATE = resolve(__dirname, `.storage-state.prod-qa.${SLOT}.json`);
+/**
+ * The WORKER whose own Living CV (`/cv`) is photographed: a minted synthetic session slot, chosen by
+ * the owner (repository variable PROD_QA_LCV_WORKER_SLOT; the owner is deciding whose CV). A real
+ * person's /cv would need that person's own session, which a walk never mints. DISABLED BY DEFAULT
+ * (owner 2026-11-24: the owner's own /cv is opened by the owner, never walked): unset, the walk
+ * takes the organization screens only, six in all.
+ */
+const WORKER_SLOT = /^[a-z0-9-]{1,24}$/.test(process.env.PROD_QA_LCV_WORKER_SLOT ?? "") ? process.env.PROD_QA_LCV_WORKER_SLOT! : "";
+const WORKER_STATE = WORKER_SLOT ? resolve(__dirname, `.storage-state.prod-qa.${WORKER_SLOT}.json`) : "";
 const ORIGIN = new URL(process.env.E2E_BASE_URL || "https://labourmarket.ai").origin;
 const LOCALE = "lt";
 const PERSON_HREF = /\/dashboard\/company\/people\/([0-9a-f-]{36})(?:[/?#]|$)/;
@@ -102,8 +111,20 @@ async function at<T>(name: string, fn: () => Promise<T>): Promise<T> {
   }
 }
 
-async function context(browser: Browser, options: object): Promise<BrowserContext> {
-  return browser.newContext({ storageState: STATE, locale: "lt-LT", ...options });
+async function context(browser: Browser, options: object, state: string = STATE): Promise<BrowserContext> {
+  return browser.newContext({ storageState: state, locale: "lt-LT", ...options });
+}
+
+/** The worker's own Living CV page: the person's name and the organizations on their history. */
+async function workerCvNames(page: Page): Promise<{ own: string[]; organizations: string[] }> {
+  return page.evaluate(() => ({
+    own: [...document.querySelectorAll('[data-testid="cv-document-header"] h1')]
+      .map((h) => (h.textContent ?? "").trim())
+      .filter(Boolean),
+    organizations: [...document.querySelectorAll('[data-testid="cv-history-node"] > span.font-display')]
+      .map((s) => (s.textContent ?? "").trim())
+      .filter(Boolean),
+  }));
 }
 
 async function open(page: Page, path: string): Promise<void> {
@@ -134,8 +155,6 @@ async function roster(orgId: string): Promise<Array<{ id: string; name: string }
 
 /** A grant-aware page for one organization, by its own address: `?org=` names the organization. */
 const historyPath = (orgId: string) => `/dashboard/company/history?org=${encodeURIComponent(orgId)}`;
-const personPath = (orgId: string, personId: string) =>
-  `/dashboard/company/people/${personId}?org=${encodeURIComponent(orgId)}`;
 
 /** The page really served to the grant: not redirected elsewhere, and its own root rendered. */
 async function served(page: Page, path: string, rootTestId: string): Promise<void> {
@@ -175,18 +194,9 @@ async function peopleOnPage(page: Page): Promise<{ names: string[]; personIds: s
   }, PERSON_HREF.source);
 }
 
-/** Organizations named on a person's history (employers before this one, clients, partners). */
-async function organizationsOnPage(page: Page): Promise<string[]> {
-  return page.evaluate(() =>
-    [...document.querySelectorAll('[data-testid="cv-history-node"] > span.font-display, [data-testid="cv-history-node"] > span:nth-of-type(3)')]
-      .map((s) => (s.textContent ?? "").trim())
-      .filter(Boolean),
-  );
-}
-
 /** Rewrite every same-origin text body before the page sees it; load no stored images. */
 async function deidentify(ctx: BrowserContext, p: Pseudonyms, allow: ReadonlySet<string>): Promise<void> {
-  await ctx.exposeBinding("__lcvMask", (_source, texts: string[]) => texts.map((t) => maskFreeText(t, p, allow)));
+  await ctx.exposeBinding("__lcvMask", (_source, texts: string[]) => texts.map((t) => maskFreeText(t, p, allow, "lt")));
   await ctx.route("**/*", async (route) => {
     const req = route.request();
     const url = new URL(req.url());
@@ -305,7 +315,9 @@ async function shoot(page: Page, p: Pseudonyms, screen: string, viewport: string
   return { screen, viewport, file, privacy: "PASS", layout, status: problems.length ? "FAIL" : "PASS", reasons: problems };
 }
 
-const SCREENS = ["1-worker-overview", "2-worker-history", "3-company-1", "4-company-2"] as const;
+// Owner, 2026-11-24: the worker's OWN Living CV (/cv) and the organization Living CV. The
+// organization screens stay on the company history until Lane E names the organization surface.
+const SCREENS = ["1-worker-cv", "2-worker-cv-full", "3-company-1", "4-company-2"] as const;
 
 test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ browser }) => {
   if (!OUT || !isAbsolute(OUT) || resolve(OUT).startsWith(resolve(__dirname, "..", "..", ".."))) {
@@ -319,7 +331,6 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
   let orgs: Array<{ id: string; name: string }> = [];
   const people: string[] = [];
   const companies: string[] = [];
-  let personId = "";
   try {
     orgs = await at("read the granted organizations", () => grants());
     if (orgs.length !== 2) throw new Error(`living-cv-screens failed at: expected exactly two read grants, found ${orgs.length}`);
@@ -328,20 +339,26 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
         const list = await roster(org.id);
         people.push(...list.map((x) => x.name));
         await served(page, historyPath(org.id), "company-history");
-        const shown = await peopleOnPage(page);
-        people.push(...shown.names);
-        // The person comes from the history page itself when it links one; else the roster's first.
-        if (i === 0) personId = shown.personIds.find((id) => list.some((x) => x.id === id)) ?? list[0]?.id ?? "";
+        people.push(...(await peopleOnPage(page)).names);
       });
     }
-    if (!personId) throw new Error("living-cv-screens failed at: no person in the first organization");
-    await at("discover the person", async () => {
-      await served(page, personPath(orgs[0]!.id, personId), "company-person");
-      people.push(...(await peopleOnPage(page)).names);
-      companies.push(...(await organizationsOnPage(page)));
-    });
   } finally {
     await discovery.close();
+  }
+  // The worker's own CV: their name, and the organizations on their history.
+  if (WORKER_STATE && existsSync(WORKER_STATE)) {
+    const wctx = await context(browser, VIEWPORTS[0].options, WORKER_STATE);
+    try {
+      const wpage = await wctx.newPage();
+      await at("discover the worker's own CV", async () => {
+        await served(wpage, "/cv", "cv-document-header");
+        const w = await workerCvNames(wpage);
+        people.push(...w.own);
+        companies.push(...w.organizations);
+      });
+    } finally {
+      await wctx.close();
+    }
   }
   const keep = orgs.map((o) => o.name);
   const p = buildPseudonyms(people, companies.filter((c) => !keep.includes(c)), keep);
@@ -362,20 +379,36 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
   };
   for (const vp of VIEWPORTS) {
     const fit = "fit" in vp;
+    // The worker's own Living CV, through the worker's own session.
+    if (!WORKER_SLOT) {
+      // Disabled by default: no worker screens at all, and nothing recorded for them.
+    } else if (!existsSync(WORKER_STATE)) {
+      for (const screen of [SCREENS[0], SCREENS[1]]) {
+        results.push({ screen, viewport: vp.key, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: ["not generated: the chosen worker session was not minted"] });
+      }
+    } else {
+      const wctx = await context(browser, vp.options, WORKER_STATE);
+      await deidentify(wctx, p, allow);
+      const wview = await wctx.newPage();
+      try {
+        await attempt(SCREENS[0], vp.key, async () => {
+          step = `${vp.key}: worker Living CV`;
+          await served(wview, "/cv", "cv-document-header");
+          return shoot(wview, p, SCREENS[0], vp.key, false, fit);
+        });
+        await attempt(SCREENS[1], vp.key, async () => {
+          step = `${vp.key}: worker Living CV, whole page`;
+          await served(wview, "/cv", "cv-document-header");
+          return shoot(wview, p, SCREENS[1], vp.key, true, fit);
+        });
+      } finally {
+        await wctx.close();
+      }
+    }
     const ctx = await context(browser, vp.options);
     await deidentify(ctx, p, allow);
     const view = await ctx.newPage();
     try {
-      await attempt(SCREENS[0], vp.key, async () => {
-        step = `${vp.key}: worker overview`;
-        await served(view, personPath(orgs[0]!.id, personId), "company-person");
-        return shoot(view, p, SCREENS[0], vp.key, false, fit);
-      });
-      await attempt(SCREENS[1], vp.key, async () => {
-        step = `${vp.key}: worker history`;
-        await served(view, personPath(orgs[0]!.id, personId), "company-person");
-        return shoot(view, p, SCREENS[1], vp.key, true, fit);
-      });
       await attempt(SCREENS[2], vp.key, async () => {
         step = `${vp.key}: first organization's company Living CV`;
         await served(view, historyPath(orgs[0]!.id), "company-history");
@@ -393,7 +426,9 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
 
   // 3. The manifest: every screen with PASS or FAIL and its reason. It names no person and no
   //    organization, and it is encrypted together with the images.
-  writeFileSync(join(OUT, "manifest.json"), JSON.stringify({ screens: results }, null, 2), { mode: 0o600 });
+  // `expected`: 6 organization screens, or 12 with the worker's own CV.
+  const expected = VIEWPORTS.length * (WORKER_SLOT ? 4 : 2);
+  writeFileSync(join(OUT, "manifest.json"), JSON.stringify({ expected, screens: results }, null, 2), { mode: 0o600 });
   const failed = results.filter((r) => r.status === "FAIL");
   if (failed.length > 0) {
     throw new Error(`living-cv-screens: ${failed.length} of ${results.length} screens FAIL: ${failed.map((r) => `${r.screen}-${r.viewport}`).join(", ")} (reasons in the encrypted manifest)`);

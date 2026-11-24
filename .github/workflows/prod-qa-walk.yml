@@ -524,6 +524,9 @@ jobs:
           SR1_READINGS_FILE: ${{ github.workspace }}/sr1-readings.jsonl
           # living-cv-screens only: the plaintext screens, outside the repository, destroyed below.
           PROD_QA_LCV_DIR: ${{ runner.temp }}/lcv
+          # living-cv-screens only: the minted synthetic slot whose OWN /cv is photographed, chosen by
+          # the owner as a repository variable. Empty: the worker screens are recorded as not chosen.
+          PROD_QA_LCV_WORKER_SLOT: ${{ needs.debounce.outputs.spec == 'living-cv-screens' && vars.PROD_QA_LCV_WORKER_SLOT || '' }}
         run: |
           set -uo pipefail
           echo "device: ${PROD_QA_DEVICE}" >> "$GITHUB_STEP_SUMMARY"
@@ -673,7 +676,9 @@ jobs:
             const listed = new Set(m.screens.filter((s) => s.privacy === "PASS" && s.file).map((s) => s.file));
             const pngs = fs.readdirSync(dir).filter((f) => f.endsWith(".png"));
             const stray = pngs.filter((f) => !listed.has(f));
-            if (m.screens.length !== 12 || stray.length > 0) { console.error(`screens=${m.screens.length} stray=${stray.length}`); process.exit(1); }
+            // 6 organization screens, or 12 with the worker's own CV (disabled by default).
+            const ok = (m.expected === 6 || m.expected === 12) && m.screens.length === m.expected;
+            if (!ok || stray.length > 0) { console.error(`screens=${m.screens.length} expected=${m.expected} stray=${stray.length}`); process.exit(1); }
             const pass = m.screens.filter((s) => s.status === "PASS").length;
             console.log(`images=${pngs.length} pass=${pass} fail=${m.screens.length - pass}`);
           ' "$LCV_DIR" >> "$GITHUB_STEP_SUMMARY"
