@@ -14718,6 +14718,26 @@
       "findWorkInCompanyContext": "Szukanie pracy to Państwa własne działanie — w przestrzeni firmy go nie uruchamiam. Proszę przełączyć się na przestrzeń osobistą i zapytać ponownie.",
       "findWorkInCompanyWhy": "Pracy szuka człowiek, nie firma — odpowiadam z Państwa przestrzeni osobistej.",
       "personalOnlyInCompany": "To działanie osobiste — w przestrzeni firmy go nie wykonuję. Proszę przełączyć się na przestrzeń osobistą i kontynuować tam.",
+      "crossSpace": {
+        "personal": {
+          "cv": "CV znajduje się w przestrzeni osobistej, nie w organizacji.",
+          "journal": "Własny dziennik pracy znajduje się w przestrzeni osobistej.",
+          "profile": "Profil znajduje się w przestrzeni osobistej.",
+          "calendar": "Własny kalendarz znajduje się w przestrzeni osobistej."
+        },
+        "open": {
+          "cv": "Przełącz i otwórz moje CV",
+          "journal": "Przełącz i otwórz mój dziennik",
+          "profile": "Przełącz i otwórz mój profil",
+          "calendar": "Przełącz i otwórz mój kalendarz"
+        },
+        "askWhoseCv": "Chodzi o własne CV czy o CV kandydata?",
+        "organizationHistory": "Zapisem organizacji jest jej historia prac.",
+        "openOrganizationHistory": "Otwórz historię organizacji",
+        "organization": "To wykonuje się w przestrzeni organizacji: {name}.",
+        "switchTo": "Przełącz na {name} i kontynuuj",
+        "whichOrganization": "To wykonuje się w przestrzeni organizacji. W której?"
+      },
       "newJobsIntro": "Nowe oferty zgodne z Państwa preferencjami: {count}.",
       "newJobsAll": "Wszystkie możliwości",
       "newJobsNone": "W ostatnich dniach nie pojawiły się nowe oferty zgodne z Państwa preferencjami. Wszystkie możliwości znajdą Państwo na stronie możliwości.",
