@@ -2,8 +2,7 @@
 # DEPLOY FREEZE GATE (owner P0 2026-11-24). The first job of deploy-vps.yml,
 # before anything is built or shipped.
 #
-#   - An open issue with the `deploy-freeze` label, or with the regression
-#     issue's exact title (its label removed by hand still freezes; opened by
+#   - An open issue with the `deploy-freeze` label (opened by
 #     post-deploy-regression-issue.sh when a post-deploy check genuinely
 #     FAILED) refuses the deploy: BLOCKED, red, with the issue link. Closing
 #     the issue lifts the freeze.
@@ -25,7 +24,6 @@
 set -euo pipefail
 
 LABEL="deploy-freeze"
-TITLE="Post-deploy smoke is failing on production"
 note() { echo "$1"; if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then echo "$1" >> "$GITHUB_STEP_SUMMARY"; fi; }
 
 emergency=false
@@ -44,12 +42,11 @@ fi
 if [ -n "${DEPLOY_FREEZE_OPEN+x}" ]; then
   open="$DEPLOY_FREEZE_OPEN"
 else
+  # The LABEL is the freeze. Only the report job of the one deploy queue sets it, and only for a check
+  # that ran and failed. A same-titled issue without it — e.g. #3793, opened by the pre-#3762 smoke for
+  # a brake refusal — never freezes. Removing the label lifts the freeze like closing the issue does;
+  # both are the owner's (AGENTS.md / CLAUDE.md, Deploy freeze emergency).
   open="$(gh issue list --state open --label "$LABEL" --limit 1 --json number,url --jq '.[0] | select(. != null) | "\(.number) \(.url)"')"
-  # The report job finds the issue by its title: an open one whose label was removed still freezes.
-  if [ -z "$open" ]; then
-    open="$(gh issue list --state open --search "in:title \"${TITLE}\"" --json number,url,title \
-      --jq "[.[] | select(.title == \"${TITLE}\")][0] | select(. != null) | \"\(.number) \(.url)\"")"
-  fi
 fi
 
 if [ -z "$open" ]; then
