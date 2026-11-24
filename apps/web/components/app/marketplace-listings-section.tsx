@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { FoldedRows, FOLDED_ROWS_VISIBLE } from "@/components/app/folded-rows";
 import {
   Plus,
   MessageSquare,
@@ -159,6 +160,7 @@ export function MarketplaceListingsSection({
   locale: string;
 }) {
   const t = useTranslations("marketplaceListings");
+  const tDisclosure = useTranslations("common.disclosure");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   // The ONE lifecycle contract's view of a listing (lib/market-lifecycle).
@@ -529,8 +531,19 @@ export function MarketplaceListingsSection({
             {t("browseEmpty")}
           </p>
         ) : (
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {shownRows.map((row) => (
+          // ONE SCREEN, THEN A FOLD (decision 0034, owner P0 2026-11-24): the
+          // first rows show and the rest open in place, so the page is never a
+          // long scroll. A row a link focuses (`?focus=`) is never folded away.
+          <FoldedRows
+            rows={shownRows}
+            testId="market-browse-more"
+            listClassName="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            showAll={
+              focusId && shownRows.findIndex((r) => r.id === focusId) >= FOLDED_ROWS_VISIBLE
+                ? undefined
+                : (count) => tDisclosure("showAll", { count })
+            }
+            render={(row) => (
               <li
                 key={`${row.sourceTable}:${row.id}`}
                 id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
@@ -618,8 +631,8 @@ export function MarketplaceListingsSection({
                   </Link>
                 )}
               </li>
-            ))}
-          </ul>
+            )}
+          />
         )}
       </section>
 
