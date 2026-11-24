@@ -135,8 +135,13 @@ test("1. the agency offers its company on the open need and names its worker", a
   await expect(w.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
   await ag.getByTestId(`offer-candidate-add-select-${s.offer}`).selectOption(s.worker);
   await ag.getByTestId(`offer-candidate-add-submit-${s.offer}`).click();
-  await expect(panel).toContainText(W_NAME, { timeout: 30_000 });
-  s.candidate = sql<{ id: string }>(`select id from public.team_demand_offer_candidates where offer_id = ${lit(s.offer)}`)[0]!.id;
+  // The add-select already lists the worker's name as an option, so the panel's
+  // text proves nothing: wait for the stored row, then for ITS list item.
+  const candidateId = () =>
+    sql<{ id: string }>(`select id from public.team_demand_offer_candidates where offer_id = ${lit(s.offer)}`)[0]?.id ?? null;
+  await expect.poll(candidateId, { timeout: 30_000 }).not.toBeNull();
+  s.candidate = candidateId()!;
+  await expect(panel.getByTestId(`offer-candidate-${s.candidate}`)).toContainText(W_NAME, { timeout: 30_000 });
   await panel.scrollIntoViewIfNeeded();
   await noSideways(ag, "agency candidates");
   // A person NOT on the agency's roster is refused, even with an id in hand.
