@@ -1,0 +1,327 @@
+import type { Metadata } from "next";
+import { headers } from "next/headers";
+import { redirect } from "next/navigation";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
+import { Suspense } from "react";
+
+import { pickClientMessages } from "@/lib/i18n/client-messages";
+import { AmbientGlow } from "@/components/decor/ambient-glow";
+import { LanguageFeedbackWidget } from "@/components/app/language-feedback-widget";
+import { SessionTelemetry } from "@/components/app/session-telemetry";
+import { SpineStream } from "@/components/app/spine-stream";
+import { DashboardChrome } from "@/components/app/dashboard-chrome";
+import type { ConversationNavLabels } from "@/components/app/conversation/chat/conversation-header";
+import { AuthProvider } from "@/lib/auth/context";
+import { type Role } from "@/lib/auth/actions";
+import { deriveIsAdmin } from "@/lib/auth/admin-signal";
+import { readActiveRoleRows } from "@/lib/auth/profile-roles";
+import {
+  DASHBOARD_PATHNAME_HEADER,
+  refusalDestination,
+  routeRequirement,
+} from "@/lib/auth/role-gated-routes";
+import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
+import type { SwitchableOrganization } from "@/lib/company/organization-switch";
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { StaleBuildRecovery } from "@/components/app/stale-build-recovery";
+import DashboardSectionLoading from "./loading";
+import { createClient } from "@/lib/supabase/server";
+
+const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
+
+/**
+ * Authenticated shell for the whole `/dashboard` tree.
+ *
+ * Resolves user + profile + roles ONCE, server-side, and hands them to the
+ * client `AuthProvider` so every downstream widget (the one header's
+ * workspace chip, nav and NotificationPanel, the pages) stays in sync. The
+ * chrome itself is chosen per-route by the client `<DashboardChrome>`:
+ *   - `/dashboard` (EVERY identity)              → the conversation — the ONE
+ *                                                  authenticated home (bare; the
+ *                                                  chat supplies the one top bar)
+ *   - every other product route                  → panel: the same one top bar
+ *                                                  over a contextual workspace
+ *   - `/dashboard/admin/*`                       → the internal operator console
+ *                                                  — the SAME one top bar since
+ *                                                  2026-10-25 (one navigation
+ *                                                  system; `/dashboard/advanced`
+ *                                                  was deleted by W3 Package 4)
+ *
+ * No header markup lives here any more: the operator console's private header
+ * (sideways-scrolling tabs, a second workspace selector in the role switcher)
+ * and its phone bottom bar were retired for the ONE header
+ * (`components/app/conversation/chat/conversation-header.tsx`). No route files
+ * move, so the dashboard file-path contract the guard suite pins stays intact.
+ * Doctrine §18 (real, not overlay illusions).
+ */
+
+/**
+ * Private surface: robots.txt already disallows crawling, but a disallow does
+ * not stop URL-only indexing from inbound links — the locale layout's
+ * `index: true` used to be inherited here. Explicit noindex closes that gap
+ * for the whole authenticated tree (metadata merges downward).
+ */
+export const metadata: Metadata = {
+  robots: { index: false, follow: false },
+};
+
+export default async function DashboardLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const layoutStart = Date.now();
+  const supabase = await createClient();
+
+  // P0 auth-performance: NOTHING awaits serially before the batch. The
+  // memoized getUser fires inside the same Promise.all as the session
+  // profile and the roles read (chained off getUser — profiles.id === auth
+  // user id), so the layout costs ONE parallel stage. (The profile row comes
+  // from the ONE request-cached session-profile reader shared with the pages.)
+  const userPromise = supabase.auth.getUser();
+  // HONESTY (2026-08-28): the roles read used to drop its PostgREST error and
+  // hand `null` down, so a transient failure (cold DB connection, pooler
+  // hiccup) silently stripped EVERY role from the authenticated shell — the
+  // role switcher, the nav and `deriveIsAdmin` all read an empty list as the
+  // fact "this user holds no roles". `readActiveProfileRoles` retries once and
+  // then throws, so an unanswered read reaches the route error boundary
+  // instead of being rendered as a confident, wrong role state.
+  //
+  // ONE `profile_roles` read per request (perf 2026-10-23): this is the
+  // request-cached reader the page gate under this layout
+  // (`requireRoleOrRedirect`) and the held-roles reads share, so the page no
+  // longer repeats the shell's query. Same throw-on-unanswered semantics.
+  const rolesPromise: Promise<{ role: string }[] | null> = userPromise.then(
+    async ({ data: { user } }) => (user ? await readActiveRoleRows(supabase, user.id) : null),
+  );
+  const [userRes, session, rolesRows] = await Promise.all([
+    userPromise,
+    getSessionProfile(),
+    rolesPromise,
+  ]);
+  const user = userRes.data.user;
+  if (!user) redirect(`/${locale}/auth/login`);
+  const profile = session.profile;
+  console.info("[perf] dashboard-layout", {
+    ms: Date.now() - layoutStart,
+  });
+
+  // A FAILED profile read is not "not onboarded" (W6 honesty, 2026-09-06):
+  // sending an onboarded person to /onboarding on a timed-out read is the
+  // same silent misroute the root fixes. The root renders the NAMED degrade
+  // state (or keeps the person's own durable workspace choice); the shell
+  // carries on with what it does know — nothing below fabricates a role.
+  if (session.profileRead !== "failed" && !profile?.onboarded_at) {
+    redirect(`/${locale}/onboarding`);
+  }
+
+  const roles = (rolesRows ?? [])
+    .map((r) => r.role)
+    .filter((r): r is Role => ROLES.has(r as Role));
+  // Admin is NOT a workspace role — it lives on a separate signal so switching
+  // workspaces never strips admin in the UI. See `deriveIsAdmin`.
+  const isAdmin = deriveIsAdmin({
+    activeRole: profile?.active_role ?? null,
+    profileRoles: rolesRows ?? [],
+  });
+
+  // ── THE ROLE GATE, WHERE IT CAN STILL BE AN HTTP REDIRECT ─────────────────
+  //
+  // Measured 2026-09-22 on the local production build: a worker opening
+  // `/lt/dashboard/company` got `HTTP 200`, 600 627 bytes of this very shell,
+  // and then ~600 ms of Next's "Application error: a client-side exception has
+  // occurred" before the browser performed the redirect itself. The gate was
+  // correct — the system WAS refusing — but it announced the refusal as a
+  // crash, and it shipped the whole authenticated shell to someone being
+  // turned away. The page-level `requireRoleOrRedirect` (and the admin
+  // subtree's `requireSuperadmin`) both sit under
+  // `app/[locale]/dashboard/loading.tsx`, and a `redirect()` thrown inside a
+  // Suspense boundary can no longer become an HTTP redirect — the response is
+  // already committed. Isolated with two same-shaped page redirects:
+  // `/lt/onboarding` (has a `loading.tsx` above it) answers 200 and redirects
+  // on the client; `/lt/live-market-review` (has none) answers a real 307.
+  //
+  // This layout is the last frame ABOVE that boundary, and it is ALSO where
+  // both signals already exist: `rolesRows` (one `profile_roles` read, honest
+  // about a failed read because `readActiveProfileRoles` throws rather than
+  // answering) and `isAdmin` (the dual signal). So the refusal is decided from
+  // the reads the shell performs anyway — no second permission model, no extra
+  // round-trip, and one fewer duplicate read on every gated navigation.
+  //
+  // The page-level gates STAY. They are the authority on a soft navigation
+  // (React reuses this layout, so it does not re-run) and on any request where
+  // the middleware header never arrived. Nothing here can grant access that
+  // they would refuse: this gate only ever refuses EARLIER.
+  const gatedPath = (await headers()).get(DASHBOARD_PATHNAME_HEADER);
+  const requirement = gatedPath ? routeRequirement(gatedPath) : null;
+  // MEMBERSHIP IS THE COMPANY GATE TOO (capability matrix P1, 2026-09-23):
+  // a governance membership in the ACTIVE workspace opens the employer
+  // space — `membership_accept_v1` never grants `profile_roles.company`,
+  // so a manager invited into an organization was refused at this frame.
+  // That arm is the ONE refusal this block does not settle: it needs the
+  // workspace, and the shell reads the workspace exactly once (W9), right
+  // below — so the arm is decided there, from the SAME binding the chip
+  // renders, never from a second call. Every other refusal (admin, worker,
+  // agency, buyer; a company route the roles DO hold is not a refusal) is
+  // final here, before anything expensive runs. The same rule runs in
+  // `requireRoleOrRedirect`, so this frame can only ever refuse earlier,
+  // never admit someone the page gate would turn away.
+  let companyMembershipArm = false;
+  if (requirement) {
+    const refused =
+      requirement.kind === "admin"
+        ? // A FAILED profile read is not "not an admin". `deriveIsAdmin` reads
+          // `profiles.active_role`, and when that row did not answer the
+          // dual signal is only half known — refusing on it would be the same
+          // false claim the honesty work removed elsewhere. Hand those to
+          // `requireSuperadmin`, which throws onto the honest error surface.
+          session.profileRead !== "failed" && !isAdmin
+        : !roles.includes(requirement.role);
+    if (refused && requirement.kind === "role" && requirement.role === "company") {
+      companyMembershipArm = true;
+    } else if (refused) {
+      redirect(refusalDestination(locale, requirement));
+    }
+  }
+
+  // Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
+  // for EVERY identity — personal space + every org membership from the
+  // canonical engagement_contexts spine. The reads are request-cached, so the
+  // company-identity block below reuses the same underlying queries.
+  //
+  // No identity argument (owner program 2026-09-23): the resolver reads the
+  // identity that decides its single-org default from the session profile
+  // itself, so the page, the employer chain, the dispatcher and this shell
+  // get ONE answer per request instead of one per argument.
+  //
+  // THE ONE READ (W9): this is the only `getWorkspaceContext()` call in the
+  // shell. The company gate's membership arm above and the chip, the role
+  // switcher and the auth context below all read THIS binding.
+  const workspace = await getWorkspaceContext();
+
+  if (companyMembershipArm && requirement && !workspaceOpensCompanySpace(workspace)) {
+    redirect(refusalDestination(locale, requirement));
+  }
+
+  const adminUiHidden = isAdmin ? await readAdminUiHidden() : false;
+  const activeRole = ROLES.has(profile?.active_role as Role)
+    ? (profile?.active_role as Role)
+    : (roles[0] ?? null);
+
+  // WHICH organization is active — derived from the ONE workspace context
+  // resolved above, never from a second reader.
+  //
+  // W9 (last `getOwnCompany()` read site): this block used to ask
+  // `getActiveOrganizationContext()`, which lists OWNED organizations only,
+  // and fall back to `getOwnCompany()` (`companies.profile_id = auth.uid()`)
+  // — the single-company-per-person assumption the multi-org train removed.
+  // Both readers are blind to `company_memberships`, so a manager or admin of
+  // an organization they do not OWN got `activeOrgName = null`: the workspace
+  // chip (fed by `getWorkspaceContext`, which merges owned + governance +
+  // engagement rows) named their organization while the role switcher and the
+  // chat's result context said nothing. One acting context cannot have two
+  // answers, so both readers are gone from this layout and the name comes
+  // from the workspace the chip itself is showing.
+  //
+  // The WORKSPACE is the acting context (owner audit P0.1), so the name
+  // follows the active workspace rather than the base identity — a person
+  // whose validated pointer is an organization really is acting there.
+  // `resolveActiveWorkspaceId` already fail-closes to the personal workspace
+  // for an ambiguous or revoked pointer, so nothing here can fabricate an org.
+  const organizationWorkspaces = workspace.workspaces.filter(
+    (w) => w.kind === "organization",
+  );
+  const activeWorkspace =
+    organizationWorkspaces.find((w) => w.id === workspace.activeWorkspaceId) ??
+    null;
+  const activeOrgName: string | null = activeWorkspace?.name ?? null;
+  const activeOrganizationId: string | null = activeWorkspace?.id ?? null;
+  // The full list is passed to the auth context; consumers apply the SAME
+  // `shouldOfferOrganizationSwitch` rule (>1) the layout used to duplicate.
+  const organizations: SwitchableOrganization[] = organizationWorkspaces.map(
+    (w) => ({ id: w.id, name: w.name }),
+  );
+  // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
+  // to the client chrome selector (which needs no data fetch of its own).
+  // The active organization's declared capabilities name the education area
+  // in the header (UX_GAPS I-1). Request-cached: the organization pages read
+  // the same rows in the same render. Read beside the labels, not after them.
+  const [tChat, activeOrganizationCapabilities] = await Promise.all([
+    getTranslations("conversation.chat"),
+    activeOrganizationId
+      ? readOrganizationCapabilities(activeOrganizationId)
+      : Promise.resolve<readonly string[]>([]),
+  ]);
+  const nav: ConversationNavLabels = {
+    chat: tChat("navChat"),
+    journal: tChat("navJournal"),
+    messages: tChat("navMessages"),
+    calendar: tChat("navCalendar"),
+    profile: tChat("navProfile"),
+  };
+
+  return (
+    <NextIntlClientProvider messages={pickClientMessages(await getMessages())}>
+      <AuthProvider
+        initial={{
+          user: { id: user.id, email: user.email ?? null },
+          profile: {
+            full_name: profile?.full_name ?? null,
+            email: profile?.email ?? null,
+          },
+          activeRole,
+          roles,
+          isAdmin,
+          adminUiHidden,
+          activeOrgName,
+          organizations,
+          activeOrganizationId,
+          activeOrganizationCapabilities,
+          workspaces: [...workspace.workspaces],
+          activeWorkspaceId: workspace.activeWorkspaceId,
+          workspacePointerAvailable: workspace.pointerAvailable,
+        }}
+      >
+        {/* Streamed notification spine: same single source, off the TTFB
+          critical path. Hydrates the bell + nav badges via the auth context as
+          soon as the derived signals resolve. Shared by every chrome mode. */}
+        {/* KEYED BY THE WORKSPACE (audit 2026-10-21): a workspace switch runs
+            in a transition, and React keeps an already-shown boundary's old
+            content until the new one resolves — so the switch (chip, page)
+            waited for the slowest badge read, up to tens of seconds on a
+            cache miss, showing "Switching…". A NEW boundary may show its
+            fallback, so the switch commits at once and the bell fills in. */}
+        <Suspense key={workspace.activeWorkspaceId} fallback={null}>
+          <SpineStream activeRole={activeRole} />
+        </Suspense>
+        <SessionTelemetry />
+        {/* A page from the build before a deploy reloads once instead of
+            failing its next action ("Failed to find Server Action"). */}
+        <StaleBuildRecovery />
+        <AmbientGlow />
+        <DashboardChrome
+          nav={nav}
+          headerTitle={tChat("headerTitle")}
+        >
+          {/* Same reason: after a switch the shell and the chip commit as soon
+              as the layout's own reads finish; the page streams in under the
+              section skeleton. Same workspace = same key = navigation as before. */}
+          <Suspense key={workspace.activeWorkspaceId} fallback={<DashboardSectionLoading />}>
+            {children}
+          </Suspense>
+        </DashboardChrome>
+        {/* v1 tester language-feedback widget — authenticated sessions only. */}
+        <LanguageFeedbackWidget />
+      </AuthProvider>
+    </NextIntlClientProvider>
+  );
+}

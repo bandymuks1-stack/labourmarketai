@@ -1,0 +1,135 @@
+-- ============================================================================
+-- DRAFT — needs-human-gate — DO NOT APPLY automatically.
+-- Apply ONLY via Supabase MCP apply_migration after explicit owner approval.
+-- Never `db push`.
+--
+-- 20260727120000 — secdef_public_grant_hygiene_v1
+-- Security audit 2026-07-27: findings L-01 and L-08.
+--
+-- @human-gate-approved
+--   Acknowledged RED because it contains REVOKE statements, which the
+--   migration-safety gate classifies as grant-surface changes. The annotation
+--   makes CI pass; it does NOT authorise an automatic merge or apply. This
+--   migration TIGHTENS the grant surface — it grants nothing to anyone.
+--
+-- ----------------------------------------------------------------------------
+-- L-01 — RESIDUAL DEFAULT `PUBLIC` EXECUTE GRANT (the 2026-07-22 root cause,
+--        still live on three functions)
+-- ----------------------------------------------------------------------------
+-- On 2026-07-22 a P0 was fixed: seven SECURITY DEFINER RPCs were anon-reachable
+-- and guarded ownership NULL-unsafely, so an unauthenticated caller could
+-- rewrite and delete other people's rows. The root cause was never the seven
+-- functions. It was the idiom `GRANT EXECUTE ... TO authenticated` written
+-- WITHOUT a matching `REVOKE ... FROM PUBLIC`, which leaves Postgres's default
+-- PUBLIC EXECUTE grant in place — visible in `proacl` as a leading `=X/postgres`.
+--
+-- The 2026-07-27 audit read the production catalog and found that idiom STILL
+-- LIVE on three functions created by 20260719120000_business_public_profile.sql
+-- (lines 146-148 grant to `anon, authenticated` with no accompanying revoke):
+--
+--   get_public_business_profile_v1(p_slug text)      proacl: =X/postgres | ...
+--   get_public_business_listings_v1(p_org_id uuid)   proacl: =X/postgres | ...
+--   get_public_business_services_v1(p_org_id uuid)   proacl: =X/postgres | ...
+--
+-- (submit_company_need_public_v1 was correctly revoked — it has no leading `=X`.)
+--
+-- IS IT EXPLOITABLE TODAY? No, and the audit says so plainly. PUBLIC is a
+-- superset of `anon`, and all three functions are INTENTIONALLY anon-readable:
+-- they are read-only, `STABLE`, `search_path`-pinned, filtered on
+-- `o.public_profile_enabled = true`, and return only columns an owner explicitly
+-- published. They are all four entries in the reviewed allowlist at
+-- apps/web/lib/security/anon-secdef-allowlist.ts. So PUBLIC grants nothing here
+-- that `anon` was not already, deliberately, given.
+--
+-- SO WHY FIX IT? Two reasons that are about recurrence, not this exploit:
+--   1. It is the exact defective idiom that caused a CRITICAL-class incident in
+--      this codebase five days earlier. Leaving live instances of the pattern
+--      means the next function copied from these three inherits it — and the
+--      next one may not be a read-only, opt-in-gated reader.
+--   2. It is a BLIND SPOT in the guard built to prevent recurrence.
+--      scripts/check-anon-secdef-allowlist.mts fails on condition 4 — "PUBLIC
+--      (`=X`) is re-granted on a NON-allowlisted function". These three ARE
+--      allowlisted, so the guard passes them and the root-cause pattern survives
+--      exactly where it already exists. (The guard is being widened in the same
+--      slice to check allowlisted functions too.)
+--
+-- EFFECT: `anon` and `authenticated` keep their EXPLICIT grants, so the public
+-- business-profile page keeps working unchanged. Only the implicit PUBLIC grant
+-- goes away. Post-apply, `proacl` should read
+-- `postgres=X/postgres | anon=X/postgres | authenticated=X/postgres` with NO
+-- leading `=X/postgres` — the same shape submit_company_need_public_v1 has.
+--
+-- ----------------------------------------------------------------------------
+-- L-08 — MUTABLE search_path ON A TRIGGER GUARD
+-- ----------------------------------------------------------------------------
+-- Supabase's advisor flags public.customer_requests_status_transition_guard for
+-- a role-mutable search_path. It is NOT exploitable: the function is SECURITY
+-- INVOKER (`prosecdef = false`), so it carries no elevated privilege, and every
+-- call inside it is already schema-qualified (`public.is_admin()`). Pinned here
+-- for consistency with every other function in this schema, and so the advisor
+-- list is empty rather than "empty except one we decided to ignore" — a list
+-- with a standing exception stops being read.
+--
+-- ROLLBACK: supabase/rollbacks/20260727120000_secdef_public_grant_hygiene_v1.down.sql
+-- ============================================================================
+
+begin;
+
+-- ---------------------------------------------------------------------------
+-- L-01. Idempotent: REVOKE on an absent grant is a no-op, so re-running is safe.
+-- Signatures are written EXACTLY as pg_get_function_identity_arguments reports
+-- them, so this cannot silently target an overload that does not exist.
+-- ---------------------------------------------------------------------------
+revoke execute on function public.get_public_business_profile_v1(text) from public;
+revoke execute on function public.get_public_business_listings_v1(uuid) from public;
+revoke execute on function public.get_public_business_services_v1(uuid) from public;
+
+-- NO re-grant here, deliberately.
+--
+-- An earlier draft of this file re-asserted `grant execute ... to anon,
+-- authenticated` for readability ("state the full end state"). The
+-- secdef-anon-allowlist guard correctly rejected it: a migration that GRANTS
+-- EXECUTE to anon must name a signature on the reviewed allowlist, and the SQL
+-- grant form `get_public_business_profile_v1(text)` does not match the
+-- allowlist's identity signature `p_slug text`. The guard was right to fail —
+-- it cannot tell a cosmetic re-grant from a new one, and it must not have to.
+--
+-- The re-grants were never needed: `REVOKE ... FROM PUBLIC` does not touch
+-- explicit role grants, so anon and authenticated keep theirs untouched. This
+-- migration now only ever REMOVES privilege, which is what makes it safe to
+-- read at a glance.
+
+-- ---------------------------------------------------------------------------
+-- L-08. ALTER FUNCTION ... SET is idempotent and does not change the body.
+-- ---------------------------------------------------------------------------
+alter function public.customer_requests_status_transition_guard()
+  set search_path = public;
+
+commit;
+
+-- ============================================================================
+-- POST-APPLY VERIFICATION (read-only; run in the SQL editor after applying)
+--
+--   -- Expect: no row has an acl entry beginning with '=X' (the PUBLIC grant).
+--   select p.proname,
+--          array_to_string(p.proacl, ' | ') as acl,
+--          has_function_privilege('anon', p.oid, 'EXECUTE') as anon_exec
+--     from pg_proc p
+--     join pg_namespace n on n.oid = p.pronamespace
+--    where n.nspname = 'public'
+--      and p.proname in ('get_public_business_profile_v1',
+--                        'get_public_business_listings_v1',
+--                        'get_public_business_services_v1')
+--    order by p.proname;
+--
+--   -- Expect: proconfig contains search_path=public.
+--   select p.proname, p.proconfig
+--     from pg_proc p
+--     join pg_namespace n on n.oid = p.pronamespace
+--    where n.nspname = 'public'
+--      and p.proname = 'customer_requests_status_transition_guard';
+--
+-- FUNCTIONAL CHECK: load the public business profile page
+-- (/{locale}/business/{slug}) logged OUT. Profile, services and listings must
+-- all still render — anon_exec above must stay true.
+-- ============================================================================

@@ -1,0 +1,60 @@
+{"step":"health","build":"93b8069e","tag":"E2E-D5-mtphzgwx","startedAt":"2026-09-06T07:36:01.115Z"}
+{"leg":"S1_agency_invite_sentence","text":"","results":0,"firstAnswerMs":-1,"chips":["Tęsti","Atšaukti"]}
+{"leg":"S1_agency_invite_done","ms":47500,"said":null}
+{"readback":"S1 invitation","error":"42501 permission denied for table company_worker_invitations","rows":null}
+{"check":"S1 roster invitation row pending on the agency","ok":false,"detail":null}
+{"leg":"S1_failed_requests","failed":[]}
+{"leg":"S2_person_invitations","text":"L LabourMarket AI Jums adresuoti kvietimai: 1.","results":0,"firstAnswerMs":1426,"chips":["Priimti","Vėliau"]}
+{"check":"S2 the agency's roster invitation is offered with an accept control","ok":true,"detail":1}
+{"leg":"S2_person_accepted","ms":63794,"done":"Priimta — dabar esate susieti."}
+{"readback":"S2 roster link","error":"42501 permission denied for table company_workers","rows":null}
+{"check":"S2 company_workers link active (agency × person)","ok":false,"detail":null}
+{"readback":"S2 invitation after","error":"42501 permission denied for table company_worker_invitations","rows":null}
+{"leg":"S2_failed_requests","failed":[]}
+{"leg":"S3_client_demand","text":"L LabourMarket AI Klientų pasidalinti poreikiai: • Suvirintojas Siūlyti kandidatą: Suvirintojas","results":0,"firstAnswerMs":1545,"chips":["Siūlyti kandidatą: Suvirintojas"]}
+{"check":"S3 the shared need 'Suvirintojas' is listed","ok":true,"detail":"L LabourMarket AI Klientų pasidalinti poreikiai: • Suvirintojas Siūlyti kandidatą: Suvirintojas"}
+{"leg":"S3_propose_sentence","text":"","results":0,"firstAnswerMs":-1,"chips":["Tęsti","Atšaukti"]}
+{"check":"S3 the roster select offers the person","ok":true,"detail":[{"value":"","text":"—"},{"value":"c83fd3d3-d974-4fa9-92eb-8d45af333d19","text":"E2E Spine Žmogus"},{"value":"0dbd5eda-59b3-4f89-8d8e-01f41a542bd2","text":"E2E Worker Two"}]}
+{"leg":"S3_proposed","ms":114811,"said":"Pasiūlymas įrašytas — klientas jį matys prie savo poreikio ir galės priimti arba atmesti.","options":[{"value":"","text":"—"},{"value":"c83fd3d3-d974-4fa9-92eb-8d45af333d19","text":"E2E Spine Žmogus"},{"value":"0dbd5eda-59b3-4f89-8d8e-01f41a542bd2","text":"E2E Worker Two"}]}
+{"leg":"S3_status","text":"L LabourMarket AI Jūsų pasiūlymų būsena: • Suvirintojas — E2E Spine Žmogus · Pasiūlyta • Suvirintojas — E2E Worker Two · Rezervacija priimta · Klientas priėmė • Suvirintojas — E2E Worker Two · Rezervacija priimta · Klientas atmetė Klientų poreikiai Įmonės erdvė","results":0,"firstAnswerMs":1041,"chips":["Pasiūlymų būsena","Klientų poreikiai","Įmonės erdvė"]}
+{"readback":"S3 offer","error":"42501 permission denied for table agency_candidate_offers","rows":null}
+{"check":"S3 agency_candidate_offers row 'offered' for the person on the shared need","ok":false,"detail":null}
+{"leg":"S3_failed_requests","failed":[]}
+{"leg":"S4_client_offers","text":"L LabourMarket AI Tai galite padaryti savo įmonės vardu — pasirinkite erdvę: E2E Walker UAB","results":0,"firstAnswerMs":1446,"chips":["","E2E Walker UAB"]}
+{"check":"S4 exactly one open offer carries an accept chip","ok":false,"detail":{"count":0,"labels":[]}}
+{"readback":"S4 offer after","error":"42501 permission denied for table agency_candidate_offers","rows":null}
+{"check":"S4 offer accepted with a booking_id","ok":false,"detail":null}
+{"readback":"S4 booking","error":"42501 permission denied for table booking_requests","rows":null}
+{"check":"S4 booking_requests row 'proposed' for the person (owner = client)","ok":false,"detail":null}
+{"leg":"S4_failed_requests","failed":[]}
+{"leg":"S5_person_offers","text":"L LabourMarket AI Kol kas neturi pasiūlymų. Kai profilis bus paruoštas, darbdaviai galės siųsti pasiūlymus ir jie atsiras čia. Ieškau darbo Su kuo dirbu Mano profilis","results":0,"firstAnswerMs":1250,"chips":["Ieškau darbo","Su kuo dirbu","Mano profilis"]}
+{"check":"S5 the booking card offers Priimti","ok":false,"detail":0}
+{"readback":"S5 booking after","error":"42501 permission denied for table booking_requests","rows":null}
+{"check":"S5 booking accepted","ok":false,"detail":null}
+{"readback":"S5 engagement","error":"42501 permission denied for table company_worker_engagements","rows":null}
+{"check":"S5 NEW company_worker_engagements row (client company × person, source = the new booking)","ok":false,"detail":null}
+{"readback":"S5 booking events","error":"42501 permission denied for table booking_request_events","rows":null}
+{"leg":"S5_failed_requests","failed":[]}
+{"leg":"S6a_projects","text":"L LabourMarket AI Štai jūsų vykdomi darbai. E2E Kauno objektas (testinis) E2E Vilniaus objektas (testinis)","results":0,"firstAnswerMs":1442,"chips":["E2E Kauno objektas (testinis)","E2E Vilniaus objektas (testinis)"]}
+{"leg":"S6a_chat_picker","said":"L\nLabourMarket AI\nKas turėtų jame dirbti?\nE2E Worker Two","chips":["E2E Worker Two"]}
+{"leg":"S6a_chat_picker_offers_booking_engaged_person","inChat":false}
+{"check":"S6b the person is offered by the ENGAGEMENT group of the page picker (not the roster)","ok":false,"detail":"absent"}
+WALK_FAILED locator.selectOption: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for getByTestId('project-assign').locator('select[name="worker_profile_id"]')[22m
+[2m    - locator resolved to <select required="" name="worker_profile_id" class="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary">…</select>[22m
+[2m  - attempting select option action[22m
+[2m    2 × waiting for element to be visible and enabled[22m
+[2m      - did not find some options[22m
+[2m    - retrying select option action[22m
+[2m    - waiting 20ms[22m
+[2m    2 × waiting for element to be visible and enabled[22m
+[2m      - did not find some options[22m
+[2m    - retrying select option action[22m
+[2m      - waiting 100ms[22m
+[2m    59 × waiting for element to be visible and enabled[22m
+[2m       - did not find some options[22m
+[2m     - retrying select option action[22m
+[2m       - waiting 500ms[22m
+
+EXIT 1

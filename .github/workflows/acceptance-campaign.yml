@@ -1,0 +1,146 @@
+name: acceptance-campaign
+
+# OWNER ACCEPTANCE CAMPAIGN 2026-10-22 .. 2026-10-25 (owner orders 2026-10-21, issue #2659).
+# Runs on GitHub's own scheduler, independent of any agent session or the owner's computer.
+# A tick dispatches the next walk of the day's plan that has not reached production yet (then, from
+# 10-24, one whose latest run did not pass and that has not been retried yet that day) through prod-qa-walk.yml WITHOUT budget_override, waits
+# for it, and then dispatches a FRESH tick of itself — so the plan no longer depends on how often
+# GitHub actually fires the cron (10-21/22 it fired 4 times in 12 h instead of every 30 minutes),
+# and every tick re-reads the repository variables. The cron stays as the fallback that restarts
+# the chain; the concurrency group keeps at most one tick running and one waiting.
+#
+# Two limits, both only ever stop it:
+#   * the 24 h walk budget (PROD_QA_WALK_DAILY_BUDGET) in prod-qa-walk.yml stays the gate: a
+#     refused walk never reaches production and consumes nothing; the tick waits, then hands over;
+#   * the owner's 12 production checks per day (#2659) count walks that reached production that
+#     UTC day (the start of their Provision step, the same predicate as the budget gate) AND the
+#     local Chrome checks recorded for the day in the repository variable ACCEPTANCE_LOCAL_CHECKS
+#     ("2026-10-22=3,2026-10-23=0"): the tick dispatches nothing once walks + local reach 12.
+# Outside the campaign window the job exits without doing anything.
+
+on:
+  schedule:
+    - cron: "17,47 * * * *"
+  workflow_dispatch: {}
+
+permissions:
+  actions: write
+  contents: read
+
+concurrency:
+  group: acceptance-campaign
+  cancel-in-progress: false
+
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - name: Dispatch the next walk of the day's plan, wait for it, hand over
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          LOCAL_CHECKS: ${{ vars.ACCEPTANCE_LOCAL_CHECKS }}
+          DAILY_CHECKS: "48"   # same as PROD_QA_WALK_DAILY_BUDGET (see prod-qa-walk.yml: measured, 48 until the origin stall is fixed)
+        run: |
+          set -euo pipefail
+          DAY1="role-routes journal-confirm living-cv-growth company-chain brigade-formation project-execution org-roster orders-bookings documents-approvals marketplace-goods-services jobs-search notifications-inapp"
+          DAY2="mcp-agents manager-chat calendar-planning chat-continuity project-context worker-identity-split agency-chain marketplace staff-review-notice mobile-surfaces sectors-languages"
+          # 2026-10-23 owner order (#2659 report 11): spend the 12 checks on the walks that prove the most
+          # NOT_VERIFIED rows of the 275-row matrix first. billing-test-mode is left out while production is
+          # armed LIVE (it cannot pass there; Stripe TEST runs need a TEST deployment).
+          UNVERIFIED_FIRST="company-chain search-support-privacy project-execution org-roster profile-cv-history public-org-locales orders-bookings role-routes manager-chat documents-approvals jobs-search notifications-inapp marketplace-goods-services"
+          DAY3="profile-cv-history search-support-privacy public-org-locales learning-practice recognition-chain chat-confirm-once mcp-chain employee-beta-gate"
+          log() { echo "$(date -u +%H:%M) $*" | tee -a "$GITHUB_STEP_SUMMARY"; }
+          handover() { gh workflow run acceptance-campaign.yml -R "$REPO" --ref main; log "handed over to a fresh tick"; }
+
+          today=$(date -u +%F)
+          case "$today" in
+            2026-10-22) plan="$DAY1"; retry_failed=0 ;;
+            2026-10-23) plan="$UNVERIFIED_FIRST $DAY2 $DAY3 $DAY1"; retry_failed=1 ;;
+            2026-10-24) plan="$DAY3 $DAY1 $DAY2"; retry_failed=1 ;;
+            2026-10-25) plan="$DAY1 $DAY2 $DAY3"; retry_failed=1 ;;
+            *) log "outside the campaign window ($today): nothing to do"; exit 0 ;;
+          esac
+
+          # Never alongside another manual/scheduled walk. A push-triggered run sits in its
+          # 120-min debounce and is left out — the walk job's own concurrency group serialises it.
+          busy=$(gh run list -R "$REPO" -w prod-qa-walk.yml --limit 20 --json status,event \
+            --jq '[.[] | select(.status != "completed" and .event != "push")] | length')
+          if [ "$busy" -gt 0 ]; then log "a walk is in flight ($busy): the next tick continues"; exit 0; fi
+
+          # Every walk run that REACHED production: its walk job's Provision step started (the
+          # budget gate's own predicate), dated by that step's start. Runs created the day before
+          # are read too, so a push run debounced across midnight counts on the day it reached
+          # production. The spec comes from the run title (prod-qa-walk <spec>), or, for runs
+          # older than that title, from the artifact prod-qa-<spec>-<run id>.
+          since=$([ "$retry_failed" = 1 ] && echo "2026-10-22" || echo "$today")
+          from=$(date -u -d "$since -1 day" +%F)
+          declare -A last=() today_tried=()
+          walks_today=0
+          while IFS=$'\t' read -r id title conclusion; do
+            [ -n "$id" ] || continue
+            reached_at=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped") | .started_at][0] // ""')
+            [ -n "$reached_at" ] || continue
+            case "$reached_at" in "$today"*) walks_today=$((walks_today + 1)) ;; esac
+            [[ "$reached_at" < "$since" ]] && continue
+            spec=${title#prod-qa-walk }
+            case "$spec" in ""|"$title"|prod-qa-walk|push|schedule|workflow_dispatch)
+              name=$(gh api "repos/$REPO/actions/runs/$id/artifacts" --jq '.artifacts[0].name // ""')
+              spec=${name#prod-qa-}; spec=${spec%-"$id"} ;;
+            esac
+            [ -n "$spec" ] || continue
+            [ "$conclusion" = success ] && last[$spec]=success || last[$spec]=failure
+            case "$reached_at" in "$today"*) today_tried[$spec]=1 ;; esac
+          done < <(gh run list -R "$REPO" -w prod-qa-walk.yml --created ">=$from" --status completed --limit 300 \
+                     --json databaseId,displayTitle,conclusion \
+                     --jq '.[] | "\(.databaseId)\t\(.displayTitle)\t\(.conclusion)"' | sort -n)
+
+          local_today=$(printf '%s' "${LOCAL_CHECKS:-}" | tr ',' '\n' | sed -n "s/^ *$today *= *\([0-9]*\).*/\1/p" | head -n1)
+          local_today=${local_today:-0}
+          if [ $((walks_today + local_today)) -ge "$DAILY_CHECKS" ]; then
+            log "today's production checks are used: walks $walks_today + local Chrome $local_today >= $DAILY_CHECKS"
+            exit 0
+          fi
+
+          # Walks that have not run yet come first; only then, from 10-24, a failed walk is
+          # retried — at most once a day, so one persistent failure cannot eat the day's checks.
+          next=""
+          for s in $plan; do
+            [ "${last[$s]:-none}" = none ] && { next="$s"; break; }
+          done
+          if [ -z "$next" ] && [ "$retry_failed" = 1 ]; then
+            for s in $plan; do
+              if [ "${last[$s]}" = failure ] && [ -z "${today_tried[$s]:-}" ]; then next="$s"; break; fi
+            done
+          fi
+          if [ -z "$next" ]; then log "today's plan is complete"; exit 0; fi
+
+          before=$(gh run list -R "$REPO" -w prod-qa-walk.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0')
+          gh workflow run prod-qa-walk.yml -R "$REPO" --ref main -f spec="$next"
+          log "dispatched: $next (walks today $walks_today, local Chrome $local_today; no override)"
+          id=""
+          for _ in $(seq 1 30); do
+            sleep 10
+            id=$(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --limit 5 --json databaseId \
+              --jq "[.[] | select(.databaseId > $before) | .databaseId] | min // empty")
+            [ -n "$id" ] && break
+          done
+          if [ -z "$id" ]; then log "the dispatched run did not appear; the next scheduled tick continues"; exit 0; fi
+          until [ "$(gh run view "$id" -R "$REPO" --json status --jq .status)" = completed ]; do sleep 60; done
+          budget=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="budget") | .conclusion][0] // ""')
+          walk=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
+          reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+            --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+          log "$next run $id: budget=$budget walk=$walk reached_production=$reached"
+          if [ "$budget" = failure ]; then
+            # Refused by the 24 h budget: nothing reached production. Let the window free first.
+            sleep 1200
+          elif [ "$reached" -eq 0 ]; then
+            # Accepted but never reached production (setup failure, cancellation): stop the chain
+            # instead of re-dispatching the same spec; the next scheduled tick tries again.
+            log "the walk never reached production; the chain stops here"
+            exit 0
+          fi
+          handover

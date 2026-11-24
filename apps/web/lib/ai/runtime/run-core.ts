@@ -1,0 +1,513 @@
+/**
+ * AI completion dispatch — provider selection + CHAIN TRAVERSAL.
+ *
+ * Two dispatch paths live here, and the difference between them is whether the
+ * caller supplied a routed task.
+ *
+ * LEGACY PATH (no chain context) — unchanged, byte for byte in behaviour: one
+ * provider, `cfg.provider`, selected by `providerKindFor`. Every existing
+ * caller and test keeps working exactly as before.
+ *
+ * CHAIN PATH (chain context supplied) — the one #1102 built the ordering module
+ * for and could not yet use. `resolveProviderChain` produces an ORDERED list of
+ * candidates that may serve this task, cheapest class first and privacy-vetoed;
+ * this file walks it. A candidate that fails is CLASSIFIED, and the class — not
+ * the fact of failure — decides whether the next candidate is tried at all.
+ *
+ * WHAT THIS FIXES. Before it, "Anthropic has no key" and "this task has nowhere
+ * to run" were the same event: one provider, no successor, one indistinguishable
+ * failure. Now a run ends in one of four honestly different places — a provider
+ * answered, the deterministic path applies, every candidate was tried and named,
+ * or no candidate was ever allowed to see the payload.
+ *
+ * WHAT IT REFUSES TO DO. It never retries a request-attributed failure across
+ * the whole chain (see `advancePolicyFor`), because handing the same personal
+ * payload to four vendors to receive the same malformed answer is a disclosure
+ * with no upside. And it can never promote a provider the operator did not
+ * configure: health is observed by `provider-health.ts` from real config, and
+ * only `ready` is ever a candidate.
+ *
+ * Pure-ish: no env read, no server-only. The adapters own their own env gates,
+ * and the states come in from the server boundary.
+ */
+import { providerKindFor, type AiRuntimeConfig, type AiProviderKind } from "./config-core";
+import type {
+  AiCompletionProvider,
+  AiCompletionRequest,
+  AiCompletionResult,
+} from "./types";
+import { disabledCompletionProvider } from "./providers/disabled";
+import { mockCompletionProvider } from "./providers/mock";
+import { anthropicCompletionProvider } from "./providers/anthropic";
+import { xaiCompletionProvider } from "./providers/xai";
+import { egressPermitted, type AiEgressGrant } from "./data-egress";
+import { sensitivityForTask, type AiDataSensitivity } from "./data-sensitivity";
+import { openaiCompletionProvider } from "./providers/openai";
+import { geminiCompletionProvider } from "./providers/gemini";
+import { deeplCompletionProvider } from "./providers/deepl";
+import {
+  libretranslateCompletionProvider,
+  libretranslateEgressProfile,
+} from "./providers/libretranslate";
+import {
+  cloudflareCompletionProvider,
+  cloudflareEgressProfile,
+} from "./providers/cloudflare";
+import { localCompletionProvider } from "./providers/local";
+import {
+  cloudflareLlmCompletionProvider,
+  groqCompletionProvider,
+  mistralCompletionProvider,
+} from "./providers/free-tier";
+import type { ProviderCooldown } from "./provider-cooldown";
+import type { ProviderCounters } from "./provider-counters";
+import {
+  advancePolicyFor,
+  classifyCompletionFailure,
+  resolveProviderChain,
+  AI_PROVIDER_PROFILES,
+  type AiChainProviderId,
+  type AiProviderProfile,
+  type AiProviderState,
+  type ChainCandidate,
+} from "./provider-chain";
+import { taskTypeForAgent, type TaskRouteDecision, type AiTaskType } from "./task-routing";
+import { AI_MODEL_CANDIDATES } from "./model-candidates";
+import { registryEntryForModel } from "./model-registry";
+import type { AiAgentKey } from "../registry/types";
+import { blockedByZeroPaidBudget, paidProvidersAllowed, ZERO_PAID_BUDGET_REASON } from "./paid-budget";
+
+export function selectCompletionProvider(
+  kind: ReturnType<typeof providerKindFor>,
+): AiCompletionProvider {
+  switch (kind) {
+    case "mock":
+      return mockCompletionProvider;
+    case "local":
+      return localCompletionProvider;
+    case "anthropic":
+      return anthropicCompletionProvider;
+    case "openai":
+      return openaiCompletionProvider;
+    case "gemini":
+      return geminiCompletionProvider;
+    case "xai":
+      return xaiCompletionProvider;
+    case "cloudflare":
+      return cloudflareLlmCompletionProvider;
+    case "mistral":
+      return mistralCompletionProvider;
+    case "groq":
+      return groqCompletionProvider;
+    case "disabled":
+    default:
+      return disabledCompletionProvider;
+  }
+}
+
+/** Chain id → adapter. Separate from `selectCompletionProvider` because the
+ *  chain addresses a provider directly, not through `cfg.provider`. */
+/**
+ * Adapter for a chain provider, or null when nothing can serve it.
+ *
+ * AN EXPLICIT PER-PROVIDER BINDING, and it has to be. An earlier version of
+ * this dispatched by WIRE PROTOCOL — every `openai-compatible` provider
+ * returning `openaiCompletionProvider` — on the reasoning that one protocol
+ * needs one implementation. That was wrong in a way worth recording: each
+ * adapter hardcodes its OWN endpoint, key env var, enable flag and model map
+ * (`api.openai.com` + `OPENAI_API_KEY` vs `api.x.ai` + `XAI_API_KEY`). Sharing
+ * the adapter would have sent an xAI-selected payload to OpenAI's endpoint
+ * under OpenAI's key — a different vendor than the chain chose — and would have
+ * reported an xAI-only deployment as disabled.
+ *
+ * `transport` on the registry entry still records protocol compatibility, which
+ * is true and useful: it says a future parameterised adapter COULD serve that
+ * provider. It does not by itself say credentials exist for it. Until the
+ * openai-compatible adapter takes its base URL, key and model map per provider,
+ * a newly registered provider needs a binding here before it can run — and
+ * gets an honest refusal, not another vendor's endpoint, until it has one.
+ *
+ * TOTAL, AND FAILS CLOSED. A lookup rather than an exhaustive switch, because
+ * `AiChainProviderId` is now open: an unrecognised id must degrade honestly,
+ * never fall through to `undefined` and crash at `.complete()`. "No adapter"
+ * and "the adapter failed" stay different sentences.
+ */
+const ADAPTER_BY_PROVIDER: Readonly<Record<string, AiCompletionProvider>> = {
+  // `local` is not registry-bound: it serves whatever model the operator
+  // pulled, so it has no fixed model id and is matched by provider directly.
+  local: localCompletionProvider,
+  anthropic: anthropicCompletionProvider,
+  openai: openaiCompletionProvider,
+  gemini: geminiCompletionProvider,
+  xai: xaiCompletionProvider,
+  // Free API tiers (2026-10-25): each its OWN binding on the shared
+  // OpenAI-compatible wire — own endpoint, own key, own model table.
+  cloudflare: cloudflareLlmCompletionProvider,
+  mistral: mistralCompletionProvider,
+  groq: groqCompletionProvider,
+};
+
+function adapterForChainId(id: AiChainProviderId): AiCompletionProvider | null {
+  return ADAPTER_BY_PROVIDER[id] ?? null;
+}
+
+
+/** What the chain path needs that the legacy path does not. */
+export interface ChainDispatchContext {
+  /** The resolved route — supplies the task type and any block. */
+  readonly decision: TaskRouteDecision;
+  /** Observed provider readiness (provider-health.ts). */
+  readonly states: readonly AiProviderState[];
+  /**
+   * Profile table override. Production always uses the shipped
+   * `AI_PROVIDER_PROFILES`; this exists so a test can INJECT a cost class that
+   * does not exist yet — without it, the free-tier privacy veto has no subject
+   * and could not be proven at the dispatch/adapter-invocation level at all.
+   */
+  readonly profiles?: readonly AiProviderProfile[];
+  /**
+   * Egress-grant override. Production always uses the shipped
+   * `AI_EGRESS_GRANTS`, which is EMPTY by owner decision — so without this a
+   * test could not reach a cloud adapter at all, and the dispatch-level
+   * mechanics (fallback ordering, adapter invocation) would be unprovable.
+   * Injecting a grant here is the counterpart of injecting a profile above.
+   */
+  readonly grants?: readonly AiEgressGrant[];
+  /**
+   * Secondary translation provider override. Production always uses
+   * `SECONDARY_TRANSLATION_PROVIDERS`; a test injects failing/succeeding
+   * adapters to prove the fallback order (a controlled hook, never an env flag).
+   */
+  readonly secondaries?: readonly SecondaryTranslationProvider[];
+  /**
+   * Runtime health from REAL failures (provider-cooldown.ts). The server
+   * boundary passes the process-wide instance; absent (tests, evals) = no
+   * cooldown, so the chain behaves exactly as before. A cooling provider is
+   * tried LAST, never removed — a cooldown reorders, it cannot empty a chain.
+   */
+  readonly cooldown?: ProviderCooldown;
+  /**
+   * Per-provider attempt counters (provider-counters.ts): requests, latency,
+   * rate limits and errors by class. The server boundary passes the
+   * process-wide instance; absent (tests, evals) = nothing counted. Counting
+   * never changes routing.
+   */
+  readonly counters?: ProviderCounters;
+  /** Clock seam for the cooldown and the counters; defaults to Date.now. */
+  readonly now?: () => number;
+}
+
+/**
+ * A machine-translation provider that sits AHEAD of the LLM chain for the
+ * tasks whose policy prefers a dedicated engine (`languageRouting`).
+ *
+ * `profile()` is evaluated per call because it can depend on operator
+ * configuration (a self-hosted engine is `local`, a public one is external) and
+ * the egress gate must see the truth, not a build-time guess.
+ */
+export interface SecondaryTranslationProvider {
+  readonly id: string;
+  readonly adapter: AiCompletionProvider;
+  readonly profile: () => {
+    readonly id: string;
+    readonly locality: "local" | "cloud";
+    readonly costClass: string;
+  };
+}
+
+/**
+ * THE ORDER, free-and-self-hosted first: a self-hosted engine (no egress, no
+ * bill) → DeepL (when the owner enabled it) → Cloudflare Workers AI free
+ * allocation. Each is env-gated and egress-gated independently; an unconfigured
+ * or refused provider is skipped silently, a failing one (429, timeout, 5xx,
+ * unsupported language) advances to the next. The LLM chain (Gemini, …) follows,
+ * and the ORIGINAL text is the final answer — the caller never sees an error.
+ */
+export const SECONDARY_TRANSLATION_PROVIDERS: readonly SecondaryTranslationProvider[] = [
+  { id: "libretranslate", adapter: libretranslateCompletionProvider, profile: libretranslateEgressProfile },
+  { id: "cloudflare", adapter: cloudflareCompletionProvider, profile: cloudflareEgressProfile },
+  { id: "deepl", adapter: deeplCompletionProvider, profile: () => deeplEgressProfile() },
+];
+
+/**
+ * Walk the secondary translation providers in order, when the policy asked for
+ * a dedicated engine. Lifted into a helper so both paths share it: a
+ * not-configured, refused or failing provider falls through honestly to the
+ * next one and finally to the LLM tier, and nothing is faked.
+ *
+ * DeepL was the only member until the multi-provider order (2026-10-01).
+ */
+async function tryPreferredSecondary(
+  request: AiCompletionRequest,
+  cfg: AiRuntimeConfig,
+  grants?: readonly AiEgressGrant[],
+  secondaries: readonly SecondaryTranslationProvider[] = SECONDARY_TRANSLATION_PROVIDERS,
+): Promise<AiCompletionResult | null> {
+  // The policy marker names a dedicated engine class, not one vendor.
+  if (!request.preferredProvider) return null;
+  const allowPaid = paidProvidersAllowed();
+  for (const secondary of secondaries) {
+    // ZERO PAID API BUDGET: a metered engine (DeepL Pro) is skipped, a free
+    // one (`deepl_free`, LibreTranslate, Cloudflare m2m100) may still serve.
+    if (blockedByZeroPaidBudget(secondary.profile().costClass, allowPaid)) continue;
+    // Each secondary is an EXTERNAL provider (unless it declares itself local)
+    // and this call sits ahead of the chain's candidate loop, so the chain's
+    // veto never saw it. Without this check the one task that prefers a
+    // dedicated engine — `translate_message`, the only SENSITIVE_FREE_TEXT task
+    // there is — would have a direct route off the platform.
+    const verdict = egressPermitted(
+      secondary.profile(),
+      sensitivityForRequest(request),
+      grants,
+      taskForRequest(request),
+    );
+    if (!verdict.permitted) continue;
+    let result: AiCompletionResult;
+    try {
+      result = await secondary.adapter.complete(request, cfg);
+    } catch {
+      // One provider's failure must never break the thread.
+      continue;
+    }
+    if (result.status === "ok") return result;
+  }
+  return null;
+}
+
+/** DeepL has no `AI_PROVIDER_PROFILES` row — it is a secondary, not a chain
+ *  candidate — so the gate needs its shape stated here. Cloud, and priced per
+ *  character, which `data-egress` treats as unpriceable rather than free. */
+const DEEPL_PROFILE = {
+  id: "deepl",
+  locality: "cloud",
+  costClass: "paid",
+} as const;
+
+/**
+ * DeepL's egress identity, by PLAN. A Free / Developer key (suffix ":fx") is a
+ * different contract: DeepL "reserves the right to perpetually store any
+ * Content" and forbids personal data on it (pro-license §3.3.2, §8.3.11). It is
+ * therefore its own catalogue id, `deepl_free`, capped at PUBLIC by its terms —
+ * a grant written for DeepL Pro can never be stretched over a free key.
+ */
+export function deeplEgressProfile(
+  key: string | undefined = process.env.DEEPL_API_KEY,
+): { readonly id: string; readonly locality: "cloud"; readonly costClass: string } {
+  return key?.trim().endsWith(":fx")
+    ? { id: "deepl_free", locality: "cloud", costClass: "free_tier" }
+    : DEEPL_PROFILE;
+}
+
+/**
+ * What this request's payload carries, for the egress gate.
+ *
+ * FAILS CLOSED. An `agentKey` this runtime does not recognise yields no task
+ * type, and an unknown payload is treated as the most restricted class rather
+ * than the least — the opposite default would make an unrecognised agent the
+ * way around the boundary.
+ */
+/** The task a request runs, for a TASK-SCOPED egress grant; undefined for an
+ *  agent this runtime does not recognise (then no scoped grant applies). */
+function taskForRequest(request: AiCompletionRequest): AiTaskType | undefined {
+  return taskTypeForAgent(request.agentKey as AiAgentKey) as AiTaskType | undefined;
+}
+
+function sensitivityForRequest(request: AiCompletionRequest): AiDataSensitivity {
+  const task = taskTypeForAgent(request.agentKey as AiAgentKey) as
+    | AiTaskType
+    | undefined;
+  return task ? sensitivityForTask(task) : "SENSITIVE_FREE_TEXT";
+}
+
+/** The gate for a single configured provider, used by the legacy path. */
+function legacyEgressVerdict(
+  request: AiCompletionRequest,
+  kind: AiProviderKind,
+  grants?: readonly AiEgressGrant[],
+) {
+  const profile = AI_PROVIDER_PROFILES.find((p) => p.id === kind);
+  return egressPermitted(
+    profile ?? { id: kind, locality: kind === "local" ? "local" : "cloud", costClass: "paid" },
+    sensitivityForRequest(request),
+    grants,
+    taskForRequest(request),
+  );
+}
+
+export async function dispatchAiCompletion(
+  request: AiCompletionRequest,
+  cfg: AiRuntimeConfig,
+  chain?: ChainDispatchContext,
+): Promise<AiCompletionResult> {
+  const kind = providerKindFor(cfg);
+
+  // mock and disabled are WHOLE-RUNTIME states. They short-circuit both paths:
+  // a chain that reached a real adapter underneath `mock` would make the mock
+  // runtime meaningless, and one that reached a real adapter underneath
+  // `disabled` would be the exact failure the disabled state exists to prevent.
+  if (kind === "mock" || kind === "disabled") {
+    return selectCompletionProvider(kind).complete(request, cfg);
+  }
+
+  if (!chain) {
+    /* ── Legacy path — one provider, and now the SAME boundary. ────────────
+     *
+     * This branch used to dispatch straight to the configured provider. With
+     * the egress gate living only in the optional `ChainDispatchContext`, every
+     * caller that omitted a chain — `runtime/run.ts` among them — sent the
+     * payload to a live cloud provider with no check at all. A boundary a
+     * caller can skip by not passing an argument is not a boundary, so the
+     * check moved onto the PATH: it now runs whether or not a chain was
+     * supplied, and the grant table is consulted either way.
+     */
+    // ZERO PAID API BUDGET: the single configured provider is refused before
+    // any payload is built for it when it is metered and the owner has not
+    // opened the paid budget.
+    const legacyCost = AI_PROVIDER_PROFILES.find((p) => p.id === kind)?.costClass ?? (kind === "local" ? "free_local" : "paid");
+    if (blockedByZeroPaidBudget(legacyCost, paidProvidersAllowed())) {
+      return { status: "error", code: "unsupported", message: ZERO_PAID_BUDGET_REASON, provider: kind };
+    }
+    const verdict = legacyEgressVerdict(request, kind);
+    if (!verdict.permitted) {
+      return { status: "error", code: "unsupported", message: verdict.reason, provider: kind };
+    }
+    const preferred = await tryPreferredSecondary(request, cfg);
+    if (preferred) return preferred;
+    return selectCompletionProvider(kind).complete(request, cfg);
+  }
+
+  // ── Chain path ────────────────────────────────────────────────────────────
+  const outcome = resolveProviderChain(
+    chain.decision,
+    chain.states,
+    chain.profiles ?? AI_PROVIDER_PROFILES,
+    chain.grants,
+    paidProvidersAllowed(),
+  );
+
+  if (outcome.kind === "deterministic") {
+    // The caller should have computed this without us. Say so precisely rather
+    // than returning an empty "ok" that looks like a model answered.
+    return {
+      status: "error",
+      code: "unsupported",
+      message: outcome.reason,
+    };
+  }
+  if (outcome.kind === "unavailable") {
+    // Name every candidate and why it was passed over. This string is the
+    // difference between "the AI is off" and "everything is down", which used
+    // to be the same silence.
+    const detail = outcome.skipped
+      .map((s) => `${s.id}: ${s.reason}`)
+      .join("; ");
+    return {
+      status: "error",
+      code: "unsupported",
+      message: detail ? `${outcome.reason} — ${detail}` : outcome.reason,
+    };
+  }
+
+  const preferred = await tryPreferredSecondary(request, cfg, chain.grants, chain.secondaries);
+  if (preferred) return preferred;
+
+  const clock = chain.now ?? Date.now;
+  const ordered: ChainCandidate[] = [outcome.selected, ...outcome.remaining];
+  const candidates: ChainCandidate[] = chain.cooldown
+    ? chain.cooldown.order(ordered, clock())
+    : ordered;
+  let invalidOutputRetries = 0;
+  let last: AiCompletionResult = {
+    status: "error",
+    code: "unsupported",
+    message: "chain produced no candidate",
+  };
+
+  /**
+   * The request re-addressed to ONE candidate, or null when no honest model
+   * exists for it. `request.model` was resolved against the PRIMARY provider
+   * (run-agent.ts), so handing the unmodified request down the chain sent an
+   * anthropic-shaped id to whichever vendor came next. Now each candidate gets
+   * its OWN registry model for the routed alias, and a candidate with no such
+   * model is skipped with a reason — never dispatched with another vendor's id
+   * (or `undefined`) on the wire.
+   */
+  const requestForCandidate = (
+    candidate: ChainCandidate,
+  ): AiCompletionRequest | null => {
+    // Local hosts exactly the model the operator pulled (cfg.localModel);
+    // the adapter ignores request.model by design.
+    if (candidate.id === "local") return request;
+    if (request.modelAlias) {
+      const model = AI_MODEL_CANDIDATES[candidate.id]?.[request.modelAlias];
+      if (!model) return null;
+      return model === request.model ? request : { ...request, model };
+    }
+    // No routed alias: pass a concrete model only to the provider it belongs
+    // to; an unrecognised model rides through unchanged (legacy behaviour).
+    const entry = request.model ? registryEntryForModel(request.model) : null;
+    if (entry && entry.provider !== candidate.id) return null;
+    return request;
+  };
+
+  for (const candidate of candidates) {
+    const adapter = adapterForChainId(candidate.id);
+    if (adapter === null) {
+      // Registered and ordered, but nothing speaks its protocol. Skip it with
+      // an honest reason rather than crashing — the next candidate may serve.
+      last = {
+        status: "error",
+        code: "unsupported",
+        message: `no adapter bound for provider "${candidate.id}" — it needs an endpoint/key binding before it can run`,
+        provider: candidate.id,
+      };
+      continue;
+    }
+    const candidateRequest = requestForCandidate(candidate);
+    if (candidateRequest === null) {
+      last = {
+        status: "error",
+        code: "unsupported",
+        message: `provider "${candidate.id}" has no registry model for this route — skipped rather than dispatched with another vendor's model id`,
+        provider: candidate.id,
+      };
+      continue;
+    }
+    const startedAt = clock();
+    const result = await adapter.complete(candidateRequest, cfg);
+    const finishedAt = clock();
+    if (result.status === "ok") {
+      chain.counters?.noteAttempt(candidate.id, "ok", finishedAt - startedAt, finishedAt);
+      chain.cooldown?.noteSuccess(candidate.id);
+      return result;
+    }
+
+    // Attribute the failure to the provider that produced it, so an audit
+    // record cannot claim the primary provider failed when a different
+    // candidate did.
+    last = { ...result, provider: candidate.id };
+
+    const failure = classifyCompletionFailure(result);
+    chain.counters?.noteAttempt(
+      candidate.id,
+      failure ?? "PROVIDER_ERROR",
+      finishedAt - startedAt,
+      finishedAt,
+    );
+    if (failure === null) return result;
+    chain.cooldown?.noteFailure(
+      candidate.id,
+      failure,
+      result.status === "error" ? result.message : undefined,
+      clock(),
+    );
+    const policy = advancePolicyFor(failure);
+    if (policy === "stop") break;
+    if (policy === "advance_once") {
+      if (invalidOutputRetries >= 1) break;
+      invalidOutputRetries += 1;
+    }
+  }
+
+  return last;
+}

@@ -1,0 +1,867 @@
+import { readFileSync } from "node:fs";
+import { join, resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+
+import {
+  SCOPED_OWNER_WAIVERS,
+  decideWaiver,
+  evaluateFindings,
+  waiverContextFromEnv,
+  waiverValidUntil,
+  // The gate imports this EXACT module — there is no second copy of the rules
+  // to drift, so what these tests prove is what CI enforces.
+} from "../../../../.github/scripts/owner-waivers.mjs";
+
+/**
+ * SCOPED OWNER WAIVER — the mechanism that lets ONE reviewed transitional debt
+ * pass the product gate without deleting the axiom (owner ruling 2026-07-29).
+ *
+ * Every case the ruling demanded is proven here. The default posture is BLOCK:
+ * each test below removes exactly one condition and shows the gate closes.
+ */
+
+const REPO = resolve(__dirname, "..", "..", "..", "..");
+const GATE = join(REPO, ".github", "scripts", "product-gate.mjs");
+
+const MAP_FINDING = {
+  code: "not_reflected_on_map",
+  axiom: "A-01",
+  what: "components/app/world-state/context-panel.tsx",
+};
+const WAIVER_FINDING = {
+  code: "transitional_waiver_in_use",
+  axiom: "A-09",
+  what: "components/app/world-state/context-panel.tsx",
+};
+const BOTH = [MAP_FINDING, WAIVER_FINDING];
+
+/**
+ * SYNTHETIC fixture. The LIVE record was deleted in W6 (the map shipped, the
+ * answer became a real yes) — the mechanism itself stays proven on this
+ * fixture so a future owner ruling can add a record with confidence.
+ */
+const FIXTURE_WAIVER = {
+  id: "test-waiver",
+  axioms: ["A-01", "A-09"],
+  scope: "W3 (Context Panel) + W4 (AI Workspace)",
+  pullRequests: [909, 912],
+  approvedHeadShas: [] as string[],
+  postMergeBranches: ["main"],
+  files: ["components/app/world-state/context-panel.tsx"],
+  expectedFindings: [
+    { code: "not_reflected_on_map", file: "components/app/world-state/context-panel.tsx" },
+    { code: "transitional_waiver_in_use", file: "components/app/world-state/context-panel.tsx" },
+  ],
+  reason:
+    "Synthetic copy of the retired W3/W4 record, kept so every constraint of the mechanism stays executable and provably enforced.",
+  resolvedBy: "W6-map-slice",
+  approvedAt: "2026-07-29",
+  // OWNER-SET term on the fixture, so the calendar-expiry path stays proven:
+  // since owner P0 2026-10-22 only an owner-set term expires by date.
+  ownerSetExpiresAt: "2026-10-31",
+  owner: "Owner ruling 2026-07-29 — scoped transitional waiver (fixture copy).",
+};
+const FIXTURES = [FIXTURE_WAIVER];
+
+
+/** A context that satisfies every condition — the baseline the tests break. */
+const ok = (over: Record<string, unknown> = {}) => ({
+  changedFiles: ["apps/web/components/app/world-state/context-panel.tsx"],
+  pullRequest: 909,
+  headSha: null,
+  today: "2026-07-29",
+  ...over,
+});
+
+describe("scoped waiver — the approved cases pass", () => {
+  it("the exact #909 (W3) finding set is allowed", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 909 }), FIXTURES);
+    expect(v.pass).toBe(true);
+    expect(v.blockingFindings).toHaveLength(0);
+    expect(v.waivedFindings).toHaveLength(2);
+  });
+
+  it("the exact #912 (W4) finding set is allowed", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 912 }), FIXTURES);
+    expect(v.pass).toBe(true);
+  });
+
+  it("main's OWN push run is allowed after those PRs merged", () => {
+    // Without this the gate turns main red the moment a waived PR merges —
+    // the debt simply moved from the PR into the branch. It stays bounded:
+    // every other constraint (file, code, axiom, subset, expiry) still holds,
+    // and only `main` is listed.
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main" }), FIXTURES);
+    expect(v.pass).toBe(true);
+  });
+
+  it("…but main is still blocked once the waiver expires", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "main", today: "2027-01-01" }), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
+  });
+
+  it("…and a NEW violation on main still blocks", () => {
+    const extra = { code: "second_dashboard", axiom: "A-01", what: "apps/web/x/page.tsx" };
+    const v = evaluateFindings([...BOTH, extra], ok({ pullRequest: null, branch: "main" }), FIXTURES);
+    expect(v.pass).toBe(false);
+  });
+
+  it("the decision names owner, scope, expiry and what removes it", () => {
+    const d = decideWaiver(MAP_FINDING, ok(), FIXTURES);
+    expect(d.waived).toBe(true);
+    // `waived: true` guarantees a waiver; TS cannot see that through the JS.
+    const w = d.waiver!;
+    expect(w.owner).toMatch(/Owner ruling/);
+    expect(w.scope).toMatch(/W3.*W4/);
+    expect(waiverValidUntil(w, "2026-07-29")).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(w.resolvedBy).toBe("W6-map-slice");
+    expect(w.reason.length).toBeGreaterThan(80);
+  });
+});
+
+describe("scoped waiver — every missing condition BLOCKS", () => {
+  it("no waiver at all → blocked", () => {
+    const v = evaluateFindings(BOTH, ok(), []);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("no-waiver");
+  });
+
+  it("wrong PR → blocked", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 999 }), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+  });
+
+  it("not a PR and not a covered branch → blocked", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: null }), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+  });
+
+  it("a push to some OTHER branch → blocked", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: null, branch: "feat/anything" }), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+  });
+
+  it("wrong head SHA → blocked (when the waiver pins SHAs)", () => {
+    const pinned = [{ ...FIXTURE_WAIVER, approvedHeadShas: ["abc1234"] }];
+    const bad = evaluateFindings(BOTH, ok({ headSha: "deadbee" }), pinned);
+    expect(bad.pass).toBe(false);
+    expect(bad.blockingFindings[0].decision.rejection).toBe("sha-not-covered");
+    // …and the matching SHA passes, so the check is real in both directions.
+    expect(evaluateFindings(BOTH, ok({ headSha: "abc1234" }), pinned).pass).toBe(true);
+  });
+
+  it("expired → blocked", () => {
+    const v = evaluateFindings(BOTH, ok({ today: "2027-01-01" }), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
+    expect(v.blockingFindings[0].decision.detail).toMatch(/W6-map-slice/);
+  });
+
+  it("an EXTRA finding outside the reviewed set → blocked", () => {
+    // The teeth of "any additional diff re-triggers review".
+    const extra = {
+      code: "second_dashboard",
+      axiom: "A-01",
+      what: "apps/web/app/[locale]/dashboard/other/page.tsx",
+    };
+    const v = evaluateFindings([...BOTH, extra], ok(), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings.map((b) => b.finding.code)).toEqual(["second_dashboard"]);
+  });
+
+  it("the SAME code on a DIFFERENT file → blocked", () => {
+    const elsewhere = { ...MAP_FINDING, what: "components/app/world-state/other-panel.tsx" };
+    const v = evaluateFindings([elsewhere], ok(), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("no-waiver");
+  });
+
+  it("an axiom outside A-01 / A-09 → blocked", () => {
+    const v = evaluateFindings([{ ...MAP_FINDING, axiom: "A-06" }], ok(), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("axiom-not-waivable");
+  });
+
+  it("a waiver with no recorded owner approval → blocked", () => {
+    const unapproved = [{ ...FIXTURE_WAIVER, owner: "" }];
+    const v = evaluateFindings(BOTH, ok(), unapproved);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("no-waiver");
+  });
+});
+
+describe("scoped waiver — pre-existing debt vs a new change", () => {
+  const PANEL = "apps/web/components/app/world-state/context-panel.tsx";
+
+  it("an UNRELATED PR is not blamed for debt already in the base branch", () => {
+    // After the waived PRs merge, the gate reports this finding on EVERY run,
+    // because it validates the registry as a whole. Blaming a PR that never
+    // opened the file would make the merged waiver a permanent repo-wide block
+    // — the exact failure the mechanism exists to remove.
+    const v = evaluateFindings(
+      BOTH,
+      ok({ pullRequest: 4242, changedFiles: ["apps/web/lib/something-else.ts"] }),
+      FIXTURES,
+    );
+    expect(v.pass).toBe(true);
+  });
+
+  it("…but a NEW PR that EDITS the waived file is blocked", () => {
+    // This is the line that keeps the exception from being inherited: touch the
+    // waived file and you must be one of the listed PRs.
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: [PANEL] }), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+    expect(v.blockingFindings[0].decision.detail).toMatch(/MODIFIES/);
+  });
+
+  it("unknown changed files are treated as touching everything (cautious)", () => {
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 4242, changedFiles: null }), FIXTURES);
+    expect(v.pass).toBe(false);
+  });
+
+  it("expiry still kills it, even for an unrelated PR", () => {
+    const v = evaluateFindings(
+      BOTH,
+      ok({ pullRequest: 4242, changedFiles: ["apps/web/lib/x.ts"], today: "2027-01-01" }),
+      FIXTURES,
+    );
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
+  });
+});
+
+describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
+  it("the W5 pull request is not covered", () => {
+    // #915 is W5. Its number is not in the waiver, so even the identical
+    // finding on the identical file is blocked.
+    const v = evaluateFindings(BOTH, ok({ pullRequest: 915 }), FIXTURES);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+  });
+
+  it("the LIVE waiver list holds exactly THREE records, each with its own owner ruling", () => {
+    // "waiver negali likti vien todėl, kad CI žalias" — the W3/W4 record died
+    // with its debt in W6, leaving the list empty. The entry below is a NEW
+    // owner ruling (PUBLIC BETA TRAIN V3 §2.1, 2026-08-10), not a leftover.
+    //
+    // Pinning the COUNT is the point: a second record may only ever appear
+    // with a second owner ruling, and this assertion is what forces that
+    // conversation instead of letting the list grow quietly.
+    //
+    // 1 -> 2 on 2026-08-18. The second record is the PUBLIC JOB BOARD
+    // (`/jobs`, `/jobs/[id]`, the row card), and it exists because a SECOND
+    // owner ruling exists — the 2026-08-18 directive §5 "CANONICAL JOB
+    // VISIBILITY POLICY", verbatim: "Owner decision is final. Jobs must be
+    // publicly discoverable." plus the restriction that anonymous callers
+    // "MUST NOT receive the complete vacancy".
+    //
+    // This is exactly the conversation the count pin exists to force, and it
+    // happened BEFORE the record was written. The new record deliberately does
+    // NOT extend the /create-cv waiver, whose own text records that its
+    // approvals were "NOT a general authority to self-approve future waivers":
+    // a different surface under a different ruling gets its own bounded record,
+    // not a widened old one.
+    // 2 -> 3 on 2026-08-20. The third record is the canonical public landing,
+    // added only after the explicit owner decision "SHIP THIS LANDING AS V1".
+    // It has its own route, PR binding and exact six-finding subset; neither
+    // earlier public-acquisition waiver was widened.
+    // 3 -> 4 on 2026-08-27. The fourth record is the ORGANIZATION
+    // MULTI-CAPABILITY CARD, and it is the first record here that is NOT a
+    // public-acquisition route — so it could not have joined any existing one
+    // even if someone wanted to. It exists because of a fourth owner ruling
+    // (2026-08-27 §3), verbatim: "APPROVED as a temporary PR-scoped waiver
+    // ONLY for: not_reflected_on_map, not_ai_controlled ... This waiver MUST
+    // NOT waive any other Product Gate finding. Do not broaden its scope."
+    //
+    // What differs from the three above, and is worth seeing in one place: it
+    // excuses TWO findings, not six, on an AUTHENTICATED workspace card whose
+    // other three World-State answers are real YES. It is a partial debt on a
+    // compliant surface — a missing map layer and a missing conversational
+    // entry point — not a category mismatch. It also carries the shortest
+    // expiry of the four (2026-11-30) and two named enabling steps, because
+    // both are integrations that need no schema change.
+    // 4 -> 5 on 2026-08-29. The fifth record is the OAUTH CONSENT SCREEN,
+    // and it exists because a fifth owner ruling exists — the 2026-08-29
+    // execution order §4, verbatim: "Prepare and perform the minimum
+    // configuration required for LabourMarket.ai to act as the OAuth
+    // authorization server for MCP/ChatGPT." The Supabase OAuth 2.1 server
+    // requires the product to host the authorization UI at a fixed URL, so
+    // the ruling that ordered the configuration ordered the surface.
+    //
+    // What differs from the four above, and is worth seeing in one place: it
+    // is the first STANDARDS-SHAPED AUTH INFRASTRUCTURE record — the page's
+    // existence and redirect flow are defined by OAuth 2.1, and two of its
+    // excused answers (aiControlled, aiCanWorkWithIt) are "no" as a SECURITY
+    // PROPERTY that must never become "yes": the step where a person grants
+    // an external agent access must not itself be agent-drivable. It is also
+    // the first record to cover an A-09 code, for exactly that one finding.
+    // The SIXTH record exists because a sixth owner ruling exists — the
+    // 2026-08-31 closure-session decision, verbatim: "M3_MIGRATION_APPROVAL:
+    // APPROVE / HOURS_PRODUCT_GATE_WAIVER: APPROVE. Approval scope is limited
+    // strictly to the fresh #1344 / package 0010 implementation." It follows
+    // the /jobs precedent exactly: the surface declared its three honest
+    // "no" answers and refused to waive itself; the waiver record arrived
+    // WITH the owner approval, in the same commit that carries the
+    // @human-gate-approved annotation on the RED migration.
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(7);
+    expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
+      "public-acquisition-route-create-cv",
+      "public-acquisition-route-jobs",
+      "public-acquisition-route-landing-v1",
+      "organization-multi-capability-card",
+      "oauth-consent-auth-infrastructure",
+      "work-hours-allocation-surface",
+      "journal-photo-viewer-modal",
+    ]);
+
+    // The 2026-08-31 boundary, executable rather than trusted: three codes,
+    // one route (plus its page path for diff matching), one PR, A-01 only.
+    const hours = SCOPED_OWNER_WAIVERS[5];
+    expect(hours.axioms).toEqual(["A-01"]);
+    expect(hours.pullRequests).toEqual([1344, 2101, 2159, 2234, 2526, 3140]);
+    expect(hours.files).toEqual([
+      "/dashboard/hours",
+      "apps/web/app/[locale]/dashboard/hours/page.tsx",
+    ]);
+    expect(hours.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "requires_new_page",
+    ]);
+    for (const f of hours.expectedFindings) {
+      expect(f.file).toBe("/dashboard/hours");
+    }
+    // The debt names its own removal: the surface reaching the map and an
+    // AI/chat write path deletes the record.
+    expect(hours.resolvedBy).toMatch(/map/i);
+    expect(hours.resolvedBy).toMatch(/chat/i);
+    expect(hours.owner).toMatch(/HOURS_PRODUCT_GATE_WAIVER: APPROVE/);
+
+    // The 2026-08-29 boundary, executable rather than trusted: seven codes,
+    // one route (plus its page path for diff matching), one PR, and A-09
+    // covering nothing beyond the single ai_cannot_work_with_entity finding.
+    const oauth = SCOPED_OWNER_WAIVERS[4];
+    expect(oauth.axioms).toEqual(["A-01", "A-09"]);
+    // #1786 (2026-09-18) joins on the owner's verbatim approval — "I approve
+    // adding ONLY PR 1786 to the existing public-acquisition-route-jobs and
+    // oauth-consent-auth-infrastructure waiver pullRequests lists" — for a
+    // dead-class fix: `bg-primary` / `text-primary-foreground` /
+    // `hover:bg-muted` were never tokens (the primary button had no
+    // background). Canonical tokens only; no auth change. Exact list, as ever.
+    expect(oauth.pullRequests).toEqual([1347, 1786]);
+    expect(oauth.files).toEqual([
+      "/oauth/consent",
+      "apps/web/app/[locale]/oauth/consent/page.tsx",
+    ]);
+    expect(oauth.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "ai_cannot_work_with_entity",
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "not_world_state_driven",
+      "requires_leaving_workspace",
+      "requires_new_page",
+      "world_state_cannot_control_it",
+    ]);
+    for (const f of oauth.expectedFindings) {
+      expect(f.file).toBe("/oauth/consent");
+    }
+    // The resolution names the only path that can exist for this surface —
+    // the gate learning the category — and records that aiControlled stays
+    // "no" permanently (the security property survives the waiver).
+    expect(oauth.resolvedBy).toMatch(/auth-infrastructure-category/);
+    expect(oauth.resolvedBy).toMatch(/remain 'no'/);
+
+    // The owner's boundary, executable rather than trusted: this record
+    // excuses exactly two codes, on exactly one file, for exactly one PR.
+    const cap = SCOPED_OWNER_WAIVERS[3];
+    expect(cap.axioms).toEqual(["A-01"]);
+    expect(cap.pullRequests).toEqual([1299]);
+    expect(cap.files).toEqual(["components/app/organization-capabilities-card.tsx"]);
+    expect(cap.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+    ]);
+    // "Do not broaden its scope" — every excused finding names the one file.
+    for (const f of cap.expectedFindings) {
+      expect(f.file).toBe("components/app/organization-capabilities-card.tsx");
+    }
+    // The two enabling steps the ruling required are recorded where the
+    // mechanism actually reads them, so the debt names its own removal.
+    expect(cap.resolvedBy).toMatch(/map/i);
+    expect(cap.resolvedBy).toMatch(/conversational/i);
+    // The former agent-chosen 2026-11-30 date is gone: the record holds the
+    // 12-month rolling internal term from the owner's ruling (P0 2026-10-22).
+    expect(cap.approvedAt).toBe("2026-08-27");
+    expect(cap.ownerSetExpiresAt).toBeUndefined();
+    const w = SCOPED_OWNER_WAIVERS[0];
+    expect(w.id).toBe("public-acquisition-route-create-cv");
+    expect(w.axioms).toEqual(["A-01"]);
+    // [1119] -> [1119, 1123] under OWNER APPROVAL, PUBLIC BETA TRAIN V5_1 §1
+    // (2026-08-11): "OWNER APPROVES extending the existing /create-cv
+    // product-constitution waiver to PR #1123 ... This approval is
+    // specifically for #1123."
+    //
+    // The RECORD count above is untouched, which is what this test exists to
+    // pin — #1123 adds no waiver, it joins the ruling that already covers this
+    // route. #1123 changes the route's CTA markup only (a <button> nested in
+    // the anchor becomes the anchor itself); the gate reports "0 new product
+    // surface(s)" and the six excused findings are unchanged.
+    //
+    // [1119, 1123] -> [1119, 1123, 1131] under OWNER APPROVAL, PUBLIC BETA
+    // TRAIN V6_4 §1 "OWNER APPROVAL B" (2026-08-12): "The owner explicitly
+    // authorizes adding PR 1131 to public-acquisition-route-create-cv ...
+    // pullRequests list", and "ONLY for the six already-known /create-cv A-01
+    // findings described in the V6.3 report" — explicitly NOT authority for
+    // future waivers, unrelated findings, a wider scope or changed expected
+    // findings.
+    //
+    // Again the RECORD count is untouched. #1131 changes two CTA hrefs on the
+    // route so the free-CV intent survives signup (`?next=/dashboard/profile`);
+    // the gate reports "0 new product surface(s)" and the six excused findings
+    // are byte-identical. Verified by RUNNING the gate at head 7809272d, both
+    // ways: PR 1131 -> PASS_WITH_SCOPED_TRANSITIONAL_WAIVER, and an unlisted PR
+    // -> still `pr-not-covered`, proving the list grew by one and not by scope.
+    expect(w.pullRequests).toEqual([1119, 1123, 1131]);
+    expect(w.owner).toMatch(/PUBLIC BETA TRAIN V3/);
+    // A waiver with no named resolution is a permanent exception wearing a
+    // deadline. This one names the constitution decision that deletes it.
+    expect(w.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
+    expect(w.approvedAt).toBe("2026-08-10");
+  });
+
+  it("the live record excuses SIX findings and no seventh", () => {
+    // The exact set the gate produced on 2026-08-10 for PR #1119. If a future
+    // change to the registry or the gate adds a seventh violation on this
+    // route, the subset rule un-waives the whole run — and this assertion is
+    // what makes that a deliberate edit rather than a surprise in CI.
+    const w = SCOPED_OWNER_WAIVERS[0];
+    expect(w.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "not_world_state_driven",
+      "requires_leaving_workspace",
+      "requires_new_page",
+      "world_state_cannot_control_it",
+    ]);
+    for (const f of w.expectedFindings) expect(f.file).toBe("/create-cv");
+  });
+
+  it("the /jobs record excuses the SAME six codes on its three surfaces and nothing else", () => {
+    // The exact set the gate produced on 2026-08-18 for PR #1184, captured by
+    // RUNNING it (BASE_SHA=origin/main PR_NUMBER=1184 node
+    // .github/scripts/product-gate.mjs) after the three declarations landed —
+    // the declarations are what removed the four `undeclared_surface` findings,
+    // so only the A-01 category error remains.
+    //
+    // Six codes x three surfaces = 18. A nineteenth finding anywhere, including
+    // on these surfaces, un-waives the entire run under the subset rule.
+    const jobs = SCOPED_OWNER_WAIVERS[1];
+    expect(jobs.id).toBe("public-acquisition-route-jobs");
+    expect(jobs.axioms).toEqual(["A-01"]);
+    // [1184, 1193, 1203] — and this pin is WHY each number had to be added
+    // deliberately rather than drifting in. #1184 opened the public surface;
+    // #1193 completes the funnel the same owner ruling mandated (§6 "REGISTER /
+    // LOGIN → RETURN TO SAME JOB", restated in the 2026-08-18 priority override
+    // as "public vacancy → registration/login → exact same vacancy →
+    // authenticated safe unlock"), because the page was auth-blind and returned
+    // a freshly registered visitor to the identical "create an account" card.
+    // #1203 adds the PRIVATE BOOKMARK (Save / Saved / Unsave plus the saved
+    // list that makes a bookmark retrievable) under the owner's 2026-08-19
+    // approval, quoted verbatim in the record: "Įtrauk tik #1203 į jau
+    // egzistuojančią /jobs waiver taisyklę, nekeisk pačių product-gate
+    // kriterijų ir jų nesilpnink."
+    // #1208 adds the PROFESSION FILTER the board could always have passed
+    // (`p_profession_slug` existed from day one; 17,145 rows carry a slug, so
+    // a Lithuanian worker had to guess the Swedish word) plus `lang` on the
+    // publisher's own text, under the owner's 2026-08-19 approval, quoted
+    // verbatim in the record: "pridėk tik `1208` prie esamo `pullRequests`
+    // sąrašo. Nekeisk ir nesilpnink pačių gate kriterijų."
+    // #1255 NARROWS the anonymous surface — the P0 identity/location boundary
+    // (owner MASTER ORDER 2026-08-24, quoted verbatim in the record: "add PR
+    // #1255 to those existing scoped waiver PR lists; add the dated
+    // explanatory comments" and nothing else). Anonymous cards/detail stop
+    // echoing raw titles that leaked employer names, cities and street
+    // addresses; attribution stops naming the source country; search stops
+    // matching the hidden title. Same surfaces, strictly less exposure.
+    //
+    // #1649 (2026-09-08) is the sixth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1649 ... This is NOT general authority to
+    // self-approve future waivers. Do not broaden, weaken or change the waiver
+    // criteria/scope." It makes a FAILURE honest rather than the surface more
+    // permissive — a statement timeout (57014) stops re-throwing into an HTTP
+    // 500 and stops being renderable as a genuine zero, becoming a named
+    // `unavailable` state instead (SEP-7). No new route, page, component or
+    // auth change, and nothing about what an anonymous visitor may see.
+    // Verified by running the gate on the same head twice, differing only in
+    // the number: 1649 produced 18 violations, every one rejected for
+    // `pr-not-covered` and no other reason, while 1255 passed.
+    //
+    // Widening the PR binding is the ONLY change each time: same axiom, same
+    // six codes, same three surfaces, same expiry, same reason. Each PR's
+    // finding set is byte-identical to `expectedFindings`, so the subset rule
+    // still bites. This stays an EXACT list — a `toContain` here would let the
+    // next number drift in without a decision, which is the whole thing this
+    // pin exists to prevent. THIS ASSERTION FAILING IS THE FEATURE: it caught
+    // the 1649 extension and forced it to be deliberate.
+    //
+    // #1786 (2026-09-18) is the seventh, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1786 to the existing
+    // public-acquisition-route-jobs and oauth-consent-auth-infrastructure
+    // waiver pullRequests lists." It replaces shadcn class names that were
+    // never in the token map and compiled to NO CSS (secondary text in the
+    // primary colour, a dead card hover) with the canonical tokens, makes the
+    // card's date a mono stamp and gives the MEMBER-ONLY detail location the
+    // map's place-precision chip. No new route, page, component or auth
+    // change; the anonymous projection still carries no employer, location or
+    // apply link (`work-world-jobs.test.ts` pins that on code, not comments).
+    // Verified by running the gate on the head as PR 1786 vs origin/main:
+    // PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER. It caught this
+    // extension too and forced it to be deliberate.
+    //
+    // #1809 (2026-09-20) is the eighth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1809 to the existing
+    // public-acquisition-route-jobs waiver pullRequests list." It is the P0
+    // acquisition loop: the MEMBER half of /jobs/[id] compares the job with
+    // the person through the ONE engine, mounts the existing interest control,
+    // offers same-profession alternatives and makes the JOB A → REGISTER →
+    // JOB A return measurable (`?via=auth`). No new route, page, auth change,
+    // schema or projection change; the anonymous visitor receives exactly what
+    // they received before. Verified by running the gate on the head as PR
+    // 1809 vs origin/main: 18 findings, every one `pr-not-covered` before the
+    // extension; PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER after. It
+    // caught this extension too and forced it to be deliberate.
+    //
+    // #1810 (2026-09-20) is the ninth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1810 to the existing
+    // public-acquisition-route-jobs waiver pullRequests list. Do not broaden
+    // the waiver." It activates `pl` as a UI locale: the `/jobs` pages and the
+    // public vacancy card gain Polish entries in their exhaustive
+    // `Record<ActiveLocale, …>` copy maps. No new route, page, auth change,
+    // schema or projection change; the anonymous projection is unchanged.
+    // Verified by running the gate on the merged head df8bc6ed as PR 1810 vs
+    // origin/main: 42 findings, every one `pr-not-covered` before the
+    // extension. It caught this extension too and forced it to be deliberate.
+    //
+    // #1838 (2026-09-22) is the tenth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR 1838 to the existing
+    // public-acquisition-route-jobs waiver pullRequests list. Do not broaden
+    // the waiver." It retires automatic translation of the board (the
+    // reader-locale path becomes a SYNCHRONOUS read of renderings that already
+    // exist, so no page view can reach a provider) and adds, inside the
+    // EXISTING member-only branch, the ad's own language plus ONE explicit
+    // translate control. No new route, page, auth change, schema or projection
+    // change; the anonymous projection is unchanged and carries zero translate
+    // controls in all six served locales. Verified by the CI quality run on
+    // head 2bb419d1 as PR 1838 vs origin/main: 42 findings, every one
+    // `pr-not-covered` before the extension. It caught this extension too and
+    // forced it to be deliberate.
+    //
+    // #1837 and #1890 (2026-09-27) are the eleventh and twelfth, on the owner's
+    // verbatim approval: "I approve adding PR #1837 AND the immediately required
+    // public vacancy card localization/source-language fix to the existing
+    // `public-acquisition-route-jobs` waiver `pullRequests` scope, strictly
+    // limited to the already-defined `/jobs`, `/jobs/[id]`, and public vacancy
+    // row/card acquisition surfaces required to close this concrete localization
+    // defect." The same message adds that it "does not authorize unrelated waiver
+    // expansion, security weakening, new public data exposure, or general
+    // self-approval of future waivers".
+    //
+    // They make the surface MORE honest, not more permissive. Production `/lt`
+    // showed the publisher's Swedish occupation as a BARE second line under the
+    // localized heading ("Sandėlio darbininkas" over "Lagerarbetare") and, on
+    // ads with no mapped profession — 30 049 of 53 392 active rows — as the
+    // heading itself with nothing saying it was Swedish. #1890 keeps the
+    // localized catalogue name primary and names the ad's language on ONE compact
+    // line using the key `/jobs/[id]` already used; #1837 is the same concern on
+    // the detail page.
+    //
+    // NOTHING about what an anonymous visitor may see changed: no new route,
+    // page, component, projection, auth or schema change, no new copy in any
+    // locale, and nothing is translated or sent externally —
+    // `translate_vacancy` stays ungranted. Same class as #1809 and #1810.
+    //
+    // THIS ASSERTION CAUGHT THIS EXTENSION TOO, in CI, and forced it to be
+    // deliberate: the waiver list was widened first and `quality` failed here
+    // until the same two numbers were recorded with this reasoning.
+    //
+    // #1892 (2026-09-27) is the thirteenth, on the owner's verbatim approval: "I
+    // approve adding ONLY PR #1892 ... strictly for removing the identified
+    // compensating/now-false human-facing disclaimer from the already-scoped
+    // public jobs surface. This is not general authority to expand the waiver or
+    // self-approve future waived changes."
+    //
+    // It is the only entry on this list that makes the page STRICTLY SMALLER:
+    // one constant and one paragraph deleted, nothing added. The sentence it
+    // removes was a disclaimer compensating for a confusing component — its own
+    // source comment said so — and became false when #1890 gave every card its
+    // own language line. Verified on deployed production before removal.
+    //
+    // #1991 and #1993 (2026-09-29) on the owner's verbatim approval: "I approve
+    // adding PR #1991 and PR #1993 to the existing public-acquisition-route-jobs
+    // waiver pullRequests, strictly for the /jobs/[id] signed-in crash fix and
+    // the job-page hreflang fix." Bounded — not general authority.
+    expect(jobs.pullRequests).toEqual([
+      1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
+      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467, 2771, 2984, 2991, 3087,
+      3149,
+      3154,
+      3171,
+      3123,
+      3255,
+      3261,
+      3448,
+      3181,
+    ]);
+    // #3448 + #3181 (2026-11-16) on the owner's verbatim approval, each added in its own PR: "I approve adding ONLY PRs 3181 and 3448 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3255 (2026-11-12) on the owner's approval given to the coordinator in its own session; only the number is added.
+    // #3261 (2026-11-12) on the owner's approval given to the coordinator in its own session; only the number is added.
+    // #3123 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3123 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3171 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3171 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3154 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3154 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3149 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3149 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #2984 + #2991 (2026-11-03) on the owner's verbatim approval: "I approve adding ONLY PR 2991 and PR 2984 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3087 (2026-11-04) on the owner's verbatim approval: "I approve adding ONLY PR 3087 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #2771 (2026-10-25) on the owner's verbatim approval: "Patvirtinu PR #2771 įtraukimą į `public-acquisition-route-jobs` išimties `pullRequests` sąrašą. Pridėk tik `#2771`, nekeisk kitų išimties sąlygų ir nesilpnink saugiklių."
+    // Markup only — the two /jobs page wrappers become <div> (one <main>).
+    // #2467 (2026-10-18) on the owner's verbatim scoped approval: "Patvirtinu
+    //   PR #2467 įtraukimą į siaurą `/jobs` produkto vartų išimtį, skirtą tik
+    //   tuščios reikšmės „—“ kortelėje ir mobiliosios paieškos išdėstymo
+    //   taisymams. Tai nėra bendras leidimas apeiti produkto kokybės, saugumo
+    //   ar migracijų patikras."
+    // Only the card's last heading fallback (the page's own GENERIC_TITLE
+    // instead of a bare "—") and the phone layout of the search form.
+    // #2388 (2026-10-15) on the owner's verbatim scoped approval: anonymous-safe
+    // JSON-LD only (CollectionPage/ItemList, WebPage/Occupation), no JobPosting,
+    // no employer, location or other non-public field; rules unchanged.
+    // #2253 (2026-10-10) on the owner's verbatim directive: "Darbo skelbimų
+    // pateikimo trūkumus taisyk naudodamas esamą architektūrą, išsaugodamas
+    // SEO, lokalizacijas ir faktinius skelbimų duomenis. Nepriskirk vertimų,
+    // kurių sistema negali patikimai pateikti." Strictly the /jobs/[id]
+    // presentation fix (catalogue profession heading, shared metadata builder,
+    // the card's own fact chips). Bounded.
+    // #2211 (2026-10-09) on the owner's verbatim approval, strictly for the three
+    // /jobs fixes: out-of-range pagination recovery, cross-active-locale
+    // profession filter mapping, locale-correct LT/RU number formatting. Bounded.
+    // #2045 (2026-10-01) on the owner's verbatim approval: "Patvirtinu #2045
+    // įtraukimą į abu /jobs owner-waiver sąrašus." A typed catalogue profession
+    // word redirects to the existing profession filter. Bounded; axiom, codes,
+    // surfaces, expiry and subset rule byte-unchanged.
+    expect(jobs.owner).toMatch(/2026-08-18/);
+    expect(jobs.resolvedBy).toMatch(/gate-learns-public-acquisition-route-category/);
+    expect(jobs.approvedAt).toBe("2026-08-18");
+
+    expect([...new Set(jobs.expectedFindings.map((f) => f.code))].sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "not_world_state_driven",
+      "requires_leaving_workspace",
+      "requires_new_page",
+      "world_state_cannot_control_it",
+    ]);
+    expect([...new Set(jobs.expectedFindings.map((f) => f.file))].sort()).toEqual([
+      "/jobs",
+      "/jobs/[id]",
+      "components/marketing/public-vacancy-card.tsx",
+    ]);
+    expect(jobs.expectedFindings).toHaveLength(18);
+
+    // Same leak this file already pins for /create-cv: the route ids are what
+    // `decideWaiver` matches, the real page paths are what `touchesWaivedFile`
+    // compares against the diff. Both halves must be listed.
+    expect(jobs.files).toContain("apps/web/app/[locale]/(marketing)/jobs/page.tsx");
+    expect(jobs.files).toContain("apps/web/app/[locale]/(marketing)/jobs/[id]/page.tsx");
+  });
+
+  it("the landing record is bound to the reviewed PRs and exactly six findings on root", () => {
+    const landing = SCOPED_OWNER_WAIVERS[2];
+    expect(landing.id).toBe("public-acquisition-route-landing-v1");
+    expect(landing.axioms).toEqual(["A-01"]);
+    // #1221 shipped LIVE V1; #1231 restored the previous production landing
+    // as the FOCUS arm of the SAME canonical route; #1232 made FOCUS the
+    // default and bound both arms to the one canonical market reader (owner
+    // approvals 2026-08-22). Whichever arm renders, the six answers below are
+    // the same honest no — the finding set is unchanged, which is what keeps
+    // these extensions rather than a broadening.
+    // #1380 (2026-08-31): the owner's P0 fresh-visit order — the FOCUS
+    // default became static/CDN-cached, the LIVE choice a middleware
+    // rewrite; same route, same six honest answers.
+    expect(landing.pullRequests).toEqual([1221, 1231, 1232, 1380]);
+    expect(landing.owner).toMatch(/SHIP THIS LANDING AS V1/);
+    expect(landing.files).toEqual(["/", "apps/web/app/[locale]/page.tsx"]);
+    expect(landing.expectedFindings).toHaveLength(6);
+    expect(landing.expectedFindings.map((f) => f.file)).toEqual(
+      Array(6).fill("/"),
+    );
+    expect(landing.expectedFindings.map((f) => f.code).sort()).toEqual([
+      "not_ai_controlled",
+      "not_reflected_on_map",
+      "not_world_state_driven",
+      "requires_leaving_workspace",
+      "requires_new_page",
+      "world_state_cannot_control_it",
+    ]);
+  });
+
+  it("the live record lists the page PATH, not only the route id — else it leaks", () => {
+    // THE BUG THIS PINS. `decideWaiver` matches a finding by `finding.what`,
+    // which for a screen is the ROUTE ("/create-cv"). But `touchesWaivedFile`
+    // compares `files` against the real CHANGED FILE PATHS in the diff. With
+    // only the route id listed, NO changed path could ever end with
+    // "/create-cv", every unlisted PR would be classified "unrelated", and it
+    // would inherit the waiver — the exact "nothing new can inherit it"
+    // guarantee this mechanism sells. Listing the page path closes it.
+    const w = SCOPED_OWNER_WAIVERS[0];
+    expect(w.files).toContain("/create-cv");
+    expect(w.files).toContain("apps/web/app/[locale]/(marketing)/create-cv/page.tsx");
+
+    // Negative control: an unlisted PR whose diff really does contain the page
+    // must be REFUSED, not silently excused.
+    const findings = w.expectedFindings.map((f) => ({
+      code: f.code,
+      axiom: "A-01",
+      what: f.file,
+    }));
+    const blocked = evaluateFindings(
+      findings,
+      {
+        changedFiles: ["apps/web/app/[locale]/(marketing)/create-cv/page.tsx"],
+        pullRequest: 9999,
+        headSha: null,
+        today: "2026-08-10",
+      },
+      SCOPED_OWNER_WAIVERS,
+    );
+    expect(blocked.pass).toBe(false);
+    expect(blocked.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+
+    // …and the listed PR still passes, so the control above proves the guard,
+    // not a broken waiver.
+    const allowed = evaluateFindings(
+      findings,
+      {
+        changedFiles: ["apps/web/app/[locale]/(marketing)/create-cv/page.tsx"],
+        pullRequest: 1119,
+        headSha: null,
+        today: "2026-08-10",
+      },
+      SCOPED_OWNER_WAIVERS,
+    );
+    expect(allowed.pass).toBe(true);
+  });
+
+  it("a live record holds the 12-month ROLLING term — it never lapses by the calendar (owner P0 2026-10-22)", () => {
+    // Before the owner's internal validity rule every record carried an
+    // agent-chosen `expiresAt` (2026-11-30 / 2026-12-31) after which these
+    // findings blocked EVERY pull request in the repository. Now no live record
+    // carries a date of its own: each holds approval + 12 months, renewed term
+    // after term, and ends only by revocation (record removed) or resolution.
+    const w = SCOPED_OWNER_WAIVERS[0];
+    const findings = w.expectedFindings.map((f) => ({
+      code: f.code,
+      axiom: "A-01",
+      what: f.file,
+    }));
+    for (const today of ["2027-01-01", "2027-08-10", "2031-06-30"]) {
+      const v = evaluateFindings(
+        findings,
+        // An unrelated PR: different number, and a diff that never opens the page.
+        { changedFiles: ["apps/web/lib/unrelated.ts"], pullRequest: 4242, headSha: null, today },
+        SCOPED_OWNER_WAIVERS,
+      );
+      expect(v.pass).toBe(true);
+      expect((waiverValidUntil(w, today) ?? "") >= today).toBe(true);
+    }
+    // Every live record: approvedAt present, no self-set calendar date.
+    for (const rec of SCOPED_OWNER_WAIVERS) {
+      expect(rec.approvedAt).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+      expect(rec.ownerSetExpiresAt).toBeUndefined();
+      expect((rec as unknown as Record<string, unknown>).expiresAt).toBeUndefined();
+    }
+    // Renewal is TIME only: the rolling term never widens the PR list.
+    const listed = evaluateFindings(
+      findings,
+      { changedFiles: [w.files[1]], pullRequest: 4242, headSha: null, today: "2030-01-01" },
+      SCOPED_OWNER_WAIVERS,
+    );
+    expect(listed.pass).toBe(false);
+    expect(listed.blockingFindings[0].decision.rejection).toBe("pr-not-covered");
+  });
+
+  it("an OWNER-SET term still expires, and then blocks EVERY pull request", () => {
+    const w = { ...SCOPED_OWNER_WAIVERS[0], ownerSetExpiresAt: "2026-12-31" };
+    const findings = w.expectedFindings.map((f) => ({ code: f.code, axiom: "A-01", what: f.file }));
+    const v = evaluateFindings(
+      findings,
+      { changedFiles: ["apps/web/lib/unrelated.ts"], pullRequest: 4242, headSha: null, today: "2027-01-01" },
+      [w],
+    );
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
+  });
+
+  it("an unreadable approvedAt fails closed", () => {
+    const w = { ...FIXTURE_WAIVER, ownerSetExpiresAt: undefined, approvedAt: "garbage" };
+    const v = evaluateFindings(BOTH, ok(), [w]);
+    expect(v.pass).toBe(false);
+    expect(v.blockingFindings[0].decision.rejection).toBe("expired");
+  });
+
+  it("a future W6 map fix makes the waiver unnecessary, not permanent", () => {
+    // When the panel IS reflected on the map, the finding stops being produced;
+    // with no finding there is nothing to waive, and the expiry then removes
+    // the record itself.
+    const v = evaluateFindings([], ok(), FIXTURES);
+    expect(v.pass).toBe(true);
+    expect(v.waivedFindings).toHaveLength(0);
+    expect(FIXTURE_WAIVER.resolvedBy).toBe("W6-map-slice");
+  });
+});
+
+describe("scoped waiver — the axiom and its diagnostic survive", () => {
+  it("the gate still DETECTS and PRINTS the violation when waived", () => {
+    const gate = readFileSync(GATE, "utf8");
+    // The finding is never filtered out of `findings`…
+    expect(gate).toMatch(/for \(const f of findings\) \{[\s\S]{0,200}::\$\{level\}/);
+    // …and a waived run says so explicitly rather than going quiet.
+    expect(gate).toMatch(/the violations above are REAL and still stand/);
+    expect(gate).toMatch(/PRODUCT_GATE_PASS_WITH_SCOPED_TRANSITIONAL_WAIVER/);
+  });
+
+  it("the A-01 rule itself is untouched", () => {
+    const gate = readFileSync(GATE, "utf8");
+    expect(gate).toContain("not_reflected_on_map");
+    const axioms = readFileSync(
+      join(REPO, "apps", "web", "lib", "product-gate", "axioms.ts"),
+      "utf8",
+    );
+    expect(axioms).toMatch(/id: "A-01"/);
+    expect(axioms).toMatch(/AI-FIRST/);
+  });
+
+  it("the waived run reports owner, scope, expiry and the removal step", () => {
+    const gate = readFileSync(GATE, "utf8");
+    for (const line of ["waiver      ", "owner       ", "scope       ", "valid until ", "removed by  "]) {
+      expect(gate).toContain(line);
+    }
+  });
+});
+
+describe("scoped waiver — the run context", () => {
+  it("reads the PR number from the CI ref", () => {
+    const ctx = waiverContextFromEnv(
+      { GITHUB_REF: "refs/pull/909/merge", GATE_TODAY: "2026-08-01" },
+      new Date("2026-08-01T00:00:00Z"),
+    );
+    expect(ctx.pullRequest).toBe(909);
+    expect(ctx.today).toBe("2026-08-01");
+  });
+
+  it("is not a PR when nothing says so", () => {
+    expect(waiverContextFromEnv({}, new Date("2026-08-01T00:00:00Z")).pullRequest).toBeNull();
+  });
+});

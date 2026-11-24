@@ -1,0 +1,180 @@
+BEGIN
+INSERT 0 3
+INSERT 0 1
+INSERT 0 0
+INSERT 0 1
+INSERT 0 1
+INSERT 0 1
+INSERT 0 2
+═══ 1-4 + 12-13. P selects A → A writes A; switches to B → B writes B ═══
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                              case                              
+----------------------------------------------------------------
+ PASS 1-4/12-13: A context wrote ONLY A; B context wrote ONLY B
+(1 row)
+
+═══ 5. Personal context grants no employer authority ═══
+                       case                       
+--------------------------------------------------
+ PASS 5a: personal demand carries NO organization
+(1 row)
+
+psql:scripts/db-proof/multi-org-integration-journey.sql:94: NOTICE:  PASS 5b: member role has no employer demand authority
+DO
+═══ 6. C management capability matches role (manager ≠ identity) ═══
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                     case                      
+-----------------------------------------------
+ PASS 6a: P manages C (manager engagement arm)
+(1 row)
+
+psql:scripts/db-proof/multi-org-integration-journey.sql:110: NOTICE:  PASS 6b: manager cannot edit C identity (no owner/admin membership)
+DO
+═══ 7. D remains inaccessible to P ═══
+             case             
+------------------------------
+ PASS 7a: P does not manage D
+(1 row)
+
+psql:scripts/db-proof/multi-org-integration-journey.sql:124: NOTICE:  PASS 7b: P cannot stamp D (not_org_member)
+DO
+═══ 8-9. Worker W: independent A and B engagements; ending A leaves B ═══
+                           case                            
+-----------------------------------------------------------
+ PASS 8: W holds independent ACTIVE engagements in A and B
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                          case                           
+---------------------------------------------------------
+ PASS 9: A engagement ended, B engagement remains ACTIVE
+(1 row)
+
+═══ 10. Completing A project leaves B project untouched ═══
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                   case                    
+-------------------------------------------
+ PASS 10: A completed, B untouched (draft)
+(1 row)
+
+═══ 11. Calendar conflict spans companies A and B ═══
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000003","role":"authenticated"}
+(1 row)
+
+                case                
+------------------------------------
+ PASS 11a: W accepted the A booking
+(1 row)
+
+psql:scripts/db-proof/multi-org-integration-journey.sql:173: NOTICE:  PASS 11: overlapping B booking REFUSED — calendar conflict spans companies (23P01)
+DO
+                             case                             
+--------------------------------------------------------------
+ PASS 11b: both bookings inherited their demand organizations
+(1 row)
+
+═══ 14. Billing subject isolation (main schema truth) ═══
+INSERT 0 1
+                                                                                                            case                                                                                                            
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ PASS 14: no org-subject columns exist on main — an ORG entitlement read (eq organization_id) fails closed to FREE (42703 feature-detect, unit-proven in effective-entitlements); P's personal row can never entitle A or B
+(1 row)
+
+═══ 15. Analytics events remain A/B/Personal scoped ═══
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+INSERT 0 3
+                                  case                                  
+------------------------------------------------------------------------
+ PASS 15a: analytics rows are admin-only (author cannot read them back)
+(1 row)
+
+ set_config 
+------------
+ postgres
+(1 row)
+
+                                case                                 
+---------------------------------------------------------------------
+ PASS 15b: A event carries only A, B only B, personal carries NO org
+(1 row)
+
+═══ 16 + lifecycle. invite → accept → change-role → revoke; B intact ═══
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0800000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                            case                            
+------------------------------------------------------------
+ PASS lifecycle: invite→accept→change-role→revoke all clean
+(1 row)
+
+                             case                             
+--------------------------------------------------------------
+ PASS 16: A membership revoked; B membership, identity intact
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0800000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+                        case                         
+-----------------------------------------------------
+ PASS 16b: revoked A member reads ZERO A demand rows
+(1 row)
+
+ set_config 
+------------
+ postgres
+(1 row)
+
+ROLLBACK
+═══ journey complete — transaction rolled back, no data left behind ═══

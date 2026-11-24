@@ -1,0 +1,379 @@
+import { getTranslations } from "next-intl/server";
+
+import { Card } from "@/components/ui/Card";
+import { Link } from "@/lib/i18n/navigation";
+import { ExplainMore } from "@/components/app/premium/disclosure";
+import {
+  importedJobsHref,
+  recommendationNextAction,
+  type CompassNextStep,
+  type LearningCompass,
+} from "@/lib/learning/learning-compass-model";
+
+/** Where each next step is actually done — in-page anchors on the profile
+ *  (the compass renders there) or the one canonical route. */
+const STEP_HREF: Record<CompassNextStep, "/dashboard/journal" | "/dashboard/opportunities" | "/dashboard/profile"> = {
+  choose_direction: "/dashboard/profile#profile-edit" as "/dashboard/profile",
+  declare_skills: "/dashboard/profile#profile-edit" as "/dashboard/profile",
+  add_current_education: "/dashboard/profile#cv-details" as "/dashboard/profile",
+  log_first_entry: "/dashboard/journal",
+  set_availability: "/dashboard/profile#cv-availability" as "/dashboard/profile",
+  express_interest: "/dashboard/opportunities",
+  gain_evidence_for_missing: "/dashboard/journal",
+};
+
+/**
+ * Learning Compass — the student home's five answers (Track C, 2026-09-03).
+ * Server component; rendered on the profile for a person on the student path.
+ * Every value comes from the person's own records or the explainable match
+ * engine (see lib/learning/learning-compass-model.ts). Skill labels resolve
+ * through the `skillNames` catalogue; an unknown slug is shown de-hyphenated,
+ * never hidden.
+ */
+export async function LearningCompassSection({
+  compass,
+}: {
+  readonly compass: LearningCompass;
+}) {
+  const t = await getTranslations("learningCompass");
+  const tSkill = await getTranslations("skillNames");
+  const tProf = await getTranslations("professions");
+  // Declared opportunity type labels — the same catalogue the demand form and
+  // the board's structured detail use (`structuredDemand.opportunityType.*`).
+  const tsd = await getTranslations("structuredDemand");
+  const skillLabel = (slug: string) =>
+    tSkill.has(slug as never) ? tSkill(slug as never) : slug.replace(/-/g, " ");
+  const professionLabel = (slug: string) =>
+    tProf.has(slug as never) ? tProf(slug as never) : slug.replace(/-/g, " ");
+
+  const { becoming, evidence, fitsNow, missing, nextSteps, recommendations } = compass;
+
+  return (
+    <Card compact>
+      <section
+        id="learning-compass"
+        className="flex flex-col gap-4"
+        data-testid="learning-compass"
+        aria-labelledby="learning-compass-title"
+      >
+        <header className="flex flex-col gap-1">
+          <h2 id="learning-compass-title" className="font-display text-base font-semibold text-text-primary">
+            {t("title")}
+          </h2>
+          <ExplainMore>
+            <p>{t("subtitle")}</p>
+            <p data-testid="compass-fits-source">{t("fitsSource")}</p>
+          </ExplainMore>
+        </header>
+
+        {/* The next step comes first so it is on the phone's first screen
+            (UX_GAPS 2026-11-18 ST-1). */}
+        <div className="flex flex-col gap-1" data-testid="compass-next">
+          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("next")}</h3>
+          {/* Every step is a door, not a sentence: each links to the exact
+              section (same page anchor or route) where the person does it. */}
+          <ol className="flex list-decimal flex-col pl-5 text-xs text-text-primary">
+            {nextSteps.map((step) => (
+              <li key={step} data-testid={`compass-step-${step}`}>
+                <Link href={STEP_HREF[step]} className="inline-flex min-h-11 items-center hover:underline">
+                  {t(`step_${step}`)} →
+                </Link>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-1 flex flex-wrap gap-2">
+            <Link href="/dashboard/journal" className="rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90">
+              {t("openJournal")}
+            </Link>
+          </div>
+          {/* The student's own door to practice places (owner 2026-11-14,
+              group 4: a dedicated internship discovery path). It is the ONE
+              board narrowed by the type the employer stated — the same
+              filters, the same interest button and the same conversation
+              with the employer — never a second listing engine. */}
+          <div className="flex flex-wrap gap-x-4">
+            <Link
+              href="/dashboard/opportunities?opportunityType=internship"
+              className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline"
+              data-testid="compass-open-internships"
+            >
+              {t("openInternships")} →
+            </Link>
+            <Link href="/dashboard/opportunities" className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline" data-testid="compass-open-board">
+              {t("openBoard")} →
+            </Link>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <div className="flex flex-col gap-1" data-testid="compass-becoming">
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("becoming")}</h3>
+            <p className="text-sm text-text-primary">
+              {becoming.professionSlug ? professionLabel(becoming.professionSlug) : t("becomingNone")}
+            </p>
+            {becoming.studyingAt ? (
+              <p className="text-xs text-text-secondary">
+                {t("studyingAt", { institution: becoming.studyingAt })}
+                {becoming.currentEducation?.programOrField
+                  ? ` · ${t("program", { program: becoming.currentEducation.programOrField })}`
+                  : ""}
+              </p>
+            ) : null}
+            {becoming.cohorts.length > 0 ? (
+              <div className="mt-1 flex flex-col gap-1.5" data-testid="compass-cohorts">
+                <h4 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("cohortsTitle")}</h4>
+                <ul className="flex flex-col gap-1.5">
+                  {becoming.cohorts.map((c) => (
+                    <li
+                      key={c.cohortId}
+                      className="flex flex-col gap-0.5 rounded-md border border-ink-600 bg-ink-800/60 p-2 text-xs"
+                      data-testid={`compass-cohort-${c.cohortId}`}
+                    >
+                      <span className="text-text-primary">
+                        {t("cohortLine", { program: c.programName, cohort: c.cohortName })}
+                        {c.institutionName ? ` · ${t("cohortAt", { institution: c.institutionName })}` : ""}
+                      </span>
+                      {c.targetProfessionSlug ? (
+                        <span className="text-text-secondary">
+                          {t("cohortDirection", { profession: professionLabel(c.targetProfessionSlug) })}
+                          {c.startsOn ? ` · ${c.startsOn}` : ""}
+                          {c.endsOn ? ` → ${c.endsOn}` : ""}
+                        </span>
+                      ) : null}
+                      {c.targetProfessionSlug ? (
+                        <span
+                          className="mt-0.5 w-fit rounded-full border border-border-subtle px-2 py-0.5 text-text-primary"
+                          data-testid={`compass-cohort-demand-${c.cohortId}`}
+                        >
+                          {c.demandCount === null ? t("cohortDemandUnknown") : t("cohortDemand", { count: c.demandCount })}
+                        </span>
+                      ) : null}
+                      {c.targetProfessionSlug && c.demandCount !== null && c.demandCount > 0 ? (
+                        <Link
+                          href={importedJobsHref(c.targetProfessionSlug) as "/jobs"}
+                          className="w-fit text-text-primary underline-offset-4 hover:underline"
+                          data-testid={`compass-cohort-jobs-${c.cohortId}`}
+                        >
+                          {t("cohortDemandOpen")} →
+                        </Link>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="flex flex-col gap-1" data-testid="compass-evidence">
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("evidence")}</h3>
+            <ul className="flex flex-wrap gap-1.5 text-xs">
+              <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-primary">
+                {t("skills", { count: evidence.skillsTotal })}
+              </li>
+              {evidence.skillsConfirmed > 0 ? (
+                <li className="rounded-full border border-state-success/40 bg-state-success/10 px-2 py-0.5 text-text-primary">
+                  {t("confirmed", { count: evidence.skillsConfirmed })}
+                </li>
+              ) : null}
+              {evidence.skillsJournalSupported > 0 ? (
+                <li className="rounded-full border border-border-subtle px-2 py-0.5 text-text-primary">
+                  {t("journalSupported", { count: evidence.skillsJournalSupported })}
+                </li>
+              ) : null}
+              {evidence.journalEntries !== null ? (
+                <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-secondary">
+                  {t("journalEntries", { count: evidence.journalEntries })}
+                </li>
+              ) : null}
+              <li className="rounded-full border border-ink-500 bg-ink-800 px-2 py-0.5 text-text-secondary">
+                {t("educationEntries", { count: evidence.educationEntries })}
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-1" data-testid="compass-fits">
+          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("fits")}</h3>
+          {fitsNow.length === 0 ? (
+            <p className="text-xs leading-relaxed text-text-muted">{t("fitsNone")}</p>
+          ) : (
+            <ul className="flex flex-col divide-y divide-ink-600">
+              {fitsNow.map((o) => (
+                <li key={o.requestId} className="flex items-center justify-between gap-3 py-1.5 text-xs" data-testid={`compass-fit-${o.status}`}>
+                  <span className="flex min-w-0 items-center gap-1.5">
+                    <span className="min-w-0 truncate text-text-primary">
+                      {o.roleSlug ? professionLabel(o.roleSlug) : "—"}
+                      {o.companyName ? ` · ${o.companyName}` : ""}
+                      {o.country ? ` · ${o.country}` : ""}
+                    </span>
+                    {o.opportunityType && o.opportunityType !== "employment" ? (
+                      <span
+                        className="shrink-0 rounded-full border border-border-subtle px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-primary"
+                        data-testid="compass-fit-type"
+                      >
+                        {tsd(`opportunityType.${o.opportunityType}` as never)}
+                      </span>
+                    ) : null}
+                  </span>
+                  <span className="shrink-0 font-mono text-meta uppercase tracking-label text-text-muted">
+                    {o.status === "strong" ? t("fitStrong") : t("fitPossible")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        <div className="flex flex-col gap-1" data-testid="compass-missing">
+          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("missing")}</h3>
+          {missing.skills.length === 0 ? (
+            <p className="text-xs leading-relaxed text-text-muted">{t("missingNone")}</p>
+          ) : (
+            <>
+              <p className="text-xs text-text-secondary">
+                {missing.source === "opportunities"
+                  ? t("missingFromOpportunities")
+                  : missing.source === "program"
+                    ? t("missingFromProgram")
+                    : t("missingFromProfession")}
+              </p>
+              <ul className="flex flex-wrap gap-1.5 text-xs">
+                {missing.skills.map((m) => (
+                  <li key={m.slug} className="rounded-full border border-brand-orange/40 bg-brand-orange/10 px-2 py-0.5 text-text-primary" data-testid="compass-missing-skill">
+                    {skillLabel(m.slug)}
+                    {m.askedBy > 0 ? (
+                      <span className="ml-1 text-text-muted">· {t("askedBy", { count: m.askedBy })}</span>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+        </div>
+
+        {recommendations.length > 0 ? (
+          <div className="flex flex-col gap-1" data-testid="compass-recommendations">
+            <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("recTitle")}</h3>
+            {(() => {
+              // ONE reason, ONE action when every recommendation shares them
+              // (owner 2026-10-10: the same sentence and button repeated on
+              // every box). Different reasons keep their own rows.
+              const reasonOf = (r: (typeof recommendations)[number]) => {
+                const first = r.sources[0];
+                const role = first?.roleSlug ? professionLabel(first.roleSlug) : null;
+                return r.basis === "profession_gap"
+                  ? t("recWhyProfession", { profession: r.professionSlug ? professionLabel(r.professionSlug) : "" })
+                  : r.basis === "demand_weak_evidence"
+                    ? t(role ? "recWhyWeakRole" : "recWhyWeak", { role: role ?? "" })
+                    : t(role ? "recWhyMissingRole" : "recWhyMissing", { role: role ?? "" });
+              };
+              const actionOf = (r: (typeof recommendations)[number]) => {
+                const action = recommendationNextAction(r);
+                const href =
+                  action.kind === "opportunities"
+                    ? action.professionSlug
+                      ? `/dashboard/opportunities?profession=${encodeURIComponent(action.professionSlug)}`
+                      : "/dashboard/opportunities"
+                    : action.kind === "journal"
+                      ? "/dashboard/journal"
+                      : "/dashboard/profile#profile-edit";
+                const label = t(
+                  action.kind === "opportunities"
+                    ? "recActionOpportunity"
+                    : action.kind === "journal"
+                      ? "recActionJournal"
+                      : "recActionProfile",
+                );
+                return { kind: action.kind, href, label };
+              };
+              const reasons = new Set(recommendations.map(reasonOf));
+              const hrefs = new Set(recommendations.map((r) => actionOf(r).href));
+              if (recommendations.length < 2 || reasons.size !== 1 || hrefs.size !== 1) return null;
+              const action = actionOf(recommendations[0]!);
+              return (
+                <div className="flex flex-col gap-2 text-xs" data-testid="compass-recommendations-grouped">
+                  <p className="leading-relaxed text-text-secondary">{[...reasons][0]}</p>
+                  <ul className="flex flex-wrap gap-1.5">
+                    {recommendations.map((r) => (
+                      <li
+                        key={`${r.basis}:${r.skillSlug}`}
+                        className="rounded-full border border-ink-500 px-2 py-0.5 text-text-primary"
+                        data-testid="compass-recommendation"
+                        data-basis={r.basis}
+                      >
+                        {skillLabel(r.skillSlug)}
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    href={action.href as "/dashboard/profile"}
+                    className="inline-block font-medium text-text-primary underline-offset-4 hover:underline"
+                    data-testid="compass-recommendation-action"
+                    data-action={action.kind}
+                  >
+                    {action.label} →
+                  </Link>
+                </div>
+              );
+            })() ?? (
+            <ul className="flex flex-col gap-1.5 text-xs">
+              {recommendations.map((r) => {
+                const first = r.sources[0];
+                const role = first?.roleSlug ? professionLabel(first.roleSlug) : null;
+                return (
+                  <li
+                    key={`${r.basis}:${r.skillSlug}`}
+                    className="rounded-md border border-ink-500 px-2 py-1.5"
+                    data-testid="compass-recommendation"
+                    data-basis={r.basis}
+                  >
+                    <span className="font-medium text-text-primary">{skillLabel(r.skillSlug)}</span>
+                    <span className="block leading-relaxed text-text-secondary">
+                      {r.basis === "profession_gap"
+                        ? t("recWhyProfession", {
+                            profession: r.professionSlug ? professionLabel(r.professionSlug) : "",
+                          })
+                        : r.basis === "demand_weak_evidence"
+                          ? t(role ? "recWhyWeakRole" : "recWhyWeak", { role: role ?? "" })
+                          : t(role ? "recWhyMissingRole" : "recWhyMissing", { role: role ?? "" })}
+                      {r.sources.length > 1 ? ` ${t("recMoreRequests", { count: r.sources.length - 1 })}` : ""}
+                    </span>
+                    {(() => {
+                      const action = recommendationNextAction(r);
+                      return (
+                        <Link
+                          href={
+                            (action.kind === "opportunities"
+                              ? action.professionSlug
+                                ? `/dashboard/opportunities?profession=${encodeURIComponent(action.professionSlug)}`
+                                : "/dashboard/opportunities"
+                              : action.kind === "journal"
+                                ? "/dashboard/journal"
+                                : "/dashboard/profile#profile-edit") as "/dashboard/profile"
+                          }
+                          className="mt-1 inline-block font-medium text-text-primary underline-offset-4 hover:underline"
+                          data-testid="compass-recommendation-action"
+                          data-action={action.kind}
+                        >
+                          {t(
+                            action.kind === "opportunities"
+                              ? "recActionOpportunity"
+                              : action.kind === "journal"
+                                ? "recActionJournal"
+                                : "recActionProfile",
+                          )}{" "}
+                          →
+                        </Link>
+                      );
+                    })()}
+                  </li>
+                );
+              })}
+            </ul>
+            )}
+          </div>
+        ) : null}
+      </section>
+    </Card>
+  );
+}

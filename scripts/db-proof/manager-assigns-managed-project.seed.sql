@@ -1,0 +1,40 @@
+-- Seed: org A (company CA, projects PA1 active, PA2 completed, PN no-org, PCN no-company), org B (company CB, PB1).
+insert into public.profiles (id, active_role) values
+  ('33333333-3333-3333-3333-333333333333','company'),  -- OWN  owner of company CA (and companies.profile_id)
+  ('77777777-7777-7777-7777-777777777777','company'),  -- MGR  engagement-manager of org A, owns nothing
+  ('66666666-6666-6666-6666-666666666666','company'),  -- MGRB manager of org B
+  ('55555555-5555-5555-5555-555555555555','admin'),    -- ADM
+  ('a1000000-0000-0000-0000-000000000001','worker'),   -- W1 active CA roster
+  ('a2000000-0000-0000-0000-000000000002','worker'),   -- W2 CB roster only
+  ('a3000000-0000-0000-0000-000000000003','worker'),   -- W3 CA roster, INACTIVE
+  ('a4000000-0000-0000-0000-000000000004','worker'),   -- W4 engagement in org A only (no roster)
+  ('a5000000-0000-0000-0000-000000000005','worker'),   -- W5 booking-engagement arm (CA), not on roster
+  ('ee000000-0000-0000-0000-00000000000e','company');  -- NOBODY: no relationship to anything
+insert into public.companies (id, owner_profile_id, profile_id) values
+  ('c0c0c0c0-0000-0000-0000-00000000000a','33333333-3333-3333-3333-333333333333','33333333-3333-3333-3333-333333333333'),
+  ('c0c0c0c0-0000-0000-0000-00000000000b','66666666-6666-6666-6666-666666666666','66666666-6666-6666-6666-666666666666');
+insert into public.organizations (id, legacy_company_id) values
+  ('a0a0a0a0-0000-0000-0000-00000000000a','c0c0c0c0-0000-0000-0000-00000000000a'),
+  ('b0b0b0b0-0000-0000-0000-00000000000b','c0c0c0c0-0000-0000-0000-00000000000b');
+insert into public.projects (id, company_id, organization_id, status) values
+  ('99999999-0000-0000-0000-0000000000a1','c0c0c0c0-0000-0000-0000-00000000000a','a0a0a0a0-0000-0000-0000-00000000000a','active'),
+  ('99999999-0000-0000-0000-0000000000a2','c0c0c0c0-0000-0000-0000-00000000000a','a0a0a0a0-0000-0000-0000-00000000000a','completed'),
+  ('99999999-0000-0000-0000-0000000000a3','c0c0c0c0-0000-0000-0000-00000000000a',null,'active'),
+  ('99999999-0000-0000-0000-0000000000a4',null,'a0a0a0a0-0000-0000-0000-00000000000a','active'),
+  ('99999999-0000-0000-0000-0000000000b1','c0c0c0c0-0000-0000-0000-00000000000b','b0b0b0b0-0000-0000-0000-00000000000b','active');
+insert into public.workers (id, profile_id) values
+  ('aaaa0001-0000-0000-0000-000000000001','a1000000-0000-0000-0000-000000000001'),
+  ('aaaa0002-0000-0000-0000-000000000002','a2000000-0000-0000-0000-000000000002'),
+  ('aaaa0003-0000-0000-0000-000000000003','a3000000-0000-0000-0000-000000000003'),
+  ('aaaa0004-0000-0000-0000-000000000004','a4000000-0000-0000-0000-000000000004'),
+  ('aaaa0005-0000-0000-0000-000000000005','a5000000-0000-0000-0000-000000000005');
+insert into public.company_workers (company_id, worker_id, status) values
+  ('c0c0c0c0-0000-0000-0000-00000000000a','aaaa0001-0000-0000-0000-000000000001','active'),
+  ('c0c0c0c0-0000-0000-0000-00000000000b','aaaa0002-0000-0000-0000-000000000002','active'),
+  ('c0c0c0c0-0000-0000-0000-00000000000a','aaaa0003-0000-0000-0000-000000000003','inactive');
+insert into public.engagement_contexts (profile_id, organization_id, status, relationship_slug) values
+  ('77777777-7777-7777-7777-777777777777','a0a0a0a0-0000-0000-0000-00000000000a','active','manager'),
+  ('66666666-6666-6666-6666-666666666666','b0b0b0b0-0000-0000-0000-00000000000b','active','manager'),
+  ('a4000000-0000-0000-0000-000000000004','a0a0a0a0-0000-0000-0000-00000000000a','active','employee');
+insert into public.company_worker_engagements (company_id, worker_id, status) values
+  ('c0c0c0c0-0000-0000-0000-00000000000a','aaaa0005-0000-0000-0000-000000000005','active');

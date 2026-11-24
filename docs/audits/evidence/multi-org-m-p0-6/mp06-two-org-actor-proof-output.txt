@@ -1,0 +1,264 @@
+BEGIN
+DO
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+CREATE INDEX
+CREATE INDEX
+CREATE INDEX
+CREATE FUNCTION
+REVOKE
+REVOKE
+GRANT
+CREATE FUNCTION
+REVOKE
+REVOKE
+REVOKE
+psql:supabase/migrations/20260806200000_org_demand_spine_v2.sql:145: NOTICE:  trigger "customer_requests_org_guard" for relation "public.customer_requests" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+psql:supabase/migrations/20260806200000_org_demand_spine_v2.sql:149: NOTICE:  trigger "demand_shortlist_org_guard" for relation "public.demand_shortlist" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+psql:supabase/migrations/20260806200000_org_demand_spine_v2.sql:153: NOTICE:  trigger "booking_requests_org_guard" for relation "public.booking_requests" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+REVOKE
+REVOKE
+REVOKE
+psql:supabase/migrations/20260806200000_org_demand_spine_v2.sql:177: NOTICE:  trigger "demand_shortlist_org_inherit" for relation "public.demand_shortlist" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+psql:supabase/migrations/20260806200000_org_demand_spine_v2.sql:181: NOTICE:  trigger "booking_requests_org_inherit" for relation "public.booking_requests" does not exist, skipping
+DROP TRIGGER
+CREATE TRIGGER
+CREATE FUNCTION
+CREATE FUNCTION
+DO
+DROP POLICY
+CREATE POLICY
+DROP POLICY
+CREATE POLICY
+DROP POLICY
+CREATE POLICY
+psql:supabase/migrations/20260806200000_org_demand_spine_v2.sql:341: NOTICE:  org-demand-spine-v2 backfill: 2 demand, 2 shortlist, 2 booking rows stamped
+DO
+               case                
+-----------------------------------
+ PASS fixture: P active in A and B
+(1 row)
+
+=== 1. P creates demand in A context, then SEPARATE demand in B context ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                         case                          
+-------------------------------------------------------
+ PASS 1: same actor, two contexts, two separate stamps
+(1 row)
+
+=== 2. forged org (no membership) is refused — no stamp, no row ===
+psql:scripts/db-proof/mp06-demand-spine-v2-proof.sql:59: NOTICE:  PASS 2: forged organization refused (42501 not_org_member)
+DO
+=== 3. raw authenticated PATCH can neither claim nor rewrite attribution ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+psql:scripts/db-proof/mp06-demand-spine-v2-proof.sql:74: NOTICE:  PASS 3a: value -> value rewrite refused (immutable)
+DO
+ set_config 
+------------
+ postgres
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+psql:scripts/db-proof/mp06-demand-spine-v2-proof.sql:93: NOTICE:  PASS 3b: raw NULL -> value claim refused
+DO
+ set_config 
+------------
+ postgres
+(1 row)
+
+                        case                        
+----------------------------------------------------
+ PASS 3c: personal demand stays personal (NULL org)
+(1 row)
+
+=== 4. shortlist inherits the demand organization; forged payload ignored ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+INSERT 0 1
+ set_config 
+------------
+ postgres
+(1 row)
+
+                         case                         
+------------------------------------------------------
+ PASS 4: shortlist inherited A (forged Delta ignored)
+(1 row)
+
+=== 5. booking inherits the demand organization through the untouched v1 RPC ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+                       case                        
+---------------------------------------------------
+ PASS 5: booking inherited the demand organization
+(1 row)
+
+=== 6. A-chain is invisible to the unrelated owner O (org D) ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0300000-0000-0000-0000-000000000002","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+                         case                         
+------------------------------------------------------
+ PASS 6: unrelated actor reads ZERO rows of the chain
+(1 row)
+
+ set_config 
+------------
+ postgres
+(1 row)
+
+=== 7. a same-org governance colleague CAN read; a mere member CANNOT ===
+INSERT 0 2
+INSERT 0 0
+INSERT 0 2
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0600000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+                 case                  
+---------------------------------------
+ PASS 7a: A manager reads the A demand
+(1 row)
+
+ set_config 
+------------
+ postgres
+(1 row)
+
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0600000-0000-0000-0000-000000000002","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+                              case                              
+----------------------------------------------------------------
+ PASS 7b: a mere member reads NOTHING (governance != belonging)
+(1 row)
+
+ set_config 
+------------
+ postgres
+(1 row)
+
+=== 8. B-context demand is NOT readable through A membership (A != B) ===
+                              set_config                               
+-----------------------------------------------------------------------
+ {"sub":"a0600000-0000-0000-0000-000000000001","role":"authenticated"}
+(1 row)
+
+  set_config   
+---------------
+ authenticated
+(1 row)
+
+                   case                    
+-------------------------------------------
+ PASS 8: A manager cannot read the B chain
+(1 row)
+
+ set_config 
+------------
+ postgres
+(1 row)
+
+=== 9. rollback archives attribution instead of destroying it ===
+CREATE TABLE
+ALTER TABLE
+INSERT 0 4
+INSERT 0 3
+INSERT 0 3
+DROP POLICY
+CREATE POLICY
+DROP POLICY
+CREATE POLICY
+DROP POLICY
+CREATE POLICY
+DROP TRIGGER
+DROP TRIGGER
+DROP TRIGGER
+DROP TRIGGER
+DROP TRIGGER
+DROP FUNCTION
+DROP FUNCTION
+DROP FUNCTION
+DROP FUNCTION
+DROP FUNCTION
+DROP INDEX
+DROP INDEX
+DROP INDEX
+ALTER TABLE
+ALTER TABLE
+ALTER TABLE
+                      case                       
+-------------------------------------------------
+ PASS 9: attribution archived before column drop
+(1 row)
+
+                case                 
+-------------------------------------
+ PASS 9b: column removed by rollback
+(1 row)
+
+ROLLBACK
+=== proof complete — transaction rolled back, zero drift ===

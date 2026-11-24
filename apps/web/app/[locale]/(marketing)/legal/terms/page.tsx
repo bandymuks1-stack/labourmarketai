@@ -1,0 +1,82 @@
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import type { Metadata } from "next";
+import { buildPageMetadata } from "@/lib/seo/metadata";
+
+/**
+ * Public Terms of Service — core contractual truth (legal-entity truth v1).
+ *
+ * Renders the mandatory, entity-accurate core (contracting party = UAB
+ * „Nonstop Group“; Lithuanian law with mandatory-rights carve-outs; IP owner
+ * = Labour Market AI Sp. z o.o. as licensor only; no employment guarantee)
+ * from `legal.terms.sections`, followed by the contact line. Guarded by
+ * legal-entity-truth.test.ts.
+ */
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  const t = await getTranslations({ locale, namespace: "legal" });
+  return buildPageMetadata({
+    locale,
+    path: "/legal/terms",
+    title: t("terms.title"),
+    // Own copy (the contracting-party line), not the inherited homepage
+    // description that every legal page duplicated (SEO gap, 2026-09-20).
+    description: t("terms.metaDescription"),
+  });
+}
+
+export default async function LegalPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("legal");
+
+  const sections = ["0", "1", "2"].map((i) => ({
+    heading: t(`terms.sections.${i}.heading`),
+    items: [0, 1, 2]
+      .map((j) =>
+        t.has(`terms.sections.${i}.items.${j}` as never)
+          ? t(`terms.sections.${i}.items.${j}` as never)
+          : null,
+      )
+      .filter((x): x is string => x !== null),
+  }));
+
+  return (
+    <article className="mx-auto max-w-3xl px-6 py-16 sm:px-12" data-testid="legal-terms">
+      <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary break-words hyphens-auto sm:text-4xl">
+        {t("terms.title")}
+      </h1>
+
+      <div className="mt-8 flex flex-col gap-8">
+        {sections.map((s) => (
+          <section key={s.heading}>
+            <h2 className="font-display text-xl font-semibold text-text-primary">
+              {s.heading}
+            </h2>
+            <ul className="mt-3 flex flex-col gap-2">
+              {s.items.map((item) => (
+                <li
+                  key={item.slice(0, 40)}
+                  className="text-sm leading-relaxed text-text-secondary"
+                >
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+
+      <div className="mt-10 border-t border-ink-600/60 pt-6 text-sm leading-relaxed text-text-secondary">
+        <p className="text-text-muted">{t("preparing.contact")}</p>
+      </div>
+    </article>
+  );
+}

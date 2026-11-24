@@ -1,0 +1,1042 @@
+import { redirect } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { Link } from "@/lib/i18n/navigation";
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { createClient } from "@/lib/supabase/server";
+import {
+  OPERATIONAL_STATUSES,
+  READINESS_STATUSES,
+  type OperationalStatus,
+  type ReadinessStatus,
+} from "@/lib/projects/operations-derive";
+import { suggestedReadinessItemKeys } from "@/lib/projects/readiness-items";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { getOperationsCentre } from "@/lib/projects/operations-centre";
+import { isProjectStatus } from "@/lib/projects/project-lifecycle-model";
+import {
+  OPS_BOARD_ANCHOR,
+  OPS_CENTRE_ATTENTION_MAX,
+  deriveAttention,
+  deriveProjectReadinessRatio,
+  deriveWorkerResources,
+  openProjectTasks,
+} from "@/lib/projects/operations-centre-model";
+import { isBlockingStatus, isOverdue } from "@/lib/tasks/task-model";
+import {
+  ProjectOperationsBoard,
+  type OperationsBoardLabels,
+} from "@/components/app/project-operations-board";
+import { ConfirmPulse } from "@/components/app/arena/confirm-pulse";
+import { HandoverPassportPanel } from "@/components/app/handover-passport-panel";
+import { ProjectFactsForm } from "@/components/app/project-facts-form";
+import { ProjectStagesPanel } from "@/components/app/project-stages-panel";
+import { getLearnedStageDurations } from "@/lib/projects/learned-stage-duration";
+import { ProjectStageGantt } from "@/components/app/project-stage-gantt";
+import { ProjectEconomicsPanel } from "@/components/app/project-economics-panel";
+import { listProjectStages } from "@/lib/projects/stages";
+import { listOrgEmployeeEngagements } from "@/lib/company/org-employee-engagements";
+import {
+  buildResponsibleOptions,
+  responsibleNameMap,
+} from "@/lib/projects/stage-responsible";
+import { buildActivityTimeline } from "@/lib/projects/stage-gantt";
+import { getTaskCollaboration } from "@/lib/tasks/tasks";
+import { getProjectEconomics } from "@/lib/economics/economics";
+import { getProjectAssets } from "@/lib/assets/assets";
+import { ProjectDefectsPanel } from "@/components/app/project-defects-panel";
+import { getProjectDefects } from "@/lib/quality/quality";
+import { getWorkerProjectView } from "@/lib/projects/worker-project-access";
+import { type Role } from "@/lib/auth/actions";
+import {
+  projectLifecycleAction,
+  setProjectResponsibleAction,
+} from "@/lib/projects/project-admin-actions";
+import { getProjectsProgress } from "@/lib/projects/progress";
+import { ProjectField } from "@/components/app/project-field";
+import { buildProjectField } from "@/lib/projects/field-model";
+import { loadWhoIsAvailableForChat } from "@/lib/conversation/capacity";
+import { getProjectManageFacts } from "@/lib/projects/responsible";
+import { listOrganizationMembers } from "@/lib/company/memberships";
+import { getProjectHoursSideBySide } from "@/lib/projects/project-hours";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/projects/[id]/operations");
+
+
+export const dynamic = "force-dynamic";
+
+const MANAGER_ROLES = new Set<Role>(["company", "agency"]);
+
+/**
+ * Project operating centre (control room PR G on top of Pilot Operations
+ * Launch v1) — the worker operations board PLUS the composed project view:
+ * header facts, real attention items, open project tasks (degrading), work
+ * evidence counts, handover state and the per-worker resource/assignment-
+ * readiness strip.
+ *
+ * Manager-only, project-scoped. Every read goes through the project's EXISTING
+ * RLS (a manager reads only projects they manage and only their workers'
+ * employer-visible signals). No migration, no new grant, no service_role.
+ * Where a real model is absent (milestones, issues, resource tables) NOTHING
+ * renders — the gap map §6/§7 records the gated follow-ups.
+ */
+const OPS_NOTICES = new Set([
+  "updated",
+  "invalid",
+  "invalid_transition",
+  "invalid_dates",
+  "completed_read_only",
+  "needs_migration",
+  "not_authorized",
+  "not_found",
+  "error",
+]);
+
+export default async function ProjectOperationsPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string; id: string }>;
+  searchParams: Promise<{ notice?: string }>;
+}) {
+  const { locale, id } = await params;
+  setRequestLocale(locale);
+  const sp = await searchParams;
+  const notice = sp.notice && OPS_NOTICES.has(sp.notice) ? sp.notice : null;
+  const t = await getTranslations("projectOps");
+  const tTasks = await getTranslations("tasks");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/${locale}/auth/login`);
+
+  // The layout already read this row through the ONE request-cached reader;
+  // re-reading it here was one more serial round trip per page view.
+  const { profile } = await getSessionProfile();
+  const role = (profile?.active_role as Role) ?? "worker";
+
+  if (!MANAGER_ROLES.has(role)) {
+    // RC2 role-aware routing (F11): the operations board stays manager-only,
+    // but an ASSIGNED worker is routed to their permitted project view
+    // instead of a dead explanatory page.
+    const workerView = await getWorkerProjectView(id);
+    if (workerView) redirect(`/${locale}/dashboard/projects/${id}`);
+    return (
+      <div className="mx-auto flex w-full max-w-content flex-col gap-4">
+        <PageTitle>{t("eyebrow")}</PageTitle>
+        <p className="card-border p-4 text-sm text-text-secondary">{t("managerOnly")}</p>
+      </div>
+    );
+  }
+
+  const centre = await getOperationsCentre(id);
+  if (!centre) {
+    return (
+      <div className="mx-auto flex w-full max-w-content flex-col gap-4">
+        <PageTitle>{t("eyebrow")}</PageTitle>
+        <p className="card-border p-4 text-sm text-text-secondary" data-testid="ops-not-authorized">
+          {t("notAuthorized")}
+        </p>
+      </div>
+    );
+  }
+
+  const { ops, passport, tasks, evidence, housingProvided } = centre;
+
+  /**
+   * SIX ROUND-TRIPS FOR ONE PROJECT, TAKEN ONE AT A TIME.
+   *
+   * The owner audit reports project windows feeling slow, and this is the
+   * measurable reason: progress, the manage facts, the stages, the economics,
+   * the assets and the defects were each `await`ed on their own line, so the
+   * page paid the sum of six latencies before rendering. All six are keyed on
+   * the SAME project id and none consumes another — they were serial only
+   * because they were written on consecutive lines.
+   *
+   * `listOrganizationMembers` is the one that genuinely cannot join them: it
+   * needs `manageFacts.organizationId`, so it stays below, after its input.
+   *
+   * Train D — project management strip data: derived progress (never stored),
+   * the responsible pointer (gated migration → null pre-apply) and the org
+   * member list for the responsible select.
+   */
+  const [
+    progressById,
+    manageFacts,
+    stages,
+    economics,
+    projectAssets,
+    defects,
+    capacity,
+    learnedStageDurations,
+    // Allocated vs journaled hours — the organization's ledger BESIDE the
+    // people's journal, each through its own reader, never summed.
+    projectHours,
+  ] = await Promise.all([
+      getProjectsProgress([id]),
+      getProjectManageFacts(id),
+      listProjectStages(id),
+      getProjectEconomics(id),
+      getProjectAssets(id),
+      getProjectDefects(id),
+      // P4 — the ready edge: the SAME capacity read the chat answers
+      // "who is available" with (roster vs approved absences, WHEN only).
+      loadWhoIsAvailableForChat(),
+      // CAL-10 — what comparable finished stages have really taken. Derived
+      // from the SAME project_stages rows, never stored, and authorized by
+      // the same policy: a caller learns only from stages they can open.
+      getLearnedStageDurations(),
+      getProjectHoursSideBySide(id),
+    ]);
+  const progress = progressById[id] ?? null;
+  const projectOrgId: string | null = manageFacts?.organizationId ?? null;
+  const responsibleProfileId: string | null =
+    manageFacts?.responsibleProfileId ?? null;
+  const orgMembersRead = projectOrgId
+    ? await listOrganizationMembers(projectOrgId)
+    : null;
+  // Stage responsible picker: ONLY engagements ACTIVE in this project's own
+  // organization (the eligibility set_project_stage_responsible_v1 enforces),
+  // read through the existing readable-name resolver. null = unreadable.
+  const stageEngagementsRead = projectOrgId
+    ? await listOrgEmployeeEngagements(projectOrgId)
+    : null;
+  const stageResponsibleOptions =
+    stageEngagementsRead && stageEngagementsRead.kind === "ok"
+      ? buildResponsibleOptions(stageEngagementsRead.rows)
+      : null;
+  const responsibleOptions =
+    orgMembersRead && orgMembersRead.kind === "ok"
+      ? orgMembersRead.members
+          .filter((m) => m.status === "active")
+          .map((m) => ({
+            profileId: m.profileId,
+            name: m.fullName ?? m.email ?? m.profileId.slice(0, 8),
+          }))
+      : [];
+  const responsibleName =
+    responsibleOptions.find((m) => m.profileId === responsibleProfileId)?.name ??
+    null;
+  const projectStatus = ops.project.status ?? null;
+  const lifecycleTargets: readonly string[] =
+    projectStatus === "draft"
+      ? ["live"]
+      : projectStatus === "live"
+        ? ["paused", "completed"]
+        : projectStatus === "paused"
+          ? ["live", "completed"]
+          : [];
+
+  // Activity timeline: the real stages + this project's real tasks. Open
+  // blocker counts come from the SAME bounded collaboration read the tasks
+  // page uses; assignee names resolve from the project's workers first (those
+  // may be opened) and the org roster second (plain text, never a dead link).
+  const timelineTasks = tasks.status === "ok" ? tasks.tasks : [];
+  const timelineCollab = await getTaskCollaboration(timelineTasks.map((x) => x.id));
+  const waitingOnByTask: Record<string, number> = {};
+  for (const [taskId, blockers] of Object.entries(timelineCollab.blockersByTask)) {
+    waitingOnByTask[taskId] = blockers.filter((b) => isBlockingStatus(b.status)).length;
+  }
+  const timeline = buildActivityTimeline({
+    projectId: id,
+    stages: stages.applied ? stages.stages : [],
+    tasks: timelineTasks,
+    waitingOnByTask,
+    stageResponsibleNames: responsibleNameMap(stageResponsibleOptions ?? []),
+    blockersByTask: timelineCollab.blockersByTask,
+    meProfileId: user.id,
+    people: ops.workers.map((w) => ({
+      profileId: w.workerProfileId,
+      name: w.name,
+      workerId: w.workerId,
+    })),
+    memberNameByProfileId: new Map(
+      responsibleOptions.map((m) => [m.profileId, m.name] as const),
+    ),
+    todayIso: (await viewerWorkToday()).todayIso,
+  });
+
+  // P4 — THE FIELD (frozen design §5, §1.5): a pure projection over the reads
+  // above — stages as lanes in time, the people on the project as tokens,
+  // open unassigned work as dashed slots, the capacity read as the ready
+  // edge. Nothing below is removed; the Field is added on top of it.
+  const readAt = new Date().toISOString();
+  const field = buildProjectField({
+    stages: stages.applied ? stages.stages : [],
+    stagesApplied: stages.applied,
+    workers: ops.workers,
+    tasks: tasks.status === "ok" ? tasks.tasks : [],
+    tasksApplied: tasks.status === "ok",
+    capacity,
+    todayIso: readAt.slice(0, 10),
+  });
+  const tAssets = await getTranslations("assets");
+  // The stored lifecycle value in the person's language (the same label set
+  // the projects map and the planning page use). An unknown value is shown
+  // as stored — never invented — but the four canonical states no longer
+  // leak the raw English enum ("BŪSENA: DRAFT" on /lt, production 2026-09-21).
+  const tProjectStatus = await getTranslations("projects.map.status");
+  const projectStatusText = isProjectStatus(ops.project.status)
+    ? tProjectStatus(ops.project.status)
+    : (ops.project.status ?? t("notSet"));
+
+  const labels: OperationsBoardLabels = {
+    eyebrow: t("eyebrow"),
+    untitledProject: t("untitledProject"),
+    statusLabel: t("statusLabel"),
+    locationLabel: t("locationLabel"),
+    startLabel: t("startLabel"),
+    notSet: t("notSet"),
+    schemaNote: t("schemaNote"),
+    countersTitle: t("countersTitle"),
+    totalAssigned: t("counters.totalAssigned"),
+    viaTeam: t("counters.viaTeam"),
+    ready: t("counters.ready"),
+    readyBasis: t("counters.readyBasis"),
+    needsDeclaredSkills: t("counters.needsDeclaredSkills"),
+    needsEvidence: t("counters.needsEvidence"),
+    needsFollowUp: t("counters.needsFollowUp"),
+    openReviewItems: t("counters.openReviewItems"),
+    instructionsSent: t("counters.instructionsSent"),
+    actionsTitle: t("actionsTitle"),
+    assignAction: t("actions.assign"),
+    instructionsAction: t("actions.instructions"),
+    csvAction: t("actions.csv"),
+    printAction: t("actions.print"),
+    candidatesAction: t("actions.candidates"),
+    workersTitle: t("workersTitle"),
+    noWorkers: t("noWorkers"),
+    readyChip: t("worker.readyChip"),
+    notReadyChip: t("worker.notReadyChip"),
+    declaredSkills: t("worker.declaredSkills"),
+    confirmedSkills: t("worker.confirmedSkills"),
+    evidence: t("worker.evidence"),
+    reviewItems: t("worker.reviewItems"),
+    lastActivity: t("worker.lastActivity"),
+    noActivity: t("worker.noActivity"),
+    assignedAt: t("worker.assignedAt"),
+    missingTitle: t("worker.missingTitle"),
+    missingName: t("worker.missingName"),
+    missingDeclaredSkills: t("worker.missingDeclaredSkills"),
+    missingEvidence: t("worker.missingEvidence"),
+    followUpChip: t("worker.followUpChip"),
+    playerCardLink: t("worker.playerCardLink"),
+    instructionLink: t("worker.instructionLink"),
+    skillClarifyLink: t("worker.skillClarifyLink"),
+    notesTitle: t("notesTitle"),
+    documentsNote: t("notes.documents"),
+    candidateSkillNote: t("notes.candidateSkill"),
+    readinessHonestyNote: t("notes.readiness"),
+    // v2 — operational status
+    statusTitle: t("statusTitle"),
+    statusEmpty: t("statusEmpty"),
+    statusHelper: t("statusHelper"),
+    save: t("save"),
+    saving: t("saving"),
+    saved: t("saved"),
+    saveError: t("saveError"),
+    needsMigration: t("needsMigration"),
+    statusLabels: Object.fromEntries(
+      OPERATIONAL_STATUSES.map((s) => [s, t(`statuses.${s}`)]),
+    ) as Record<OperationalStatus, string>,
+    // v2 — checklist
+    checklist: {
+      title: t("checklist.title"),
+      empty: t("checklist.empty"),
+      seed: t("checklist.seed"),
+      addItem: t("checklist.addItem"),
+      addPlaceholder: t("checklist.addPlaceholder"),
+      toAgree: t("checklist.toAgree"),
+      missing: t("checklist.missing"),
+      received: t("checklist.received"),
+      checked: t("checklist.checked"),
+      blocked: t("checklist.blocked"),
+      helper: t("checklist.helper"),
+    },
+    readinessStatusLabels: Object.fromEntries(
+      READINESS_STATUSES.map((s) => [s, t(`readinessStatuses.${s}`)]),
+    ) as Record<ReadinessStatus, string>,
+    defaultItemLabels: Object.fromEntries(
+      // SUGGESTIONS for this job, not a universal list (decision 0021,
+      // extended 2026-10-24). Whether the work crosses a border is not known
+      // on this board, so cross-border rows (A1 / posting) are left to the
+      // manager to add when they apply.
+      suggestedReadinessItemKeys({ crossBorder: false }).map((k) => [k, t(`defaults.${k}`)]),
+    ) as Record<string, string>,
+    // v2 — filters
+    filters: {
+      title: t("filters.title"),
+      all: t("filters.all"),
+      byStatus: t("filters.byStatus"),
+      anyStatus: t("filters.anyStatus"),
+      missingDocs: t("filters.missingDocs"),
+      ready: t("filters.ready"),
+      needsSkillInfo: t("filters.needsSkillInfo"),
+      needsEvidence: t("filters.needsEvidence"),
+      docsChecked: t("filters.docsChecked"),
+      followUp: t("filters.followUp"),
+      none: t("filters.none"),
+      showAll: t("filters.showAll"),
+      empty: {
+        missingDocs: t("filters.empty.missingDocs"),
+        ready: t("filters.empty.ready"),
+        needsSkillInfo: t("filters.empty.needsSkillInfo"),
+        needsEvidence: t("filters.empty.needsEvidence"),
+        docsChecked: t("filters.empty.docsChecked"),
+        followUp: t("filters.empty.followUp"),
+      },
+    },
+    counterOpenHint: t("counters.openHint"),
+    counters2: {
+      withMissingDocs: t("counters2.withMissingDocs"),
+      docsReceived: t("counters2.docsReceived"),
+      docsChecked: t("counters2.docsChecked"),
+      docsBlocked: t("counters2.docsBlocked"),
+    },
+  };
+
+  // ── PR G derivations: pure functions over the composed real reads ──
+  const tCentre = await getTranslations("projectOps.centre");
+  const tNetwork = await getTranslations("network");
+  const tasksHref = `/dashboard/tasks?project=${id}`;
+  const taskList = tasks.status === "ok" ? tasks.tasks : [];
+  const openTasks = openProjectTasks(taskList);
+  const openTaskCount = openProjectTasks(taskList, taskList.length).length;
+  const readiness = deriveProjectReadinessRatio(ops.workers);
+  const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const now = new Date();
+  const attention = deriveAttention({
+    workers: ops.workers,
+    tasks: taskList,
+    tasksHref,
+    now,
+  }).slice(0, OPS_CENTRE_ATTENTION_MAX);
+  const resources = deriveWorkerResources({
+    workers: ops.workers,
+    availability: centre.availability,
+    bookings: centre.bookings,
+    project: {
+      startDate: ops.project.startDate,
+      endDate: ops.project.endDate,
+    },
+  });
+  const hasProjectWindow = ops.project.startDate !== null;
+
+  const chipClass =
+    "inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary";
+  const sectionTitleClass =
+    "font-mono text-meta uppercase tracking-label text-text-muted";
+
+  return (
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
+      {notice ? (
+        <p
+          role="status"
+          className={`rounded-md border px-3 py-2 text-sm ${
+            notice === "updated"
+              ? "border-state-success/50 bg-state-success/10 text-state-success"
+              : "border-state-warning/50 bg-state-warning/10 text-text-primary"
+          }`}
+          data-testid={`ops-notice-${notice}`}
+        >
+          {t(`manage.notice.${notice}`)}
+        </p>
+      ) : null}
+
+      {/* WHICH PROJECT this is, first. The page used to open on the
+          organization-wide confirm pulse ("25 entries wait") with the
+          project's own name ~2,000px further down in the board header, so a
+          phone landed on a global banner instead of the project (UX review
+          2026-10-24). A plain line, not a second <h1> — the board keeps the
+          page heading. */}
+      <header className="flex min-w-0 flex-col gap-0.5" data-testid="ops-project-context">
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
+        </span>
+        <p className="break-words font-display text-xl font-semibold tracking-tight text-text-primary">
+          {ops.project.title ?? t("untitledProject")}
+        </p>
+      </header>
+
+      {/* P4 — the Field: the primary operational view, ADDED on the page
+          (§1.5). Every control is a registered canonical action the chat
+          already executes, with a readback; the sections below stay. */}
+      <ProjectField
+        field={field}
+        tasks={tasks.status === "ok" ? tasks.tasks.filter((x) => x.status !== "done" && x.status !== "cancelled") : []}
+        projectId={id}
+        locale={locale}
+        readAt={readAt}
+        labels={{
+          readinessStatus: labels.readinessStatusLabels,
+          operationalStatus: labels.statusLabels,
+        }}
+      />
+
+      {/* ── PR G header strip: real project facts + real counts only.
+            Status is the stored enum VERBATIM; every number is a raw count
+            of rows this session read under RLS. ── */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="ops-centre-header"
+      >
+        <h2 className={sectionTitleClass}>{tCentre("summaryTitle")}</h2>
+        <div className="flex flex-wrap gap-2">
+          <span className={chipClass} data-testid="ops-centre-status">
+            {t("statusLabel")}: {projectStatusText}
+          </span>
+          <span className={chipClass} data-testid="ops-centre-dates">
+            {tCentre("datesLabel")}: {ops.project.startDate ?? t("notSet")} →{" "}
+            {ops.project.endDate ?? t("notSet")}
+          </span>
+          <span className={chipClass}>
+            {t("counters.totalAssigned")}: {ops.counters.totalAssigned}
+            {(ops.counters.viaTeam ?? 0) > 0
+              ? ` (${t("counters.viaTeam")}: ${ops.counters.viaTeam})`
+              : ""}
+          </span>
+          {tasks.status === "ok" ? (
+            <span className={chipClass} data-testid="ops-centre-open-tasks">
+              {tCentre("openTasksLabel")}: {openTaskCount}
+            </span>
+          ) : (
+            <span className={chipClass} data-testid="ops-centre-tasks-preparing">
+              {tCentre("openTasksLabel")}: {tCentre("tasksPreparingShort")}
+            </span>
+          )}
+          {readiness.total > 0 ? (
+            <span className={chipClass} data-testid="ops-centre-readiness">
+              {tCentre("readinessLabel")}: {readiness.checked}/{readiness.total}
+            </span>
+          ) : (
+            <span className={chipClass} data-testid="ops-centre-readiness-none">
+              {tCentre("readinessLabel")}: {tCentre("readinessNone")}
+            </span>
+          )}
+          <span className={chipClass} data-testid="ops-centre-housing">
+            {tCentre("housingLabel")}:{" "}
+            {housingProvided === true
+              ? tCentre("housingYes")
+              : housingProvided === false
+                ? tCentre("housingNo")
+                : tCentre("housingUnknown")}
+          </span>
+        </div>
+      </section>
+
+      {/* ── Hours on this project, two ledgers side by side: what the
+            organization allocated (its own hour records on the project's
+            work objects) and what people journaled (their entries on this
+            project, confirmed = approved review). Bridged, never merged:
+            no total across the two, and a failed read says so. ── */}
+      <section
+        className="card-border flex flex-col gap-2 p-5"
+        data-testid="ops-centre-hours"
+      >
+        <h2 className={sectionTitleClass}>{tCentre("hours.title")}</h2>
+        <div className="flex flex-wrap gap-2">
+          <span
+            className={chipClass}
+            data-testid="ops-centre-hours-allocated"
+            data-state={projectHours.allocated.state}
+            data-hours={projectHours.allocated.state === "measured" ? projectHours.allocated.hours : undefined}
+          >
+            {tCentre("hours.allocated")}:{" "}
+            {projectHours.allocated.state === "measured"
+              ? tCentre("hours.value", { hours: hoursFmt.format(projectHours.allocated.hours) })
+              : projectHours.allocated.state === "none"
+                ? tCentre("hours.noLedger")
+                : tCentre("hours.unavailable")}
+          </span>
+          <span className={chipClass} data-testid="ops-centre-hours-journaled">
+            {tCentre("hours.journaled")}:{" "}
+            {projectHours.journaled.state === "measured"
+              ? tCentre("hours.value", { hours: hoursFmt.format(projectHours.journaled.hours) })
+              : tCentre("hours.unavailable")}
+          </span>
+          <span className={chipClass} data-testid="ops-centre-hours-confirmed">
+            {tCentre("hours.confirmed")}:{" "}
+            {projectHours.journaled.state === "measured"
+              ? tCentre("hours.value", {
+                  hours: hoursFmt.format(projectHours.journaled.confirmedHours),
+                })
+              : tCentre("hours.unavailable")}
+          </span>
+        </div>
+        <p className="text-meta leading-relaxed text-text-muted">
+          {tCentre("hours.note")}
+          {projectHours.journaled.state === "measured" && projectHours.journaled.truncated
+            ? ` ${tCentre("hours.truncated", { count: projectHours.journaled.entries })}`
+            : ""}
+        </p>
+      </section>
+
+      {/* ARENA rhythm (TASK 07 slice 2): the S3.5 one-tap confirm queue
+          pulse — the real gated reviewable count, one tap to confirm. It is
+          the ORGANIZATION's queue, so it follows this project's own facts
+          rather than leading the page (same placement as the project page,
+          where it sits after the project's own panels). */}
+      <ConfirmPulse />
+
+      {/* ── Train D: project management strip — derived progress (never a
+            stored number), the accountable person, and the applied W11
+            lifecycle as REAL forms (no dead buttons; completed is terminal
+            and says so instead of offering controls that would fail). ── */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="ops-manage"
+      >
+        <h2 className={sectionTitleClass}>{t("manage.title")}</h2>
+
+        {/* R-3: the project's FACTS — title, place, dates — through the one
+            gated write (update_project_facts_v1). These are the columns the
+            calendar band, the dates chip above and the booking-overlap check
+            read; until this form they had no write path after creation. */}
+        <ProjectFactsForm locale={locale} projectId={id} project={ops.project} />
+
+        <div className="flex flex-wrap items-center gap-2">
+          {progress && progress.percent !== null ? (
+            <span className={chipClass} data-testid="ops-manage-progress">
+              {t("manage.progressLabel")}: {progress.percent}% (
+              {progress.taskDone}/{progress.taskTotal})
+            </span>
+          ) : progress && progress.basis === "stages" ? (
+            <span className={chipClass} data-testid="ops-manage-progress-stages">
+              {t("manage.progressLabel")}:{" "}
+              {t("manage.progressStages", {
+                done: progress.stageDone,
+                total: progress.stageTotal,
+              })}
+            </span>
+          ) : (
+            <span className={chipClass} data-testid="ops-manage-progress-none">
+              {t("manage.progressLabel")}: {t("manage.progressNone")}
+            </span>
+          )}
+          {progress && progress.percent !== null ? (
+            <span
+              className="h-2 w-40 overflow-hidden rounded-full bg-ink-700"
+              role="img"
+              aria-label={`${t("manage.progressLabel")}: ${progress.percent}%`}
+            >
+              <span
+                className="block h-full rounded-full bg-brand-blue"
+                style={{ width: `${progress.percent}%` }}
+              />
+            </span>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-text-secondary">
+            {t("manage.responsibleLabel")}:{" "}
+            <span
+              className="font-semibold text-text-primary"
+              data-testid="ops-manage-responsible-name"
+            >
+              {responsibleName ?? t("manage.responsibleNone")}
+            </span>
+          </span>
+          {responsibleOptions.length > 0 ? (
+            <form
+              action={setProjectResponsibleAction}
+              className="flex flex-wrap items-center gap-2"
+              data-testid="ops-manage-responsible-form"
+            >
+              <input type="hidden" name="locale" value={locale} />
+              <input type="hidden" name="projectId" value={id} />
+              <label className="flex items-center gap-2 text-xs text-text-secondary">
+                <span className="sr-only">{t("manage.responsibleLabel")}</span>
+                <select
+                  name="profileId"
+                  defaultValue={responsibleProfileId ?? ""}
+                  className="rounded-lg border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
+                >
+                  <option value="">{t("manage.responsibleNone")}</option>
+                  {responsibleOptions.map((m) => (
+                    <option key={m.profileId} value={m.profileId}>
+                      {m.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <button
+                type="submit"
+                className="inline-flex h-9 items-center rounded-lg border border-ink-500 px-3 text-xs font-semibold text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                data-testid="ops-manage-responsible-save"
+              >
+                {t("manage.responsibleSave")}
+              </button>
+            </form>
+          ) : null}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="text-sm text-text-secondary">
+            {t("manage.lifecycleLabel")}:
+          </span>
+          {projectStatus === "completed" ? (
+            <span className={chipClass} data-testid="ops-manage-completed">
+              {t("manage.completedTerminal")}
+            </span>
+          ) : lifecycleTargets.length === 0 ? (
+            <span className={chipClass} data-testid="ops-manage-no-transitions">
+              {t("manage.noTransitions")}
+            </span>
+          ) : (
+            lifecycleTargets.map((target) => (
+              <form key={target} action={projectLifecycleAction}>
+                <input type="hidden" name="locale" value={locale} />
+                <input type="hidden" name="projectId" value={id} />
+                <input type="hidden" name="toStatus" value={target} />
+                <button
+                  type="submit"
+                  className={`inline-flex h-9 items-center rounded-lg border px-3 text-xs font-semibold transition-colors ${
+                    target === "completed"
+                      ? "border-brand-orange/50 text-brand-orange hover:border-brand-orange"
+                      : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                  }`}
+                  data-testid={`ops-manage-lifecycle-${target}`}
+                >
+                  {t(`manage.lifecycle.${target}`)}
+                </button>
+              </form>
+            ))
+          )}
+        </div>
+        {projectStatus !== "completed" && lifecycleTargets.includes("completed") ? (
+          <p className="text-xs text-text-muted">{t("manage.completeHint")}</p>
+        ) : null}
+      </section>
+
+      {/* Wagon 6 — Project Operations Core: ordered stages over the SAME
+            project spine. Managers add stages, set real status and planned
+            dates; no fabricated progress. Honest "not yet available" state
+            while the owner-gated migration is unapplied. */}
+      <ProjectStagesPanel
+        projectId={id}
+        data={stages}
+        learned={learnedStageDurations}
+        canManage={manageFacts !== null}
+        responsibleOptions={stageResponsibleOptions}
+      />
+
+      {/* Gantt projection over the SAME stage truth (no stored events) — bars
+            from real planned/actual dates, today marker, overdue highlight,
+            mobile list fallback. */}
+      <ProjectStageGantt timeline={timeline} />
+
+      {/* Wagon 8 — Project Economics: budget vs actual. Actual cost is read
+            from the canonical finance_records ledger (no second cost ledger);
+            EUR only, honest variance, manager-only. */}
+      <ProjectEconomicsPanel projectId={id} data={economics} />
+
+      {/* Wagon 9 — Assets & Logistics: read-only view of the assets currently
+            assigned to THIS project (managed on /dashboard/assets). */}
+      {projectAssets.applied && projectAssets.assets.length > 0 && (
+        <section className="card-border flex flex-col gap-3 p-5" data-testid="project-assets">
+          <h2 className={sectionTitleClass}>{tAssets("onProjectTitle")}</h2>
+          <ul className="flex flex-col gap-2">
+            {projectAssets.assets.map((a) => (
+              <li key={a.assignmentId} className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 px-3 py-2" data-testid="project-asset-row">
+                <span className="text-sm text-text-primary">{a.assetName}</span>
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">{tAssets(`types.${a.assetType}`)}</span>
+                <span className="font-mono text-meta uppercase tracking-label text-text-secondary">{tAssets(`assignmentStatus.${a.status}`)}</span>
+                {a.workerName ? <span className="text-xs text-text-muted">· {a.workerName}</span> : null}
+              </li>
+            ))}
+          </ul>
+          <Link href={"/dashboard/assets" as "/dashboard"} className="text-sm text-brand-blue hover:underline" data-testid="project-assets-link">
+            {tAssets("manageLink")} →
+          </Link>
+        </section>
+      )}
+
+      {/* Wagon 11 — Delivery & Quality: defects + corrections for this project.
+            Manager-only; nothing is auto-accepted. */}
+      <ProjectDefectsPanel projectId={id} data={defects} />
+
+      {/* ── PR G attention: blockers derived ONLY from real records —
+            manager-set statuses, open checklist rows, overdue/blocked
+            project tasks. Each row links where it is resolved. ── */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="ops-centre-attention"
+      >
+        <h2 className={sectionTitleClass}>{tCentre("attention.title")}</h2>
+        {attention.length === 0 ? (
+          <p
+            className="text-sm leading-relaxed text-text-secondary"
+            data-testid="ops-attention-empty"
+          >
+            {tCentre("attention.empty")}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {attention.map((a) => {
+              const body = (
+                <>
+                  <span className="inline-flex shrink-0 items-center rounded-md border border-state-warning/30 bg-state-warning/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">
+                    {tCentre(`attention.kind.${a.kind}`)}
+                  </span>
+                  <span className="min-w-0 flex-1 truncate text-sm text-text-primary">
+                    {a.subject}
+                  </span>
+                  <span aria-hidden className="text-text-muted">
+                    →
+                  </span>
+                </>
+              );
+              return (
+                <li key={a.id} data-testid={`ops-attention-${a.kind}`}>
+                  {a.href.startsWith("#") ? (
+                    <a
+                      href={a.href}
+                      className="flex min-h-11 items-center gap-2 rounded-md border border-ink-600 px-3 py-2 transition-colors duration-fast hover:border-brand-blue"
+                    >
+                      {body}
+                    </a>
+                  ) : (
+                    <Link
+                      href={a.href as "/dashboard"}
+                      className="flex min-h-11 items-center gap-2 rounded-md border border-ink-600 px-3 py-2 transition-colors duration-fast hover:border-brand-blue"
+                    >
+                      {body}
+                    </Link>
+                  )}
+                </li>
+              );
+            })}
+          </ul>
+        )}
+        <p className="text-meta leading-relaxed text-text-muted">
+          {tCentre("attention.note")}
+        </p>
+      </section>
+
+      {/* The board keeps everything it rendered before — the attention rows
+          above anchor into it (OPS_BOARD_ANCHOR). */}
+      {/* Canonical Pakviesti (core-network area B): invite a person into
+          THIS project via the one invitation surface, project preselected. */}
+      <Link
+        href={`/dashboard/network?invite=1&type=join_project&project=${id}` as "/dashboard"}
+        data-testid="project-invite-link"
+        className="flex w-fit items-center gap-2 rounded-md border border-brand-blue/50 px-4 py-2 text-sm font-medium text-brand-blue transition-colors hover:border-brand-blue"
+      >
+        {tNetwork("invite.title")}
+      </Link>
+
+      <div id={OPS_BOARD_ANCHOR.slice(1)} className="flex flex-col gap-6">
+        {/* The mutual pre-agreement recommendation — advice for both sides,
+            never a gate (decision 0021 extension, 2026-10-24). */}
+        <CollaborationChecksNote
+          context={{ dealKind: "work_engagement", workCountry: ops.project.country }}
+          countryName={ops.project.country}
+        />
+        <ProjectOperationsBoard
+          ops={{ ...ops, project: { ...ops.project, status: projectStatusText } }}
+          labels={labels}
+          locale={locale}
+          projectId={id}
+          csvHref={`/${locale}/dashboard/projects/${id}/operations/report`}
+        />
+      </div>
+
+      {/* §8.8 handover passport shell (branch 19) — append-only manager
+          record on the SAME project spine. Responsible parties are the real
+          active assignments already loaded above (names only). The panel
+          owns the honest "not yet available" state while the owner-gated
+          migration is unapplied. */}
+      <HandoverPassportPanel
+        projectId={id}
+        data={passport}
+        responsibleWorkers={ops.workers.map((w) => ({ name: w.name }))}
+      />
+
+      {/* ── PR G resources: per assigned worker — manager-set status
+            VERBATIM, real checklist ratio, the worker's own recorded
+            availability fields, and accepted-booking overlaps with the
+            project band (planning-model semantics). Accommodation/transport
+            needs are NOT tracked yet, so nothing renders for them. ── */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="ops-centre-resources"
+      >
+        <h2 className={sectionTitleClass}>{tCentre("resources.title")}</h2>
+        {resources.length === 0 ? (
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("noWorkers")}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-3">
+            {resources.map((r) => (
+              <li
+                key={r.workerId}
+                className="flex flex-col gap-2 rounded-md border border-ink-600 p-3"
+                data-testid="ops-resource-row"
+              >
+                <p className="text-sm font-semibold text-text-primary">
+                  {r.name}
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  <span className={chipClass}>
+                    {t("statusTitle")}:{" "}
+                    {r.operationalStatus
+                      ? t(`statuses.${r.operationalStatus}`)
+                      : t("statusEmpty")}
+                  </span>
+                  <span className={chipClass}>
+                    {tCentre("resources.checklistLabel")}:{" "}
+                    {r.readiness.total > 0
+                      ? `${r.readiness.checked}/${r.readiness.total}`
+                      : tCentre("readinessNone")}
+                  </span>
+                  <span className={chipClass}>
+                    {tCentre("resources.availabilityLabel")}:{" "}
+                    {r.availability.availabilityStatus ??
+                      tCentre("resources.notRecorded")}
+                  </span>
+                  {r.availability.availableFrom ? (
+                    <span className={chipClass}>
+                      {tCentre("resources.availableFromLabel")}:{" "}
+                      {r.availability.availableFrom}
+                    </span>
+                  ) : null}
+                  {!hasProjectWindow ? (
+                    <span
+                      className={chipClass}
+                      data-testid="ops-resource-no-window"
+                    >
+                      {tCentre("resources.noWindow")}
+                    </span>
+                  ) : r.overlappingBookings > 0 ? (
+                    <span
+                      className="inline-flex items-center gap-1.5 rounded-full border border-state-warning/30 bg-state-warning/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-state-warning"
+                      data-testid="ops-resource-booking-overlap"
+                    >
+                      {tCentre("resources.bookingConflict", {
+                        n: r.overlappingBookings,
+                      })}
+                    </span>
+                  ) : (
+                    <span className={chipClass}>
+                      {tCentre("resources.noConflict")}
+                    </span>
+                  )}
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+        <p className="text-meta leading-relaxed text-text-muted">
+          {tCentre("resources.note")}
+        </p>
+      </section>
+
+      {/* ── PR G tasks: open project tasks inline (bounded), honest
+            preparing note while the owner-gated work_tasks migration is
+            unapplied; the tasks page stays the full surface. ── */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="ops-centre-tasks"
+      >
+        <h2 className={sectionTitleClass}>{tCentre("tasksTitle")}</h2>
+        {tasks.status === "needs-migration" ? (
+          <p
+            className="rounded-md border border-dashed border-ink-500 px-3 py-2 text-xs leading-relaxed text-text-muted"
+            data-testid="ops-tasks-preparing"
+          >
+            {tTasks("unavailable")}
+          </p>
+        ) : openTasks.length === 0 ? (
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {tCentre("tasksEmpty")}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {openTasks.map((task) => (
+              <li
+                key={task.id}
+                className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 px-3 py-2"
+                data-testid="ops-task-row"
+              >
+                <span className="min-w-0 flex-1 truncate text-sm text-text-primary">
+                  {task.title}
+                </span>
+                <span className={chipClass}>
+                  {tTasks(`status.${task.status}`)}
+                </span>
+                {task.dueAt ? (
+                  <span
+                    className={
+                      isOverdue(task.dueAt, now)
+                        ? "inline-flex items-center rounded-full border border-state-warning/30 bg-state-warning/10 px-3 py-1 font-mono text-meta uppercase tracking-label text-state-warning"
+                        : chipClass
+                    }
+                  >
+                    {tTasks("dueLabel")}: {task.dueAt.slice(0, 10)}
+                  </span>
+                ) : null}
+              </li>
+            ))}
+          </ul>
+        )}
+        {/* Work tasks bridge (control room PR D) — navigation only: the tasks
+            page owns the project-scoped read (RLS) and degrades honestly until
+            the owner-gated work_tasks migration is applied. */}
+        <p className="text-sm" data-testid="ops-project-tasks-link">
+          <Link
+            href={tasksHref as "/dashboard"}
+            className="text-brand-blue hover:underline"
+          >
+            {tTasks("projectSection.link")} →
+          </Link>
+        </p>
+      </section>
+
+      {/* ── PR G work evidence: real counts of journal entries linked to
+            this project and their uploaded photos — a summary of the SAME
+            gallery the project page shows, never a second photo system. ── */}
+      <section
+        className="card-border flex flex-col gap-3 p-5"
+        data-testid="ops-centre-evidence"
+      >
+        <h2 className={sectionTitleClass}>{tCentre("evidence.title")}</h2>
+        <div className="flex flex-wrap gap-2">
+          <span className={chipClass} data-testid="ops-evidence-entries">
+            {tCentre("evidence.entriesLabel")}: {evidence.entryCount}
+          </span>
+          <span className={chipClass} data-testid="ops-evidence-photos">
+            {tCentre("evidence.photosLabel")}: {evidence.photoCount}
+          </span>
+        </div>
+        <p className="text-meta leading-relaxed text-text-muted">
+          {tCentre("evidence.note")}
+        </p>
+        <Link
+          href={`/dashboard/projects/${id}` as "/dashboard"}
+          data-testid="ops-evidence-gallery-link"
+          className="text-sm text-brand-blue hover:underline"
+        >
+          {tCentre("evidence.link")} →
+        </Link>
+      </section>
+
+      {/* Honest scope line: the centre composes records that already exist —
+          nothing absent (milestones, issue registers, resource tables) is
+          simulated. */}
+      <p
+        className="text-meta leading-relaxed text-text-muted"
+        data-testid="ops-centre-honest-note"
+      >
+        {tCentre("honestNote")}
+      </p>
+    </div>
+  );
+}

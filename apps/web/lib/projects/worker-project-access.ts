@@ -1,0 +1,430 @@
+import "server-only";
+
+import { cache } from "react";
+
+import { createClient } from "@/lib/supabase/server";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
+import {
+  teamProjectsFromRows,
+  viaTeamLabel,
+} from "@/lib/projects/team-work-context-model";
+import { listMyDocuments } from "@/lib/documents/readiness";
+import { listWorkerInstructions } from "@/lib/instructions/instructions";
+import { deriveWorkerProjectAsks, type WorkerProjectAsk } from "@/lib/projects/worker-project-asks";
+import {
+  UNKNOWN_RECORDED_WORK,
+  getOwnRecognitionRows,
+  getOwnRecordedWorkEvidence,
+} from "@/lib/qualification/capability-evidence";
+
+/**
+ * Worker-side project access (F11 / RC2 — role-aware project routing).
+ *
+ * Production finding: a worker who opened a project card landed on a dead
+ * "Ši lenta skirta įmonės ar agentūros vadovui." page. The manager surfaces
+ * (stadium / operations) stay manager-gated, but an ASSIGNED worker must get
+ * a real, permission-scoped view of their own project instead of a dead end.
+ *
+ * Everything here reads only rows the session's RLS already allows:
+ *   - `workers` — the caller's own worker row (profile_id = auth.uid()).
+ *   - `project_worker_assignments` — pwa_select lets a worker read exactly
+ *     their own assignment rows (owns_worker), never teammates'.
+ *   - `projects` — projects_select exposes live projects to any
+ *     authenticated user; draft/paused/closed stay manager-only, and the
+ *     view degrades honestly when the row is not readable.
+ *
+ * No migration, no new grant, no fake team data: a worker cannot read
+ * teammates' assignments under RLS, so the worker view deliberately does
+ * NOT show a team list it could only fake.
+ */
+
+export interface WorkerAssignment {
+  readonly assignmentId: string;
+  readonly status: "active" | "ended";
+  readonly assignedAt: string;
+  readonly endedAt: string | null;
+}
+
+export interface WorkerProjectView {
+  readonly assignment: WorkerAssignment;
+  /** Team name(s) when the caller reaches this project ONLY through an
+   *  actively assigned team (20261003150700) — "via team ...". Null/absent for
+   *  a person on the project roster. */
+  readonly viaTeam?: string | null;
+  /** Null when the project row is not RLS-readable (e.g. no longer live). */
+  readonly project: {
+    readonly id: string;
+    readonly title: string | null;
+    readonly status: string | null;
+    readonly city: string | null;
+    readonly country: string | null;
+    readonly startDate: string | null;
+    readonly endDate: string | null;
+  } | null;
+}
+
+export interface WorkerProjectListItem {
+  readonly projectId: string;
+  readonly title: string | null;
+  readonly status: string | null;
+  readonly city: string | null;
+  readonly country: string | null;
+  readonly assignmentStatus: "active" | "ended";
+  readonly assignedAt: string;
+  /** Team name(s) when this project is reached ONLY through an actively
+   *  assigned team (20261003150700). Absent for a person assignment. */
+  readonly viaTeam?: string | null;
+}
+
+/** The caller's own profile id. Request-cached beside `getOwnWorkerId`, which
+ *  already resolves the same session — the capability read needs the PROFILE
+ *  id to tell a self-confirmation from an independent one. */
+export const getOwnProfileId = cache(async (): Promise<string | null> => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user?.id ?? null;
+});
+
+/** The caller's own worker id, or null when they have no worker row.
+ *  Request-cached: the ledger, the project view and the asks read all ask
+ *  for it in one render (QA F3 — five queries per project became three). */
+export const getOwnWorkerId = cache(async (): Promise<string | null> => {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  return data?.id ?? null;
+});
+
+/**
+ * The caller's own assignment on this project + the project facts their
+ * session may read. Null when the caller is not assigned to the project.
+ */
+export async function getWorkerProjectView(
+  projectId: string,
+): Promise<WorkerProjectView | null> {
+  const workerId = await getOwnWorkerId();
+  if (!workerId) return null;
+
+  const supabase = await createClient();
+  const { data: assignment } = await supabase
+    .from("project_worker_assignments")
+    .select("id, status, assigned_at, ended_at")
+    .eq("project_id", projectId)
+    .eq("worker_id", workerId)
+    .maybeSingle();
+  // No person assignment: the caller may still work here through a team that is
+  // ACTIVELY assigned (20261003150700). A person assignment always wins.
+  const teamProject = assignment
+    ? null
+    : teamProjectsFromRows(await readMyTeamWorkContexts(supabase)).find(
+        (t) => t.projectId === projectId,
+      ) ?? null;
+  if (!assignment && !teamProject) return null;
+
+  const { data: project } = await supabase
+    .from("projects")
+    .select("id, title, status, city, country, start_date, end_date")
+    .eq("id", projectId)
+    .maybeSingle();
+
+  return {
+    assignment: assignment
+      ? {
+          assignmentId: assignment.id as string,
+          status: (assignment.status as "active" | "ended") ?? "active",
+          assignedAt: assignment.assigned_at as string,
+          endedAt: (assignment.ended_at as string | null) ?? null,
+        }
+      : {
+          assignmentId: teamProject!.assignmentId,
+          status: "active" as const,
+          assignedAt: teamProject!.assignedAt ?? "",
+          endedAt: null,
+        },
+    viaTeam: teamProject ? viaTeamLabel(teamProject.teamNames) : null,
+    project: project
+      ? {
+          id: project.id as string,
+          title: (project.title as string | null) ?? null,
+          status: (project.status as string | null) ?? null,
+          city: (project.city as string | null) ?? null,
+          country: (project.country as string | null) ?? null,
+          startDate: (project.start_date as string | null) ?? null,
+          endDate: (project.end_date as string | null) ?? null,
+        }
+      : null,
+  };
+}
+
+/**
+ * All projects the caller is or was assigned to (own assignments only), with
+ * a FAILED read told apart from an EMPTY one (SEP-7: UNKNOWN ≠ ZERO). The
+ * home needs the difference: "could not read your projects" is not "you have
+ * none". `listWorkerProjects` below keeps its historical, lossy shape by
+ * delegating. The team-reached rows come from the existing lossy
+ * `readMyTeamWorkContexts`: a failed team read only drops the team-only
+ * rows, never the person's own assignments.
+ */
+export type WorkerProjectsResult =
+  | { readonly status: "ok"; readonly rows: WorkerProjectListItem[] }
+  | { readonly status: "unavailable" };
+
+export async function listWorkerProjectsResult(): Promise<WorkerProjectsResult> {
+  const workerId = await getOwnWorkerId();
+  if (!workerId) return { status: "ok", rows: [] };
+
+  const supabase = await createClient();
+  const { data: assignments, error } = await supabase
+    .from("project_worker_assignments")
+    .select("project_id, status, assigned_at")
+    .eq("worker_id", workerId)
+    .order("assigned_at", { ascending: false });
+  if (error) return { status: "unavailable" };
+  const own = assignments ?? [];
+  // Projects reached ONLY through an actively assigned team (20261003150700).
+  const ownIds = new Set(own.map((a) => a.project_id as string));
+  const teamOnly = teamProjectsFromRows(await readMyTeamWorkContexts(supabase)).filter(
+    (t) => !ownIds.has(t.projectId),
+  );
+  if (own.length === 0 && teamOnly.length === 0) return { status: "ok", rows: [] };
+
+  const ids = [...own.map((a) => a.project_id as string), ...teamOnly.map((t) => t.projectId)];
+  const { data: projects, error: projectsError } = await supabase
+    .from("projects")
+    .select("id, title, status, city, country")
+    .in("id", ids);
+  if (projectsError) return { status: "unavailable" };
+  const byId = new Map(
+    (projects ?? []).map((p) => [p.id as string, p] as const),
+  );
+
+  const fromPerson: WorkerProjectListItem[] = own.map((a) => {
+    const p = byId.get(a.project_id as string);
+    return {
+      projectId: a.project_id as string,
+      title: (p?.title as string | null) ?? null,
+      status: (p?.status as string | null) ?? null,
+      city: (p?.city as string | null) ?? null,
+      country: (p?.country as string | null) ?? null,
+      assignmentStatus: (a.status as "active" | "ended") ?? "active",
+      assignedAt: a.assigned_at as string,
+    };
+  });
+  const fromTeam: WorkerProjectListItem[] = teamOnly.map((t) => {
+    const p = byId.get(t.projectId);
+    return {
+      projectId: t.projectId,
+      title: (p?.title as string | null) ?? t.title,
+      status: (p?.status as string | null) ?? null,
+      city: (p?.city as string | null) ?? null,
+      country: (p?.country as string | null) ?? null,
+      assignmentStatus: "active" as const,
+      assignedAt: t.assignedAt ?? "",
+      viaTeam: viaTeamLabel(t.teamNames),
+    };
+  });
+  return { status: "ok", rows: [...fromPerson, ...fromTeam] };
+}
+
+/** All projects the caller is or was assigned to (own assignments only). */
+export async function listWorkerProjects(): Promise<WorkerProjectListItem[]> {
+  const result = await listWorkerProjectsResult();
+  return result.status === "ok" ? result.rows : [];
+}
+
+/**
+ * The manager's checklist rows for the PERSON on their own projects (owner
+ * contract §11/§12: "what does the project still need from me?"). `pwri_select`
+ * admits exactly the caller's own rows (owns_worker), so a worker reads their
+ * own asks and never a teammate's. Only the still-open rows (needed / missing /
+ * rejected / expired), bounded; the checklist page's own table, no write.
+ *
+ * Scale (owner constraint §1b): indexed by `worker_id`
+ * (idx_project_worker_readiness_items_worker_id) and the caller's own project
+ * ids; hard limit; never a project's whole checklist.
+ */
+export interface OwnReadinessItem {
+  readonly projectId: string;
+  readonly itemKey: string;
+  readonly label: string;
+  readonly status: "needed" | "missing" | "rejected" | "expired";
+  readonly updatedAt: string;
+}
+
+export const OWN_READINESS_ITEMS_LIMIT = 40;
+const OPEN_READINESS_STATUSES = ["needed", "missing", "rejected", "expired"] as const;
+/** Every status the manager can hold a row in except `not_required` — the
+ *  requirement ledger (lib/player-card/requirement-ledger) reads these so the
+ *  person's "N of M" also counts the rows the manager already received /
+ *  checked. The default (open rows only) is unchanged for the asks. */
+export const LEDGER_READINESS_STATUSES = ["needed", "missing", "received", "checked", "rejected", "expired"] as const;
+
+export interface OwnReadinessLedgerItem extends Omit<OwnReadinessItem, "status"> {
+  readonly status: (typeof LEDGER_READINESS_STATUSES)[number];
+}
+
+export async function listOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+): Promise<OwnReadinessItem[]>;
+export async function listOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+  options: { readonly statuses: typeof LEDGER_READINESS_STATUSES },
+): Promise<OwnReadinessLedgerItem[]>;
+export async function listOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+  options?: { readonly statuses: readonly string[] },
+): Promise<OwnReadinessItem[] | OwnReadinessLedgerItem[]> {
+  return (await queryOwnReadinessItems(workerId, projectIds, options?.statuses)) ?? [];
+}
+
+/** The checklist query itself. `null` = the read did not answer (an error),
+ *  which a caller that SHOWS asks must not render as "nothing is open". */
+async function queryOwnReadinessItems(
+  workerId: string,
+  projectIds: readonly string[],
+  statuses?: readonly string[],
+): Promise<OwnReadinessLedgerItem[] | null> {
+  if (!workerId || projectIds.length === 0) return [];
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from("project_worker_readiness_items")
+    .select("project_id, item_key, label, status, updated_at")
+    .eq("worker_id", workerId)
+    .in("project_id", projectIds.slice(0, 10))
+    .in("status", [...(statuses ?? OPEN_READINESS_STATUSES)])
+    .order("updated_at", { ascending: false })
+    .limit(OWN_READINESS_ITEMS_LIMIT);
+  if (error || !data) return null;
+  return data.map((r) => ({
+    projectId: r.project_id as string,
+    itemKey: r.item_key as string,
+    label: r.label as string,
+    status: r.status as OwnReadinessLedgerItem["status"],
+    updatedAt: r.updated_at as string,
+  }));
+}
+
+/**
+ * WHAT MY PROJECTS STILL NEED FROM ME — the ONE domain read both the chat
+ * ("mano projektai") and the instructions page render (owner contract §11 /
+ * §12 / §16; chat-first, not chat-only — no chat-specific business workflow).
+ * Composes three existing canonical reads under the caller's RLS: the
+ * person's own open checklist rows (`listOwnReadinessItems`), the person's
+ * own documents (`listMyDocuments`, the documents page's read; an
+ * unanswered read is UNKNOWN, never "no documents"), and the manager's
+ * latest instruction per project (`listWorkerInstructions`, the instructions
+ * page's read — only threads the person is in). A manager never reads a
+ * person's documents through this path (§4 default-closed).
+ */
+export interface OwnProjectAsks {
+  readonly asks: readonly WorkerProjectAsk[];
+  /** How many open rows the project has for the person. `asks` names at
+   *  most WORKER_PROJECT_ASK_LIMIT of them, so a surface that shows a count
+   *  says "N of total", never the preview length as the total. */
+  readonly asksTotal: number;
+  readonly instruction: { readonly conversationId: string; readonly authorName: string | null; readonly text: string } | null;
+}
+
+export async function loadOwnProjectAsks(projectIds: readonly string[]): Promise<Map<string, OwnProjectAsks>> {
+  return (await loadOwnProjectAsksResult(projectIds)).byProject;
+}
+
+/**
+ * The same read, saying whether the checklist ANSWERED. `checklistRead:
+ * false` = the checklist query failed: the asks are unknown, never "nothing
+ * is open". `totalsAtLeast` = the query hit OWN_READINESS_ITEMS_LIMIT, so a
+ * project's `asksTotal` is a lower bound.
+ */
+export interface OwnProjectAsksResult {
+  readonly checklistRead: boolean;
+  readonly totalsAtLeast: boolean;
+  readonly byProject: Map<string, OwnProjectAsks>;
+}
+
+export async function loadOwnProjectAsksResult(projectIds: readonly string[]): Promise<OwnProjectAsksResult> {
+  const out = new Map<string, OwnProjectAsks>();
+  const ids = [...new Set(projectIds)].slice(0, 10);
+  if (ids.length === 0) return { checklistRead: true, totalsAtLeast: false, byProject: out };
+  const workerId = await getOwnWorkerId();
+  if (!workerId) return { checklistRead: false, totalsAtLeast: false, byProject: out };
+  const [checklist, docs, read, ownProfileId] = await Promise.all([
+    queryOwnReadinessItems(workerId, ids) as Promise<OwnReadinessItem[] | null>,
+    listMyDocuments(),
+    listWorkerInstructions(),
+    getOwnProfileId(),
+  ]);
+  const items = checklist ?? [];
+  /**
+   * REAL WORK IS READ BESIDE THE PAPER (owner correction 2026-09-07).
+   *
+   * The `qualification_or_skill_evidence` row used to be answered by two
+   * document types and nothing else, so a person with years of confirmed work
+   * and no certificate read exactly like a person with nothing. The counts
+   * below let the derivation say both things at once — the certificate is
+   * still required, AND the work exists. A caller that cannot answer hands in
+   * the UNKNOWN shape rather than zeros.
+   */
+  const evidence =
+    items.length > 0 && ownProfileId
+      ? await getOwnRecordedWorkEvidence(workerId, ownProfileId).catch(
+          () => UNKNOWN_RECORDED_WORK,
+        )
+      : null;
+  // SKL-9: the person's own recognition records. Empty today (the relation is
+  // an unapplied owner packet); `null` = unknown, which claims nothing.
+  const recognitions =
+    items.length > 0 && ownProfileId
+      ? await getOwnRecognitionRows(ownProfileId).catch(() => null)
+      : null;
+  const asks =
+    items.length > 0
+      ? deriveWorkerProjectAsks(
+          items,
+          docs.kind === "ok" ? docs.documents : null,
+          new Date(),
+          evidence
+            ? {
+                ...evidence,
+                // The document layer already decided what is recorded and in
+                // date; the derivation fills these from `own`.
+                hasValidCredential: false,
+                hasExpiringCredential: false,
+                hasRecognizedEquivalence: false,
+              }
+            : null,
+          recognitions,
+        )
+      : new Map<string, WorkerProjectAsk[]>();
+  const instructions = new Map<string, OwnProjectAsks["instruction"]>();
+  if (read.kind === "ok") {
+    for (const ins of read.instructions) {
+      if (ins.projectId && !instructions.has(ins.projectId)) {
+        instructions.set(ins.projectId, { conversationId: ins.conversationId, authorName: ins.authorName, text: ins.originalText.split("\n")[0].slice(0, 160) });
+      }
+    }
+  }
+  const totals = new Map<string, number>();
+  for (const it of items) totals.set(it.projectId, (totals.get(it.projectId) ?? 0) + 1);
+  for (const id of ids) {
+    const a = asks.get(id) ?? [];
+    const ins = instructions.get(id) ?? null;
+    if (a.length > 0 || ins) out.set(id, { asks: a, asksTotal: totals.get(id) ?? a.length, instruction: ins });
+  }
+  return {
+    checklistRead: checklist !== null,
+    totalsAtLeast: items.length >= OWN_READINESS_ITEMS_LIMIT,
+    byProject: out,
+  };
+}

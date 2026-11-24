@@ -1,0 +1,425 @@
+"use client";
+
+import { useActionState, useEffect, useState, useTransition } from "react";
+
+import { WORK_CARD_OPEN_EDITOR_EVENT } from "./work-card-missing-chip";
+import {
+  EmployerVisibilityAsk,
+  type EmployerVisibilityAskLabels,
+} from "./employer-visibility-ask";
+import {
+  WorkCardPlausibilityNote,
+  type WorkCardCheckItem,
+} from "./work-card-plausibility-note";
+
+import { Link } from "@/lib/i18n/navigation";
+import { Button, buttonLinkClassName } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
+import {
+  saveWorkerCardAction,
+  confirmWorkerCardAction,
+  type WorkCardActionResult,
+} from "@/lib/worker/work-card-actions";
+import type { WorkCardValues } from "@/lib/worker/work-card";
+import {
+  preferredCountriesCleared,
+  type WorkCardState,
+} from "@/lib/worker/work-card-state";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+
+/**
+ * Interactive part of "Mano darbo kortelė" (slice work-card-state-aware-v1):
+ *   - the ONE primary next action (a real Link, or an inline-edit trigger),
+ *   - the small "Ar tai vis dar galioja?" confirmation when the card is stale,
+ *   - a secondary/collapsed editor for the card fields (prefilled, partial-save
+ *     safe). No fake state: every control calls a real owner-scoped action.
+ *
+ * All copy is passed in as resolved labels (server resolves i18n).
+ */
+
+export interface WorkCardLabels {
+  nextEyebrow: string;
+  nextLabel: string;
+  why: string;
+  staleTitle: string;
+  staleBody: string;
+  yes: string;
+  change: string;
+  staleSaved: string;
+  editorOpen: string;
+  editorTitle: string;
+  availabilityLabel: string;
+  availabilityOptionAvailable: string;
+  availabilityOptionBusy: string;
+  availabilityOptionUnavailable: string;
+  availabilityOptionNone: string;
+  /** Saved figures can be changed, not cleared (save_worker_card coalesces
+   *  null = keep); shown once anything is saved so an empty field never
+   *  reads as "cleared". */
+  keepOnlyHint: string;
+  availableFromLabel: string;
+  locationLabel: string;
+  locationHint: string;
+  /** The country list for the "country I am in" field. When present the field
+   *  is a <select> that submits the ISO code; when absent it stays free text
+   *  (the action resolves a code or a name either way). */
+  locationOptions?: ReadonlyArray<{ code: string; label: string }>;
+  preferredLabel: string;
+  preferredHint: string;
+  salaryMinLabel: string;
+  salaryMaxLabel: string;
+  /** Plausibility note (deriveWorkCardChecks): eyebrow + the two actions. */
+  checksEyebrow: string;
+  checkKeep: string;
+  checkCorrect: string;
+  save: string;
+  saving: string;
+  saved: string;
+  errorMsg: string;
+  needsMigration: string;
+  /** The one-time "should employers find you?" ask shown after a save. */
+  visibilityAsk: EmployerVisibilityAskLabels;
+}
+
+/** Fired after a save the server confirmed — a surface that read the card
+ *  BEFORE the save (the chat's result panel) re-reads it. */
+export const WORK_CARD_SAVED_EVENT = "lm:work-card-saved";
+
+export function WorkCardEditor({
+  state,
+  nextHref,
+  values: propValues,
+  labels,
+  checks = [],
+}: {
+  state: WorkCardState;
+  /** Real route for the next action, or null when it is an inline card edit. */
+  nextHref: string | null;
+  values: WorkCardValues;
+  labels: WorkCardLabels;
+  /** Plausibility checks over `values` (server-derived, pre-localised) —
+   *  a sentence each; none blocks a save. */
+  checks?: WorkCardCheckItem[];
+}) {
+  const [open, setOpen] = useState(false);
+  // What is typed in the preferred-countries field, so an emptied field that
+  // had saved countries is sent as an EXPLICIT clear (not as "keep").
+  const [typedCountries, setTypedCountries] = useState<string | null>(null);
+
+  // Inline-dim "+" chips (availability/location/pay) open this editor via a
+  // window event — they used to self-anchor to #work-card and do nothing
+  // (audit PR4). Scroll after open so the expanded form is in view.
+  useEffect(() => {
+    const openEditor = () => {
+      setOpen(true);
+      requestAnimationFrame(() =>
+        document
+          .getElementById("work-card-editor-section")
+          ?.scrollIntoView({ block: "nearest" }),
+      );
+    };
+    window.addEventListener(WORK_CARD_OPEN_EDITOR_EVENT, openEditor);
+    return () => window.removeEventListener(WORK_CARD_OPEN_EDITOR_EVENT, openEditor);
+  }, []);
+
+  const [saveState, saveAction, savePending] = useActionState<
+    WorkCardActionResult | null,
+    FormData
+  >(saveWorkerCardAction, null);
+  // WHAT PERSISTED, not what was typed (production walk 2026-09-29): the chat
+  // panel's props were read before the save, and React resets an action form
+  // to its defaults — so the card said "Išsaugota" beside the OLD salary. After
+  // a confirmed save the fields show the row the server read back.
+  const values = saveState?.ok && saveState.saved ? saveState.saved : propValues;
+  useEffect(() => {
+    if (saveState?.ok) window.dispatchEvent(new Event(WORK_CARD_SAVED_EVENT));
+  }, [saveState]);
+  const [confirmPending, startConfirm] = useTransition();
+  const [confirmDone, setConfirmDone] = useState(false);
+  const hasSavedFigures =
+    values.availabilityStatus !== null ||
+    values.availableFrom !== null ||
+    values.locationCountry !== null ||
+    values.salaryMin !== null ||
+    values.salaryMax !== null;
+
+  const why = (
+    <p className="max-w-prose text-xs leading-relaxed text-text-muted">
+      {labels.why}
+    </p>
+  );
+
+  // ── The single primary next action ─────────────────────────────────────
+  // Stale card → the primary move is the small confirmation, not a new task.
+  const primary =
+    state === "stale" ? null : nextHref ? (
+      <div className="flex flex-col gap-2">
+        <Link
+          href={nextHref as "/dashboard/profile"}
+          className={buttonLinkClassName("primary", "sm")}
+          data-testid="work-card-next"
+          onClick={() =>
+            trackFunnel(FUNNEL_EVENTS.firstActionCardClicked, {
+              surface: "work_card",
+            })
+          }
+        >
+          {labels.nextLabel} →
+        </Link>
+        {why}
+      </div>
+    ) : (
+      <div className="flex flex-col gap-2">
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          className="min-h-11 w-fit"
+          data-testid="work-card-next"
+          onClick={() => setOpen(true)}
+        >
+          {labels.nextLabel}
+        </Button>
+        {why}
+      </div>
+    );
+
+  return (
+    <div className="flex flex-col gap-4">
+      {primary}
+
+      {/* ── Stale: "Ar tai vis dar galioja?" — one small confirmation ── */}
+      {state === "stale" && (
+        <div
+          className="flex flex-col gap-2 rounded-md border border-brand-orange/40 bg-brand-orange/5 p-4"
+          data-testid="work-card-stale"
+        >
+          <p className="text-sm font-semibold text-text-primary">
+            {labels.staleTitle}
+          </p>
+          <p className="text-xs leading-relaxed text-text-secondary">
+            {labels.staleBody}
+          </p>
+          <div className="mt-1 flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="primary"
+              size="sm"
+              className="min-h-11 w-fit"
+              disabled={confirmPending || confirmDone}
+              data-testid="work-card-confirm-yes"
+              onClick={() =>
+                startConfirm(async () => {
+                  const r = await confirmWorkerCardAction();
+                  if (r.ok) setConfirmDone(true);
+                })
+              }
+            >
+              {confirmDone ? labels.staleSaved : labels.yes}
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              size="sm"
+              className="min-h-11 w-fit"
+              onClick={() => setOpen(true)}
+              data-testid="work-card-confirm-change"
+            >
+              {labels.change}
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ── What the saved figures READ AS (owner #1689: "150–500 EUR/month")
+          — one sentence per check beside the card, never a blocked save;
+          "correct" opens the editor below, "keep" is the person's word. ── */}
+      {checks.length > 0 ? (
+        <WorkCardPlausibilityNote
+          items={checks}
+          eyebrow={labels.checksEyebrow}
+          keepLabel={labels.checkKeep}
+          correctLabel={labels.checkCorrect}
+          onCorrect={() => {
+            setOpen(true);
+            document
+              .getElementById("work-card-editor-section")
+              ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+          }}
+        />
+      ) : null}
+
+      {/* ── Secondary/collapsed editor (always available, never primary) ── */}
+      <div id="work-card-editor-section">
+        <Button
+          type="button"
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-fit"
+          aria-expanded={open}
+          onClick={() => setOpen((v) => !v)}
+          data-testid="work-card-editor-toggle"
+        >
+          {labels.editorOpen}
+        </Button>
+
+        {open && (
+          <form
+            // Re-mounted on the persisted values, so the reset after the
+            // action lands on them rather than on the pre-save defaults.
+            key={JSON.stringify(values)}
+            action={saveAction}
+            className="mt-3 flex flex-col gap-4 rounded-md border border-ink-600 bg-ink-800/40 p-4"
+            data-testid="work-card-editor"
+          >
+            <p className="font-display text-sm font-semibold text-text-primary">
+              {labels.editorTitle}
+            </p>
+
+            {/* Saved figures can be CHANGED here, not cleared: the RPC keeps
+                the stored value for every empty field (coalesce). Production
+                2026-09-21: choosing "not stated" over a saved status showed
+                "Saved" while the row kept `available`. So the empty choice is
+                offered only while nothing is saved, and the hint below says
+                what an empty field means once something is. Clearing needs a
+                write path with explicit clear flags (RED follow-up). */}
+            {hasSavedFigures ? (
+              <p className="text-xs leading-relaxed text-text-muted" data-testid="work-card-keep-only-hint">
+                {labels.keepOnlyHint}
+              </p>
+            ) : null}
+            {/* kada — availability */}
+            <label className="flex flex-col gap-1 text-xs">
+              <Label>{labels.availabilityLabel}</Label>
+              <Select
+                name="availability_status"
+                defaultValue={values.availabilityStatus ?? ""}
+              >
+                {values.availabilityStatus ? null : (
+                  <option value="">{labels.availabilityOptionNone}</option>
+                )}
+                <option value="available">
+                  {labels.availabilityOptionAvailable}
+                </option>
+                <option value="busy">{labels.availabilityOptionBusy}</option>
+                <option value="unavailable">
+                  {labels.availabilityOptionUnavailable}
+                </option>
+              </Select>
+            </label>
+
+            <label className="flex flex-col gap-1 text-xs">
+              <Label>{labels.availableFromLabel}</Label>
+              <Input
+                type="date"
+                name="available_from"
+                defaultValue={values.availableFrom ?? ""}
+              />
+            </label>
+
+            {/* kur — location */}
+            <label className="flex flex-col gap-1 text-xs">
+              <Label>{labels.locationLabel}</Label>
+              {labels.locationOptions && labels.locationOptions.length > 0 ? (
+                <Select
+                  name="location_country"
+                  defaultValue={values.locationCountry ?? ""}
+                  data-testid="work-card-location-select"
+                >
+                  <option value="">—</option>
+                  {labels.locationOptions.map((c) => (
+                    <option key={c.code} value={c.code}>
+                      {c.label}
+                    </option>
+                  ))}
+                </Select>
+              ) : (
+                <Input
+                  type="text"
+                  name="location_country"
+                  maxLength={80}
+                  placeholder={labels.locationHint}
+                  defaultValue={values.locationCountry ?? ""}
+                />
+              )}
+            </label>
+
+            <label className="flex flex-col gap-1 text-xs">
+              <Label>{labels.preferredLabel}</Label>
+              <Input
+                type="text"
+                name="preferred_countries"
+                placeholder={labels.preferredHint}
+                defaultValue={values.preferredCountries.join(", ")}
+                onChange={(e) => setTypedCountries(e.target.value)}
+                className="uppercase"
+              />
+            </label>
+
+            {typedCountries !== null &&
+            preferredCountriesCleared(values.preferredCountries, typedCountries) ? (
+              <input type="hidden" name="preferred_countries_clear" value="1" />
+            ) : null}
+
+            {/* kiek — pay */}
+            <div className="grid grid-cols-2 gap-3">
+              <label className="flex flex-col gap-1 text-xs">
+                <Label>{labels.salaryMinLabel}</Label>
+                <Input
+                  type="number"
+                  name="salary_min"
+                  min={0}
+                  inputMode="numeric"
+                  defaultValue={values.salaryMin ?? ""}
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs">
+                <Label>{labels.salaryMaxLabel}</Label>
+                <Input
+                  type="number"
+                  name="salary_max"
+                  min={0}
+                  inputMode="numeric"
+                  defaultValue={values.salaryMax ?? ""}
+                />
+              </label>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <Button
+                type="submit"
+                variant="primary"
+                size="sm"
+                className="min-h-11 w-fit"
+                loading={savePending}
+                disabled={savePending}
+                data-testid="work-card-save"
+              >
+                {savePending ? labels.saving : labels.save}
+              </Button>
+              {saveState?.ok && (
+                <span className="text-xs text-state-success" role="status" data-testid="work-card-saved">
+                  {labels.saved}
+                </span>
+              )}
+              {saveState && !saveState.ok && (
+                <span className="text-xs text-state-danger" role="status" data-testid="work-card-error">
+                  {saveState.code === "needs_migration"
+                    ? labels.needsMigration
+                    : labels.errorMsg}
+                </span>
+              )}
+            </div>
+          </form>
+        )}
+        {/* After a SUCCESSFUL save only — the one non-blocking ask. It decides
+            for itself whether to render (never-decided consent, not ended on
+            this device) and writes nothing but its own device-local record. */}
+        {saveState?.ok ? <EmployerVisibilityAsk labels={labels.visibilityAsk} /> : null}
+      </div>
+    </div>
+  );
+}

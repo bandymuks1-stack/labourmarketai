@@ -1,0 +1,14 @@
+{
+  "collaborator": "Bendradarbis",
+  "consultant": "Konsultantas",
+  "employee": "Darbuotojas",
+  "freelancer": "Laisvai samdomas",
+  "manager": "Vadovas",
+  "owner": "Savininkas",
+  "student": "Studentas",
+  "unemployed": "Bedarbis",
+  "volunteer": "Savanoris",
+  "intern": "Praktikantas",
+  "external_manager": "Išorinis vadovas (užsakovo)",
+  "other": "Kitas ryšys"
+}

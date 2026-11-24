@@ -1,0 +1,14 @@
+{
+  "collaborator": "Соисполнитель",
+  "consultant": "Консультант",
+  "employee": "Сотрудник",
+  "freelancer": "Фрилансер",
+  "manager": "Руководитель",
+  "owner": "Владелец",
+  "student": "Студент",
+  "unemployed": "Безработный",
+  "volunteer": "Волонтёр",
+  "intern": "Стажёр",
+  "external_manager": "Внешний руководитель (заказчик)",
+  "other": "Другая связь"
+}

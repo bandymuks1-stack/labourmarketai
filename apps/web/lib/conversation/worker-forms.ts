@@ -1,0 +1,276 @@
+import {
+  WORKER_LANGUAGES,
+  WORKER_LANGUAGE_LEVELS,
+  WORKER_LANGUAGE_NATIVE_NAMES,
+} from "@/lib/worker/worker-languages-model";
+import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
+import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+
+/**
+ * Declarative inline-form specs for the reversible worker conversation actions
+ * (Phase B). Each spec maps a small set of deterministic fields to the exact
+ * typed input its zod schema + executor expect. Pure/client-safe (no IO, no
+ * LLM) so the conversation surface can render a structured form — never a bare
+ * free-text box — for every profile-building action, and works with AI OFF.
+ */
+
+export type FieldSpec =
+  | { name: string; kind: "text" | "textarea"; labelKey: string; placeholderKey?: string; required?: boolean; maxLength?: number }
+  | { name: string; kind: "number"; labelKey: string; placeholderKey?: string; min?: number; max?: number; required?: boolean }
+  | { name: string; kind: "select"; labelKey: string; required?: boolean; options: ReadonlyArray<{ value: string; label?: string; labelKey?: string }> }
+  | { name: string; kind: "tristate"; labelKey: string }
+  | { name: string; kind: "checkbox"; labelKey: string };
+
+export type FormState = Record<string, string | boolean>;
+
+export interface WorkerFormSpec {
+  actionId: string;
+  titleKey: string; // conversation.actions.<side>.<x>.label
+  fields: readonly FieldSpec[];
+  /** Convert raw form state to the typed input the schema expects. */
+  build: (s: FormState) => Record<string, unknown>;
+  /** IMPORTANT/STRONG-tier action (rebuild W4): the inline form mints a
+   *  one-time confirmation token (prepareConfirmationAction) right before
+   *  dispatch — the dispatcher rejects the write without it. Reversible
+   *  actions omit this and dispatch directly, exactly as before. */
+  requiresConfirmation?: boolean;
+}
+
+const s = (v: unknown) => (typeof v === "string" ? v.trim() : "");
+const numOrNull = (v: unknown) => {
+  const n = Number.parseInt(String(v ?? ""), 10);
+  return Number.isFinite(n) ? n : null;
+};
+
+/** One typed country field holds a code OR a name; the longest CLDR country
+ *  name in any product language is well under this, and the zod schema
+ *  (`workerSaveWorkCardFields`) carries the same ceiling. */
+export const COUNTRY_TEXT_MAX = 80;
+
+/** "LT, Vietnam; viet nam" → ["LT", "Vietnam", "viet nam"] — split on the
+ *  same separators as the canonical `resolveCountryList` (commas, semicolons,
+ *  newlines ONLY), so a multi-word name survives; blanks are dropped. An
+ *  input that holds nothing but separators is `undefined` (= keep), never the
+ *  explicit clear `[]` (W6). */
+export function splitCountryText(raw: string): string[] | undefined {
+  const parts = raw
+    .split(/[,;\n]+/)
+    .map((c) => c.trim())
+    .filter((c) => c !== "");
+  return parts.length > 0 ? parts : undefined;
+}
+
+const languageOptions = WORKER_LANGUAGES.map((code) => ({
+  value: code,
+  label: WORKER_LANGUAGE_NATIVE_NAMES[code] ?? code,
+}));
+const levelOptions = WORKER_LANGUAGE_LEVELS.map((lvl) => ({ value: lvl, label: lvl }));
+const educationTypeOptions = EDUCATION_TYPE_SLUGS.map((slug) => ({
+  value: slug,
+  labelKey: `cvSections.educationTypes.${slug}`,
+}));
+/** How the person was engaged. Labels reuse the canonical relationship-type
+ *  catalogue (`relationship-types.json`) — the same words the CV prints, so a
+ *  placement is named the same way everywhere it appears. */
+const relationshipOptions = SELF_DECLARED_RELATIONSHIPS.map((slug) => ({
+  value: slug,
+  labelKey: `relationshipTypes.${slug}`,
+}));
+const availabilityOptions = [
+  { value: "available", labelKey: "conversation.forms.availability.available" },
+  { value: "busy", labelKey: "conversation.forms.availability.busy" },
+  { value: "unavailable", labelKey: "conversation.forms.availability.unavailable" },
+];
+
+export const WORKER_FORMS: readonly WorkerFormSpec[] = [
+  {
+    actionId: "worker.add-language",
+    titleKey: "conversation.actions.worker.addLanguage.label",
+    fields: [
+      { name: "lang", kind: "select", labelKey: "conversation.forms.fields.language", required: true, options: languageOptions },
+      { name: "level", kind: "select", labelKey: "conversation.forms.fields.level", required: true, options: levelOptions },
+    ],
+    build: (st) => ({ lang: s(st.lang), level: s(st.level) }),
+  },
+  {
+    actionId: "worker.add-work-history",
+    titleKey: "conversation.actions.worker.addWorkHistory.label",
+    fields: [
+      { name: "title", kind: "text", labelKey: "conversation.forms.fields.jobTitle", placeholderKey: "conversation.forms.fields.jobTitlePlaceholder", required: true, maxLength: 200 },
+      { name: "relationship", kind: "select", labelKey: "conversation.forms.fields.engagementKind", required: true, options: relationshipOptions },
+      { name: "startMonth", kind: "number", labelKey: "conversation.forms.fields.startMonth", placeholderKey: "conversation.forms.fields.mm", min: 1, max: 12 },
+      { name: "startYear", kind: "number", labelKey: "conversation.forms.fields.startYear", placeholderKey: "conversation.forms.fields.yyyy", min: 1900, max: 2100, required: true },
+      { name: "isCurrent", kind: "checkbox", labelKey: "conversation.forms.fields.ongoing" },
+      { name: "endMonth", kind: "number", labelKey: "conversation.forms.fields.endMonth", placeholderKey: "conversation.forms.fields.mm", min: 1, max: 12 },
+      { name: "endYear", kind: "number", labelKey: "conversation.forms.fields.endYear", placeholderKey: "conversation.forms.fields.yyyy", min: 1900, max: 2100 },
+    ],
+    build: (st) => ({
+      title: s(st.title),
+      relationship: s(st.relationship) || "employee",
+      startYear: numOrNull(st.startYear),
+      startMonth: numOrNull(st.startMonth),
+      isCurrent: st.isCurrent === true,
+      endYear: st.isCurrent === true ? null : numOrNull(st.endYear),
+      endMonth: st.isCurrent === true ? null : numOrNull(st.endMonth),
+    }),
+  },
+  {
+    actionId: "worker.add-education",
+    titleKey: "conversation.actions.worker.addEducation.label",
+    fields: [
+      { name: "institution", kind: "text", labelKey: "conversation.forms.fields.institution", placeholderKey: "conversation.forms.fields.institutionPlaceholder", required: true, maxLength: 200 },
+      { name: "program", kind: "text", labelKey: "conversation.forms.fields.program", placeholderKey: "conversation.forms.fields.programPlaceholder", maxLength: 200 },
+      { name: "educationTypeSlug", kind: "select", labelKey: "conversation.forms.fields.educationType", required: true, options: educationTypeOptions },
+      { name: "startYear", kind: "number", labelKey: "conversation.forms.fields.startYear", placeholderKey: "conversation.forms.fields.yyyy", min: 1900, max: 2100 },
+      { name: "endYear", kind: "number", labelKey: "conversation.forms.fields.endYear", placeholderKey: "conversation.forms.fields.yyyy", min: 1900, max: 2100 },
+      { name: "isCurrent", kind: "checkbox", labelKey: "conversation.forms.fields.ongoing" },
+    ],
+    build: (st) => ({
+      institution: s(st.institution),
+      program: s(st.program) || null,
+      educationTypeSlug: s(st.educationTypeSlug),
+      startYear: numOrNull(st.startYear),
+      endYear: numOrNull(st.endYear),
+      isCurrent: st.isCurrent === true,
+    }),
+  },
+  {
+    actionId: "worker.add-achievement",
+    titleKey: "conversation.actions.worker.addAchievement.label",
+    fields: [
+      { name: "title", kind: "text", labelKey: "conversation.forms.fields.achievementTitle", required: true, maxLength: 200 },
+      { name: "kind", kind: "select", labelKey: "conversation.forms.fields.achievementKind", required: true, options: [
+        { value: "achievement", labelKey: "conversation.forms.achievementKind.achievement" },
+        { value: "declared_certificate", labelKey: "conversation.forms.achievementKind.certificate" },
+      ] },
+      { name: "achievedYear", kind: "number", labelKey: "conversation.forms.fields.year", placeholderKey: "conversation.forms.fields.yyyy", min: 1900, max: 2100 },
+      { name: "description", kind: "textarea", labelKey: "conversation.forms.fields.description", maxLength: 1000 },
+    ],
+    build: (st) => ({
+      title: s(st.title),
+      kind: s(st.kind) === "declared_certificate" ? "declared_certificate" : "achievement",
+      achievedYear: numOrNull(st.achievedYear),
+      description: s(st.description) || null,
+    }),
+  },
+  {
+    actionId: "worker.save-work-card",
+    titleKey: "conversation.actions.worker.saveWorkCard.label",
+    fields: [
+      { name: "availabilityStatus", kind: "select", labelKey: "conversation.forms.fields.availability", options: [{ value: "", labelKey: "conversation.forms.fields.notStated" }, ...availabilityOptions] },
+      // "galiu dirbti nuo spalio 1 d." — the FROM date the card already
+      // stores (`available_from`; the schema and executor carried it, the
+      // form did not). Prefilled from the sentence, editable, ISO day.
+      { name: "availableFrom", kind: "text", labelKey: "conversation.forms.fields.availableFrom", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
+      // A country is a CODE or a NAME ("VN", "Vietnam", "Viet Nam"): the raw
+      // text travels as typed and `lib/worker/work-card-core` resolves it
+      // through the canonical `resolveCountryCode` (global-access rule
+      // 2026-09-22). Measured before this: `maxLength: 2` truncated a typed
+      // name to its first two letters ("VI" for Vietnam — the Virgin Islands).
+      { name: "locationCountry", kind: "text", labelKey: "conversation.forms.fields.locationCountry", placeholderKey: "conversation.forms.fields.countryCodePlaceholder", maxLength: COUNTRY_TEXT_MAX },
+      { name: "preferredCountries", kind: "text", labelKey: "conversation.forms.fields.preferredCountries", placeholderKey: "conversation.forms.fields.preferredCountriesPlaceholder" },
+      { name: "salaryMin", kind: "number", labelKey: "conversation.forms.fields.salaryMin", min: 0, max: 100000 },
+      { name: "salaryMax", kind: "number", labelKey: "conversation.forms.fields.salaryMax", min: 0, max: 100000 },
+    ],
+    // Partial save (W6): every field the person leaves blank is OMITTED —
+    // `null` for the scalars, `undefined` for the country list — and the
+    // canonical `save_worker_card` keeps the recorded value for an omitted
+    // field. A blank country field is therefore "keep", never "clear": this
+    // form used to send `[]` for a blank field, which the executor now treats
+    // as the explicit clear (`worker-executors.ts`), so an empty form must
+    // not produce it. The form opens PREFILLED from the current card
+    // (`workCardPrefillFromCard`), so what the person edits is the whole
+    // list, never an empty box whose one new entry replaces the rest.
+    //
+    // Countries pass through as TYPED (trimmed, never upper-cased, never
+    // clamped to two characters): the executor → `saveWorkerCardCore` →
+    // `normalizeCountry` / `normalizeCountryList` resolve a code OR a name
+    // and REFUSE what does not resolve (global-access rule 2026-09-22; before
+    // this, `.filter((c) => c.length === 2)` silently dropped "Vietnam").
+    build: (st) => ({
+      availabilityStatus: s(st.availabilityStatus) || null,
+      availableFrom: /^\d{4}-\d{2}-\d{2}$/.test(s(st.availableFrom)) ? s(st.availableFrom) : null,
+      locationCountry: s(st.locationCountry) || null,
+      preferredCountries: s(st.preferredCountries)
+        ? splitCountryText(s(st.preferredCountries))
+        : undefined,
+      salaryMin: numOrNull(st.salaryMin),
+      salaryMax: numOrNull(st.salaryMax),
+    }),
+  },
+  {
+    actionId: "worker.save-preferences",
+    titleKey: "conversation.actions.worker.savePreferences.label",
+    fields: [
+      { name: "willingToRelocate", kind: "tristate", labelKey: "conversation.forms.fields.willingToRelocate" },
+      { name: "hasTransport", kind: "tristate", labelKey: "conversation.forms.fields.hasTransport" },
+      { name: "needsAccommodation", kind: "tristate", labelKey: "conversation.forms.fields.needsAccommodation" },
+      { name: "availabilityNote", kind: "textarea", labelKey: "conversation.forms.fields.availabilityNote", placeholderKey: "conversation.forms.fields.availabilityNotePlaceholder", maxLength: 500 },
+    ],
+    build: (st) => ({
+      willingToRelocate: (s(st.willingToRelocate) || "not_stated") as "not_stated" | "yes" | "no",
+      hasTransport: (s(st.hasTransport) || "not_stated") as "not_stated" | "yes" | "no",
+      needsAccommodation: (s(st.needsAccommodation) || "not_stated") as "not_stated" | "yes" | "no",
+      availabilityNote: s(st.availabilityNote) || null,
+    }),
+  },
+] as const;
+
+/** "Record a document" — BUILT per turn from the canonical catalogues the
+ *  server read returns (types + countries), never a list of its own. */
+export function workerAddDocumentForm(
+  types: ReadonlyArray<{ value: string; label: string }>,
+  countries: ReadonlyArray<{ value: string; label: string }>,
+): WorkerFormSpec {
+  return {
+    actionId: "worker.add-document",
+    titleKey: "conversation.actions.worker.addDocument.label",
+    fields: [
+      { name: "typeSlug", kind: "select", labelKey: "conversation.forms.fields.documentType", required: true, options: types.map((o) => ({ value: o.value, label: o.label })) },
+      { name: "country", kind: "select", labelKey: "conversation.forms.fields.documentCountry", options: [{ value: "", label: "—" }, ...countries.map((o) => ({ value: o.value, label: o.label }))] },
+      { name: "validUntil", kind: "text", labelKey: "conversation.forms.fields.validUntil", placeholderKey: "conversation.forms.fields.validUntilPlaceholder", maxLength: 10 },
+      { name: "note", kind: "text", labelKey: "conversation.forms.fields.documentNote", maxLength: 500 },
+    ],
+    build: (st) => ({
+      typeSlug: s(st.typeSlug),
+      country: s(st.country) || null,
+      status: "ready",
+      validUntil: s(st.validUntil) || null,
+      note: s(st.note) || null,
+    }),
+  };
+}
+
+export function getWorkerForm(actionId: string): WorkerFormSpec | undefined {
+  return WORKER_FORMS.find((f) => f.actionId === actionId);
+}
+
+/** The current work card as the ONE canonical worker read model returns it
+ *  (`getWorkerCriteriaSnapshot`, workers row under the person's own RLS). */
+export type WorkCardPrefillSource = {
+  availabilityStatus: string | null;
+  availableFrom: string | null;
+  locationCountry?: string | null;
+  preferredCountries: string[];
+  salaryMinEur: number | null;
+  salaryMaxEur: number | null;
+};
+
+/**
+ * W6 prefill: the `worker.save-work-card` form ALWAYS opens showing what the
+ * card already holds, whichever chip or sentence opened it — so a person who
+ * came to add one country edits the full list, and saving the form as-is
+ * changes nothing. Only recorded values become field state; an unset field
+ * stays absent (blank = keep, see `build`). Pure: a caller's own prefill
+ * (`?preferredCountries=…`, a parsed `availableFrom`) is spread OVER this.
+ */
+export function workCardPrefillFromCard(card: WorkCardPrefillSource): FormState {
+  const out: FormState = {};
+  if (card.availabilityStatus) out.availabilityStatus = card.availabilityStatus;
+  if (card.availableFrom) out.availableFrom = card.availableFrom.slice(0, 10);
+  if (card.locationCountry) out.locationCountry = card.locationCountry;
+  if (card.preferredCountries.length > 0) out.preferredCountries = card.preferredCountries.join(", ");
+  if (card.salaryMinEur != null) out.salaryMin = String(card.salaryMinEur);
+  if (card.salaryMaxEur != null) out.salaryMax = String(card.salaryMaxEur);
+  return out;
+}

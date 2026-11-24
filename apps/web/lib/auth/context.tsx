@@ -1,0 +1,440 @@
+"use client";
+
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+  useTransition,
+  type ReactNode,
+} from "react";
+import { useRouter } from "next/navigation";
+import {
+  markAllNotificationEventsReadAction,
+  markNotificationEventReadAction,
+} from "@/lib/notifications/events-actions";
+import {
+  addRole as addRoleAction,
+  switchActiveRole as switchActiveRoleAction,
+  type Role,
+} from "@/lib/auth/actions";
+// The ONE workspace switch: the personal space (PERSONAL_WORKSPACE_ID — the
+// same core `clearActiveOrganization` runs) and every organization go through
+// `switchWorkspaceAction`, which moves the pointer, follows the identity and
+// revalidates once.
+import { switchWorkspaceAction } from "@/lib/company/organization-actions";
+import {
+  type SwitchableOrganization,
+  type WorkspaceInfo,
+} from "@/lib/company/organization-switch";
+import { withoutWorkspaceScopedDepth } from "@/lib/conversation/result-registry";
+
+export type Notification = {
+  id: string;
+  role: Role;
+  type: string;
+  payload: Record<string, unknown>;
+  read_at: string | null;
+  created_at: string;
+  /** Derived-signal notifications (audit PR5): a REAL count from an existing
+   *  per-surface model (unread threads, pending requests/bookings, responses
+   *  since last seen). They clear by VISITING the surface (`href`), never by
+   *  a local "mark read" — the bell only ever states what is actually true. */
+  count?: number;
+  href?: string;
+  /** True for STORED events (`notification_events`), whose read state is
+   *  persisted and cleared by "mark all read".
+   *
+   *  This used to be inferred from `!href`, which forced every stored row to
+   *  be link-less: giving one a destination silently hid the mark-all-read
+   *  control. How a row CLEARS (durable) and where it GOES (href) are separate
+   *  facts, so they are separate fields. Derived signals leave this unset —
+   *  they clear by visiting their surface, and marking them read would be a
+   *  lie the next page-load reverts. */
+  durable?: boolean;
+};
+
+type AuthState = {
+  user: { id: string; email: string | null } | null;
+  profile: { full_name: string | null; email: string | null } | null;
+  activeRole: Role | null;
+  roles: Role[];
+  /**
+   * Server-resolved admin flag. True iff `profiles.active_role === 'admin'`
+   * for the current user — orthogonal to the `roles` / `activeRole`
+   * workspace catalogue (worker/company/agency/customer). The header
+   * role switcher uses this to render an explicit Admin badge instead
+   * of falling back to a user-facing role chip (the prior bug — admin
+   * fell through `ROLES.has(...)` in `dashboard/layout.tsx` and showed
+   * up as DARBUOTOJAS). Server-side admin pages still enforce their
+   * own gate via `requireSuperadmin`; this flag is purely a display
+   * signal.
+   */
+  isAdmin: boolean;
+  /** Display-only: admin chose to hide admin chrome on normal surfaces (Fix D). */
+  adminUiHidden?: boolean;
+  /**
+   * Display-only: the active company/organization's name, resolved server-side
+   * ONLY when the active workspace is the company identity (else null). Lets the
+   * header truthfully show WHICH company is active so workspace switching is
+   * unambiguous. Never a fabricated name — null when no company row exists yet.
+   */
+  activeOrgName?: string | null;
+  /**
+   * Multi-company switching (company architecture v1): the organizations the
+   * profile can act as (server-resolved, RLS-scoped, membership-validated)
+   * and the server-stored active org id. Empty / single-entry list → no
+   * switcher is rendered (honest single-company case). Populated ONLY when
+   * the owner-gated active-organization migration is applied — otherwise the
+   * server passes an empty list and the header keeps today's behaviour.
+   */
+  organizations?: SwitchableOrganization[];
+  activeOrganizationId?: string | null;
+  /**
+   * Display-only: the capabilities the ACTIVE organization declared
+   * (`organization_roles`, read under the caller's RLS). The header uses it
+   * only to name the education area (UX_GAPS I-1); every page re-checks.
+   */
+  activeOrganizationCapabilities?: readonly string[];
+  /**
+   * Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
+   * for EVERY identity — the personal space plus every organization the person
+   * owns, manages or works for (server-resolved from the canonical
+   * engagement_contexts spine). Display + orientation only: it never fabricates
+   * a membership, and switching persists server-side via the same
+   * active-organization pointer (honestly unavailable until the owner-gated
+   * migration is applied).
+   */
+  workspaces?: WorkspaceInfo[];
+  /** PERSONAL_WORKSPACE_ID or a membership-validated org id. */
+  activeWorkspaceId?: string | null;
+  /** False → the workspace chip is an indicator only (no switch offered). */
+  workspacePointerAvailable?: boolean;
+  notifications: Notification[];
+};
+
+type AuthContextValue = AuthState & {
+  /** Nav badges derived from the streamed notification spine (P0 perf):
+   *  empty until the SpineStream hydrates — badges appear as soon as the
+   *  derived signals resolve, without gating the shell's TTFB. */
+  badges: Partial<Record<string, number>>;
+  switchRole: (role: Role) => Promise<void>;
+  addRole: (role: Role) => Promise<void>;
+  /** Switch the ACTIVE organization (server-side pointer, then refresh). */
+  switchOrganization: (organizationId: string) => Promise<void>;
+  /** Switch the ACTIVE workspace — PERSONAL_WORKSPACE_ID clears the pointer,
+   *  an org id points at that organization. Server-validated, honest no-op on
+   *  failure. Returns whether the server ACCEPTED the switch (a thrown or
+   *  refused switch resolves `false`, never rejects), so a caller that reports
+   *  the outcome (the chat, the chip) never claims a switch that did not
+   *  happen. */
+  switchWorkspace: (workspaceId: string) => Promise<boolean>;
+  /** The workspace a switch is in flight to — the chip shows it as pending
+   *  while the ONE server call and its re-render run. Null when idle. */
+  pendingWorkspaceId: string | null;
+  markAsRead: (id: string) => void;
+  markAllRead: () => void;
+  /** Streamed-spine hydration hook (SpineHydrator only). */
+  applySpine: (
+    notifications: Notification[],
+    badges: Partial<Record<string, number>>,
+  ) => void;
+};
+
+type Badges = Partial<Record<string, number>>;
+type SpineSnapshot = { notifications: Notification[]; badges: Badges };
+
+/**
+ * THE SPINE LIVES IN A STORE, NOT IN THE CONTEXT VALUE (#3539).
+ *
+ * The bell and the nav badges stream in after first paint, usually before a
+ * slow page. React 19.2 holds a streamed page segment back for up to ~300 ms
+ * before revealing it (`$RC` queues it, the boundary reads `$~`), and while it
+ * waits the client treats that boundary as still pending. A context change
+ * that reaches a pending boundary makes React client-render it from the RSC
+ * payload — even inside a transition — so for that window the page exists
+ * twice: the client copy in <main> and the queued server copy in a hidden
+ * `div#S:n` (the ST-1 strict-mode duplicate; role-journeys J-DEC, #3487).
+ *
+ * A store read through `useSyncExternalStore` schedules work only on the
+ * mounted components that read it, so a spine update never touches a boundary
+ * that has not hydrated. The context value below holds the store, which never
+ * changes, and no spine data.
+ */
+type SpineStore = {
+  get: () => SpineSnapshot;
+  /** What the server rendered: hydration reads this, then React re-renders
+   *  the reader with `get()` if the spine has arrived in between. */
+  getInitial: () => SpineSnapshot;
+  set: (update: (cur: SpineSnapshot) => SpineSnapshot) => void;
+  subscribe: (onChange: () => void) => () => void;
+};
+
+function createSpineStore(initial: SpineSnapshot): SpineStore {
+  let snapshot = initial;
+  const listeners = new Set<() => void>();
+  return {
+    get: () => snapshot,
+    getInitial: () => initial,
+    set: (update) => {
+      const next = update(snapshot);
+      if (next === snapshot) return;
+      snapshot = next;
+      for (const l of listeners) l();
+    },
+    subscribe: (onChange) => {
+      listeners.add(onChange);
+      return () => {
+        listeners.delete(onChange);
+      };
+    },
+  };
+}
+
+type AuthContextBase = Omit<AuthContextValue, "notifications" | "badges"> & {
+  spine: SpineStore;
+};
+
+const AuthContext = createContext<AuthContextBase | null>(null);
+
+export function AuthProvider({
+  initial,
+  children,
+}: {
+  /** `notifications` may be omitted: the notification spine STREAMS in after
+   *  first paint (P0 perf — the spine no longer gates TTFB) and hydrates the
+   *  context via `applySpine`. The bell is never permanently empty: the
+   *  SpineStream server component always renders inside the auth shell and
+   *  pushes the real derived signals as soon as they resolve. */
+  initial: Omit<AuthState, "notifications"> & {
+    notifications?: Notification[];
+  };
+  children: ReactNode;
+}) {
+  const router = useRouter();
+  const [spine] = useState(() =>
+    createSpineStore({ notifications: initial.notifications ?? [], badges: {} }),
+  );
+
+  const switchRole = useCallback(
+    async (role: Role) => {
+      await switchActiveRoleAction(role);
+      router.refresh();
+    },
+    [router],
+  );
+
+  const addRole = useCallback(
+    async (role: Role) => {
+      await addRoleAction(role);
+      router.refresh();
+    },
+    [router],
+  );
+
+  /**
+   * THE workspace switch, as ONE observable server call (owner program
+   * 2026-09-23).
+   *
+   * It used to be two or three client-driven round trips — the pointer action,
+   * then `switchActiveRole` whenever the person held a company role anywhere,
+   * then `router.refresh()` — each revalidating the whole layout, with no
+   * pending state and a second action that could throw after the first had
+   * already moved the pointer. Now `switchWorkspaceAction` moves the pointer,
+   * follows the identity by the person's RELATIONSHIP to the workspace (server-
+   * side, from the verified membership row) and revalidates once; its response
+   * carries the re-rendered tree, and the dashboard page keys the conversation
+   * on the active workspace, so the new context mounts without a reload.
+   *
+   * The organization-scoped depth of an open result (`?demand=`, the project
+   * result's `?project=`, `?interaction=`) is dropped BEFORE the call, so the
+   * new workspace never mounts pointed at the previous one's object; a refused
+   * switch puts the address back exactly as it was.
+   *
+   * Never rejects: a throw (network, auth) resolves `false`, the same answer a
+   * refusal gives, so no caller can leave an unhandled rejection behind.
+   */
+  const [isSwitching, startSwitch] = useTransition();
+  const [requestedWorkspaceId, setRequestedWorkspaceId] = useState<string | null>(null);
+
+  const switchWorkspace = useCallback((workspaceId: string): Promise<boolean> => {
+    const before = typeof window === "undefined" ? null : window.location;
+    const strippedSearch = before ? withoutWorkspaceScopedDepth(before.search) : null;
+    const restore = before ? before.pathname + before.search + before.hash : null;
+    // `null`, never `window.history.state`: Next marks its own entries with
+    // `__NA`, and its patched replaceState skips the router sync for any state
+    // carrying that mark. Passing it on left the router holding the old URL,
+    // and the revalidated render then wrote `?demand=` straight back. With
+    // `null`, Next copies its internals itself and syncs `useSearchParams`.
+    if (before && strippedSearch !== null) {
+      window.history.replaceState(null, "", before.pathname + strippedSearch + before.hash);
+    }
+    setRequestedWorkspaceId(workspaceId);
+    return new Promise<boolean>((resolve) => {
+      startSwitch(async () => {
+        let accepted = false;
+        try {
+          accepted = (await switchWorkspaceAction(workspaceId)).ok;
+        } catch {
+          accepted = false;
+        }
+        if (!accepted && strippedSearch !== null && restore) {
+          window.history.replaceState(null, "", restore);
+        }
+        resolve(accepted);
+      });
+    });
+  }, []);
+
+  const switchOrganization = useCallback(
+    async (organizationId: string) => {
+      // Membership is validated server-side (action + DB trigger); a failed
+      // switch simply leaves the current org active — nothing is faked. An
+      // organization switch IS a workspace switch: same call, same identity
+      // follow, so the admin role switcher and the chip cannot diverge.
+      await switchWorkspace(organizationId);
+    },
+    [switchWorkspace],
+  );
+
+  const markAsRead = useCallback(
+    (id: string) => {
+      // PERSIST for durable events only (completion v1): a stored row's read
+      // marker survives the next hydration; derived signals clear by visiting
+      // their surface and get the optimistic client state only (persisting
+      // them is impossible — they are counts, not rows). Fire-and-forget:
+      // the action is idempotent and an unapplied store is an honest no-op.
+      const target = spine.get().notifications.find((n) => n.id === id);
+      if (target?.durable && !target.read_at) {
+        void markNotificationEventReadAction(id).catch(() => {});
+      }
+      spine.set((cur) => ({
+        ...cur,
+        notifications: cur.notifications.map((n) =>
+          n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
+        ),
+      }));
+    },
+    [spine],
+  );
+
+  const markAllRead = useCallback(() => {
+    const now = new Date().toISOString();
+    // DURABLE rows only. A derived signal is a live count that clears by
+    // visiting its surface; stamping it read here turned the bell's dot off
+    // while the people waiting were still waiting, until the next hydration
+    // switched it back on — the "lie the next page-load reverts" the panel
+    // promises never to tell.
+    spine.set((cur) => ({
+      ...cur,
+      notifications: cur.notifications.map((n) =>
+        n.durable && !n.read_at ? { ...n, read_at: now } : n,
+      ),
+    }));
+    // PERSIST for durable events (notification_events store). Fire-and-forget:
+    // the optimistic state above is correct either way, and while the
+    // owner-gated store is unapplied the action is an honest no-op — exactly
+    // the client-only behaviour this control had before.
+    void markAllNotificationEventsReadAction().catch(() => {});
+  }, [spine]);
+
+  /** Streamed-spine hydration (P0 perf): the SpineStream server component
+   *  resolves the derived signals AFTER first paint and pushes them here —
+   *  same single spine source, no TTFB gate. Replaces the list wholesale
+   *  (server truth wins; per-navigation semantics identical to the old
+   *  blocking read). */
+  const applySpine = useCallback(
+    (next: Notification[], nextBadges: Partial<Record<string, number>>) => {
+      spine.set(() => ({ notifications: next, badges: nextBadges }));
+    },
+    [spine],
+  );
+
+  const value = useMemo<AuthContextBase>(
+    () => ({
+      user: initial.user,
+      profile: initial.profile,
+      activeRole: initial.activeRole,
+      roles: initial.roles,
+      isAdmin: initial.isAdmin,
+      adminUiHidden: initial.adminUiHidden ?? false,
+      activeOrgName: initial.activeOrgName ?? null,
+      organizations: initial.organizations ?? [],
+      activeOrganizationId: initial.activeOrganizationId ?? null,
+      activeOrganizationCapabilities: initial.activeOrganizationCapabilities ?? [],
+      workspaces: initial.workspaces ?? [],
+      activeWorkspaceId: initial.activeWorkspaceId ?? null,
+      workspacePointerAvailable: initial.workspacePointerAvailable ?? false,
+      spine,
+      switchRole,
+      addRole,
+      switchOrganization,
+      switchWorkspace,
+      pendingWorkspaceId: isSwitching ? requestedWorkspaceId : null,
+      markAsRead,
+      markAllRead,
+      applySpine,
+    }),
+    [
+      initial.user,
+      initial.profile,
+      initial.activeRole,
+      initial.roles,
+      initial.isAdmin,
+      initial.adminUiHidden,
+      initial.activeOrgName,
+      initial.organizations,
+      initial.activeOrganizationId,
+      initial.activeOrganizationCapabilities,
+      initial.workspaces,
+      initial.activeWorkspaceId,
+      initial.workspacePointerAvailable,
+      spine,
+      switchRole,
+      addRole,
+      switchOrganization,
+      switchWorkspace,
+      isSwitching,
+      requestedWorkspaceId,
+      markAsRead,
+      markAllRead,
+      applySpine,
+    ],
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+const NO_SPINE: SpineStore = createSpineStore({ notifications: [], badges: {} });
+
+/** The context plus the spine, read from the store so that only components
+ *  that are already mounted re-render when the bell or the badges change. */
+function useWithSpine(base: AuthContextBase | null): AuthContextValue | null {
+  const store = base?.spine ?? NO_SPINE;
+  const snap = useSyncExternalStore(store.subscribe, store.get, store.getInitial);
+  return useMemo(() => {
+    if (!base) return null;
+    const { spine: _store, ...rest } = base;
+    void _store;
+    return { ...rest, notifications: snap.notifications, badges: snap.badges };
+  }, [base, snap]);
+}
+
+export function useAuth(): AuthContextValue {
+  const v = useWithSpine(useContext(AuthContext));
+  if (!v) throw new Error("useAuth must be used inside <AuthProvider>");
+  return v;
+}
+
+/**
+ * Non-throwing variant: returns null when rendered outside an `<AuthProvider>`.
+ * Used by surfaces that must render in BOTH the authenticated app (real auth
+ * context) and provider-less contexts such as the dev-only design gallery
+ * preview (`/design/conversation`), which renders the conversation shell to
+ * capture screenshots without a Supabase session.
+ */
+export function useAuthOptional(): AuthContextValue | null {
+  return useWithSpine(useContext(AuthContext));
+}

@@ -1,0 +1,14 @@
+{
+  "collaborator": "Mitwirkender",
+  "consultant": "Berater",
+  "employee": "Angestellter",
+  "freelancer": "Freiberufler",
+  "manager": "Manager",
+  "owner": "Inhaber",
+  "student": "Student",
+  "unemployed": "Arbeitslos",
+  "volunteer": "Freiwilliger",
+  "intern": "Praktikant/in",
+  "external_manager": "Externer Vorgesetzter (Auftraggeber)",
+  "other": "Andere Beziehung"
+}

@@ -1,0 +1,365 @@
+import "server-only";
+
+import { cache } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { createClient } from "@/lib/supabase/server";
+import {
+  effectiveEndDay,
+  projectAbsenceItem,
+  rangesOverlapInclusive,
+  type PlanningItem,
+} from "@/lib/planning/planning-model";
+
+/**
+ * Employer-side worker availability (W12 employer projection).
+ *
+ * WHAT THIS EXISTS FOR. The canonical calendar answered every WORKER question
+ * and none of the employer ones. `/dashboard/company/planning` is a demand and
+ * gap-risk surface over `getWorkforce()` — it never touched the planning model.
+ * So an employer could assign a worker to days that worker had approved leave
+ * for, and nothing in the product said a word: the only employer-side absence
+ * read (`getManagerPendingAbsences`) filters `status = 'requested'`, i.e. an
+ * approval queue, never a schedule.
+ *
+ * ── MINIMUM NECESSARY VISIBILITY (owner decision) ──────────────────────────
+ *
+ * An employer may learn: this worker is UNAVAILABLE, over this date range, and
+ * what that collides with. An employer may NOT learn WHY.
+ *
+ * That is enforced by what the query ASKS FOR, not by what the UI chooses to
+ * render. The select list below deliberately omits `note` (free text, up to
+ * 500 chars, written by the worker) and `absence_type` — `sickness` alone is
+ * health information and it is one of the five allowed values. Neither column
+ * ever reaches this process, so no later refactor of a component can leak
+ * them, and no client bundle can contain them.
+ *
+ * The canonical `projectAbsenceItem` mapper turns out to be exactly the right
+ * shape for this: it already returns `label: null` and carries no place, no
+ * counterpart and no type, because the WORKER'S own calendar had already
+ * decided that absence detail belongs on the absences surface. Reusing it
+ * means the employer view cannot drift from the worker view on date semantics,
+ * and gets the privacy minimisation for free.
+ *
+ * ── AUTHORIZATION ──────────────────────────────────────────────────────────
+ *
+ * NOT enforced here. `worker_absences` RLS (migration 20260718150000) already
+ * reads:
+ *
+ *   worker themselves  OR  public.caller_manages_worker(worker_id)  OR  admin
+ *
+ * and `caller_manages_worker` is true only when the caller OWNS the company
+ * that actively employs the worker (`company_workers.status = 'active'`) or
+ * OWNS the agency that actively represents them. An unrelated organisation
+ * receives zero rows from the database itself — the boundary is structural,
+ * not a filter this module could forget to apply. Nothing here widens it: no
+ * service-role client, no SECURITY DEFINER call, no migration.
+ *
+ * Read-only. Sends nothing anywhere.
+ */
+
+/** Absence lifecycle states that make a worker genuinely UNAVAILABLE.
+ *  A `requested` absence is a pending intention, not a commitment — showing it
+ *  as unavailability would block scheduling on something nobody approved. */
+const UNAVAILABLE_STATUSES = ["approved"] as const;
+
+/** Bounded reads — the employer view never streams unbounded rows. */
+const MANAGED_WORKER_LIMIT = 200;
+const ABSENCE_READ_LIMIT = 500;
+
+export interface WorkerUnavailability {
+  readonly workerId: string;
+  /** The worker's display name — already visible to this employer on every
+   *  workforce surface; no new disclosure. */
+  readonly workerName: string | null;
+  /** The canonical planning item, built by the SAME mapper the worker's own
+   *  calendar uses. Carries dates and status only. */
+  readonly item: PlanningItem;
+}
+
+export type EmployerAvailabilityResult =
+  | { readonly status: "not-authed" }
+  | { readonly status: "unavailable" } /* leave model not applied yet */
+  | { readonly status: "error" }
+  | {
+      readonly status: "ok";
+      readonly unavailability: readonly WorkerUnavailability[];
+      /** Workers the caller manages — the denominator for "who is free". */
+      readonly managedWorkerCount: number;
+    };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type AnyClient = any;
+
+/** A relation the database does not have. TWO codes, not one, and the second
+ *  is the one that actually fires in production: `42P01` is raw Postgres
+ *  `undefined_table`, but PostgREST answers a request for a relation missing
+ *  from its schema cache with `PGRST205` and never reaches Postgres at all.
+ *  Verified in this repo — see `lib/agency/clients-model.ts`. Handling only
+ *  `42P01` would have made the owner-gated fallback below dead code on the
+ *  hosted stack, which is exactly the window it exists for. */
+const MISSING_RELATION = new Set(["42P01", "PGRST205"]);
+const UNDEFINED_COLUMN = "42703";
+
+/**
+ * Approved, dated unavailability for every worker the caller manages.
+ *
+ * Both reads are ordinary authenticated reads; RLS decides the rows. The
+ * worker list is read first only so the view can say how many workers it
+ * covers — the absence read is NOT scoped by it, because narrowing to a list
+ * this process computed would be a weaker guarantee than the database's own
+ * `caller_manages_worker`.
+ */
+export async function getEmployerWorkerAvailability(
+  /** OPTIONAL explicit caller (G4 bridge). Absent = the cookie session, which
+   *  is every existing call site and is unchanged. Present = a bearer or agent
+   *  transport handing in ITS OWN RLS-scoped client. Never service-role: the
+   *  privacy minimisation above is enforced by the SELECT list, and RLS still
+   *  decides which workers the caller may see at all. */
+  caller?: { readonly supabase: SupabaseClient; readonly userId: string },
+): Promise<EmployerAvailabilityResult> {
+  // The cookie session's read is shared within ONE render; an explicit caller
+  // (bearer / agent transport, its own client) always reads for itself.
+  return caller ? readEmployerWorkerAvailability(caller) : readSessionEmployerAvailabilityOnce();
+}
+
+/**
+ * REQUEST-SCOPED (perf 2026-10-22): one `/dashboard/company` render read the
+ * session's availability three times — the opening brief's "absent today",
+ * the planning-conflicts count and the who-is-free answer — each the same
+ * roster, absence and own-identity round trips. React `cache()` deduplicates
+ * within ONE render only: every navigation reads again, and a server action
+ * (no render) reads itself, so a leave decision is never answered from an
+ * earlier read. Callers treat the result as read-only.
+ */
+const readSessionEmployerAvailabilityOnce = cache(
+  async (): Promise<EmployerAvailabilityResult> => readEmployerWorkerAvailability(undefined),
+);
+
+async function readEmployerWorkerAvailability(
+  caller: { readonly supabase: SupabaseClient; readonly userId: string } | undefined,
+): Promise<EmployerAvailabilityResult> {
+  const supabase = caller?.supabase ?? (await createClient());
+  let userId = caller?.userId ?? null;
+  if (!userId) {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    userId = user?.id ?? null;
+  }
+  if (!userId) return { status: "not-authed" };
+
+  // MINIMISED SELECT — `note` and `absence_type` are never requested. See the
+  // module header: this is the enforcement point, not the component.
+  //
+  // DEFENCE IN DEPTH, and the database now offers it. `worker_absence_scheduling`
+  // (migration 20260808120000) is a relation with no reason column at all, so
+  // the guarantee no longer depends on this module's discipline alone. It is
+  // APPLIED — verified on production 2026-09-07; this comment said "not applied
+  // yet" until then, which under-reported a privacy guarantee that was already
+  // in force. The base-table fallback below is kept for environments without
+  // it, and reads the same minimised column list either way.
+  const SCHEDULING_COLUMNS = "id, worker_id, start_date, end_date, status";
+  const readAbsences = (relation: string) =>
+    (supabase as AnyClient)
+      .from(relation)
+      .select(SCHEDULING_COLUMNS)
+      .in("status", [...UNAVAILABLE_STATUSES])
+      .order("start_date", { ascending: true })
+      .limit(ABSENCE_READ_LIMIT);
+
+  // ONE STAGE (perf 2026-10-23): the roster, the leave rows and the caller's
+  // own worker ids depend on nothing but the caller, so they are read together
+  // (they used to be three stages on the People page and the company home).
+  // Each answer is handled exactly as before, in the same order.
+  const [workersRes, firstAbsRes, ownRes] = await Promise.all([
+    (supabase as AnyClient)
+      .from("company_workers")
+      .select("worker_id, workers(id, display_name)")
+      .eq("status", "active")
+      .limit(MANAGED_WORKER_LIMIT),
+    readAbsences("worker_absence_scheduling"),
+    (supabase as AnyClient).from("workers").select("id").eq("profile_id", userId).limit(5),
+  ]);
+  if (workersRes.error) return { status: "error" };
+
+  type WorkerRow = {
+    worker_id: string;
+    workers: { id: string; display_name: string | null } | null;
+  };
+  const managed = (workersRes.data ?? []) as WorkerRow[];
+  const nameByWorker = new Map<string, string | null>(
+    managed.map((r) => [r.worker_id, r.workers?.display_name ?? null]),
+  );
+
+  let absRes = firstAbsRes;
+  if (absRes.error) {
+    const code = (absRes.error as { code?: string }).code;
+    // The hardened relation is absent on a stack where the owner-gated
+    // migration has not been applied — fall back rather than degrade the
+    // feature to nothing.
+    if (MISSING_RELATION.has(code ?? "")) {
+      absRes = await readAbsences("worker_absences");
+    }
+  }
+  if (absRes.error) {
+    const code = (absRes.error as { code?: string }).code;
+    if (MISSING_RELATION.has(code ?? "") || code === UNDEFINED_COLUMN) {
+      return { status: "unavailable" };
+    }
+    return { status: "error" };
+  }
+
+  type AbsenceRow = {
+    id: string;
+    worker_id: string;
+    start_date: string;
+    end_date: string;
+    status: string;
+  };
+  const absenceRows = (absRes.data ?? []) as AbsenceRow[];
+
+  // The caller's OWN absences come back too (the worker-themselves branch of
+  // the same policy) — an employer who is also a worker should not appear in
+  // their own workforce availability list. That is the ONLY row dropped:
+  // RLS (`caller_manages_worker`) already decided every other row, and since
+  // 20261011160000 it admits people who joined by invitation (an engagement,
+  // no `company_workers` row). Filtering by the roster list hid exactly their
+  // approved leave from the employer's plan.
+  // (`ownRes` was read in the first stage above.)
+  const ownWorkerIds = new Set<string>(
+    ((ownRes.data ?? []) as { id: string }[]).map((r) => r.id),
+  );
+  // Unknown own identity → the old roster-only rule, never a self row.
+  const rosterOnly = Boolean(ownRes.error);
+  const unnamed = rosterOnly ? [] : [
+    ...new Set(
+      absenceRows
+        .map((r) => r.worker_id)
+        .filter((id) => !nameByWorker.has(id) && !ownWorkerIds.has(id)),
+    ),
+  ];
+  if (unnamed.length > 0) {
+    const namesRes = await (supabase as AnyClient)
+      .from("workers")
+      .select("id, display_name")
+      .in("id", unnamed.slice(0, MANAGED_WORKER_LIMIT));
+    for (const w of (namesRes.data ?? []) as { id: string; display_name: string | null }[]) {
+      nameByWorker.set(w.id, w.display_name ?? null);
+    }
+    for (const id of unnamed) if (!nameByWorker.has(id)) nameByWorker.set(id, null);
+  }
+
+  const unavailability: WorkerUnavailability[] = [];
+  for (const row of absenceRows) {
+    if (ownWorkerIds.has(row.worker_id)) continue;
+    if (rosterOnly && !nameByWorker.has(row.worker_id)) continue;
+    const item = projectAbsenceItem({
+      id: row.id,
+      startDate: row.start_date,
+      endDate: row.end_date,
+      status: row.status,
+    });
+    if (!item) continue;
+    unavailability.push({
+      workerId: row.worker_id,
+      workerName: nameByWorker.get(row.worker_id) ?? null,
+      item,
+    });
+  }
+
+  return {
+    status: "ok",
+    unavailability,
+    managedWorkerCount: nameByWorker.size,
+  };
+}
+
+/* ------------------------------------------------------------------ */
+/* Pure scheduling questions — canonical overlap semantics, reused      */
+/* ------------------------------------------------------------------ */
+
+/** A dated thing an employer is planning (a project band, a booking window). */
+export interface PlannedWindow {
+  readonly startDate: string;
+  readonly endDate: string | null;
+}
+
+/**
+ * Does a planned window collide with this worker's unavailability?
+ *
+ * Delegates to `rangesOverlapInclusive` and `effectiveEndDay` — the SAME
+ * inclusive day-range semantics the booking accept guard enforces in the
+ * database (`daterange(start, coalesce(end, start), '[]') &&`, errcode 23P01)
+ * and the same the worker's calendar renders. A second overlap rule here
+ * would be a second truth, and the two would disagree the first time either
+ * changed.
+ */
+export function unavailabilityOverlaps(
+  planned: PlannedWindow,
+  unavailable: Pick<PlanningItem, "startDate" | "endDate">,
+): boolean {
+  const plannedEnd = effectiveEndDay({
+    startDate: planned.startDate,
+    endDate: planned.endDate,
+  });
+  const unavailableEnd = effectiveEndDay(unavailable);
+  if (!planned.startDate || !plannedEnd) return false;
+  if (!unavailable.startDate || !unavailableEnd) return false;
+  return rangesOverlapInclusive(
+    planned.startDate,
+    plannedEnd,
+    unavailable.startDate,
+    unavailableEnd,
+  );
+}
+
+/** Every managed worker whose unavailability collides with a planned window —
+ *  the "can I staff these dates with this person?" answer. */
+export function workersUnavailableFor(
+  planned: PlannedWindow,
+  unavailability: readonly WorkerUnavailability[],
+): readonly WorkerUnavailability[] {
+  return unavailability.filter((u) => unavailabilityOverlaps(planned, u.item));
+}
+
+// ── "Who is absent NOW" (V8 employer daily loop, GAP 3) ─────────────────────
+//
+// The audit of 2026-08-13 named this precisely: both halves of the answer
+// were already written — the minimised availability read above and the
+// canonical overlap predicate — and nothing composed them into the question
+// a manager actually asks each morning. These two derivations are pure and
+// UTC-day based (dates in this domain are date-only strings; the W12
+// presentation doctrine is UTC → UTC, so "today" is the UTC calendar day).
+
+/** ISO date (YYYY-MM-DD) `days` calendar days after `todayIso` (UTC). */
+function isoDayPlus(todayIso: string, days: number): string {
+  const d = new Date(`${todayIso}T00:00:00.000Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Managed workers whose approved unavailability covers the UTC day
+ *  `todayIso`. A worker appears once per overlapping absence band. */
+export function absentOn(
+  todayIso: string,
+  unavailability: readonly WorkerUnavailability[],
+): readonly WorkerUnavailability[] {
+  return workersUnavailableFor(
+    { startDate: todayIso, endDate: todayIso },
+    unavailability,
+  );
+}
+
+/** Managed workers whose approved unavailability overlaps the window of
+ *  `days` calendar days starting at `todayIso` (inclusive). */
+export function absentWithinDays(
+  todayIso: string,
+  days: number,
+  unavailability: readonly WorkerUnavailability[],
+): readonly WorkerUnavailability[] {
+  return workersUnavailableFor(
+    { startDate: todayIso, endDate: isoDayPlus(todayIso, days - 1) },
+    unavailability,
+  );
+}

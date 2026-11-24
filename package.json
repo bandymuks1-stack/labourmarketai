@@ -1,0 +1,44 @@
+{
+  "name": "labourmarket-platform",
+  "version": "0.1.0",
+  "private": true,
+  "packageManager": "pnpm@10.33.2",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "dev": "pnpm -C apps/web dev",
+    "build": "pnpm -C apps/web build",
+    "start": "pnpm -C apps/web start",
+    "lint": "pnpm -C apps/web lint",
+    "typecheck": "pnpm -C apps/web typecheck",
+    "format": "pnpm -C apps/web format",
+    "placeholders:list": "pnpm -C apps/web placeholders:list",
+    "placeholders:pending": "pnpm -C apps/web placeholders:pending",
+    "placeholders:check": "pnpm -C apps/web placeholders:check",
+    "placeholders:promote": "pnpm -C apps/web placeholders:promote",
+    "check:primary-route-smoke": "pnpm -C apps/web check:primary-route-smoke",
+    "check:i18n-debt": "pnpm -C apps/web check:i18n-debt",
+    "check:public-seo-indexing": "pnpm -C apps/web check:public-seo-indexing",
+    "check:anon-secdef-allowlist": "pnpm -C apps/web exec tsx ../../scripts/check-anon-secdef-allowlist.mts",
+  "check:migration-parity": "pnpm -C apps/web exec tsx ../../scripts/check-migration-parity.mts",
+    "db:push": "node scripts/db-push-refused.mjs",
+    "db:types": "supabase gen types typescript --project-id gorgitwvdzxbnaxhrsrw --schema public > apps/web/lib/supabase/types.ts",
+    "db:fixtures:local": "pnpm -C apps/web db:fixtures:local",
+    "admin:promote": "pnpm -C apps/web admin:promote",
+    "e2e": "pnpm -C apps/web e2e"
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "pg": "^8.22.0",
+    "supabase": "^2.116.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "supabase"
+    ],
+    "patchedDependencies": {
+      "next@15.5.24": "patches/next@15.5.24.patch"
+    }
+  }
+}

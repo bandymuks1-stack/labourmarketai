@@ -1,0 +1,2048 @@
+/**
+ * PRODUCT SURFACE REGISTRY — the declaration a new UI element must carry.
+ *
+ * Human half: `docs/PRODUCT_CONSTITUTION.md` §13.
+ * Enforced by: `.github/scripts/product-gate.mjs` + `lib/guards/product-gate.test.ts`.
+ *
+ * THE RULE: a PR that adds a screen, a menu item, a dashboard element, a popup,
+ * a module, a wizard or a persistent card must add its declaration here — with
+ * the five answers the Product Constitution demands. A surface nobody can
+ * justify in five short sentences is a surface that should not exist.
+ *
+ * THE BASELINE: everything that existed on 2026-07-28 is grandfathered. This
+ * PR fixes nothing and redesigns nothing (that was the explicit scope); it
+ * stops the NEXT undeclared surface. The known violations in today's baseline
+ * are recorded in `docs/audits/product-constitution-audit-v1.md`, not silently
+ * blessed here.
+ *
+ * Pure data. No IO.
+ */
+
+import type { AxiomId } from "./axioms";
+import type { WorldElementId } from "./world-elements";
+import { validateUniverseAnswers, type UniverseAnswers } from "./universal-object-model";
+import { validateWorldStateAnswers, type WorldStateAnswers } from "./world-state";
+import { validateEntityAnswers, type EntityAnswers } from "./entity-model";
+import {
+  validateBehaviorAnswers,
+  type BehaviorAnswers,
+  type TransitionalWaiver,
+} from "./behavior-model";
+
+export type SurfaceKind =
+  | "screen"
+  | "menu_item"
+  | "dashboard_element"
+  | "popup"
+  | "module"
+  | "wizard"
+  | "persistent_card";
+
+export interface SurfaceDeclaration {
+  /** Stable id — the route, the nav id, or the component path. */
+  readonly id: string;
+  readonly kind: SurfaceKind;
+  /** Which axiom PERMITS this to exist. Must be a real axiom id. */
+  readonly originAxiom: AxiomId;
+  /** What it is for, in one concrete sentence. */
+  readonly purpose: string;
+  /** Why a conversation cannot do this job. The hardest question, asked first. */
+  readonly whyNotChat: string;
+  /** Why an existing component cannot carry it. */
+  readonly whyNotExistingComponent: string;
+  /** The accountable role. */
+  readonly owner: string;
+  /**
+   * The canonical action this surface OWNS. Two surfaces may not own the same
+   * action (A-08). `null` = it owns no action (a pure read surface).
+   */
+  readonly ownsAction: string | null;
+
+  // ── The six mandatory answers (PRODUCT_VISION_LOCK_V1, owner 2026-07-28) ──
+  /** 1. Which core world element is being extended? */
+  readonly worldElement: WorldElementId;
+  /** 2. Why can an existing element not be used? */
+  readonly whyNotExistingElement: string;
+  /** 3. How does this integrate into the AI conversation? */
+  readonly chatIntegration: string;
+  /** 4. How is it reflected in the Avatar's state? */
+  readonly avatarEffect: string;
+  /** 5. How is it reflected in the World Map? */
+  readonly mapEffect: string;
+  /** 6. How is it related to the Work Journal? */
+  readonly journalRelation: string;
+
+  // ── The nine universe answers (PRODUCT_UNIVERSE_LOCK_V2, owner 2026-07-28) ─
+  /** Which of the four pillars is extended. */
+  readonly pillar: string;
+  /** Which world object type it acts on. */
+  readonly objectType: string;
+  /** Is that type registered in the Universal Object Model? (blocking) */
+  readonly registeredInObjectModel: boolean;
+  /** Does the object have a Timeline? (blocking) */
+  readonly hasTimeline: boolean;
+  /** Does the object have History? (blocking) */
+  readonly hasHistory: boolean;
+  /** Can it be added WITHOUT changing World Map architecture? (blocking) */
+  readonly addableWithoutMapChange: boolean;
+
+  // ── The five world-state answers (WORLD_STATE_UX_ARCHITECTURE_V1) ─────────
+  // All five are blocking: "Jeigu bent vienas atsakymas yra 'ne', sprendimas
+  // laikomas neatitinkančiu PRODUCT_VISION_LOCK."
+  readonly changesWorldState: boolean;
+  readonly reflectedOnMap: boolean;
+  readonly aiControlled: boolean;
+  readonly usableWithoutLeavingWorkspace: boolean;
+  readonly needsNoNewPage: boolean;
+
+  // ── The entity answers (UNIFIED_WORLD_MODEL_V1, owner 2026-07-28) ─────────
+  // Entity is the only base thing in the world. Growth happens by REGISTRATION:
+  // `registrationIsEnough` is the mechanism, and it blocks. Needing a new type,
+  // role or relationship never blocks on its own — that is how the world grows.
+  // The map question is NOT repeated here: `addableWithoutMapChange` above is
+  // the canonical one, and the entity validator reads it.
+  /** Does it use Entity at all? (blocking) */
+  readonly usesEntity: boolean;
+  /** Does it need a new Entity Type? (never blocks — growth is allowed) */
+  readonly needsNewEntityType: boolean;
+  /** Is registering it enough? THE growth mechanism. (blocking) */
+  readonly registrationIsEnough: boolean;
+  /** Does it create a new Role? (never blocks — roles are dynamic) */
+  readonly createsNewRole: boolean;
+  /** Does it create a new Relationship? (never blocks — predicates register) */
+  readonly createsNewRelationship: boolean;
+  /** Can the AI work with this Entity? (blocking) */
+  readonly aiCanWorkWithIt: boolean;
+  // ── The behavior answers (ENTITY_BEHAVIOR_MODEL_V1, owner 2026-07-28) ─────
+  // The world grows by CHANGING BEHAVIOR — not by new tables, modules or
+  // architectures. All six of the owner's questions are still asked; three are
+  // answered by fields ABOVE, which their own locks own, so nothing is judged
+  // twice:
+  //   "existing Entity Type?"     → `needsNewEntityType`      (entity block)
+  //   "AI without arch. change?"  → `aiCanWorkWithIt`         (entity block)
+  //   "can the Map render it?"    → `addableWithoutMapChange` (universe block)
+  /** Is adding a new Behavior enough? (blocking) */
+  readonly newBehaviorIsEnough: boolean;
+  /** Is adding a new Relationship enough? (blocking) */
+  readonly newRelationshipIsEnough: boolean;
+  /** Can World State control it? — false means REDESIGN, not review. */
+  readonly worldStateCanControlIt: boolean;
+
+  /**
+   * TEMPORARY, owner-approved, self-expiring. Present only while the enabling
+   * architecture (E.7 map platform / B.6 behavior binding) does not exist. It
+   * may excuse ONLY the readiness answers in `WAIVABLE_FIELDS`; it can never
+   * excuse `usesEntity` or `registrationIsEnough`, and the Product Gate turns
+   * it into a hard error the moment the enabling architecture ships.
+   */
+  readonly transitionalWaiver?: TransitionalWaiver;
+
+  /**
+   * A-14 (owner decision 0015, 2026-09-13): a genuinely DISTINCT user job /
+   * graph edge that reuse would materially damage. Owner-gated: the block is
+   * valid only with its ruling and at least one evidence item; then the
+   * readiness answers in `A14_EXCUSED_CODES` may honestly be "no" and are
+   * reported as notices. `aiControlled`, `usesEntity`, `registrationIsEnough`
+   * and `aiCanWorkWithIt` are never excused — a distinct surface must still be
+   * AI-operable and entity-based.
+   */
+  readonly distinctSurface?: DistinctSurfaceRuling;
+}
+
+export interface DistinctSurfaceRuling {
+  /** Which user job / decision space this serves, in one sentence. */
+  readonly userJob: string;
+  /** Which §14 graph edge it is, and why not the edge an existing surface serves. */
+  readonly graphEdge: string;
+  /** What reusing the existing structure would materially damage. */
+  readonly whyReuseDamages: string;
+  /** Repository / audit / production evidence, one item each. */
+  readonly evidence: readonly string[];
+  /** The owner ruling that authorised it (decision id + date). */
+  readonly ownerRuling: string;
+}
+
+/** The readiness answers an A-14 ruling may excuse (reported as notices). */
+export const A14_EXCUSED_CODES = [
+  "not_world_state_driven",
+  "not_reflected_on_map",
+  "requires_leaving_workspace",
+  "requires_new_page",
+  "world_state_cannot_control_it",
+] as const;
+
+/** A complete A-14 block: every answer stated, at least one evidence item. */
+export function distinctSurfaceIsRuled(d: DistinctSurfaceRuling | undefined): boolean {
+  if (!d) return false;
+  return (
+    d.userJob.trim().length >= 10 &&
+    d.graphEdge.trim().length >= 10 &&
+    d.whyReuseDamages.trim().length >= 10 &&
+    d.evidence.length > 0 &&
+    d.evidence.every((e) => e.trim().length >= 10) &&
+    d.ownerRuling.trim().length >= 10
+  );
+}
+
+/**
+ * Declarations added from this PR onward.
+ *
+ * The FIRST entry is the Context Panel (W3). It is declared even though no
+ * detection pattern in the Product Gate would have caught it — it is not a
+ * page, not a modal, not a wizard and not a `*-card.tsx`. Declaring it anyway
+ * is the point of the constitution: this is the largest UI addition since the
+ * conversation itself, and a surface nobody can justify in five sentences is a
+ * surface that should not exist. The alternative — shipping it silently because
+ * the regexes happen not to match — would be following the letter of the gate
+ * while defeating it.
+ */
+export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
+  {
+    id: "components/app/world-state/context-panel.tsx",
+    kind: "dashboard_element",
+    // A-01 does not merely permit this — it NAMES it: "AI Conversation + World
+    // Map + Context Panel are ONE workspace".
+    originAxiom: "A-01",
+    purpose:
+      "The third part of the one workspace: it always answers 'what is in front of me right now' — the person's real work context when nothing is selected, and the selected entity's facts, requirements, history, deterministic next steps and real actions when something is.",
+    whyNotChat:
+      "The conversation answers a question once and the answer scrolls away. Selection state is PERSISTENT context: while a person compares an opportunity against their own skills they need the facts to stay in view while they keep talking. Re-asking the assistant for the same demand every turn is the failure this replaces — and the panel still performs no action of its own, it dispatches into the conversation.",
+    whyNotExistingComponent:
+      "No existing component is keyed on an ENTITY. Every detail view in the product today is a page per domain (/dashboard/people/[id], /dashboard/projects/[id], the opportunities board), which is exactly the page-based shape WORLD_STATE_UX_ARCHITECTURE_V1 forbids. The panel replaces those detail pages with one entity-typed lens that any registered entity type reaches without new UI.",
+    owner: "Product architecture (DI)",
+    // It owns the ACT of opening an entity in the workspace. Every domain
+    // action it offers still belongs to that domain's canonical control — the
+    // express-interest write stays at lib/opportunities/interest-actions.ts.
+    ownsAction: "world_state.open_entity",
+
+    // ── PRODUCT_VISION_LOCK_V1: the six answers ─────────────────────────────
+    worldElement: "ai_conversation",
+    whyNotExistingElement:
+      "It IS this element, not a new one: the AI Conversation element is defined as the interface that 'opens the context it needs, closes it, and returns to the conversation'. Before W3 the product had no way to open context without leaving the conversation, so the element was only half built.",
+    chatIntegration:
+      "One World State: a selection made in the chat opens the panel, and every action the panel offers is dispatched back into the chat's existing chip handler. The panel owns no dispatcher, no flow and no write path of its own.",
+    avatarEffect:
+      "It changes nothing about the avatar by itself. It shows the avatar's own state against a selected entity — which of the demand's required skills the person actually holds — and routes the fix to the work journal, where skills really come from.",
+    mapEffect:
+      "W6 delivered it: the workspace map (components/app/world-state/workspace-map.tsx) subscribes to the SAME World State — the selection flies the map to the entity's place, and clicking a marker dispatches open_object so the panel and the conversation follow. Real rows only, clustered per city, approximate centroids labelled.",
+    journalRelation:
+      "The panel's primary recommendation for a missing required skill is to log the work that proves it — the journal stays the source of skills, and the panel never offers a self-declaration shortcut around it.",
+
+    // ── PRODUCT_UNIVERSE_LOCK_V2: the universe answers ──────────────────────
+    pillar: "ai_conversation",
+    objectType: "job",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "job"
+    hasTimeline: true, // the person's own interest signal is dated state
+    hasHistory: true, // interest + saved state, read from real rows
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // ── WORLD_STATE_UX_ARCHITECTURE_V1: the five answers ────────────────────
+    changesWorldState: true, // it IS a World State slot (context_panel)
+    reflectedOnMap: true, // W6: the workspace map reacts to the selection
+    aiControlled: true, // opened/closed through the conversation's own state
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true, // no route was added by this slice
+
+    // ── UNIFIED_WORLD_MODEL_V1: the entity answers ──────────────────────────
+    usesEntity: true, // it opens an EntityRef, never a per-domain screen
+    needsNewEntityType: false, // "job" already exists in the registry
+    registrationIsEnough: true, // a second type = one line in resolvers.ts
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    // ── ENTITY_BEHAVIOR_MODEL_V1: the behavior answers ──────────────────────
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: true,
+
+    // The W3-era transitional waiver (reflectedOnMap) was DELETED in W6: the
+    // workspace map now genuinely reacts to the selection, so the answer is a
+    // real yes and nothing is excused any more.
+  },
+  {
+    // ═══════════════════════════════════════════════════════════════════════
+    // /create-cv — the PUBLIC front door of the free CV chain.
+    //
+    // Owner product decision, PUBLIC BETA TRAIN V3 §2.1 (2026-08-10):
+    //   "YES — labourmarket.ai SHOULD have a dedicated public FREE CV creation
+    //    / acquisition surface. The public CV builder is intentional. Do NOT
+    //    fold it invisibly into /worker-intake merely to avoid adding a page."
+    //
+    // WHY THIS DECLARATION ANSWERS "NO" FIVE TIMES, AND WHY THAT IS THE HONEST
+    // ANSWER. The five WORLD_STATE questions describe a surface INSIDE the
+    // authenticated workspace: does it move World State, is it drawn on the
+    // map, does the AI drive it, can the person stay in the workspace, does it
+    // avoid a new page. An anonymous visitor arriving from a search result has
+    // no World State, no avatar, no map and no assistant — there is no
+    // workspace to stay inside, and the honest answer to all five is "no".
+    //
+    // Answering them "yes" to make the gate green would be a lie of exactly the
+    // kind A-06 exists to prevent, so they are recorded as "no" and excused by
+    // ONE scoped, expiring, owner-approved waiver in
+    // `.github/scripts/owner-waivers.mjs` — the mechanism the owner ruling of
+    // 2026-07-29 built for reviewed transitional debt. The violations stay
+    // detected and stay printed; only the exit code changes, only for this PR,
+    // only until the recorded date.
+    //
+    // WHAT REMOVES THE WAIVER: `gate-learns-public-acquisition-route-category`.
+    // The gate does not currently distinguish a pre-auth public acquisition
+    // route from a workspace screen — the 118 grandfathered BASELINE screens
+    // include `/`, `/for-workers`, `/for-companies` and `/pricing`, none of
+    // which satisfy the five questions either; they escape by being older, not
+    // by being compliant. Teaching the gate that category is a constitution
+    // change and therefore an OWNER decision, not something this train may take
+    // on its own authority.
+    // ═══════════════════════════════════════════════════════════════════════
+    id: "/create-cv",
+    kind: "screen",
+    // A-04: "Multiple valid entry points, suggestions not coercion, progressive
+    // completion — no mandatory long wizard, and no path may be blocked." This
+    // surface IS an entry point, and it coerces nothing: the CV is free, the
+    // profile step is optional, the discoverability step is optional again.
+    originAxiom: "A-04",
+    purpose:
+      "The public, indexable, advert-addressable front door of the free CV chain: a visitor who has never heard of labourmarket.ai learns in one screen that they can build or import a CV for free, export it as a PDF, and — only if they choose — turn the facts they have reviewed into a work profile that improves the jobs they are shown.",
+    whyNotChat:
+      "There is no conversation before authentication. This surface exists precisely where the assistant cannot reach: an anonymous visitor arriving from a search result or an advert, who has not signed up and has nothing for an assistant to operate on. The moment that person starts, the surface hands off into the authenticated CV flow the assistant does drive — it adds no second flow of its own.",
+    whyNotExistingComponent:
+      "Every existing CV surface sits behind authentication, and `robots.ts` disallows the `/*/cv` prefix outright, so no current component can be indexed or pointed at by an advert. `/worker-intake` is a post-signup onboarding step, not an acquisition promise: it answers 'what do we need from you' to someone who already joined, not 'what do I get' to someone deciding whether to.",
+    owner:
+      "Product / worker acquisition — owner decision, PUBLIC BETA TRAIN V3 §2.1 (2026-08-10)",
+    // A pure read surface. Every write it leads to belongs to the CV chain that
+    // already owns it (upload/extract, per-fact confirm, profile write). It
+    // deliberately owns NO action, so A-08 cannot be violated.
+    ownsAction: null,
+
+    // ── PRODUCT_VISION_LOCK_V1: the six answers ─────────────────────────────
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "It extends no new element: the CV is the avatar's work identity rendered for the outside world, and this surface is the public doorway to it. What did not exist was a doorway an anonymous person could find — the element was reachable only by people already inside.",
+    chatIntegration:
+      "One-way, by design: the surface starts the existing CV chain and the assistant takes over from the first authenticated screen onward. It dispatches nothing, holds no conversation state, and introduces no second flow the assistant would have to learn.",
+    avatarEffect:
+      "None by itself, and that is the honesty constraint: extracted facts are suggestions until the person confirms them one by one, and only confirmed facts reach the avatar's profile. A visitor who exports a PDF and leaves has changed nothing about any avatar.",
+    mapEffect:
+      "None. A pre-auth acquisition page draws nothing on the World Map — recorded as `reflectedOnMap: false` rather than dressed up as a map effect.",
+    journalRelation:
+      "Downstream and deliberately subordinate: the CV seeds an initial skill claim set, but the Work Journal remains the source of proven skills. The surface never presents an imported CV line as evidence of anything — it presents it as something the person said about themselves.",
+
+    // ── PRODUCT_UNIVERSE_LOCK_V2: the universe answers ──────────────────────
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "avatar"
+    hasTimeline: true, // the profile's confirmed facts are dated state
+    hasHistory: true, // CV imports and confirmations are recorded events
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // ── WORLD_STATE_UX_ARCHITECTURE_V1: the five answers ────────────────────
+    // All five are "no", honestly. See the header comment: a pre-auth public
+    // route has no World State to change, no map to appear on, no assistant to
+    // be driven by, no workspace to stay inside, and it is by definition a new
+    // page. Excused by the scoped owner waiver, not by a rewritten answer.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    // ── UNIFIED_WORLD_MODEL_V1: the entity answers ──────────────────────────
+    // These are real yeses: the chain this surface opens acts on the avatar
+    // Entity that already exists, and needs no new type, role or relationship.
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    // ── ENTITY_BEHAVIOR_MODEL_V1: the behavior answers ──────────────────────
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    // World State cannot control a page that renders before World State exists.
+    worldStateCanControlIt: false,
+  },
+
+  // ══ PUBLIC JOB BOARD (owner directive 2026-08-18 §5) ══════════════════════
+  // Three surfaces, one job: make the imported supply discoverable to people
+  // who have not signed up. They share the same honest World-State answers as
+  // `/create-cv` above and the same category error behind them — see the
+  // scoped owner waiver in `.github/scripts/owner-waivers.mjs`.
+  {
+    id: "/jobs",
+    kind: "screen",
+    // A-04: multiple valid entry points, suggestions not coercion. This is an
+    // entry point that coerces nothing — browsing is free and anonymous, and
+    // the account is asked for only when the visitor wants the restricted half.
+    originAxiom: "A-04",
+    purpose:
+      "The public, indexable front door to the imported job supply: an anonymous visitor searches 38,142 live vacancies by title and sees the safe half of each ad (title, occupation, employment form, working time, positions, publication date, and pay where the publisher genuinely supplied it) without an account.",
+    whyNotChat:
+      "There is no conversation before authentication. The assistant cannot reach an anonymous visitor arriving from a search result, and that visitor is exactly who this surface exists for. Members already meet the same vacancies inside the workspace through /dashboard/opportunities, which the assistant does operate — this adds a pre-auth doorway to the same supply, not a second board.",
+    whyNotExistingComponent:
+      "Every existing vacancy surface sits behind authentication because `public_vacancies` grants SELECT to `authenticated` only; an anonymous read of that table fails with 42501, proven in production. `/dashboard/opportunities` therefore cannot be indexed or linked from an advert, and it renders the COMPLETE ad, which an anonymous caller may not receive.",
+    owner:
+      "Product / worker acquisition — owner directive 2026-08-18 §5 (jobs must be publicly discoverable; anonymous must not receive the complete vacancy)",
+    // A pure read surface: it owns no write. The search box is a GET filter.
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "It extends no new element. Imported vacancies are already market-world supply; what did not exist was a doorway an anonymous person could walk through. The element was reachable only from inside.",
+    chatIntegration:
+      "One-way by design: the surface hands off to signup/login carrying `?next=` back to the same job, after which the authenticated workspace and its assistant own the journey. It dispatches nothing and holds no conversation state.",
+    avatarEffect:
+      "None. Browsing anonymously changes no avatar; there is no avatar yet. That is the point of the surface.",
+    mapEffect:
+      "None. A pre-auth acquisition route draws nothing on the World Map — recorded as `reflectedOnMap: false` rather than dressed up as a map effect.",
+    journalRelation:
+      "None. An imported advert is somebody else's published offer, never evidence of work done; the Work Journal remains the only source of proven skills.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "job"
+    hasTimeline: true, // published_at / expires_at decide liveness at read time
+    hasHistory: true, // first_seen_at / last_seen_at are recorded per import
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // Honestly "no", all five — a pre-auth public route has no World State to
+    // change, no map to appear on, no assistant to be driven by, no workspace
+    // to stay inside, and it is by definition a new page. A-06 forbids
+    // rewriting these to green more strongly than A-01 forbids the page.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+  {
+    id: "/jobs/[id]",
+    kind: "screen",
+    originAxiom: "A-04",
+    purpose:
+      "One indexable page per live vacancy — the addressable unit of the acquisition funnel, showing the safe half of the ad and asking for a free account to reveal the employer, the location and how to apply.",
+    whyNotChat:
+      "Same reason as /jobs: this page's whole audience is people the assistant cannot talk to yet, arriving on a single URL from a search engine or a shared link.",
+    whyNotExistingComponent:
+      "No existing route renders a single vacancy at all, for members or anyone else, and none could be indexed: the member surface is a list inside an authenticated dashboard.",
+    owner:
+      "Product / worker acquisition — owner directive 2026-08-18 §5",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "Same element as /jobs — one row of it, addressably. No new element is introduced.",
+    chatIntegration:
+      "One-way: both CTAs carry `?next=` back to this exact job, so the workspace resumes the visitor's actual intent instead of dropping them on a generic dashboard.",
+    avatarEffect: "None until the visitor creates an account; the page itself writes nothing.",
+    mapEffect: "None — recorded honestly rather than invented.",
+    journalRelation:
+      "None. A published advert is not evidence of work; the journal is untouched.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+  {
+    id: "components/marketing/public-vacancy-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-04",
+    purpose:
+      "The one row shape of the public board: title, occupation, and the few honest chips the anonymous projection actually carries, linking to that vacancy's own page.",
+    whyNotChat:
+      "It is the repeated unit of a pre-auth list; there is no conversation to render it in.",
+    whyNotExistingComponent:
+      "The member-side vacancy card renders employer, location and an apply link — every one of which is a restricted field here. Reusing it would hand a component the anonymous data it must never show, and the leak would be one prop away.",
+    owner: "Product / worker acquisition — owner directive 2026-08-18 §5",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement: "Same element, rendered for an anonymous reader.",
+    chatIntegration:
+      "None, deliberately: the card is a link, not a dispatcher. It holds no conversation state and cannot start an action — the visitor either opens the job page or does nothing.",
+    avatarEffect:
+      "None. An anonymous reader has no avatar, and the card writes nothing anywhere; rendering it changes no profile, no skill and no state.",
+    mapEffect:
+      "None. A pre-auth list row draws nothing on the World Map — recorded as false rather than dressed up as a map effect.",
+    journalRelation:
+      "None. The card shows somebody else's published advert, which is never evidence of work done; the Work Journal remains the only source of proven skills and is untouched.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+  {
+    // PUBLIC LANDING V1 — owner decision 2026-08-20.
+    //
+    // This is the canonical anonymous front door, not a second authenticated
+    // workspace. The six World-State answers are therefore recorded as honest
+    // "no" values and covered only by the PR-scoped owner waiver in
+    // `.github/scripts/owner-waivers.mjs`.
+    id: "/",
+    kind: "screen",
+    originAxiom: "A-04",
+    purpose:
+      "The public Europe-first front door to LabourMarket.ai: it explains the Work → Evidence → Opportunity loop, presents governed current Sweden supply as secondary evidence, and hands workers and employers into the existing canonical signup and workforce-inquiry paths.",
+    whyNotChat:
+      "The audience is an anonymous visitor arriving before authentication, when no AI conversation, avatar or World State exists. The surface explains the product and routes intent into the existing flows; after authentication the AI-first workspace remains the operating interface.",
+    whyNotExistingComponent:
+      "The previous public homepage did not expose the approved living-market V1 composition or its governed supply reader. This route reuses one shared LiveMarketLanding component with the review alias and creates no duplicate workflow, write path or authenticated workspace.",
+    owner:
+      "Product owner — OWNER DECISION: SHIP THIS LANDING AS V1 (2026-08-20)",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "It extends the existing Market World Map idea as a public, conceptual acquisition view; it introduces no thirteenth world element and does not alter the authenticated map architecture.",
+    chatIntegration:
+      "One-way at the pre-auth boundary: worker and employer intent is handed to the existing signup or workforce-inquiry entry, after which the authenticated AI conversation owns the journey. The landing dispatches no competing product action.",
+    avatarEffect:
+      "None on the page itself. Anonymous viewing changes no avatar, and the worker CTA enters the existing profile path where confirmed facts are handled under the avatar rules.",
+    mapEffect:
+      "The page shows conceptual Europe-wide sector activity and labels it as illustrative; it does not claim to be the authenticated World Map or mutate map state, so reflectedOnMap remains honestly false.",
+    journalRelation:
+      "It explains the canonical chain in which completed work becomes journal evidence and later opportunity; the landing writes no journal entry and never presents anonymous browsing as work evidence.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+  {
+    // ORGANIZATION CAPABILITIES — "What does your organization do?"
+    //
+    // The screen that made an already-applied table reachable. Two of the five
+    // World-State answers are recorded as honest NO below, and they are not
+    // dressed up: the capability set is not drawn on the World Map yet, and the
+    // AI cannot yet set it by conversation. Recording those as "yes" to clear
+    // the gate would be exactly the fabrication the gate exists to catch.
+    id: "components/app/organization-capabilities-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-01",
+    purpose:
+      "Lets an organization state what it actually does — educate/train, employ, supply workers, recruit, run projects, commission work — as several simultaneous capabilities, so an education institution can register honestly instead of calling itself a company.",
+    whyNotChat:
+      "It is a settled identity claim about an organization, not a request. Each answer is a durable, owner-only statement that others rely on for matching and discovery, and the RPC behind it is additive — a capability cannot be withdrawn. A conversational turn is the wrong shape for a decision that is hard to reverse and must be reviewable at a glance; chat may later OPEN this card, which is the extension recorded below.",
+    whyNotExistingComponent:
+      "The company setup form already answers a different question — companies.company_type, which is the INDUSTRY and holds exactly one value. Capabilities are what the organization DOES and are many-valued; a vocational school that also employs people needs both. Extending the industry control to carry capabilities would collapse the two axes and rebuild the single-value trap ORGANIZATION_ROLE_ORCHESTRATION_V1 exists to forbid.",
+    owner:
+      "Product owner — education pilot P0.1, owner directive 2026-08-27 (institution capability UI)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "Same element. This states what an existing organization is, and creates no new world element.",
+    chatIntegration:
+      "None today, and that is recorded as a NO rather than implied. The capability question is reachable only from the organization page. Making the assistant able to open it — 'we also train people' — is the natural next step and needs no schema change, because add_organization_role_v1 already accepts it.",
+    avatarEffect:
+      "None on a person. This describes an organization, not a human, and writes nothing to any profile, skill or journal.",
+    mapEffect:
+      "None yet — recorded honestly. A training capability is exactly the kind of fact the market map should eventually show (where education supply actually is), but nothing renders it today and claiming otherwise would be a fabricated map effect.",
+    journalRelation:
+      "None. An organization declaring what it does is a statement about itself, never evidence of work performed; the Work Journal remains the only source of proven capability for a person.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // The five mandatory answers, honestly.
+    changesWorldState: true,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: true,
+  },
+  {
+    // ═══════════════════════════════════════════════════════════════════════
+    // components/app/historical-player-card.tsx — the `history-card` variant
+    // of the ONE person identity, rendered from an organization's evidence
+    // about a person (owner command 2026-09-16, post-#1748: "the premium
+    // player card is a first-class product requirement … reusable across
+    // profile, historical reconstruction, team/field board, project,
+    // matching"). It reads a pre-commit PROJECTION of staged import rows and
+    // writes nothing; it shows only what the evidence supports — period,
+    // daily hours, days, places, activities, the source's words, the
+    // interpretations made, the unknowns — behind the organization-reported
+    // provenance edge, and it states that the person's CURRENT state is not
+    // inferred from history. No score, rating, rank or tier exists on it.
+    //
+    // The World-State answers below are honest: the card is a projection of
+    // a staging session, not a world-state entity yet (NO); nothing renders
+    // it on the map (NO); the assistant OPENS this surface (the chat's
+    // historical-import intent routes to the history door) and CHANGES what
+    // the card shows through evidence.import.resolve_label /
+    // resolve_time_semantics over the same staged rows (aiControlled YES).
+    //
+    // LABOURMARKET_VISUAL_FIRST (owner constitution, same day, docs/design/
+    // final/04): the file now carries TWO renderings of the same atom — the
+    // COMPACT identity used in every group view (overview, people rail,
+    // field rows, objects, calendar days) and the FOCUS identity shown for
+    // ONE selected person inside the historical workspace
+    // (components/app/historical/historical-workspace.tsx). Still one
+    // identity, still a read-only projection, still no score.
+    id: "components/app/historical-player-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-01",
+    purpose:
+      "Shows a person as the organization's historical evidence describes them — one identity atom shared with the worker's own player card — so the owner reviewing an import sees people, not spreadsheet rows, and sees exactly what the file proves and what it does not.",
+    whyNotChat:
+      "A person's evidence-backed history is a thing to LOOK AT and compare across seven people at once (period, rhythm by week, places, words); a conversational turn can name the facts but cannot lay them side by side. The assistant reaches the same staged rows through the import capabilities; the card is the visual form of the same facts, not a second source.",
+    whyNotExistingComponent:
+      "components/app/worker-player-card.tsx is bound to a platform worker's own data (skills, journal, documents, availability) and would either show zeros for an unlinked roster person or invent them. This variant renders the same identity atoms (monogram, provenance edge, history band) from organization evidence, with no current-state fields at all — extending the identity registry (history-card), not forking it.",
+    owner:
+      "Product owner — owner unified command 2026-09-16 (post-#1748 human correction + premium player card / historical team reality), §3–§5",
+    ownsAction: null,
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "Same element. It presents a person an organization's evidence names (organization_people, possibly unlinked) and creates no new world element; the roster row is the existing one the real person may later claim.",
+    chatIntegration:
+      "The chat's historical-import intent opens the history door where the cards render; the assistant previews, settles place labels and time semantics through the evidence.import.* capabilities over the SAME staged rows, and every such decision changes what the card shows on the next render. The card itself is display; the control is the shared core.",
+    avatarEffect:
+      "None until commit and until the roster row is claimed: the card is a projection and writes nothing. After a human commit and a claimed link, the same evidence reaches the person's Work in Numbers, Living CV and player card through the one work model (worker-evidence-read.ts) — no second write.",
+    mapEffect:
+      "None. Places on the card are the organization's work objects the evidence names; nothing here renders on the market map and claiming otherwise would fabricate a map effect.",
+    journalRelation:
+      "Organization-reported evidence is a ledger BESIDE the Work Journal, never inside it and never a skill: the card shows hours, days and words as reported, with the EVIDENCE_SUPPORTED provenance class (never EMPLOYER_CONFIRMED), and hours never become competency.",
+
+    pillar: "avatar",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // The five mandatory answers, honestly.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "See the PEOPLE a historical import reconstructs — as evidence-backed professional identities, side by side — before deciding to commit it.",
+      graphEdge:
+        "PERSON ↔ EVIDENCE ↔ TIME ↔ OBJECT (§14 nodes PEOPLE, EVIDENCE, REAL WORK, TIME): the edge from organization evidence to a person's identity. The worker player card serves the person's OWN edge (journal → capability); no surface served the organization-reported edge.",
+      whyReuseDamages:
+        "Reusing the worker player card would render zeros for skills, documents and availability of a person who has no account — inventing a current state from history, which the owner command forbids — or force the card's data model onto roster people; the rejected 158-row table was the alternative.",
+      evidence: [
+        "docs/launch/HISTORICAL_IMPORT_TRACE_2026-09-16.md (chain trace; post-#1748 correction section)",
+        "docs/design/player-identity-adaptation-plan.md §4 (history-card variant registered)",
+        "lib/guards/historical-living-model.test.ts (no score, no current-state field, same identity atoms, no second model)",
+      ],
+      ownerRuling:
+        "Owner unified command 2026-09-16 (post-#1748): 'PREMIUM PLAYER CARD / AI AVATAR IS NOW A FIRST-CLASS PRODUCT REQUIREMENT … reusable across worker profile, historical reconstruction, team/field board, project/object, employer candidate inspection, matching' (§3); anti-slop acceptance §14.",
+    },
+  },
+  {
+    // components/app/identity/person-identity-card.tsx — the compact,
+    // list-friendly depth of the ONE person identity (owner order 2026-10-01:
+    // one reusable professional-identity layer travelling PROFILE → APPLICATION
+    // → CANDIDATE → SHORTLIST → TEAM → PROJECT → ASSIGNMENT → CALENDAR, with
+    // different depth by context). Variants candidate-review and team-member.
+    // Presentation only: it takes already-authorized facts from its caller and
+    // shows no score, percentage or stars.
+    id: "components/app/identity/person-identity-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-01",
+    purpose:
+      "Shows ONE person as a professional identity — portrait or monogram, name, main profession, place, availability, a few facts for the context — with deeper layers opened on demand, so an employer reading an application and a manager reading the team see the same identity at different depth.",
+    whyNotChat:
+      "Scanning and comparing several people side by side (who, where, when free, on which project) is a visual act; chat can name one person's facts but cannot lay a team or a candidate list side by side. The assistant reaches the same facts through the existing capabilities; the card is their visual form, not a second source.",
+    whyNotExistingComponent:
+      "IdentityStage is the full-width portrait stage of one person's own card (hero scale, readiness ring, fact strip) and WorkerPlayerCard is bound to the worker's own data; neither is a list-row depth with disclosure layers and a caller-owned action slot. This component reuses their tokens (monogram source, fallback surface, hairline) and extends the identity variant registry (candidate-review, team-member) instead of forking it.",
+    owner:
+      "Product owner — owner order 2026-10-01 (one reusable professional-identity presentation layer)",
+    ownsAction: null,
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "Same element. It presents the existing worker/person and creates no new world element.",
+    chatIntegration:
+      "The chat opens the same candidate and team surfaces; the card only presents what those surfaces already read and authorize. Every action on it is the caller's existing control.",
+    avatarEffect:
+      "None: presentation of the existing avatar identity (monogram or consented photo).",
+    mapEffect:
+      "None. Country and availability are the person's own stated facts; nothing here renders on the market map.",
+    journalRelation:
+      "None written. Evidence tiers (self-declared, journal-grounded, manager-confirmed) are shown by the caller exactly as before, never merged and never scored.",
+
+    pillar: "avatar",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "Recognise WHO a person is at a glance in a list (candidate, team member), then open only the depth the decision needs.",
+      graphEdge:
+        "PERSON ↔ WORK ↔ TIME ↔ PLACE (nodes PEOPLE, REAL WORK, TIME, OBJECT): the person-as-presence edge in every list view of the graph.",
+      whyReuseDamages:
+        "Reusing the full identity stage in a list would stack a hero portrait and fact strip per row; leaving each list to its own text row (e-mail as the headline, a wall of badges) is what the owner rejected.",
+      evidence: [
+        "docs/design/player-identity-adaptation-plan.md §10 (candidate-review, team-member variants)",
+        "lib/guards/person-identity-card.test.ts (no score, same tokens, native disclosure, anonymity kept)",
+      ],
+      ownerRuling:
+        "Owner order 2026-10-01: ONE reusable professional-identity presentation layer (avatar / visual professional identity) that travels with the person across the product, showing different depth by context.",
+    },
+  },
+  {
+    // ═══════════════════════════════════════════════════════════════════════
+    // /dashboard/hours — where a day of real work becomes a record.
+    //
+    // A site manager, standing on a site, on a phone, records who worked, on
+    // which date, on which object, for how many hours. It writes
+    // `work_hour_allocations` — the canonical row a timesheet was only ever a
+    // snapshot of.
+    //
+    // WHY THIS ONE IS NOT /create-cv. That declaration answers all five
+    // world-state questions "no" because a pre-auth public page has no
+    // workspace to be inside. This surface IS inside the authenticated
+    // workspace, so three of the five are honestly "yes" and only three
+    // findings remain. They are recorded as they are, not softened: the point
+    // of A-06 is that a false "yes" here would be worse than a blocked gate.
+    //
+    //   changesWorldState              TRUE  — it writes canonical work facts.
+    //   usableWithoutLeavingWorkspace  TRUE  — a /dashboard route; the person
+    //                                          never leaves the workspace.
+    //   reflectedOnMap                 false — hours draw nothing on the World
+    //                                          Map today. Recorded as false
+    //                                          rather than dressed up.
+    //   aiControlled                   false — structured entry, deliberately.
+    //                                          Natural-language hours entry is
+    //                                          a later slice and must not gate
+    //                                          a crew being paid correctly.
+    //   needsNoNewPage                 false — it is a new page.
+    //
+    // The three "false" answers are what the gate reports. Excusing them is an
+    // OWNER decision via `.github/scripts/owner-waivers.mjs`; this train does
+    // not write its own waiver, because a surface that approves itself is the
+    // same defect as an agent that mints its own authorisation.
+    // ═══════════════════════════════════════════════════════════════════════
+    id: "/dashboard/hours",
+    kind: "screen",
+    // A-04 names this case exactly: "a new wizard/stepper or multi-field form
+    // must declare why a conversation cannot do the same job."
+    originAxiom: "A-04",
+    purpose:
+      "The one mobile surface where a manager records a day of real work for a real crew: date, object, worker, hours, and optionally what was done. It writes the canonical per-worker/per-object/per-day allocation that timesheets, monthly totals and export all aggregate from, so the hours a company pays against exist as facts rather than as cells in someone's spreadsheet.",
+    whyNotChat:
+      "A conversation is the wrong instrument for repetitive numeric entry: a manager enters a whole crew across several objects in one sitting, and each allocation is four short values he already knows. Dictating twenty of them and re-reading each confirmation is slower and less accurate than tapping them, on a site, in poor signal. This is not a rejection of natural-language entry — that is a planned later slice — but the pilot must not make a crew's pay depend on parsing quality that has never been measured.",
+    whyNotExistingComponent:
+      "Every existing hours surface READS. `lib/timesheets` aggregates and approves; the timesheet is a snapshot. Nothing in the product WROTE the underlying per-worker/per-object/per-day fact — the rows a timesheet is a snapshot OF did not exist, which is why hours were being kept in a spreadsheet outside the product. This surface adds the missing writer and reuses the existing readers (`listActiveCompanyWorkers`, `getOrgWorkObjects`) rather than asking a second time who works here.",
+    owner:
+      "Product / work-hours foundation — Ramūnas pilot train (2026-08-29), PR #1344",
+    ownsAction: "work_hours.record_allocation",
+
+    // ── PRODUCT_VISION_LOCK_V1: the six answers ─────────────────────────────
+    worldElement: "objects",
+    whyNotExistingElement:
+      "It extends no new element. Hours are a dated fact ABOUT an existing work object and an existing worker; the object is the same `work_objects` row the task picker and the company page already use. What was missing was not an element but a way to attach elapsed work to one.",
+    chatIntegration:
+      "None today, and recorded as none rather than as a plan. The assistant cannot yet write allocations; when it can, it will dispatch into this same action instead of growing a second entry path.",
+    avatarEffect:
+      "None automatically, and that is a deliberate constraint rather than an omission: recorded hours are NOT skill evidence. A worker having been on a site for eight hours says nothing about what they can do, and inventing a competency from it is precisely the fake-verification A-06 forbids. Only an explicit, optional journal entry can carry evidence, and only a human confirms it.",
+    mapEffect:
+      "None. Recorded as `reflectedOnMap: false` rather than described as a map effect it does not have.",
+    journalRelation:
+      "Optional and one-directional: an allocation may reference a `journal_entries` row via `journal_entry_id`, but hours-only entry never creates one. The Work Journal stays the source of proven skills; this surface supplies time, not proof.",
+
+    // ── PRODUCT_UNIVERSE_LOCK_V2: the universe answers ──────────────────────
+    // `objects` is an ELEMENT, and the pillar that owns it is `world_map` —
+    // the four pillars are ai_conversation / avatar / world_map / work_journal.
+    pillar: "world_map",
+    objectType: "construction_site",
+    registeredInObjectModel: true, // EXAMPLE_OBJECT_TYPES includes "construction_site"
+    hasTimeline: true, // `work_date` — allocations are dated state by construction
+    hasHistory: true, // corrections supersede via correction_of / superseded_by
+    addableWithoutMapChange: true, // no map file is touched by this slice
+
+    // ── WORLD_STATE_UX_ARCHITECTURE_V1: the five answers ────────────────────
+    // Three true, two false, honestly. See the header comment.
+    changesWorldState: true,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    // ── UNIFIED_WORLD_MODEL_V1: the entity answers ──────────────────────────
+    usesEntity: true,
+    // No new Entity Type: an allocation is a RELATIONSHIP between a worker and
+    // an already-registered object, carrying a date and a duration.
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    // worker × object × day, with hours. Registered as a predicate, not as a
+    // new architecture.
+    createsNewRelationship: true,
+    // A plain relational fact with named columns — the AI can read, total and
+    // summarise it with no architectural change.
+    aiCanWorkWithIt: true,
+
+    // ── ENTITY_BEHAVIOR_MODEL_V1: the behavior answers ──────────────────────
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: true,
+  },
+
+  // ══ OAUTH CONSENT (owner directive 2026-08-29 §4) ═════════════════════════
+  // The authorization UI the Supabase OAuth 2.1 server DELEGATES to the
+  // product: external clients (the ChatGPT connector, future agents) obtain
+  // the user's own JWT only after the user approves on this screen. It is
+  // infrastructure the OAuth standard requires at a stable URL — not a
+  // workspace feature — so its World-State answers are honestly "no" and are
+  // excused by the scoped owner waiver, not rewritten.
+  {
+    id: "/oauth/consent",
+    kind: "screen",
+    // A-04: multiple valid entry points. This one is the doorway through which
+    // EXTERNAL clients gain a user's delegated access — the user is coerced
+    // into nothing; deny is a first-class button.
+    originAxiom: "A-04",
+    purpose:
+      "The one screen where a signed-in person approves or denies an external OAuth client's request to act as them: it shows the client name, its registered redirect URI and the requested scopes exactly as GoTrue recorded them, then routes the decision through supabase.auth.oauth.approveAuthorization / denyAuthorization on the user's own session.",
+    whyNotChat:
+      "Deliberate security property, not a limitation: granting an external agent standing access to the account is the ONE decision an assistant must never make or be able to make on a person's behalf — if the assistant could drive this screen, a prompt injection could grant itself access. aiControlled: false is the point.",
+    whyNotExistingComponent:
+      "No existing surface renders a pending OAuth authorization: the flow is defined by the OAuth 2.1 spec and Supabase's Authorization Path contract (a fixed URL GoTrue redirects to with an authorization_id), which no dashboard component satisfies.",
+    owner:
+      "Owner directive 2026-08-29 §4 — 'Prepare and perform the minimum configuration required for LabourMarket.ai to act as the OAuth authorization server for MCP/ChatGPT.'",
+    ownsAction: "oauth.consent-decision",
+
+    worldElement: "user_avatar",
+    whyNotExistingElement:
+      "It extends no element — it guards the existing identity. One user, one identity, multiple clients: this screen is where the 'multiple clients' half becomes consented fact.",
+    chatIntegration:
+      "None, by design (see whyNotChat). After approval the external client reaches the SAME canonical capability layer the assistant uses — the integration point is the bearer boundary, not this screen.",
+    avatarEffect:
+      "None directly; an approval records an OAuth grant against the user's identity in GoTrue, visible and revocable, never a profile/avatar change.",
+    mapEffect:
+      "None. An authorization handshake draws nothing on the World Map — recorded as reflectedOnMap: false rather than dressed up.",
+    journalRelation:
+      "None. Consent is not work and never becomes evidence; the journal is untouched.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    hasTimeline: true, // grants are issued/revoked at recorded times (GoTrue)
+    hasHistory: true, // GoTrue records the grant lifecycle
+    addableWithoutMapChange: true,
+
+    // Honestly "no", all five. This is standards-shaped auth infrastructure:
+    // it exists at a fixed URL because RFC 6749/OAuth 2.1 and the Supabase
+    // Authorization Path contract require exactly that, and it must never be
+    // AI-drivable (the security property above).
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: false, // MUST stay false — see whyNotChat
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    // World State cannot and must not control an OAuth consent screen.
+    worldStateCanControlIt: false,
+  },
+
+  // ══ WORK IN NUMBERS — "Mano veikla skaičiais" (A-14, owner decision 0015) ══
+  // The person's DERIVED reading of their recorded work over a period. Not a
+  // journal module (it owns no write, lives on no journal path) and not a
+  // second dashboard: one station of the worker loop the target IA names
+  // (docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md §2), reached from
+  // ŠIANDIEN, the journal's compact card, the chat's answers and the CV.
+  {
+    id: "/dashboard/work-in-numbers",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "Answers, first and above the fold on a phone, which skills take the largest share of the person's recorded work over a chosen window — hours, share, entries, first/last day, contexts, outputs, approved share and trend per skill — then the hours no skill can claim and their provenance, the organization's own ledger beside (never summed), the plausibility checks and the growth kinds with their WHY.",
+    whyNotChat:
+      "The conversation answers one period question at a time (\"Kiek šią savaitę?\", \"Kam skyriau daugiausia laiko?\") from the same reader and links here; a share-bar reading over twelve skills, a period selector and the organization ledger beside are a comparison the person keeps in view while deciding what to deepen or present — an answer that scrolls away cannot carry it. The station owns no action; every write stays in the journal.",
+    whyNotExistingComponent:
+      "The journal page's job is record → see it saved → correct → submit (one entry, one day, one context, a write path). Composing the period reading inside it produced a 1,662-line single scroll, the owner's production defects A/B/K on #1689, a day-scoped page carrying period-scoped server reads (§T) and more than three first-level blocks on a phone. The organization pages already compose the same reading WITHOUT the recording surface; mobile exposes it as its own capability.",
+    owner: "Product architecture (DI) — owner decision 0015 (2026-09-13)",
+    // A pure read surface: the period selector is a GET; acknowledging a
+    // plausibility check reuses the journal's own action (its home stays
+    // the journal).
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the TIME → CAPABILITY edge of the §14 graph: the journal is the REAL WORK fact; this is the derived reading over it (SEP-1 DERIVED, never FACT). No new element — the reading already exists in the model (`WorkIntelligence`); what did not exist was its own destination.",
+    chatIntegration:
+      "The assistant answers the same questions from the same reader (`loadOwnWorkIntelligence`, capability `journal.work_intelligence.get`) and links here; the station dispatches nothing and holds no conversation state.",
+    avatarEffect:
+      "None by itself. It SHOWS the avatar's practice (share per skill, approved share, trend) and feeds the Living CV's skill presentation and professional facts through the same reader; it changes no skill row.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the contexts it counts are the engagement contexts the map already knows.",
+    journalRelation:
+      "Downstream and read-only: every figure is a sum of journal lines through the ONE canonical work-time rule; every skill row links back to the entries that back it; the journal page keeps a one-card summary with a link here.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    hasTimeline: true, // periods and months are dated state of the reading
+    hasHistory: true, // all-time reading over dated entries
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct station needs its own page — and
+    // excused ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true, // the chat opens and answers it from the same model
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "Understand what dominates my recorded work, over which window, how it moves, and what to deepen or present — a period decision, not a recording task.",
+      graphEdge:
+        "TIME → CAPABILITY (§14 nodes TIME and CAPACITY; value chain REAL WORK → EVIDENCE → CAPABILITY → CAPACITY). The journal serves the REAL WORK edge; no existing surface serves this edge for the person.",
+      whyReuseDamages:
+        "Reuse put a period-scoped analytical reading inside a day-scoped recording page: a 1,662-line scroll, owner defects A/B/K on the #1689 production walk, §T server-scoping conflict (period vs day), >3 first-level blocks on a phone, and no destination the chat, the CV or ŠIANDIEN could link to.",
+      evidence: [
+        "docs/PRODUCT_CONSTITUTION.md §14: TIME and CAPACITY are graph nodes distinct from REAL WORK; product-graph.ts node `time`",
+        "docs/design/final/00-GALUTINE-DIZAINO-SISTEMA.md: Time is its own lens (kas buvo / yra / bus); §P fact / derived / forecast language",
+        "capability-register.ts EVID-7: the reading's surfaces already span journal, CV, /dashboard/people/[workerId] and /dashboard/reports — read apart from the recorder",
+        "lib/capabilities/registry.ts: mobile capability journal.work_intelligence.get beside journal.list",
+        "docs/audits/labourmarket-full-product-audit-2026-09-12.md §21: defects A, B, K; docs/design/final/01-WORKER-MOBILE-IA-2026-09-13.md §4 journal page REDESIGN → split",
+      ],
+      ownerRuling:
+        "Owner decision 0015 (2026-09-13), docs/DECISIONS/0015-distinct-user-job-surfaces.md: 'I authorize a constitution change only if case B is demonstrated by evidence' — case B demonstrated above.",
+    },
+  },
+
+  // ORGANIZATION DOOR (people) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/people",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The organization's PEOPLE door: who works with us (roster, invitations, recorded work), teams/brigades, bringing people in (invite, roster import and its readback), readiness, membership and employment lifecycle — every section the company hub carried for this domain, now behind one door.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the PERSON ↔ ORGANIZATION (§14 nodes PERSON, ORGANIZATION, TEAM; edge people → assignment → capacity). No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The organization's PEOPLE door — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "PERSON ↔ ORGANIZATION (§14 nodes PERSON, ORGANIZATION, TEAM; edge people → assignment → capacity).",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION PERSON CARD — the historical person BEFORE claim.
+  // Organization-provided history exists before any account does; this is the
+  // address where the supplying organization sees one roster person with all of
+  // their recorded work, hours, skills the history points to, and claim status.
+  // It composes the EXISTING evidence readers and PersonImportedHistory; it
+  // adds no data model, no write path and no gate of any kind.
+  {
+    id: "/dashboard/company/people/[personId]",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "One roster person of the supplying organization as a historical Person card: who they are to this organization, ALL of the history the organization supplied (including records tied to no known project), the stated hours, the skills the history points to, and whether an account has claimed them yet. It exists whether or not the person has claimed an account.",
+    whyNotChat:
+      "The conversation can answer a single question about a person, but the card is where a manager stands while reading one person's whole supplied history across projects and years, with the roster one tap away; the chat links here and reads the same readers.",
+    whyNotExistingComponent:
+      "The worker page /dashboard/people/[workerId] is keyed on a linked account and renders nothing for an unclaimed person (41 of 43 roster people in production). The roster row is a list item, not a history. The history rendering is REUSED (PersonImportedHistory), not duplicated; only the destination keyed on the roster person was missing.",
+    owner: "Product architecture (DI) — owner decision 0020 (2026-10-07)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the PERSON ↔ ORGANIZATION edge (§14 nodes PERSON, EVIDENCE, ORGANIZATION). No new element; it is the destination for evidence the model already holds.",
+    chatIntegration:
+      "Chat readbacks about a roster person link here; the card reads through the same evidence readers the chat answers from, and it adds no action the chat cannot already dispatch.",
+    avatarEffect:
+      "None — the card is read-only; claim later links an account and hands the PERSON control through the existing roster-claim flow.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented.",
+    journalRelation:
+      "Read-only relation: organization-provided history is shown as such (not self-declared, not independently verified), and every write stays in the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "person",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "See, as the supplying organization, one roster person's whole supplied history before or without any account claim.",
+      graphEdge:
+        "PERSON ↔ EVIDENCE ↔ ORGANIZATION (§14 nodes PERSON, EVIDENCE, ORGANIZATION). The linked-worker page serves the claimed edge; no surface served the unclaimed person.",
+      whyReuseDamages:
+        "Reuse of /dashboard/people/[workerId] would require an account that does not exist yet (organization_people.link_state unlinked), hiding the organization's own history from it until a claim — the exact inversion the owner ruled out.",
+      evidence: [
+        "production read 2026-10-07: organization_evidence_records 2944 rows, all with organization_person_id; 41 of 43 organization_people unlinked",
+        "migration 20260907114500_organization_evidence_import_v1.sql: manager SELECT branches admit unlinked rows; only the subject branch requires link_state='linked'",
+        "apps/web/components/app/people/person-imported-history.tsx previously required link_state='linked' and rendered nothing for an unclaimed person",
+      ],
+      ownerRuling:
+        "Owner decision 0020 (2026-10-07, docs/DECISIONS/0020-organization-history-exists-before-claim.md): organization-provided historical worker data exists before account claim and must build the historical Person/worker card and company worker history; claim only later links an account.",
+    },
+  },
+
+  // ORGANIZATION DOOR (needs) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/needs",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The organization's DEMAND door: the canonical intake wizard (#demand-intake), the readback of what was already asked for with who is waiting, claimable public intakes, the public demand pool for agencies/institutions, and the door onward to matching (/dashboard/company/scouting).",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "It extends an existing element on the DEMAND (§14 node DEMAND; edge need → supply → match). Scouting serves MATCH; no existing surface served the intake + readback without the hub. No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The organization's DEMAND door — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "DEMAND (§14 node DEMAND; edge need → supply → match). Scouting serves MATCH; no existing surface served the intake + readback without the hub.",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (partners) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/partners",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The relationship door: a staffing agency's operating mode, client records and the two-subject agency→client bridge; for any other organization the client side of that bridge (agencies that invited it, requests it shared). Exists only when the relationship exists.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the EMPLOYER / CLIENT ↔ AGENCY (§14 nodes ORGANIZATION, AGENCY, DEMAND; the supply bridge edge). No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The relationship door — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "EMPLOYER / CLIENT ↔ AGENCY (§14 nodes ORGANIZATION, AGENCY, DEMAND; the supply bridge edge).",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (education) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/education",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The education institution's door: learners' participation state (least-privilege), programmes → cohorts → learners with live public demand per direction, and the public demand pool. Exists only for the `training_provider` capability.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the PROGRAMME ↔ PERSON ↔ DEMAND (§14 nodes INSTITUTION, EDUCATION, DEMAND; journey J-INSTITUTION-OUTCOME). No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The education institution's door — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "PROGRAMME ↔ PERSON ↔ DEMAND (§14 nodes INSTITUTION, EDUCATION, DEMAND; journey J-INSTITUTION-OUTCOME).",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (history) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/history",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The canonical HISTORICAL IMPORT door (journey J-IMPORT-HISTORY): upload → inspect → detect structure → identify people / sites / dates / hours / work → match what exists → PREPARE what is missing → detect duplicates and contradictions → one preview → the human decides only real ambiguities → explicit commit → records with provenance. The chat's 'noriu įkelti istorinius duomenis' lands here.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends an existing element on the EVIDENCE (§14 nodes EVIDENCE, REAL WORK, TIME; edge source → evidence → capability). The hours surface serves TODAY'S allocation; no surface served the reconstruction of history as a door. No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "work_journal",
+    objectType: "project",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The canonical HISTORICAL IMPORT door (journey J-IMPORT-HISTORY) — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "EVIDENCE (§14 nodes EVIDENCE, REAL WORK, TIME; edge source → evidence → capability). The hours surface serves TODAY'S allocation; no surface served the reconstruction of history as a door.",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // ORGANIZATION DOOR (settings) — owner IA correction 2026-09-16
+  // (docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §2). One of the
+  // doors the 1,709-line company hub was split into. It composes EXISTING
+  // sections with their EXISTING reads and actions; it introduces no data
+  // model, no write path and no second dashboard — it is the address of a
+  // domain the hub used to stack under six others.
+  {
+    id: "/dashboard/company/settings",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The organization's own record: identity and verification status, what it does (capabilities), public business profile, tier-1 expectations, typed help requests to the operator, the person's profile link — administration kept out of the operating screens.",
+    whyNotChat:
+      "The conversation opens and PREPARES this context (its intents and chips link here) and answers single questions from the same readers; the door is where the person stands while working through several objects of one domain, with the organization's other doors one tap away. The chat stays the universal front door; a door is where a known destination is reached directly (constitution §4).",
+    whyNotExistingComponent:
+      "The sections are reused verbatim. What did not exist was a destination: they lived only inside `/dashboard/company`, a single scroll of ~25 sections across six domains that the owner's human walk rejected as a capability dump (constitution §7). Splitting the hub into doors is the owner-directed correction; adding another anchor to the same page would have reproduced the defect.",
+    owner: "Product architecture (DI) — owner directive 2026-09-16 (global UX / IA correction)",
+    ownsAction: null,
+
+    worldElement: "organizations",
+    whyNotExistingElement:
+      "It extends an existing element on the ORGANIZATION (§14 node ORGANIZATION; identity ≠ role, SEP-5). No new element; the door is a destination for what the model already holds.",
+    chatIntegration:
+      "The intent router and the command registry resolve the matching intents to this route (anchors preserved); chat readbacks link here; the same server actions the chat dispatches are the ones the door's forms call.",
+    avatarEffect:
+      "None by itself — the door renders the organization's view of people, work, demand or evidence through the readers the avatar already feeds; it changes no person state directly.",
+    mapEffect:
+      "None — recorded as `reflectedOnMap: false` rather than invented; the objects shown are the ones the map already knows.",
+    journalRelation:
+      "Read-only relation: the door shows organization-side readings of journal-derived work (recorded work, evidence, readiness) through the ONE work-intelligence and evidence readers; every write stays in the journal or the evidence import engine.",
+
+    pillar: "world_map",
+    objectType: "company",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    // A-14: honestly "no" where a distinct door needs its own page — excused
+    // ONLY by the ruled block below, reported as notices by the gate.
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The organization's own record — reach one domain of running the organization directly, without scrolling through the other five.",
+      graphEdge:
+        "ORGANIZATION (§14 node ORGANIZATION; identity ≠ role, SEP-5).",
+      whyReuseDamages:
+        "Reuse (one more anchor on /dashboard/company) is exactly the rejected state: a 1,709-line page with ~25 stacked sections, in-page anchors pretending to be navigation, and a chat intent for historical import that dead-ended on a lower-level hours form (owner human walk 2026-09-16).",
+      evidence: [
+        "docs/design/final/03-PRODUCT-IA-ANTI-SLOP-2026-09-16.md §1.1 (inventory), §2 (doors), §3 (systemic corrections)",
+        "docs/design/final/00-FROZEN-DESIGN-CONTRACT.md §2.2 WORLD → FIELD → CONTEXT/OBJECT; §1.5 no destructive change to existing surfaces",
+        "lib/product-gate/journey-register.ts J-COMPANY-EXECUTION and J-IMPORT-HISTORY: the doors are the stations of these journeys",
+        "apps/web/lib/company/organization-doors.ts: the one source of which doors an organization has",
+      ],
+      ownerRuling:
+        "Owner directive 2026-09-16 (OWNER PRODUCT UX / IA CORRECTION + GLOBAL ANTI-AI-SLOP PRODUCT CONSTITUTION §3, §7): 'Create a coherent navigation model … Use icons/cards/tabs/navigation doors where appropriate instead of vertically stacking every capability on one page.'",
+    },
+  },
+
+  // JOURNAL PHOTO VIEWER — owner request 2026-09-30 ("paspaudus Journal Day
+  // Object nuotraukos miniatiūrą, nuotrauka turi atsidaryti didesnei
+  // peržiūrai"). An image zoom over the day's own already-signed private
+  // photos. Recorded as honest NO answers below — NOT dressed up as a
+  // workspace surface; the exception arrives as a scoped owner waiver.
+  {
+    id: "components/app/journal/journal-photo-viewer.tsx",
+    kind: "popup",
+    originAxiom: "A-09",
+    purpose:
+      "Shows one of the person's OWN journal-day photos larger (with previous/next and an explicit close), so a thumbnail of real work evidence can actually be looked at.",
+    whyNotChat:
+      "A photo is looked at, not asked about. The conversation cannot render a zoomable image of a private journal photo at the moment a person taps its thumbnail on the day view; the thumbnail is already the entry point and the viewer is its only sensible continuation.",
+    whyNotExistingComponent:
+      "No shared image viewer/lightbox exists in components/ (searched: lightbox, image-viewer, photo-viewer, ImageDialog; the only shared dialog, MobileSheet, is a phone-only bottom sheet). The viewer reuses the shared focus contract (useDialogFocus) rather than inventing its own.",
+    owner: "Product owner — Journal photo viewer request 2026-09-30",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the EVIDENCE edge: the day object already lists the day's photos; this only enlarges them. No new element.",
+    chatIntegration:
+      "None, recorded as a NO. The viewer is opened by tapping a thumbnail and is not an action the assistant performs.",
+    avatarEffect:
+      "None. It reads nothing new and writes nothing; it cannot change a person's profile, skills or history.",
+    mapEffect:
+      "None — recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Read-only presentation of journal_entry_photos rows the day object already loaded and signed (private bucket, one hour). No upload, no new table, no Journal model change.",
+
+    pillar: "avatar",
+    objectType: "avatar",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: false,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+
+  // EVID-2 slice 2 (PR #2143): the counterparty's own review surface. Declared
+  // here, in the same PR, as the gate demands; the A-14 block records why it is
+  // not the employer inbox.
+  {
+    id: "/dashboard/inbox/counterparty",
+    kind: "screen",
+    originAxiom: "A-14",
+    purpose:
+      "The client review queue: the representative of the party a worker submitted work to (client, customer, contracting party, project owner) sees the work, its hours, figures and photos, and decides - accept (final), request a correction, or dispute - with a note.",
+    whyNotChat:
+      "A decision about specific submitted work needs the work itself in front of the person - text, hours, photos, history - and an explicit, auditable act. The conversation can open this context (the command finder resolves 'client review' here) but cannot replace looking at the evidence and pressing a deliberate, final Accept.",
+    whyNotExistingComponent:
+      "The manager inbox is an employer surface (reviewer authority inside the worker's own organization, skill verification) and its set is employer-only; a client has neither. The queue reuses the shared EmptyState and Button primitives and the one review RPC; only the destination is new.",
+    owner: "Product owner - decision 0018 (counterparty review authority)",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the COUNTERPARTY edge: the entry, its evidence and its append-only decision rows already exist; this lets the party the work was submitted to see and decide them. No new element, no new table for the decision.",
+    chatIntegration:
+      "The command registry resolves 'client review / accept work' to this route; the decision runs through the same review_journal_entry RPC the employer path uses, so a capability can dispatch it later without a new write path.",
+    avatarEffect:
+      "None directly. An acceptance is read back separately as 'accepted by the client' (CLIENT_ACCEPTED) on the worker's journal, CV and card through the ONE provenance derivation; it is never an employer confirmation, never a skill verification and never a payment record.",
+    mapEffect:
+      "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Reads the submitted entry through list_counterparty_review_queue_v1 and counterparty_review_entry_detail_v1 (the explicit submission is the grant; journal_entries RLS is not widened) and writes only through review_journal_entry, which appends to journal_entry_confirmations with basis 'counterparty' and provenance. History is append-only.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The client / customer / contracting party of a worker's work decides the work that worker explicitly submitted to them: accept it, ask for a correction, or dispute it, with a note.",
+      graphEdge:
+        "PERSON - WORK - COUNTERPARTY (the transaction / project relationship, section 14 nodes WORK_JOURNAL, EVIDENCE and the counterparty edge); not the employer REVIEW edge the manager inbox serves.",
+      whyReuseDamages:
+        "The manager inbox is an EMPLOYER surface: its decision verifies skills and requires reviewer authority inside the worker's own organization. A client is not the worker's employer; folding client decisions into that inbox would either let an acceptance read as an employer confirmation (the defect EVID-2 exists to remove) or hand a client skill-verification buttons the database refuses. The two claims are different proof concepts (CLIENT_ACCEPTED vs EMPLOYER_CONFIRMED) and must stay on different surfaces.",
+      evidence: [
+        "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql: the counterparty is a party of the work relationship; list_counterparty_review_queue_v1 is its only read door",
+        "apps/web/lib/journal/confirmation-origin.ts: CLIENT_ACCEPTED and EMPLOYER_CONFIRMED are distinct proof concepts",
+        "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql: reviewable_journal_entry_ids() is employer-only, so the employer inbox cannot carry client decisions",
+        "scripts/db-proof/journal-counterparty-link-ui.sh and journal-counterparty-authority.sh: scratch-PG proof that the subject cannot be their own counterparty",
+      ],
+      ownerRuling:
+        "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
+    },
+  },
+
+  // EVID-2 slice 2 (PR #2143): the counterparty's own review surface. Declared
+  // here, in the same PR, as the gate demands; the A-14 block records why it is
+  // not the employer inbox.
+  {
+    id: "components/app/counterparty-review-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-14",
+    purpose:
+      "One submitted entry in the client review queue: the work, hours, figures, photos and history, and the decision form (accept / request correction / dispute with a note).",
+    whyNotChat:
+      "The card is the evidence the decision is about. A decision is made looking at it; a chat message cannot present a photo grid and an append-only history next to a final, explicit Accept control.",
+    whyNotExistingComponent:
+      "The employer inbox card (journal-inbox-entry) carries skill verification and employer-only copy; reusing it would show a client skill-verification controls the database refuses and would label the result with employer wording. This card shares the same primitives and a different, narrower action set.",
+    owner: "Product owner - decision 0018 (counterparty review authority)",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "It extends the Work Journal element on the COUNTERPARTY edge: the entry, its evidence and its append-only decision rows already exist; this lets the party the work was submitted to see and decide them. No new element, no new table for the decision.",
+    chatIntegration:
+      "It is rendered only by the queue page the command registry resolves; its action calls the shared review RPC through one server action that re-derives the caller.",
+    avatarEffect:
+      "None directly. An acceptance is read back separately as 'accepted by the client' (CLIENT_ACCEPTED) on the worker's journal, CV and card through the ONE provenance derivation; it is never an employer confirmation, never a skill verification and never a payment record.",
+    mapEffect:
+      "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Displays one entry's journal text, metrics and photo metadata read through the counterparty's narrow door, and appends one decision row via review_journal_entry; the worker sees it on the entry and in the CV as a client acceptance.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "The client / customer / contracting party of a worker's work decides the work that worker explicitly submitted to them: accept it, ask for a correction, or dispute it, with a note.",
+      graphEdge:
+        "PERSON - WORK - COUNTERPARTY (the transaction / project relationship, section 14 nodes WORK_JOURNAL, EVIDENCE and the counterparty edge); not the employer REVIEW edge the manager inbox serves.",
+      whyReuseDamages:
+        "The manager inbox is an EMPLOYER surface: its decision verifies skills and requires reviewer authority inside the worker's own organization. A client is not the worker's employer; folding client decisions into that inbox would either let an acceptance read as an employer confirmation (the defect EVID-2 exists to remove) or hand a client skill-verification buttons the database refuses. The two claims are different proof concepts (CLIENT_ACCEPTED vs EMPLOYER_CONFIRMED) and must stay on different surfaces.",
+      evidence: [
+        "supabase/migrations/20261003150500_journal_counterparty_review_authority_v1.sql: the counterparty is a party of the work relationship; list_counterparty_review_queue_v1 is its only read door",
+        "apps/web/lib/journal/confirmation-origin.ts: CLIENT_ACCEPTED and EMPLOYER_CONFIRMED are distinct proof concepts",
+        "supabase/migrations/20261003150550_counterparty_link_assignment_kinds_review_doors_v1.sql: reviewable_journal_entry_ids() is employer-only, so the employer inbox cannot carry client decisions",
+        "scripts/db-proof/journal-counterparty-link-ui.sh and journal-counterparty-authority.sh: scratch-PG proof that the subject cannot be their own counterparty",
+      ],
+      ownerRuling:
+        "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
+    },
+  },
+
+  // OWNER APPROVAL 2026-11-03, verbatim (given to the coordinator in its own
+  // session): "Patvirtinu #2828 komponento `premium-action-card` registravimą
+  // kaip atskiro veiksmų pasirinkimo paviršiaus pagal A-09 taisyklę. Tai nėra
+  // leidimas kurti papildomų dubliuojančių kortelių sistemų."
+  {
+    id: "components/ui/premium-action-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-09",
+    purpose:
+      "The one action-choice tile: on a page where a person chooses what to do next (projects, bookings, service requests) each tile is a link to a real destination, with one primary action per screen.",
+    whyNotChat:
+      "Choosing among a page's next steps is a glance at a few labelled doors; a chat reply cannot hold a stable, tappable set of destinations with one marked primary and the current one marked, and the conversation remains available beside it for anything typed.",
+    whyNotExistingComponent:
+      "It REPLACES the audit-PR8 ActionCard (deleted in #2828; bookings and service-requests moved onto this tile's list layout), so there is exactly one action-choice primitive. It never replaces PersonIdentityCard, the Player Card, the vacancy card or the capability card — those present an entity's state, this only chooses an action — and the guard premium-action-card.test.ts forbids any second ActionCard / ActionTile / ActionDeck export.",
+    owner: "Product owner - design direction A (2026-11-03), owner approval of #2828 the same day",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "No new world element: every tile links to an existing surface (a project, the journal, bookings, service requests) that already owns its action; the tile holds no data and decides nothing.",
+    chatIntegration:
+      "Every destination a tile links to is reachable from the conversation through the command registry / MCP capabilities; the tile is a shortcut to the same doors, not a separate path.",
+    avatarEffect: "None - recorded honestly; a navigation choice changes no state of the person.",
+    mapEffect: "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Indirect: some tiles lead to the Work Journal or its project context; the tile itself reads and writes nothing.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "A person on a work page (their projects, bookings or service requests) picks the next thing to do from a small set of labelled destinations, with the one main action made obvious.",
+      graphEdge:
+        "PERSON - next ACTION on an existing node (project, journal, booking, service request); a presentation of doors the graph already has, not a new edge and not an entity view.",
+      whyReuseDamages:
+        "Reusing an entity card (identity, Player Card, vacancy, capability) for navigation would make a door look like a record and blur 'this is a person / job' with 'go here'; keeping two action-card families (the old ActionCard beside this tile) would give the same job two looks, which the owner's ruling forbids.",
+      evidence: [
+        "apps/web/components/ui/premium-action-card.tsx: link-only tile, one emphasis=\"primary\" per screen, aria-current for the current place, 44 px targets, no motion under prefers-reduced-motion",
+        "apps/web/lib/guards/premium-action-card.test.ts: no other component may export an ActionCard / ActionTile / ActionDeck (the audit-PR8 ActionCard is deleted, no exception)",
+        "#2828 comments 6604167149 and 6609654286: current vs proposed at 390 and 1440 px, light and dark, tilt removed (hover is a 1 px lift), bookings and service-requests on the list layout",
+      ],
+      ownerRuling:
+        "Owner approval 2026-11-03 (coordinator session): register `premium-action-card` as a distinct action-choice surface under A-09; explicitly not a licence for additional duplicate card systems; design direction A, one primary action per screen, no 3D tilt, accessibility kept.",
+    },
+  },
+
+] as const;
+
+/**
+ * BASELINE — surfaces that existed before the gate. Recorded as PATHS only:
+ * a grandfathered surface is not a justified one, it is an un-audited one.
+ * The gate ignores these; the audit document lists which of them already
+ * conflict with an axiom and at what priority.
+ *
+ * Generated from `apps/web/app/[locale]/**\/page.tsx` on 2026-07-28.
+ * The COUNT is pinned by the guard, so the baseline cannot grow silently.
+ */
+export const BASELINE_SCREEN_COUNT = 118;
+export const BASELINE_DASHBOARD_SCREEN_COUNT = 79;
+export const BASELINE_DATE = "2026-07-28";
+
+/**
+ * The routes that behave as a PRIMARY surface today. Recorded because A-01
+ * (chat-first) is about how many of these exist, and the honest answer today
+ * is "more than one" — see the audit.
+ */
+export const BASELINE_PRIMARY_SURFACES: readonly string[] = [
+  "/dashboard", // the canonical chat-first root (PR #864)
+  // `/dashboard/advanced` was the documented module escape hatch — DELETED
+  // by W3 Package 4 (the second dashboard is gone; chat-first is the one root).
+  "/dashboard/visual-os", // NOT in any registry — audit finding PC-01
+  "/dashboard/start", // activity setup hub — audit finding PC-04
+] as const;
+
+export function surface(id: string): SurfaceDeclaration | null {
+  return PRODUCT_SURFACES.find((s) => s.id === id) ?? null;
+}
+
+export type DeclarationViolation =
+  | "unknown_axiom"
+  | "unknown_pillar"
+  | "not_registered_object_type"
+  | "requires_map_architecture_change"
+  | "not_world_state_driven"
+  | "not_reflected_on_map"
+  | "not_ai_controlled"
+  | "requires_leaving_workspace"
+  | "requires_new_page"
+  | "unknown_world_element"
+  | "not_entity_based"
+  | "new_base_entity"
+  | "registration_not_enough"
+  | "map_does_not_support_type"
+  | "ai_cannot_work_with_entity"
+  | "new_entity_type_instead_of_behavior"
+  | "behavior_not_enough"
+  | "relationship_not_enough"
+  | "ai_needs_architecture_change"
+  | "map_cannot_render_it"
+  | "world_state_cannot_control_it"
+  | "special_case_for_entity_type"
+  | "unanswered_vision_question"
+  | "empty_purpose"
+  | "empty_why_not_chat"
+  | "empty_why_not_existing_component"
+  | "empty_owner"
+  | "duplicate_id"
+  | "waiver_not_approved"
+  | "waiver_covers_unwaivable_field"
+  | "distinct_surface_unruled"
+  | "waiver_expired"
+  | "duplicate_action";
+
+export interface DeclarationProblem {
+  readonly id: string;
+  readonly code: DeclarationViolation;
+  readonly detail: string;
+}
+
+/**
+ * Validate the registry itself. A declaration that answers "why not chat?"
+ * with a blank is not a declaration — it is paperwork.
+ */
+export function validateDeclarations(
+  declarations: readonly SurfaceDeclaration[],
+  knownAxiomIds: readonly string[],
+  knownWorldElementIds: readonly string[] = [],
+): readonly DeclarationProblem[] {
+  const problems: DeclarationProblem[] = [];
+  const seenIds = new Set<string>();
+  const actionOwners = new Map<string, string>();
+
+  for (const d of declarations) {
+    if (seenIds.has(d.id)) {
+      problems.push({ id: d.id, code: "duplicate_id", detail: "declared twice" });
+    }
+    seenIds.add(d.id);
+
+    if (!knownAxiomIds.includes(d.originAxiom)) {
+      problems.push({
+        id: d.id,
+        code: "unknown_axiom",
+        detail: `origin axiom ${d.originAxiom} is not in the Product Constitution`,
+      });
+    }
+    if (d.purpose.trim().length < 10) {
+      problems.push({ id: d.id, code: "empty_purpose", detail: "purpose is not stated" });
+    }
+    if (d.whyNotChat.trim().length < 10) {
+      problems.push({
+        id: d.id,
+        code: "empty_why_not_chat",
+        detail: "why a conversation cannot do this is not answered",
+      });
+    }
+    if (d.whyNotExistingComponent.trim().length < 10) {
+      problems.push({
+        id: d.id,
+        code: "empty_why_not_existing_component",
+        detail: "why an existing component cannot carry this is not answered",
+      });
+    }
+    if (d.owner.trim().length < 2) {
+      problems.push({ id: d.id, code: "empty_owner", detail: "no accountable owner" });
+    }
+    // The six mandatory vision answers. A blank is not an answer.
+    if (!knownWorldElementIds.includes(d.worldElement)) {
+      problems.push({
+        id: d.id,
+        code: "unknown_world_element",
+        detail: `"${d.worldElement}" is not one of the twelve world elements`,
+      });
+    }
+    for (const [field, value] of [
+      ["whyNotExistingElement", d.whyNotExistingElement],
+      ["chatIntegration", d.chatIntegration],
+      ["avatarEffect", d.avatarEffect],
+      ["mapEffect", d.mapEffect],
+      ["journalRelation", d.journalRelation],
+    ] as const) {
+      if (value.trim().length < 10) {
+        problems.push({
+          id: d.id,
+          code: "unanswered_vision_question",
+          detail: `${field} is unanswered — PRODUCT_VISION_LOCK_V1 requires all six answers`,
+        });
+      }
+    }
+
+    // The nine universe answers. A blocking "no" stops the PR (owner rule).
+    for (const problem of validateUniverseAnswers(d.id, d as UniverseAnswers)) {
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.detail,
+      });
+    }
+
+    // The entity answers. registrationIsEnough is the growth mechanism.
+    for (const problem of validateEntityAnswers(d.id, d as EntityAnswers)) {
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.detail,
+      });
+    }
+
+    // The five world-state answers. Any "no" breaks the vision lock.
+    // A-14 (decision 0015): a DISTINCT user job may honestly answer the
+    // readiness questions "no" — only with a complete, owner-ruled block. An
+    // incomplete block is itself a violation; a complete one turns the
+    // excused codes into notices (the gate prints them), never silence.
+    const a14Present = d.distinctSurface !== undefined;
+    const a14Ruled = distinctSurfaceIsRuled(d.distinctSurface);
+    if (a14Present && !a14Ruled) {
+      problems.push({
+        id: d.id,
+        code: "distinct_surface_unruled",
+        detail:
+          "distinctSurface must state userJob, graphEdge, whyReuseDamages, at least one evidence item and the owner ruling (A-14, decision 0015)",
+      });
+    }
+    const excusedByA14 = (code: string) =>
+      a14Ruled && (A14_EXCUSED_CODES as readonly string[]).includes(code);
+
+    for (const problem of validateWorldStateAnswers(d.id, d as WorldStateAnswers)) {
+      if (excusedByA14(problem.code)) continue;
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.detail,
+      });
+    }
+
+    // The six behavior answers. The last one escalates to REDESIGN.
+    for (const problem of validateBehaviorAnswers(d.id, d as BehaviorAnswers)) {
+      if (excusedByA14(problem.code)) continue;
+      problems.push({
+        id: problem.id,
+        code: problem.code as DeclarationViolation,
+        detail: problem.redesignRequired
+          ? `${problem.detail} — REDESIGN REQUIRED`
+          : problem.detail,
+      });
+    }
+
+    if (d.ownsAction) {
+      const existing = actionOwners.get(d.ownsAction);
+      if (existing) {
+        problems.push({
+          id: d.id,
+          code: "duplicate_action",
+          detail: `action "${d.ownsAction}" is already owned by ${existing} (A-08: one function, one home)`,
+        });
+      } else {
+        actionOwners.set(d.ownsAction, d.id);
+      }
+    }
+  }
+  return problems;
+}

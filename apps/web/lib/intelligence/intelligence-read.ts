@@ -1,0 +1,513 @@
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { getWorkerProfessionRows } from "@/lib/data/worker-core";
+import {
+  buildSalaryIntelligenceView,
+  compareSalaryToBenchmark,
+  toSalaryBenchmark,
+  type SalaryBenchmarkV1,
+  type SalaryComparisonResult,
+  type SalaryIntelligenceView,
+} from "./salary-model";
+import {
+  aggregateSkillDemand,
+  INTELLIGENCE_CALC_VERSION,
+  type DemandAggregateItem,
+  type DemandInputRow,
+} from "./skills-demand-model";
+import {
+  buildInsightQueryLogRecord,
+  type InsightQueryLogRecord,
+} from "./privacy";
+
+/**
+ * Intelligence READ layer — composes existing canonical reads with honest
+ * per-source degradation (style: lib/workforce/workforce.ts):
+ *  - market_rate_averages (applied migration, authenticated-readable) feeds
+ *    the admin-curated benchmark;
+ *  - market_intelligence_observations / market_intelligence_insight_queries
+ *    are GATED draft migrations owned by another agent — every read/write
+ *    catches 42P01/PGRST205 and degrades to "needs-migration" / soft-false;
+ *  - everything stays RLS-scoped (createClient) — no service-role client
+ *    here at all; the best-effort query log insert (persistAiRunAudit-style
+ *    never-throw semantics) runs as the viewer and fails soft.
+ * Nothing here throws for a missing table, and nothing fabricates a number.
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+
+const MISSING_TABLE_CODES = new Set(["42P01", "PGRST205"]);
+
+function isMissingTableCode(code: string | null | undefined): boolean {
+  return MISSING_TABLE_CODES.has(code ?? "");
+}
+
+// ── Curated salary benchmarks (market_rate_averages) ─────────────────────────
+
+export type SalaryBenchmarksResult =
+  | { readonly kind: "ok"; readonly benchmarks: readonly SalaryBenchmarkV1[] }
+  | { readonly kind: "insufficient_data" };
+
+/**
+ * Admin-curated market averages for a profession × country. The table's
+ * `basis` is 'monthly_eur' — it does NOT specify gross/net, so the benchmark
+ * basis is honestly "unknown" (comparisons then surface "basis_unknown"
+ * instead of guessing a tax model). sampleSize is null by design for this
+ * curated source (source_note provenance instead) — the salary model carries
+ * the "curated_no_sample_size" uncertainty for it.
+ */
+export async function getSalaryBenchmarksForRole(input: {
+  professionId: string;
+  country: string;
+}): Promise<SalaryBenchmarksResult> {
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase)
+    .from("market_rate_averages")
+    .select("id, avg_rate_eur, basis, country, entered_at, source_note")
+    .eq("profession_id", input.professionId)
+    .eq("country", input.country)
+    .eq("is_active", true)
+    .order("entered_at", { ascending: false })
+    .limit(10);
+  if (error || !Array.isArray(data) || data.length === 0) {
+    return { kind: "insufficient_data" };
+  }
+  const benchmarks: SalaryBenchmarkV1[] = [];
+  for (const r of data as {
+    id: string;
+    avg_rate_eur: unknown;
+    basis: string;
+    country: string;
+    entered_at: string;
+  }[]) {
+    const built = toSalaryBenchmark({
+      valueEur: Number(r.avg_rate_eur),
+      // 'monthly_eur' carries no gross/net information — honest "unknown".
+      basis: "unknown",
+      statMethod: "mean",
+      geo: { country: r.country, region: null, city: null },
+      sampleSize: null, // curated source — source_note instead of a sample
+      sourceKey: "admin_market_rate_averages",
+      sourceKind: "internal_aggregated",
+      observedAtIso: r.entered_at,
+      originKind: "internal",
+    });
+    if (built.ok) benchmarks.push(built.benchmark);
+  }
+  return benchmarks.length > 0
+    ? { kind: "ok", benchmarks }
+    : { kind: "insufficient_data" };
+}
+
+// ── Observations store (GATED migration — degrade honestly) ─────────────────
+
+export interface ObservationFilter {
+  readonly subjectKind?: string;
+  readonly subjectId?: string;
+  readonly metricKey?: string;
+  readonly country?: string;
+  readonly limit?: number;
+}
+
+export type ObservationsReadResult =
+  | { readonly kind: "ok"; readonly rows: readonly Record<string, unknown>[] }
+  | { readonly kind: "unavailable"; readonly reason: "needs-migration" }
+  | { readonly kind: "error" };
+
+const OBSERVATIONS_READ_LIMIT = 200;
+
+/**
+ * Read market_intelligence_observations — NOT YET APPLIED (gated migration).
+ * Missing table (42P01/PGRST205) → honest "needs-migration". RLS is expected
+ * to expose only privacy_class = 'public_aggregate' rows to viewers.
+ */
+export async function getIntelligenceObservations(
+  filter: ObservationFilter = {},
+): Promise<ObservationsReadResult> {
+  const supabase = await createClient();
+  let q = asAny(supabase)
+    .from("market_intelligence_observations")
+    .select("*")
+    .limit(Math.min(filter.limit ?? OBSERVATIONS_READ_LIMIT, OBSERVATIONS_READ_LIMIT));
+  if (filter.subjectKind) q = q.eq("subject_kind", filter.subjectKind);
+  if (filter.subjectId) q = q.eq("subject_id", filter.subjectId);
+  if (filter.metricKey) q = q.eq("metric_key", filter.metricKey);
+  if (filter.country) q = q.eq("geo_country", filter.country);
+  const { data, error } = await q;
+  if (error) {
+    if (isMissingTableCode(error.code)) {
+      return { kind: "unavailable", reason: "needs-migration" };
+    }
+    return { kind: "error" };
+  }
+  return { kind: "ok", rows: (data ?? []) as Record<string, unknown>[] };
+}
+
+// ── Eurostat context read (public aggregates only) ──────────────────────────
+
+export interface EurostatContextRow {
+  readonly metricKey: string;
+  readonly subjectId: string;
+  readonly geoCountry: string | null;
+  readonly valueNumeric: number;
+  readonly unit: string;
+  readonly windowStart: string;
+  readonly windowEnd: string;
+  readonly capturedAt: string;
+  readonly freshnessStatus: string;
+  readonly contentHash: string;
+  readonly sourceUrl: string | null;
+}
+
+export type EurostatContextReadResult =
+  | { readonly kind: "ok"; readonly rows: readonly EurostatContextRow[] }
+  | { readonly kind: "unavailable"; readonly reason: "needs-migration" }
+  | { readonly kind: "error" };
+
+/** Headline aggregate for the Eurostat context cards — the EU-27 figure. */
+export const EUROSTAT_CONTEXT_SUBJECT = "EU27_2020";
+
+/**
+ * Read the latest live public-aggregate Eurostat observation per metric for
+ * the EU-27 headline geography. RLS exposes only public_aggregate rows to an
+ * authenticated session; we additionally scope to source_key='eurostat',
+ * subject_id=EU27_2020 and valid_to IS NULL (current rows), newest window
+ * first, and keep the first per metric. Missing table (gated migration) →
+ * honest needs-migration; before the import runs this simply returns no rows
+ * and the cards stay honestly unavailable.
+ */
+export async function getEurostatContextObservations(): Promise<EurostatContextReadResult> {
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase)
+    .from("market_intelligence_observations")
+    .select(
+      "metric_key, subject_id, geo_country, value_numeric, unit, window_start, window_end, captured_at, freshness_status, content_hash, source_url, valid_to",
+    )
+    .eq("source_key", "eurostat")
+    .eq("subject_id", EUROSTAT_CONTEXT_SUBJECT)
+    .eq("privacy_class", "public_aggregate")
+    .is("valid_to", null)
+    .order("window_start", { ascending: false })
+    .limit(OBSERVATIONS_READ_LIMIT);
+  if (error) {
+    if (isMissingTableCode(error.code)) {
+      return { kind: "unavailable", reason: "needs-migration" };
+    }
+    return { kind: "error" };
+  }
+  const seen = new Set<string>();
+  const rows: EurostatContextRow[] = [];
+  for (const r of (data ?? []) as Record<string, unknown>[]) {
+    const metricKey = String(r.metric_key ?? "");
+    if (seen.has(metricKey)) continue; // newest window already kept
+    seen.add(metricKey);
+    rows.push({
+      metricKey,
+      subjectId: String(r.subject_id ?? ""),
+      geoCountry: r.geo_country === null ? null : String(r.geo_country),
+      valueNumeric: Number(r.value_numeric),
+      unit: String(r.unit ?? ""),
+      windowStart: String(r.window_start ?? ""),
+      windowEnd: String(r.window_end ?? ""),
+      capturedAt: String(r.captured_at ?? ""),
+      freshnessStatus: String(r.freshness_status ?? "unverified"),
+      contentHash: String(r.content_hash ?? ""),
+      sourceUrl: r.source_url === null ? null : String(r.source_url),
+    });
+  }
+  return { kind: "ok", rows };
+}
+
+// ── Insight query log (best-effort, NEVER throws) ────────────────────────────
+
+function boundedErrorMessage(err: unknown): string {
+  const message =
+    err instanceof Error
+      ? err.message
+      : typeof err === "string"
+        ? err
+        : "unknown error";
+  // Never echo payloads/keys — keep the log short and structural.
+  return message.slice(0, 200);
+}
+
+/**
+ * Best-effort insert into market_intelligence_insight_queries. NEVER throws;
+ * returns true only when the row was persisted. Table missing (gated
+ * migration) → soft false, the insight is unaffected.
+ *
+ * Client choice (deliberate): the RLS-scoped request client, NOT the
+ * service-role admin client. The chat-visibility guard pins the exact
+ * audited inventory of service-role call sites (§17.2 audit doc); adding
+ * a service-role writer is an audited decision, not a drive-by.
+ * The gated migration should therefore ship an authenticated INSERT-only
+ * policy for this append-only log table (viewer inserts their own query
+ * record; no read policy needed for users). Until then this fails soft —
+ * exactly like every other best-effort log path.
+ */
+export async function logInsightQuery(
+  record: InsightQueryLogRecord,
+): Promise<boolean> {
+  try {
+    const supabase = await createClient();
+    const { error } = await asAny(supabase)
+      .from("market_intelligence_insight_queries")
+      .insert({
+        insight_key: record.insightKey.slice(0, 120),
+        observation_ids: [...record.observationIds],
+        computation_version: record.computationVersion.slice(0, 40),
+        viewer_role: record.viewerRole.slice(0, 40),
+        profile_id: record.profileId,
+        params_summary: record.paramsSummary,
+      });
+    if (error) {
+      if (!isMissingTableCode(error.code)) {
+        console.error("[intelligence/read] query log insert failed", {
+          message: (error.message ?? "unknown").slice(0, 200),
+        });
+      }
+      return false;
+    }
+    return true;
+  } catch (err) {
+    console.error("[intelligence/read] query log insert failed", {
+      message: boundedErrorMessage(err),
+    });
+    return false;
+  }
+}
+
+// ── Worker composer ──────────────────────────────────────────────────────────
+
+export type WorkerSalaryIntelligence =
+  | {
+      readonly kind: "ok";
+      readonly benchmark: SalaryBenchmarkV1;
+      readonly comparison: SalaryComparisonResult;
+      readonly view: SalaryIntelligenceView;
+    }
+  | {
+      readonly kind: "insufficient_data";
+      /** Which canonical inputs were missing (honest, never guessed). */
+      readonly missingCodes: readonly string[];
+    }
+  | { readonly kind: "no_viewer" };
+
+/**
+ * The signed-in WORKER'S own salary intelligence: their declared expectation
+ * (workers.salary_min_eur / salary_max_eur — midpoint when both exist) vs
+ * the curated benchmark for their primary profession × country. RLS-scoped
+ * via createClient; no other user's rows are readable here. The worker's
+ * declared range carries no gross/net basis column → basis "unknown"
+ * (comparison degrades honestly to "basis_unknown", never a converted
+ * number). Query is logged best-effort.
+ */
+export async function getWorkerSalaryIntelligence(): Promise<WorkerSalaryIntelligence> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "no_viewer" };
+
+  const { data: worker } = await asAny(supabase)
+    .from("workers")
+    .select("id, salary_min_eur, salary_max_eur, current_location_country")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (!worker?.id) {
+    return { kind: "insufficient_data", missingCodes: ["intelligence.missing.workerProfile"] };
+  }
+
+  const missingCodes: string[] = [];
+  const minEur = typeof worker.salary_min_eur === "number" ? worker.salary_min_eur : null;
+  const maxEur = typeof worker.salary_max_eur === "number" ? worker.salary_max_eur : null;
+  const subjectEur =
+    minEur !== null && maxEur !== null
+      ? (minEur + maxEur) / 2
+      : (minEur ?? maxEur);
+  if (subjectEur === null || !Number.isFinite(subjectEur) || subjectEur <= 0) {
+    missingCodes.push("intelligence.missing.salaryExpectation");
+  }
+  const country: string | null = worker.current_location_country ?? null;
+  if (!country) missingCodes.push("intelligence.missing.country");
+
+  // Primary profession from THE request-cached core read (was one of the 4
+  // identical `is_primary = true` selects per dashboard navigation).
+  const professionRows = await getWorkerProfessionRows();
+  const professionId: string | null =
+    professionRows.find((r) => r.is_primary === true)?.profession_id ?? null;
+  if (!professionId) missingCodes.push("intelligence.missing.primaryProfession");
+
+  if (missingCodes.length > 0) {
+    return { kind: "insufficient_data", missingCodes };
+  }
+
+  const benchmarks = await getSalaryBenchmarksForRole({
+    professionId: professionId as string,
+    country: country as string,
+  });
+  if (benchmarks.kind !== "ok") {
+    return {
+      kind: "insufficient_data",
+      missingCodes: ["intelligence.missing.benchmark"],
+    };
+  }
+  const benchmark = benchmarks.benchmarks[0];
+  const comparison = compareSalaryToBenchmark(
+    subjectEur as number,
+    // No basis column exists for the worker's declared range — honest unknown.
+    "unknown",
+    benchmark,
+  );
+
+  const logBuild = buildInsightQueryLogRecord({
+    insightKey: "worker_salary_vs_benchmark",
+    observationIds: [],
+    computationVersion: INTELLIGENCE_CALC_VERSION,
+    viewerRole: "worker",
+    profileId: user.id,
+    paramsSummary: { country: country as string, comparisonKind: comparison.kind },
+  });
+  if (logBuild.ok) await logInsightQuery(logBuild.record);
+
+  return {
+    kind: "ok",
+    benchmark,
+    comparison,
+    // Curated internal benchmark only — no external source is active today,
+    // and external/internal results are never blended by design.
+    view: buildSalaryIntelligenceView(comparison, null),
+  };
+}
+
+// ── Company composer ─────────────────────────────────────────────────────────
+
+export type CompanyDemandIntelligence =
+  | {
+      readonly kind: "ok";
+      readonly demandAggregates: readonly DemandAggregateItem[];
+      readonly windowStart: string;
+      readonly windowEnd: string;
+    }
+  | { readonly kind: "insufficient_data" }
+  | { readonly kind: "no_viewer" };
+
+const COMPANY_DEMAND_WINDOW_DAYS = 90;
+const COMPANY_DEMAND_READ_LIMIT = 500;
+
+/**
+ * The signed-in COMPANY viewer's demand intelligence over their OWN
+ * `customer_requests`, aggregated with cohort policy over the trailing 90-day
+ * window. Query is logged best-effort.
+ *
+ * W14 audit P0-3. The docblock used to say "RLS keeps other tenants' rows
+ * invisible" and the query carried NO owner predicate — it leaned entirely on
+ * `customer_requests_select`, which is:
+ *
+ *     profile_id = auth.uid() OR public.is_admin()
+ *
+ * That second branch is the whole defect. This function is rendered on COMPANY
+ * surfaces — `/dashboard/company/planning` and `/dashboard/intelligence` — not
+ * on a platform-admin screen. So an operator with an admin role opening a
+ * customer's workforce plan got EVERY tenant's demand for the window,
+ * aggregated and labelled as that company's demand signal, with nothing in the
+ * UI indicating the scope had changed. A shortfall figure reported back to the
+ * customer would have been built from their competitors' data.
+ *
+ * The predicate below makes the read mean what the surface claims. It is
+ * defence in depth, not a replacement for RLS: `auth.uid()` is the server's
+ * own session, never a client-supplied id.
+ *
+ * STAGE B (W8/W14-7, this slice): the predicate used to be `profile_id =
+ * user.id` — deliberately too NARROW, because `customer_requests` had no
+ * organization column. Migration `20260806200000` added exactly that
+ * organization column (applied to prod 2026-08-06, membership-gated via
+ * `has_org_demand_access`), so the read now scopes to the RESOLVED
+ * organization: a legitimate co-manager sees their organization's demand,
+ * and personal (NULL-org) rows stay out of a COMPANY surface. The scope
+ * still comes from the canonical employer-company resolver below —
+ * server-resolved, no caller-supplied id — so the `is_admin()` RLS branch
+ * remains exactly as unreachable as before (W14 P0-3).
+ */
+export async function getCompanyDemandIntelligence(): Promise<CompanyDemandIntelligence> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "no_viewer" };
+
+  // Stage A workspace gate: this is a COMPANY surface read — it requires a
+  // resolved company workspace via the ONE canonical resolver, fail-closed.
+  // Without it there is no company viewer, so `no_viewer` is the honest
+  // state (never rendered as "the company has no demand"). The gate scopes
+  // the SURFACE, the org predicate below scopes the ROWS (W14 P0-3 +
+  // Stage B) — both remain.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "no_viewer" };
+
+  const nowMs = Date.now();
+  const windowStart = new Date(
+    nowMs - COMPANY_DEMAND_WINDOW_DAYS * 24 * 60 * 60 * 1000,
+  ).toISOString();
+  const windowEnd = new Date(nowMs).toISOString();
+
+  const { data, error } = await asAny(supabase)
+    .from("customer_requests")
+    .select("role_or_work_type, country, location, team_size, created_at")
+    // A privacy request to the platform is never a labour need (P0 2026-11-22).
+    .is("payload->>privacy_request_type", null)
+    // W14 P0-3 + W8 Stage B: the org predicate. Without one an admin viewer
+    // cross-aggregated every tenant on a company surface. The id comes from
+    // `requireEmployerCompany()` — the server's own resolution of the active
+    // workspace + membership — never from client input.
+    .eq("organization_id", employer.organizationId)
+    .gte("created_at", windowStart)
+    .limit(COMPANY_DEMAND_READ_LIMIT);
+  if (error || !Array.isArray(data) || data.length === 0) {
+    return { kind: "insufficient_data" };
+  }
+
+  const rows: DemandInputRow[] = (data as {
+    role_or_work_type: string | null;
+    country: string | null;
+    location: string | null;
+    team_size: number | null;
+    created_at: string;
+  }[]).map((r) => ({
+    roleText: r.role_or_work_type,
+    country: r.country,
+    city: r.location,
+    teamSize: r.team_size,
+    createdAtIso: r.created_at,
+  }));
+
+  const demandAggregates = aggregateSkillDemand(rows, {
+    windowStart,
+    windowEnd,
+  });
+  if (demandAggregates.length === 0) {
+    return { kind: "insufficient_data" };
+  }
+
+  const logBuild = buildInsightQueryLogRecord({
+    insightKey: "company_demand_aggregates",
+    observationIds: [],
+    computationVersion: INTELLIGENCE_CALC_VERSION,
+    viewerRole: "company",
+    profileId: user.id,
+    paramsSummary: {
+      windowDays: COMPANY_DEMAND_WINDOW_DAYS,
+      buckets: demandAggregates.length,
+    },
+  });
+  if (logBuild.ok) await logInsightQuery(logBuild.record);
+
+  return { kind: "ok", demandAggregates, windowStart, windowEnd };
+}

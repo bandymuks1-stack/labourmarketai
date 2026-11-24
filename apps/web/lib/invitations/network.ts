@@ -1,0 +1,464 @@
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { createClient } from "@/lib/supabase/server";
+
+/**
+ * "Mano tinklas" read layer (core-network area B) — bounded, RLS-scoped
+ * reads only. The network surface is a SUB-SURFACE of the person/company
+ * context (a dashboard module page), never a second dashboard: it lists
+ * real relationships and real invitations, and links every row to its real
+ * home surface.
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+
+export type SentInvitationRow = {
+  id: string;
+  invitationType: string;
+  /** NULL for an open link (universal network v1) — no addressee, the token
+   *  is the only capability. */
+  invitedEmail: string | null;
+  invitedName: string | null;
+  status: string;
+  deliveryStatus: string;
+  createdAt: string;
+  expiresAt: string;
+  /** Real decision timestamps — the calendar projects lifecycle events at
+   *  the day they actually happened (Timeline Source Expansion v1). */
+  acceptedAt: string | null;
+  declinedAt: string | null;
+  revokedAt: string | null;
+  resendCount: number;
+  organizationId: string | null;
+  projectId: string | null;
+  personalMessage: string | null;
+  /** The role the inviter proposed — free text on most invitations; the
+   *  closed `agency_client` marker on the agency bridge's connection
+   *  invitations (lib/invitations/model, 2026-09-24), which is how the
+   *  partners door pairs a sent invitation with its connection. */
+  proposedRole: string | null;
+  /** The RECIPIENT'S language the invitation was created with (V8 W4-B
+   *  item 6) — a resend keeps it instead of the sender's UI locale. */
+  recipientLocale: string | null;
+  /**
+   * INVITER STATUS (universal network v1) — the smallest useful operational
+   * view, only what is actually evidenced: seats (1 = single-use), opens
+   * counted by the logged-out landing, and the acceptance ledger's own
+   * counts. Absent (zeros / 1) while the owner-gated migration is not
+   * applied. Never a score.
+   */
+  maxUses: number;
+  useCount: number;
+  openCount: number;
+  campaignLabel: string | null;
+  targetRequestId: string | null;
+  acceptedCount: number;
+  declinedCount: number;
+};
+
+export type SentInvitationsRead =
+  | { status: "ok"; items: SentInvitationRow[] }
+  | { status: "needs-migration" }
+  | { status: "error" };
+
+/** The caller's own sent invitations, newest first. "Mine" is pinned with an
+ *  explicit inviter filter rather than inherited from RLS: since the
+ *  org-bound authority migration (20260817121000) the SELECT policy also
+ *  admits org managers to their org's invitations, and this list must stay
+ *  "invitations I sent", not "invitations my colleagues sent". */
+export async function listMySentInvitations(): Promise<SentInvitationsRead> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "error" };
+  const BASE_COLUMNS =
+    "id, invitation_type, invited_email, invited_name, status, delivery_status, created_at, expires_at, accepted_at, declined_at, revoked_at, resend_count, organization_id, project_id, personal_message, proposed_role, locale";
+  const V2_COLUMNS = ", max_uses, use_count, open_count, campaign_label, target_request_id";
+  // The v2 columns (20260917120000, owner-gated) may not exist yet: an
+  // undefined-column error (42703) means "read the v1 shape", never "no
+  // invitations".
+  let { data, error } = await asAny(supabase)
+    .from("invitations")
+    .select(BASE_COLUMNS + V2_COLUMNS)
+    .eq("inviter_profile_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  if (error && error.code === "42703") {
+    ({ data, error } = await asAny(supabase)
+      .from("invitations")
+      .select(BASE_COLUMNS)
+      .eq("inviter_profile_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(100));
+  }
+  if (error) {
+    if (error.code === "42P01") return { status: "needs-migration" };
+    return { status: "error" };
+  }
+  // The acceptance ledger, under its own RLS (the inviter reads the rows of
+  // invitations they sent). Absent table → zeros, honestly typed as such.
+  const ids = ((data ?? []) as { id: string }[]).map((r) => r.id);
+  const counts = new Map<string, { accepted: number; declined: number }>();
+  if (ids.length > 0) {
+    const { data: acc } = await asAny(supabase)
+      .from("invitation_acceptances")
+      .select("invitation_id, decision")
+      .in("invitation_id", ids)
+      .limit(5000);
+    for (const a of (acc ?? []) as { invitation_id: string; decision: string }[]) {
+      const c = counts.get(a.invitation_id) ?? { accepted: 0, declined: 0 };
+      if (a.decision === "accepted") c.accepted += 1;
+      else if (a.decision === "declined") c.declined += 1;
+      counts.set(a.invitation_id, c);
+    }
+  }
+  type Row = {
+    id: string;
+    invitation_type: string;
+    invited_email: string | null;
+    invited_name: string | null;
+    status: string;
+    delivery_status: string;
+    created_at: string;
+    expires_at: string;
+    accepted_at: string | null;
+    declined_at: string | null;
+    revoked_at: string | null;
+    resend_count: number;
+    organization_id: string | null;
+    project_id: string | null;
+    personal_message: string | null;
+    proposed_role: string | null;
+    locale: string | null;
+    max_uses?: number | null;
+    use_count?: number | null;
+    open_count?: number | null;
+    campaign_label?: string | null;
+    target_request_id?: string | null;
+  };
+  return {
+    status: "ok",
+    items: ((data ?? []) as Row[]).map((r) => ({
+      id: r.id,
+      invitationType: r.invitation_type,
+      invitedEmail: r.invited_email,
+      invitedName: r.invited_name,
+      status: computeDisplayStatus(r.status, r.expires_at),
+      deliveryStatus: r.delivery_status,
+      createdAt: r.created_at,
+      expiresAt: r.expires_at,
+      acceptedAt: r.accepted_at,
+      declinedAt: r.declined_at,
+      revokedAt: r.revoked_at,
+      resendCount: r.resend_count,
+      organizationId: r.organization_id,
+      projectId: r.project_id,
+      personalMessage: r.personal_message,
+      proposedRole: r.proposed_role ?? null,
+      recipientLocale: r.locale,
+      maxUses: r.max_uses ?? 1,
+      useCount: r.use_count ?? 0,
+      openCount: r.open_count ?? 0,
+      campaignLabel: r.campaign_label ?? null,
+      targetRequestId: r.target_request_id ?? null,
+      acceptedCount: counts.get(r.id)?.accepted ?? 0,
+      declinedCount: counts.get(r.id)?.declined ?? 0,
+    })),
+  };
+}
+
+/** A pending row past its expiry reads as expired — no stale "pending". */
+function computeDisplayStatus(status: string, expiresAt: string): string {
+  if (status === "pending" && Date.parse(expiresAt) <= Date.now()) {
+    return "expired";
+  }
+  return status;
+}
+
+export type IncomingInvitationRow = {
+  id: string;
+  invitationType: string;
+  personalMessage: string | null;
+  proposedRole: string | null;
+  createdAt: string;
+  expiresAt: string;
+  organizationName: string | null;
+  projectTitle: string | null;
+  inviterName: string | null;
+  /**
+   * WHAT the invited person is being asked to become — `student`, `volunteer`,
+   * `employee`… Null on every invitation created before 20260827200000, which
+   * is exactly when the historical per-type default applies. Rendered through
+   * the localized `relationshipTypes` catalogue, never as the slug.
+   */
+  relationshipSlug: string | null;
+  /** The partner a referral came from (`nonstop`…); null for invitations
+   *  from a person or a company, and until the database read returns it. */
+  externalSourceSlug: string | null;
+};
+
+export type IncomingInvitationsRead =
+  | { status: "ok"; items: IncomingInvitationRow[] }
+  /** The caller's address is not VERIFIED (database `email_unverified`): what is
+   *  addressed to an email is only shown to that mailbox's proven owner. Distinct
+   *  from "none" and from "error" so the UI can offer the progressive proof. */
+  | { status: "email_unverified" }
+  | { status: "needs-migration" }
+  | { status: "error" };
+
+/** Pending invitations addressed to the caller's own VERIFIED email. */
+export async function listInvitationsForMe(): Promise<IncomingInvitationsRead> {
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc("list_invitations_for_me_v1");
+  if (error) {
+    if (error.code === "42883") return { status: "needs-migration" };
+    return { status: "error" };
+  }
+  if ((data as { email_unverified?: unknown } | null)?.email_unverified === true) {
+    return { status: "email_unverified" };
+  }
+  type Item = {
+    id: string;
+    invitation_type: string;
+    personal_message: string | null;
+    proposed_role: string | null;
+    created_at: string;
+    expires_at: string;
+    organization_name: string | null;
+    project_title: string | null;
+    inviter_name: string | null;
+    /** WHAT the invited person is being asked to become. Null on every
+     *  invitation created before 20260827200000 — the historical default. */
+    relationship_slug: string | null;
+    external_source_slug?: string | null;
+  };
+  const items = ((data?.items ?? []) as Item[]).map((i) => ({
+    id: i.id,
+    invitationType: i.invitation_type,
+    personalMessage: i.personal_message,
+    proposedRole: i.proposed_role,
+    createdAt: i.created_at,
+    expiresAt: i.expires_at,
+    organizationName: i.organization_name,
+    projectTitle: i.project_title,
+    inviterName: i.inviter_name,
+    relationshipSlug: i.relationship_slug ?? null,
+    externalSourceSlug: i.external_source_slug ?? null,
+  }));
+  return { status: "ok", items };
+}
+
+export type NetworkPerson = {
+  workerId: string;
+  /** Profile id — used ONLY by the permission-gated message flow (the
+   *  server action re-checks contact permission); never a contact channel. */
+  profileId: string | null;
+  displayName: string;
+  city: string | null;
+  country: string | null;
+};
+
+export type NetworkCompany = {
+  organizationId: string;
+  displayName: string;
+  organizationType: string;
+  country: string | null;
+};
+
+export type PeopleCompanySearchResult = {
+  people: NetworkPerson[];
+  companies: NetworkCompany[];
+};
+
+/** PostgREST code for "function does not exist" — the migration is not applied. */
+const UNDEFINED_FUNCTION_CODE = "42883";
+
+type DirectoryOrgRow = {
+  id: string;
+  display_name: string | null;
+  legal_name?: string | null;
+  organization_type: string;
+  country: string | null;
+};
+
+/**
+ * Organization directory read.
+ *
+ * Canonical path: `search_organizations_directory_v1` (20260802170000) — a
+ * SECURITY DEFINER function whose projection is fixed by its signature, so the
+ * caller cannot widen it to owner_profile_id / vat_number / contact fields.
+ *
+ * Fallback path: the pre-hardening direct table read, used ONLY when the RPC
+ * is absent (42883). That is the real production state until the migration is
+ * approved and applied; degrading to an empty directory instead would silently
+ * break invitations on an unrelated deploy.
+ */
+async function searchOrganizationsDirectory(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  term: string,
+): Promise<{ data: DirectoryOrgRow[] | null; error: unknown }> {
+  const rpc = await asAny(supabase).rpc("search_organizations_directory_v1", {
+    p_term: term,
+  });
+  if (!rpc.error) {
+    return { data: (rpc.data ?? []) as DirectoryOrgRow[], error: null };
+  }
+  if (rpc.error?.code !== UNDEFINED_FUNCTION_CODE) {
+    return { data: null, error: rpc.error };
+  }
+  const legacy = await asAny(supabase)
+    .from("organizations")
+    .select("id, display_name, legal_name, organization_type, country")
+    .or(`display_name.ilike.%${term}%,legal_name.ilike.%${term}%`)
+    .limit(20);
+  return {
+    data: legacy.error ? null : ((legacy.data ?? []) as DirectoryOrgRow[]),
+    error: legacy.error ?? null,
+  };
+}
+
+/**
+ * People & companies search — RLS does the privacy work: the workers read
+ * goes through the fail-closed `can_view_worker` SELECT policy (only
+ * consented-discoverable people or real work relationships come back), and
+ * organizations come back through `search_organizations_directory_v1`
+ * (20260802170000), whose fixed projection is id + display name + type +
+ * country. No email, no phone, no exact address is selected — ever.
+ *
+ * W9 slice 2: this is the ONE surface that legitimately reads organizations
+ * the caller is not a member of, so it is the one that gets an RPC. Before
+ * 20260802170000 it leaned on `organizations_select using (true)`, which let
+ * ANY authenticated session read every column of every org row directly.
+ * Until that migration is applied the RPC does not exist, so a 42883 is an
+ * expected state, not an error: we fall back to the pre-hardening table read,
+ * which still works precisely because the old permissive policy is still live.
+ */
+export async function searchPeopleAndCompanies(
+  query: string,
+): Promise<PeopleCompanySearchResult> {
+  const q = query.trim();
+  if (q.length < 2 || q.length > 80) return { people: [], companies: [] };
+  // Escape PostgREST pattern characters — the term is a literal.
+  const term = q.replace(/[%_,()]/g, " ").trim();
+  if (!term) return { people: [], companies: [] };
+  const supabase = await createClient();
+
+  const [workersRes, orgsRes] = await Promise.all([
+    asAny(supabase)
+      .from("workers")
+      .select("id, profile_id, full_name, city, country")
+      .ilike("full_name", `%${term}%`)
+      .limit(20),
+    searchOrganizationsDirectory(supabase, term),
+  ]);
+
+  type WorkerRow = {
+    id: string;
+    profile_id: string | null;
+    full_name: string | null;
+    city: string | null;
+    country: string | null;
+  };
+  // The RPC path already coalesces the display name server-side and returns no
+  // `legal_name` column at all; the 42883 fallback still carries one. The
+  // `?? o.legal_name` below therefore covers the fallback shape only.
+  type OrgRow = DirectoryOrgRow;
+
+  const people: NetworkPerson[] = workersRes.error
+    ? []
+    : ((workersRes.data ?? []) as WorkerRow[])
+        .filter((w) => (w.full_name ?? "").trim().length > 0)
+        .map((w) => ({
+          workerId: w.id,
+          profileId: w.profile_id,
+          displayName: w.full_name as string,
+          city: w.city,
+          country: w.country,
+        }));
+  const companies: NetworkCompany[] = orgsRes.error
+    ? []
+    : ((orgsRes.data ?? []) as OrgRow[])
+        .map((o) => ({
+          organizationId: o.id,
+          displayName: (o.display_name ?? o.legal_name ?? "").trim(),
+          organizationType: o.organization_type,
+          country: o.country,
+        }))
+        .filter((o) => o.displayName.length > 0);
+  return { people, companies };
+}
+
+export type NetworkRelationship = {
+  engagementId: string;
+  relationshipSlug: string;
+  /** The organisation this engagement is with (null for the personal context). */
+  organizationId: string | null;
+  organizationName: string | null;
+  startedAt: string | null;
+  title: string | null;
+};
+
+export type MyEngagementsResult =
+  | { readonly kind: "ok"; readonly rows: readonly NetworkRelationship[] }
+  /** The read failed (or no session) — UNKNOWN, never "no relationships". */
+  | { readonly kind: "unavailable" };
+
+/**
+ * The caller's own active engagements (their side of the network), with
+ * the read's outcome kept apart from its rows: a surface that LISTS the
+ * relationships (`/dashboard/network`) renders `unavailable` as "could not
+ * load", never as the empty state that invites a first invitation.
+ */
+export async function listMyEngagementsResult(): Promise<MyEngagementsResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "unavailable" };
+  const { data, error } = await asAny(supabase)
+    .from("engagement_contexts")
+    .select("id, relationship_slug, organization_id, started_at, title, organizations(display_name, legal_name)")
+    .eq("profile_id", user.id)
+    .eq("status", "active")
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) return { kind: "unavailable" };
+  type Row = {
+    id: string;
+    relationship_slug: string;
+    organization_id: string | null;
+    started_at: string | null;
+    title: string | null;
+    organizations: { display_name: string | null; legal_name: string | null } | null;
+  };
+  return {
+    kind: "ok",
+    rows: ((data ?? []) as Row[]).map((r) => ({
+      engagementId: r.id,
+      relationshipSlug: r.relationship_slug,
+      organizationId: r.organization_id ?? null,
+      organizationName:
+        r.organizations?.display_name ?? r.organizations?.legal_name ?? null,
+      startedAt: r.started_at,
+      title: r.title,
+    })),
+  };
+}
+
+/**
+ * The rows alone — for consumers that DELIBERATELY treat the read as an
+ * optional signal (the opening brief, the learning compass, the education
+ * next steps, the dashboard greeting): each of them already degrades to "no
+ * link named" on failure and never renders an empty relationship list as a
+ * fact. A surface that lists relationships uses `listMyEngagementsResult`.
+ */
+export async function listMyEngagements(): Promise<NetworkRelationship[]> {
+  const read = await listMyEngagementsResult();
+  return read.kind === "ok" ? [...read.rows] : [];
+}

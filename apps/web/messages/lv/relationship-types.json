@@ -1,0 +1,14 @@
+{
+  "collaborator": "[EN] Collaborator",
+  "consultant": "[EN] Consultant",
+  "employee": "[EN] Employee",
+  "freelancer": "[EN] Freelancer",
+  "manager": "[EN] Manager",
+  "owner": "[EN] Owner",
+  "student": "[EN] Student",
+  "unemployed": "[EN] Unemployed",
+  "volunteer": "[EN] Volunteer",
+  "intern": "Praktikants",
+  "external_manager": "Ārējais vadītājs (pasūtītāja)",
+  "other": "Cita saistība"
+}

@@ -1,0 +1,393 @@
+import "server-only";
+
+import { cache } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
+import type { ProfessionEntry } from "@/lib/worker/self-declared-profession";
+import type { CoreRead, DomainCaller } from "@/lib/domain/caller";
+import {
+  anyRecordedConfirmation,
+  withStandingConfirmation,
+  type SkillConfirmationState,
+  type StandingSkillRead,
+} from "@/lib/evidence/skill-confirmation-standing";
+import {
+  readOwnStandingConfirmedSkillIds,
+  readStandingConfirmedSkillIds,
+} from "@/lib/evidence/skill-confirmation-standing-read";
+
+/**
+ * Request-cached CORE worker readers (P0 nav-performance repair, Track B).
+ *
+ * Production evidence (2026-07-19, single dashboard navigation): the same
+ * signed-in worker's rows were re-read by every lib helper independently —
+ * `workers` 4× with different column subsets, `worker_professions` 4×
+ * (always `is_primary = true`), `worker_skills` 5×, `preferred_locations`
+ * 2-3×. Each reader below is THE canonical per-request read of one of those
+ * tables (guard-pinned by lib/guards/p0-auth-dashboard-performance.test.ts):
+ * React `cache()` collapses all consumers within one request into a single
+ * round-trip, and `createClient()` is itself request-cached with a memoised
+ * `auth.getUser()`, so no extra auth round-trips are added.
+ *
+ * Contract:
+ *   - Every reader resolves the CURRENT user internally (session → RLS own
+ *     rows only). No caller-supplied ids — a caller can never read another
+ *     user's rows through this module.
+ *   - Request-scoped deduplication ONLY, never time-based caching: a new
+ *     navigation always re-reads.
+ *   - Defensive: null / [] on any error (honest degradation, never a throw
+ *     and never fabricated data).
+ *   - The `workers` select is the SUPERSET of the columns the per-navigation
+ *     consumers used across their 4 independent selects, so adopting the
+ *     shared read never loses a column any consumer relied on.
+ */
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+
+/** Superset of the columns the per-navigation `workers` consumers selected
+ *  (player-card, worker-subject primary + mirrored-facts reads, hub
+ *  availability). Every column exists in the generated Database types. */
+const WORKER_FULL_COLS =
+  "id, profile_id, availability_status, available_from, current_location_country, preferred_countries, preferred_contract_type, willing_to_relocate, has_transport, driving_licence_categories, pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, own_vehicle, own_tools, work_card_confirmed_at, salary_min_eur, salary_max_eur";
+
+/** Fallback column set for environments where the human-gated MP-2 /
+ *  work-card columns are not applied yet (Postgres 42703). Mirrors the old
+ *  feature-detected behaviour: the base row still loads, the newer facts
+ *  degrade honestly to null. */
+const WORKER_BASE_COLS =
+  "id, profile_id, availability_status, available_from, current_location_country, preferred_countries, preferred_contract_type";
+
+const UNDEFINED_COLUMN_CODE = "42703";
+
+export interface WorkerCoreRow {
+  id: string;
+  profile_id: string | null;
+  availability_status: string | null;
+  available_from: string | null;
+  current_location_country: string | null;
+  preferred_countries: string[] | null;
+  preferred_contract_type: string | null;
+  willing_to_relocate: boolean | null;
+  has_transport: boolean | null;
+  driving_licence_categories: string[] | null;
+  pay_basis_preference: string | null;
+  night_shifts_ok: boolean | null;
+  weekend_shifts_ok: boolean | null;
+  overtime_ok: boolean | null;
+  own_vehicle: boolean | null;
+  own_tools: boolean | null;
+  work_card_confirmed_at: string | null;
+  /** The work card's monthly EUR range (`save_worker_card`); absent on the
+   *  base-column fallback, read as "not stated". */
+  salary_min_eur?: number | null;
+  salary_max_eur?: number | null;
+}
+
+/**
+ * THE canonical `workers` row read as an explicit caller (G4 bridge) — the
+ * transport-neutral core under `getWorkerCoreRow`. Same query, same
+ * feature-detected column fallback; the difference is the honest three-state
+ * result: `{ ok: false }` on a failed read, `{ ok: true, value: null }` when
+ * the caller has no worker row (#1314 — absence and failure are different
+ * facts, and bearer consumers must be able to tell them apart).
+ */
+export async function readWorkerCoreRow(
+  caller: DomainCaller,
+): Promise<CoreRead<WorkerCoreRow | null>> {
+  try {
+    const full = await asAny(caller.supabase)
+      .from("workers")
+      .select(WORKER_FULL_COLS)
+      .eq("profile_id", caller.userId)
+      .maybeSingle();
+    if (!full.error) {
+      return { ok: true, value: (full.data as WorkerCoreRow | null) ?? null };
+    }
+
+    // Missing human-gated column → degrade to the base set (never throw).
+    if (full.error.code !== UNDEFINED_COLUMN_CODE) return { ok: false };
+    const base = await asAny(caller.supabase)
+      .from("workers")
+      .select(WORKER_BASE_COLS)
+      .eq("profile_id", caller.userId)
+      .maybeSingle();
+    if (base.error) return { ok: false };
+    if (!base.data) return { ok: true, value: null };
+    return {
+      ok: true,
+      value: {
+        willing_to_relocate: null,
+        has_transport: null,
+        driving_licence_categories: null,
+        pay_basis_preference: null,
+        night_shifts_ok: null,
+        weekend_shifts_ok: null,
+        overtime_ok: null,
+        own_vehicle: null,
+        own_tools: null,
+        work_card_confirmed_at: null,
+        ...(base.data as Partial<WorkerCoreRow>),
+      } as WorkerCoreRow,
+    };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
+ * THE canonical per-request `workers` row read (workers.profile_id =
+ * auth.uid()). One round-trip per navigation regardless of how many
+ * consumers call it. Null when signed out, when no worker row exists, or on
+ * any read error. Delegates to the caller-scoped core above — one query
+ * contract for every transport.
+ */
+export const getWorkerCoreRow = cache(
+  async (): Promise<WorkerCoreRow | null> => {
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return null;
+
+      const read = await readWorkerCoreRow({ supabase, userId: user.id });
+      return read.ok ? read.value : null;
+    } catch {
+      return null;
+    }
+  },
+);
+
+export interface WorkerProfessionRow {
+  is_primary: boolean | null;
+  profession_id: string | null;
+  professions: { slug: string | null } | null;
+  /** The person's OWN WORDS when the registry does not carry what they do
+   *  (ledger 20260927060325). Null on a registry row. Rendered through
+   *  `professionDisplayName`, never interpreted. */
+  label: string | null;
+}
+
+/**
+ * THE canonical `worker_professions` read as an explicit caller (G4 bridge) —
+ * the transport-neutral core under `getWorkerProfessionRows`. `workerId` must
+ * be the caller's OWN worker row (RLS scopes the rows regardless).
+ */
+export async function readWorkerProfessionRows(
+  caller: DomainCaller,
+  workerId: string,
+): Promise<CoreRead<WorkerProfessionRow[]>> {
+  try {
+    const { data, error } = await asAny(caller.supabase)
+      .from("worker_professions")
+      .select("is_primary, profession_id, label, professions(slug)")
+      .eq("worker_id", workerId)
+      .order("is_primary", { ascending: false });
+    if (error || !Array.isArray(data)) return { ok: false };
+    return { ok: true, value: data as WorkerProfessionRow[] };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
+ * THE canonical per-request `worker_professions` read for the signed-in
+ * worker (primary first). Consumers derive "the primary profession" from
+ * this ONE result instead of each issuing their own `is_primary = true`
+ * select (4× per navigation in production). [] when there is no worker row
+ * or on any error. Delegates to the caller-scoped core above.
+ */
+export const getWorkerProfessionRows = cache(
+  async (): Promise<WorkerProfessionRow[]> => {
+    try {
+      const worker = await getWorkerCoreRow();
+      if (!worker) return [];
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [];
+      const read = await readWorkerProfessionRows(
+        { supabase, userId: user.id },
+        worker.id,
+      );
+      return read.ok ? read.value : [];
+    } catch {
+      return [];
+    }
+  },
+);
+
+export interface WorkerSkillRow {
+  id: string;
+  skill_id: string | null;
+  /**
+   * The STANDING confirmation (lib/evidence/skill-confirmation-standing.ts):
+   * true only while a confirmation by someone other than the person is backed
+   * by live, counted-once, independently approved work. NOT the stored flag —
+   * that is `verifiedRecorded` (history, never rewritten).
+   */
+  verified: boolean | null;
+  /** The stored `worker_skills.verified` flag: the confirmation ACT happened. */
+  verifiedRecorded?: boolean;
+  /** Why `verified` reads as it does (standing / withdrawn / self_confirmed / unknown / none). */
+  confirmation?: SkillConfirmationState;
+  source: string | null;
+  /** When the skill was confirmed — carried for the Living CV consumers
+   *  (superset pattern: one select serves every transport). */
+  verified_at: string | null;
+  confidence_bin: string | null;
+  /** Catalogue slug — the ONLY name source. The `skills` table carries just
+   *  id/slug/category/is_active/esco_uri; the legacy name_lt/name_en columns
+   *  do NOT exist (selecting them 400-ed on every navigation). */
+  skills: { slug: string | null } | null;
+}
+
+/**
+ * THE canonical `worker_skills` read as an explicit caller (G4 bridge) — the
+ * transport-neutral core under `getWorkerSkillRows` AND the MCP
+ * `living_cv.skills.get` capability. `workerId` must be the caller's OWN
+ * worker row (RLS scopes the rows regardless); honest three-state result.
+ */
+export async function readWorkerSkillRows(
+  caller: DomainCaller,
+  workerId: string,
+  /** How the standing read is made — the request-cached own read on the
+   *  cookie path; the caller's own client otherwise (MCP bearer). */
+  readStanding: (workerId: string) => Promise<StandingSkillRead | null> = (id) =>
+    readStandingConfirmedSkillIds(caller.supabase as SupabaseClient, id),
+): Promise<CoreRead<WorkerSkillRow[]>> {
+  try {
+    const { data, error } = await asAny(caller.supabase)
+      .from("worker_skills")
+      .select(
+        "id, skill_id, verified, verified_by, source, verified_at, confidence_bin, skills(slug)",
+      )
+      .eq("worker_id", workerId);
+    if (error || !Array.isArray(data)) return { ok: false };
+    const rows = data as (WorkerSkillRow & { verified_by: string | null })[];
+    // A recorded confirmation reads as confirmed only while it STANDS. The
+    // journal is read only when there is a recorded confirmation to judge.
+    const standing = anyRecordedConfirmation(rows) ? await readStanding(workerId) : null;
+    // verified_by is read to classify a self-confirmation, never handed out:
+    // the confirmer's identity is not part of this row (role-only rule).
+    const value: WorkerSkillRow[] = withStandingConfirmation(rows, standing).map(
+      (r) => {
+        const row: WorkerSkillRow & { verified_by?: string | null } = { ...r };
+        delete row.verified_by;
+        return row;
+      },
+    );
+    return { ok: true, value };
+  } catch {
+    return { ok: false };
+  }
+}
+
+/**
+ * THE canonical per-request `worker_skills` read for the signed-in worker
+ * (was 5 independent selects per navigation). [] when there is no worker
+ * row or on any error. Delegates to the caller-scoped core above.
+ */
+export const getWorkerSkillRows = cache(async (): Promise<WorkerSkillRow[]> => {
+  try {
+    const worker = await getWorkerCoreRow();
+    if (!worker) return [];
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return [];
+    const read = await readWorkerSkillRows(
+      { supabase, userId: user.id },
+      worker.id,
+      readOwnStandingConfirmedSkillIds,
+    );
+    return read.ok ? read.value : [];
+  } catch {
+    return [];
+  }
+});
+
+export interface PreferredLocationCoreRow {
+  city: string | null;
+  country_code: string | null;
+  priority: string | null;
+  active: boolean | null;
+}
+
+/**
+ * THE canonical per-request read of the caller's ACTIVE preferred locations
+ * (own rows, §20 — never readable by employers), priority order. The table
+ * is owner-gated and may be absent in some environments → []. NOTE: the
+ * market-map management surface (lib/market-map/capture.ts) keeps its own
+ * richer select (all rows incl. inactive + visibility/intents columns) — a
+ * different read model, not a duplicate of this one.
+ */
+export const getPreferredLocationRows = cache(
+  async (): Promise<PreferredLocationCoreRow[]> => {
+    try {
+      const supabase = await createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+      if (!user) return [];
+      const { data, error } = await asAny(supabase)
+        .from("preferred_locations")
+        .select("city, country_code, priority, active")
+        .eq("profile_id", user.id)
+        .eq("active", true)
+        .order("priority", { ascending: true });
+      if (error || !Array.isArray(data)) return [];
+      return data as PreferredLocationCoreRow[];
+    } catch {
+      return [];
+    }
+  },
+);
+
+/** The signed-in worker's primary profession slug (or null) — derived from
+ *  the ONE cached profession read; replaces the per-consumer
+ *  `is_primary = true` selects. */
+/**
+ * EVERY profession this person holds, primary first, as the display layer
+ * needs them: a registry slug, or the person's own words, or nothing.
+ *
+ * Separate from `getPrimaryProfessionSlug` on purpose. That one answers "which
+ * REGISTRY profession is primary" and feeds the match subject and the market
+ * map, which can only work with a catalogue slug; widening it would quietly
+ * change what matching is given. This one answers "what does this person say
+ * they do", which is the question the profile, the Living CV and the ŠIANDIEN
+ * line are actually asking.
+ */
+export const getProfessionEntries = cache(
+  async (): Promise<ProfessionEntry[]> => {
+    const rows = await getWorkerProfessionRows();
+    return rows.map((r) => ({
+      slug: r.professions?.slug ?? null,
+      label: r.label ?? null,
+    }));
+  },
+);
+
+export const getPrimaryProfessionSlug = cache(
+  async (): Promise<string | null> => {
+    const rows = await getWorkerProfessionRows();
+    return rows.find((r) => r.is_primary === true)?.professions?.slug ?? null;
+  },
+);
+
+/** Unique catalogue slugs of ALL the worker's declared skills — derived from
+ *  the ONE cached skill read. */
+export const getDeclaredSkillSlugs = cache(async (): Promise<string[]> => {
+  const rows = await getWorkerSkillRows();
+  const slugs = new Set<string>();
+  for (const r of rows) {
+    const slug = r.skills?.slug;
+    if (typeof slug === "string" && slug) slugs.add(slug);
+  }
+  return [...slugs];
+});

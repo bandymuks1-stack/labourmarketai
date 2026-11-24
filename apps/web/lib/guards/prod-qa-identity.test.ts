@@ -1,0 +1,506 @@
+import { readFileSync, readdirSync, type Dirent } from "node:fs";
+import { join, resolve } from "node:path";
+import { describe, expect, it } from "vitest";
+
+import { CANONICAL_ORIGIN } from "@/lib/domain/canonical";
+import {
+  assertBareStorageFilename,
+  assertIgnoredStorageTarget,
+} from "@/lib/testing/e2e-storage-target";
+import {
+  PRODUCTION_ORIGIN,
+  PROD_QA_FRESH_IDENTITIES,
+  PROD_QA_IDENTITIES,
+  PROD_QA_INVITED_EMAIL,
+  PROD_QA_WORKER_EMAIL,
+  ProdQaGuardError,
+  assertProdQaTarget,
+  describeProdQaTarget,
+} from "@/lib/testing/prod-qa-guard";
+
+/**
+ * THE PRODUCTION QA IDENTITY GUARD.
+ *
+ * This guard is the only thing standing between a production service-role key
+ * and an arbitrary account. Its refusals are the safety property, so they are
+ * tested here directly rather than trusted to review.
+ *
+ * The owner's authorisation was explicit and narrow: ONE clearly-marked
+ * synthetic QA account, no general production session-mint, and no weakening of
+ * Auth, RLS or service-role protections. Each of those is an assertion below.
+ */
+
+const WEB = resolve(__dirname, "..", "..");
+const read = (rel: string) => readFileSync(join(WEB, rel), "utf8");
+
+const GUARD = "lib/testing/prod-qa-guard.ts";
+const MINT = "scripts/prod-qa-mint-session.ts";
+const PROVISION = "scripts/prod-qa-provision.ts";
+const LOCAL_GUARD = "lib/testing/local-supabase-guard.ts";
+
+const PROD_URL = `${PRODUCTION_ORIGIN}`;
+
+/**
+ * SQL shapes the provisioning script must never contain. Hoisted so the
+ * negative control at the bottom of this file asserts against the SAME
+ * objects the guard uses — not a copy that could drift.
+ *
+ * Two of these shipped with a literal U+0008 where `\b` was intended
+ * (2026-07-31 → 2026-08-29). They compiled, matched nothing, and the
+ * "provisioning changes no protection" assertion passed against ANY script.
+ */
+const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
+  /\.rpc\(/,
+  /create\s+policy/i,
+  /alter\s+policy/i,
+  /drop\s+policy/i,
+  /\bgrant\s+(select|insert|update|delete|all|usage|execute)\b/i,
+  /\brevoke\s+(select|insert|update|delete|all|usage|execute)\b/i,
+  /security\s+definer/i,
+  /alter\s+table/i,
+];
+
+describe("exactly the synthetic cast is allowlisted", () => {
+  it("the allowlist is exactly these eleven, each unmistakably synthetic", () => {
+    // Widening is a reviewed code change (owner decision 2026-09-28 added the
+    // three +multiw identities beside the worker; owner decision 2026-10-26
+    // added the two fresh-activation identities; owner decision 2026-10-28 the
+    // one invited worker; owner decision 2026-11-10 the act2 fresh pair, act1
+    // being onboarded). Pinned exactly.
+    expect([...PROD_QA_IDENTITIES].sort()).toEqual(
+      [
+        "qa.agency+multiw@labourmarket.ai",
+        "qa.buyer+act1@labourmarket.ai",
+        "qa.freshcompany+act1@labourmarket.ai",
+        "qa.freshcompany+act2@labourmarket.ai",
+        "qa.freshworker+act1@labourmarket.ai",
+        "qa.freshworker+act2@labourmarket.ai",
+        "qa.invited@labourmarket.ai",
+        "qa.manager+multiw@labourmarket.ai",
+        "qa.owner+multiw@labourmarket.ai",
+        "qa.worker+goal3@labourmarket.ai",
+        "qa.worker+multiw@labourmarket.ai",
+      ].sort(),
+    );
+    expect(PROD_QA_IDENTITIES[0]).toBe(PROD_QA_WORKER_EMAIL);
+    for (const email of PROD_QA_IDENTITIES) {
+      // Plus-tagged, except the one invited worker, which is the QA mailbox's own
+      // address (the mailbox host refuses plus addresses; owner D-4 2026-11-02).
+      expect(email).toMatch(email === PROD_QA_INVITED_EMAIL ? /^qa\.invited@labourmarket\.ai$/ : /^qa\.[a-z]+\+[a-z0-9]+@labourmarket\.ai$/);
+    }
+  });
+
+  it("a walk can never create a fresh identity — only the owner can", () => {
+    expect([...PROD_QA_FRESH_IDENTITIES].sort()).toEqual([
+      "qa.buyer+act1@labourmarket.ai",
+      "qa.freshcompany+act1@labourmarket.ai",
+      "qa.freshcompany+act2@labourmarket.ai",
+      "qa.freshworker+act1@labourmarket.ai",
+      "qa.freshworker+act2@labourmarket.ai",
+      "qa.invited@labourmarket.ai",
+    ]);
+    // The mint looks the account up and refuses before any magic link exists.
+    const mint = read(MINT);
+    const check = mint.indexOf("PROD_QA_FRESH_IDENTITIES.includes(target.email)");
+    expect(check).toBeGreaterThan(-1);
+    expect(check).toBeLessThan(mint.indexOf("generateLink("));
+    expect(mint.slice(check, mint.indexOf("generateLink("))).toMatch(/findAuthUserByEmail\(admin, target\.email\)[\s\S]*fail\(/);
+    // The walk mints the fresh pair WITHOUT the provision step.
+    const walk = readFileSync(join(WEB, "..", "..", ".github", "workflows", "prod-qa-walk.yml"), "utf8");
+    const fresh = walk.slice(walk.indexOf("mint_existing()"), walk.indexOf("- name: Walk"));
+    expect(fresh).toMatch(/mint_existing "qa\.freshworker\+act2@labourmarket\.ai"\s+freshworker/);
+    expect(fresh).toMatch(/mint_existing "qa\.freshcompany\+act2@labourmarket\.ai"\s+freshcompany/);
+    const body = fresh.slice(0, fresh.indexOf("}"));
+    expect(body).not.toMatch(/prod-qa-provision/);
+    // A fresh account starts like a real one: no role in its metadata; the
+    // buyer carries only the customer role (never admin).
+    expect(read(PROVISION)).toMatch(/: fresh\s*\? \{\}/);
+    expect(read(PROVISION)).toMatch(/PROD_QA_BUYER_EMAIL\s*\? \{ role: "customer" \}/);
+    expect(read(PROVISION)).not.toMatch(/role: "admin"/);
+    expect(walk).toMatch(/mint_existing "qa\.buyer\+act1@labourmarket\.ai"\s+buyer/);
+  });
+
+  it("accepts the allowlisted identity against production", () => {
+    const t = assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL });
+    expect(t.email).toBe(PROD_QA_WORKER_EMAIL);
+    expect(t.origin).toBe(PRODUCTION_ORIGIN);
+  });
+
+  it("normalises case and surrounding whitespace, and nothing else", () => {
+    const t = assertProdQaTarget({
+      url: PROD_URL,
+      email: `  ${PROD_QA_WORKER_EMAIL.toUpperCase()}  `,
+    });
+    expect(t.email).toBe(PROD_QA_WORKER_EMAIL);
+  });
+
+  it("REFUSES every identity that is not the allowlisted one", () => {
+    for (const email of [
+      "someone@labourmarket.ai", //          a real user
+      "qa.worker@labourmarket.ai", //        close, but not it
+      "qa.worker+goal4@labourmarket.ai", //  same prefix, different tag
+      "qa.worker+goal3@evil.example", //     same local part, other domain
+      "qa.worker+goal3@labourmarket.ai.evil.example", // suffix attack
+      "qa.owner@labourmarket.ai", //         cast prefix without its tag
+      "qa.owner+multiw2@labourmarket.ai", // cast tag extended
+      "qa.agency+other@labourmarket.ai", // plausible, never allowlisted
+      "", //                                  nothing
+      undefined,
+    ]) {
+      expect(
+        () => assertProdQaTarget({ url: PROD_URL, email: email as string }),
+        `must refuse: ${String(email)}`,
+      ).toThrow(ProdQaGuardError);
+    }
+  });
+
+  it("matches by equality, never by prefix or pattern", () => {
+    // A `startsWith("qa.")` implementation would let this through, and it is
+    // the exact mistake that turns a one-account allowlist into a wildcard.
+    const src = read(GUARD);
+    expect(src).not.toMatch(/startsWith\(\s*["']qa/i);
+    expect(src).toMatch(/PROD_QA_IDENTITIES\.includes\(/);
+  });
+});
+
+describe("the target must be production — this is not a general-purpose mint", () => {
+  it("refuses a local target (that is the other script's job)", () => {
+    for (const url of [
+      "http://127.0.0.1:54321",
+      "http://localhost:54321",
+      "https://some-other-ref.supabase.co",
+      // The APP origin, not the Supabase project origin — a plausible
+      // copy-paste mistake. Built from the canonical constant so this file does
+      // not itself re-advertise the legacy host that `single-domain-origin`
+      // exists to keep out of the source.
+      CANONICAL_ORIGIN,
+      "not a url",
+      undefined,
+    ]) {
+      expect(
+        () => assertProdQaTarget({ url: url as string, email: PROD_QA_WORKER_EMAIL }),
+        `must refuse target: ${String(url)}`,
+      ).toThrow(ProdQaGuardError);
+    }
+  });
+
+  it("refuses a key that belongs to a different project", () => {
+    // A well-formed JWT whose `ref` claim is some other project.
+    const claims = Buffer.from(JSON.stringify({ ref: "someotherproject" })).toString("base64url");
+    const foreign = `eyJhbGciOiJIUzI1NiJ9.${claims}.sig`;
+    expect(() =>
+      assertProdQaTarget({
+        url: PROD_URL,
+        email: PROD_QA_WORKER_EMAIL,
+        serviceKey: foreign,
+      }),
+    ).toThrow(ProdQaGuardError);
+  });
+});
+
+describe("the current Supabase key formats are accepted — strictly, by role", () => {
+  const secret = "sb_secret_" + "a1B2c3D4e5F6g7H8i9J0";
+  const publishable = "sb_publishable_" + "a1B2c3D4e5F6g7H8i9J0";
+
+  it("accepts a current-format service key and anon key against production", () => {
+    expect(() =>
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, serviceKey: secret, anonKey: publishable }),
+    ).not.toThrow();
+  });
+
+  it("a key of the wrong role, a truncated key or a lookalike is still refused", () => {
+    for (const bad of [
+      { serviceKey: publishable },
+      { anonKey: secret },
+      { serviceKey: "sb_secret_short" },
+      { serviceKey: "sb_secret_" + "a".repeat(20) + " x" },
+      { serviceKey: "xsb_secret_" + "a".repeat(20) },
+      { serviceKey: "not-a-key-at-all" },
+    ]) {
+      expect(
+        () => assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, ...bad }),
+        JSON.stringify(Object.keys(bad)),
+      ).toThrow(ProdQaGuardError);
+    }
+  });
+
+  it("the production origin and the allowlisted identity are still required with such a key", () => {
+    expect(() =>
+      assertProdQaTarget({ url: "https://some-other-ref.supabase.co", email: PROD_QA_WORKER_EMAIL, serviceKey: secret }),
+    ).toThrow(ProdQaGuardError);
+    expect(() =>
+      assertProdQaTarget({ url: PROD_URL, email: "someone.real@example.com", serviceKey: secret }),
+    ).toThrow(ProdQaGuardError);
+  });
+
+  it("the redacted form of such a key never contains the key", () => {
+    const line = describeProdQaTarget(
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL, serviceKey: secret }),
+    );
+    expect(line).not.toContain("sb_secret_");
+  });
+});
+
+describe("no secret ever reaches a log, a report or an artefact", () => {
+  it("the target description carries origin and identity, never a key", () => {
+    const line = describeProdQaTarget(
+      assertProdQaTarget({ url: PROD_URL, email: PROD_QA_WORKER_EMAIL }),
+    );
+    expect(line).toContain(PRODUCTION_ORIGIN);
+    expect(line).toContain(PROD_QA_WORKER_EMAIL);
+    expect(line).not.toMatch(/eyJ/); // no JWT fragment
+  });
+
+  it("neither script prints a key or a token", () => {
+    for (const f of [MINT, PROVISION]) {
+      const src = read(f);
+      // Keys are read from env and passed onward; they are never interpolated
+      // into console output.
+      expect(src, `${f} must not log a key`).not.toMatch(
+        /console\.(info|log|error)\([^)]*(serviceKey|anonKey|access_token|refresh_token)/,
+      );
+    }
+  });
+
+  it("the minted session file is gitignored", () => {
+    const ignore = readFileSync(join(WEB, "..", "..", ".gitignore"), "utf8");
+    expect(ignore).toContain("/apps/web/tests/e2e/.storage-state.prod-qa.json");
+  });
+});
+
+/**
+ * #1842 ON THE PRODUCTION MINT. The file it writes is a live PRODUCTION
+ * session, so "it is gitignored" is proven by `git check-ignore` at run time —
+ * the same guards the local mint uses — and not left to the `.gitignore` line
+ * asserted above. The ORDER is the property: both guards must complete before
+ * `generateLink`, or a refusal is a refusal with a live token already minted.
+ */
+describe("the production mint proves its output path is ignored BEFORE it mints", () => {
+  const src = read(MINT);
+  const at = (needle: string): number => {
+    const i = src.indexOf(needle);
+    expect(i, `expected to find "${needle}" in ${MINT}`).toBeGreaterThan(-1);
+    return i;
+  };
+
+  it("bare name -> production target -> ignored target -> mint -> write", () => {
+    const name = at("assertBareStorageFilename(OUT_NAME)");
+    const prodTarget = at("assertProdQaTarget({");
+    const ignored = at("assertIgnoredStorageTarget({");
+    const mint = at("admin.auth.admin.generateLink");
+    const write = at("writeFileSync(out.path,");
+
+    expect(name).toBeLessThan(prodTarget);
+    expect(prodTarget).toBeLessThan(ignored);
+    expect(ignored).toBeLessThan(mint);
+    expect(mint).toBeLessThan(write);
+  });
+
+  it("writes only to the guarded target — no raw path survives", () => {
+    // A second, unguarded `join(... ".storage-state.prod-qa.json")` would let a
+    // later edit write around the guard.
+    expect(src).not.toMatch(/writeFileSync\(OUT\b/);
+    expect(src.match(/writeFileSync\(/g)).toHaveLength(1);
+  });
+
+  it("ANTI-VACUITY: the real output name passes the real git decision", () => {
+    // Without this, a guard that refused EVERY name would pass the order test
+    // above while making the production gate impossible to run.
+    const filename = /const OUT_FILENAME = "([^"]+)";/.exec(src)?.[1];
+    expect(filename).toBe(".storage-state.prod-qa.json");
+    const target = assertIgnoredStorageTarget({
+      filename: assertBareStorageFilename(filename),
+      e2eDir: join(WEB, "tests", "e2e"),
+    });
+    expect(target.ignoreRule).toContain(".gitignore:");
+  });
+
+  it("a per-identity slot (multi-actor walks) stays a bare, ignored name", () => {
+    expect(src).toMatch(/\/\^\[a-z0-9-\]\{1,24\}\$\/\.test\(SLOT\)/);
+    expect(src).toMatch(/assertBareStorageFilename\(OUT_NAME\)/);
+    for (const slot of ["owner", "worker", "worker2", "manager", "agency"]) {
+      const target = assertIgnoredStorageTarget({
+        filename: assertBareStorageFilename(`.storage-state.prod-qa.${slot}.json`),
+        e2eDir: join(WEB, "tests", "e2e"),
+      });
+      expect(target.ignoreRule, slot).toContain(".gitignore:");
+    }
+  });
+
+  it("refuses by the #1842 code, before any session exists", () => {
+    expect(src).toContain("UnsafeStorageTargetError");
+    expect(src).toContain("STORAGE_TARGET_REFUSAL_CODE");
+  });
+});
+
+describe("the production path is a SCRIPT, never a reachable surface", () => {
+  // 30s, not the 5s default. This walks app/, components/ and lib/ and reads
+  // every .ts/.tsx in them; alone it takes ~2s, and under full-suite CPU
+  // contention it intermittently crossed the default. A guard that fails on
+  // load rather than on truth is worse than no guard.
+  it("nothing in the app imports the production QA guard", { timeout: 30_000 }, () => {
+    // If a route, server action or component ever imported this, the "no
+    // general production session-mint endpoint" promise would be broken.
+    // The guard itself and this test may name it; nothing that ships to a user
+    // may. Paths are normalised because this repo is developed on Windows and a
+    // separator mismatch would silently turn this assertion into a no-op.
+    const ALLOWED = new Set([
+      "lib/testing/prod-qa-guard.ts",
+      "lib/guards/prod-qa-identity.test.ts",
+      // Another guard TEST (never shipped): pins the walk-token rules (#2537).
+      "lib/guards/prod-qa-token-hygiene.test.ts",
+      // Another guard TEST (never shipped): pins the mobile review identity's
+      // one-run password script to the allowlisted owner (#2871). Reads the
+      // guard as text, imports nothing from it.
+      "lib/guards/mobile-qa-credential.test.ts",
+      // Another guard TEST (never shipped): keeps the service-role key off the
+      // browser walk (R2 P3-1 on #3303). Names the key-reading scripts as text.
+      "lib/guards/prod-walk-service-key-scope.test.ts",
+    ]);
+    const offenders: string[] = [];
+    for (const dir of ["app", "components", "lib"]) {
+      for (const hit of grepTree(join(WEB, dir), /prod-qa-guard|prod-qa-mint|prod-qa-provision/)) {
+        const rel = hit.slice(WEB.length + 1).replace(/\\/g, "/");
+        if (!ALLOWED.has(rel)) offenders.push(rel);
+      }
+    }
+    expect(offenders, `production QA helpers leaked into the app:\n${offenders.join("\n")}`).toEqual(
+      [],
+    );
+  });
+
+  it("provisioning requires an explicit production acknowledgement", () => {
+    const src = read(PROVISION);
+    expect(src).toContain("--i-understand-production");
+    // …and refuses without it, rather than warning and proceeding.
+    expect(src).toMatch(/if \(!argv\.includes\(ACK\)\)/);
+  });
+
+  it("the account is passwordless — there is no credential to leak", () => {
+    const src = read(PROVISION);
+    expect(src).not.toMatch(/password\s*:/);
+    expect(src).toMatch(/email_confirm: true/);
+    // And it is identifiable as synthetic from the database alone.
+    expect(src).toMatch(/qa_synthetic: true/);
+  });
+
+  it("provisioning changes no Auth, RLS or service-role protection", () => {
+    const src = read(PROVISION);
+    // SQL-shaped only. The script has a `--revoke` FLAG that bans the QA
+    // account's sessions — that is the removal procedure, not a policy change,
+    // and a bare /revoke/ would have flagged the word in its own documentation.
+    for (const forbidden of FORBIDDEN_PROVISIONING_SQL) {
+      expect(forbidden.test(src), `provisioning must not touch: ${forbidden}`).toBe(false);
+    }
+  });
+});
+
+describe("the local guard was NOT weakened to make this possible", () => {
+  it("the local helper still refuses every non-local target", () => {
+    const src = read(LOCAL_GUARD);
+    expect(src).toContain("REFUSED_NON_LOCAL_E2E_SESSION_MINT");
+    expect(src).toContain("ALLOWED_LOCAL_ORIGINS");
+    // No production escape hatch was added to it.
+    expect(src).not.toMatch(/allowProduction|PROD_QA|skipLocalCheck/);
+  });
+
+  it("the local mint script gained no production mode", () => {
+    const src = read("scripts/e2e-mint-session.ts");
+    expect(src).toContain("resolveLocalSupabaseEnv");
+    expect(src).not.toMatch(/PROD_QA|prod-qa/);
+  });
+});
+
+describe("the gate refuses to run rather than pass for the wrong reason", () => {
+  it("it fails loudly when the minted session is missing", () => {
+    const spec = read("tests/e2e/employee-beta-gate.spec.ts");
+    expect(spec).toMatch(/An unrun gate is NOT a passed gate/);
+    expect(spec).toMatch(/storage-state\.prod-qa\.json/);
+  });
+
+  it("a check passes only with zero console errors and zero failed requests", () => {
+    const spec = read("tests/e2e/employee-beta-gate.spec.ts");
+    expect(spec).toMatch(/consoleErrors\.length === 0 && c\.failedRequests\.length === 0/);
+  });
+
+  it("it writes a machine-readable PASS/FAIL per check", () => {
+    const spec = read("tests/e2e/employee-beta-gate.spec.ts");
+    expect(spec).toMatch(/EMPLOYEE_BETA_PRODUCTION_GATE/);
+    expect(spec).toMatch(/gate-results\.json/);
+  });
+});
+
+// ── helpers ────────────────────────────────────────────────────────────────
+
+function grepTree(dir: string, rx: RegExp): string[] {
+  const out: string[] = [];
+  // Dirents, not a stat per path: the type comes with the listing, so there is
+  // no check-then-use window on a path another process may be rewriting.
+  let entries: Dirent[];
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const dirent of entries) {
+    const entry = dirent.name;
+    const p = join(dir, entry);
+    if (dirent.isDirectory()) {
+      // Build and test ARTEFACTS. Skipped both because they cannot contain a
+      // source import and because walking a directory another process is
+      // actively writing makes this assertion intermittently unreliable — the
+      // same failure mode `product-readiness`'s scan hit.
+      if (
+        entry === "node_modules" ||
+        entry === ".next" ||
+        entry === ".turbo" ||
+        entry === "test-results" ||
+        entry === "playwright-report"
+      )
+        continue;
+      out.push(...grepTree(p, rx));
+    } else if (/\.(ts|tsx)$/.test(p) && rx.test(readFileSync(p, "utf8"))) {
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+describe("NEGATIVE CONTROL — every forbidden-SQL pattern can actually fire", () => {
+  // A pattern that is only ever asserted `false` must be shown `true` on the
+  // thing it forbids, or it guards nothing. One sample per pattern, in the
+  // order of FORBIDDEN_PROVISIONING_SQL.
+  const SAMPLES = [
+    'await admin.rpc("grant_something", {})',
+    "create policy p on public.t for select using (true)",
+    "alter policy p on public.t using (false)",
+    "drop policy if exists p on public.t",
+    "grant select on public.workers to anon;",
+    "REVOKE EXECUTE ON FUNCTION public.f() FROM anon;",
+    "create function f() returns void language sql security definer",
+    "alter table public.workers disable row level security",
+  ];
+
+  it("fires once per pattern on its own sample", () => {
+    expect(SAMPLES).toHaveLength(FORBIDDEN_PROVISIONING_SQL.length);
+    FORBIDDEN_PROVISIONING_SQL.forEach((re, i) => {
+      expect(re.test(SAMPLES[i]), `${re} must match ${JSON.stringify(SAMPLES[i])}`).toBe(true);
+    });
+  });
+
+  it("still ignores the documented --revoke FLAG and ordinary prose", () => {
+    const prose = "the --revoke flag bans the QA account's sessions; granted access is logged";
+    for (const re of FORBIDDEN_PROVISIONING_SQL) {
+      expect(re.test(prose), `${re} must not match prose`).toBe(false);
+    }
+  });
+
+  it("no pattern carries a control character where a boundary was meant", () => {
+    for (const re of FORBIDDEN_PROVISIONING_SQL) {
+      for (const ch of re.source) {
+        const code = ch.charCodeAt(0);
+        expect(code < 0x20, `${re} contains U+${code.toString(16).padStart(4, "0")}`).toBe(false);
+      }
+    }
+  });
+});

@@ -1,0 +1,646 @@
+[
+  {
+    "phase": "before",
+    "viewport": "1440",
+    "totalFields": 19,
+    "hiddenFields": 17,
+    "perceivableFields": 2,
+    "unlabelledPerceivable": 0,
+    "unlabelledIncludingHidden": 17,
+    "interactiveTotal": 40,
+    "sub44": 36,
+    "sub44Detail": [
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-yes",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-no",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-not_stated",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-yes",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-no",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-not_stated",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-yes",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-no",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-not_stated",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-yes",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-no",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_tools-not_stated",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_tools-yes",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_tools-no",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-licence-B",
+        "w": 34,
+        "h": 30
+      },
+      {
+        "id": "prefs-licence-BE",
+        "w": 41,
+        "h": 30
+      },
+      {
+        "id": "prefs-licence-C",
+        "w": 35,
+        "h": 30
+      },
+      {
+        "id": "prefs-licence-CE",
+        "w": 42,
+        "h": 30
+      },
+      {
+        "id": "prefs-licence-D",
+        "w": 35,
+        "h": 30
+      },
+      {
+        "id": "prefs-save",
+        "w": 192,
+        "h": 36
+      }
+    ],
+    "radiogroups": [
+      {
+        "name": "Galiu persikelti dėl darbo",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Reikalingas apgyvendinimas",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Turiu nuosavą transportą",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Galiu dirbti komandoje",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Galiu dirbti vienas",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Gali dirbti naktinėmis pamainomis",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Gali dirbti savaitgaliais",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Gali dirbti viršvalandžius",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Turi nuosavą automobilį",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Turi nuosavus įrankius",
+        "radios": 3,
+        "tabbableRadios": 3
+      }
+    ],
+    "groups": [
+      {
+        "name": "Vairuotojo pažymėjimo kategorijos",
+        "children": 5
+      }
+    ],
+    "selectedMarkers": [
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-own_tools-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      }
+    ],
+    "overflow": false,
+    "a11yTree": {
+      "controls": 52,
+      "unnamedControls": 0,
+      "unnamedDetail": [],
+      "ariaSnapshot": "- heading \"Darbo pageidavimai\" [level=2]\n- paragraph: Nurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.\n- text: Galiu persikelti dėl darbo\n- radiogroup \"Galiu persikelti dėl darbo\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Reikalingas apgyvendinimas\n- radiogroup \"Reikalingas apgyvendinimas\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Turiu nuosavą transportą\n- radiogroup \"Turiu nuosavą transportą\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Galiu dirbti komandoje\n- radiogroup \"Galiu dirbti komandoje\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Galiu dirbti vienas\n- radiogroup \"Galiu dirbti vienas\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Ilgiausia komandiruotė (dienomis)\n- spinbutton \"Ilgiausia komandiruotė (dienomis)\"\n- text: Pageidaujama sutarties forma\n- button \"Pageidaujama sutarties forma\": Nenurodyta\n- text: Pastaba apie užimtumą\n- textbox \"Pastaba apie užimtumą\":\n  - /placeholder: Pvz., galiu nuo rugpjūčio, pageidauju 2 savaičių pamainų…\n- group \"Papildomi darbo pageidavimai\":\n  - text: Papildomi darbo pageidavimai\n  - paragraph: Galioja ta pati taisyklė — kas palikta „Nenurodyta“, lieka nenurodyta.\n  - text: Atlygio lūkesčio pagrindas\n  - button \"Atlygio lūkesčio pagrindas\": Nenurodyta\n  - text: Gali dirbti naktinėmis pamainomis\n  - radiogroup \"Gali dirbti naktinėmis pamainomis\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Gali dirbti savaitgaliais\n  - radiogroup \"Gali dirbti savaitgaliais\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Gali dirbti viršvalandžius\n  - radiogroup \"Gali dirbti viršvalandžius\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Turi nuosavą automobilį\n  - radiogroup \"Turi nuosavą automobilį\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Turi nuosavus įrankius\n  - radiogroup \"Turi nuosavus įrankius\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Vairuotojo pažymėjimo kategorijos\n  - group \"Vairuotojo pažymėjimo kategorijos\":\n    - button \"B\"\n    - button \"BE\"\n    - button \"C\"\n    - button \"CE\"\n    - button \"D\"\n- button \"Išsaugoti pageidavimus\"",
+      "radios": 30,
+      "checkboxes": 0,
+      "byRole": {
+        "radiogroup": 10,
+        "radio": 30,
+        "spinbutton": 1,
+        "button": 8,
+        "textbox": 1,
+        "group": 2
+      }
+    },
+    "consoleErrors": [],
+    "hydrationWarnings": []
+  },
+  {
+    "phase": "before",
+    "viewport": "375",
+    "totalFields": 19,
+    "hiddenFields": 17,
+    "perceivableFields": 2,
+    "unlabelledPerceivable": 0,
+    "unlabelledIncludingHidden": 17,
+    "interactiveTotal": 40,
+    "sub44": 36,
+    "sub44Detail": [
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-yes",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-no",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-not_stated",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-yes",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-no",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-not_stated",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-yes",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-no",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-not_stated",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-yes",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-no",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_tools-not_stated",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_tools-yes",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-own_tools-no",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-licence-B",
+        "w": 34,
+        "h": 30
+      },
+      {
+        "id": "prefs-licence-BE",
+        "w": 41,
+        "h": 30
+      },
+      {
+        "id": "prefs-licence-C",
+        "w": 35,
+        "h": 30
+      },
+      {
+        "id": "prefs-licence-CE",
+        "w": 42,
+        "h": 30
+      },
+      {
+        "id": "prefs-licence-D",
+        "w": 35,
+        "h": 30
+      },
+      {
+        "id": "prefs-save",
+        "w": 192,
+        "h": 36
+      }
+    ],
+    "radiogroups": [
+      {
+        "name": "Galiu persikelti dėl darbo",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Reikalingas apgyvendinimas",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Turiu nuosavą transportą",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Galiu dirbti komandoje",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Galiu dirbti vienas",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Gali dirbti naktinėmis pamainomis",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Gali dirbti savaitgaliais",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Gali dirbti viršvalandžius",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Turi nuosavą automobilį",
+        "radios": 3,
+        "tabbableRadios": 3
+      },
+      {
+        "name": "Turi nuosavus įrankius",
+        "radios": 3,
+        "tabbableRadios": 3
+      }
+    ],
+    "groups": [
+      {
+        "name": "Vairuotojo pažymėjimo kategorijos",
+        "children": 5
+      }
+    ],
+    "selectedMarkers": [
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      },
+      {
+        "id": "prefs-tristate-own_tools-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": false
+      }
+    ],
+    "overflow": false,
+    "a11yTree": {
+      "controls": 52,
+      "unnamedControls": 0,
+      "unnamedDetail": [],
+      "ariaSnapshot": "- heading \"Darbo pageidavimai\" [level=2]\n- paragraph: Nurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.\n- text: Galiu persikelti dėl darbo\n- radiogroup \"Galiu persikelti dėl darbo\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Reikalingas apgyvendinimas\n- radiogroup \"Reikalingas apgyvendinimas\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Turiu nuosavą transportą\n- radiogroup \"Turiu nuosavą transportą\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Galiu dirbti komandoje\n- radiogroup \"Galiu dirbti komandoje\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Galiu dirbti vienas\n- radiogroup \"Galiu dirbti vienas\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Ilgiausia komandiruotė (dienomis)\n- spinbutton \"Ilgiausia komandiruotė (dienomis)\"\n- text: Pageidaujama sutarties forma\n- button \"Pageidaujama sutarties forma\": Nenurodyta\n- text: Pastaba apie užimtumą\n- textbox \"Pastaba apie užimtumą\":\n  - /placeholder: Pvz., galiu nuo rugpjūčio, pageidauju 2 savaičių pamainų…\n- group \"Papildomi darbo pageidavimai\":\n  - text: Papildomi darbo pageidavimai\n  - paragraph: Galioja ta pati taisyklė — kas palikta „Nenurodyta“, lieka nenurodyta.\n  - text: Atlygio lūkesčio pagrindas\n  - button \"Atlygio lūkesčio pagrindas\": Nenurodyta\n  - text: Gali dirbti naktinėmis pamainomis\n  - radiogroup \"Gali dirbti naktinėmis pamainomis\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Gali dirbti savaitgaliais\n  - radiogroup \"Gali dirbti savaitgaliais\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Gali dirbti viršvalandžius\n  - radiogroup \"Gali dirbti viršvalandžius\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Turi nuosavą automobilį\n  - radiogroup \"Turi nuosavą automobilį\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Turi nuosavus įrankius\n  - radiogroup \"Turi nuosavus įrankius\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Vairuotojo pažymėjimo kategorijos\n  - group \"Vairuotojo pažymėjimo kategorijos\":\n    - button \"B\"\n    - button \"BE\"\n    - button \"C\"\n    - button \"CE\"\n    - button \"D\"\n- button \"Išsaugoti pageidavimus\"",
+      "radios": 30,
+      "checkboxes": 0,
+      "byRole": {
+        "radiogroup": 10,
+        "radio": 30,
+        "spinbutton": 1,
+        "button": 8,
+        "textbox": 1,
+        "group": 2
+      }
+    },
+    "consoleErrors": [],
+    "hydrationWarnings": []
+  }
+]

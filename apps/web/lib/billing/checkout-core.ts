@@ -1,0 +1,122 @@
+/**
+ * Test-checkout request gate — PURE core (Stripe sprint PR3). No IO. The route
+ * (app/api/billing/test-checkout) wires auth + the provider around this. Every
+ * rejection is honest and specific; checkout is possible ONLY in a valid Stripe
+ * test config, for a known PAID plan, by an eligible user, with a configured
+ * test price.
+ */
+
+import { PRE_PAYMENT_PLANS, isSellablePlan, type PlanAudience } from "@/lib/billing/plans";
+import type { BillingConfig } from "@/lib/billing/config-core";
+
+export type CheckoutRejectReason =
+  | "payments_disabled"
+  | "live_blocked"
+  | "unknown_plan"
+  | "not_a_paid_plan"
+  | "plan_deferred"
+  | "not_eligible"
+  | "price_not_configured"
+  | "not_authenticated"
+  | "organization_required"
+  | "not_organization_member";
+
+/**
+ * Server-side verdict of resolving the organization for a company/agency plan:
+ *   - "not_required"  — a personal plan (worker audience); no org involved;
+ *   - "verified"      — the caller is owner/manager of the resolved org;
+ *   - "missing"       — an org is required but none could be resolved
+ *                       (none supplied and no single owned org to default to);
+ *   - "not_member"    — an org was supplied but the caller has no active
+ *                       owner/manager membership in it.
+ */
+export type OrgBindingResult =
+  | "not_required"
+  | "verified"
+  | "missing"
+  | "not_member";
+
+/** Audiences whose paid plan MUST be bound to a canonical organization. */
+export function planRequiresOrganization(audience: PlanAudience): boolean {
+  return audience === "company" || audience === "agency";
+}
+
+export type CheckoutGateResult =
+  | { ok: true; planKey: string; audience: PlanAudience }
+  | { ok: false; status: number; reason: CheckoutRejectReason };
+
+/** The plans a user can start a TEST checkout for (the paid pilot tiers). */
+export function isPaidPlanKey(planKey: string): boolean {
+  const p = PRE_PAYMENT_PLANS.find((x) => x.slug === planKey);
+  return Boolean(p && isSellablePlan(p));
+}
+
+export function evaluateCheckoutRequest(input: {
+  config: Pick<BillingConfig, "state" | "reason">;
+  authenticated: boolean;
+  planKey: string;
+  userRoles: readonly string[];
+  isAdmin: boolean;
+  priceConfigured: boolean;
+  /**
+   * Org binding verdict for company/agency plans (server-resolved, never
+   * trusted from the client). Personal plans pass "not_required". Callers
+   * that predate org binding may omit it ONLY for worker-audience plans.
+   */
+  orgBinding?: OrgBindingResult;
+}): CheckoutGateResult {
+  // Billing must be in an active Stripe state (test, or owner-armed live).
+  if (input.config.state === "stripe_live_blocked") {
+    return { ok: false, status: 403, reason: "live_blocked" };
+  }
+  if (input.config.state !== "stripe_test" && input.config.state !== "stripe_live") {
+    return { ok: false, status: 400, reason: "payments_disabled" };
+  }
+  if (!input.authenticated) {
+    return { ok: false, status: 401, reason: "not_authenticated" };
+  }
+
+  const plan = PRE_PAYMENT_PLANS.find((p) => p.slug === input.planKey);
+  if (!plan) return { ok: false, status: 400, reason: "unknown_plan" };
+  if (plan.accessState !== "payment_not_enabled") {
+    return { ok: false, status: 400, reason: "not_a_paid_plan" };
+  }
+  // Owner launch pricing 2026-09-05: only the sellable launch plan reaches
+  // checkout; deferred plans (ai_plus / vip_media successors, agency tiers)
+  // are refused here even if a price id were configured for them.
+  if (!isSellablePlan(plan)) {
+    return { ok: false, status: 400, reason: "plan_deferred" };
+  }
+
+  // Eligibility: the plan's audience role, or an admin (for internal testing) -
+  // or, for an ORGANIZATION plan, the verified manage-billing authority over
+  // the organization itself. The organization's capability and the caller's
+  // proven owner/admin membership are the canonical authority; the legacy
+  // `profile_roles` row is a derived label that an invited owner/admin, or a
+  // legacy-`agency`-only profile, may not carry. Requiring it refused those
+  // callers with `not_eligible` although they hold the authority. Anyone
+  // without verified authority is still refused (below and here, fail closed).
+  const orgAuthorityVerified =
+    planRequiresOrganization(plan.audience) && input.orgBinding === "verified";
+  const eligible =
+    input.isAdmin || input.userRoles.includes(plan.audience) || orgAuthorityVerified;
+  if (!eligible) return { ok: false, status: 403, reason: "not_eligible" };
+
+  // Company/agency plans are bound to a canonical organization with a
+  // verified active owner/manager membership — fail closed on anything else.
+  if (planRequiresOrganization(plan.audience)) {
+    const binding = input.orgBinding ?? "missing";
+    if (binding === "not_member") {
+      return { ok: false, status: 403, reason: "not_organization_member" };
+    }
+    if (binding !== "verified") {
+      return { ok: false, status: 400, reason: "organization_required" };
+    }
+  }
+
+  if (!input.priceConfigured) {
+    return { ok: false, status: 400, reason: "price_not_configured" };
+  }
+
+  return { ok: true, planKey: plan.slug, audience: plan.audience };
+}

@@ -1,0 +1,180 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+
+import { createClient } from "@/lib/supabase/server";
+import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
+import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
+
+
+/**
+ * Education programmes / cohorts — server actions (RED batch B). Thin
+ * wrappers over the three SECURITY DEFINER commands; every rule (manager of
+ * the organisation, training_provider capability, learner already linked as
+ * a student) lives server-side in the RPCs (batch 20260903120000, applied).
+ */
+export type ProgramActionState =
+  | { status: "idle" }
+  | { status: "ok"; id?: string }
+  | { status: "invalid" }
+  | { status: "forbidden" }
+  | { status: "error"; reason?: string };
+
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+
+function mapErr(code: string | undefined, message: string | undefined): ProgramActionState {
+  const m = (message ?? "").toLowerCase();
+  if (
+    m.includes("not_manager") ||
+    m.includes("not_education_institution") ||
+    m.includes("not_a_linked_learner") ||
+    m.includes("self_decision_not_allowed")
+  )
+    return { status: "forbidden" };
+  if (m.includes("unknown_") || m.includes("invalid") || m.includes("not_found") || m.includes("no_pending_request"))
+    return { status: "invalid" };
+  return { status: "error", reason: code };
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function rpc(supabase: unknown): any {
+  return supabase;
+}
+
+export async function createProgramAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const organizationId = String(formData.get("organizationId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const profession = String(formData.get("targetProfessionSlug") ?? "").trim();
+  const educationType = String(formData.get("educationTypeSlug") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim().slice(0, 2000);
+  if (!UUID.test(organizationId) || name.length < 2 || name.length > 160) return { status: "invalid" };
+  if (profession && !PROFESSION_SLUGS.includes(profession)) return { status: "invalid" };
+  if (educationType && !(EDUCATION_TYPE_SLUGS as readonly string[]).includes(educationType)) return { status: "invalid" };
+  const supabase = await createClient();
+  const { data, error } = await rpc(supabase).rpc("create_education_program_v1", {
+    p_organization_id: organizationId,
+    p_name: name,
+    p_target_profession_slug: profession || null,
+    p_education_type_slug: educationType || null,
+    p_description: description || null,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "layout");
+  return { status: "ok", id: typeof data === "string" ? data : undefined };
+}
+
+export async function createCohortAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const programId = String(formData.get("programId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const startsOn = String(formData.get("startsOn") ?? "").trim();
+  const endsOn = String(formData.get("endsOn") ?? "").trim();
+  if (!UUID.test(programId) || name.length < 1 || name.length > 120) return { status: "invalid" };
+  const date = /^\d{4}-\d{2}-\d{2}$/;
+  if ((startsOn && !date.test(startsOn)) || (endsOn && !date.test(endsOn))) return { status: "invalid" };
+  const supabase = await createClient();
+  const { data, error } = await rpc(supabase).rpc("create_education_cohort_v1", {
+    p_program_id: programId,
+    p_name: name,
+    p_starts_on: startsOn || null,
+    p_ends_on: endsOn || null,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "layout");
+  return { status: "ok", id: typeof data === "string" ? data : undefined };
+}
+
+export async function setCohortMemberAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const cohortId = String(formData.get("cohortId") ?? "");
+  const profileId = String(formData.get("profileId") ?? "");
+  const status = String(formData.get("status") ?? "active");
+  if (!UUID.test(cohortId) || !UUID.test(profileId)) return { status: "invalid" };
+  if (status !== "active" && status !== "left") return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("set_education_cohort_member_v1", {
+    p_cohort_id: cohortId,
+    p_profile_id: profileId,
+    p_status: status,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "layout");
+  return { status: "ok" };
+}
+
+/**
+ * CORRECT a programme the institution already created.
+ *
+ * Before this, `education_programs` had one policy — a SELECT — and one
+ * writer, `create_education_program_v1`. A programme was immutable from
+ * creation, so an institution that skipped the optional target profession
+ * could never turn on the employer-demand signal that field activates, and
+ * the surface read `demandUnknown` forever.
+ *
+ * REPLACE, NOT PATCH: the form always sends the current values, so an empty
+ * select clears the field. The RPC re-derives the organisation from the row
+ * rather than trusting the form, so a manager of one organisation cannot edit
+ * another's programme.
+ */
+export async function updateProgramAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const programId = String(formData.get("programId") ?? "");
+  const name = String(formData.get("name") ?? "").trim();
+  const profession = String(formData.get("targetProfessionSlug") ?? "").trim();
+  const educationType = String(formData.get("educationTypeSlug") ?? "").trim();
+  const description = String(formData.get("description") ?? "").trim().slice(0, 2000);
+  if (!UUID.test(programId) || name.length < 2 || name.length > 160) return { status: "invalid" };
+  if (profession && !PROFESSION_SLUGS.includes(profession)) return { status: "invalid" };
+  if (educationType && !(EDUCATION_TYPE_SLUGS as readonly string[]).includes(educationType)) return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("update_education_program_v1", {
+    p_program_id: programId,
+    p_name: name,
+    p_target_profession_slug: profession || null,
+    p_education_type_slug: educationType || null,
+    p_description: description || null,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "layout");
+  return { status: "ok", id: programId };
+}
+
+/**
+ * J-12: the institution opens or closes a group for learners' join requests
+ * (`set_education_cohort_join_requests_v1`, migration 20261102160000). Closing
+ * never touches a request already made; it only stops new ones.
+ */
+export async function setCohortJoinRequestsAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const cohortId = String(formData.get("cohortId") ?? "");
+  const open = String(formData.get("open") ?? "");
+  if (!UUID.test(cohortId) || (open !== "true" && open !== "false")) return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("set_education_cohort_join_requests_v1", {
+    p_cohort_id: cohortId,
+    p_open: open === "true",
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "layout");
+  return { status: "ok" };
+}
+
+/**
+ * J-12: the institution's authorised person (a manager of the institution — the
+ * same authority that confirms a learner's journal under decision 0028) accepts
+ * or declines a learner's request. Accepting creates the student relationship
+ * the learner asked for and the membership in one command; nobody decides their
+ * own request (`self_decision_not_allowed`).
+ */
+export async function decideCohortJoinAction(_prev: ProgramActionState, formData: FormData): Promise<ProgramActionState> {
+  const cohortId = String(formData.get("cohortId") ?? "");
+  const profileId = String(formData.get("profileId") ?? "");
+  const decision = String(formData.get("decision") ?? "");
+  if (!UUID.test(cohortId) || !UUID.test(profileId)) return { status: "invalid" };
+  if (decision !== "accept" && decision !== "decline") return { status: "invalid" };
+  const supabase = await createClient();
+  const { error } = await rpc(supabase).rpc("decide_education_cohort_join_v1", {
+    p_cohort_id: cohortId,
+    p_profile_id: profileId,
+    p_decision: decision,
+  });
+  if (error) return mapErr(error.code, error.message);
+  revalidatePath("/[locale]/dashboard/company", "layout");
+  return { status: "ok" };
+}

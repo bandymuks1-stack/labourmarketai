@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>STATINĖ PERŽIŪRA — šiandienos ekranas + player card (NE gyva programa)</title>
+<style>
+  /* Token mirror (apps/web/app/globals.css dark theme) — review artefact only */
+  :root{
+    --ink-900:#06070d;--ink-800:#0b0d17;--ink-700:#101321;--ink-600:#1a1e2e;--ink-500:#252a3d;
+    --blue:#3e8bff;--cyan:#00c2ff;--success:#34d399;--warning:#ffb845;
+    --t1:#f4f6fb;--t2:#9ba3b8;--t3:#8690a8;--gold:#ffc857;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:var(--ink-900);color:var(--t1);font-family:system-ui,sans-serif;padding:24px;display:flex;flex-direction:column;gap:16px;align-items:center}
+  .note{max-width:640px;border:1px dashed var(--warning);border-radius:10px;padding:10px 14px;font-size:12px;color:var(--warning)}
+  .toggle{display:flex;gap:8px}
+  .toggle button{min-height:44px;padding:10px 16px;border-radius:8px;border:1px solid var(--ink-500);background:var(--ink-800);color:var(--t2);cursor:pointer;font-size:13px}
+  .toggle button.on{border-color:var(--blue);color:var(--blue)}
+  #frame{width:390px;max-width:100%;display:flex;flex-direction:column;gap:16px;transition:width .24s}
+  #frame.desktop{width:760px}
+  .card{position:relative;border-radius:18px;border:1px solid #28324e;background:var(--ink-800);padding:24px;display:flex;flex-direction:column;gap:12px}
+  .eyebrow{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--cyan);display:flex;gap:8px;align-items:center}
+  .eyebrow.muted{color:var(--t3)}
+  h2{font-size:24px;letter-spacing:-0.02em}
+  h3{font-size:16px}
+  p{font-size:13px;line-height:1.6;color:var(--t2)}
+  .pending{font-size:12px;color:var(--t2);display:flex;gap:8px;align-items:center}
+  .pending::before{content:"⏳"}
+  .cta{display:inline-flex;min-height:44px;align-items:center;width:fit-content;gap:8px;border-radius:8px;padding:12px 20px;font-size:14px;font-weight:600;color:var(--ink-900);background:linear-gradient(90deg,var(--blue),var(--cyan));text-decoration:none}
+  .cta.ghost{background:none;border:1px solid rgba(62,139,255,.4);color:var(--blue);font-weight:500}
+  .grid{display:grid;grid-template-columns:1fr;gap:16px}
+  #frame.desktop .grid{grid-template-columns:1fr 1fr}
+  dl{display:flex;gap:24px;flex-wrap:wrap;margin-top:auto}
+  .num{font-family:ui-monospace,monospace;font-size:24px;font-weight:700}
+  .num.gold{color:var(--gold)}
+  dt{font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t3)}
+  .trust{box-shadow:0 0 0 1px rgba(255,200,87,.5),0 0 24px -10px rgba(255,200,87,.45)}
+  .id{display:flex;gap:16px;align-items:center}
+  .avatar{width:56px;height:56px;border-radius:16px;background:var(--ink-700);border:1px solid rgba(255,200,87,.5);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{display:inline-flex;min-height:28px;align-items:center;gap:6px;border-radius:999px;border:1px solid var(--ink-500);background:var(--ink-800);padding:4px 12px;font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--t2)}
+  .chip.gold{border-color:rgba(255,200,87,.4);background:rgba(255,200,87,.1);color:var(--gold)}
+  .dot{width:8px;height:8px;border-radius:99px;background:#00e676}
+  .skills{display:flex;gap:8px;flex-wrap:wrap}
+  .skill{display:inline-flex;min-height:32px;align-items:center;gap:6px;border-radius:8px;border:1px solid rgba(52,211,153,.3);background:rgba(52,211,153,.1);padding:6px 10px;font-size:12px;font-weight:500;color:var(--success)}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  .stat{border:1px solid var(--ink-600);background:rgba(11,13,23,.4);border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:2px}
+  .stat small{font-size:11px;color:var(--t2);line-height:1.5}
+  .proof{display:flex;gap:8px;align-items:center;border-top:1px solid var(--ink-600);padding-top:16px;font-size:12px;color:var(--t2)}
+</style>
+</head>
+<body>
+<div class="note">STATINĖ PERŽIŪRA owner'iui — skaičiai čia PAVYZDINIAI, tai NE gyva
+programa. Gyvas UI: /lt/dashboard (worker) ir /lt/dashboard/player-card — ten
+rodomi tik realūs tavo duomenys.</div>
+<div class="toggle">
+  <button class="on" onclick="f.classList.remove('desktop');this.classList.add('on');d.classList.remove('on')">390px</button>
+  <button id="d" onclick="f.classList.add('desktop');this.classList.add('on');document.querySelector('.toggle button').classList.remove('on')">Desktop</button>
+</div>
+<div id="frame">
+  <section class="card">
+    <span class="eyebrow">✎ ŠIANDIEN</span>
+    <h2>Užrašyk, ką šiandien padarei</h2>
+    <p>Kelios eilutės savais žodžiais — ir tavo diena lieka įraše kaip ilgalaikis darbo įrodymas.</p>
+    <span class="pending">2 įrašai laukia vadovo patvirtinimo</span>
+    <a class="cta" href="#">Pildyti dienos žurnalą →</a>
+  </section>
+  <div class="grid">
+    <section class="card">
+      <span class="eyebrow muted">▣ ŠI SAVAITĖ</span>
+      <h3>Šią savaitę tavo darbas patvirtintas 3 kartus</h3>
+      <dl>
+        <div><div class="num">5</div><dt>Įrašai</dt></div>
+        <div><div class="num gold">3</div><dt>Patvirtinta</dt></div>
+        <div><div class="num">21.5</div><dt>Patvirtintos val.</dt></div>
+      </dl>
+    </section>
+    <section class="card">
+      <span class="eyebrow muted">✦ KELIAS Į DAUGIAU</span>
+      <h3>Pamatų betonavimas</h3>
+      <p>Tavo profesijoje šio įgūdžio dažnai prireikia, o tavo kortelėje jo dar nėra. Pridėk — ir kortelė paaugs.</p>
+      <a class="cta ghost" href="#">Pridėti prie savo įgūdžių →</a>
+    </section>
+  </div>
+  <section class="card trust">
+    <div class="id">
+      <span class="avatar">JP</span>
+      <div>
+        <span class="eyebrow">DARBUOTOJO KORTELĖ</span>
+        <h3 style="font-size:20px">Jonas Pavyzdys</h3>
+        <p style="font-size:12px">Mūrininkas</p>
+      </div>
+    </div>
+    <div class="chips">
+      <span class="chip"><span class="dot"></span> LAISVAS</span>
+      <span class="chip gold">🛡 PATVIRTINTA</span>
+    </div>
+    <dt style="margin-top:4px">PATVIRTINTI ĮGŪDŽIAI</dt>
+    <div class="skills">
+      <span class="skill">🔧 Mūro darbai</span>
+      <span class="skill">🧱 Blokelių mūras</span>
+    </div>
+    <div class="stats">
+      <div class="stat"><span class="num" style="font-size:22px">7</span><dt>Įgūdžiai</dt><small>Tavo nurodyti įgūdžiai (savideklaruoti, nepatvirtinti).</small></div>
+      <div class="stat"><span class="num" style="font-size:22px">1</span><dt>Kandidatiniai įgūdžiai</dt><small>Pridėti savais žodžiais (tikslinama).</small></div>
+      <div class="stat"><span class="num" style="font-size:22px">12</span><dt>Įrodymai</dt><small>Tavo darbo žurnalo įrašai.</small></div>
+      <div class="stat"><span class="num" style="font-size:22px">0</span><dt>Reikia dėmesio</dt><small>Šiuo metu nieko nereikia daryti.</small></div>
+    </div>
+    <div class="proof">📅 <span style="font-family:ui-monospace,monospace;font-size:10px;letter-spacing:.12em;color:var(--t3)">NAUJAUSIAS ĮRODYMAS</span> <span style="color:var(--t1)">2026-06-10</span></div>
+  </section>
+</div>
+<script>const f=document.getElementById('frame');const d=document.getElementById('d');</script>
+</body>
+</html>

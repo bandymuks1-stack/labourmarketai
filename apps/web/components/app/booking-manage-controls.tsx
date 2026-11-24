@@ -1,0 +1,290 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import {
+  rescheduleBookingAction,
+  setBookingDeadlineAction,
+} from "@/lib/booking/booking-actions";
+
+/**
+ * Owner-side lifecycle controls for an OPEN outgoing proposal (P2-PR6):
+ * "Change dates" (reschedule_booking_proposal_v1) and "Respond-by date"
+ * (set_booking_response_deadline_v1). Mounted ONLY under
+ * canRescheduleProposal(row.status) — `proposed` and `accepted` rows. On an
+ * ACCEPTED booking (`reopensDecision`) only "change dates" is offered, and
+ * saving it reopens the worker's decision: the booking never stays accepted
+ * on terms the worker did not see (owner decision 2026-09-28). An absent
+ * RPC degrades honestly — the row is untouched and one
+ * calm sentence says the dates / deadline were not changed. Never a fake
+ * success, never an error wall.
+ */
+export function BookingManageControls({
+  locale,
+  bookingId,
+  reopensDecision = false,
+  startDate,
+  expectedEndDate,
+  responseDeadlineDate,
+}: {
+  locale: string;
+  bookingId: string;
+  /** ACCEPTED booking: a date change asks the worker to decide again. */
+  reopensDecision?: boolean;
+  startDate: string | null;
+  expectedEndDate: string | null;
+  responseDeadlineDate: string | null;
+}) {
+  const t = useTranslations("bookings");
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [panel, setPanel] = useState<"none" | "dates" | "deadline">("none");
+  const [start, setStart] = useState(startDate ?? "");
+  const [end, setEnd] = useState(expectedEndDate ?? "");
+  const [note, setNote] = useState("");
+  const [deadline, setDeadline] = useState(responseDeadlineDate ?? "");
+  const [notice, setNotice] = useState<
+    | "idle"
+    | "dates-saved"
+    | "dates-reopened"
+    | "dates-same"
+    | "dates-unchanged"
+    | "deadline-saved"
+    | "deadline-unsaved"
+    | "error"
+  >("idle");
+
+  function saveDates() {
+    startTransition(async () => {
+      const res = await rescheduleBookingAction({
+        locale,
+        bookingId,
+        startDate: start,
+        endDate: end || null,
+        note: note || null,
+      });
+      if (res.kind === "ok") {
+        setNotice(
+          res.reopened
+            ? "dates-reopened"
+            : res.unchanged
+              ? "dates-same"
+              : "dates-saved",
+        );
+        setPanel("none");
+        router.refresh();
+      } else if (res.kind === "needs-migration") {
+        // Honest degradation: nothing changed on the row.
+        setNotice("dates-unchanged");
+        setPanel("none");
+      } else {
+        setNotice("error");
+      }
+    });
+  }
+
+  function saveDeadline() {
+    startTransition(async () => {
+      const res = await setBookingDeadlineAction({
+        locale,
+        bookingId,
+        deadline,
+      });
+      if (res.kind === "ok") {
+        setNotice("deadline-saved");
+        setPanel("none");
+        router.refresh();
+      } else if (res.kind === "needs-migration") {
+        setNotice("deadline-unsaved");
+        setPanel("none");
+      } else {
+        setNotice("error");
+      }
+    });
+  }
+
+
+  return (
+    <div
+      className="flex w-full flex-col gap-1.5"
+      data-testid="booking-manage-controls"
+    >
+      <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+        <Button
+          type="button"
+          disabled={pending}
+          onClick={() => setPanel(panel === "dates" ? "none" : "dates")}
+          data-testid="booking-reschedule-open"
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
+        >
+          {reopensDecision
+            ? t("reschedule.openAccepted")
+            : t("reschedule.open")}
+        </Button>
+        {reopensDecision ? null : (
+          <Button
+            type="button"
+            disabled={pending}
+            onClick={() => setPanel(panel === "deadline" ? "none" : "deadline")}
+            data-testid="booking-deadline-open"
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto"
+          >
+            {t("deadline.open")}
+          </Button>
+        )}
+      </div>
+
+      {panel === "dates" ? (
+        <div
+          className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
+          data-testid="booking-reschedule-form"
+        >
+          {reopensDecision ? (
+            <p
+              className="text-meta text-state-warning"
+              data-testid="booking-reschedule-reopen-hint"
+            >
+              {t("reschedule.reopenHint")}
+            </p>
+          ) : null}
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
+            {t("reschedule.startDate")}
+            <Input
+              type="date"
+              value={start}
+              onChange={(e) => setStart(e.target.value)}
+              className="max-sm:text-base"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
+            {t("reschedule.endDate")}
+            <Input
+              type="date"
+              value={end}
+              onChange={(e) => setEnd(e.target.value)}
+              className="max-sm:text-base"
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
+            {t("reschedule.note")}
+            <Input
+              type="text"
+              maxLength={500}
+              value={note}
+              onChange={(e) => setNote(e.target.value)}
+              className="max-sm:text-base"
+            />
+          </label>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              disabled={pending || !start}
+              onClick={saveDates}
+              data-testid="booking-reschedule-save"
+              variant="secondary"
+              size="sm"
+              className="min-h-11 w-full sm:w-auto"
+            >
+              {t("reschedule.save")}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setPanel("none")}
+              variant="ghost"
+              size="sm"
+              className="min-h-11"
+            >
+              {t("reschedule.cancel")}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {panel === "deadline" ? (
+        <div
+          className="flex w-full flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
+          data-testid="booking-deadline-form"
+        >
+          <label className="flex flex-col gap-1 text-meta text-text-muted">
+            {t("deadline.label")}
+            <Input
+              type="date"
+              value={deadline}
+              onChange={(e) => setDeadline(e.target.value)}
+              className="max-sm:text-base"
+            />
+          </label>
+          <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
+            <Button
+              type="button"
+              disabled={pending || !deadline}
+              onClick={saveDeadline}
+              data-testid="booking-deadline-save"
+              variant="secondary"
+              size="sm"
+              className="min-h-11 w-full sm:w-auto"
+            >
+              {t("deadline.save")}
+            </Button>
+            <Button
+              type="button"
+              onClick={() => setPanel("none")}
+              variant="ghost"
+              size="sm"
+              className="min-h-11"
+            >
+              {t("deadline.cancel")}
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
+      {notice === "dates-reopened" ? (
+        <span
+          className="text-meta text-state-success"
+          data-testid="booking-reschedule-reopened"
+        >
+          {t("reschedule.reopened")}
+        </span>
+      ) : notice === "dates-same" ? (
+        <span className="text-meta text-text-muted">
+          {t("reschedule.sameDates")}
+        </span>
+      ) : notice === "dates-saved" ? (
+        <span className="text-meta text-state-success">
+          {t("reschedule.saved")}
+        </span>
+      ) : notice === "dates-unchanged" ? (
+        <span
+          className="text-meta text-text-muted"
+          data-testid="booking-reschedule-unchanged"
+        >
+          {t("reschedule.notChanged")}
+        </span>
+      ) : notice === "deadline-saved" ? (
+        <span className="text-meta text-state-success">
+          {t("deadline.saved")}
+        </span>
+      ) : notice === "deadline-unsaved" ? (
+        <span
+          className="text-meta text-text-muted"
+          data-testid="booking-deadline-unsaved"
+        >
+          {t("deadline.notSet")}
+        </span>
+      ) : notice === "error" ? (
+        <span className="text-meta text-state-danger">
+          {t("actions.error")}
+        </span>
+      ) : null}
+    </div>
+  );
+}

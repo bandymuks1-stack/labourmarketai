@@ -1,0 +1,191 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
+
+/**
+ * Click-target repair guard (root-cause audit PR4, 2026-07-06).
+ *
+ * Pins the ten repaired click targets so none of them silently regresses to a
+ * dead/misleading state:
+ *   1. learning queue rows state WHAT/WHO before Approve (never blind);
+ *   2. accepted marketplace rows carry a Message next step (never inert);
+ *   3. #capabilities deep links land on an OPEN disclosure;
+ *   4. work-card inline "+" chips open the editor (never self-anchor);
+ *   5. the role gate never bounces silently (?notice= redirect + copy);
+ *   6. company "submit for real" switches workspace first (no branch-dependent
+ *      anchor link);
+ *   9. demand submit success links scouting + refreshes the read-back;
+ *  10. instruction clarify surfaces failure and links the thread.
+ */
+
+const root = join(__dirname, "..", "..");
+const read = (rel: string) => readFileSync(join(root, rel), "utf8");
+const LOCALES = activeLocales;
+const catalog = (loc: string) =>
+  JSON.parse(read(`messages/${loc}.json`)) as Record<string, never>;
+
+describe("1. learning review queue is never a blind approve", () => {
+  const section = read("components/app/learning-review-section.tsx");
+  it("every row renders the suggestion kind + subject before any decision button", () => {
+    expect(section).toMatch(/data-testid="learning-item-kind"/);
+    expect(section).toMatch(/data-testid="learning-item-subject"/);
+    expect(section).toMatch(/subjectWorkerName/);
+    expect(section).toMatch(/subjectSkillSlug/);
+  });
+  it("the viewer's own rows are transparency rows, split from the manager queue", () => {
+    expect(section).toMatch(/viewerWorkerId/);
+    expect(section).toMatch(/data-testid="learning-own-row"/);
+    // Decision buttons render only inside the org-items branch.
+    expect(section).toMatch(/orgItems\.map/);
+  });
+  it("the enriched read joins worker + skill display fields", () => {
+    const lib = read("lib/learning/learning.ts");
+    expect(lib).toMatch(/workers\(profiles\(full_name, email\)\), skills\(slug\)/);
+  });
+});
+
+describe("2. accepted marketplace rows open the next step", () => {
+  const loop = read("components/app/marketplace-loop-section.tsx");
+  it("both accepted row variants render the message CTA", () => {
+    expect(loop).toMatch(/marketplace-outgoing-message-cta/);
+    expect(loop).toMatch(/marketplace-incoming-message-cta/);
+  });
+  it("the grant is verified server-side on the ACCEPTED status only", () => {
+    const action = read("lib/marketplace/service-request-conversation.ts");
+    expect(action).toMatch(/status !== "accepted"/);
+    expect(action).toMatch(/allowed_accepted_service_request/);
+    // Counterpart is resolved server-side — rows never expose profile ids.
+    expect(action).toMatch(/buyer_id/);
+    expect(loop).not.toMatch(/buyerProfileId|providerProfileId/);
+  });
+});
+
+describe("3. #capabilities deep links land on an open disclosure", () => {
+  it("the profile page mounts the hash opener next to the details target", () => {
+    const page = read("app/[locale]/dashboard/profile/page.tsx");
+    expect(page).toMatch(/DetailsHashOpener targetId="capabilities"/);
+    expect(page).toMatch(/<details id="capabilities"/);
+  });
+  it("the opener opens on initial hash AND later hash changes", () => {
+    const opener = read("components/app/details-hash-opener.tsx");
+    expect(opener).toMatch(/hashchange/);
+    expect(opener).toMatch(/HTMLDetailsElement/);
+  });
+});
+
+describe("4. work-card inline '+' chips open the editor, never self-anchor", () => {
+  // NOTE (dedup v1): WorkCard was removed; the missing-dim "+" chips are no
+  // longer rendered on the dashboard. The chip→editor open-event wiring still
+  // exists (the editor keeps its own toggle), so the event contract is pinned.
+  it("inline chips dispatch the open event; the editor listens", () => {
+    const chip = read("components/app/work-card-missing-chip.tsx");
+    const editor = read("components/app/work-card-editor.tsx");
+    expect(chip).toMatch(/WORK_CARD_OPEN_EDITOR_EVENT/);
+    expect(editor).toMatch(/addEventListener\(WORK_CARD_OPEN_EDITOR_EVENT/);
+  });
+});
+
+describe("5. role gate never bounces silently", () => {
+  // W3 Package 4 deleted the /dashboard/advanced second dashboard that
+  // rendered the notice banner; the redirect contract + its copy survive.
+  it("the redirect carries a notice param", () => {
+    const gate = read("lib/auth/require-role.ts");
+    expect(gate).toMatch(/\?notice=needs_\$\{expectedRole\}_role/);
+  });
+  it("banner copy exists in every active locale", () => {
+    for (const loc of LOCALES) {
+      const d = catalog(loc) as never as {
+        auth: { dashboard: { roleNotice: Record<string, string> } };
+      };
+      for (const k of [
+        "needs_worker_role",
+        "needs_company_role",
+        "needs_agency_role",
+        "needs_customer_role",
+        "cta",
+      ]) {
+        expect(d.auth.dashboard.roleNotice[k], `${loc}:${k}`).toBeTruthy();
+      }
+    }
+  });
+});
+
+describe("6. company demand intake is reachable for every held-role user", () => {
+  // Re-anchored 2026-09-16: the wizard lives on the Needs door.
+  const page = read("app/[locale]/dashboard/company/needs/page.tsx");
+  it("no link into the retired root-dashboard #demand-intake anchor remains", () => {
+    expect(page).not.toMatch(/\/dashboard#demand-intake/);
+  });
+  it("the wizard lives ON the company page; the shared action targets it", () => {
+    // W3 rows 7/8/25: the full wizard is mounted here — no bridge form.
+    expect(page).toMatch(/id="demand-intake"/);
+    expect(page).toMatch(/<DemandRequestButton/);
+    const action = read("lib/company/demand-intake-navigation.ts");
+    expect(action).toMatch(/switchActiveRole\("company"\)/);
+    expect(action).toMatch(/\/dashboard\/company\/needs#demand-intake/);
+  });
+});
+
+// Targets 7 (chain actions → #company-team) and 8 (manage spaces) were
+// carried by dashboard-chain-actions / identity-actions, both deleted with
+// the W3 Package 4 second dashboard. The #company-team anchor itself stays
+// pinned by the company-page guards (w3-company-rows-2-3-9-10).
+
+describe("9. demand submit success is not a dead end", () => {
+  const btn = read("components/app/demand-request-button.tsx");
+  it("success refreshes the server read-back and links scouting", () => {
+    expect(btn).toMatch(/if \(res\.ok\) router\.refresh\(\)/);
+    expect(btn).toMatch(/demand-done-scouting-link/);
+  });
+  it("the link label exists in every active locale", () => {
+    for (const loc of LOCALES) {
+      const d = catalog(loc) as never as {
+        auth: { dashboard: { wow: { demand: { form: Record<string, string> } } } };
+      };
+      expect(d.auth.dashboard.wow.demand.form.doneScoutingLink, loc).toBeTruthy();
+    }
+  });
+});
+
+describe("10. instruction clarify surfaces failure and links the thread", () => {
+  const card = read("components/app/worker-instruction-card.tsx");
+  it("failure renders an error; success links the conversation", () => {
+    expect(card).toMatch(/data-testid="instruction-clarify-error"/);
+    expect(card).toMatch(/data-testid="instruction-clarify-thread-link"/);
+    expect(card).toMatch(/\/dashboard\/communication\/\$\{instruction\.conversationId\}/);
+  });
+  it("clarify copy exists in every active locale", () => {
+    for (const loc of LOCALES) {
+      const d = catalog(loc) as never as {
+        instructions: { card: Record<string, string> };
+      };
+      expect(d.instructions.card.clarifyError, loc).toBeTruthy();
+      expect(d.instructions.card.clarifyViewThread, loc).toBeTruthy();
+    }
+  });
+});
+
+describe("i18n parity for the other PR4 keys", () => {
+  it("learning + marketplace keys exist in every active locale", () => {
+    for (const loc of LOCALES) {
+      const d = catalog(loc) as never as {
+        learning: Record<string, unknown> & { kind: Record<string, string> };
+        marketplace: Record<string, string>;
+      };
+      expect(d.learning.kind.confirm_skill, loc).toBeTruthy();
+      expect(d.learning.kind.review_skill, loc).toBeTruthy();
+      expect(d.learning.kind.dismiss, loc).toBeTruthy();
+      for (const k of [
+        "skillFallback",
+        "workerFallback",
+        "noteLabel",
+        "managerContextLink",
+        "ownContextLink",
+      ]) {
+        expect(d.learning[k], `${loc}:learning.${k}`).toBeTruthy();
+      }
+      expect(d.marketplace.messageCta, loc).toBeTruthy();
+    }
+  });
+});

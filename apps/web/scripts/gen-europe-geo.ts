@@ -1,0 +1,240 @@
+/**
+ * One-time generator (NOT in the build pipeline). Reads the low-res
+ * world-atlas countries-110m TopoJSON, filters to Europe + an immediate
+ * frame, projects to the LiveMap viewBox with a plain equirectangular
+ * projection, decimates to stay well under the 12,000-point budget, and
+ * writes a dependency-free static module: components/app/europe-geo.ts
+ *
+ * Run: pnpm -C apps/web exec tsx scripts/gen-europe-geo.ts
+ * world-atlas + topojson-client are devDependencies used ONLY here — the
+ * runtime LiveMap imports the generated file and ships no geo deps.
+ */
+import { createRequire } from "node:module";
+import { writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { feature } from "topojson-client";
+
+const require = createRequire(import.meta.url);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const topo: any = require("world-atlas/countries-110m.json");
+
+const W = 1000;
+const H = 740;
+const LNG0 = -10;
+const LNG1 = 40;
+const LAT0 = 34;
+const LAT1 = 71;
+const project = (lng: number, lat: number): [number, number] => [
+  ((lng - LNG0) / (LNG1 - LNG0)) * W,
+  ((LAT1 - lat) / (LAT1 - LAT0)) * H,
+];
+
+const norm = (s: string) =>
+  s.toLowerCase().replace(/[^a-z]/g, "");
+
+const TARGET = new Set(
+  [
+    "Netherlands",
+    "Germany",
+    "Denmark",
+    "Sweden",
+    "Norway",
+    "Poland",
+    "Lithuania",
+    "Latvia",
+    "Estonia",
+  ].map(norm),
+);
+const CODE: Record<string, string> = {
+  netherlands: "NL",
+  germany: "DE",
+  denmark: "DK",
+  sweden: "SE",
+  norway: "NO",
+  poland: "PL",
+  lithuania: "LT",
+  latvia: "LV",
+  estonia: "EE",
+};
+const CONTEXT = new Set(
+  [
+    "Finland",
+    "France",
+    "Spain",
+    "Portugal",
+    "Ireland",
+    "United Kingdom",
+    "Belgium",
+    "Luxembourg",
+    "Switzerland",
+    "Austria",
+    "Czechia",
+    "Czech Rep.",
+    "Slovakia",
+    "Hungary",
+    "Slovenia",
+    "Croatia",
+    "Bosnia and Herz.",
+    "Serbia",
+    "Montenegro",
+    "Kosovo",
+    "Albania",
+    "Macedonia",
+    "North Macedonia",
+    "Greece",
+    "Bulgaria",
+    "Romania",
+    "Moldova",
+    "Ukraine",
+    "Belarus",
+    "Italy",
+    "Iceland",
+    "Cyprus",
+    "Malta",
+    "N. Cyprus",
+  ].map(norm),
+);
+const FRAME = new Set(
+  [
+    "Russia",
+    "Turkey",
+    "Morocco",
+    "Algeria",
+    "Tunisia",
+    "Georgia",
+    "Armenia",
+    "Azerbaijan",
+    "Syria",
+    "Lebanon",
+    "Israel",
+    "Palestine",
+    "Libya",
+    "Egypt",
+  ].map(norm),
+);
+
+type Tier = "target" | "context" | "frame";
+function tierOf(name: string): Tier | null {
+  const n = norm(name);
+  if (TARGET.has(n)) return "target";
+  if (CONTEXT.has(n)) return "context";
+  if (FRAME.has(n)) return "frame";
+  return null;
+}
+
+const CAP: Record<Tier, number> = { target: 900, context: 700, frame: 140 };
+
+function ringPath(ring: number[][], cap: number): string | null {
+  // project
+  let pts = ring.map(([lng, lat]) => project(lng, lat));
+  // bbox cull: skip rings with no chance of touching the viewport
+  const xs = pts.map((p) => p[0]);
+  const ys = pts.map((p) => p[1]);
+  if (
+    Math.max(...xs) < -40 ||
+    Math.min(...xs) > W + 40 ||
+    Math.max(...ys) < -40 ||
+    Math.min(...ys) > H + 40
+  )
+    return null;
+  // decimate to the cap (keep first/last)
+  if (pts.length > cap) {
+    const step = Math.ceil(pts.length / cap);
+    pts = pts.filter((_, i) => i % step === 0 || i === pts.length - 1);
+  }
+  if (pts.length < 4) return null;
+  const r = (v: number) => Math.round(v * 10) / 10;
+  return (
+    "M" +
+    pts
+      .map((p, i) => `${i ? "L" : ""}${r(p[0])} ${r(p[1])}`)
+      .join(" ") +
+    "Z"
+  );
+}
+
+const fc = feature(
+  topo,
+  topo.objects.countries,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) as any;
+
+type Row = { code: string; name: string; tier: Tier; d: string };
+const rows: Row[] = [];
+let totalPoints = 0;
+
+for (const f of fc.features) {
+  const name: string = f.properties?.name ?? "";
+  const tier = tierOf(name);
+  if (!tier) continue;
+  const geom = f.geometry;
+  const polys: number[][][][] =
+    geom.type === "Polygon" ? [geom.coordinates] : geom.coordinates;
+  const parts: string[] = [];
+  let perCountryCap = CAP[tier];
+  for (const poly of polys) {
+    for (const ring of poly) {
+      const d = ringPath(ring, Math.max(40, Math.floor(perCountryCap / 2)));
+      if (d) {
+        parts.push(d);
+        totalPoints += (d.match(/L/g)?.length ?? 0) + 1;
+        perCountryCap = Math.max(40, perCountryCap - 60);
+      }
+    }
+  }
+  if (!parts.length) continue;
+  rows.push({
+    code: CODE[norm(name)] ?? norm(name).slice(0, 3).toUpperCase(),
+    name,
+    tier,
+    d: parts.join(" "),
+  });
+}
+
+rows.sort((a, b) => {
+  const order = { frame: 0, context: 1, target: 2 };
+  return order[a.tier] - order[b.tier];
+});
+
+const out = `// GENERATED by scripts/gen-europe-geo.ts — do not edit by hand.
+// Source: world-atlas countries-110m (devDependency, not shipped).
+// Equirectangular projection, viewBox 0 0 ${W} ${H}.
+// Total polygon points: ${totalPoints} (budget < 12000).
+
+export const MAP_W = ${W};
+export const MAP_H = ${H};
+const LNG0 = ${LNG0};
+const LNG1 = ${LNG1};
+const LAT0 = ${LAT0};
+const LAT1 = ${LAT1};
+
+/** Same projection the country paths were generated with — markers MUST
+ *  use this so they land in the right place. */
+export function project(lng: number, lat: number): [number, number] {
+  return [
+    ((lng - LNG0) / (LNG1 - LNG0)) * MAP_W,
+    ((LAT1 - lat) / (LAT1 - LAT0)) * MAP_H,
+  ];
+}
+
+export type GeoTier = "target" | "context" | "frame";
+export type GeoCountry = {
+  code: string;
+  name: string;
+  tier: GeoTier;
+  d: string;
+};
+
+export const EUROPE_GEO: GeoCountry[] = ${JSON.stringify(rows)};
+`;
+
+const dest = join(
+  process.cwd(),
+  "components",
+  "app",
+  "europe-geo.ts",
+);
+writeFileSync(dest, out);
+console.log(
+  `europe-geo.ts written: ${rows.length} countries, ~${totalPoints} points.`,
+);

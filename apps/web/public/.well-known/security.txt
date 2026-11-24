@@ -1,0 +1,9 @@
+# LabourMarket.ai vulnerability disclosure (RFC 9116)
+# Report security problems to the contact below. A person reviews every
+# report. Please do not test against real user data, do not attempt denial
+# of service, and do not access data that is not yours.
+Contact: mailto:info@labourmarket.ai
+Expires: 2027-08-13T00:00:00.000Z
+Preferred-Languages: en, lt
+Canonical: https://labourmarket.ai/.well-known/security.txt
+Policy: https://labourmarket.ai/en/legal/data-protection

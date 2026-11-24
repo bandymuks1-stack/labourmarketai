@@ -1,0 +1,181 @@
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
+import { buildPageMetadataFor } from "@/lib/seo/metadata";
+import { CompanyNeedAuthLinks } from "@/components/app/company-need-auth-links";
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  return buildPageMetadataFor("companyNeed", locale, "/company-need");
+}
+import {
+  CompanyNeedForm,
+  type CompanyNeedFormLabels,
+} from "@/components/app/company-need-form";
+import {
+  buildWorkCategoryOptions,
+} from "@/lib/taxonomy/work-categories";
+import { Link } from "@/lib/i18n/navigation";
+
+/**
+ * Company need / vacancy page (Staffing Operating Model v1, PR4 UI / PR10).
+ * A company describes the workers it needs and gets a normalized vacancy DRAFT
+ * as a labelled AI suggestion (disabled until the owner enables a provider).
+ * Nothing is published here; the company reviews the draft.
+ */
+export default async function CompanyNeedPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("companyNeed");
+  // The landing's worker-search door now opens this form (one canonical worker
+  // need, doctrine §17; employer path P0 2026-11-15, F5). What that door asked
+  // and said comes along in its own words: the phone field and the privacy notice.
+  const tDoor = await getTranslations("landing.requestDoors");
+  // Rendered here, on the server: the client form gets finished markup, not a function.
+  const privacyNotice = tDoor.rich("notice", {
+    privacy: (chunks) => (
+      <Link href="/legal/privacy" className="underline hover:text-text-primary">
+        {chunks}
+      </Link>
+    ),
+  });
+
+  const labels: CompanyNeedFormLabels = {
+    title: t("title"),
+    subtitle: t("subtitle"),
+    companyName: t("companyName"),
+    contactPerson: t("contactPerson"),
+    contactPersonHelp: t("contactPersonHelp"),
+    contactEmail: t("contactEmail"),
+    profession: t("profession"),
+    country: t("country"),
+    countryHelp: t("countryHelp"),
+    cityRegion: t("cityRegion"),
+    cityRegionHelp: t("cityRegionHelp"),
+    numberOfWorkers: t("numberOfWorkers"),
+    startDate: t("startDate"),
+    expectedDuration: t("expectedDuration"),
+    expectedDurationHelp: t("expectedDurationHelp"),
+    urgency: t("urgency"),
+    urgencyAsap: t("urgencyAsap"),
+    urgencyWeeks: t("urgencyWeeks"),
+    urgencyFlexible: t("urgencyFlexible"),
+    preparedTitle: t("preparedTitle"),
+    preparedBody: t("preparedBody"),
+    receivedTitle: t("receivedTitle"),
+    receivedBody: t("receivedBody"),
+    partnerRouteTitle: t("partnerRouteTitle"),
+    partnerRouteBody: t("partnerRouteBody"),
+    accommodation: t("accommodation"),
+    accFree: t("accFree"),
+    accPaid: t("accPaid"),
+    accDeducted: t("accDeducted"),
+    accNone: t("accNone"),
+    transport: t("transport"),
+    transportYes: t("transportYes"),
+    transportNo: t("transportNo"),
+    languages: t("languages"),
+    languagesHelp: t("languagesHelp"),
+    engagement: t("engagement"),
+    engEmployment: t("engEmployment"),
+    engSubcontracting: t("engSubcontracting"),
+    engAgency: t("engAgency"),
+    description: t("description"),
+    descriptionHelp: t("descriptionHelp"),
+    submit: t("submit"),
+    aiBadge: t("aiBadge"),
+    aiNotVerified: t("aiNotVerified"),
+    aiDisabled: t("aiDisabled"),
+    aiRole: t("aiRole"),
+    aiSkills: t("aiSkills"),
+    aiDocs: t("aiDocs"),
+    aiMissing: t("aiMissing"),
+    aiBlockers: t("aiBlockers"),
+    aiNone: t("aiNone"),
+    statusInvalid: t("statusInvalid"),
+    statusError: t("statusError"),
+  };
+
+  const categories = buildWorkCategoryOptions(locale);
+
+  // ── THE MARKETS THIS FORM MAY NAME (owner readiness window, 2026-09-09) ──
+  //
+  // This list used to be `READINESS_COUNTRIES` — ten countries — under a
+  // comment claiming it was "the current target markets". It stopped being
+  // that on 2026-07-17, when GE/BE/FR/ES/AT/CH joined `ACTIVE_MARKETS`, and
+  // again in 2026-07 when US did. `READINESS_COUNTRIES` answers a DIFFERENT
+  // question: where researched, source-backed document/legal guidance exists
+  // (see its own docblock). A market and a curated-guidance country are not
+  // the same fact, and this select was answering the wrong one.
+  //
+  // The visible consequence, walked on production today: the landing's map
+  // band tells a visitor "the 17 markets LabourMarket.ai operates in today"
+  // and lists Belgium, France, Spain, Austria, Switzerland, Georgia and the
+  // United States by name. The employer door is the very next click, and a
+  // company in any of those seven could not say where it needs people. The
+  // landing claimed a capability the first real action could not reach —
+  // release-defect class §33.
+  //
+  // `MARKET_COUNTRIES` is the canonical set and its own docblock already
+  // names this exact use ("the allowed country set for structured demand
+  // intake"). The signed-in company workspace has read it all along, so this
+  // aligns the public door with the workspace behind it rather than
+  // inventing a third list. Display names come from the shared
+  // `labourMarket.countryNames` catalogue — which carries all 17 in every
+  // active locale — instead of `companyNeed.countries`, which carries only
+  // the ten and would have rendered raw keys for the rest.
+  //
+  // Nothing widens downstream: `customer_requests.country` is free text with
+  // no CHECK constraint, so this needs no migration, and this public form
+  // persists nothing at all (it prepares a draft — see the honest note).
+  // 2026-09-22 (global-access rule): every ISO country, active markets first — the RPC
+  // behind this form now accepts any code in public.countries (20260922130000), so the
+  // select offers the world; MARKET_COUNTRIES only orders it. Labels come from CLDR
+  // (countryDisplayName) for the 232 countries that have no translation key.
+  const countryOptions = countryOptionsForLocale(locale).map((o) => ({ code: o.value, label: o.label }));
+
+  return (
+    <div
+      className="mx-auto flex max-w-2xl flex-col gap-8 px-6 py-14 sm:px-12"
+      id="main-content"
+    >
+      {/* Honest-capability note ABOVE the form (nav/funnel consistency PR):
+          the inquiry is structured and stored for follow-up; nothing is
+          published automatically. */}
+      <p
+        className="card-border p-4 text-sm leading-relaxed text-text-secondary"
+        data-testid="company-need-honest-note"
+      >
+        {t("honestNote")}
+      </p>
+
+      <CompanyNeedForm
+        labels={labels}
+        categories={categories}
+        countryOptions={countryOptions}
+        phone={{ label: tDoor("phone"), optional: tDoor("optional") }}
+        notice={privacyNotice}
+      />
+
+      {/* Funnel bridge: sending the form already stores the inquiry for
+          follow-up (no account needed). The account is the next step — to
+          follow and manage the inquiry, post jobs and save candidates — never
+          a condition for the inquiry to count. */}
+      <div className="card-border flex flex-col gap-3 p-5" data-testid="need-bridge">
+        <p className="text-sm leading-relaxed text-text-secondary">{t("bridgeNote")}</p>
+        {/* Plain links (auth is a full-page boundary), relative under the
+            single-domain policy. Both come back to this form with what was
+            typed (employer path P0 2026-11-15). */}
+        <CompanyNeedAuthLinks locale={locale} signup={t("bridgeSignup")} login={t("bridgeLogin")} />
+      </div>
+    </div>
+  );
+}

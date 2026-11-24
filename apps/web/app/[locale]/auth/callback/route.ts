@@ -1,0 +1,351 @@
+import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
+import { createClient } from "@/lib/supabase/server";
+import { getSafeReturnPath } from "@/lib/auth/redirect";
+import { requestPublicOrigin } from "@/lib/mcp/public-origin";
+import {
+  LOCALE_COOKIE_NAME,
+  resolvePostLoginLocale,
+} from "@/lib/auth/locale-preference";
+import { readOauthTraceId } from "@/lib/auth/oauth-trace";
+import { decideOauthDisplayNameRepair } from "@/lib/auth/oauth-display-name";
+import {
+  classifyAuthRedirectError,
+  isReplayableProviderError,
+  classifyExchangeFailure,
+  isEmailConfirmFlow,
+  parseEmailVerification,
+  parseRedirectToHint,
+  classifyMissingCode,
+} from "@/lib/auth/email-confirm";
+import {
+  VERIFY_RESULT_PARAM,
+  isVerifyEmailFlow,
+  verifyOutcomeToParam,
+  type VerifyResultParam,
+} from "@/lib/auth/email-verification";
+import { routing } from "@/lib/i18n/routing";
+
+/**
+ * E-mail confirmation / OAuth callback. Supabase redirects here after the
+ * user clicks the email link or finishes Google OAuth, with `?code=…` (PKCE
+ * flow), OR — with the `token_hash` e-mail template — with
+ * `?token_hash=…&type=signup`, which we verify ourselves (`verifyOtp`) so the
+ * link works on ANY device, not only the browser that started the signup.
+ * Either way a session cookie is established, then the user is routed:
+ *
+ *   • back to `?next=…` when the middleware attached one and it is safe,
+ *   • else `/[locale]/onboarding` for users who haven't onboarded yet,
+ *   • else `/[locale]/dashboard`.
+ *
+ * On any failure we bounce to `/[locale]/auth/login?error=…` while
+ * preserving the original `next` param so the user still lands where
+ * they intended after a retry. See lib/auth/email-confirm.ts for the
+ * cross-device and resume reasoning (Train A slice 1).
+ */
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ locale: string }> },
+) {
+  const { locale: urlLocale } = await params;
+  const url = new URL(request.url);
+  // THE PUBLIC ORIGIN, never the request URL's own origin (2026-10-18
+  // incident): behind the VPS proxy `request.url` carries the BIND host
+  // (`0.0.0.0:3000`), so every redirect built from it sent a person who had
+  // just confirmed their e-mail or finished Google sign-in to an unreachable
+  // address — and the e-mail link's `rt` hint (locale + invitation `next`)
+  // was rejected as foreign.
+  const origin = requestPublicOrigin(request);
+  const code = url.searchParams.get("code");
+  // A `token_hash` template passes the original `emailRedirectTo` along as
+  // `rt`; it is a HINT (locale + next) validated below, never a target.
+  const hint = parseRedirectToHint(
+    url.searchParams.get("rt"),
+    origin,
+    routing.locales as readonly string[],
+  );
+  const locale = hint.locale ?? urlLocale;
+  const nextParam = url.searchParams.get("next") ?? hint.next;
+  const verification = parseEmailVerification(url.searchParams);
+  const emailConfirmFlow = isEmailConfirmFlow(url.searchParams);
+  // v1 OAuth trace id (see lib/auth/oauth-trace.ts). NOT a secret; safe to
+  // log and to forward to /login on failure so the user can quote it back.
+  const traceId = readOauthTraceId(url);
+  const loginUrl = new URL(`/${locale}/auth/login`, origin);
+  if (nextParam) loginUrl.searchParams.set("next", nextParam);
+  if (traceId) loginUrl.searchParams.set("trace", traceId);
+
+  // A bounce that carries an explicit ?error= is an OUTCOME, not a missing
+  // code: `error=access_denied` is the person pressing Cancel/Deny on the
+  // provider's consent screen — a deliberate choice, not a system fault — so
+  // it must not fall through to the "missing sign-in code" system-error copy.
+  // Safe diagnostics only: `error` + `error_code` are bounded identifiers;
+  // `error_description` is free-form provider text and is deliberately NOT
+  // logged (same convention as never logging the full request URL).
+  const providerError = url.searchParams.get("error");
+  if (providerError) {
+    const errorCode = url.searchParams.get("error_code");
+    console.info("[auth/callback] provider returned an explicit error", {
+      locale,
+      trace: traceId,
+      error: providerError,
+      errorCode,
+    });
+    // ALREADY SIGNED IN: `bad_oauth_state` arrives AFTER a successful sign-in when the
+    // browser replays the provider step (Back into the account chooser, a
+    // restored tab) — the state was spent by the sign-in that worked. Telling
+    // a signed-in person "sign-in failed" is false; they go where they were
+    // going. Without a session nothing changes: the error is shown as before.
+    if (isReplayableProviderError(errorCode)) {
+      try {
+        const supabase = await createClient();
+        const {
+          data: { user },
+        } = await supabase.auth.getUser();
+        if (user) {
+          return NextResponse.redirect(new URL(getSafeReturnPath(nextParam, locale), origin));
+        }
+      } catch {
+        // No readable session: fall through to the honest error below.
+      }
+    }
+    // `access_denied` + `otp_expired` is a dead e-mail link, not a cancel —
+    // the classifier keeps the two apart (lib/auth/email-confirm.ts).
+    loginUrl.searchParams.set(
+      "error",
+      classifyAuthRedirectError({ error: providerError, errorCode }),
+    );
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (!code && !verification) {
+    // On the e-mail confirmation return this is what a RE-SENT link does (see
+    // classifyMissingCode): the address is confirmed, the person signs in.
+    const outcome = classifyMissingCode(emailConfirmFlow);
+    if (outcome === "missing_code") {
+      console.error("[auth/callback] missing code in callback URL", {
+        locale,
+        trace: traceId,
+      });
+    } else {
+      console.info("[auth/callback] confirmation link returned without a code", {
+        locale,
+        trace: traceId,
+      });
+    }
+    loginUrl.searchParams.set("error", outcome);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  try {
+    const supabase = await createClient();
+    if (verification) {
+      // token_hash path: GoTrue's single-use, expiring token is verified
+      // here, so the session is created in THIS browser whatever device
+      // started the signup. Nothing about PKCE is bypassed — no auth code
+      // is involved on this path at all.
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        token_hash: verification.tokenHash,
+        type: verification.type,
+      });
+      if (verifyError) {
+        console.error("[auth/callback] verifyOtp failed", {
+          locale,
+          trace: traceId,
+          type: verification.type,
+          code: verifyError.code,
+          status: verifyError.status,
+          name: verifyError.name,
+        });
+        // Expired, already used, or never valid — the login page offers a
+        // fresh link; a person who already confirmed simply signs in.
+        loginUrl.searchParams.set("error", "link_expired");
+        return NextResponse.redirect(loginUrl);
+      }
+    }
+    const { error: exchangeError } = verification
+      ? { error: null }
+      : await supabase.auth.exchangeCodeForSession(code as string);
+    if (exchangeError) {
+      // Surface the non-secret Supabase error identifiers so the owner can
+      // tell expired/already-used codes (`invalid_grant`) apart from PKCE
+      // verifier cookie issues, network blips, etc. We deliberately do NOT
+      // log the auth code, tokens, cookies, or the full request URL.
+      console.error("[auth/callback] exchangeCodeForSession failed", {
+        locale,
+        trace: traceId,
+        code: exchangeError.code,
+        status: exchangeError.status,
+        name: exchangeError.name,
+        message: exchangeError.message,
+      });
+
+      // PKCE cookie race fallback: a concurrent token_revoke / cookie
+      // overwrite can make exchangeCodeForSession abort locally before
+      // posting to /token even though the SDK has already established a
+      // valid session via other means (refresh, cached cookie). Check
+      // getSession before giving up — if a real session is present we
+      // proceed, exactly like a normal success. Verified safe: getSession
+      // only reads existing cookies, never trusts client input.
+      const { data: sessionData } = await supabase.auth.getSession();
+      if (!sessionData?.session) {
+        // E-mail confirmation opened on ANOTHER device: GoTrue already
+        // confirmed the address before redirecting here, and this browser
+        // holds no PKCE verifier → "confirmed, sign in here", not a fault.
+        loginUrl.searchParams.set(
+          "error",
+          classifyExchangeFailure(exchangeError, emailConfirmFlow),
+        );
+        return NextResponse.redirect(loginUrl);
+      }
+      console.warn(
+        "[auth/callback] exchangeCodeForSession errored but getSession is valid — proceeding (PKCE race fallback)",
+        { locale, trace: traceId },
+      );
+    }
+
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) {
+      console.error("[auth/callback] getUser returned no user after exchange", {
+        locale,
+        trace: traceId,
+      });
+      loginUrl.searchParams.set("error", "no_user");
+      return NextResponse.redirect(loginUrl);
+    }
+
+    // PROGRESSIVE EMAIL PROOF (flow=verify_email): the session just minted
+    // from the mailed one-time link is the evidence; the database decides
+    // (confirm_my_email_v1 checks the signed `amr` claim, the pending request
+    // and that the address is still the live one). A failure never blocks
+    // sign-in — the person is simply still unverified and is told so.
+    let verifyResult: VerifyResultParam | null = null;
+    if (isVerifyEmailFlow(url.searchParams)) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: vData, error: vError } = await (supabase as any).rpc(
+        "confirm_my_email_v1",
+      );
+      verifyResult = vError ? "failed" : verifyOutcomeToParam(vData?.outcome);
+      console.info("[auth/callback] email proof", { trace: traceId, result: verifyResult });
+    }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("onboarded_at, locale, full_name, email")
+      .eq("id", user.id)
+      .single();
+
+    // Social OAuth identity repair (lib/auth/oauth-display-name.ts): a
+    // profile whose full_name is still the onboarding e-mail-local-part
+    // default gets the provider's real name on a successful callback. The
+    // decision is pure and pinned by tests; the writes below are own-row RLS
+    // and compare-and-set on the exact stored value, so a human edit that
+    // races this callback is never overwritten. Best-effort: a write failure
+    // is logged and the sign-in proceeds.
+    const profileRow = profile as { full_name?: string | null; email?: string | null } | null;
+    const repair = decideOauthDisplayNameRepair({
+      storedFullName: profileRow?.full_name,
+      profileEmail: profileRow?.email,
+      userEmail: user.email,
+      userMetadata: (user.user_metadata ?? {}) as Record<string, unknown>,
+    });
+    if (repair.repair) {
+      const { error: nameRepairError } = await supabase
+        .from("profiles")
+        .update({ full_name: repair.providerName })
+        .eq("id", user.id)
+        .eq("full_name", repair.syntheticName);
+      if (nameRepairError) {
+        console.warn("[auth/callback] OAuth display-name repair skipped after write failure", {
+          trace: traceId,
+          code: nameRepairError.code,
+        });
+      } else {
+        // Keep the worker projection aligned when it carries the same
+        // synthetic value (20260805090100 backfilled it from full_name). The
+        // equality guard leaves a display name the person changed elsewhere
+        // untouched.
+        const { error: workerNameRepairError } = await supabase
+          .from("workers")
+          .update({ display_name: repair.providerName })
+          .eq("profile_id", user.id)
+          .eq("display_name", repair.syntheticName);
+        if (workerNameRepairError) {
+          console.warn("[auth/callback] worker OAuth display-name repair skipped", {
+            trace: traceId,
+            code: workerNameRepairError.code,
+          });
+        }
+      }
+    }
+
+    // V8 W4-B item 2: honor the ACCOUNT language on a device that carries no
+    // explicit choice. Priority (pinned by lib/auth/locale-preference.test.ts):
+    // NEXT_LOCALE cookie > profiles.locale > the URL locale the middleware
+    // derived from Accept-Language. When the profile preference wins, the
+    // cookie is set so the choice sticks for every later navigation.
+    // A NOT-yet-onboarded account never gets its URL locale overridden: its
+    // profiles.locale is the signup-time DB default, not a human choice (the
+    // onboarding wizard records the real one at completion).
+    const jar = await cookies();
+    const decision = resolvePostLoginLocale({
+      cookieLocale: jar.get(LOCALE_COOKIE_NAME)?.value ?? null,
+      profileLocale:
+        (profile as { locale?: string | null } | null)?.locale ?? null,
+      urlLocale: locale,
+      onboarded: Boolean(profile?.onboarded_at),
+    });
+    const landingLocale = decision.locale;
+    const withLocaleCookie = (res: NextResponse): NextResponse => {
+      if (decision.overridden) {
+        res.cookies.set(LOCALE_COOKIE_NAME, landingLocale, {
+          // The SAME lifetime next-intl's middleware gives this cookie
+          // (routing.localeCookie) — one truth for how long a choice lives.
+          maxAge:
+            (routing.localeCookie as { maxAge?: number }).maxAge ??
+            60 * 60 * 24 * 365,
+          path: "/",
+          sameSite: "lax",
+        });
+      }
+      return res;
+    };
+
+    // If onboarding is incomplete /onboarding still wins — the user
+    // cannot usefully land on /dashboard/<anything> without a profile.
+    // We attach the `next` query so onboarding completion can fall
+    // back to it (when that hook is wired in a future PR).
+    if (!profile?.onboarded_at) {
+      const onboarding = new URL(`/${landingLocale}/onboarding`, origin);
+      if (nextParam) onboarding.searchParams.set("next", nextParam);
+      return withLocaleCookie(NextResponse.redirect(onboarding));
+    }
+
+    // A `next` value carrying its OWN locale prefix is an explicit deep link
+    // and keeps it; a bare path gets the landing locale prefixed.
+    const safeNext = getSafeReturnPath(nextParam, landingLocale);
+    console.info("[auth/callback] success", {
+      locale,
+      trace: traceId,
+      onboarded: !!profile?.onboarded_at,
+    });
+    const destination = new URL(safeNext, origin);
+    if (verifyResult) destination.searchParams.set(VERIFY_RESULT_PARAM, verifyResult);
+    return withLocaleCookie(NextResponse.redirect(destination));
+  } catch (e) {
+    // Without this the bare catch silently swallowed every unexpected error
+    // (env throws, fetch failures, etc.) and the user saw `error=callback`
+    // with no signal in Vercel logs. Log the error message only — never the
+    // request URL (it carries the auth code).
+    console.error("[auth/callback] unexpected error during exchange", {
+      trace: traceId,
+      ...(e instanceof Error
+        ? { name: e.name, message: e.message }
+        : { value: String(e) }),
+    });
+    loginUrl.searchParams.set("error", "callback");
+    return NextResponse.redirect(loginUrl);
+  }
+}

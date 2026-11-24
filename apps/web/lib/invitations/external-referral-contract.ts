@@ -1,0 +1,212 @@
+import { z } from "zod";
+
+import type { DeclaredContextV1 } from "@/lib/invitations/model";
+import { resolveCountryCode } from "@/lib/location/country-model";
+
+/**
+ * EXTERNAL WORKER REFERRAL — the receiving contract (universal network v1).
+ *
+ * What an approved source POSTs to `/api/referrals/external/v1`. The shape
+ * is the partner's `NONSTOP_WORKER_REFERRAL` v1 envelope, accepted as the
+ * generic `kind` list below so the next approved partner sends the same
+ * thing under its own kind. Strict: unknown keys are refused, every string
+ * is bounded, and the consent object is REQUIRED with `given: true` — a
+ * schema-valid envelope without consent does not exist.
+ *
+ * WHAT IS NOT IN HERE
+ *   - No verification field. A source cannot say "verified"; the schema has
+ *     no place to put it.
+ *   - No LabourMarket identity. A source never names a profile id or an
+ *     account; the person claims the referral themselves by opening the link
+ *     signed in.
+ *   - No phone in storage. `contact.phone` is accepted for schema fidelity
+ *     and then DROPPED before anything is stored — the invitation stores the
+ *     addressee e-mail and name only; the source keeps the phone and the lead.
+ */
+export const EXTERNAL_REFERRAL_KINDS = ["NONSTOP_WORKER_REFERRAL"] as const;
+
+/** The partner's declared work situations (Nonstop `WorkStatus`), verbatim. */
+export const WORK_STATUSES = [
+  "EU_CITIZEN",
+  "EU_LONG_TERM_OR_PERMANENT_RESIDENT",
+  "TEMPORARY_RESIDENCE",
+  "TEMPORARY_PROTECTION",
+  "WORK_PERMIT_BASED_RESIDENCE",
+  "EMPLOYED_IN_EU",
+  "OTHER",
+  "UNKNOWN",
+] as const;
+export const ACCOMMODATION_NEEDS = ["NEEDED", "NOT_NEEDED", "FLEXIBLE", "UNKNOWN"] as const;
+
+/**
+ * One residence field, one or two facts. A whole value that names a country is
+ * that country. Otherwise the value is split on commas, slashes, semicolons,
+ * dashes and parentheses; exactly one part that resolves to a country becomes
+ * the country, and the remaining parts (in order) the city. No country, or two
+ * different ones, resolves to nothing — never guessed — and an unresolved value
+ * is not promoted to a city either (it may be a region or a sentence).
+ */
+export function splitResidence(raw: string | undefined): { country?: string; city?: string } {
+  const t = raw?.trim();
+  if (!t) return {};
+  const whole = resolveCountryCode(t);
+  if (whole) return { country: whole };
+  const parts = t.split(/\s*(?:[,;/|()]|\s[-–—]\s)\s*/).map((x) => x.trim()).filter(Boolean);
+  const hits = parts.map((p) => resolveCountryCode(p));
+  const codes = [...new Set(hits.filter((c): c is string => Boolean(c)))];
+  if (codes.length !== 1) return {};
+  const city = parts.filter((_, i) => !hits[i]).join(", ").slice(0, 80).trim();
+  return { country: codes[0], ...(city ? { city } : {}) };
+}
+
+const bounded = (max: number) => z.string().trim().min(1).max(max);
+const boundedList = (max: number, each: number) =>
+  z.array(bounded(each)).max(max).default([]);
+
+export const externalWorkerReferralV1Schema = z
+  .object({
+    v: z.literal(1),
+    kind: z.enum(EXTERNAL_REFERRAL_KINDS),
+    /** The source's own reference (Nonstop: `leadId`). Idempotency key with
+     *  the source slug. Never PII by contract; bounded either way. */
+    leadId: bounded(120),
+    receivedAt: z.string().datetime({ offset: true }).optional(),
+    locale: z.string().regex(/^[a-z]{2}$/).optional(),
+    worker: z
+      .object({
+        subjectType: z.enum(["INDIVIDUAL_WORKER", "SPECIALIST", "TEAM", "BRIGADE"]),
+        professions: z
+          .array(
+            z
+              .object({ id: bounded(80).optional(), raw: bounded(120).optional() })
+              .strict()
+              .refine((p) => Boolean(p.id || p.raw), "profession needs id or raw"),
+          )
+          .max(20)
+          .default([]),
+        sectors: boundedList(30, 60),
+        skills: boundedList(50, 120),
+        yearsClaimed: z.number().int().min(0).max(60).optional(),
+        languages: boundedList(20, 40),
+        /** ISO-2, or the country's NAME as a person typed it into the partner's form
+         *  (measured 2026-09-22, lead_4735a23a: "Vietnam" was refused as `invalid_envelope`
+         *  and a consenting worker's referral was lost). A name that resolves to exactly one
+         *  ISO-2 code becomes that code; one that does not is DROPPED — residence unknown —
+         *  never guessed, and never a reason to refuse the whole consent.
+         *  "City, Country" in this one field (2026-10-13, lead_db65f2db, a worker in Turkey):
+         *  the part that is a country becomes the code and the rest becomes `city` when the
+         *  sender gave none (see `splitResidence`). The 80-character bound stays. */
+        residenceCountry: z.string().trim().min(1).max(80).optional(),
+        /** The town or city the person lives in — a separate fact from the country. */
+        city: bounded(80).optional(),
+        /** READINESS to work (e.g. AVAILABLE_NOW) — never a statement about the RIGHT to work. */
+        availability: bounded(40).optional(),
+        /** The person's own declared work situation (EU citizen, permit-based residence, …).
+         *  Recorded as declared, never verified, and never read as a right to work in any
+         *  particular country — that is a separate, legally-gated determination. */
+        workStatus: z.enum(WORK_STATUSES).optional(),
+        /** Whether accommodation must be arranged — a condition, not a qualification. */
+        accommodationNeed: z.enum(ACCOMMODATION_NEEDS).optional(),
+        /** Where they wish to work — codes or names; what does not resolve is dropped from
+         *  the list (it was a wish, not an identity), never a refusal of the person. */
+        destinations: z
+          .array(z.string().trim().min(1).max(80))
+          .max(40)
+          .default([])
+          .transform((xs) => {
+            const out: string[] = [];
+            for (const x of xs) {
+              const code = resolveCountryCode(x);
+              if (code && !out.includes(code)) out.push(code);
+            }
+            return out;
+          }),
+        mobilityScope: z.enum(["LISTED", "EU_WIDE"]).optional(),
+        freeText: z.string().trim().max(4000).optional(),
+        contact: z
+          .object({
+            name: bounded(120).optional(),
+            phone: bounded(40).optional(),
+            email: z.string().trim().toLowerCase().email().max(254).optional(),
+          })
+          .strict(),
+      })
+      .strict()
+      .transform((w) => {
+        const place = splitResidence(w.residenceCountry);
+        const { residenceCountry: _raw, ...rest } = w;
+        void _raw;
+        return {
+          ...rest,
+          ...(place.country ? { residenceCountry: place.country } : {}),
+          ...(w.city ? { city: w.city } : place.city ? { city: place.city } : {}),
+        };
+      }),
+    /** The permission the envelope exists on. `given` must be literally true. */
+    consent: z
+      .object({
+        given: z.literal(true),
+        text: bounded(4000),
+        version: bounded(80),
+      })
+      .strict(),
+    requests: z
+      .array(z.enum(["WORKER_PROFILE", "OPPORTUNITY_SEARCH", "OPPORTUNITY_DELIVERY"]))
+      .max(3)
+      .default([]),
+  })
+  .strict();
+
+export type ExternalWorkerReferralV1 = z.infer<typeof externalWorkerReferralV1Schema>;
+
+/** Country resolution lives in `lib/location/country-model` (`resolveCountryCode`) — one resolver for every boundary. */
+export const resolveCountryIso2 = resolveCountryCode;
+
+/**
+ * The envelope → what the invitation stores. Contact is split off: the
+ * e-mail becomes the addressee, the name the invited name, the phone is
+ * dropped. Everything else is declared context, verbatim, as declared.
+ */
+export function toDeclaredContext(
+  envelope: ExternalWorkerReferralV1,
+): DeclaredContextV1 {
+  const w = envelope.worker;
+  return {
+    v: 1,
+    subjectType: w.subjectType,
+    professions: w.professions.map((p) => ({
+      ...(p.id ? { id: p.id } : {}),
+      ...(p.raw ? { raw: p.raw } : {}),
+    })),
+    sectors: [...w.sectors],
+    skills: [...w.skills],
+    ...(w.yearsClaimed !== undefined ? { yearsClaimed: w.yearsClaimed } : {}),
+    languages: [...w.languages],
+    ...(w.residenceCountry ? { residenceCountry: w.residenceCountry } : {}),
+    ...(w.city ? { city: w.city } : {}),
+    ...(w.availability ? { availability: w.availability } : {}),
+    ...(w.workStatus ? { workStatus: w.workStatus } : {}),
+    ...(w.accommodationNeed ? { accommodationNeed: w.accommodationNeed } : {}),
+    destinations: [...w.destinations],
+    ...(w.mobilityScope ? { mobilityScope: w.mobilityScope } : {}),
+    ...(w.freeText ? { freeText: w.freeText } : {}),
+  };
+}
+
+/**
+ * Parse a raw body. A failure is reported as a bounded list of paths, never
+ * the offending values — the response goes back to a machine and its log,
+ * and a person's free text must not be echoed into either.
+ */
+export type ParsedReferral =
+  | { readonly ok: true; readonly envelope: ExternalWorkerReferralV1 }
+  | { readonly ok: false; readonly issues: readonly string[] };
+
+export function parseExternalWorkerReferral(body: unknown): ParsedReferral {
+  const r = externalWorkerReferralV1Schema.safeParse(body);
+  if (r.success) return { ok: true, envelope: r.data };
+  const issues = r.error.issues
+    .slice(0, 20)
+    .map((i) => `${i.path.map(String).join(".") || "$"}: ${i.code}`);
+  return { ok: false, issues };
+}

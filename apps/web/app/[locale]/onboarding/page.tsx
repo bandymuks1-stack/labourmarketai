@@ -1,0 +1,246 @@
+import { redirect } from "next/navigation";
+import { DiscoverabilityConsent } from "@/components/app/discoverability-consent";
+import { loadEmployerVisibilityForChat } from "@/lib/conversation/employer-visibility-chat";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { AmbientGlow } from "@/components/decor/ambient-glow";
+import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
+import { LmLogo } from "@/components/ui/lm-logo";
+import { OnboardingWizard } from "@/components/app/onboarding-wizard";
+import { SessionTelemetry } from "@/components/app/session-telemetry";
+import { FirstTouchAccountCopy } from "@/components/app/first-touch-account-copy";
+import { Link } from "@/lib/i18n/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
+import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
+import {
+  inviteTokenFromNextPath,
+  invitationImpliesWorkerContext,
+  invitationJoinsExistingOrganization,
+} from "@/lib/invitations/model";
+import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
+import { readMyInvitationDecision } from "@/lib/invitations/my-decision";
+import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
+import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
+import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
+import { DOOR_WORDS_KEY, readLandingHandoff } from "@/lib/onboarding/landing-handoff";
+
+/** Unified onboarding shell. Role is picked here (Step 1), so we no longer
+ *  pre-read active_role. Display name is prefilled from the auth identity:
+ *  Google's full_name > name > the email's local part. */
+export default async function OnboardingPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{ next?: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  // Deep-link continuity (core-network area B): the auth callback forwards
+  // ?next= here so an invite link (or any protected destination) survives
+  // first-time registration — onboarding completion returns to it.
+  const { next } = await searchParams;
+  const safeNext = isSafeReturnPath(next) ? (next as string) : null;
+  // The landing sentence (`/dashboard?say=…` inside `next`) becomes the
+  // wizard's DEFAULTS — the family the router read is pre-ticked and a
+  // profession the sentence names is pre-chosen. Read on the server: the
+  // recogniser's lexicon never ships in the wizard's client bundle.
+  const handoff = readLandingHandoff(safeNext);
+  // The landing DOOR (`/dashboard/start/company?capability=…` inside `next`)
+  // ticks the card it routes to; its plain words — the button the person
+  // pressed on the landing — are shown back from the landing catalogue,
+  // resolved here so the wizard's client bundle keeps the auth allowlist.
+  const tDoors = handoff.door.length > 0 ? await getTranslations("landing.cta") : null;
+  const doorWords = tDoors
+    ? handoff.door
+        .map((intent) => DOOR_WORDS_KEY[intent])
+        .filter((key): key is NonNullable<typeof key> => key !== undefined)
+        .map((key) => tDoors(key))
+        .join(" · ") || null
+    : null;
+
+  // FRICTIONLESS ADDRESSED INVITE (owner decision 2026-10-06): when the
+  // invitation the person arrived through canonically implies a worker, the
+  // first-run role picker asks nothing the invitation already answered. Narrow
+  // by construction (invitationImpliesWorkerContext): every ambiguous kind
+  // still shows the picker.
+  const inviteToken = inviteTokenFromNextPath(safeNext);
+  let impliedWorker = false;
+  // Finishing onboarding ALSO accepts the invitation (the wizard's finish), so
+  // a staff invitation of a named organization shows the review sentence right
+  // above that button (owner decision 1).
+  let invitationReviewNotice: string | null = null;
+  if (inviteToken) {
+    const [preview, myDecision] = await Promise.all([
+      readPublicInvitationPreview(inviteToken, { emitOpened: false }),
+      readMyInvitationDecision(inviteToken),
+    ]);
+    // The SAME rule completeOnboarding enforces (resolveInvitedWorkerContext):
+    // a person joining an existing organization sets up no organization of
+    // their own here (owner P0 2026-11-22).
+    impliedWorker =
+      preview.kind === "ok" &&
+      (invitationImpliesWorkerContext({
+        invitationType: preview.preview.invitationType,
+        externalSourceSlug: preview.preview.externalSourceSlug,
+      }) ||
+        invitationJoinsExistingOrganization({
+          invitationType: preview.preview.invitationType,
+          organizationName: preview.preview.organizationName,
+          status: preview.preview.status,
+          expiresAt: preview.preview.expiresAt,
+          myDecision,
+        }));
+    if (
+      preview.kind === "ok" &&
+      preview.preview.status === "pending" &&
+      showsStaffReviewNotice({
+        invitationType: preview.preview.invitationType,
+        relationshipSlug: preview.preview.relationshipSlug,
+        organizationName: preview.preview.organizationName,
+      })
+    ) {
+      const tInvite = await getTranslations({ locale, namespace: "network.invitePage" });
+      invitationReviewNotice = tInvite("reviewNotice", { organization: preview.preview.organizationName ?? "" });
+    }
+  }
+
+  // NO TOKEN, STILL INVITED (2026-10-27). A person who registered without the
+  // invitation link in `?next=` — mail opened in one browser, registration in
+  // another, or a later visit — is still the addressee: the pending
+  // `join_platform` invitation for their verified e-mail is found here, so
+  // onboarding uses it exactly as it uses a token (worker implied only for a
+  // partner referral; accepted when the person finishes).
+  if (!inviteToken) {
+    // The role question is skipped from the same server decision that
+    // completeOnboarding enforces (and that accepts the invitation there).
+    const invited = await resolveInvitedWorkerContext(null);
+    impliedWorker = invited.workerImplied;
+  }
+
+  const supabase = await createClient();
+  // ONE `profiles` read per request. This used to be its own SELECT; it is now
+  // the same request-cached `getSessionProfile()` the layout above already
+  // called to decide the gate, so moving the gate up added no read — it
+  // removed one. `getUser()` is memoized by the cached client, so reading
+  // `user_metadata` below still costs no extra round-trip.
+  const [
+    {
+      data: { user },
+    },
+    session,
+  ] = await Promise.all([supabase.auth.getUser(), getSessionProfile()]);
+  if (!user) redirect(`/${locale}/auth/login`);
+  const profile = session.profile;
+
+  // Already onboarded — a direct visit shouldn't show the form again; an
+  // attached safe ?next= still wins over the generic dashboard.
+  //
+  // DEFENCE IN DEPTH, not the primary gate. `onboarding/layout.tsx` makes this
+  // same decision ABOVE the `loading.tsx` Suspense boundary, because a
+  // `redirect()` thrown below one cannot set an HTTP status — it becomes a 200
+  // that streams the onboarding form to someone who has already finished, then
+  // redirects on the client behind Next's "Application error" shell. This copy
+  // stays because it is the authority on a SOFT navigation (React reuses the
+  // layout, so it does not re-run) and on any request where the middleware
+  // header never arrived. It can only ever refuse LATER, never grant.
+  if (profile?.onboarded_at) {
+    redirect(getSafeReturnPath(safeNext, locale));
+  }
+
+  // Slice 10 — an invited-but-not-yet-onboarded user lands here; surface the
+  // real pending invitation so they aren't confused by a bare role-start screen.
+  const pendingInvites = await listMyPendingWorkerInvitations();
+  // The employer-visibility consent, asked where a worker starts (owner P0
+  // 2026-09-30, source "onboarding"). The SAME loader the chat uses: an
+  // unknown state or an account with no worker row embeds nothing (SEP-7).
+  const visibility = await loadEmployerVisibilityForChat();
+  const employerVisibility =
+    visibility.kind === "state" && visibility.consent ? (
+      <DiscoverabilityConsent compact locale={locale} source="onboarding" {...visibility.consent} />
+    ) : null;
+  const tOnboard = await getTranslations("auth.onboarding");
+  // Student step (universal first-run router): the education-type registry
+  // labels, resolved here on the server from the CV namespace so the wizard's
+  // client bundle keeps the auth allowlist (no `cvSections` root shipped).
+  const tEducationTypes = await getTranslations("cvSections.educationTypes");
+  const educationTypeOptions = EDUCATION_TYPE_SLUGS.map((slug) => ({
+    slug,
+    label: tEducationTypes(slug),
+  }));
+
+  const meta = (user.user_metadata ?? {}) as Record<string, unknown>;
+  const metaFullName =
+    typeof meta.full_name === "string" ? meta.full_name : "";
+  const metaName = typeof meta.name === "string" ? meta.name : "";
+  // Never the e-mail handle: "uxv-d1-w-m" is not a name, and a prefilled
+  // field gets accepted as-is (UX review 2026-10-24, 1.4). Only a name the
+  // person or their identity provider actually gave is offered; otherwise
+  // the field starts empty and the person types it.
+  const defaultName =
+    [profile?.full_name, metaFullName, metaName]
+      .map((v) => (v ?? "").trim())
+      .find((v) => v.length > 0) ?? "";
+
+  return (
+    <div className="relative min-h-screen">
+      {/* New users reach onboarding BEFORE any dashboard layout mounts —
+          without this, login_succeeded fires after onboarding_started
+          (funnel order inversion) and onboarding drop-offs count as
+          "never logged in" (audit F-T4). Dedup key prevents double-fire
+          once the user later reaches the dashboard in the same tab.
+          surface="onboarding": this is the ONE surface allowed to emit
+          `signup_completed` from the pending marker — every genuinely new
+          account passes through here first. */}
+      <SessionTelemetry surface="onboarding" />
+      <FirstTouchAccountCopy />
+      <AmbientGlow />
+      {/* V8 W4-B: language stays switchable DURING onboarding — the wizard
+          writes profiles.locale from the URL locale at completion, so the
+          person must be able to correct the language before that happens.
+          (The layout is a pure message-scope wrapper; this page owns the
+          chrome, so the switcher mounts here, mirroring the auth header.) */}
+      <header className="relative z-10 mx-auto flex max-w-container items-center justify-between gap-3 px-6 py-6 sm:px-12">
+        <Link
+          href="/"
+          className="flex min-h-11 items-center gap-2 font-display text-lg font-bold tracking-tightest text-text-primary"
+        >
+          <LmLogo title="" className="h-7 w-auto shrink-0" />
+          <span>
+            LabourMarket<span className="text-gradient-accent">.ai</span>
+          </span>
+        </Link>
+        <LocaleSwitcher compactBelowSm />
+      </header>
+      <main className="relative z-10 mx-auto flex w-full max-w-md flex-col px-6 pb-20 sm:max-w-lg lg:max-w-2xl">
+        {pendingInvites.length > 0 && (
+          <div
+            className="card-border mb-4 bg-brand-blue/5 p-4"
+            data-testid="onboarding-pending-invite"
+          >
+            <p className="text-sm leading-relaxed text-text-secondary">
+              {tOnboard("pendingInviteNote", { org: pendingInvites[0].orgName })}
+            </p>
+          </div>
+        )}
+        <OnboardingWizard
+          defaultName={defaultName}
+          returnTo={safeNext}
+          educationTypeOptions={educationTypeOptions}
+          saidSentence={handoff.sentence || null}
+          defaultIntents={impliedWorker ? ["work"] : handoff.intents}
+          skipRoleStep={impliedWorker}
+          invitationToken={inviteToken}
+          invitationReviewNotice={invitationReviewNotice}
+          defaultProfessionSlug={handoff.professionSlug}
+          doorIntents={handoff.door}
+          doorWords={doorWords}
+          employerVisibility={employerVisibility}
+          countryOptions={countryOptionsForLocale(locale)}
+        />
+      </main>
+    </div>
+  );
+}

@@ -1,0 +1,275 @@
+"use client";
+
+/**
+ * Document → journal draft REVIEW FORM (value train 2, C2b).
+ *
+ * The human-in-the-loop step of the import chain: the worker sees what the
+ * system read from their document, EDITS it, chooses the engagement, and
+ * explicitly confirms — only then does the text become canonical Work
+ * Journal history, via the EXISTING `createJournalEntry` server action
+ * (which re-verifies the source document under the caller's RLS and stamps
+ * the provenance rows server-side, C2a). Nothing here invents a second save
+ * path, second composer, or second store.
+ *
+ * Labels arrive as props from the server parent (the WorkerWorkLogFlow
+ * precedent), so this client component reads no i18n namespace itself.
+ */
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
+import {
+  createJournalEntry,
+  type CreateJournalEntryResult,
+} from "@/lib/journal/actions";
+import type { WorkLogEngagement } from "@/lib/conversation/worklog-engagements";
+import { useTranslations } from "next-intl";
+import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectDisplayLabel,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+
+export type DocumentJournalDraftFormLabels = {
+  notesLabel: string;
+  engagementLabel: string;
+  save: string;
+  saving: string;
+  saved: string;
+  savedLink: string;
+  error: string;
+  /** Says the document does not state the work day — the worker chooses it. */
+  workDateHint: string;
+};
+
+function todayLocalIso(): string {
+  const d = new Date();
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+/**
+ * After a successful save, drop `?draftFrom` so a reload cannot re-open the
+ * draft and save the same text again. `history.replaceState` (Next syncs it
+ * with the router) rather than `router.replace`: the latter would re-render
+ * the server page without the draft section and remove the confirmation the
+ * worker is reading.
+ */
+function clearDraftFromUrl(): void {
+  try {
+    const url = new URL(window.location.href);
+    if (!url.searchParams.has("draftFrom")) return;
+    url.searchParams.delete("draftFrom");
+    window.history.replaceState(
+      window.history.state,
+      "",
+      `${url.pathname}${url.search}${url.hash}`,
+    );
+  } catch {
+    /* URL cleanup is best-effort; the save already succeeded. */
+  }
+}
+
+export function DocumentJournalDraftForm({
+  locale,
+  documentFileId,
+  initialText,
+  engagements,
+  defaultEngagementId,
+  contextCandidates,
+  activeOrganizationId = null,
+  labels,
+}: {
+  locale: string;
+  documentFileId: string;
+  initialText: string;
+  engagements: readonly WorkLogEngagement[];
+  defaultEngagementId: string | null;
+  /** The facts the server resolved the default from. When given, the default
+   *  is RE-RESOLVED against the work date the person chooses — a context only
+   *  applies on days inside its bounds (Codex P2 on #2884). */
+  contextCandidates?: readonly EngagementCandidate[];
+  /** The server-resolved active workspace's organization (rule W), or null. */
+  activeOrganizationId?: string | null;
+  labels: DocumentJournalDraftFormLabels;
+}) {
+  const formRef = useRef<HTMLFormElement>(null);
+  const [pending, startTransition] = useTransition();
+  const [result, setResult] = useState<CreateJournalEntryResult | null>(null);
+  const tJournal = useTranslations("journal");
+  // Attribution is part of the draft: a document-derived entry is not saved as
+  // work evidence until the project question (2+ active projects) is answered.
+  const [engagementId, setEngagementId] = useState<string>(defaultEngagementId ?? "");
+  // The document does not state the day; the person chooses it. Once chosen,
+  // the default context is resolved FOR THAT DAY with the same pure resolver
+  // the server ran — until the person picks a context themselves.
+  const [workDate, setWorkDate] = useState<string>("");
+  const contextTouched = useRef(false);
+  const dayResolution = useMemo(
+    () =>
+      contextCandidates && workDate
+        ? resolveEngagementContext({
+            candidates: contextCandidates,
+            workDay: workDate,
+            activeOrganizationId,
+          })
+        : null,
+    [contextCandidates, workDate, activeOrganizationId],
+  );
+  const daySelectedId = dayResolution ? (dayResolution.selectedId ?? "") : null;
+  useEffect(() => {
+    if (daySelectedId === null || contextTouched.current) return;
+    setEngagementId(daySelectedId);
+  }, [daySelectedId]);
+  const [projectChoice, setProjectChoice] = useState<string>("");
+  const contextProjects: AssignedProject[] =
+    engagements.find((e) => e.id === engagementId)?.projects ?? [];
+  const projectPrompt = projectPromptFor(contextProjects);
+  const projectChoiceValid = projectChoiceIsSatisfied(contextProjects, projectChoice)
+    ? projectChoice
+    : "";
+
+  if (result?.ok) {
+    return (
+      <div
+        role="status"
+        className="rounded-md border border-state-success/50 bg-state-success/10 px-3 py-2 text-sm text-text-primary"
+        data-testid="doc-journal-draft-saved"
+      >
+        <p>{labels.saved}</p>
+        <a
+          href={`/${locale}/dashboard/journal`}
+          className="font-mono text-meta uppercase tracking-label text-brand-blue underline-offset-2 hover:underline"
+        >
+          {labels.savedLink}
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <form
+      ref={formRef}
+      className="flex flex-col gap-3"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (!formRef.current || pending) return;
+        if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+          setResult({
+            ok: false,
+            code: "project_required",
+            message: tJournal("projectAmbiguous"),
+          });
+          return;
+        }
+        const fd = new FormData(formRef.current);
+        if (projectPrompt === "ask") fd.set("project_id", projectChoiceValid);
+        startTransition(async () => {
+          try {
+            const saved = await createJournalEntry(fd);
+            setResult(saved);
+            if (saved.ok) clearDraftFromUrl();
+          } catch {
+            setResult({
+              ok: false,
+              code: "entry_insert_failed",
+              message: labels.error,
+            });
+          }
+        });
+      }}
+    >
+      <input type="hidden" name="locale" value={locale} />
+      <input
+        type="hidden"
+        name="source_document_file_id"
+        value={documentFileId}
+      />
+      <label className="flex flex-col gap-1 text-sm text-text-secondary">
+        {labels.notesLabel}
+        <textarea
+          name="notes"
+          required
+          defaultValue={initialText}
+          rows={10}
+          className="w-full rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
+          data-testid="doc-journal-draft-notes"
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-text-secondary">
+        {tJournal("date")}
+        <input
+          type="date"
+          name="work_date"
+          required
+          defaultValue=""
+          onChange={(e) => setWorkDate(e.target.value)}
+          max={todayLocalIso()}
+          className="w-full max-w-xs rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
+          data-testid="doc-journal-draft-work-date"
+        />
+        <span className="text-xs text-text-muted">{labels.workDateHint}</span>
+      </label>
+      <label className="flex flex-col gap-1 text-sm text-text-secondary">
+        {labels.engagementLabel}
+        <select
+          name="engagement_context_id"
+          required
+          value={engagementId}
+          onChange={(e) => {
+            contextTouched.current = true;
+            setEngagementId(e.target.value);
+          }}
+          className="w-full max-w-md rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
+          data-testid="doc-journal-draft-engagement"
+        >
+          {engagementId === "" ? <option value="" /> : null}
+          {engagements.map((e) => (
+            <option key={e.id} value={e.id}>
+              {e.label}
+            </option>
+          ))}
+        </select>
+      </label>
+      {projectPrompt === "ask" ? (
+        <label className="flex flex-col gap-1 text-sm text-text-secondary">
+          {tJournal("project")}
+          <select
+            value={projectChoiceValid}
+            onChange={(e) => setProjectChoice(e.target.value)}
+            className="w-full max-w-md rounded-md border border-ink-500 bg-ink-800/40 p-2 text-sm text-text-primary"
+            data-testid="doc-journal-draft-project"
+          >
+            <option value="">{tJournal("projectChoose")}</option>
+            {contextProjects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {projectDisplayLabel(p, (k, v) => tJournal(k, v))}
+              </option>
+            ))}
+            <option value={PROJECT_FIELD_NONE}>{tJournal("projectNone")}</option>
+          </select>
+        </label>
+      ) : null}
+      {result && !result.ok ? (
+        <p
+          role="alert"
+          className="rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
+          data-testid="doc-journal-draft-error"
+        >
+          {result.message || labels.error}
+        </p>
+      ) : null}
+      <button
+        type="submit"
+        disabled={pending}
+        className="self-start rounded-md border border-brand-blue/50 px-3 py-1.5 font-mono text-meta uppercase tracking-label text-brand-blue transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-60"
+        data-testid="doc-journal-draft-save"
+      >
+        {pending ? labels.saving : labels.save}
+      </button>
+    </form>
+  );
+}

@@ -1,0 +1,101 @@
+==============================================================
+ can_view_worker vs booking engagements
+==============================================================
+psql:<stdin>:353: NOTICE:  policy "workers_select" for relation "public.workers" does not exist, skipping
+psql:<stdin>:358: NOTICE:  policy "worker_skills_select" for relation "public.worker_skills" does not exist, skipping
+psql:<stdin>:363: NOTICE:  policy "worker_professions_select" for relation "public.worker_professions" does not exist, skipping
+psql:<stdin>:368: NOTICE:  policy "worker_languages_select" for relation "public.worker_languages" does not exist, skipping
+psql:<stdin>:373: NOTICE:  policy "company_worker_engagements_select" for relation "public.company_worker_engagements" does not exist, skipping
+harness loaded (throwaway can-view-worker-eng-proof)
+
+--- PRE-EXISTING DISCLOSURE (why the predicate contradicts the database) ---
+  PASS  APPLIED definer RPC ALREADY hands E1 the engaged worker's name     ENGAGED-W1
+  PASS  …while the RLS predicate says E1 may not see that worker         f
+
+--- BEFORE (production's current behaviour) ---
+  W1 -> own row             : ENGAGED-W1:W1 private bio
+  E2 -> W4 (roster)         : ROSTER-W4
+  E2 -> W2 (consented)      : CONSENTED-W2
+  PASS  GAP REPRODUCED: engaging employer sees NO name                     NOROWS
+  PASS  GAP REPRODUCED: engaging employer sees NO skills                   0
+  PASS  GAP REPRODUCED: engaging employer sees NO professions              0
+  PASS  GAP REPRODUCED: engaging employer sees NO languages                0
+  PASS  BEFORE: roster control works (E2 reads W4)                         ROSTER-W4
+  PASS  BEFORE: consent control works (E2 reads W2)                        CONSENTED-W2
+  PASS  BEFORE: withdrawn consent already fails closed (E4 -> W3)          NOROWS
+  PASS  BEFORE: assignment arm already grants E5 -> W5                     ASSIGNED-W5
+
+--- APPLYING 20260809120000_can_view_worker_booking_engagement_v1.sql verbatim ---
+  applied cleanly
+
+--- AFTER: (a) the engaging company owner is admitted ---
+  PASS  (a) predicate now TRUE via the engagement                          t
+  PASS  (a) engaging employer reads the display name                       ENGAGED-W1
+  PASS  (a) …and the RLS answer now MATCHES the definer RPC              ENGAGED-W1
+  PASS  (a) skills become readable                                         1
+  PASS  (a) professions become readable                                    1
+  PASS  (a) languages become readable                                      2
+  PASS  (a) free-text bio becomes readable (the widening, stated)          W1 private bio
+
+--- AFTER: (b) unrelated / ended / detached still see nothing ---
+  PASS  (b) UNRELATED employer: predicate still false                      f
+  PASS  (b) UNRELATED employer: no name for W1                             NOROWS
+  PASS  (b) ENDED engagement: predicate false                              f
+  PASS  (b) ENDED engagement: no name for W1                               NOROWS
+  PASS  (b) DETACHED row (worker_id NULL) grants E2 nothing                f
+  PASS  (b) DETACHED row grants no read of ANY worker to E2 beyond its roster NOROWS
+  PASS  (b) ANON: base table denied                                        DENIED
+  PASS  (b) ANON: predicate EXECUTE denied                                 DENIED
+
+--- AFTER: (c) the consent arm is untouched ---
+  PASS  (c) consented worker still visible to any employer                 CONSENTED-W2
+  PASS  (c) consented worker visible to E1 too (consent, not relationship) CONSENTED-W2
+  PASS  (c) roster control unchanged                                       ROSTER-W4
+  PASS  (c) worker self-read byte-identical to BEFORE                      ENGAGED-W1:W1 private bio
+  PASS  (c) admin unchanged (all 5 workers)                                5
+  PASS  (c) is_employer() is still AND-ed with the consent predicate       1
+
+--- AFTER: memo §7.1 — the WITHDRAWAL path, measured ---
+  PASS  §7.1 E4 (engaged) CAN read W3 despite the withdrawal              WITHDRAWN-W3
+  PASS  §7.1 every OTHER employer still cannot read W3                    NOROWS
+  PASS  §7.1 the discovery predicate itself still says NOT discoverable   f
+
+--- AFTER: no policy, no grant, no schema changed ---
+  PASS  workers_select policy count unchanged (1)                          1
+  PASS  policy count across all four gated tables unchanged (4)            4
+  PASS  workers_select still keyed on can_view_worker(id)                  1
+  PASS  predicate is still SECURITY DEFINER with search_path pinned        1
+  PASS  predicate is still STABLE (not volatile)                           s
+  PASS  anon holds NO execute on the predicate                             f
+  PASS  authenticated holds execute on the predicate                       t
+  PASS  no UPDATE/DELETE/INSERT grant on workers for authenticated         0
+  PASS  exactly ONE function was replaced (signature unchanged)            1
+
+--- AFTER: ending the engagement REVOKES (and where it does not) ---
+  PASS  worker's OWN end action is accepted                                {"outcome": "ended"}
+  PASS  …revocation is immediate: predicate false again                  f
+  PASS  …and the name is gone again                                      NOROWS
+  PASS  …skills/professions/languages gone again                         0|0|0
+  PASS  CAVEAT: E5 ends the W5 engagement…                               {"outcome": "ended"}
+  PASS  CAVEAT: …yet E5 STILL sees W5 via the assignment branch          ASSIGNED-W5
+  PASS  CAVEAT: predicate still true for E5 (assignment, not engagement)   t
+
+--- ROLLBACK 20260809120000_can_view_worker_booking_engagement_v1.down.sql verbatim ---
+  PASS  ROLLBACK restores the BEFORE state (E1 sees no name)               NOROWS
+  PASS  ROLLBACK restores the roster control unchanged                     ROSTER-W4
+  PASS  ROLLBACK restores the consent control unchanged                    CONSENTED-W2
+  PASS  ROLLBACK restores the worker self-read unchanged                   ENGAGED-W1:W1 private bio
+  PASS  ROLLBACK removes the engagement branch from the body               0
+  PASS  ROLLBACK leaves the four policies intact                           4
+  PASS  ROLLBACK: the definer RPC still discloses the name (the contradiction returns) ENGAGED-W1
+
+--- RE-APPLY (migration is re-runnable) ---
+  PASS  RE-APPLY: engaging employer reads the name again                   ENGAGED-W1
+  PASS  RE-APPLY: unrelated employer still sees nothing                    NOROWS
+  PASS  RE-APPLY: ended engagement still grants nothing                    f
+  PASS  RE-APPLY: consent control unchanged                                CONSENTED-W2
+  PASS  RE-APPLY: policy count still 4                                     4
+
+==============================================================
+ RESULT: 62 passed, 0 failed
+==============================================================

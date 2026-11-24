@@ -1,0 +1,388 @@
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { createClient } from "@/lib/supabase/server";
+import { validateOperationsRoleAssignment } from "@/lib/operations/assign-operations-role";
+import type { SetJournalReviewOutcome } from "@/lib/operations/journal-review-actions";
+
+/**
+ * Agency-worker linking service (Stage 2 PR 2).
+ *
+ * Reads:
+ *   - getOwnAgencyId() — the agency row owned by the current user.
+ *   - listActiveAgencyWorkers(agency) — rows in public.agency_workers
+ *     joined to workers + profiles; RLS lets the agency owner see them
+ *     via owns_agency(agency_id).
+ *   - listAgencyWorkerInvitations(agency) — pending invitations table
+ *     rows. Gracefully returns { kind: "needs-migration" } when the
+ *     0025 migration is not yet applied (Postgres 42P01).
+ *
+ * Writes:
+ *   - inviteAgencyWorker(agency, email, note) — wraps
+ *     public.invite_agency_worker RPC. Gracefully returns
+ *     { kind: "needs-migration" } when the RPC is missing (42883).
+ *
+ * Privacy / safety:
+ *   - Every call goes through the user-scoped supabase client. RLS +
+ *     owns_agency(p_agency_id) inside the RPC enforce ownership; this
+ *     layer never escalates to service-role.
+ *   - The RPC never reveals whether a `workers` row exists for an
+ *     arbitrary email — `already_linked` is only returned when the
+ *     caller owns the agency. Non-owners get `not_owner`.
+ */
+
+const RPC_NOT_FOUND_CODE = "42883"; // function does not exist
+const RELATION_NOT_FOUND_CODE = "42P01"; // table does not exist
+const PERMISSION_DENIED_CODE = "42501";
+/** Postgres "undefined_column" — ops-bridge columns (migration 0030) are
+ *  owner-gated and may not be applied yet; degrade gracefully. */
+const UNDEFINED_COLUMN_CODE = "42703";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(supabase: SupabaseClient): any {
+  return supabase;
+}
+
+export interface OwnAgency {
+  readonly id: string;
+  readonly legalName: string | null;
+  readonly country: string | null;
+}
+
+export interface LinkedAgencyWorker {
+  readonly workerId: string;
+  readonly profileId: string;
+  readonly status: string | null;
+  readonly displayName: string | null;
+  readonly email: string | null;
+  readonly createdAt: string;
+  /** Ops-bridge fields (migration 0030); null/false until applied + set. */
+  readonly operationsRole: string | null;
+  readonly operationsTitle: string | null;
+  readonly journalReviewEnabled: boolean;
+  /** Whether an active 'employee' engagement_context links this worker to the
+   *  agency's mirrored organization (migration 0033 per-row read). False until
+   *  the owner provisions the bridge (migration 0032 RPC) or the read RPC is
+   *  applied. The journal-review toggle stays disabled until this is true. */
+  readonly engagementContextLinked: boolean;
+}
+
+export interface AgencyWorkerInvitation {
+  readonly id: string;
+  readonly invitedEmail: string;
+  readonly status: "pending" | "accepted" | "cancelled" | "expired";
+  readonly createdAt: string;
+  readonly note: string | null;
+}
+
+export type AgencyWorkersListResult =
+  | { kind: "ok"; rows: readonly LinkedAgencyWorker[] }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+export type AgencyInvitationsListResult =
+  | { kind: "ok"; rows: readonly AgencyWorkerInvitation[] }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+export type InviteAgencyWorkerResult =
+  | {
+      kind: "ok";
+      outcome:
+        | "invited"
+        | "already_pending"
+        | "already_linked"
+        | "not_owner"
+        | "invalid_email";
+    }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+export async function getOwnAgency(): Promise<OwnAgency | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await supabase
+    .from("agencies")
+    .select("id, legal_name, country")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return {
+    id: data.id,
+    legalName: data.legal_name ?? null,
+    country: data.country ?? null,
+  };
+}
+
+export async function listActiveAgencyWorkers(
+  agencyId: string,
+): Promise<AgencyWorkersListResult> {
+  const supabase = await createClient();
+  const WORKER_JOIN = "workers(profile_id, display_name, profiles(email))";
+  const BASE_COLS = `worker_id, status, created_at, ${WORKER_JOIN}`;
+  const BRIDGE_COLS = `worker_id, status, created_at, operations_role, operations_title, journal_review_enabled, ${WORKER_JOIN}`;
+  const run = (cols: string) =>
+    asAny(supabase)
+      .from("agency_workers")
+      .select(cols)
+      .eq("agency_id", agencyId)
+      .order("created_at", { ascending: false })
+      .limit(50);
+
+  let { data, error } = await run(BRIDGE_COLS);
+  if (error && error.code === UNDEFINED_COLUMN_CODE) {
+    ({ data, error } = await run(BASE_COLS));
+  }
+  if (error) {
+    if (error.code === RELATION_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message };
+  }
+  // Per-row engagement-context read (migration 0033) — owner/admin-scoped RPC;
+  // degrades to an empty set (every row unlinked) until applied. Mirrors the
+  // company path exactly.
+  const linkedWorkerIds = await readEngagementLinkedWorkerIds(
+    supabase,
+    "agency_worker_engagement_links",
+    "p_agency_id",
+    agencyId,
+  );
+  const rows: LinkedAgencyWorker[] = (data ?? []).map(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (r: any) => ({
+      workerId: r.worker_id as string,
+      profileId: (r.workers?.profile_id as string) ?? "",
+      status: (r.status as string | null) ?? null,
+      displayName: (r.workers?.display_name as string | null) ?? null,
+      email: (r.workers?.profiles?.email as string | null) ?? null,
+      createdAt: r.created_at as string,
+      operationsRole: (r.operations_role as string | null) ?? null,
+      operationsTitle: (r.operations_title as string | null) ?? null,
+      journalReviewEnabled: r.journal_review_enabled === true,
+      engagementContextLinked: linkedWorkerIds.has(r.worker_id as string),
+    }),
+  );
+  return { kind: "ok", rows };
+}
+
+/**
+ * Shared per-row engagement read (mirrors the company path). Calls the
+ * owner/admin-scoped SECURITY DEFINER read RPC (migration 0033) and returns the
+ * set of worker_ids with an active 'employee' engagement_context link. Always
+ * degrades to an empty set when the RPC is missing (42883) or any error occurs;
+ * it never throws and never fabricates a link.
+ */
+async function readEngagementLinkedWorkerIds(
+  supabase: SupabaseClient,
+  rpcName: "company_worker_engagement_links" | "agency_worker_engagement_links",
+  paramName: "p_company_id" | "p_agency_id",
+  orgId: string,
+): Promise<ReadonlySet<string>> {
+  const { data, error } = await asAny(supabase).rpc(rpcName, {
+    [paramName]: orgId,
+  });
+  if (error || !Array.isArray(data)) return new Set<string>();
+  const ids = data
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    .map((row: any) =>
+      typeof row === "string" ? row : (row?.[rpcName] ?? row?.worker_id ?? null),
+    )
+    .filter((v: unknown): v is string => typeof v === "string");
+  return new Set<string>(ids);
+}
+
+export async function listAgencyWorkerInvitations(
+  agencyId: string,
+): Promise<AgencyInvitationsListResult> {
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase)
+    .from("agency_worker_invitations")
+    .select("id, invited_email, status, created_at, note")
+    .eq("agency_id", agencyId)
+    .order("created_at", { ascending: false })
+    .limit(50);
+  if (error) {
+    if (error.code === RELATION_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message };
+  }
+  const rows: AgencyWorkerInvitation[] = (data ?? []).map(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (r: any) => ({
+      id: r.id as string,
+      invitedEmail: r.invited_email as string,
+      status: r.status as AgencyWorkerInvitation["status"],
+      createdAt: r.created_at as string,
+      note: (r.note as string | null) ?? null,
+    }),
+  );
+  return { kind: "ok", rows };
+}
+
+export async function inviteAgencyWorker(
+  agencyId: string,
+  email: string,
+  note: string | null,
+): Promise<InviteAgencyWorkerResult> {
+  const supabase = await createClient();
+  const trimmed = email.trim();
+  if (trimmed.length === 0) {
+    return { kind: "ok", outcome: "invalid_email" };
+  }
+  const { data, error } = await asAny(supabase).rpc("invite_agency_worker", {
+    p_agency_id: agencyId,
+    p_email: trimmed,
+    p_note: note?.trim() || null,
+  });
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    if (error.code === PERMISSION_DENIED_CODE) {
+      return { kind: "ok", outcome: "not_owner" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  const outcome = data as InviteAgencyWorkerResult extends { outcome: infer O }
+    ? O
+    : never;
+  return { kind: "ok", outcome };
+}
+
+export type AssignAgencyWorkerRoleResult =
+  | {
+      kind: "ok";
+      outcome:
+        | "assigned"
+        | "cleared"
+        | "not_owner"
+        | "not_linked"
+        | "invalid_role"
+        | "review_not_allowed";
+    }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * Assign (or clear) an operations role/title on an agency↔worker
+ * relationship via the owner/admin-scoped `assign_agency_worker_role` RPC
+ * (migration 0031). Mirrors assignCompanyWorkerRole exactly: journal review
+ * is never enabled here (the RPC + this wrapper reject any review-enable
+ * attempt — review cannot come from a stored label). `operationsRole = null`
+ * (or blank) clears the assignment; ownership is re-validated server-side.
+ */
+export async function assignAgencyWorkerRole(
+  agencyId: string,
+  workerId: string,
+  operationsRole: string | null,
+  operationsTitle: string | null = null,
+): Promise<AssignAgencyWorkerRoleResult> {
+  const check = validateOperationsRoleAssignment({
+    operationsRole,
+    operationsTitle,
+  });
+  if (!check.ok) {
+    return { kind: "ok", outcome: check.reason };
+  }
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc("assign_agency_worker_role", {
+    p_agency_id: agencyId,
+    p_worker_id: workerId,
+    p_operations_role: check.action === "clear" ? null : check.role,
+    p_operations_title: check.action === "clear" ? null : check.title,
+    p_journal_review_enabled: false,
+  });
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    if (error.code === PERMISSION_DENIED_CODE) {
+      return { kind: "ok", outcome: "not_owner" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  const outcome =
+    data as AssignAgencyWorkerRoleResult extends { outcome: infer O }
+      ? O
+      : never;
+  return { kind: "ok", outcome };
+}
+
+export type ProvisionAgencyEngagementContextResult =
+  | {
+      kind: "ok";
+      outcome:
+        | "connected"
+        | "already_connected"
+        | "not_owner"
+        | "not_linked"
+        | "profile_missing"
+        | "role_not_assigned"
+        | "role_not_allowed"
+        | "organization_missing";
+    }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * Owner/admin-only: provision (idempotently) an active `employee`
+ * engagement_context linking an agency↔worker relationship to the agency's
+ * mirrored organization, via the SECURITY DEFINER RPC
+ * `provision_agency_worker_engagement_context` (migration 0032). Mirrors the
+ * company wrapper: makes the relationship bridge-ready, never enables review,
+ * ownership re-validated server-side, degrades to `needs-migration` until 0032
+ * is applied.
+ */
+export async function provisionAgencyWorkerEngagementContext(
+  agencyId: string,
+  workerId: string,
+): Promise<ProvisionAgencyEngagementContextResult> {
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc(
+    "provision_agency_worker_engagement_context",
+    { p_agency_id: agencyId, p_worker_id: workerId },
+  );
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    if (error.code === PERMISSION_DENIED_CODE) {
+      return { kind: "ok", outcome: "not_owner" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  const outcome =
+    data as ProvisionAgencyEngagementContextResult extends { outcome: infer O }
+      ? O
+      : never;
+  return { kind: "ok", outcome };
+}
+
+export type SetAgencyJournalReviewResult =
+  | { kind: "ok"; outcome: SetJournalReviewOutcome }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * Owner/admin-only: enable or disable journal review for an agency↔worker
+ * relationship via the SECURITY DEFINER RPC `set_agency_worker_journal_review`
+ * (migration 0033). Mirrors the company wrapper: enabling is gated server-side
+ * on a real active 'employee' engagement_context (never from a stored label);
+ * disabling is always allowed; ownership re-validated inside the RPC; degrades
+ * to `needs-migration` (42883) until applied.
+ */
+export async function setAgencyWorkerJournalReview(
+  agencyId: string,
+  workerId: string,
+  enabled: boolean,
+): Promise<SetAgencyJournalReviewResult> {
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc(
+    "set_agency_worker_journal_review",
+    { p_agency_id: agencyId, p_worker_id: workerId, p_enabled: enabled },
+  );
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
+    if (error.code === PERMISSION_DENIED_CODE) {
+      return { kind: "ok", outcome: "not_owner" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  return { kind: "ok", outcome: data as SetJournalReviewOutcome };
+}

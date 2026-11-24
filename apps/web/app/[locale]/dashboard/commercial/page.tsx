@@ -1,0 +1,66 @@
+import { redirect } from "next/navigation";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+
+import { createClient } from "@/lib/supabase/server";
+import { getMyCommercial } from "@/lib/commercial/commercial";
+import { CommercialPanel } from "@/components/app/commercial-panel";
+import { AgreementsRegister } from "@/components/app/agreements-register";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { CollaborationChecksNote } from "@/components/app/collaboration-checks-note";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/commercial");
+
+
+export const dynamic = "force-dynamic";
+
+/**
+ * Commercial CRM (Wagon 10) + the canonical agreement register (Agreement &
+ * Rights Engine v1). One commercial surface: the signed-in owner's proposals
+ * + contracts over the canonical demand/project facts, and — for an
+ * organization workspace — the org-scoped agreement register below them.
+ * The legacy B2B `contracts` register stays untouched; `agreements` is the
+ * canonical general register going forward. Invoices and payments are the
+ * canonical finance layer's concern (linked, not duplicated).
+ */
+export default async function CommercialPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<{
+    agr?: string;
+    agrType?: string;
+    agrStatus?: string;
+    agrSearch?: string;
+    agrExpiring?: string;
+  }>;
+}) {
+  const { locale } = await params;
+  const search = await searchParams;
+  setRequestLocale(locale);
+  const t = await getTranslations("commercial");
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/commercial`);
+
+  const data = await getMyCommercial();
+
+  return (
+    <div className="mx-auto flex w-full max-w-content flex-col gap-6">
+      <header className="flex flex-col gap-1">
+        <PageTitle>{t("pageTitle")}</PageTitle>
+        <p className="text-sm text-text-secondary">{t("pageIntro")}</p>
+      </header>
+      {/* Mutual, neutral pre-agreement recommendation — advice to both
+          parties, never a gate (decision 0021 extension, 2026-10-24). */}
+      <CollaborationChecksNote context={{ dealKind: "b2b_contract" }} testId="commercial-collaboration-checks" />
+      <CommercialPanel data={data} />
+      <AgreementsRegister locale={locale} searchParams={search} />
+    </div>
+  );
+}

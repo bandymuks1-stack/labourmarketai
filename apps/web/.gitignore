@@ -1,0 +1,50 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+
+# production
+/build
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+# Opt-in: documents the LOCAL-ONLY E2E overrides. Placeholders only — it holds
+# no key, and the guard in lib/testing/local-supabase-guard.ts refuses any
+# value that resolves to a cloud project. Mirrors the root .gitignore, which
+# likewise tracks .env.example by exception.
+!.env.e2e.local.example
+
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+# Work Market Atlas — external-names denylist is supplied out-of-band (never committed)
+lib/guards/external-names.denylist.json
+
+# hero media pipeline: raw generated originals (local only)
+/.hero-raw/

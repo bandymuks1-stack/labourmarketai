@@ -1,0 +1,292 @@
+[
+  {
+    "phase": "before",
+    "viewport": "1440",
+    "docHeight": 5273,
+    "totalFields": 51,
+    "hiddenFields": 32,
+    "perceivableFields": 19,
+    "unlabelledPerceivable": 2,
+    "unlabelledPerceivableDetail": [
+      "INPUT:url",
+      "INPUT:file"
+    ],
+    "unlabelledIncludingHidden": 34,
+    "interactiveTotal": 113,
+    "sub44Total": 71,
+    "sub44InPrefsForm": 36,
+    "sub44Elsewhere": 35,
+    "sub44Sample": [
+      {
+        "id": "BUTTON:Lietuvių",
+        "w": 109,
+        "h": 30
+      },
+      {
+        "id": "BUTTON:Mano pranešimai",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "id": "profile-opportunities-link",
+        "w": 182,
+        "h": 26
+      },
+      {
+        "id": "profile-cv-export-link",
+        "w": 144,
+        "h": 26
+      },
+      {
+        "id": "profile-documents-link",
+        "w": 125,
+        "h": 26
+      },
+      {
+        "id": "profile-gallery-link",
+        "w": 65,
+        "h": 26
+      },
+      {
+        "id": "room-my-spaces-link",
+        "w": 113,
+        "h": 26
+      },
+      {
+        "id": "profile-add-company",
+        "w": 126,
+        "h": 34
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-yes",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-no",
+        "w": 214,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "w": 208,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-yes",
+        "w": 208,
+        "h": 32
+      }
+    ]
+  },
+  {
+    "phase": "before",
+    "viewport": "375",
+    "docHeight": 7486,
+    "totalFields": 51,
+    "hiddenFields": 32,
+    "perceivableFields": 19,
+    "unlabelledPerceivable": 2,
+    "unlabelledPerceivableDetail": [
+      "INPUT:url",
+      "INPUT:file"
+    ],
+    "unlabelledIncludingHidden": 34,
+    "interactiveTotal": 113,
+    "sub44Total": 70,
+    "sub44InPrefsForm": 36,
+    "sub44Elsewhere": 34,
+    "sub44Sample": [
+      {
+        "id": "BUTTON:Mano pranešimai",
+        "w": 36,
+        "h": 36
+      },
+      {
+        "id": "profile-opportunities-link",
+        "w": 168,
+        "h": 42
+      },
+      {
+        "id": "profile-cv-export-link",
+        "w": 168,
+        "h": 42
+      },
+      {
+        "id": "profile-documents-link",
+        "w": 168,
+        "h": 26
+      },
+      {
+        "id": "profile-gallery-link",
+        "w": 168,
+        "h": 26
+      },
+      {
+        "id": "room-my-spaces-link",
+        "w": 168,
+        "h": 26
+      },
+      {
+        "id": "profile-add-company",
+        "w": 126,
+        "h": 34
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-has_transport-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-team_available-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-yes",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-solo_available-no",
+        "w": 100,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-yes",
+        "w": 88,
+        "h": 32
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-no",
+        "w": 88,
+        "h": 32
+      }
+    ]
+  }
+]

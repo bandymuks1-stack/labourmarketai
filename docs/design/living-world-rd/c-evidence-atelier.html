@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Living World R&D · C — Įrodymų atelje (The Evidence Atelier)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Archivo:wdth,wght@75..100,400;75..100,600;75..100,700&family=Caveat:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --room:#181310; --room-2:#241c15; --wall:#2a2119; --plaster:#332822;
+  --brass:#c9903a; --brass-soft:#e0b269; --print:#f5efe2; --ink:#1d1811;
+  --chalk:#d8cdbb; --chalk-dim:#9d907c; --moss:#8fae7c;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--room);color:var(--chalk);font-family:Archivo,sans-serif;overflow-x:hidden;
+  background:
+    radial-gradient(1600px 900px at 18% -20%, rgba(201,144,58,.16), transparent 55%),
+    radial-gradient(1200px 800px at 100% 115%, rgba(20,14,10,.9), transparent 60%),
+    linear-gradient(var(--room-2),var(--room));}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;opacity:.55;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.8' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .8 0 0 0 0 .7 0 0 0 0 .55 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E")}
+.ribbon{position:fixed;top:14px;right:-46px;z-index:60;transform:rotate(35deg);background:var(--brass);color:var(--ink);
+  font:700 10px/1 Archivo,sans-serif;letter-spacing:.14em;padding:7px 52px;text-transform:uppercase}
+header{display:flex;justify-content:space-between;align-items:center;padding:24px clamp(18px,4vw,54px);position:relative;z-index:5}
+.wordmark{font:700 21px/1 Archivo,sans-serif;color:var(--print)}
+.wordmark span{color:var(--brass-soft)}
+.leg{font:italic 400 13px/1.4 "Instrument Serif",serif;color:var(--chalk-dim)}
+.hero{position:relative;z-index:5;padding:clamp(10px,2vh,30px) clamp(18px,4vw,54px) 0;max-width:1160px}
+.kicker{font:600 11px/1 Archivo,sans-serif;letter-spacing:.3em;text-transform:uppercase;color:var(--brass-soft)}
+h1{font:400 clamp(42px,6.6vw,98px)/1.0 "Instrument Serif",serif;color:var(--print);margin:.28em 0 .16em;letter-spacing:-.015em}
+h1 em{font-style:italic;color:var(--brass-soft)}
+.lede{font:400 clamp(14px,1.2vw,17px)/1.7 Archivo,sans-serif;color:var(--chalk);max-width:56ch}
+.lede b{color:var(--print)}
+/* ------- the wall ------- */
+.atelier{position:relative;margin:clamp(26px,5vh,56px) auto 0;max-width:1280px;padding:0 clamp(14px,3vw,44px) 40px;min-height:640px}
+/* light cone */
+.cone{position:absolute;left:-6%;top:-12%;width:75%;height:130%;pointer-events:none;z-index:1;
+  background:conic-gradient(from 12deg at 0% 30%, transparent 0deg, rgba(224,178,105,.30) 9deg, rgba(224,178,105,.08) 25deg, transparent 32deg);
+  filter:blur(6px);transform-origin:0% 30%;}
+.cone.sweep{animation:sweep 5s cubic-bezier(.45,0,.25,1) forwards}
+@keyframes sweep{0%{transform:rotate(-14deg)}55%{transform:rotate(16deg)}100%{transform:rotate(6deg)}}
+.projector{position:absolute;left:clamp(6px,1vw,20px);top:24%;z-index:2;width:54px;height:34px;background:linear-gradient(#3b3026,#241c15);
+  border:1px solid #4d4030;border-radius:6px;box-shadow:0 10px 26px -8px #000}
+.projector::after{content:"";position:absolute;right:-7px;top:10px;width:10px;height:12px;background:var(--brass-soft);
+  border-radius:2px;box-shadow:0 0 18px 4px rgba(224,178,105,.8)}
+.wallgrid{position:relative;z-index:3;display:grid;grid-template-columns:repeat(12,1fr);gap:0;min-height:620px}
+/* prints */
+.print{position:relative;background:var(--print);color:var(--ink);padding:9px 9px 12px;
+  box-shadow:0 26px 44px -18px rgba(0,0,0,.75), 0 4px 10px -4px rgba(0,0,0,.5);
+  transform:rotate(var(--r,0deg));opacity:0;translate:0 22px}
+.print.on{animation:pin .7s cubic-bezier(.2,.8,.25,1.2) forwards}
+@keyframes pin{60%{opacity:1;translate:0 -4px}100%{opacity:1;translate:0 0}}
+.print::before{content:"";position:absolute;top:-9px;left:50%;translate:-50% 0;width:12px;height:12px;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #f0d9a8, var(--brass) 55%, #7a5518);box-shadow:0 3px 6px rgba(0,0,0,.6)}
+.print img{width:100%;object-fit:cover;display:block;aspect-ratio:4/3.4}
+.print .cap{font:500 12px/1.35 Caveat,cursive;font-size:16px;color:#463c2c;padding:8px 4px 0}
+.print .cap small{display:block;font:600 9px/1.4 Archivo,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:#8a7c62;margin-top:2px}
+.pr1{grid-column:2/5;grid-row:1;--r:-2.4deg;margin-top:34px}
+.pr2{grid-column:5/8;grid-row:1;--r:1.6deg;margin-top:88px}
+.pr3{grid-column:2/5;grid-row:2;--r:1.2deg;margin-top:-8px}
+.pr4{grid-column:5/8;grid-row:2;--r:-1.8deg;margin-top:30px}
+.pr5{grid-column:3/6;grid-row:3;--r:2deg;margin-top:-6px;z-index:4}
+/* weigh note — paper slip, not photo */
+.slip{background:repeating-linear-gradient(var(--print) 0 26px, #e7ddc8 26px 27px);font:500 15px/26px Caveat,cursive;color:#3d3423}
+.slip .head{font:700 10px/1.4 Archivo,sans-serif;letter-spacing:.12em;text-transform:uppercase;color:#8a7c62;padding-top:2px}
+.slip .big{font-size:21px;color:#2c2416}
+/* doorways */
+.door{position:relative;grid-row:1/4;overflow:hidden;border-radius:130px 130px 6px 6px;
+  box-shadow:0 0 0 1px rgba(224,178,105,.35), 0 40px 70px -30px rgba(0,0,0,.8), 0 0 70px -8px rgba(224,178,105,.28);
+  opacity:0;transform:translateY(18px);z-index:3;min-height:430px}
+.door.lit{animation:doorup 1.6s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes doorup{to{opacity:1;transform:none}}
+.door img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;filter:brightness(1.02) saturate(1.05)}
+.door::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(24,19,16,0) 55%,rgba(24,19,16,.85) 92%)}
+.door .label{position:absolute;left:14px;right:14px;bottom:12px;z-index:2}
+.door .label .role{font:400 22px/1.15 "Instrument Serif",serif;color:var(--print)}
+.door .label .src{font:600 9.5px/1.5 Archivo,sans-serif;letter-spacing:.1em;text-transform:uppercase;color:var(--brass-soft);margin-top:4px}
+.door .label .why{display:inline-block;margin-top:7px;font:600 10px/1.4 Archivo,sans-serif;color:var(--ink);
+  background:var(--brass-soft);padding:5px 8px;border-radius:2px}
+.d1{grid-column:9/12;margin-top:40px}
+.d2{grid-column:8/11;grid-row:2/4;margin-top:210px;display:none;z-index:5}
+.d2.shown{display:block}
+.d1.dim{filter:brightness(.55) saturate(.8)}
+.d1.dim .label{opacity:0;transition:opacity .6s ease}
+/* chalk annotation */
+.chalkline{position:absolute;z-index:4;font:500 19px/1.3 Caveat,cursive;color:var(--brass-soft);
+  transform:rotate(-3deg);max-width:200px;opacity:0;transition:opacity .8s ease 1s}
+.chalkline.on{opacity:.95}
+.chalkline svg{display:block;margin-top:4px}
+.an1{left:37%;top:56%}
+/* pin action */
+.handle{position:relative;z-index:6;display:flex;gap:12px;align-items:center;justify-content:center;padding:26px 18px 8px;flex-wrap:wrap}
+button.pinbtn{cursor:pointer;border:1px solid var(--brass);background:linear-gradient(#33281f,#241c15);color:var(--brass-soft);
+  font:700 13px/1 Archivo,sans-serif;letter-spacing:.08em;text-transform:uppercase;padding:15px 24px;border-radius:3px;
+  box-shadow:0 14px 30px -14px rgba(201,144,58,.55);transition:transform .2s ease}
+button.pinbtn:hover{transform:translateY(-2px)}
+button.pinbtn:disabled{opacity:.5;transform:none;cursor:default}
+.handle .note{font:italic 400 13px/1.5 "Instrument Serif",serif;color:var(--chalk-dim);max-width:40ch}
+/* creed */
+.creed{position:relative;z-index:5;margin:60px auto 0;max-width:900px;padding:0 22px;text-align:center}
+.creed p{font:400 clamp(19px,2.4vw,30px)/1.45 "Instrument Serif",serif;color:var(--chalk)}
+.creed p em{color:var(--brass-soft)}
+.creed .sub{font:400 13px/1.7 Archivo,sans-serif;color:var(--chalk-dim);max-width:62ch;margin:14px auto 0}
+.cta-row{display:flex;gap:16px;justify-content:center;align-items:center;padding:34px 16px 30px;flex-wrap:wrap;position:relative;z-index:5}
+a.cta{background:var(--brass-soft);color:var(--ink);text-decoration:none;font:700 14px/1 Archivo,sans-serif;
+  letter-spacing:.06em;text-transform:uppercase;padding:17px 28px;border-radius:3px;
+  box-shadow:0 16px 40px -14px rgba(224,178,105,.6);transition:transform .25s}
+a.cta:hover{transform:translateY(-2px)}
+.legal{position:relative;z-index:5;padding:10px clamp(18px,4vw,54px) 26px;font:400 10px/1.6 Archivo,sans-serif;color:#6d6250;text-align:center}
+/* mobile: vertical corkboard, door as bottom sheet */
+@media (max-width:860px){
+  .wallgrid{display:flex;flex-direction:column;gap:18px;min-height:0}
+  .print{margin:0!important;max-width:420px;align-self:var(--al,flex-start)}
+  .pr2{--al:flex-end}.pr4{--al:flex-end}
+  .door{min-height:380px;border-radius:110px 110px 6px 6px;margin:8px auto 0!important;width:min(86%,380px)}
+  .d2.shown{margin-top:16px!important}
+  .cone{width:140%;left:-20%}
+  .an1{display:none}
+}
+@media (max-width:560px){.leg{display:none}}
+@media (prefers-reduced-motion:reduce){
+  .print{opacity:1;translate:0 0;animation:none}
+  .cone{transform:rotate(6deg);animation:none}
+  .door{opacity:1;transform:none;animation:none}
+  .chalkline{opacity:.95;transition:none}
+}
+</style>
+</head>
+<body>
+<div class="ribbon">R&amp;D prototipas · ne produkcija</div>
+
+<header>
+  <div class="wordmark">labourmarket<span>.ai</span></div>
+  <div class="leg">Gyvo pasaulio kryptis C · „Įrodymų atelje“</div>
+</header>
+
+<section class="hero">
+  <span class="kicker">Tavo darbai — ant sienos. Šviesa randa kelią.</span>
+  <h1>Įrodymai kabo.<br><em>Durys atsiveria.</em></h1>
+  <p class="lede">Kiekvienas tikras darbas — pamainos lapas, aktas, svėrimo kvitas, nuotrauka —
+  prisegamas prie tavo sienos. <b>Kai įrodymų susikaupia, šviesa suranda juos</b> ir toje vietoje
+  atsiveria durys į tikrą darbo vietą Švedijoje — arba į pirkėją tavo derliui.</p>
+</section>
+
+<section class="atelier" id="atelier">
+  <div class="projector" aria-hidden="true"></div>
+  <div class="cone" id="cone" aria-hidden="true"></div>
+
+  <div class="wallgrid">
+    <figure class="print pr1"><img alt="Slaugytoja padeda vyresnio amžiaus porai" src="https://images.unsplash.com/photo-1762955911431-4c44c7c3f408?q=80&w=640&auto=format&fit=crop">
+      <figcaption class="cap">Rytinė pamaina, 6 gyventojai<small>Įrašas №147 · priežiūra · su parašu</small></figcaption></figure>
+    <figure class="print pr2"><img alt="Suvirintojas darbo metu, kibirkštys" src="https://images.unsplash.com/photo-1504328345606-18bbc8c9d7d1?q=80&w=640&auto=format&fit=crop">
+      <figcaption class="cap">Siūlės sertifikuotos — patikra OK<small>Įrašas №203 · suvirinimas · aktas</small></figcaption></figure>
+    <figure class="print pr3"><img alt="Elektrikas tikrina skydinę multimetru" src="https://images.unsplash.com/photo-1758101755915-462eddc23f57?q=80&w=640&auto=format&fit=crop">
+      <figcaption class="cap">Skydinė — matavimai normos ribose<small>Įrašas №311 · elektra · aktas + foto</small></figcaption></figure>
+    <figure class="print pr4"><img alt="Virėjas gamina restorano virtuvėje" src="https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=640&auto=format&fit=crop">
+      <figcaption class="cap">Vakaro servisas — 84 svečiai<small>Įrašas №508 · virtuvė</small></figcaption></figure>
+
+    <figure class="print pr5 slip" id="slip" style="display:none">
+      <div style="padding:4px 8px 8px">
+        <div class="head">Svėrimo kvitas · šiltnamis</div>
+        <div class="big">Agurkai — 30 kg</div>
+        šviežia, sava, be tarpininkų<br>
+        <span style="font-family:Archivo;font-size:9px;letter-spacing:.1em;color:#8a7c62">ĮRAŠAS №52 · PASIŪLA</span>
+      </div>
+    </figure>
+
+    <div class="door d1" id="door1">
+      <img alt="Šviesi Švedijos darbo vieta — virtuvė" src="https://images.unsplash.com/photo-1681270543584-8e541a1bb056?q=80&w=800&auto=format&fit=crop">
+      <div class="label">
+        <div class="role">Kock — Malmö</div>
+        <div class="src">Arbetsförmedlingen · aktualus skelbimas</div>
+        <span class="why">šviesa rado: №508 + 3 įrašai</span>
+      </div>
+    </div>
+
+    <div class="door d2" id="door2">
+      <img alt="Turgaus prekystalis su šviežia produkcija" src="https://images.unsplash.com/photo-1758524056453-2ed606a0d06c?q=80&w=800&auto=format&fit=crop">
+      <div class="label">
+        <div class="role">Ūkininkų turgus — tavo 30 kg</div>
+        <div class="src">Vietinė paklausa · teisėtas pasiūlos kelias</div>
+        <span class="why">šviesa rado: kvitą №52</span>
+      </div>
+    </div>
+
+    <div class="chalkline an1" id="chalk">
+      įrodymai čia → durys ten
+      <svg width="120" height="30" viewBox="0 0 120 30" fill="none"><path d="M4,22 C40,30 80,18 114,6 M104,4 l12,2 -7,9" stroke="#e0b269" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </div>
+  </div>
+
+  <div class="handle">
+    <button class="pinbtn" id="pinBtn">Prisegti naują įrodymą — 30 kg agurkų</button>
+    <p class="note">Prisegi kvitą — šviesa iš naujo peržiūri sieną, ir atsiveria dar vienos durys.
+    Taip veikia priežastingumas: darbas → įrodymas → durys.</p>
+  </div>
+</section>
+
+<section class="creed">
+  <p>Mes nematuojame žmogaus. <em>Mes apšviečiame darbą.</em></p>
+  <p class="sub">Jokio „asmens balo“. Kaupiami tik darbai, rezultatai, paslaugos, pasiūla ir tinkami įrodymai —
+  kad geriau suprastume, ką gali pasiūlyti, ir rastume tam tikrą, realią paklausą.
+  Veikia ir tada, kai darbą jau turi: siena pildosi, durys atsiranda, kai jos tikros.</p>
+</section>
+
+<div class="cta-row">
+  <a class="cta" href="#">Pakabink pirmą įrodymą</a>
+</div>
+<p class="legal">R&amp;D prototipas — ne produkcinis puslapis. Nuotraukos: Unsplash (licencija leidžia naudojimą); galutiniam variantui — savininko patvirtinta fotografija.</p>
+
+<script>
+(function(){
+  var reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function seen(el,cb){if(reduced){cb();return}
+    new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){cb();o.disconnect()}})},{threshold:.2}).observe(el)}
+  seen(document.getElementById('atelier'),function(){
+    document.querySelectorAll('.print:not(#slip)').forEach(function(p,i){setTimeout(function(){p.classList.add('on')},i*420)});
+    if(!reduced){setTimeout(function(){document.getElementById('cone').classList.add('sweep')},1400)}
+    setTimeout(function(){document.getElementById('door1').classList.add('lit');
+      document.getElementById('chalk').classList.add('on')},reduced?0:3400);
+  });
+  var btn=document.getElementById('pinBtn');
+  btn.addEventListener('click',function(){
+    var slip=document.getElementById('slip');
+    slip.style.display='block';
+    requestAnimationFrame(function(){slip.classList.add('on')});
+    var cone=document.getElementById('cone');
+    if(!reduced){cone.classList.remove('sweep');void cone.getBoundingClientRect();cone.classList.add('sweep');}
+    document.getElementById('door1').classList.add('dim');
+    var d2=document.getElementById('door2');d2.classList.add('shown');
+    setTimeout(function(){d2.classList.add('lit')},reduced?0:1900);
+    btn.disabled=true;btn.textContent='Įrodymas prisegtas ✓';
+  });
+})();
+</script>
+</body>
+</html>

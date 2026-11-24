@@ -1,0 +1,113 @@
+import type { Metadata } from "next";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { LabourMarketOsMap } from "@/components/marketing/labour-market-os-map";
+import { notFound } from "next/navigation";
+import { isVisionPublic } from "@/lib/config/vision-publication";
+import { isSuperadmin } from "@/lib/auth/superadmin";
+
+/**
+ * Public vision page — the one-page system explanation for
+ * labourmarket.ai. Server-rendered, no auth required, no user data
+ * touched. The whole body is composed of catalogue-driven cards (roles
+ * + features + activity types) so the page can never claim a capability
+ * the catalogue says is `preparing` or `hidden`.
+ *
+ * Publication state is gated on `lib/config/vision-publication.ts`:
+ *
+ * - `VISION_PUBLIC = false` (current) — INTERNAL ONLY (owner P0
+ *   2026-11-10): a platform superadmin sees the page with the "internal
+ *   preview" banner, so the owner can run the smoke checklist; every other
+ *   visitor, signed in or not, gets a plain 404 — not a login redirect,
+ *   which would confirm the page exists. Metadata still emits
+ *   `robots: noindex,nofollow` and the marketing nav drops the link.
+ *   (It used to be reachable by anyone with the URL, banner included.)
+ * - `VISION_PUBLIC = true` — back to a normal indexable marketing page.
+ *   The flip is a one-line owner-authored PR after smoke PASSES.
+ */
+// Per request, never prerendered: who is asking decides 404 or the page. A
+// prerender has no session, so the static build served a 500 (e2e-smoke).
+export const dynamic = "force-dynamic";
+
+/** Superadmin only, failing CLOSED: a missing session, an auth error or an
+ *  unreachable role signal is "no" (a 404), never a 500 and never a grant. */
+async function canSeeInternalPreview(): Promise<boolean> {
+  try {
+    return await isSuperadmin();
+  } catch {
+    return false;
+  }
+}
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("vision");
+  const publishedPublicly = isVisionPublic();
+  // A visitor who gets the 404 gets no title or description of the page either.
+  if (!publishedPublicly && !(await canSeeInternalPreview())) {
+    return { robots: { index: false, follow: false, googleBot: { index: false, follow: false } } };
+  }
+  return {
+    title: t("metaTitle"),
+    description: t("metaDescription"),
+    robots: publishedPublicly
+      ? undefined
+      : { index: false, follow: false, googleBot: { index: false, follow: false } },
+  };
+}
+
+export default async function VisionPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  const t = await getTranslations("vision");
+  const publishedPublicly = isVisionPublic();
+  if (!publishedPublicly && !(await canSeeInternalPreview())) notFound();
+
+  return (
+    <article className="mx-auto flex max-w-container flex-col gap-12 px-6 py-12 sm:gap-16 sm:px-12 sm:py-16">
+      {/* Internal-preview banner — present while VISION_PUBLIC === false.
+          Lives ABOVE the hero so anyone with the URL sees the "do not
+          share publicly" signal before any other vision content. */}
+      {!publishedPublicly && (
+        <aside
+          role="note"
+          aria-label={t("internalPreviewBadge")}
+          data-testid="vision-internal-preview"
+          className="flex flex-col gap-2 rounded-md border border-state-warning/40 bg-state-warning/5 p-4"
+        >
+          <span className="inline-flex w-fit items-center gap-2 rounded-sm border border-state-warning/40 bg-state-warning/10 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-state-warning">
+            {t("internalPreviewBadge")}
+          </span>
+          <p className="text-sm leading-relaxed text-text-secondary">
+            {t("internalPreviewBanner")}
+          </p>
+        </aside>
+      )}
+
+      <header className="flex flex-col gap-4">
+        <span className="font-mono text-xs uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
+        </span>
+        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary sm:text-5xl">
+          {t("headline")}
+        </h1>
+        <p className="max-w-prose text-base leading-relaxed text-text-secondary sm:text-lg">
+          {t("lede")}
+        </p>
+        <p className="max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-xs leading-relaxed text-text-secondary">
+          {t("honesty")}
+        </p>
+      </header>
+
+      <LabourMarketOsMap />
+    </article>
+  );
+}

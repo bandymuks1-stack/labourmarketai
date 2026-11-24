@@ -1,0 +1,19 @@
+{"step":"health","build":"13562988"}
+{"leg":"person_trade_need","text":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją","results":0,"firstAnswerMs":1492,"chips":["Rasti paslaugą","Sukurti organizaciją"]}
+{"check":"person's answer is the service-need line","ok":true,"detail":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją"}
+{"check":"the answer's own chips stay: service-request door","ok":true,"detail":["Rasti paslaugą","Sukurti organizaciją"]}
+{"check":"the answer's own chips stay: company-setup door","ok":true,"detail":["Rasti paslaugą","Sukurti organizaciją"]}
+{"check":"no late opening brief after the person spoke","ok":true,"detail":"L LabourMarket AI Tai darbas, kurį reikia atlikti — parodysiu, kas siūlo tokias paslaugas. Rasti paslaugą Sukurti organizaciją"}
+{"leg":"person_failed_requests","failed":[]}
+{"leg":"worker_find_work","ms":6370,"text":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusiaurinai.","chips":[]}
+{"check":"'ieškau darbo' answers (board or honest state) within 20 s","ok":true,"detail":{"ms":6370,"results":0}}
+{"check":"'ieškau darbo' is not the not-understood menu","ok":true,"detail":"L LabourMarket AI Skydelyje yra 5 viešų darbo skelbimų iš oficialių šaltinių — kandidatuojama per originalų skelbimą. Ieškojau visame tavo sąraše — nieko nesusi"}
+{"leg":"worker_documents_gap","text":"L LabourMarket AI Nieko netrūksta: turi visus įgūdžius, kurių prašo 9 matomi poreikiai. Dokumentai: trūksta 4 (Asmens dokumentas (NL, DE), Komandiravimo pranešimas (NL, DE)). Iš 9 tau matomų poreikių reikalavimų, palygintų su tavo įrašytais įgūdžiais. Dokumentai","results":0,"firstAnswerMs":2084,"chips":["Dokumentai"]}
+{"check":"'kas man trūksta?' answers the gap, not the menu","ok":true,"detail":"L LabourMarket AI Nieko netrūksta: turi visus įgūdžius, kurių prašo 9 matomi poreikiai. Dokumentai: trūksta 4 (Asmens dokumentas (NL, DE), Komandiravimo pranešimas (NL, DE)). Iš 9 tau matomų poreikių reikalavimų, palygin"}
+{"check":"no document name is repeated in the gap line","ok":true,"detail":{"list":"Asmens dokumentas (NL, DE), Komandiravimo pranešimas (NL, DE)","dupes":[]}}
+{"leg":"worker_failed_requests","failed":[]}
+{"leg":"company_mechanic","role":"Automechanikas","teamSize":"2"}
+{"check":"the need form's role is prefilled 'Automechanikas'","ok":true,"detail":"Automechanikas"}
+{"check":"headcount 2 is read","ok":true,"detail":"2"}
+{"leg":"company_failed_requests","failed":[]}
+{"result":"PASS","failed":[]}

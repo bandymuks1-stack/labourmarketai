@@ -1,0 +1,376 @@
+import "server-only";
+
+import { getLocale, getTranslations } from "next-intl/server";
+
+import { statedDateLabel } from "@/lib/cv/period-dates";
+import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
+import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
+import type { PlayerCardLabels } from "@/components/app/worker-player-card";
+import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
+import { contextHoursById } from "@/lib/player-card/context-hours";
+import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
+import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenance";
+import type { ContextWorkTime, WorkPeriodTotals } from "@/lib/journal/work-intelligence";
+import { professionDisplayName } from "@/lib/worker/self-declared-profession";
+import { buildIdentityFacts } from "@/lib/player-card/identity-facts";
+import { mobilityLabels } from "@/lib/people/person-page-labels";
+
+/**
+ * One place that turns the player-card's REAL data into resolved viewer-locale
+ * labels (doctrine §2: slug → JSON, nothing user-facing hardcoded). Shared by
+ * every mount of the card (dashboard today screen + /dashboard/player-card) —
+ * zero duplication (DESIGN_SOUL §1).
+ *
+ * `contexts` — the journal's per-engagement figures (`WorkIntelligence.contexts`,
+ * the ONE hour ledger) when the mounting surface has already loaded them; the
+ * card then says "recorded h / confirmed h" beside each engagement. Absent →
+ * no hours line (not "0 h": the journal was not read here).
+ */
+export async function buildPlayerCardLabels(
+  card: WorkerPlayerCard,
+  opts: {
+    readonly contexts?: readonly ContextWorkTime[] | null;
+    /**
+     * The journal's ALL-TIME period row (`WorkIntelligence.periods` key
+     * "all") when the mount loaded it, and whether that read was truncated.
+     * Drives the identity stage's fact strip; absent → no strip (the journal
+     * was not read here — never "0 h").
+     */
+    readonly allTime?: WorkPeriodTotals | null;
+    readonly allTimeTruncated?: boolean;
+    /** The decision-0025 figures (`experienceFiguresOf`) — the same the
+     *  profile hub passes; absent → the strip shows the journal only. */
+    readonly organizationHistoryHours?: number | null;
+    readonly professionalExperienceHours?: number | null;
+  } = {},
+): Promise<PlayerCardLabels> {
+  const locale = await getLocale();
+  const t = await getTranslations("playerCard");
+  const tProf = await getTranslations("professions");
+  const tSkill = await getTranslations("skillNames");
+  const tWorkCard = await getTranslations("auth.dashboard.workCard");
+  // Country names come from the ONE canonical country catalogue the rest of
+  // the product reads (never a second list).
+  const tlm = await getTranslations("labourMarket");
+  // P6 — the provenance line's words: ONE namespace, one key per fact shape
+  // (`provenanceTextKey`), so every mount of the card says the same thing.
+  const tProv = await getTranslations("provenance");
+  // Mobility words already exist where the same facts are shown elsewhere
+  // (the person page, the CV export) — one wording, no new copy.
+  const tPeople = await getTranslations("people");
+  const tCvPrivate = await getTranslations("cvExport.privateDetails");
+
+  const availabilityKey = card.availabilityStatus
+    ? `editor.availabilityOption.${card.availabilityStatus}`
+    : null;
+
+  // ── §5.2 VISUALIZATION COPY ──────────────────────────────────────────────
+  // Everything here is derived from the card's REAL series. A label is only
+  // produced when the underlying number exists; `peak` stays null when there
+  // is nothing to point at, so the chart never annotates an invented high.
+  const monthFmt = new Intl.DateTimeFormat(locale, {
+    month: "short",
+    timeZone: "UTC",
+  });
+  const monthName = (key: string): string =>
+    monthFmt.format(new Date(`${key}-01T00:00:00Z`));
+  // The axis stays compact (many locales render "short" months numerically),
+  // but the peak annotation names the month in words — "4 (06)" was a riddle.
+  const monthLongFmt = new Intl.DateTimeFormat(locale, {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const monthLongName = (key: string): string =>
+    monthLongFmt.format(new Date(`${key}-01T00:00:00Z`));
+  const timelineTotal = card.evidenceTimeline.reduce((n, m) => n + m.entries, 0);
+  const peakMonth = card.evidenceTimeline.reduce<{ month: string; entries: number } | null>(
+    (best, m) => (m.entries > 0 && (best === null || m.entries > best.entries) ? m : best),
+    null,
+  );
+  const dateFmt = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeZone: "UTC",
+  });
+  // The history band is derived from the SAME rows the card's text list uses.
+  const history = deriveWorkHistoryTimeline(card.workHistory, new Date());
+  // Hours per engagement — the journal's own per-context figures joined on
+  // `engagement_contexts.id`; org-reported minutes never enter these numbers
+  // (they stay beside, on the journal's own checks).
+  const hoursFmt = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
+  const hoursById: Record<string, string> = {};
+  for (const [id, h] of contextHoursById(card.workHistory, opts.contexts ?? null)) {
+    hoursById[id] = t("visuals.historyHours", {
+      hours: hoursFmt.format(h.hours),
+      confirmed: hoursFmt.format(h.confirmedHours),
+    });
+  }
+  const historyUnavailable = card.unavailable.includes("workHistory");
+
+  // ── THE IDENTITY STAGE (premium Player Card, 2026-09-29) ─────────────────
+  // EVERY profession (0 / 1 / N), each through the ONE display rule: the
+  // localized registry name, else the person's own words. Deduped by the
+  // shown name so a registry row and its own-words twin never read twice.
+  const professionNames = [
+    ...new Set(
+      card.professions
+        .map((e) =>
+          professionDisplayName(e, (slug) =>
+            tProf.has(slug as never) ? tProf(slug as never) : null,
+          ),
+        )
+        .filter((n): n is string => Boolean(n)),
+    ),
+  ];
+  // WORKING NOW — only engagements the model marks current (active AND no
+  // end date); an ended organization stays in the history, never here.
+  const currentWork = [
+    ...new Set(
+      card.workHistory
+        .filter((h) => h.current)
+        .map((h) => (h.organizationName ?? "").trim())
+        .filter((n) => n.length > 0),
+    ),
+  ];
+  // THE FACT STRIP — the ONE rule (identity-facts.ts) the profile hub uses too.
+  const tIdentity = await getTranslations("playerCard.identity");
+  const identityFacts = buildIdentityFacts({
+    allTime: opts.allTime,
+    truncated: opts.allTimeTruncated ?? false,
+    locale,
+    t: (key, values) => tIdentity(key, values),
+    organizationHistoryHours: opts.organizationHistoryHours ?? null,
+    professionalExperienceHours: opts.professionalExperienceHours ?? null,
+  });
+
+  return {
+    professionNames,
+    currentWork,
+    currentWorkLabel: t("identity.currentWork"),
+    identityFacts,
+    modes: {
+      label: t("identity.modes.label"),
+      identity: t("identity.modes.identity"),
+      next: t("identity.modes.next"),
+      nextOpportunities: t("identity.modes.nextOpportunities"),
+      doorCalendar: t("identity.modes.doorCalendar"),
+      doorJournal: t("identity.modes.doorJournal"),
+      doorCv: t("identity.modes.doorCv"),
+      work: t("identity.modes.work"),
+      skills: t("identity.modes.skills"),
+      evidence: t("identity.modes.evidence"),
+      history: t("identity.modes.history"),
+    },
+    title: t("title"),
+    subtitle: t("subtitle"),
+    // P6 — the text equivalent of the provenance edge (the edge is never the
+    // only signal). The date is formatted in the viewer's locale; the class
+    // travels with the text so the component reads the fact, not the colour.
+    provenance: {
+      class: card.provenance.class,
+      label: tProv("label"),
+      text: tProv(
+        provenanceTextKey(card.provenance),
+        provenanceTextParams(card.provenance, {
+          date: (iso) => dateFmt.format(new Date(iso)),
+        }),
+      ),
+    },
+    skillsLabel: t("skillsLabel"),
+    skillsHint: t("skillsHint"),
+    skillsUnavailable: t("skillsUnavailable"),
+    candidateLabel: t("candidateLabel"),
+    candidateHint: t("candidateHint"),
+    evidenceLabel: t("evidenceLabel"),
+    evidenceHint: t("evidenceHint"),
+    attentionLabel: t("attentionLabel"),
+    attentionHint: t("attentionHint"),
+    attentionZero: t("attentionZero"),
+    workCardLabel: t("workCardLabel"),
+    workCardConfirmed: t("workCardConfirmed"),
+    workCardPending: t("workCardPending"),
+    namePlaceholder: t("namePlaceholder"),
+    professionName:
+      card.professionSlug && tProf.has(card.professionSlug)
+        ? tProf(card.professionSlug)
+        : null,
+    availabilityLabel:
+      availabilityKey && tWorkCard.has(availabilityKey)
+        ? tWorkCard(availabilityKey)
+        : null,
+    availabilityFrom: card.availableFrom
+      ? t("availabilityFrom", {
+          date: dateFmt.format(new Date(card.availableFrom)),
+        })
+      : null,
+    // §5.2 LOCATION — the country NAME for the worker's own stated code.
+    // An unknown code renders the raw code rather than a guessed country.
+    locationName: card.locationCountry
+      ? tlm.has(`countryNames.${card.locationCountry}`)
+        ? (tlm(`countryNames.${card.locationCountry}`) as string)
+        : card.locationCountry
+      : null,
+    // MOBILITY — where the worker says they would work, and whether they
+    // would relocate. Country NAMES from the one catalogue (an unknown code
+    // stays the code, never a guess); nothing is shown for facts not given.
+    mobilityLabel: tPeople("mobility"),
+    mobilityCountries: mobilityLabels(card.preferredCountries ?? [], {
+      has: (key: string) => tlm.has(`countryNames.${key}`),
+      get: (key: string) => tlm(`countryNames.${key}`) as string,
+    }),
+    relocateLabel: card.willingToRelocate === true ? tCvPrivate("relocate") : null,
+    // §5.2 DOCUMENTS — real counts only; absent when the surface is not
+    // available for this account (the card then shows no documents block).
+    documentsLabel: card.documents ? t("documentsLabel") : null,
+    // A ZERO is stated in words, never rendered as a bare "0 valid" tile —
+    // the same rule the reputation block follows. (Premium self-check on the
+    // production card: "0 galiojantys" read as a verdict, not as an absence.)
+    documentsValue: card.documents
+      ? card.documents.total === 0
+        ? t("documentsEmpty")
+        : card.documents.expiring > 0
+          ? t("documentsValueExpiring", {
+              valid: card.documents.total,
+              expiring: card.documents.expiring,
+            })
+          : t("documentsValue", { valid: card.documents.total })
+      : null,
+    // §5.2 REPUTATION — what other people really confirmed. No universal
+    // score, no medal tier: a count of real confirmations, or the honest
+    // "nothing confirmed yet" line.
+    reputationLabel: t("reputationLabel"),
+    reputationValue:
+      card.managerConfirmations > 0
+        ? t("reputationValue", { count: card.managerConfirmations })
+        : null,
+    reputationEmpty: t("reputationEmpty"),
+    reputationHint: t("reputationHint"),
+    workHistoryLabel: t("workHistoryLabel"),
+    workHistoryUnnamed: t("workHistoryUnnamed"),
+    workHistoryCurrent: t("workHistoryCurrent"),
+    verifiedTitle: t("verifiedTitle"),
+    verifiedEmpty: t("verifiedEmpty"),
+    verifiedUnavailable: t("verifiedUnavailable"),
+    journalSupportedLabel: t("journalSupportedLabel"),
+    journalSupportedHint: t("journalSupportedHint"),
+    verifiedSkillNames: card.verifiedSkills.map((s) =>
+      tSkill.has(s.slug) ? tSkill(s.slug) : s.slug.replace(/-/g, " "),
+    ),
+    latestEvidenceLabel: t("latestEvidenceLabel"),
+    latestEvidenceValue: card.latestEvidenceAt
+      ? dateFmt.format(new Date(card.latestEvidenceAt))
+      : null,
+    latestEvidenceEmpty: t("latestEvidenceEmpty"),
+    thermoLabel: t("thermoLabel"),
+    thermoHint: t("thermoHint"),
+    thermoMissingPosition: t("thermoMissingPosition"),
+    thermoMissingMarket: t("thermoMissingMarket"),
+    thermoMissingBoth: t("thermoMissingBoth"),
+    thermoSmallSample: t("thermoSmallSample"),
+    readiness: {
+      label: t("readiness.label"),
+      hint: t("readiness.hint"),
+      levelReady: t("readiness.levelReady"),
+      levelBuilding: t("readiness.levelBuilding"),
+      levelStart: t("readiness.levelStart"),
+      signalsTemplate: t("readiness.signalsTemplate"),
+      nextLabel: t("readiness.nextLabel"),
+      pillars: {
+        profession: t("readiness.pillars.profession"),
+        availability: t("readiness.pillars.availability"),
+        skills: t("readiness.pillars.skills"),
+        journal: t("readiness.pillars.journal"),
+        evidence: t("readiness.pillars.evidence"),
+        workCard: t("readiness.pillars.workCard"),
+      },
+    },
+    visuals: {
+      evidence: {
+        title: t("visuals.evidenceTitle"),
+        hint: t("visuals.evidenceHint", { months: EVIDENCE_TIMELINE_MONTHS }),
+        empty: t("visuals.evidenceEmpty"),
+        total: t("visuals.evidenceTotal", {
+          count: timelineTotal,
+          months: EVIDENCE_TIMELINE_MONTHS,
+        }),
+        peak: peakMonth
+          ? t("visuals.evidencePeak", {
+              count: peakMonth.entries,
+              month: monthLongName(peakMonth.month),
+            })
+          : null,
+        monthLabels: card.evidenceTimeline.map((m) => monthName(m.month)),
+        ariaLabel: t("visuals.evidenceAria", {
+          months: EVIDENCE_TIMELINE_MONTHS,
+        }),
+      },
+      skills: {
+        title: t("visuals.skillsTitle"),
+        hint: t("visuals.skillsHint"),
+        empty: t("visuals.skillsEmpty"),
+        skillNames: card.skillEvidence.map((s) =>
+          tSkill.has(s.slug) ? tSkill(s.slug) : s.slug.replace(/-/g, " "),
+        ),
+        entryLabels: card.skillEvidence.map((s) =>
+          t("visuals.skillsEntries", { count: s.entries }),
+        ),
+        noEvidence: t("visuals.skillsNoEvidence"),
+        // §4.4 — the bar is a record count, never a competence score.
+        scaleNote: t("visuals.skillsScaleNote", { scale: EVIDENCE_SCALE_MAX }),
+        legendTitle: t("visuals.skillsLegendTitle"),
+        tierLabels: {
+          verified: t("visuals.skillsTierVerified"),
+          journal: t("visuals.skillsTierJournal"),
+          declared: t("visuals.skillsTierDeclared"),
+        },
+        ariaLabel: t("visuals.skillsAria"),
+      },
+      history: {
+        title: t("visuals.historyTitle"),
+        current: t("visuals.historyCurrent"),
+        undated:
+          history.undatedCount > 0
+            ? t("visuals.historyUndated", { count: history.undatedCount })
+            : null,
+        range:
+          history.fromIso && history.toIso
+            ? t("visuals.historyRange", {
+                from: dateFmt.format(new Date(`${history.fromIso}T00:00:00Z`)),
+                to: dateFmt.format(new Date(`${history.toIso}T00:00:00Z`)),
+              })
+            : null,
+        // One compact detail row per placed engagement, so the real dates are
+        // readable without a second history list underneath the card.
+        laneDetails: history.lanes.map((lane) => {
+          const entry = card.workHistory.find((h) => h.id === lane.id);
+          // No organization: only what the person stated, never a padded day.
+          const own = entry !== undefined && entry.organizationName === null;
+          const from = entry?.startedAt
+            ? own
+              ? statedDateLabel(entry.startedAt, "start", locale)
+              : dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
+            : null;
+          const to = entry?.current
+            ? t("workHistoryCurrent")
+            : entry?.endedAt
+              ? own
+                ? statedDateLabel(entry.endedAt, "end", locale)
+                : dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
+              : null;
+          return from && to ? `${from} — ${to}` : (from ?? "");
+        }),
+        empty: t("visuals.historyEmpty"),
+        unavailable: t("visuals.historyUnavailable"),
+        hoursById,
+        ariaLabel: historyUnavailable
+          ? t("visuals.historyUnavailable")
+          : history.fromIso && history.toIso
+            ? t("visuals.historyAria", {
+                from: dateFmt.format(new Date(`${history.fromIso}T00:00:00Z`)),
+                to: dateFmt.format(new Date(`${history.toIso}T00:00:00Z`)),
+              })
+            : t("visuals.historyEmpty"),
+      },
+    },
+  };
+}

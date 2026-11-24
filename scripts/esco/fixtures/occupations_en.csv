@@ -1,0 +1,4 @@
+﻿conceptType,conceptUri,iscoGroup,preferredLabel,altLabels,description
+Occupation,http://data.europa.eu/esco/occupation/0001,7111,house builder,"home builder
+residential constructor",builds houses
+Occupation,http://data.europa.eu/esco/occupation/0002,7126,plumber,pipe fitter,installs pipes

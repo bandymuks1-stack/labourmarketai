@@ -1,0 +1,1546 @@
+"use client";
+
+import { useEffect, useMemo, useRef, useState, useTransition } from "react";
+import { mentionsOrganization } from "@/lib/journal/org-mention";
+import {
+  resolveEngagementContext,
+  type EngagementCandidate,
+} from "@/lib/journal/engagement-context-selection";
+import { useTranslations } from "next-intl";
+import {
+  PROJECT_FIELD_NONE,
+  projectChoiceIsSatisfied,
+  projectDisplayLabel,
+  projectNamedInText,
+  projectPromptFor,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+import {
+  ChatAction,
+  ChatActionRow,
+} from "@/components/app/conversation/chat/chat-action";
+import { Clock, X } from "lucide-react";
+
+import { CameraCaptureButton } from "@/components/app/camera-capture-button";
+import { Link, useRouter } from "@/lib/i18n/navigation";
+import { compressImageFile } from "@/lib/browser/image-compress";
+import {
+  isValidJournalPhoto,
+  uploadJournalEntryPhoto,
+  type JournalPhotoUploadResult,
+} from "@/lib/journal/photo-upload";
+import {
+  prepareConfirmationAction,
+  dispatchWorkerAction,
+} from "@/lib/conversation/dispatch";
+import {
+  listWorkLogEngagements,
+  type WorkLogEngagement,
+} from "@/lib/conversation/worklog-engagements";
+import {
+  journalDraftReadiness,
+  type WorkLogParse,
+} from "@/lib/conversation/worklog-extract";
+import { logWorkNotesRefusal } from "@/lib/conversation/worker-schemas";
+import {
+  useAttachSink,
+  useInitialFile,
+  type RegisterAttachSink,
+} from "@/components/app/conversation/attach-sink";
+import { deriveIntakeWorkTime } from "@/lib/journal/intake-work-time";
+import {
+  confirmJournalSkillCandidate,
+  rejectJournalSkillCandidate,
+} from "@/lib/journal/skill-pipeline-actions";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { formatUtcDate } from "@/lib/time/display";
+import { durationLocale, formatDuration } from "@/lib/journal/format-duration";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import { addCalendarDays } from "@/lib/time/local-day";
+import { quoteText } from "@/lib/i18n/quote";
+
+export type WorkLogLabels = {
+  understood: string;
+  loading: string;
+  noContext: string;
+  noContextCta: string;
+  noWorker: string;
+  notAuthed: string;
+  labelDate: string;
+  labelTime: string;
+  labelBreak: string;
+  labelHours: string;
+  labelSite: string;
+  labelNotes: string;
+  labelContext: string;
+  contextChoose: string;
+  contextAmbiguous: string;
+  contextEndedOrg: string;
+  /** The CONFIRM step's button — the only press that writes. */
+  save: string;
+  /** The FIRST button: it opens the review step ("Patvirtinti įrašą?") and
+   *  writes nothing, so it never says "Save" (activation audit fix #5). */
+  continue: string;
+  cancel: string;
+  working: string;
+  confirmTitle: string;
+  saved: string;
+  errorGeneric: string;
+  minutesUnit: string;
+  // PR-C "what changed" — the completion message lists the REAL pipeline
+  // outcome (skills added / strengthened, candidates awaiting confirmation)
+  // plus the truthful CV + matching consequences.
+  addedSkillPrefix: string;
+  strengthenedSkillPrefix: string;
+  pendingConfirmPrefix: string;
+  cvUpdatedNote: string;
+  /** Shown after EVERY save: the entry now counts in the Living CV as
+   *  recorded work — written by the person, not confirmed by anyone. The
+   *  Living CV prints its recorded-work facts from one entry on
+   *  (`lib/cv-export/professional-summary.ts`), so this is a fact, not a
+   *  promise. Never says "verified" / "confirmed". */
+  livingCvNote: string;
+  /** The one link from the confirmation to the Living CV (`/cv`). */
+  viewLivingCv: string;
+  /** A calm return line ("tomorrow, add that day's work too") — no streak,
+   *  no score, no pressure. */
+  comeBackNote: string;
+  matchingNote: string;
+  /** Next action after real enrichment: open the board where the updated
+   *  skills are recomputed into recommendations (read-time, never pushed). */
+  viewOpportunities: string;
+  pipelineFailedNote: string;
+  /** The evidence text is not work the server would take: under 3 characters,
+   *  or only the request "Užpildyk darbo žurnalą" typed into the field. The
+   *  flow asks for the work instead of saving the request (prod 2026-09-06). */
+  errorNoWorkContent: string;
+  /** Over the server's 4000-character ceiling — said plainly, not as a
+   *  generic failure. */
+  errorNotesTooLong: string;
+  /** NEUTRAL (never red) line on the confirm step when the text carries no
+   *  recognised time, place or activity. The server takes such text, so the
+   *  form does too (owner P0 2026-09-23) — it just says what it did not read. */
+  noWorkSignalHint: string;
+  /** What the save will RECORD as work time (issue #1689): the timed phrases
+   *  the executor persists as fragments, in the person's own words, and the
+   *  stated day total beside them. The person confirms figures, not a
+   *  sentence — before this the preview showed the parser's day figure while
+   *  the record received the itemised phrases. */
+  recordTitle: string;
+  recordNoActivity: string;
+  recordTotalStated: string;
+  recordPartsSum: string;
+  recordTotalDiffers: string;
+  recordNone: string;
+  hoursUnit: string;
+};
+
+/** The subset of the awaited server pipeline result the chat surface shows.
+ *  Parsed defensively from the dispatcher's `data.skills` — anything missing
+ *  or malformed renders as "no outcome details", never as invented facts. */
+type WorkLogSkillsOutcome = {
+  status: "completed" | "partial" | "failed";
+  addedSkills: string[];
+  strengthenedSkills: string[];
+  pendingCandidates: { label: string; slug: string | null; kind: string }[];
+  /** Derivation version of the candidates (the actions refuse a stale one);
+   *  null = not readable → the offers are listed, not decidable here. */
+  pipelineVersion: number | null;
+  cvUpdated: boolean;
+};
+
+/** One-tap decision state per offered skill (keyed by slug). */
+type CandidateDecision = "idle" | "working" | "confirmed" | "rejected" | "error";
+
+/** The saved entry's id, straight off the dispatcher result. The photo can only
+ *  be attached once a REAL entry exists, so a missing id means no upload is
+ *  attempted at all (rather than an upload aimed at nothing). */
+function parseEntryId(data: unknown): string | null {
+  if (typeof data !== "object" || data === null) return null;
+  const id = (data as { entryId?: unknown }).entryId;
+  return typeof id === "string" && id.length > 0 ? id : null;
+}
+
+/** Owner §13 — the open day-level plausibility check the saved entry takes
+ *  part in, straight off the dispatcher result. Parsed defensively: anything
+ *  malformed means "no check shown", never an invented warning. */
+type WorkLogDayCheck = {
+  code: "day_over_24h" | "long_day";
+  day: string;
+  hours: number;
+  entries: number;
+};
+
+function parseDayCheck(data: unknown): WorkLogDayCheck | null {
+  if (typeof data !== "object" || data === null) return null;
+  const c = (data as { dayCheck?: unknown }).dayCheck;
+  if (typeof c !== "object" || c === null) return null;
+  const o = c as Record<string, unknown>;
+  if (o.code !== "day_over_24h" && o.code !== "long_day") return null;
+  if (typeof o.day !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(o.day)) return null;
+  if (typeof o.hours !== "number" || !Number.isFinite(o.hours)) return null;
+  if (typeof o.entries !== "number" || !Number.isFinite(o.entries)) return null;
+  return { code: o.code, day: o.day, hours: o.hours, entries: o.entries };
+}
+
+function parseSkillsOutcome(data: unknown): WorkLogSkillsOutcome | null {
+  if (typeof data !== "object" || data === null) return null;
+  const s = (data as { skills?: unknown }).skills;
+  if (typeof s !== "object" || s === null) return null;
+  const o = s as Record<string, unknown>;
+  const status =
+    o.status === "completed" || o.status === "partial" || o.status === "failed"
+      ? o.status
+      : null;
+  if (!status) return null;
+  const strings = (v: unknown): string[] =>
+    Array.isArray(v) ? v.filter((x): x is string => typeof x === "string") : [];
+  const candidates = Array.isArray(o.pendingCandidates)
+    ? o.pendingCandidates
+        .filter(
+          (c): c is Record<string, unknown> =>
+            typeof c === "object" && c !== null,
+        )
+        .map((c) => ({
+          label: typeof c.label === "string" ? c.label : "",
+          slug: typeof c.slug === "string" ? c.slug : null,
+          kind: typeof c.kind === "string" ? c.kind : "",
+        }))
+        .filter((c) => c.label.length > 0)
+    : [];
+  return {
+    status,
+    addedSkills: strings(o.addedSkills),
+    strengthenedSkills: strings(o.strengthenedSkills),
+    pendingCandidates: candidates,
+    pipelineVersion:
+      typeof o.pipelineVersion === "number" && Number.isFinite(o.pipelineVersion)
+        ? o.pipelineVersion
+        : null,
+    cvUpdated: o.cvUpdated === true,
+  };
+}
+
+type Phase =
+  | { kind: "loading" }
+  | { kind: "blocked"; reason: "no-context" | "no-worker" | "not-authed" }
+  | { kind: "ready"; token: null }
+  | { kind: "confirm"; token: string }
+  /** The entry is ALREADY saved and the photo is going up. A distinct phase so
+   *  the person is never shown "saved" while a file is still in flight, and
+   *  never shown a spinner that implies the entry might still be lost. */
+  | { kind: "uploading" }
+  | {
+      kind: "done";
+      /** The saved entry's id (null = not readable → offers are not decidable). */
+      entryId: string | null;
+      skills: WorkLogSkillsOutcome | null;
+      /** null = no open day check (or not readable) — nothing is shown. */
+      dayCheck: WorkLogDayCheck | null;
+      /** null = no photo was attached; otherwise the REAL upload outcome. */
+      photo: JournalPhotoUploadResult | null;
+    }
+  | { kind: "error"; message: string };
+
+/** The bounded funnel surface labels this flow can report. */
+export type WorkLogSurface = "conversation" | "journal";
+
+/** `journal_rematch_viewed` keeps its historical per-surface label. */
+const REMATCH_SURFACE: Record<WorkLogSurface, string> = {
+  conversation: "worklog_chat",
+  journal: "worklog_journal",
+};
+
+/** Client-side preparation state for the picked photo. */
+type PhotoPrep = "idle" | "preparing" | "ready";
+
+/**
+ * Upload outcome → the ONE honest sentence for it, in the SAME `journal.photo`
+ * lexicon the journal composer uses. TOTAL by construction: a new outcome in
+ * `JournalPhotoUploadResult` fails to typecheck here rather than silently
+ * rendering nothing, so no state can ever reach the person as blank space.
+ */
+const PHOTO_OUTCOME_KEY: Record<JournalPhotoUploadResult, string> = {
+  uploaded: "uploaded",
+  invalid: "invalidFile",
+  limit: "limitReached",
+  quota: "quotaReached",
+  "not-ready": "notReady",
+  failed: "uploadFailed",
+};
+
+/** The photo types the journal photo path re-encodes and stores. */
+const JOURNAL_PHOTO_TYPE = /^image\/(jpeg|png|webp)$/;
+
+/**
+ * Conversation-first work-log (Phase 3). The worker types a natural sentence
+ * ("šiandien dirbau nuo 8 iki 17, montavau langus"); the deterministic
+ * extractor already parsed it into `draft`. This component:
+ *   1. loads the worker's REAL writable engagement contexts (a journal entry
+ *      must pin to one — doctrine §5.5). No context → an HONEST blocker with the
+ *      real next step, never a fake save;
+ *   2. shows the parse as a preview the worker can correct (date / site / the
+ *      evidence notes) and pick the context;
+ *   3. saves ONLY after an explicit confirmation, through the server dispatcher
+ *      with a one-time token → the canonical `createJournalEntry`;
+ *   4. shows the REAL server outcome (never a fabricated success — §7).
+ *
+ * Times/break/hours are shown as a read-only parse summary. Since issue #1689
+ * the SAME deterministic parse is persisted by the executor as duration
+ * metrics with machine-extraction provenance (`lib/journal/intake-work-time`),
+ * so the hours the person stated reach the canonical work-time rule instead
+ * of staying hidden in the evidence text — and the preview lists EXACTLY
+ * those figures (`RecordedTimePreview`, derived from the notes as edited),
+ * so what the person confirms is what the record receives.
+ */
+export function WorkerWorkLogFlow({
+  draft,
+  locale,
+  labels,
+  onClose,
+  onSaved,
+  photoFirst = false,
+  initialFile = null,
+  onRegisterAttachSink,
+  voice,
+  surface = "conversation",
+}: {
+  /** WHERE the flow is mounted — the funnel label on the save events. The
+   *  journal page's quick record mounts this same flow, and its saves were
+   *  reported as "conversation" (activation audit fix #7). Bounded label. */
+  surface?: WorkLogSurface;
+  /** Set only when the text came from the voice door (already reviewed by the
+   *  person): carried to the save as provenance, nothing more. */
+  voice?: { language: string; disclosureVersion: string };
+  draft: WorkLogParse;
+  locale: string;
+  labels: WorkLogLabels;
+  onClose?: () => void;
+  /** Called once when the entry is persisted (the "done" phase) — the chat
+   *  retires the work-log goal so a later "ne 5, o 6" corrects THIS entry
+   *  instead of opening a second one (2026-09-29). */
+  onSaved?: (entryId: string) => void;
+  /** Opened via the composer's attach path — the photo field leads and is the
+   *  reason the flow is on screen. The short text stays REQUIRED either way: a
+   *  photo alone is evidence without a claim, which the journal cannot store. */
+  photoFirst?: boolean;
+  /** The photo the person picked with the composer paperclip BEFORE this flow
+   *  opened. It enters through the SAME `pickPhoto` a pick inside the form
+   *  takes (compress → validate → preview), and it is uploaded only after the
+   *  entry is saved — until then it lives in this browser tab only. */
+  initialFile?: File | null;
+  /** While this form is open it is where a paperclip photo goes — into THIS
+   *  form, never into a second one (owner P0 2026-09-23). Withdrawn on done,
+   *  cancel and unmount. The journal page's quick record passes none. */
+  onRegisterAttachSink?: RegisterAttachSink;
+}) {
+  const router = useRouter();
+  const [phase, setPhase] = useState<Phase>({ kind: "loading" });
+  const savedEntryId = phase.kind === "done" ? phase.entryId : null;
+  useEffect(() => {
+    if (savedEntryId) onSaved?.(savedEntryId);
+    // Once per persisted entry; the callback identity is not a trigger.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [savedEntryId]);
+  const [engagements, setEngagements] = useState<WorkLogEngagement[]>([]);
+  const [engagementId, setEngagementId] = useState<string>("");
+  /** Which project the hours belong to. Two or more active projects in the
+   *  chosen context → nothing is preselected and the person must answer
+   *  (a project, or "not project work"); the shared rule lives in
+   *  lib/journal/project-attribution. */
+  const [projectChoice, setProjectChoice] = useState<string>("");
+  /** Rule C: several engagements are legitimately possible, so the flow must
+   *  ask instead of preselecting one. */
+  const [mustChooseEngagement, setMustChooseEngagement] = useState(false);
+  /** The sentence named an organization whose relationship has ENDED. */
+  const [endedOrgNamed, setEndedOrgNamed] = useState<string | null>(null);
+  // Acting for an organization with no recorded work relationship (owner P0
+  // 2026-10-29): the server's localized sentence, shown under the picker.
+  const [activeWorkspaceNotice, setActiveWorkspaceNotice] = useState<string | null>(null);
+  // The facts the server resolved from, so a changed WORK DATE re-resolves
+  // with the same pure resolver (applicability is bounded by the day — Codex
+  // P2 on #2884). Until the person picks, or their sentence named an org.
+  const [contextFacts, setContextFacts] = useState<{
+    candidates: EngagementCandidate[];
+    activeOrganizationId: string | null;
+  } | null>(null);
+  const contextDecidedByPerson = useRef(false);
+  const resolvedForDate = useRef<string | null>(null);
+  const [workDate, setWorkDate] = useState(draft.date);
+  // The person's own calendar day, read once when the flow opens.
+  const [today] = useState(() => personCalendarDay());
+  const [site, setSite] = useState(draft.site ?? "");
+  const [notes, setNotes] = useState(draft.notes);
+  const [pending, start] = useTransition();
+  /**
+   * PHOTO EVIDENCE (W7 slice 2). The SAME three modules the journal composer
+   * uses — `compressImageFile` → `isValidJournalPhoto` → `uploadJournalEntryPhoto`
+   * — in the same order, so there is ONE compression rule, ONE 5 MB rule and
+   * ONE write path across both surfaces. Nothing about photos is re-decided here.
+   */
+  const tPhoto = useTranslations("journal.photo");
+  const tCheck = useTranslations("journal.intelligence.checks");
+  // The offered-skill decision rides the journal composer's OWN copy and
+  // actions (issue #1689): a fragment nothing read may carry a catalogue
+  // OFFER ("2 val. testavau" → software testing) that only the worker's word
+  // links — and the worker typed it here, so the decision is made here.
+  const tCandidate = useTranslations("journal");
+  const [candidateDecisions, setCandidateDecisions] = useState<
+    Record<string, CandidateDecision>
+  >({});
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [photoPrep, setPhotoPrep] = useState<PhotoPrep>("idle");
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const photoFieldRef = useRef<HTMLDivElement>(null);
+  /** The person pressed this form's own cancel. The form stays in the thread
+   *  as history, but it is no longer where a newly picked file goes. */
+  const [closed, setClosed] = useState(false);
+
+  // The object URL is a live handle, not a value — revoke it whenever it is
+  // replaced or the flow unmounts, or a long chat session leaks every photo
+  // the person previewed.
+  //
+  // ONLY a browser-minted `blob:` URL is ever stored. `createObjectURL` cannot
+  // return anything else, but the preview `src` is fed by a value that
+  // originates at a DOM file input, so the invariant is asserted here rather
+  // than assumed: anything that is not `blob:` becomes null and simply does
+  // not render. This is the barrier between a picked file and an image sink —
+  // it also keeps `js/xss-through-dom` satisfied without suppressing it.
+  useEffect(() => {
+    if (!photoFile) {
+      setPhotoPreview(null);
+      return;
+    }
+    // Preview from a NAMELESS Blob, not from the File itself. A File carries
+    // `name`, which is DOM-supplied text; a Blob carries only bytes and a MIME
+    // type. Nothing the person's filesystem chose can reach the image sink.
+    const url = URL.createObjectURL(
+      new Blob([photoFile], { type: photoFile.type }),
+    );
+    setPhotoPreview(url.startsWith("blob:") ? url : null);
+    return () => URL.revokeObjectURL(url);
+  }, [photoFile]);
+
+  function clearPhoto() {
+    setPhotoFile(null);
+    setPhotoError(null);
+    setPhotoPrep("idle");
+    if (photoInputRef.current) photoInputRef.current.value = "";
+  }
+
+  async function pickPhoto(f: File | null) {
+    if (!f) {
+      clearPhoto();
+      return;
+    }
+    // Wrong format → honest, specific error. Size is NOT judged here: that is
+    // what compression is for, and judging it first is the 5 MB wall this
+    // slice exists to remove.
+    if (!JOURNAL_PHOTO_TYPE.test(f.type)) {
+      setPhotoFile(null);
+      setPhotoPrep("idle");
+      setPhotoError(tPhoto("invalidFile"));
+      return;
+    }
+    setPhotoError(null);
+    setPhotoPrep("preparing");
+    const { file: prepared } = await compressImageFile(f);
+    // Still over the server's ceiling after a real attempt → say exactly that,
+    // and attach nothing. The server rule stays the authority.
+    if (!isValidJournalPhoto(prepared)) {
+      setPhotoFile(null);
+      setPhotoPrep("idle");
+      setPhotoError(tPhoto("tooLargeAfter"));
+      return;
+    }
+    setPhotoFile(prepared);
+    setPhotoPrep("ready");
+  }
+
+  // THE PAPERCLIP'S FILE ENTERS THROUGH THE FORM'S OWN PICK. No second
+  // uploader: the picked photo takes exactly the path a pick in the photo
+  // field takes, and it still uploads only after the entry is saved.
+  useInitialFile(initialFile, (f) => void pickPhoto(f));
+  useAttachSink(
+    onRegisterAttachSink,
+    "worklog",
+    // Open for a photo until the entry is on its way: not once it is saving,
+    // saved, blocked, or cancelled by the person.
+    !closed &&
+      (phase.kind === "loading" ||
+        phase.kind === "ready" ||
+        phase.kind === "error" ||
+        phase.kind === "confirm"),
+    (f) => !pending && JOURNAL_PHOTO_TYPE.test(f.type),
+    (f) => {
+      // A photo that arrives while "Patvirtinti įrašą?" is showing sends the
+      // person back one step: they confirm again WITH the photo in view.
+      setPhase((p) => (p.kind === "confirm" || p.kind === "error" ? { kind: "ready", token: null } : p));
+      void pickPhoto(f);
+      photoFieldRef.current?.scrollIntoView({ block: "nearest" });
+    },
+  );
+
+  /** An edit answers the error it was shown for — the red line must not stay
+   *  beside text that has since been corrected (owner P0 2026-09-23). */
+  function clearError() {
+    setPhase((p) => (p.kind === "error" ? { kind: "ready", token: null } : p));
+  }
+  // Localized taxonomy skill names for the completion summary (slug → name,
+  // falling back to the raw slug so an uncatalogued name never blanks a fact).
+  const tSkill = useTranslations("skillNames");
+  const skillName = (slug: string): string => {
+    try {
+      const v = tSkill(slug);
+      if (v && v !== slug && !v.startsWith("skillNames.")) return v;
+    } catch {
+      /* fall through */
+    }
+    return slug;
+  };
+
+  useEffect(() => {
+    let alive = true;
+    listWorkLogEngagements(draft.date)
+      .then((res) => {
+        if (!alive) return;
+        if (res.kind === "ok") {
+          setEngagements(res.engagements);
+          // The server RESOLVES the default (see
+          // lib/journal/engagement-context-selection): source-determined, or
+          // the single applicable organization context, or — when several are
+          // legitimately possible — NOTHING, because guessing between
+          // employers is what put 15 production entries where no employer
+          // could ever read them. An empty id makes the picker a question.
+          // WHAT THE PERSON SAID OUTRANKS THE DEFAULT (2026-09-29): a sentence
+          // naming one of their ACTIVE organizations files there; one naming
+          // an organization whose relationship ENDED preselects nothing and
+          // says so — it was one click from landing at a different employer.
+          const said = draft.notes ?? "";
+          const named = res.engagements.find(
+            (e) => e.orgName && mentionsOrganization(said, e.orgName),
+          );
+          const endedNamed = named
+            ? null
+            : ((res.endedOrgNames ?? []).find((n) => mentionsOrganization(said, n)) ?? null);
+          setEndedOrgNamed(endedNamed);
+          setActiveWorkspaceNotice(res.activeWorkspaceNotice ?? null);
+          contextDecidedByPerson.current = Boolean(named || endedNamed);
+          resolvedForDate.current = draft.date;
+          setContextFacts(
+            res.candidates
+              ? { candidates: res.candidates, activeOrganizationId: res.activeOrganizationId ?? null }
+              : null,
+          );
+          setEngagementId(named ? named.id : endedNamed ? "" : (res.resolution.selectedId ?? ""));
+          setMustChooseEngagement(!named && (endedNamed !== null || res.resolution.rule === "C"));
+          setPhase({ kind: "ready", token: null });
+        } else if (res.kind === "no-context") {
+          setPhase({ kind: "blocked", reason: "no-context" });
+        } else if (res.kind === "no-worker") {
+          setPhase({ kind: "blocked", reason: "no-worker" });
+        } else {
+          setPhase({ kind: "blocked", reason: "not-authed" });
+        }
+      })
+      .catch(
+        () =>
+          alive && setPhase({ kind: "error", message: labels.errorGeneric }),
+      );
+    return () => {
+      alive = false;
+    };
+  }, [labels.errorGeneric]);
+
+  // The resolution for the CURRENT work date (null until the facts arrive).
+  const liveResolution = useMemo(
+    () =>
+      contextFacts
+        ? resolveEngagementContext({
+            candidates: contextFacts.candidates,
+            workDay: workDate,
+            activeOrganizationId: contextFacts.activeOrganizationId,
+          })
+        : null,
+    [contextFacts, workDate],
+  );
+  useEffect(() => {
+    if (!liveResolution || contextDecidedByPerson.current) return;
+    if (resolvedForDate.current === workDate) return;
+    resolvedForDate.current = workDate;
+    setEngagementId(liveResolution.selectedId ?? "");
+    setMustChooseEngagement(liveResolution.rule === "C");
+  }, [liveResolution, workDate]);
+
+  // UX gap W-2 (2026-11-18): on the journal page the read-back opened below
+  // the quick-record field, and on a phone only its date and hours were in
+  // view; both Save steps sat below the fold. Bring the card to the top ONCE
+  // when it first opens. Instant (no `behavior: "smooth"`), so reduced motion
+  // is respected. Journal only: the conversation thread keeps its own scroll.
+  const flowRef = useRef<HTMLDivElement>(null);
+  const openedInView = useRef(false);
+  const formOpen = phase.kind === "ready" || phase.kind === "error" || phase.kind === "confirm";
+  useEffect(() => {
+    if (surface !== "journal" || !formOpen || openedInView.current) return;
+    openedInView.current = true;
+    flowRef.current?.scrollIntoView({ block: "start" });
+  }, [surface, formOpen]);
+  const showActiveWorkspaceNotice = Boolean(
+    activeWorkspaceNotice && liveResolution?.activeWorkspaceWithoutContext,
+  );
+
+  const contextProjects: AssignedProject[] =
+    engagements.find((e) => e.id === engagementId)?.projects ?? [];
+  const projectPrompt = projectPromptFor(contextProjects);
+  // The project the sentence itself names ("Oslo projekte …") is PRESELECTED
+  // in the picker below — visible before the confirm, changeable, and only
+  // ever one of the person's own assigned projects (owner launch order
+  // 2026-10-10 §5). An explicit pick always wins.
+  const namedProjectId =
+    projectPrompt === "ask"
+      ? projectNamedInText(contextProjects, `${notes} ${site}`)
+      : null;
+  const projectAnswer = projectChoice || namedProjectId || "";
+  // A choice made for another context's projects never carries over.
+  const projectChoiceValid = projectChoiceIsSatisfied(contextProjects, projectAnswer)
+    ? projectAnswer
+    : "";
+
+  function input() {
+    return {
+      engagementContextId: engagementId,
+      notes: notes.trim(),
+      workDate,
+      siteName: site.trim() || null,
+      ...(voice ? { voice } : {}),
+      ...(projectPrompt === "ask" && projectChoiceValid
+        ? { projectId: projectChoiceValid }
+        : {}),
+    };
+  }
+
+  function beginConfirm() {
+    // THE FORM IS NEVER STRICTER THAN THE SERVER (owner P0 2026-09-23). It
+    // used to refuse anything its keyword recogniser could not read as work —
+    // "Buvau pas klientą", "Rašau kodą", "Darbas biure" — while the server
+    // schema accepted all of them, so text the record would take was blocked
+    // with a red line. It now refuses exactly what `workerLogWorkSchema`
+    // refuses, through the schema's own notes rule: under 3 characters, over
+    // 4000, or only the request "Užpildyk darbo žurnalą" (A2, prod
+    // 2026-09-06 — the request never becomes the record, on either layer).
+    const refusal = logWorkNotesRefusal(notes);
+    if (refusal !== null) {
+      setPhase({
+        kind: "error",
+        message:
+          refusal === "too-long" ? labels.errorNotesTooLong : labels.errorNoWorkContent,
+      });
+      return;
+    }
+    // Nothing failed here: the person still has to choose WHICH context
+    // (Rule C). Say that — not "could not save, try again". With no context
+    // list at all the list itself could not be read, which IS a failure.
+    if (!engagementId) {
+      setPhase({
+        kind: "error",
+        message: engagements.length > 1 ? labels.contextAmbiguous : labels.errorGeneric,
+      });
+      return;
+    }
+    if (!projectChoiceIsSatisfied(contextProjects, projectChoiceValid)) {
+      setPhase({ kind: "error", message: tCandidate("projectAmbiguous") });
+      return;
+    }
+    start(async () => {
+      // A thrown action (network gone) is an error phase, never the page's
+      // error boundary: the readback and everything typed stay on screen.
+      let prep: Awaited<ReturnType<typeof prepareConfirmationAction>>;
+      try {
+        prep = await prepareConfirmationAction("worker.log-work", input());
+      } catch {
+        setPhase({ kind: "error", message: labels.errorGeneric });
+        return;
+      }
+      if (!prep.ok) {
+        setPhase({ kind: "error", message: failureCode(prep) === "auth" ? labels.notAuthed : labels.errorGeneric });
+        return;
+      }
+      setPhase({ kind: "confirm", token: prep.token });
+    });
+  }
+
+  function confirm() {
+    if (phase.kind !== "confirm") return;
+    const token = phase.token;
+    start(async () => {
+      let res: Awaited<ReturnType<typeof dispatchWorkerAction>>;
+      try {
+        res = await dispatchWorkerAction("worker.log-work", input(), {
+          locale,
+          confirmationToken: token,
+        });
+      } catch {
+        // Nothing was confirmed as saved: the entry stays on screen to retry.
+        setPhase({ kind: "error", message: labels.errorGeneric });
+        return;
+      }
+      if (!res.ok) {
+        setPhase({
+          kind: "error",
+          message: failureCode(res) === "auth" ? labels.notAuthed : res.message || labels.errorGeneric,
+        });
+        return;
+      }
+      trackFunnel(FUNNEL_EVENTS.journalEntrySaved, {
+        surface,
+        role_context: "worker",
+        success: true,
+      });
+      const skills = parseSkillsOutcome(res.data);
+      const entryId = parseEntryId(res.data);
+      const dayCheck = parseDayCheck(res.data);
+
+      // ORDER MATTERS, and it is the journal composer's order: the entry is
+      // saved FIRST and the photo is attached to it afterwards. A storage
+      // failure then costs the photo, never the work record — the opposite
+      // order would let a flaky upload lose a day of real work.
+      if (photoFile && entryId) {
+        setPhase({ kind: "uploading" });
+        let outcome: JournalPhotoUploadResult;
+        try {
+          outcome = await uploadJournalEntryPhoto(entryId, photoFile);
+        } catch {
+          // A thrown uploader is a FAILED upload, never a silent success.
+          outcome = "failed";
+        }
+        setPhase({ kind: "done", entryId, skills, dayCheck, photo: outcome });
+        router.refresh();
+        return;
+      }
+      // A photo was prepared but the id never arrived — report the entry
+      // honestly and say the photo did not attach, rather than implying it did.
+      setPhase({
+        kind: "done",
+        entryId,
+        skills,
+        dayCheck,
+        photo: photoFile ? "failed" : null,
+      });
+      router.refresh();
+    });
+  }
+
+  // ── loading ───────────────────────────────────────────────────────────────
+  if (phase.kind === "loading") {
+    return (
+      <div
+        className="rounded-card border border-ink-600 bg-surface-1/40 px-4 py-3 text-support text-text-muted"
+        data-testid="worklog-loading"
+      >
+        {labels.loading}
+      </div>
+    );
+  }
+
+  // ── honest blocker (real precondition, no fake save) ───────────────────────
+  if (phase.kind === "blocked") {
+    return (
+      <div
+        className="rounded-card border border-state-warning/40 bg-state-warning/5 px-4 py-3 text-support text-text-primary"
+        data-testid="worklog-blocked"
+      >
+        <p>
+          {phase.reason === "no-context"
+            ? labels.noContext
+            : phase.reason === "no-worker"
+              ? labels.noWorker
+              : labels.notAuthed}
+        </p>
+        {phase.reason === "no-context" && (
+          // W3 rows 19/14: this pointed at /dashboard/advanced — a stale door
+          // into the dying second dashboard. The spaces hub is where a work
+          // context is actually established (per-space status + entry lanes),
+          // and the header's workspace switcher stays one tap away besides.
+          <Link
+            href="/dashboard/start"
+            className="mt-2 inline-flex min-h-11 items-center rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
+          >
+            {labels.noContextCta}
+          </Link>
+        )}
+      </div>
+    );
+  }
+
+  // ── uploading — the entry is SAFE, the photo is in flight ──────────────────
+  if (phase.kind === "uploading") {
+    return (
+      <div
+        className="flex flex-col gap-1 rounded-card border border-ink-600 bg-surface-1/40 px-4 py-3 text-support"
+        data-testid="worklog-photo-uploading"
+        role="status"
+        aria-live="polite"
+      >
+        <p className="font-semibold text-state-success">{labels.saved}</p>
+        <p className="text-text-secondary">{tPhoto("uploading")}</p>
+      </div>
+    );
+  }
+
+  // ── done — the REAL "what changed" outcome (§7: facts only) ────────────────
+  if (phase.kind === "done") {
+    const skills = phase.skills;
+    // Only genuinely confirmable candidates (fuzzy/ambiguous) — free-text
+    // claims are persisted as self-declared claims, not queued confirmations.
+    const awaiting =
+      skills?.pendingCandidates.filter((c) => c.kind !== "claim") ?? [];
+    const skillsTouched =
+      (skills?.addedSkills.length ?? 0) +
+        (skills?.strengthenedSkills.length ?? 0) >
+      0;
+    // A taxonomy offer (`fuzzy_skill`) is decidable right here through the
+    // SAME server actions the journal composer uses — the server re-derives
+    // from the stored text and checks membership + version; nothing is
+    // trusted from this client. Ambiguous readings keep their curated
+    // choices in the journal, so they stay listed, not decided, here.
+    const decidable = (c: { slug: string | null; kind: string }): c is {
+      slug: string;
+      kind: "fuzzy_skill";
+    } =>
+      c.kind === "fuzzy_skill" &&
+      typeof c.slug === "string" &&
+      phase.entryId !== null &&
+      skills?.pipelineVersion !== null;
+    const decide = async (slug: string, decision: "confirm" | "reject") => {
+      if (!phase.entryId || skills?.pipelineVersion == null) return;
+      setCandidateDecisions((prev) => ({ ...prev, [slug]: "working" }));
+      try {
+        const res =
+          decision === "confirm"
+            ? await confirmJournalSkillCandidate(
+                phase.entryId,
+                slug,
+                skills.pipelineVersion,
+              )
+            : await rejectJournalSkillCandidate(
+                phase.entryId,
+                slug,
+                skills.pipelineVersion,
+              );
+        setCandidateDecisions((prev) => ({
+          ...prev,
+          [slug]: res.ok
+            ? decision === "confirm"
+              ? "confirmed"
+              : "rejected"
+            : "error",
+        }));
+        if (res.ok) router.refresh();
+      } catch {
+        setCandidateDecisions((prev) => ({ ...prev, [slug]: "error" }));
+      }
+    };
+    return (
+      <div
+        className="flex flex-col gap-2 rounded-card border border-state-success/40 bg-state-success/5 px-4 py-3 text-support"
+        data-testid="worklog-done"
+      >
+        <p className="font-semibold text-state-success">{labels.saved}</p>
+        {skills &&
+          (skillsTouched ||
+            awaiting.length > 0 ||
+            skills.status === "failed") && (
+            <ul
+              className="flex flex-col gap-1 text-text-primary"
+              data-testid="worklog-outcome"
+            >
+              {skills.addedSkills.map((slug) => (
+                <li key={`added-${slug}`} data-testid={`worklog-added-${slug}`}>
+                  {labels.addedSkillPrefix}: {skillName(slug)}
+                </li>
+              ))}
+              {skills.strengthenedSkills.map((slug) => (
+                <li
+                  key={`str-${slug}`}
+                  data-testid={`worklog-strengthened-${slug}`}
+                >
+                  {labels.strengthenedSkillPrefix}: {skillName(slug)}
+                </li>
+              ))}
+              {awaiting.map((c) => {
+                const state: CandidateDecision = c.slug
+                  ? (candidateDecisions[c.slug] ?? "idle")
+                  : "idle";
+                return (
+                  <li
+                    key={`pend-${c.slug ?? c.label}`}
+                    className="text-text-muted"
+                    data-testid="worklog-pending-candidate"
+                    data-candidate-slug={c.slug ?? undefined}
+                    data-candidate-state={state}
+                  >
+                    {labels.pendingConfirmPrefix}:{" "}
+                    {c.slug ? skillName(c.slug) : c.label}
+                    {state === "confirmed" && (
+                      <span
+                        className="ml-2 font-semibold text-state-success"
+                        data-testid="worklog-candidate-confirmed"
+                      >
+                        ✓ {tCandidate("candidateConfirmed")}
+                      </span>
+                    )}
+                    {state === "rejected" && (
+                      <span
+                        className="ml-2"
+                        data-testid="worklog-candidate-rejected"
+                      >
+                        {tCandidate("candidateRejected")}
+                      </span>
+                    )}
+                    {state === "error" && (
+                      <span
+                        role="alert"
+                        className="ml-2 text-state-danger"
+                        data-testid="worklog-candidate-error"
+                      >
+                        {tCandidate("candidateError")}
+                      </span>
+                    )}
+                    {decidable(c) &&
+                      state !== "confirmed" &&
+                      state !== "rejected" && (
+                        <ChatActionRow>
+                          <ChatAction
+                            tone="primary"
+                            loading={state === "working"}
+                            testId="worklog-candidate-confirm"
+                            onClick={() => void decide(c.slug, "confirm")}
+                          >
+                            {state === "working"
+                              ? tCandidate("candidateConfirming")
+                              : tCandidate("candidateConfirm")}
+                          </ChatAction>
+                          <ChatAction
+                            tone="secondary"
+                            disabled={state === "working"}
+                            testId="worklog-candidate-reject"
+                            onClick={() => void decide(c.slug, "reject")}
+                          >
+                            {tCandidate("candidateReject")}
+                          </ChatAction>
+                        </ChatActionRow>
+                      )}
+                  </li>
+                );
+              })}
+              {skills.status === "failed" && (
+                <li className="text-text-muted">{labels.pipelineFailedNote}</li>
+              )}
+            </ul>
+          )}
+        {/* "CV papildytas" is truthful: the CV export derives directly from
+            worker_skills + journal_entry_skills rows this save just wrote. */}
+        {skills?.cvUpdated && (
+          <p className="text-text-muted" data-testid="worklog-cv-updated">
+            {labels.cvUpdatedNote}
+          </p>
+        )}
+        {/* WHERE THE ENTRY NOW COUNTS (activation audit fix #5). The Living
+            CV prints its recorded-work facts from the first entry on
+            (`deriveProfessionalFacts`), so the line is a fact. It names the
+            entry as RECORDED by the person — never confirmed or verified:
+            only a manager / client review can confirm it. */}
+        <p className="text-text-primary" data-testid="worklog-living-cv-note">
+          {labels.livingCvNote}
+        </p>
+        <Link
+          href="/cv"
+          className="mt-1 inline-flex min-h-11 items-center self-start rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
+          data-testid="worklog-living-cv-link"
+        >
+          {labels.viewLivingCv} →
+        </Link>
+        {/* The calm return line — no streak, no count, no pressure. */}
+        <p className="text-text-muted" data-testid="worklog-come-back">
+          {labels.comeBackNote}
+        </p>
+        {/* Honest matching phrasing: recommendations are computed from the
+            worker's current skills at read time (no persisted score), so new
+            skills flow into the next computation — nothing is "pushed". */}
+        {skillsTouched && (
+          <p className="text-text-muted" data-testid="worklog-matching-note">
+            {labels.matchingNote}
+          </p>
+        )}
+        {/* The return loop's next action: the board recomputes from the
+            skills this save just wrote (revalidated by the pipeline), so the
+            link leads to genuinely updated results — never a fake count. */}
+        {skillsTouched && (
+          <Link
+            href="/dashboard/opportunities"
+            className="mt-1 inline-flex min-h-11 items-center self-start rounded-control border border-brand-blue/50 bg-brand-blue/10 px-3 text-support font-semibold text-brand-blue hover:bg-brand-blue/20"
+            data-testid="worklog-view-opportunities"
+            onClick={() => {
+              // The retention loop's measurable heartbeat: journal
+              // contribution → recomputed board actually inspected.
+              trackFunnel(FUNNEL_EVENTS.journalRematchViewed, {
+                surface: REMATCH_SURFACE[surface],
+              });
+            }}
+          >
+            {labels.viewOpportunities} →
+          </Link>
+        )}
+        {/* OWNER §13 — the saved record pushed its day above 24 h / into a
+            long day. A warning next to the save, never a changed figure:
+            the hours stay exactly as recorded; the person decides whether
+            a record is a duplicate (edit it in the journal) or stands
+            (acknowledge it there with a reason). */}
+        {phase.dayCheck && (
+          <p
+            className="rounded-control border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-state-warning"
+            role="status"
+            data-testid="worklog-day-check"
+            data-check-code={phase.dayCheck.code}
+          >
+            {tCheck(phase.dayCheck.code, {
+              hours: new Intl.NumberFormat(locale, {
+                maximumFractionDigits: 1,
+              }).format(phase.dayCheck.hours),
+              day:
+                formatUtcDate(phase.dayCheck.day, locale, {
+                  month: "short",
+                  day: "numeric",
+                }) ?? phase.dayCheck.day,
+              entries: phase.dayCheck.entries,
+            })}{" "}
+            <Link
+              href="/dashboard/journal#work-intelligence"
+              className="font-semibold underline underline-offset-2"
+              data-testid="worklog-day-check-link"
+            >
+              {tCheck("openInJournal")}
+            </Link>
+          </p>
+        )}
+        {/* PHOTO OUTCOME — the real result of the real upload, one sentence per
+            state. `uploaded` is the ONLY line that claims evidence is attached;
+            every other state says plainly that it is not, and the entry above
+            stays truthfully saved either way (fail-closed, §7). */}
+        {phase.photo !== null && (
+          <p
+            className={
+              phase.photo === "uploaded"
+                ? "text-state-success"
+                : "text-state-warning"
+            }
+            data-testid="worklog-photo-outcome"
+            data-photo-outcome={phase.photo}
+          >
+            {tPhoto(PHOTO_OUTCOME_KEY[phase.photo])}
+          </p>
+        )}
+      </div>
+    );
+  }
+
+  const confirming = phase.kind === "confirm";
+
+  /* ONE photo field, placed by `photoFirst`: the attach path leads with it, a
+     typed work log keeps it after the text. Same field, same free-tier rule,
+     same after-save upload either way — mirroring the journal composer so the
+     two surfaces cannot drift apart. */
+  const photoField = (
+    <div
+      ref={photoFieldRef}
+      className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+      data-testid="worklog-photo-field"
+    >
+      <span className="text-support text-text-muted">{tPhoto("label")}</span>
+      <input
+        ref={photoInputRef}
+        type="file"
+        aria-label={tPhoto("label")}
+        accept="image/jpeg,image/png,image/webp"
+        disabled={confirming || pending}
+        data-testid="worklog-photo-input"
+        onChange={(e) => {
+          void pickPhoto(e.target.files?.[0] ?? null);
+        }}
+        className="min-h-11 text-meta text-text-secondary file:mr-3 file:rounded-md file:border file:border-ink-500 file:bg-ink-700 file:px-3 file:py-1.5 file:text-meta file:text-text-primary"
+      />
+      {/* The camera as a second door into the SAME field (phones only). */}
+      <CameraCaptureButton
+        label={tPhoto("takePhoto")}
+        disabled={confirming || pending}
+        testId="worklog-photo-camera"
+        onFile={(f) => void pickPhoto(f)}
+      />
+
+      {photoError ? (
+        <p
+          className="text-meta text-state-danger"
+          role="alert"
+          data-testid="worklog-photo-error"
+        >
+          {photoError}
+        </p>
+      ) : null}
+
+      {photoPrep === "preparing" ? (
+        <p
+          className="text-meta text-text-secondary"
+          role="status"
+          aria-live="polite"
+          data-testid="worklog-photo-preparing"
+        >
+          {tPhoto("preparing")}
+        </p>
+      ) : null}
+
+      {/* PREVIEW + REMOVE. The person sees exactly what they are about to
+          attach and can drop it before anything is written — nothing has been
+          uploaded at this point. */}
+      {photoPrep === "ready" && photoFile ? (
+        <div
+          className="flex items-center gap-3"
+          data-testid="worklog-photo-preview"
+        >
+          {photoPreview?.startsWith("blob:") ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              // Re-checked AT the sink, not only at the source: a local
+              // object URL is the one thing this preview may ever load.
+              src={photoPreview}
+              alt={tPhoto("previewAlt")}
+              className="size-16 flex-none rounded-md border border-ink-500 object-cover"
+            />
+          ) : null}
+          <p
+            className="min-w-0 flex-1 text-meta text-state-success"
+            role="status"
+            aria-live="polite"
+          >
+            {tPhoto("prepared")}
+          </p>
+          <button
+            type="button"
+            onClick={clearPhoto}
+            disabled={confirming || pending}
+            aria-label={tPhoto("remove")}
+            data-testid="worklog-photo-remove"
+            className="flex size-11 flex-none items-center justify-center rounded-full border border-ink-500 text-text-secondary hover:border-brand-blue hover:text-brand-blue disabled:opacity-60"
+          >
+            <X className="size-4" aria-hidden />
+          </button>
+        </div>
+      ) : null}
+
+      <p
+        className="text-meta leading-relaxed text-text-muted"
+        data-testid="worklog-photo-free-tier-note"
+      >
+        {tPhoto("freeTierNote")}
+      </p>
+    </div>
+  );
+
+  return (
+    <div
+      ref={flowRef}
+      className="flex flex-col gap-3 rounded-card border border-ink-600 bg-surface-1/40 p-4"
+      data-testid="worklog-flow"
+    >
+      <p className="flex items-center gap-1.5 text-support font-semibold text-text-primary">
+        <Clock className="size-4 text-brand-blue" aria-hidden />{" "}
+        {labels.understood}
+      </p>
+
+      {photoFirst ? photoField : null}
+
+      {/* Parse summary — read-only display of what was understood. */}
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-1 text-support">
+        <Field label={labels.labelDate}>
+          <input
+            type="date"
+            aria-label={labels.labelDate}
+            value={workDate}
+            disabled={confirming || pending}
+            onChange={(e) => {
+              setWorkDate(e.target.value);
+              clearError();
+            }}
+            data-testid="worklog-date"
+            className="min-h-11 w-full rounded border border-ink-500 bg-ink-800 px-2 py-1 text-support text-text-primary"
+          />
+        </Field>
+        {draft.start && draft.end && (
+          <Row k={labels.labelTime} v={`${draft.start}–${draft.end}`} />
+        )}
+        {draft.breakMinutes > 0 && (
+          <Row
+            k={labels.labelBreak}
+            v={`${draft.breakMinutes} ${labels.minutesUnit}`}
+          />
+        )}
+        {draft.workedMinutes != null ? (
+          <Row
+            k={labels.labelHours}
+            v={formatDuration(draft.workedMinutes, "minutes", durationLocale(locale))}
+          />
+        ) : (
+          draft.hoursLabel && <Row k={labels.labelHours} v={draft.hoursLabel} />
+        )}
+      </dl>
+
+      {/* THE DAY, OFFERED (owner P1 2026-11-21): today or yesterday in one
+          tap, any other day in the date field above. The day the sentence
+          named is already set; the person only changes it if it is wrong.
+          The journal's own day words — no new copy. */}
+      <div className="flex flex-wrap gap-2" data-testid="worklog-date-choices">
+        {[
+          { day: today, label: tCandidate("stream.today"), id: "today" },
+          { day: addCalendarDays(today, -1), label: tCandidate("stream.yesterday"), id: "yesterday" },
+        ].map((choice) => (
+          <button
+            key={choice.id}
+            type="button"
+            aria-pressed={workDate === choice.day}
+            disabled={confirming || pending}
+            onClick={() => {
+              setWorkDate(choice.day);
+              clearError();
+            }}
+            data-testid={`worklog-date-${choice.id}`}
+            className={`inline-flex min-h-11 items-center rounded-control border px-3 text-support font-semibold transition-colors disabled:opacity-50 ${
+              workDate === choice.day
+                ? "border-brand-blue bg-brand-blue/15 text-brand-blue"
+                : "border-ink-500 bg-ink-800 text-text-secondary hover:border-brand-blue/50"
+            }`}
+          >
+            {choice.label}
+          </button>
+        ))}
+      </div>
+
+      <RecordedTimePreview notes={notes} workDate={workDate} labels={labels} locale={locale} />
+
+      <label className="flex flex-col gap-1 text-support">
+        <span className="text-text-muted">{labels.labelSite}</span>
+        <input
+          type="text"
+          value={site}
+          disabled={confirming || pending}
+          onChange={(e) => {
+            setSite(e.target.value);
+            clearError();
+          }}
+          data-testid="worklog-site"
+          className="min-h-11 rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1 text-support">
+        <span className="text-text-muted">{labels.labelNotes}</span>
+        <textarea
+          value={notes}
+          disabled={confirming || pending}
+          onChange={(e) => {
+            setNotes(e.target.value);
+            clearError();
+          }}
+          rows={2}
+          data-testid="worklog-notes"
+          className="resize-none rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
+        />
+      </label>
+
+      {(engagements.length > 1 || mustChooseEngagement) && (
+        <label className="flex flex-col gap-1 text-support">
+          <span className="text-text-muted">{labels.labelContext}</span>
+          <select
+            value={engagementId}
+            disabled={confirming || pending}
+            onChange={(e) => {
+              contextDecidedByPerson.current = true;
+              setEngagementId(e.target.value);
+              clearError();
+            }}
+            data-testid="worklog-context"
+            className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
+          >
+            {/* Rule C: an explicit unchosen option, so the field reads as a
+                question rather than as an answer someone already gave. */}
+            {mustChooseEngagement && (
+              <option value="">{labels.contextChoose}</option>
+            )}
+            {engagements.map((e) => (
+              <option key={e.id} value={e.id}>
+                {e.label}
+              </option>
+            ))}
+          </select>
+          {endedOrgNamed ? (
+            <span
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="worklog-context-ended-org"
+            >
+              {labels.contextEndedOrg} {quoteText(locale, endedOrgNamed)}
+            </span>
+          ) : null}
+          {mustChooseEngagement && !engagementId && !endedOrgNamed ? (
+            <span
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="worklog-context-must-choose"
+            >
+              {labels.contextAmbiguous}
+            </span>
+          ) : null}
+        </label>
+      )}
+      {showActiveWorkspaceNotice ? (
+        <p
+          className="text-meta leading-relaxed text-text-secondary"
+          data-testid="worklog-context-active-workspace-notice"
+        >
+          {activeWorkspaceNotice}
+        </p>
+      ) : null}
+
+      {projectPrompt === "ask" ? (
+        <label className="flex flex-col gap-1 text-support">
+          <span className="text-text-muted">{tCandidate("project")}</span>
+          <select
+            value={projectChoiceValid}
+            disabled={confirming || pending}
+            onChange={(e) => {
+              setProjectChoice(e.target.value);
+              clearError();
+            }}
+            data-testid="worklog-project"
+            className="rounded border border-ink-500 bg-ink-800 px-2 py-1.5 text-support text-text-primary"
+          >
+            <option value="">{tCandidate("projectChoose")}</option>
+            {contextProjects.map((p) => (
+              <option key={p.id} value={p.id}>
+                {projectDisplayLabel(p, (k, v) => tCandidate(k, v))}
+              </option>
+            ))}
+            <option value={PROJECT_FIELD_NONE}>{tCandidate("projectNone")}</option>
+          </select>
+          {projectChoiceValid === "" ? (
+            <span
+              className="text-meta leading-relaxed text-state-warning"
+              data-testid="worklog-project-must-choose"
+            >
+              {tCandidate("projectAmbiguous")}
+            </span>
+          ) : null}
+        </label>
+      ) : projectPrompt === "auto" ? (
+        <p
+          className="text-meta leading-relaxed text-text-muted"
+          data-testid="worklog-project-auto"
+        >
+          {tCandidate("projectAuto", {
+            name: contextProjects[0]
+              ? projectDisplayLabel(contextProjects[0], (k, v) => tCandidate(k, v))
+              : "",
+          })}
+        </p>
+      ) : null}
+
+      {photoFirst ? null : photoField}
+
+      {confirming ? (
+        <div className="flex flex-col gap-2 rounded-control border border-state-warning/40 bg-state-warning/5 p-3">
+          <p className="font-display text-card-title font-semibold text-text-primary">
+            {labels.confirmTitle}
+          </p>
+          {/* Text the recogniser cannot read as work is still the person's
+              record to make — the server takes it, so the form does too. It
+              only says, neutrally, what it did not recognise. */}
+          {journalDraftReadiness(notes) === "no-content" ? (
+            <p
+              className="text-meta leading-relaxed text-text-muted"
+              data-testid="worklog-no-signal-hint"
+            >
+              {labels.noWorkSignalHint}
+            </p>
+          ) : null}
+          <ChatActionRow>
+            <ChatAction
+              tone="primary"
+              loading={pending}
+              testId="worklog-confirm"
+              onClick={confirm}
+            >
+              {pending ? labels.working : labels.save}
+            </ChatAction>
+            <ChatAction
+              tone="secondary"
+              disabled={pending}
+              onClick={() => setPhase({ kind: "ready", token: null })}
+            >
+              {labels.cancel}
+            </ChatAction>
+          </ChatActionRow>
+        </div>
+      ) : (
+        <ChatActionRow>
+          {/* THE FIRST PRESS WRITES NOTHING. `worker.log-work` is an
+              `important_write`: the server mints a one-time token bound to
+              exactly this input, and only the confirm step below spends it
+              (the consent gate `prod-chat-confirm-once` double-clicks). So
+              this button opens the review and says so — "Toliau / Continue"
+              — and "Save" is said once, on the press that saves
+              (activation audit fix #5). */}
+          <ChatAction
+            tone="primary"
+            disabled={pending}
+            testId="worklog-save"
+            onClick={beginConfirm}
+          >
+            {labels.continue}
+          </ChatAction>
+          {onClose && (
+            <ChatAction
+              tone="secondary"
+              disabled={pending}
+              onClick={() => {
+                setClosed(true);
+                onClose();
+              }}
+            >
+              {labels.cancel}
+            </ChatAction>
+          )}
+        </ChatActionRow>
+      )}
+
+      {phase.kind === "error" && (
+        <p
+          role="alert"
+          className="text-support text-state-danger"
+          data-testid="worklog-error"
+        >
+          {phase.message}
+        </p>
+      )}
+    </div>
+  );
+}
+
+/** One line per figure the save will record, in the person's own words. */
+function fragmentTimeLabel(
+  value: number,
+  unit: string,
+  labels: Pick<WorkLogLabels, "hoursUnit" | "minutesUnit">,
+): string {
+  if (unit === "minutes") return `${value} ${labels.minutesUnit}`;
+  if (unit === "hours") return `${value} ${labels.hoursUnit}`;
+  return `${value} ${unit}`;
+}
+
+function RecordedTimePreview({
+  notes,
+  workDate,
+  labels,
+  locale,
+}: {
+  notes: string;
+  workDate: string;
+  labels: WorkLogLabels;
+  /** The reader's quote pair around the person's own words (UX review 2026-10-24). */
+  locale: string;
+}) {
+  // The SAME derivation the executor runs on save, over the notes as the
+  // person has edited them — never a second parser, never a cached figure.
+  const record = useMemo(() => {
+    const anchor = /^\d{4}-\d{2}-\d{2}$/.test(workDate)
+      ? workDate
+      : personCalendarDay();
+    const t = deriveIntakeWorkTime(notes, anchor);
+    const partsMinutes = t.fragments.reduce((sum, f) => {
+      if (f.timeUnit === "hours") return sum + f.timeValue * 60;
+      if (f.timeUnit === "minutes") return sum + f.timeValue;
+      return sum;
+    }, 0);
+    return { ...t, partsMinutes };
+  }, [notes, workDate]);
+
+  if (record.fragments.length === 0 && record.quantityMinutes === null) {
+    return (
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="worklog-record-none">
+        {labels.recordNone}
+      </p>
+    );
+  }
+  const hours = (minutes: number) =>
+    `${Math.round((minutes / 60) * 100) / 100} ${labels.hoursUnit}`;
+  return (
+    <div
+      className="flex flex-col gap-1 rounded-control border border-ink-500 bg-ink-800/60 px-3 py-2 text-support"
+      data-testid="worklog-record"
+    >
+      <p className="text-meta text-text-muted">{labels.recordTitle}</p>
+      {record.fragments.length > 0 ? (
+        <ul className="flex flex-col gap-0.5">
+          {record.fragments.map((f, i) => (
+            <li key={`${i}-${f.rawPhrase}`} className="flex justify-between gap-3">
+              <span className="min-w-0 truncate text-text-primary">{quoteText(locale, f.rawPhrase)}</span>
+              <span className="shrink-0 text-right font-medium text-text-primary">
+                {fragmentTimeLabel(f.timeValue, f.timeUnit, labels)}
+                {f.activitySlug === null && f.activityLabel === null ? (
+                  <span className="ml-1 font-normal text-text-muted">· {labels.recordNoActivity}</span>
+                ) : null}
+              </span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p className="text-text-primary">{hours(record.quantityMinutes ?? 0)}</p>
+      )}
+      {record.statedTotalMinutes !== null ? (
+        <p className="text-meta leading-relaxed text-state-warning" data-testid="worklog-record-total-differs">
+          {labels.recordTotalStated} {hours(record.statedTotalMinutes)} · {labels.recordPartsSum}{" "}
+          {hours(record.partsMinutes)} — {labels.recordTotalDiffers}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+function Row({ k, v }: { k: string; v: string }) {
+  return (
+    <>
+      <dt className="text-text-muted">{k}</dt>
+      <dd className="text-right font-medium text-text-primary">{v}</dd>
+    </>
+  );
+}
+
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <>
+      <dt className="flex items-center text-text-muted">{label}</dt>
+      <dd>{children}</dd>
+    </>
+  );
+}
+
+/** The failure code a refused action carries, when it carries one. */
+function failureCode(r: unknown): string | null {
+  return r && typeof r === "object" && "code" in r && typeof (r as { code: unknown }).code === "string"
+    ? (r as { code: string }).code
+    : null;
+}

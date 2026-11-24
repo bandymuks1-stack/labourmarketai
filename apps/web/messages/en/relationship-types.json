@@ -1,0 +1,14 @@
+{
+  "collaborator": "Collaborator",
+  "consultant": "Consultant",
+  "employee": "Employee",
+  "freelancer": "Freelancer",
+  "manager": "Manager",
+  "owner": "Owner",
+  "student": "Student",
+  "unemployed": "Unemployed",
+  "volunteer": "Volunteer",
+  "intern": "Intern",
+  "external_manager": "External manager (client)",
+  "other": "Other relationship"
+}

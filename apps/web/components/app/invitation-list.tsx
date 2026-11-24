@@ -1,0 +1,356 @@
+"use client";
+
+import { useState } from "react";
+import { useTranslations } from "next-intl";
+import { REVIEW_NOTICE_VERSION, showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
+import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { useRouter } from "@/lib/i18n/navigation";
+import { Check, Copy } from "lucide-react";
+
+import {
+  acceptInvitationByIdAction,
+  resendInvitationAction,
+  revokeInvitationAction,
+} from "@/lib/invitations/actions";
+import type {
+  IncomingInvitationRow,
+  SentInvitationRow,
+} from "@/lib/invitations/network";
+import { formatUtcDate } from "@/lib/time/display";
+// The ONE list that says "this happened and it was a placement, not a job".
+import { PRACTICE_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
+
+/**
+ * Sent-invitation manager + incoming-invitation cards (core-network area B).
+ * Every state shown is the REAL stored state; resend rotates the token and
+ * shows the fresh link once; revoke kills the link immediately.
+ */
+
+export function SentInvitationList({
+  items,
+  locale,
+}: {
+  items: SentInvitationRow[];
+  locale: string;
+}) {
+  const t = useTranslations("network.sent");
+  const tTypes = useTranslations("network.invite.types");
+  const router = useRouter();
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [freshLinks, setFreshLinks] = useState<Record<string, string>>({});
+  const [notice, setNotice] = useState<string | null>(null);
+  const [copied, setCopied] = useState<string | null>(null);
+
+  async function onRevoke(id: string) {
+    setBusyId(id);
+    setNotice(null);
+    try {
+      const r = await revokeInvitationAction({ invitationId: id, locale });
+      setNotice(r.status === "ok" ? t(`notices.${r.outcome}`) : t("notices.error"));
+      router.refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function onResend(row: SentInvitationRow) {
+    setBusyId(row.id);
+    setNotice(null);
+    try {
+      const r = await resendInvitationAction({
+        invitationId: row.id,
+        email: row.invitedEmail ?? "",
+        locale,
+        // A resend keeps the invitation's stored RECIPIENT language.
+        recipientLocale: row.recipientLocale,
+        invitationType: row.invitationType,
+        personalMessage: row.personalMessage,
+      });
+      if (r.status === "ok" && r.inviteLink) {
+        setFreshLinks((m) => ({ ...m, [row.id]: r.inviteLink as string }));
+      }
+      setNotice(r.status === "ok" ? t(`notices.${r.outcome}`) : t("notices.error"));
+      router.refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  async function copyLink(link: string) {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopied(link);
+      setTimeout(() => setCopied(null), 2500);
+    } catch {
+      /* clipboard unavailable — link stays visible */
+    }
+  }
+
+  if (items.length === 0) {
+    return (
+      <p className="text-xs text-text-muted" data-testid="sent-invitations-empty">
+        {t("empty")}
+      </p>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2">
+      {notice && (
+        <p role="status" className="text-xs text-text-secondary" data-testid="sent-invitations-notice">
+          {notice}
+        </p>
+      )}
+      <ul className="flex flex-col gap-2" data-testid="sent-invitations">
+        {items.map((row) => (
+          <li
+            key={row.id}
+            className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/30 px-3 py-2"
+            data-testid={`sent-invitation-${row.id}`}
+          >
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="min-w-0 break-all font-medium text-text-primary">
+                {row.invitedName ? `${row.invitedName} · ` : ""}
+                {row.invitedEmail ??
+                  (row.campaignLabel
+                    ? row.campaignLabel
+                    : row.maxUses > 1
+                      ? t("campaignLink")
+                      : t("openLink"))}
+              </span>
+              <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                {tTypes(row.invitationType)}
+              </span>
+            </div>
+            {/* INVITER STATUS — only what is evidenced: seats, opens counted
+                by the landing, joins from the acceptance ledger. Never a
+                score, never a name of who opened. */}
+            {(row.maxUses > 1 || row.openCount > 0 || row.acceptedCount > 0 || row.declinedCount > 0) && (
+              <div
+                className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted"
+                data-testid={`sent-invitation-funnel-${row.id}`}
+              >
+                {row.maxUses > 1 && (
+                  <span>{t("seats", { used: row.useCount, max: row.maxUses })}</span>
+                )}
+                <span>{t("opened", { count: row.openCount })}</span>
+                <span className={row.acceptedCount > 0 ? "text-state-success" : ""}>
+                  {t("joined", { count: row.acceptedCount })}
+                </span>
+                {row.declinedCount > 0 && (
+                  <span>{t("declinedCount", { count: row.declinedCount })}</span>
+                )}
+              </div>
+            )}
+            <div className="flex flex-wrap items-center gap-2 font-mono text-meta uppercase tracking-label">
+              <span
+                className={
+                  row.status === "accepted"
+                    ? "text-state-success"
+                    : row.status === "pending"
+                      ? "text-brand-blue"
+                      : "text-text-muted"
+                }
+                data-testid={`sent-invitation-status-${row.id}`}
+              >
+                {t(`status.${row.status}`)}
+              </span>
+              {row.status === "pending" && (
+                <span
+                  className={
+                    row.deliveryStatus === "sent"
+                      ? "text-state-success"
+                      : row.deliveryStatus === "delivery_failed"
+                        ? "text-state-danger"
+                        : "text-text-muted"
+                  }
+                  data-testid={`sent-invitation-delivery-${row.id}`}
+                >
+                  {t(`delivery.${row.deliveryStatus}`)}
+                </span>
+              )}
+              <span className="text-text-muted">
+                {formatUtcDate(row.createdAt, locale)}
+              </span>
+            </div>
+            {row.status === "pending" && (
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => onResend(row)}
+                  disabled={busyId === row.id}
+                  data-testid={`sent-invitation-resend-${row.id}`}
+                  // Nothing was ever e-mailed: the button does not "send again",
+                  // it issues a NEW link and kills the one already handed over.
+                  title={row.deliveryStatus === "sent" ? undefined : t("newLinkHint")}
+                  className="inline-flex items-center rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+                >
+                  {row.deliveryStatus === "sent" ? t("resend") : t("newLink")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => onRevoke(row.id)}
+                  disabled={busyId === row.id}
+                  data-testid={`sent-invitation-revoke-${row.id}`}
+                  className="inline-flex items-center rounded border border-state-danger/40 px-2 py-1 text-meta text-state-danger hover:border-state-danger disabled:opacity-50"
+                >
+                  {t("revoke")}
+                </button>
+                {freshLinks[row.id] && (
+                  <button
+                    type="button"
+                    onClick={() => copyLink(freshLinks[row.id])}
+                    data-testid={`sent-invitation-copy-${row.id}`}
+                    className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
+                  >
+                    {copied === freshLinks[row.id] ? (
+                      <Check className="h-3 w-3" aria-hidden />
+                    ) : (
+                      <Copy className="h-3 w-3" aria-hidden />
+                    )}
+                    {copied === freshLinks[row.id] ? t("copied") : t("copyNewLink")}
+                  </button>
+                )}
+              </div>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+/** THE shared predicate (owner decision 1): the same rule the invite page uses. */
+function rowShowsReviewNotice(row: IncomingInvitationRow): boolean {
+  return showsStaffReviewNotice({
+    invitationType: row.invitationType,
+    relationshipSlug: row.relationshipSlug,
+    organizationName: row.organizationName,
+  });
+}
+
+export function IncomingInvitationList({
+  items,
+  locale,
+}: {
+  items: IncomingInvitationRow[];
+  locale: string;
+}) {
+  const t = useTranslations("network.incoming");
+  const tTypes = useTranslations("network.invite.types");
+  const tPage = useTranslations("network.invitePage");
+  // The ONE localized relationship vocabulary — the words the CV also prints.
+  const tRelationships = useTranslations("relationshipTypes");
+  const router = useRouter();
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
+
+  async function onAccept(row: IncomingInvitationRow) {
+    const id = row.id;
+    setBusyId(id);
+    setNotice(null);
+    try {
+      const r = await acceptInvitationByIdAction({
+        invitationId: id,
+        locale,
+        noticeSurface: "network",
+        // Only when this row showed the review sentence (rendered below).
+        reviewNotice: rowShowsReviewNotice(row) ? REVIEW_NOTICE_VERSION : null,
+      });
+      setNotice(
+        r.status === "ok" ? t(`notices.${r.outcome}`) : t("notices.error"),
+      );
+      router.refresh();
+    } finally {
+      setBusyId(null);
+    }
+  }
+
+  if (items.length === 0) return null;
+
+  return (
+    <div className="flex flex-col gap-2">
+      {notice && (
+        <p role="status" className="text-xs text-text-secondary" data-testid="incoming-invitations-notice">
+          {notice}
+        </p>
+      )}
+      <ul className="flex flex-col gap-2" data-testid="incoming-invitations">
+        {items.map((row) => (
+          <li
+            key={row.id}
+            className="flex flex-col gap-1.5 rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-2"
+            data-testid={`incoming-invitation-${row.id}`}
+          >
+            <div className="flex flex-wrap items-center gap-2 text-sm">
+              <span className="font-medium text-text-primary">
+                {tTypes(row.invitationType)}
+              </span>
+              {(row.organizationName ?? row.projectTitle) && (
+                <span className="text-text-secondary">
+                  {row.organizationName ?? row.projectTitle}
+                </span>
+              )}
+              {row.inviterName && (
+                <span className="text-meta text-text-muted">
+                  {t("from", { name: row.inviterName })}
+                </span>
+              )}
+            </div>
+            {/* WHAT YOU ARE ABOUT TO BECOME. Accepting creates a real,
+                attributable relationship, and the type alone ("Join my
+                company") does not say whether that is employment or a
+                placement. Resolved through the shared `relationshipTypes`
+                catalogue so no slug reaches the reader. Absent on invitations
+                created before 20260827200000, which is exactly when the
+                historical default applies. */}
+            {row.relationshipSlug && (
+              <p
+                className="text-xs text-text-secondary"
+                data-testid={`incoming-invitation-relationship-${row.id}`}
+              >
+                {tPage("capacity", {
+                  capacity: tRelationships(row.relationshipSlug),
+                })}
+                {(PRACTICE_RELATIONSHIPS as readonly string[]).includes(
+                  row.relationshipSlug,
+                ) && (
+                  <span className="ml-1 text-text-muted">
+                    {tPage("capacityNotEmployment")}
+                  </span>
+                )}
+              </p>
+            )}
+            {row.personalMessage && (
+              <p className="text-xs text-text-secondary">
+                &ldquo;{row.personalMessage}&rdquo;
+              </p>
+            )}
+            {rowShowsReviewNotice(row) && (
+              <StaffReviewNotice
+                text={tPage("reviewNotice", { organization: row.organizationName ?? "" })}
+                testId={`incoming-invitation-review-notice-${row.id}`}
+              />
+            )}
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={() => onAccept(row)}
+                disabled={busyId === row.id}
+                data-testid={`incoming-invitation-accept-${row.id}`}
+                className="inline-flex min-h-9 items-center rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-50"
+              >
+                {busyId === row.id ? t("accepting") : t("accept")}
+              </button>
+              <span className="text-meta text-text-muted">
+                {t("expires", {
+                  date: formatUtcDate(row.expiresAt, locale) ?? "",
+                })}
+              </span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}

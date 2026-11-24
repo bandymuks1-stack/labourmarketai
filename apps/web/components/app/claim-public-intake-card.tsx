@@ -1,0 +1,135 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { claimPublicIntakeAction } from "@/lib/company/claim-public-intake-actions";
+import type { ClaimableIntake } from "@/lib/company/claim-public-intake";
+import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
+
+/**
+ * Canonical-journey P3 — "we found your earlier public submission" card.
+ *
+ * Rendered on the company workspace ONLY when the signed-in user's own
+ * authenticated email matches an unclaimed public /company-need intake (the
+ * server component passes the already-verified rows). One clear action per
+ * intake: continue it as the account's draft demand — the data the company
+ * already typed once is never re-typed. Honest states only; a failure shows
+ * a short retryable error, never a fake success.
+ */
+export function ClaimPublicIntakeCard({
+  locale,
+  intakes,
+  labels,
+}: {
+  locale: string;
+  intakes: ClaimableIntake[];
+  labels: {
+    title: string;
+    body: string;
+    claimCta: string;
+    claimed: string;
+    error: string;
+    /** An open company draft already exists — finish or discard it first. */
+    draftExists: string;
+    workersLabel: string;
+  };
+}) {
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
+  const [done, setDone] = useState<Set<string>>(new Set());
+  const [failedId, setFailedId] = useState<string | null>(null);
+  const [draftBlockedId, setDraftBlockedId] = useState<string | null>(null);
+  // The claim is authorised by a VERIFIED mailbox only; when the server says the
+  // address is unverified the progressive proof is offered instead of a dead end.
+  const [needsProof, setNeedsProof] = useState(false);
+
+  if (intakes.length === 0) return null;
+
+  const onClaim = (id: string) =>
+    startTransition(async () => {
+      setFailedId(null);
+      setDraftBlockedId(null);
+      const r = await claimPublicIntakeAction(locale, id);
+      if (r.ok) {
+        setDone((prev) => new Set(prev).add(id));
+        router.refresh();
+      } else if (r.reason === "email_unverified") {
+        setNeedsProof(true);
+      } else if (r.reason === "draft_exists") {
+        setDraftBlockedId(id);
+      } else {
+        setFailedId(id);
+      }
+    });
+
+  return (
+    <section
+      className="card-border flex flex-col gap-3 p-5"
+      data-testid="claim-public-intake-card"
+    >
+      <header className="flex flex-col gap-1">
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {labels.title}
+        </h2>
+        <p className="text-sm text-text-secondary">{labels.body}</p>
+      </header>
+      <ul className="flex flex-col gap-2">
+        {intakes.map((intake) => (
+          <li
+            key={intake.id}
+            className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/40 p-3 sm:flex-row sm:items-center sm:justify-between"
+            data-testid={`claimable-intake-${intake.id}`}
+          >
+            <div className="flex min-w-0 flex-col gap-0.5">
+              <span className="truncate text-sm font-medium text-text-primary">
+                {intake.companyName || "—"}
+                {intake.country ? ` · ${intake.country}` : ""}
+                {intake.headcount != null
+                  ? ` · ${labels.workersLabel}: ${intake.headcount}`
+                  : ""}
+              </span>
+              {intake.descriptionExcerpt ? (
+                <span className="line-clamp-2 text-xs text-text-secondary">
+                  {intake.descriptionExcerpt}
+                </span>
+              ) : null}
+            </div>
+            <div className="flex shrink-0 items-center gap-2">
+              {done.has(intake.id) ? (
+                <span
+                  className="rounded-md border border-state-success/40 bg-state-success/10 px-3 py-1.5 text-xs font-semibold text-state-success"
+                  data-testid="intake-claimed"
+                >
+                  ✓ {labels.claimed}
+                </span>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => onClaim(intake.id)}
+                  disabled={pending}
+                  className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
+                  data-testid={`intake-claim-${intake.id}`}
+                >
+                  {labels.claimCta}
+                </button>
+              )}
+              {failedId === intake.id ? (
+                <span role="alert" className="text-meta text-state-warning">
+                  {labels.error}
+                </span>
+              ) : null}
+              {draftBlockedId === intake.id ? (
+                <span role="alert" className="text-meta text-state-warning" data-testid="intake-claim-draft-exists">
+                  {labels.draftExists}
+                </span>
+              ) : null}
+            </div>
+          </li>
+        ))}
+      </ul>
+      {needsProof ? (
+        <VerifyEmailPrompt locale={locale} next="/dashboard/company/needs" variant="intake" />
+      ) : null}
+    </section>
+  );
+}

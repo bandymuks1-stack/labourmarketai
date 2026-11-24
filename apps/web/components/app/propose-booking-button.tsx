@@ -1,0 +1,244 @@
+"use client";
+
+import { useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { proposeBookingAction, type BookingActionResult } from "@/lib/booking/booking-actions";
+import {
+  PROPOSE_TIMEOUT_LABEL,
+  isProposeTimeout,
+  proposeOutcomeState,
+  type ProposeOutcomeState,
+} from "@/lib/booking/propose-outcome";
+import { SAVE_TIMEOUT_MS, withTimeout } from "@/lib/async/with-timeout";
+import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
+
+/**
+ * Company "propose booking" for a shortlisted, contactable candidate (Stage 6).
+ * Sends only the safe requestId + workerId + a start date/note; the worker's
+ * identity/contact never reaches the client. The worker alone accepts later.
+ * Honest states only; degrades to "unavailable" until the migration is applied.
+ *
+ * Mode clarity (PR 5, contract §4): this surface is explicitly the
+ * request_booking / propose_dates mode — a booking PROPOSAL with dates that
+ * the worker confirms or declines. The dialog says so before submit, and
+ * after submit it says what happens next (worker decides; answer lands in
+ * Bookings; withdrawable until answered). Data contract unchanged — the new
+ * copy comes from the shared `bookings.propose` namespace, not new props.
+ *
+ * Repeat actions (Capability G, PR 6b): `variant="rebook"` renders the SAME
+ * flow pre-scoped to the same request + worker, for a proposal the company
+ * WITHDREW itself. A DECLINED proposal is not re-opened (20261021095200,
+ * owner decision 2026-10-21: the worker's answer stands without the
+ * worker's new consent), so the page mounts this variant for withdrawn only.
+ *
+ * Refusals (20261021095200): a worker this company may not contact, a closed
+ * need and an already-answered proposal each get their own sentence — never
+ * the generic error.
+ */
+export function ProposeBookingButton({
+  locale,
+  requestId,
+  workerId,
+  countryCode,
+  labels,
+  variant = "propose",
+}: {
+  locale: string;
+  requestId: string;
+  workerId: string;
+  countryCode: string | null;
+  variant?: "propose" | "rebook";
+  labels: {
+    open: string;
+    startDate: string;
+    note: string;
+    send: string;
+    sending: string;
+    sent: string;
+    unavailable: string;
+    notEntitled: string;
+    error: string;
+    cancel: string;
+  };
+}) {
+  const tPropose = useTranslations("bookings.propose");
+  const expectedWorkspaceId = useDisplayedWorkspaceId();
+  const [open, setOpen] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [note, setNote] = useState("");
+  // The pending flag is OUR state, not a React transition's: a transition's
+  // isPending stays true for as long as the router's own server-action update
+  // is in flight, so a stalled request would hold "Siunčiama…" even after the
+  // bounded wait below gave up.
+  const [pending, setPending] = useState(false);
+  const [state, setState] = useState<"idle" | ProposeOutcomeState>("idle");
+  // Only the LATEST send may set the state: a late answer to an earlier,
+  // timed-out send must not overwrite a newer attempt's outcome.
+  const attempt = useRef(0);
+
+  // Every send ends in a visible state and frees the button — never a
+  // "Siunčiama…" that outlives the request (UX run 2026-10-24, row 5.13).
+  // See `propose-outcome.ts` for the three endings and why a retry is safe.
+  async function send() {
+    const mine = ++attempt.current;
+    setState("idle");
+    setPending(true);
+    let call: Promise<BookingActionResult> | null = null;
+    try {
+      call = proposeBookingAction({
+        locale,
+        requestId,
+        workerId,
+        startDate,
+        locationCountry: countryCode,
+        note,
+        expectedWorkspaceId,
+      });
+      const res = await withTimeout(call, SAVE_TIMEOUT_MS, PROPOSE_TIMEOUT_LABEL);
+      if (attempt.current === mine) setState(proposeOutcomeState(res));
+    } catch (error) {
+      if (attempt.current !== mine) return;
+      if (isProposeTimeout(error) && call) {
+        setState("unconfirmed");
+        // The request may still answer: a slow success becomes "sent".
+        call.then(
+          (late) => {
+            if (attempt.current === mine) setState(proposeOutcomeState(late));
+          },
+          () => undefined,
+        );
+      } else {
+        setState("error");
+      }
+    } finally {
+      if (attempt.current === mine) setPending(false);
+    }
+  }
+
+  if (state === "sent") {
+    return (
+      <div className="flex flex-col gap-1" data-testid="propose-booking-sent">
+        <span className="text-meta font-medium text-state-success">{labels.sent}</span>
+        {/* What happens next: the worker decides; the answer lands under
+            Bookings; the proposal stays withdrawable until answered. */}
+        <span className="text-meta text-text-muted">{tPropose("afterSent")}</span>
+      </div>
+    );
+  }
+
+  if (!open) {
+    // Two literal test ids (one per variant) so the e2e orphan guard can see
+    // both controls the walks press.
+    return variant === "rebook" ? (
+      <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(true)} className="min-h-11 w-fit" data-testid="propose-again-open">
+        {labels.open}
+      </Button>
+    ) : (
+      <Button type="button" variant="secondary" size="sm" onClick={() => setOpen(true)} className="min-h-11 w-fit" data-testid="propose-booking-open">
+        {labels.open}
+      </Button>
+    );
+  }
+
+  return (
+    <div className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5" data-testid="propose-booking-form">
+      {/* Mode: request_booking / propose_dates — a proposal, never a booking
+          until the WORKER accepts. Stated up front, honestly. The rebook
+          variant says instead that this RE-OPENS the same proposal with new
+          dates and the worker decides again. */}
+      <p className="text-meta text-text-secondary" data-testid="propose-booking-mode-note">
+        {variant === "rebook" ? tPropose("againModeNote") : tPropose("modeNote")}
+      </p>
+      <label className="flex flex-col gap-1 text-meta text-text-muted">
+        {labels.startDate}
+        <Input
+          type="date"
+          value={startDate}
+          onChange={(e) => setStartDate(e.target.value)}
+          data-testid="propose-booking-start-date"
+          className="max-sm:min-h-11 max-sm:text-base"
+        />
+      </label>
+      <label className="flex flex-col gap-1 text-meta text-text-muted">
+        {labels.note}
+        <Input
+          type="text"
+          maxLength={2000}
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          data-testid="propose-booking-note"
+          className="max-sm:min-h-11 max-sm:text-base"
+        />
+      </label>
+      <div className="flex items-center gap-2">
+        <Button
+          type="button"
+          variant="primary"
+          size="sm"
+          disabled={pending}
+          onClick={() => void send()}
+          data-testid="propose-booking-send"
+          className="min-h-11"
+        >
+          {pending ? labels.sending : labels.send}
+        </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => setOpen(false)}
+          className="min-h-11"
+        >
+          {labels.cancel}
+        </Button>
+      </div>
+      {state === "unavailable" ? (
+        <span className="text-meta text-text-muted" data-testid="propose-booking-unavailable">
+          {labels.unavailable}
+        </span>
+      ) : state === "not_entitled" ? (
+        <span className="text-meta text-state-amber" data-testid="propose-booking-not-entitled">
+          {labels.notEntitled}
+        </span>
+      ) : state === "rate_limited" ? (
+        // Bounded request budget reached (Wagon 1) — honest limit note.
+        <span className="text-meta text-state-warning" data-testid="propose-booking-limit">
+          {tPropose("rateLimited")}
+        </span>
+      ) : state === "already_accepted" ? (
+        // The worker already agreed to these terms — an agreement is not
+        // rewritten by proposing again; changes are agreed in conversation.
+        <span className="text-meta text-state-warning" data-testid="propose-booking-already-accepted">
+          {tPropose("alreadyAccepted")}
+        </span>
+      ) : state === "refused_not_reachable" ? (
+        // The database refused: no consent to be found and no working
+        // relationship — a proposal is contact (20261021095200).
+        <span className="text-meta text-state-warning" data-testid="propose-booking-refused">
+          {tPropose("refusedNotReachable")}
+        </span>
+      ) : state === "refused_need_closed" ? (
+        <span className="text-meta text-state-warning" data-testid="propose-booking-refused">
+          {tPropose("refusedNeedClosed")}
+        </span>
+      ) : state === "refused_answered" ? (
+        <span className="text-meta text-state-warning" data-testid="propose-booking-refused">
+          {tPropose("refusedAnswered")}
+        </span>
+      ) : state === "unconfirmed" ? (
+        // No answer in time: the proposal MAY already be stored. Honest —
+        // check Bookings or send again (the same row, never a duplicate).
+        <span className="text-meta text-state-warning" data-testid="propose-booking-unconfirmed" role="status">
+          {tPropose("unconfirmed")}
+        </span>
+      ) : state === "error" ? (
+        <span className="text-meta text-state-danger" data-testid="propose-booking-error" role="alert">
+          {labels.error}
+        </span>
+      ) : null}
+    </div>
+  );
+}

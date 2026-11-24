@@ -1,0 +1,341 @@
+import "server-only";
+
+import { getLocale, getTranslations } from "next-intl/server";
+
+import { countryDisplayName } from "@/lib/location/country-model";
+import { collectDiscoveryFacets, type DiscoveryFacets } from "@/lib/opportunities/discovery-filters";
+import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
+import type { OpportunityNeed } from "@/lib/opportunities/opportunity-fit";
+import { activeLocales } from "@/lib/i18n/config";
+import { buildWorkTypeLabelMap, MARKET_COUNTRIES } from "@/lib/taxonomy/work-categories";
+import type { VocabularyTerm, WorldStateDimension } from "./world-state-language";
+
+/**
+ * The words the AI knows, built from the person's REAL world (W4).
+ *
+ * Two rules decide everything here:
+ *
+ * 1. **Terms come from the canonical catalogues, never from a new list.**
+ *    Country names come from the platform's own `labourMarket.countryNames`
+ *    catalogue and the ICU region names; professions from the work-type
+ *    taxonomy; accommodation / transport / start from the `opportunities.*`
+ *    enum labels; tools from the `skillNames` catalogue. Adding a language or a
+ *    work type anywhere makes the AI understand it here, with no edit.
+ *
+ * 2. **Values come from the rows the person can actually see.**
+ *    `collectDiscoveryFacets` over their own authorized board decides which
+ *    values are `available`. So "find me work in Germany" can only filter to DE
+ *    when a German demand is really visible to them — otherwise the word is
+ *    still understood, and the caller says what IS there instead of returning
+ *    an unexplained empty list.
+ *
+ * Terms are collected across the ACTIVE locales, not just the current one: a
+ * Lithuanian worker types "Vokietijoje" one moment and "Germany" the next, and
+ * both are their own words.
+ */
+
+/**
+ * Everyday words for an ENUM value, per dimension — the stems a person types
+ * instead of the catalogue label. Closed, and additive only: a word here can
+ * make an existing value recognisable, never create a value or a filter.
+ *
+ * "Su būstu" / "with housing" is asked as a YES, and the board's yes is
+ * `provided_*`: the person means "an ad that provides accommodation", so the
+ * same words belong to each providing value. `not_provided` keeps only its
+ * label plus the explicit negatives, so "be būsto" never narrows to "with".
+ */
+const EVERYDAY_ENUM_WORDS: Readonly<
+  Partial<Record<WorldStateDimension, Readonly<Record<string, readonly string[]>>>>
+> = {
+  accommodation: {
+    provided_free: [
+      "su būstu", "būstas", "apgyvendinimu", "apgyvendinimas", "nakvyne", "nakvynė",
+      "with housing", "with accommodation", "housing", "accommodation", "lodging",
+      "с жильем", "с жильём", "жилье", "жильё", "проживание", "проживанием",
+      "met huisvesting", "huisvesting", "onderdak",
+      "mit unterkunft", "unterkunft", "wohnung gestellt",
+      "z zakwaterowaniem", "zakwaterowanie", "mieszkanie zapewnione",
+    ],
+    provided_paid: [
+      "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
+      "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
+      "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
+    ],
+    provided_deducted: [
+      "su būstu", "būstas", "apgyvendinimu", "with housing", "with accommodation",
+      "housing", "accommodation", "с жильем", "с жильём", "жилье", "жильё",
+      "проживание", "met huisvesting", "huisvesting", "mit unterkunft",
+      "unterkunft", "z zakwaterowaniem", "zakwaterowanie",
+    ],
+    not_provided: [
+      "be būsto", "be apgyvendinimo", "without housing", "no accommodation",
+      "без жилья", "zonder huisvesting", "ohne unterkunft", "bez zakwaterowania",
+    ],
+  },
+};
+
+/** Enum dimensions and the `opportunities.*` subtree that labels each one. */
+const ENUM_LABEL_NAMESPACES = {
+  accommodation: "accommodation",
+  transport: "transport",
+  start: "urgency",
+} as const satisfies Partial<Record<WorldStateDimension, string>>;
+
+export interface WorkspaceVocabulary {
+  readonly terms: readonly VocabularyTerm[];
+  readonly facets: DiscoveryFacets;
+}
+
+/**
+ * The SWEDISH everyday words for the same values — `svTerms`, matched only
+ * against a Swedish sentence (see `VocabularyTerm.svTerms`). "logi" in the
+ * shared list read "logistics" as "accommodation provided".
+ */
+const SV_EVERYDAY_ENUM_WORDS: Readonly<
+  Partial<Record<WorldStateDimension, Readonly<Record<string, readonly string[]>>>>
+> = {
+  accommodation: {
+    provided_free: ["med boende", "boende", "bostad", "logi"],
+    provided_paid: ["med boende", "boende", "bostad", "logi"],
+    provided_deducted: ["med boende", "boende", "bostad", "logi"],
+    not_provided: ["utan boende", "utan bostad"],
+  },
+};
+
+/**
+ * The names of one value, kept apart by who contributes them: every language
+ * but Swedish in `terms`, what only Swedish adds in `svTerms`. A name both
+ * share ("Portugal") is simply a shared name.
+ */
+class TermNames {
+  private readonly shared = new Set<string>();
+  private readonly swedish = new Set<string>();
+  constructor(initial: readonly string[] = []) {
+    for (const name of initial) this.shared.add(name);
+  }
+  add(name: string, locale?: string): void {
+    (locale === "sv" ? this.swedish : this.shared).add(name);
+  }
+  get size(): number {
+    return this.shared.size + this.swedish.size;
+  }
+  split(): { terms: string[]; svTerms?: string[] } {
+    const svTerms = [...this.swedish].filter((name) => !this.shared.has(name));
+    return svTerms.length > 0 ? { terms: [...this.shared], svTerms } : { terms: [...this.shared] };
+  }
+}
+
+/**
+ * Build the vocabulary for one person's board.
+ *
+ * `needs` are the needs of the rows they are authorized to see — the caller
+ * passes them straight from the canonical marketplace use case, so this module
+ * reads nothing of its own.
+ */
+export async function buildWorkspaceVocabulary(
+  needs: readonly OpportunityNeed[],
+  /**
+   * Countries of the public ads the SAME board read carries (the page shows
+   * them). Production walk 2026-09-29: a worker's page listed Swedish ads
+   * while the chat, reading only platform needs, said "nothing visible in
+   * Sweden — visible: NL".
+   */
+  extraCountries: readonly string[] = [],
+): Promise<WorkspaceVocabulary> {
+  const base = collectDiscoveryFacets(needs);
+  const facets = {
+    ...base,
+    countries: [...new Set([...base.countries, ...extraCountries.filter(Boolean)])].sort(),
+  };
+  const terms: VocabularyTerm[] = [];
+
+  // ── countries ────────────────────────────────────────────────────────────
+  // Every country on the board, named in every active language. The platform
+  // catalogue first (it is the product's own wording), then the ICU region name
+  // as a fallback for a country the catalogue does not cover.
+  const countryCatalogues = await Promise.all(
+    activeLocales.map(async (locale) => ({
+      locale,
+      t: await getTranslations({ locale, namespace: "labourMarket.countryNames" }),
+    })),
+  );
+  for (const code of facets.countries) {
+    const names = new TermNames();
+    for (const { locale, t } of countryCatalogues) {
+      if (t.has(code)) names.add(t(code), locale);
+      const icu = countryDisplayName(code, locale);
+      // `countryDisplayName` returns the raw code when it cannot name it —
+      // never add that, or "DE" would match any word starting with "de".
+      if (icu && icu.toUpperCase() !== code.toUpperCase()) names.add(icu, locale);
+    }
+    if (names.size > 0) {
+      terms.push({ dimension: "country", value: code, ...names.split(), available: true });
+    }
+  }
+
+  // ── professions ──────────────────────────────────────────────────────────
+  // The work-type taxonomy labels the slug in each language. A demand whose
+  // role is free text (not a taxonomy slug) contributes the raw value, so the
+  // person can still name it the way the demand does.
+  const workTypeMaps = activeLocales.map((locale) => ({ locale, map: buildWorkTypeLabelMap(locale) }));
+  for (const slug of facets.professions) {
+    const names = new TermNames([slug]);
+    for (const { locale, map } of workTypeMaps) {
+      const label = map[slug];
+      if (label) names.add(label, locale);
+    }
+    terms.push({ dimension: "profession", value: slug, ...names.split(), available: true });
+  }
+
+  // ── enum dimensions ──────────────────────────────────────────────────────
+  const enumValues: Record<keyof typeof ENUM_LABEL_NAMESPACES, readonly string[]> = {
+    accommodation: facets.accommodations,
+    transport: facets.transports,
+    start: facets.starts,
+  };
+  for (const [dimension, namespace] of Object.entries(ENUM_LABEL_NAMESPACES) as Array<
+    [keyof typeof ENUM_LABEL_NAMESPACES, string]
+  >) {
+    const catalogues = await Promise.all(
+      activeLocales.map(async (locale) => ({
+        locale,
+        t: await getTranslations({ locale, namespace: `opportunities.${namespace}` }),
+      })),
+    );
+    for (const value of enumValues[dimension]) {
+      const names = new TermNames();
+      for (const { locale, t } of catalogues) {
+        if (t.has(value)) names.add(t(value) as string, locale);
+      }
+      // THE WORDS PEOPLE ACTUALLY TYPE (owner P0 2026-09-22 §5). Measured:
+      // the accommodation vocabulary held ONLY the enum LABELS
+      // ("Suteikiamas, nemokamai"), which nobody writes — so "Tik su būstu"
+      // read as nothing and the refinement silently did not happen. This
+      // file's own docstring used that very sentence as an example. Same
+      // idiom as EVERYDAY_TYPE_WORDS below: the catalogue labels stay the
+      // display names; the everyday stems only make the value recognisable.
+      for (const word of EVERYDAY_ENUM_WORDS[dimension]?.[value] ?? []) names.add(word);
+      for (const word of SV_EVERYDAY_ENUM_WORDS[dimension]?.[value] ?? []) names.add(word, "sv");
+      if (names.size > 0) {
+        terms.push({ dimension, value, ...names.split(), available: true });
+      }
+    }
+  }
+
+  // ── tools ────────────────────────────────────────────────────────────────
+  // The SAME closed taxonomy the demand's required-tools list is drawn from.
+  const toolCatalogues = await Promise.all(
+    activeLocales.map(async (locale) => ({
+      locale,
+      t: await getTranslations({ locale, namespace: "skillNames" }),
+    })),
+  );
+  for (const slug of facets.tools) {
+    const names = new TermNames();
+    for (const { locale, t } of toolCatalogues) {
+      if (t.has(slug)) names.add(t(slug) as string, locale);
+    }
+    if (names.size > 0) {
+      terms.push({ dimension: "tool", value: slug, ...names.split(), available: true });
+    }
+  }
+
+  // ── opportunity types ────────────────────────────────────────────────────
+  // Owner contract 2026-09-04 §4A/§15: "Where can I do an internship?" must
+  // narrow the board to internships. Values are the DECLARED types present on
+  // the board; the words are the catalogue labels in every active language
+  // plus the everyday stems a person actually types ("praktika", "stažuotė",
+  // "стажировка", "stage", "Praktikum", "pameistrystė", "apprenticeship").
+  const currentLocale = await getLocale();
+  const typeCatalogues = await Promise.all(
+    activeLocales.map(async (locale) => ({
+      locale,
+      t: await getTranslations({ locale, namespace: "structuredDemand.opportunityType" }),
+    })),
+  );
+  const EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
+    internship: ["praktika", "stažuotė", "internship", "стажировка", "практика", "stage", "praktikum"],
+    apprenticeship: ["pameistrystė", "apprenticeship", "ученичество", "leerwerkplek", "ausbildung", "lehrstelle"],
+  };
+  // sv — `svTerms`, matched only against a Swedish sentence.
+  const SV_EVERYDAY_TYPE_WORDS: Readonly<Record<string, readonly string[]>> = {
+    internship: ["praktik", "praktikplats"],
+    apprenticeship: ["lärlingsplats", "lärling"],
+  };
+  // EVERY type of the closed set is a term, marked available only when a
+  // demand of that type is on the person's board. Prod walk 2026-09-04: with
+  // no internship on the board the word "praktiką" was simply unknown and
+  // the student got the whole board — the honest answer is "I understood
+  // internships; none is visible to you right now" (same rule as a country
+  // that is not on the board).
+  // Term order matters for DISPLAY only: the first term is what the answer
+  // shows when it lists what IS visible ("Matoma: darbas, pameistrystė"), so
+  // the person's own language comes first, then the other catalogues, then
+  // the everyday stems.
+  for (const value of OPPORTUNITY_TYPES) {
+    const names = new TermNames();
+    // A Swedish reader's own label is a Swedish name (`svTerms`), so what the
+    // answer SHOWS for the value is carried apart from what it matches on.
+    let displayName: string | undefined;
+    for (const { locale, t } of typeCatalogues) {
+      if (locale === currentLocale && t.has(value)) {
+        names.add(t(value) as string, locale);
+        if (locale === "sv") displayName = t(value) as string;
+      }
+    }
+    for (const { locale, t } of typeCatalogues) {
+      if (t.has(value)) names.add(t(value) as string, locale);
+    }
+    for (const word of EVERYDAY_TYPE_WORDS[value] ?? []) names.add(word);
+    for (const word of SV_EVERYDAY_TYPE_WORDS[value] ?? []) names.add(word, "sv");
+    if (names.size > 0) {
+      terms.push({
+        dimension: "opportunityType",
+        value,
+        ...names.split(),
+        ...(displayName ? { displayName } : {}),
+        available: facets.opportunityTypes.includes(value),
+      });
+    }
+  }
+
+  return { terms, facets };
+}
+
+/**
+ * Countries the person could ask about but which are NOT on their board.
+ *
+ * Recognising them is what lets the answer be useful: "no demands in Norway are
+ * visible to you — these countries are." Built from the platform catalogue, so
+ * it names exactly the markets the product actually speaks about.
+ */
+export async function buildUnavailableCountryTerms(
+  facets: DiscoveryFacets,
+): Promise<VocabularyTerm[]> {
+  const onBoard = new Set(facets.countries.map((c) => c.toUpperCase()));
+  const out: VocabularyTerm[] = [];
+  const catalogues = await Promise.all(
+    activeLocales.map(async (locale) => ({
+      locale,
+      t: await getTranslations({ locale, namespace: "labourMarket.countryNames" }),
+    })),
+  );
+  // The canonical market list — the SAME set structured demand intake allows,
+  // so the AI recognises exactly the markets the product speaks about. Not a
+  // new list, and bounded (a 250-country vocabulary would be both slow and
+  // full of two-letter false positives).
+  for (const code of MARKET_COUNTRIES) {
+    if (onBoard.has(code)) continue;
+    const names = new TermNames();
+    for (const { locale, t } of catalogues) {
+      if (t.has(code)) names.add(t(code), locale);
+      const icu = countryDisplayName(code, locale);
+      if (icu && icu.toUpperCase() !== code.toUpperCase()) names.add(icu, locale);
+    }
+    if (names.size > 0) {
+      out.push({ dimension: "country", value: code, ...names.split(), available: false });
+    }
+  }
+  return out;
+}

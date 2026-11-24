@@ -1,0 +1,27 @@
+{"step":"health","build":"ca96605b"}
+{"step":"resume","entryId":"fa0747b7-f27e-4e60-be85-0144917630d6","marker":"LANE-D-mtpg9xuq"}
+{"readback":"AFTER_ENTRY_BEFORE_CONFIRM","readErrors":{"worker_skills":"permission denied for table worker_skills","links":"permission denied for table journal_entry_skills","entries":"","confirmations":"permission denied for table journal_entry_confirmations"},"entries":null,"worker_skills":[],"links":[],"confirmations":null}
+{"check":"EDGE journal→profile: worker_skills now holds welding-blueprint at source=work_journal, verified=false","ok":false,"detail":[]}
+{"check":"EDGE entry→skill link: journal_entry_skills links the entry to welding-blueprint with provenance=recognized","ok":false,"detail":[]}
+{"leg":"company_quick_queue","present":true,"cardText":"E2E Worker Two 2026-09-06 Suvirinau metalo konstrukcijas pusautomačiu. LANE-D-mtpg9xuq Metalo konstrukcijų montavimas Suvirinimo brėžinių skaitymas BUS PATVIRTINTA: Metalo konstrukcijų montavimas Suvirinimo brėžinių skaitymas Patvirtinti įrašą ir įgūdžius (2) Atmesti","willConfirm":"BUS PATVIRTINTA: Metalo konstrukcijų montavimas Suvirinimo brėžinių skaitymas","failed":[]}
+{"check":"CONFIRM: the entry reaches the company's one-tap queue","ok":true,"detail":"E2E Worker Two 2026-09-06 Suvirinau metalo konstrukcijas pusautomačiu. LANE-D-mtpg9xuq Metalo konstrukcijų montavimas Suvirinimo brėžinių skaitymas BUS PATVIRTINTA: Metalo konstrukcijų montavimas Suvi"}
+{"check":"CONFIRM: the card names the worker (not a dash)","ok":true,"detail":"E2E Worker Two 2026-09-06 Suvirinau metalo konstrukcijas pusautomačiu. LANE-D-mtpg9xuq Metalo konstrukcijų montavimas Su"}
+{"leg":"company_quick_confirmed","confirmed":false,"text":""}
+{"check":"CONFIRM: the tap lands as confirmed","ok":false,"detail":false}
+{"readback":"AFTER","readErrors":{"worker_skills":"permission denied for table worker_skills","links":"permission denied for table journal_entry_skills","entries":"","confirmations":"permission denied for table journal_entry_confirmations"},"entries":null,"worker_skills":[],"links":[],"confirmations":null}
+{"leg":"company_candidates_07-after","state":"candidates-view","header":"Suvirintojas PATEIKTAS","worker2Present":true,"cardText":"Kandidatas 0DBD5E STIPRUS ATITIKIMAS · 100% REIKALINGŲ ĮGŪDŽIŲ Priimtas Šalis LT Vadovo patvirtinti įgūdžiai 1 Rezervacija Priimta Įtraukti į trumpąjį sąrašą Pokalbio ar rezervacijos pradėti dar negalima: šis žmogus nenurodė tai leidžiančio pasiekiamumo.","candidatesOnScreen":6,"failed":[]}
+{"leg":"worker_journal_08-after","chart":"","provenanceLine":[],"entryVisible":true,"failed":[]}
+{"check":"EDGE confirm→capability: welding-blueprint is verified=true, source=manager_confirmed, bin=green","ok":false,"detail":[]}
+{"check":"EDGE confirm row: journal_entry_confirmations carries the company owner as confirmer with action=confirm","ok":false,"detail":null}
+{"check":"EDGE capability→matching (employer): worker2 now appears in the company's candidates for its own need","ok":true,"detail":{"before":"(resumed)","after":true,"state":"candidates-view"}}
+{"check":"EDGE matching→UI: the candidate card shows the confirmed / skill-fit reading","ok":true,"detail":"Kandidatas 0DBD5E STIPRUS ATITIKIMAS · 100% REIKALINGŲ ĮGŪDŽIŲ Priimtas Šalis LT Vadovo patvirtinti įgūdžiai 1 Rezervacija Priimta Įtraukti į trumpąjį sąrašą Pokalbio ar rezervacijos pradėti dar negalima: šis žmogus nenurodė tai leidžiančio pasiekiamumo."}
+{"check":"EDGE profile provenance: the worker's journal page shows the confirming organisation","ok":false,"detail":{"lines":[],"chart":""}}
+C:\Users\Mano\Documents\labourmarketai-wt\lane-p4-field\docs\launch\pilot-feedback\walks-2026-09-06\walk-living-evidence-loop\walk-living-evidence-loop-prod.cjs:216
+  log({ result: fail.length === 0 ? "PASS" : "FAIL", failed, entryId, marker: MARKER });
+                                                     ^
+
+ReferenceError: failed is not defined
+    at C:\Users\Mano\Documents\labourmarketai-wt\lane-p4-field\docs\launch\pilot-feedback\walks-2026-09-06\walk-living-evidence-loop\walk-living-evidence-loop-prod.cjs:216:54
+
+Node.js v24.14.0
+exit=1

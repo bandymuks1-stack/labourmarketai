@@ -1,0 +1,4 @@
+﻿occupationUri,relationType,skillType,skillUri
+http://data.europa.eu/esco/occupation/0001,essential,skill/competence,http://data.europa.eu/esco/skill/s001
+http://data.europa.eu/esco/occupation/0002,essential,skill/competence,http://data.europa.eu/esco/skill/s002
+http://data.europa.eu/esco/occupation/0001,optional,knowledge,http://data.europa.eu/esco/skill/s003

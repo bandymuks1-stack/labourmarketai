@@ -1,0 +1,158 @@
+[
+  {
+    "phase": "after",
+    "tag": "worker-partial",
+    "viewport": "1440",
+    "ttfbRuns": [
+      2363,
+      3180,
+      3438,
+      4910,
+      11103
+    ],
+    "ttfbMedian": 3438,
+    "primaryEarly": 780,
+    "primaryLate": 780,
+    "layoutJumpPx": 0,
+    "consoleErrors": [],
+    "hydrationWarnings": [],
+    "url": "http://127.0.0.1:3460/lt/dashboard/profile",
+    "docHeight": 5273,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "cardBorders": 16,
+    "sections": 14,
+    "h1": 1,
+    "h2": [
+      "Dev Worker",
+      "Įmonės kanalai",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "h3": 6,
+    "buttons": 57,
+    "links": 34,
+    "unlabelledInputs": 34,
+    "smallTargets": 71,
+    "hub": {
+      "y": 259,
+      "h": 648
+    },
+    "stateStrip": null,
+    "liveProfile": null,
+    "setupJourney": null,
+    "cvGrid": {
+      "y": 1235,
+      "h": 168
+    },
+    "reviewBanner": null,
+    "missing": {
+      "y": 378,
+      "h": 350
+    },
+    "primaryAction": {
+      "y": 780,
+      "h": 44
+    },
+    "doneSummary": {
+      "y": 841,
+      "h": 44
+    },
+    "editorsPresent": [
+      "#profile-edit",
+      "#cv-availability",
+      "#cv-languages",
+      "#capabilities",
+      "#managed-companies",
+      "#profile-identity"
+    ],
+    "text": "L\nLabourMarket\nAsmeninė erdvė\nLietuvių\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nDW\nDev Worker\n\nTik pradėtas · 1 iš 5 · Paskutinis įrašas — 2026-07-25\n\nDAR TRŪKSTA\n1. Įkelkite CV arba atsakykite į kelis klausimus\nPapasakokite apie savo patirtį — įkelkite CV arba įrašykite ją patys.\nDar reikia\n2. Patikrinkite, ką radome\nPatvirtinkite, pataisykite arba pašalinkite pasiūlytus įrašus.\nDar reikia\n3. Kur norite dirbti?\nNurodykite šalį ir pageidaujamas šalis darbo kortelėje.\nDar reikia\n4. Kada galite pradėti?\nPažymėkite savo prieinamumą.\nDar reikia\nPridėti darbo įrašą\nDar reikia\n\nTai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.\n\nPridėti, ko trūksta ↓\nPaklausti darbo erdvėje →\nDarbo žurnalas →\nPridėk savo CV — įklijuok arba įkelk ↓\nPeržiūrėti atitinkančias galimybes →\n›\nKAS JAU PARUOŠTA\nDW\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\n\nDar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.\n\n+ Pridėti įmonę\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.\nPasitikėjimo signalai\n\nŠie skaičiai — tiesiai iš jūsų darbo įrašų.\n\nVADOVO PATVIRTINTI ĮGŪDŽIAI\n0\nVADOVO PATVIRTINIMAI\n0\nŽURNALO ĮRAŠAI\n14\nDarbo pageidavimai\n\nNurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“,"
+  },
+  {
+    "phase": "after",
+    "tag": "worker-partial",
+    "viewport": "375",
+    "ttfbRuns": [
+      1946,
+      2113,
+      2178,
+      2534,
+      2844
+    ],
+    "ttfbMedian": 2178,
+    "primaryEarly": 1034,
+    "primaryLate": 1034,
+    "layoutJumpPx": 0,
+    "consoleErrors": [],
+    "hydrationWarnings": [],
+    "url": "http://127.0.0.1:3460/lt/dashboard/profile",
+    "docHeight": 7486,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "cardBorders": 16,
+    "sections": 14,
+    "h1": 1,
+    "h2": [
+      "Dev Worker",
+      "Įmonės kanalai",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "h3": 6,
+    "buttons": 57,
+    "links": 34,
+    "unlabelledInputs": 34,
+    "smallTargets": 70,
+    "hub": {
+      "y": 401,
+      "h": 984
+    },
+    "stateStrip": null,
+    "liveProfile": null,
+    "setupJourney": null,
+    "cvGrid": {
+      "y": 1794,
+      "h": 485
+    },
+    "reviewBanner": null,
+    "missing": {
+      "y": 534,
+      "h": 429
+    },
+    "primaryAction": {
+      "y": 1034,
+      "h": 44
+    },
+    "doneSummary": {
+      "y": 1319,
+      "h": 44
+    },
+    "editorsPresent": [
+      "#profile-edit",
+      "#cv-availability",
+      "#cv-languages",
+      "#capabilities",
+      "#managed-companies",
+      "#profile-identity"
+    ],
+    "text": "L\nAsmeninė erdvė\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nDW\nDev Worker\n\nTik pradėtas · 1 iš 5 · Paskutinis įrašas — 2026-07-25\n\nDAR TRŪKSTA\n1. Įkelkite CV arba atsakykite į kelis klausimus\nPapasakokite apie savo patirtį — įkelkite CV arba įrašykite ją patys.\nDar reikia\n2. Patikrinkite, ką radome\nPatvirtinkite, pataisykite arba pašalinkite pasiūlytus įrašus.\nDar reikia\n3. Kur norite dirbti?\nNurodykite šalį ir pageidaujamas šalis darbo kortelėje.\nDar reikia\n4. Kada galite pradėti?\nPažymėkite savo prieinamumą.\nDar reikia\nPridėti darbo įrašą\nDar reikia\n\nTai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.\n\nPridėti, ko trūksta ↓\nPaklausti darbo erdvėje →\nDarbo žurnalas →\nPridėk savo CV — įklijuok arba įkelk ↓\nPeržiūrėti atitinkančias galimybes →\n›\nKAS JAU PARUOŠTA\nDW\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\n\nDar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.\n\n+ Pridėti įmonę\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.\nPasitikėjimo signalai\n\nŠie skaičiai — tiesiai iš jūsų darbo įrašų.\n\nVADOVO PATVIRTINTI ĮGŪDŽIAI\n0\nVADOVO PATVIRTINIMAI\n0\nŽURNALO ĮRAŠAI\n14\nDarbo pageidavimai\n\nNurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurod"
+  }
+]

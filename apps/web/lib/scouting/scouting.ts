@@ -1,0 +1,823 @@
+import "server-only";
+
+import { cache } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
+import {
+  requireEmployerCompany,
+  resolveEmployerCompanyContext,
+  type EmployerContextReason,
+} from "@/lib/company/employer-company-context";
+import { hasOrganizationCapability, type GovernanceRole } from "@/lib/company/role-capabilities";
+import { isLabourDemandRow } from "@/lib/demand/market-direction";
+import { parseStructuredNeed } from "@/lib/market/fit";
+import type { NeedSkillSource } from "@/lib/market/need-skills";
+import { buildNeedFromRequestRow } from "@/lib/market/need-from-request";
+import { matchWorkerToNeed, compareMatches, type MatchNeed } from "@/lib/market/match-v1";
+import { buildSupplyCandidates } from "@/lib/market/match-subject";
+import { SUPPLY_POOL_BUDGET } from "@/lib/market/supply-retrieval";
+import { isSyntheticFixtureLabel } from "@/lib/qa/synthetic-fixture";
+import type { SupplyRetrievalReport } from "@/lib/market/supply-retrieval";
+import {
+  toScoutSafeCandidate,
+  toUnassessedHandRaiser,
+  type ScoutSafeCandidate,
+  type UnassessedHandRaiser,
+  type ShortlistStatus as SafeShortlistStatus,
+} from "@/lib/scouting/scout-safe-view";
+import { freshnessDemotionRank } from "@/lib/scouting/profile-freshness";
+import {
+  candidateActionability,
+  isClosedNeedHistory,
+  mayOfferEmployerActions,
+} from "@/lib/scouting/candidate-actionability";
+import { readStructuredDemandV2 } from "@/lib/demand/structured-demand-v2";
+import {
+  withNeedCountryFacet,
+  allowlistScoutFilters,
+  applyScoutFilters,
+  buildScoutFacets,
+  EMPTY_SCOUT_FILTERS,
+  type ScoutFacets,
+  type ScoutFilters,
+} from "@/lib/scouting/scout-filters";
+import { validateShortlistWrite } from "@/lib/scouting/shortlist-note";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
+
+/**
+ * Company scouting (Full Cycle Sprint v1, Slice 3) — the demand→matching→
+ * shortlist stage. A company runs the deterministic match-v1 engine over the
+ * employer-discoverable worker supply for ONE of ITS OWN structured demands,
+ * sees ranked candidates with the "why"/gaps, and shortlists them.
+ *
+ * RLS: everything is read/written through the caller's session.
+ *   - own demands: customer_requests SELECT (profile_id = auth.uid()).
+ *   - supply: workers / worker_skills are employer-visible by existing RLS.
+ *   - shortlist: demand_shortlist is owner-scoped (owner_id = auth.uid()).
+ * No RLS change, no SECURITY DEFINER. Honest empty/needs-structuring states.
+ */
+
+const RELATION_NOT_FOUND = "42P01";
+const UNDEFINED_COLUMN = "42703";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+
+export type ShortlistStatus = SafeShortlistStatus;
+export const SHORTLIST_STATUSES: readonly ShortlistStatus[] = [
+  "saved",
+  "interested",
+  "not_fit",
+  "reviewed",
+];
+
+/** Re-export the safe company-facing candidate shapes (the ONLY ones the UI gets). */
+export type { ScoutSafeCandidate, UnassessedHandRaiser } from "@/lib/scouting/scout-safe-view";
+
+export interface CompanyDemand {
+  readonly id: string;
+  readonly title: string;
+  readonly status: string;
+  readonly structured: boolean;
+  /** How the requirement set was derived for matching (PR4): human
+   *  structuring, ESCO bridge, offline text recognition, or profession
+   *  expansion. Null ⇒ nothing derivable (honest unstructured). */
+  readonly needSource: NeedSkillSource | null;
+  readonly createdAt: string;
+  /** R-15: true when the caller created the row. Close/reopen are shared with
+   *  colleagues (has_org_demand_access); the §19 confirm act and every field
+   *  edit stay the creator's, and the surface offers only what will land. */
+  readonly ownedByCaller: boolean;
+}
+
+// Canonical demand → MatchNeed derivation now lives in
+// lib/market/need-from-request.ts (Wagon 4) so scouting AND the admin
+// workbench share the ONE need-assembly path.
+
+/**
+ * The active company's demands (most recent first).
+ *
+ * W8 slice 1 — WORKSPACE GATE. The rows are still keyed on `profile_id`
+ * (`customer_requests` has no organization/company column — the W9 structural
+ * block recorded in the W8 audit), so this cannot yet filter BY company. What
+ * it can do, and now does, is refuse to answer at all unless the caller is
+ * really acting for a company right now. Without this gate the same demands
+ * rendered in every workspace the person could switch to, which is exactly the
+ * "active organization is decorative" defect (audit P0-1).
+ *
+ * Empty array = no demands OR no company context. Surfaces that need to tell
+ * those apart call `resolveEmployerCompanyContext()` and render the reason —
+ * see `/dashboard/company/scouting`.
+ */
+export async function listCompanyDemands(): Promise<CompanyDemand[]> {
+  // A fresh array per caller over the request-shared read (callers filter it).
+  return [...(await readCompanyDemandsOnce())];
+}
+
+/** Read ONCE per server render (perf 2026-10-22): the opening brief's agency
+ *  offers line and the bell's team-offer count both listed the company's
+ *  demands in the same `/dashboard/company` render. React `cache()` is
+ *  request-scoped — every navigation and every server action reads again. */
+const readCompanyDemandsOnce = cache(async (): Promise<readonly CompanyDemand[]> => readCompanyDemands());
+
+async function readCompanyDemands(): Promise<CompanyDemand[]> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return [];
+  const ctx = await resolveEmployerCompanyContext();
+  if (ctx.kind !== "ok") return [];
+  try {
+    // DIRECTION (SEP-4). Scouting looks for PEOPLE to fill a need. An agency's
+    // own `agency_offer` is a declaration that it HAS people, and it lives in
+    // the same table with the same columns — listing it here offered to scout
+    // candidates for a need that was never recorded. Classified rather than
+    // filtered in the query, so an unrecognised kind is dropped, never guessed.
+    // R-15: the ORGANIZATION's needs — own rows plus rows stamped with the
+    // active workspace's organization (the SELECT policy already grants a
+    // colleague with has_org_demand_access exactly that; this read just
+    // stopped asking for less than it was allowed).
+    const { data } = await asAny(supabase)
+      .from("customer_requests")
+      .select("id, title, status, payload, created_at, kind, profile_id")
+      .or(demandsOfWorkspaceFilter(user.id, ctx.organizationId))
+      .order("created_at", { ascending: false })
+      .limit(50);
+    return ((data ?? []) as {
+      id: string;
+      title: string | null;
+      status: string | null;
+      payload: unknown;
+      created_at: string;
+      kind: string | null;
+      profile_id: string | null;
+    }[]).filter((r) => isLabourDemandRow(r)).map((r) => ({
+      ownedByCaller: r.profile_id === user.id,
+      id: r.id,
+      // RAW stored title. The data layer does not get to pick a display
+      // string: an em-dash here would have been an internal placeholder
+      // rendered at the employer (§23), and the stored title can be an
+      // English synthetic label that only the display layer knows how to
+      // localize. The single consumer resolves both.
+      title: r.title ?? "",
+      status: r.status ?? "draft",
+      structured: parseStructuredNeed(r.payload) !== null,
+      // List view derives from title only (full derivation runs in
+      // runScouting with the whole row); null here just means "open it".
+      needSource: parseStructuredNeed(r.payload) !== null ? "human_structured" : null,
+      createdAt: r.created_at,
+    }));
+  } catch {
+    return [];
+  }
+}
+
+export type ScoutResult =
+  | {
+      kind: "ok";
+      demand: CompanyDemand;
+      candidates: ScoutSafeCandidate[];
+      /** worker_id → interest status for THIS demand (worker-initiated,
+       *  internal-only signals; empty until the owner-gated interest table
+       *  is applied). Withdrawn signals are never shown. */
+      interestByWorker: Record<string, string>;
+      /** The facet allowlists derived from the visible (RLS-scoped, bounded)
+       *  supply — the ONLY values the filter chips offer (Wagon 1). */
+      facets: ScoutFacets;
+      /** The filters actually applied after allowlisting (an out-of-supply
+       *  probe value is dropped, honestly reflected here). */
+      filters: ScoutFilters;
+      /** How this candidate pool was retrieved (W10 slice 3). Surfaces MUST
+       *  disclose `capped` — an employer reading "no candidates" is entitled
+       *  to know whether the platform actually looked at everyone. */
+      retrieval: SupplyRetrievalReport;
+      /** The need exactly as the matcher reads it (the same assembly the
+       *  candidates were judged against). Carried so the team-offer section
+       *  (E6) matches an offered brigade against the SAME need - never a
+       *  second reduction. Optional: older callers/tests build results
+       *  without it. */
+      need?: MatchNeed;
+    }
+  | { kind: "not-found" }
+  /**
+   * Nothing derivable from the need, so nothing was matched — AND the people
+   * who raised a hand on it anyway (owner decision 2026-10-22). They are shown
+   * NOW, through the same visibility gates and the same actionability verdict
+   * as scouted candidates, and they carry `matchAssessed: false`: no score, no
+   * band, no rank, no fit. Empty when nobody (visible, not withdrawn) raised a
+   * hand — the plain "not structured" state, exactly as before.
+   */
+  | { kind: "not-structured"; demand: CompanyDemand; handRaisers: UnassessedHandRaiser[] }
+  | { kind: "needs-migration" }
+  /** W8 slice 1: the caller is not acting for a company right now. Its own
+   *  kind, never "not-found" — "you are in your personal space" and "that
+   *  demand does not exist" are different truths and must read differently. */
+  | { kind: "no-company-context"; reason: EmployerContextReason }
+  | { kind: "error"; message: string };
+
+/** Run scouting for ONE of the company's own demands. Optional bounded
+ *  facet filters (Wagon 1) only ever NARROW the RLS-scoped supply. */
+export async function runScouting(
+  requestId: string,
+  requestedFilters: ScoutFilters = EMPTY_SCOUT_FILTERS,
+): Promise<ScoutResult> {
+  if (!requestId) return { kind: "not-found" };
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-found" };
+
+  // W8 slice 1 — WORKSPACE GATE, before any demand row is read. A deep link
+  // carrying another workspace's request id can therefore never resolve from a
+  // context that is not acting for a company.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "no-company-context", reason: employer.reason };
+  return runScoutingCore({ supabase, userId: user.id }, employer, requestId, requestedFilters);
+}
+
+/**
+ * The employer the scouting and shortlist cores act for — ALWAYS resolved by
+ * the caller's own gate chain (`requireEmployerCompany` on the web,
+ * `requireEmployerCompanyForCaller` on a bearer transport), never a client id.
+ */
+export type ScoutingEmployer = {
+  readonly companyId: string;
+  readonly organizationId: string;
+  readonly organizationName: string;
+  readonly role: GovernanceRole;
+};
+
+/**
+ * THE scouting core (G4 bridge): the SAME retrieval, match-v1 ranking and
+ * actionability rules for the web page and for an authorized assistant
+ * (`candidate.search` on /api/mcp). The transport hands in its own
+ * RLS-scoped client and the employer its own gate resolved; nothing else
+ * differs, so the two can never disagree about who the candidates are.
+ */
+export async function runScoutingCore(
+  caller: { readonly supabase: SupabaseClient; readonly userId: string },
+  employer: ScoutingEmployer,
+  requestId: string,
+  requestedFilters: ScoutFilters = EMPTY_SCOUT_FILTERS,
+): Promise<ScoutResult> {
+  if (!requestId) return { kind: "not-found" };
+  const supabase = caller.supabase;
+  const user = { id: caller.userId };
+
+  // R-15: own row OR a row of the active workspace's organization (SELECT
+  // policy: creator or has_org_demand_access). Pinned to the active org so a
+  // deep link from another workspace still resolves to nothing here.
+  //
+  // OR a need a client ACTIVELY SHARED with this agency company (owner
+  // decision 2026-09-28 B): the share row, read under its own policy, pinned
+  // to the ACTING agency company and a live connection — then the request row
+  // itself is admitted by `customer_requests_select_agency_share`. When the
+  // share or the connection ends, both reads say no again.
+  const { data: share } = await asAny(supabase)
+    .from("agency_client_request_shares")
+    .select("id, agency_client_connections!inner(agency_company_id, status)")
+    .eq("request_id", requestId)
+    .eq("status", "active")
+    .eq("agency_client_connections.agency_company_id", employer.companyId)
+    .eq("agency_client_connections.status", "active")
+    .limit(1)
+    .maybeSingle();
+  const readRequest = asAny(supabase)
+    .from("customer_requests")
+    .select(
+      "id, title, status, need_summary, role_or_work_type, notes, country, location, language_requirement, payload, created_at, profile_id",
+    )
+    .eq("id", requestId);
+  const { data: req, error } = await (share
+    ? readRequest
+    : readRequest.or(demandsOfWorkspaceFilter(user.id, employer.organizationId))
+  ).maybeSingle();
+  if (error) {
+    if (error.code === RELATION_NOT_FOUND || error.code === UNDEFINED_COLUMN) {
+      return { kind: "needs-migration" };
+    }
+    return { kind: "error", message: error.message };
+  }
+  if (!req) return { kind: "not-found" };
+
+  // Curated esco_uri → slug bridge (sparse until the owner curates links;
+  // matching works on slugs regardless — never blocked on ESCO).
+  const escoUriToSlug = new Map<string, string>();
+  try {
+    const { data: bridge } = await asAny(supabase)
+      .from("skills")
+      .select("slug, esco_uri")
+      .not("esco_uri", "is", null);
+    for (const b of (bridge ?? []) as { slug: string | null; esco_uri: string | null }[]) {
+      if (b.slug && b.esco_uri) escoUriToSlug.set(b.esco_uri, b.slug);
+    }
+  } catch {
+    // bridge unavailable → slugs-only (still fully functional)
+  }
+
+  // Structured market-map location for THIS demand (owner-scoped RLS read;
+  // city granularity) — beats the free-text location fallback when present.
+  let structuredCity: string | null = null;
+  try {
+    const { data: loc } = await asAny(supabase)
+      .from("company_demand_locations")
+      .select("city, location_label, active, updated_at")
+      .eq("request_id", requestId)
+      .eq("active", true)
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    const label = ((loc?.city ?? loc?.location_label ?? "") as string).trim();
+    structuredCity = label !== "" ? label : null;
+  } catch {
+    // table absent in this environment → free-text fallback below
+  }
+
+  const { need, source } = buildNeedFromRequestRow(
+    structuredCity ? { ...req, location: structuredCity } : req,
+    escoUriToSlug,
+  );
+  const demand: CompanyDemand = {
+    id: req.id,
+    title: req.title ?? "—",
+    status: req.status ?? "draft",
+    structured: parseStructuredNeed(req.payload) !== null,
+    needSource: source,
+    createdAt: req.created_at,
+    ownedByCaller: req.profile_id === user.id,
+  };
+  // Worker-initiated interest signals on THIS demand (owner-scoped read via
+  // RLS; table absent pre-apply → empty, the view is simply unchanged).
+  // Read BEFORE the structure check: a hand raised on a need that names no
+  // trade is still a person waiting for this employer (owner decision
+  // 2026-10-22), and the unstructured state used to return before anyone
+  // looked — the worker saw "interested", the employer saw nobody.
+  const interestByWorker: Record<string, string> = {};
+  try {
+    const { data: ints } = await asAny(supabase)
+      .from("demand_interest_signals")
+      .select("worker_id, status")
+      .eq("request_id", requestId);
+    for (const r of (ints ?? []) as { worker_id: string; status: string }[]) {
+      // WITHDRAWN IS KEPT, not dropped (owner ruling 2026-09-22). Filtering
+      // it out here turned "this person withdrew from your opportunity" into
+      // "this person never answered" — the same screen, two opposite facts.
+      // `candidateActionability` needs to SEE the withdrawal to refuse the
+      // proposal; the display map below still hides it from the interest
+      // chip, which is a presentation choice, not a loss of the fact.
+      interestByWorker[r.worker_id] = r.status;
+    }
+  } catch {
+    // owner-gated migration not applied yet → no interest signals
+  }
+
+  // The need's own stated start, from the canonical structured payload —
+  // the SAME field `compareStartDateV2` reads, so the two never disagree.
+  // Absent → the caller's "now", i.e. an employer who states no date is
+  // asking about today.
+  const v2Time = readStructuredDemandV2(req.payload)?.time;
+  const needStartsOn = v2Time?.start_latest ?? v2Time?.start_earliest ?? null;
+  const nowIso = new Date().toISOString();
+
+  // Nothing derivable at all (no human structure, nothing recognizable in
+  // the text, no detectable profession) → honest unstructured state, plus the
+  // people who raised a hand on it. Nothing is matched, scored or ranked.
+  if (source === null) {
+    return {
+      kind: "not-structured",
+      demand,
+      handRaisers: await readUnassessedHandRaisers(supabase, {
+        userId: user.id,
+        requestId,
+        needStatus: req.status,
+        needStartsOn,
+        nowIso,
+        interestByWorker,
+        excludeFixtures: !isSyntheticFixtureLabel(employer.organizationName),
+      }),
+    };
+  }
+
+  // W10 slice 3 (audit P0-3) — STAGED RETRIEVAL. The pool used to be the 200
+  // newest registrations, chosen before anyone looked at this demand: a
+  // qualified worker who registered earlier was never fetched, so the page
+  // said "no candidates" when the truth was "we did not look". Retrieval is
+  // now planned FROM `need` (skills → profession → country, all index-backed),
+  // with a deterministic id-ordered backfill so nobody who was reachable
+  // before became unreachable. The ranking below is unchanged.
+  // Test accounts are not candidates for a real organization; a synthetic
+  // organization may still scout them — that is how the company chain is
+  // proven on the real database (lib/qa/synthetic-fixture.ts).
+  // A person who raised a hand on THIS demand is always looked at, whatever
+  // the plan searched: they asked to be contacted. Withdrawn hands are not
+  // pinned (they stay a fact for actionability, not a reason to retrieve).
+  // The person searching is never their own candidate: their own worker row
+  // reads back to them (employer-flow audit 2026-11-15).
+  const { candidates: supply, retrieval } = await buildSupplyCandidates(supabase, {
+    need,
+    excludeFixtures: !isSyntheticFixtureLabel(employer.organizationName),
+    viewerProfileId: user.id,
+    alwaysInclude: Object.entries(interestByWorker)
+      .filter(([, status]) => status !== "withdrawn")
+      .map(([workerId]) => workerId),
+  });
+
+  const shortlist = await readShortlistForDemand(supabase, user.id, requestId);
+
+  // Facet allowlists come from the visible supply itself; the requested
+  // filters are clamped to them (a probe value matching nothing is dropped)
+  // and can only NARROW the already-bounded, can_view_worker-scoped list.
+  const facets = withNeedCountryFacet(buildScoutFacets(supply), need.country);
+  const filters = allowlistScoutFilters(requestedFilters, facets);
+  const filteredSupply = applyScoutFilters(supply, filters);
+
+  // CURRENT ACTIONABILITY, decided in ONE place for every candidate
+  // (lib/scouting/candidate-actionability.ts). A person the canonical state
+  // says is not a live proposal — the need is closed, they withdrew, their
+  // consent is gone — is removed from the CURRENT list here rather than in
+  // each surface's own conditionals. Nothing is deleted: the shortlist row,
+  // the interest row and their provenance are untouched, and the employer's
+  // own recorded decisions stay readable as history.
+  const candidates: ScoutSafeCandidate[] = filteredSupply
+    .map((c) => ({
+      c,
+      actionability: candidateActionability(
+        {
+          needStatus: req.status,
+          needStartsOn,
+          workerRecordPresent: true,
+          interestStatus: interestByWorker[c.workerId] ?? null,
+          shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+          availabilityStatus: c.subject.availabilityStatus ?? null,
+          availableFrom: c.subject.availableFrom ?? null,
+        },
+        nowIso,
+      ),
+    }))
+    // `actionable_later` SURVIVES: real future supply, kept and labelled by
+    // the surface, never silently presented as available now.
+    //
+    // A CLOSED need has no actionable candidate, and used to list nobody,
+    // while the page says "below is who was compared and what was decided".
+    // Its HISTORY survives: the people this need has a recorded fact about
+    // (they raised a hand, or the employer recorded a decision on them, a
+    // "not a fit" included). Read-only: the surface offers no control on a
+    // closed need and every write refuses it. People who were only ever a
+    // match, with nothing recorded, are not history and are not listed.
+    .filter(
+      ({ c, actionability }) =>
+        mayOfferEmployerActions(actionability) ||
+        isClosedNeedHistory(actionability, {
+          interestStatus: interestByWorker[c.workerId] ?? null,
+          shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+        }),
+    )
+    .map(({ c, actionability }) =>
+      toScoutSafeCandidate({
+        workerId: c.workerId,
+        professionSlug: c.professionSlug,
+        subject: c.subject,
+        match: matchWorkerToNeed(need, c.subject),
+        needCountry: need.country,
+        shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+        shortlistNote: shortlist.get(c.workerId)?.note ?? null,
+        lastActiveBucket: c.lastActiveBucket,
+        actionability,
+        startDateSet: c.startDateSet,
+      }),
+    )
+    // Rank via the SHARED need-context comparator (§19 — strength, coverage,
+    // confirmed share, explicit availability; never a global person score).
+    //
+    // W10 audit P0-2: these two keys used to be the other way round —
+    // `freshnessDemotionRank` FIRST, `compareMatches` second. That made an
+    // activity signal outrank a competence signal unconditionally: a worker
+    // with 100% coverage, every skill manager_confirmed, `strong` and
+    // `eligible`, whose last profile write was 91 days ago, sorted BELOW a
+    // worker with zero skills and `insufficient_data` who saved a field
+    // yesterday. On every demand. The employer's best candidate was pushed
+    // under every recently-active account, and the way to outrank competence
+    // was to touch a form.
+    //
+    // FIT IS THE PRIMARY KEY. Freshness still earns its place — a dormant
+    // profile really is less likely to reply — but only as a TIE-BREAK between
+    // candidates the need-context comparator has already judged equal. It can
+    // reorder equals; it can no longer overturn the ranking.
+    //
+    // The freshness badge on the card is unchanged: the fact stays visible,
+    // it just stops deciding the order.
+    .sort(
+      (a, b) =>
+        compareMatches(a.match, b.match) ||
+        freshnessDemotionRank(a.lastActiveBucket) -
+          freshnessDemotionRank(b.lastActiveBucket) ||
+        // Deterministic last resort. Two candidates equal on fit AND freshness
+        // must not swap places between two loads of the same page — an
+        // unstable list reads as a changing recommendation.
+        a.workerId.localeCompare(b.workerId),
+    );
+
+  // W14 mid-funnel: a match preview was really generated for a real demand.
+  // Count only — never worker ids. Fire-and-forget; scouting is unaffected.
+  emitServerFunnelEvent(FUNNEL_EVENTS.matchPreviewGenerated, {
+    source: "scouting",
+    metadata: { candidate_count: candidates.length, surface: "scouting" },
+  });
+
+  return { kind: "ok", demand, candidates, interestByWorker, facets, filters, retrieval, need };
+}
+
+/** Existing shortlist statuses + internal notes for this demand
+ *  (owner-scoped; the note column existed since 20260612220000 and is now
+ *  actually read — extension B). One read for both scouting paths. */
+async function readShortlistForDemand(
+  supabase: SupabaseClient,
+  userId: string,
+  requestId: string,
+): Promise<Map<string, { status: ShortlistStatus; note: string | null }>> {
+  const shortlist = new Map<string, { status: ShortlistStatus; note: string | null }>();
+  try {
+    const { data: sl } = await asAny(supabase)
+      .from("demand_shortlist")
+      .select("worker_id, status, note")
+      .eq("owner_id", userId)
+      .eq("request_id", requestId);
+    for (const r of (sl ?? []) as {
+      worker_id: string;
+      status: ShortlistStatus;
+      note: string | null;
+    }[]) {
+      shortlist.set(r.worker_id, { status: r.status, note: r.note ?? null });
+    }
+  } catch {
+    // table absent (pre-apply) → no shortlist statuses yet
+  }
+  return shortlist;
+}
+
+/**
+ * The hand-raisers on a need that names NO trade (owner decision 2026-10-22).
+ *
+ * Every gate is the structured path's own, applied to exactly these people:
+ *   - WHO MAY BE SEEN: `buildSupplyCandidates` — the worker row under RLS for
+ *     a viewer with a working relationship, otherwise the anonymous
+ *     employer-visibility projection (`list_discoverable_worker_profiles_v1`,
+ *     which answers nothing for a worker who withheld discoverability). A
+ *     hand-raiser the caller may not view returns from neither read and
+ *     stays invisible; pinning an id reveals nobody.
+ *   - TEST ACCOUNTS: the same `excludeFixtures` rule as the planned pool.
+ *   - LIVE PROPOSAL: the same `candidateActionability` verdict — a withdrawn
+ *     hand, a closed need or the employer's own `not_fit` keeps the person
+ *     off the current list (withdrawn hands are not even fetched).
+ *   - WHAT IS SHOWN: the same Step 3A safe preview (`toUnassessedHandRaiser`).
+ *
+ * What is NOT done is the point: no `matchWorkerToNeed`, no comparator, no
+ * freshness demotion. The order is the worker id — deterministic, and
+ * deliberately meaningless, so it cannot read as a recommendation.
+ */
+async function readUnassessedHandRaisers(
+  supabase: SupabaseClient,
+  input: {
+    readonly userId: string;
+    readonly requestId: string;
+    readonly needStatus: string | null;
+    readonly needStartsOn: string | null;
+    readonly nowIso: string;
+    readonly interestByWorker: Readonly<Record<string, string>>;
+    readonly excludeFixtures: boolean;
+  },
+): Promise<UnassessedHandRaiser[]> {
+  const raised = Object.entries(input.interestByWorker)
+    .filter(([, status]) => status !== "withdrawn")
+    .map(([workerId]) => workerId);
+  if (raised.length === 0) return [];
+
+  // EVERY hand-raiser, in pool-sized batches: one call takes at most
+  // SUPPLY_POOL_BUDGET ids and drops the rest, so a need with more hands than
+  // that would silently lose real applications (Codex review #2680). Each
+  // batch keeps the same visibility and fixture rules.
+  const batches: string[][] = [];
+  for (let i = 0; i < raised.length; i += SUPPLY_POOL_BUDGET) {
+    batches.push(raised.slice(i, i + SUPPLY_POOL_BUDGET));
+  }
+  const [pools, shortlist] = await Promise.all([
+    Promise.all(
+      batches.map((workerIds) =>
+        buildSupplyCandidates(supabase, {
+          workerIds,
+          excludeFixtures: input.excludeFixtures,
+          viewerProfileId: input.userId,
+        }),
+      ),
+    ),
+    readShortlistForDemand(supabase, input.userId, input.requestId),
+  ]);
+  const visible = pools.flatMap((p) => p.candidates);
+
+  return visible
+    .flatMap((c) => {
+      // Only the ids asked for come back; a row without its own hand is not
+      // a hand-raiser, so it is not shown here under any label.
+      const interestStatus = input.interestByWorker[c.workerId];
+      return typeof interestStatus === "string" ? [{ c, interestStatus }] : [];
+    })
+    .map(({ c, interestStatus }) => ({
+      c,
+      interestStatus,
+      actionability: candidateActionability(
+        {
+          needStatus: input.needStatus,
+          needStartsOn: input.needStartsOn,
+          workerRecordPresent: true,
+          interestStatus,
+          shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+          availabilityStatus: c.subject.availabilityStatus ?? null,
+          availableFrom: c.subject.availableFrom ?? null,
+        },
+        input.nowIso,
+      ),
+    }))
+    .filter(({ actionability }) => mayOfferEmployerActions(actionability))
+    .map(({ c, interestStatus, actionability }) =>
+      toUnassessedHandRaiser({
+        workerId: c.workerId,
+        professionSlug: c.professionSlug,
+        subject: c.subject,
+        interestStatus,
+        shortlistStatus: shortlist.get(c.workerId)?.status ?? null,
+        shortlistNote: shortlist.get(c.workerId)?.note ?? null,
+        lastActiveBucket: c.lastActiveBucket,
+        actionability,
+        startDateSet: c.startDateSet,
+      }),
+    )
+    .sort((a, b) => a.workerId.localeCompare(b.workerId));
+}
+
+export type ShortlistWriteResult =
+  | { kind: "ok"; status: ShortlistStatus; note: string | null }
+  | { kind: "invalid" }
+  /** The need is closed — its candidates are history, not decisions. */
+  | { kind: "closed" }
+  /** `not_fit` needs a short reason and neither this write nor the stored
+   *  row carries one (extension B — server-enforced, never client-trusted). */
+  | { kind: "reason-required" }
+  | { kind: "not-owner" }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+/**
+ * Upsert a shortlist decision for the company's own demand. Owner-scoped:
+ * the request must belong to the caller (verified) and the row is written with
+ * owner_id = auth.uid(), so a company can never touch another's shortlist.
+ *
+ * Extension B: writes/preserves the EXISTING `note` column (20260612220000 —
+ * internal to the company; the worker can never read shortlist rows under
+ * demand_shortlist RLS). `note === undefined` keeps the stored note;
+ * `not_fit` requires a reason (this write's note or the stored one).
+ */
+export async function setShortlist(input: {
+  requestId: string;
+  workerId: string;
+  status: ShortlistStatus;
+  note?: string | null;
+}): Promise<ShortlistWriteResult> {
+  if (
+    !input.requestId ||
+    !input.workerId ||
+    !(SHORTLIST_STATUSES as readonly string[]).includes(input.status)
+  ) {
+    return { kind: "invalid" };
+  }
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-owner" };
+
+  // W8 slice 1 — a WRITE from a context that is not acting for a company is
+  // refused before it reaches the demand row. Mapped onto the existing
+  // `not-owner` kind on purpose: no second error vocabulary, and the surface
+  // already renders it honestly.
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return { kind: "not-owner" };
+  return setShortlistCore({ supabase, userId: user.id }, employer, input);
+}
+
+/**
+ * THE shortlist write core — the web action and `shortlist.*` on /api/mcp
+ * both land here.
+ *
+ * WHO MAY DECIDE (2026-09-30 fix). The need's CREATOR, as before, OR a
+ * colleague whose governance role in the ACTING organization carries
+ * `manage-demand` (owner / admin / manager / external manager — the same set
+ * `has_org_demand_access` admits at the database) on a need stamped with that
+ * organization. Membership alone is never enough: a `member` is refused.
+ * Before this, a manager who could SEE and scout a colleague's need (R-15)
+ * was refused the shortlist write with `not-owner` — one screen, two answers.
+ *
+ * Rows stay per-decider (`owner_id = auth.uid()` — the write policy), so a
+ * colleague's decision is added beside the creator's, never overwrites it.
+ */
+export async function setShortlistCore(
+  caller: { readonly supabase: SupabaseClient; readonly userId: string },
+  employer: ScoutingEmployer,
+  input: {
+    requestId: string;
+    workerId: string;
+    status: ShortlistStatus;
+    note?: string | null;
+  },
+): Promise<ShortlistWriteResult> {
+  if (
+    !input.requestId ||
+    !input.workerId ||
+    !(SHORTLIST_STATUSES as readonly string[]).includes(input.status)
+  ) {
+    return { kind: "invalid" };
+  }
+  const supabase = caller.supabase;
+  const user = { id: caller.userId };
+
+  // The need: own row OR a row of the acting organization (SELECT policy:
+  // creator or has_org_demand_access). A clean not-owner signal, never a
+  // silent FK error.
+  const { data: req } = await asAny(supabase)
+    .from("customer_requests")
+    .select("id, status, profile_id")
+    .eq("id", input.requestId)
+    .or(demandsOfWorkspaceFilter(user.id, employer.organizationId))
+    .maybeSingle();
+  if (!req) return { kind: "not-owner" };
+  // A colleague's need: role/capability, not membership, decides.
+  if (req.profile_id !== user.id && !hasOrganizationCapability(employer.role, "manage-demand")) {
+    return { kind: "not-owner" };
+  }
+  // LIFECYCLE (owner P0 2026-09-22 §12): a candidate on a CLOSED need is a
+  // historical relationship, not an actionable one. The shortlist rows stay
+  // (audit/history); no new decision may be written against a need that is
+  // not open — the surface hides the controls, and this is the rule behind
+  // it, so a stale tab or a hand-made request cannot get around it.
+  if (req.status === "closed") return { kind: "closed" };
+
+  // Current stored note (own row via RLS) — needed both to preserve it on a
+  // note-less write and to satisfy the not_fit reason rule honestly.
+  let existingNote: string | null = null;
+  try {
+    const { data: existing } = await asAny(supabase)
+      .from("demand_shortlist")
+      .select("note")
+      .eq("owner_id", user.id)
+      .eq("request_id", input.requestId)
+      .eq("worker_id", input.workerId)
+      .maybeSingle();
+    existingNote = (existing?.note as string | null) ?? null;
+  } catch {
+    // table absent → the upsert below returns needs-migration
+  }
+
+  const validated = validateShortlistWrite({
+    status: input.status,
+    note: input.note,
+    existingNote,
+  });
+  if (validated.kind === "reason-required") return { kind: "reason-required" };
+
+  const payload: Record<string, unknown> = {
+    owner_id: user.id,
+    request_id: input.requestId,
+    worker_id: input.workerId,
+    status: input.status,
+    updated_at: new Date().toISOString(),
+  };
+  // Only a provided note touches the column — an omitted note never erases
+  // the stored one.
+  if (validated.note !== undefined) payload.note = validated.note;
+
+  const { error } = await asAny(supabase)
+    .from("demand_shortlist")
+    .upsert(payload, { onConflict: "owner_id,request_id,worker_id" });
+  if (error) {
+    if (error.code === RELATION_NOT_FOUND) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message };
+  }
+  // W14 mid-funnel: only a POSITIVE shortlist decision counts as "added" —
+  // `not_fit` / `reviewed` are triage, not shortlisting. Fire-and-forget.
+  if (input.status === "saved" || input.status === "interested") {
+    emitServerFunnelEvent(FUNNEL_EVENTS.shortlistAdded, {
+      source: "scouting",
+      metadata: { step: input.status, surface: "scouting" },
+    });
+  }
+  return {
+    kind: "ok",
+    status: input.status,
+    note: validated.note !== undefined ? validated.note : existingNote,
+  };
+}

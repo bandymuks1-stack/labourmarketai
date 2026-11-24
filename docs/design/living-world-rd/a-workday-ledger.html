@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="lt">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Living World R&D · A — Darbo diena (The Workday Ledger)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,500;9..144,700;9..144,900&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f1e7; --paper-2:#efe7d7; --ink:#211d16; --ink-soft:#5c5546;
+  --falu:#8f2b1e; --falu-bright:#b23a28; --gold:#a9741f; --moss:#4a5d3a;
+  --frame:#fffdf8; --shadow:0 18px 40px -18px rgba(33,29,22,.35);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:"IBM Plex Sans",sans-serif;overflow-x:hidden}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;z-index:40;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 .13 0 0 0 0 .11 0 0 0 0 .08 0 0 0 .04 0'/%3E%3C/filter%3E%3Crect width='140' height='140' filter='url(%23n)'/%3E%3C/svg%3E")}
+.ribbon{position:fixed;top:14px;right:-46px;z-index:60;transform:rotate(35deg);background:var(--ink);color:var(--paper);
+  font:600 10px/1 "IBM Plex Mono",monospace;letter-spacing:.14em;padding:7px 52px;text-transform:uppercase}
+.masthead{display:flex;justify-content:space-between;align-items:baseline;padding:26px clamp(20px,4vw,56px) 0}
+.masthead .wordmark{font:900 clamp(20px,2vw,26px)/1 Fraunces,serif;letter-spacing:-.02em}
+.masthead .wordmark em{font-style:normal;color:var(--falu)}
+.masthead .issue{font:500 11px/1.5 "IBM Plex Mono",monospace;color:var(--ink-soft);text-align:right;text-transform:uppercase;letter-spacing:.12em}
+.hero-head{padding:clamp(28px,5vh,64px) clamp(20px,4vw,56px) 8px;max-width:1200px}
+.kicker{font:500 12px/1 "IBM Plex Mono",monospace;color:var(--falu);letter-spacing:.22em;text-transform:uppercase}
+h1{font:300 clamp(40px,6.4vw,96px)/1.02 Fraunces,serif;letter-spacing:-.03em;margin:.35em 0 .2em}
+h1 b{font-weight:900;color:var(--falu)}
+.lede{max-width:56ch;color:var(--ink-soft);font-size:clamp(15px,1.25vw,18px);line-height:1.65}
+.lede strong{color:var(--ink)}
+/* ---------- the day strip ---------- */
+.day{position:relative;margin-top:clamp(28px,5vh,54px);padding:0 clamp(20px,4vw,56px)}
+.day-rail{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:clamp(12px,1.6vw,24px);align-items:end}
+.moment{position:relative;background:var(--frame);padding:10px 10px 14px;box-shadow:var(--shadow);
+  border:1px solid rgba(33,29,22,.08);transform:rotate(var(--tilt,0deg)) translateY(24px);opacity:0}
+.moment.on{animation:develop 1s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes develop{to{transform:rotate(var(--tilt,0deg)) translateY(0);opacity:1}}
+.moment:nth-child(1){--tilt:-1.2deg}.moment:nth-child(2){--tilt:.8deg;margin-bottom:34px}
+.moment:nth-child(3){--tilt:-.6deg;margin-bottom:12px}.moment:nth-child(4){--tilt:1.1deg;margin-bottom:44px}
+.moment img{width:100%;aspect-ratio:4/4.6;object-fit:cover;display:block;filter:grayscale(.92) contrast(1.02);transition:filter 1.4s ease .35s}
+.moment.on img{filter:grayscale(0) contrast(1)}
+.moment .t{position:absolute;top:18px;left:18px;background:var(--ink);color:var(--paper);font:500 11px/1 "IBM Plex Mono",monospace;padding:6px 9px;letter-spacing:.08em}
+.moment figcaption{padding:12px 6px 2px;font:500 13px/1.45 "IBM Plex Sans",sans-serif}
+.moment figcaption span{display:block;font:400 11px/1.5 "IBM Plex Mono",monospace;color:var(--ink-soft);margin-top:3px}
+/* red thread */
+.thread{position:absolute;left:0;right:0;top:0;height:100%;pointer-events:none;overflow:visible;z-index:3}
+.thread path{fill:none;stroke:var(--falu-bright);stroke-width:2.4;stroke-dasharray:1;stroke-dashoffset:1}
+.thread.on path{animation:draw 3.6s cubic-bezier(.5,0,.2,1) forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+.thread circle{fill:var(--falu-bright);opacity:0}
+.thread.on circle{animation:pip .4s ease forwards}
+.thread.on circle:nth-of-type(1){animation-delay:.9s}.thread.on circle:nth-of-type(2){animation-delay:1.8s}
+.thread.on circle:nth-of-type(3){animation-delay:2.6s}.thread.on circle:nth-of-type(4){animation-delay:3.4s}
+@keyframes pip{to{opacity:1}}
+/* ---------- ledger ---------- */
+.ledger{margin:clamp(40px,7vh,72px) clamp(20px,4vw,56px) 0;border-top:2px solid var(--ink);position:relative}
+.ledger-head{display:flex;justify-content:space-between;align-items:center;padding:14px 2px 18px}
+.ledger-head h2{font:700 clamp(19px,2vw,26px)/1 Fraunces,serif;letter-spacing:-.01em}
+.ledger-head .note{font:400 11px/1.5 "IBM Plex Mono",monospace;color:var(--ink-soft);max-width:34ch;text-align:right}
+.ledger-grid{display:grid;grid-template-columns:1.5fr 1fr;gap:clamp(18px,3vw,44px);align-items:start;padding-bottom:clamp(48px,8vh,90px)}
+.records{display:flex;flex-direction:column;gap:10px;position:relative}
+.rec{display:grid;grid-template-columns:74px 1fr auto;gap:14px;align-items:center;background:var(--frame);
+  border:1px solid rgba(33,29,22,.1);border-left:4px solid var(--falu);padding:12px 16px;box-shadow:0 8px 22px -14px rgba(33,29,22,.3);
+  opacity:0;transform:translateX(-26px)}
+.rec.on{animation:slide .7s cubic-bezier(.2,.7,.2,1) forwards}
+@keyframes slide{to{opacity:1;transform:none}}
+.rec .when{font:500 11px/1.4 "IBM Plex Mono",monospace;color:var(--ink-soft)}
+.rec .what{font:600 14px/1.4 "IBM Plex Sans",sans-serif}
+.rec .what span{display:block;font:400 12px/1.5 "IBM Plex Sans",sans-serif;color:var(--ink-soft);margin-top:2px}
+.rec .mark{font:500 10px/1 "IBM Plex Mono",monospace;color:var(--moss);border:1px solid var(--moss);
+  border-radius:999px;padding:5px 9px;letter-spacing:.08em;white-space:nowrap}
+.rec.hot{outline:2px solid var(--falu-bright);outline-offset:2px}
+/* routes svg between columns */
+.routes{position:absolute;inset:0;pointer-events:none;overflow:visible}
+.routes path{fill:none;stroke:var(--gold);stroke-width:1.6;stroke-dasharray:5 4;opacity:0}
+.routes.on path{animation:routefade .8s ease forwards}
+.routes.on path:nth-of-type(1){animation-delay:4.1s}.routes.on path:nth-of-type(2){animation-delay:4.5s}
+.routes.on path:nth-of-type(3){animation-delay:4.9s}
+@keyframes routefade{to{opacity:.85}}
+/* opportunities */
+.opps{display:flex;flex-direction:column;gap:10px;position:sticky;top:24px}
+.opps h3{font:700 15px/1 Fraunces,serif;padding-bottom:6px;display:flex;align-items:center;gap:8px}
+.opps h3::after{content:"";flex:1;height:1px;background:rgba(33,29,22,.25)}
+.opp{background:var(--ink);color:var(--paper);padding:14px 16px;position:relative;opacity:.42;transition:opacity .6s ease;box-shadow:var(--shadow)}
+.opp .role{font:700 15px/1.3 Fraunces,serif}
+.opp .meta{font:400 11px/1.6 "IBM Plex Mono",monospace;color:#cfc6b4;margin-top:4px}
+.opp .why{display:inline-block;margin-top:9px;font:500 10px/1 "IBM Plex Mono",monospace;letter-spacing:.1em;
+  color:var(--paper);background:var(--falu);padding:5px 8px;opacity:0;transform:translateY(4px);transition:.5s ease}
+.opp.lit{opacity:1}
+.opp.lit .why{opacity:1;transform:none}
+.opp.soft .why{background:transparent;border:1px dashed #857c68;color:#cfc6b4}
+/* footer band */
+.cta-band{background:var(--ink);color:var(--paper);padding:clamp(40px,7vh,70px) clamp(20px,4vw,56px);display:flex;flex-wrap:wrap;gap:26px;align-items:center;justify-content:space-between}
+.cta-band .msg{max-width:52ch}
+.cta-band .msg h2{font:300 clamp(24px,3vw,40px)/1.15 Fraunces,serif}
+.cta-band .msg h2 b{font-weight:900;color:#e5a13c}
+.cta-band .msg p{margin-top:10px;color:#cfc6b4;font-size:14px;line-height:1.6}
+.cta{display:inline-block;background:var(--falu-bright);color:#fff;text-decoration:none;font:600 15px/1 "IBM Plex Sans",sans-serif;
+  padding:16px 26px;box-shadow:0 12px 30px -10px rgba(178,58,40,.7);transition:transform .25s ease}
+.cta:hover{transform:translateY(-2px)}
+.legal{padding:16px clamp(20px,4vw,56px);font:400 10px/1.6 "IBM Plex Mono",monospace;color:var(--ink-soft)}
+/* scrub hint */
+.hint{margin:10px clamp(20px,4vw,56px) 0;font:400 11px/1.5 "IBM Plex Mono",monospace;color:var(--ink-soft)}
+/* ---------- mobile: vertical day feed + sticky ledger drawer ---------- */
+@media (max-width:820px){
+  .day-rail{grid-template-columns:1fr;gap:20px}
+  .moment{margin-bottom:0!important}
+  .moment img{aspect-ratio:4/3}
+  .thread{display:none}
+  .ledger-grid{grid-template-columns:1fr}
+  .routes{display:none}
+  .opps{position:relative;top:0}
+  .rec{grid-template-columns:1fr auto}
+  .rec .when{grid-column:1/-1}
+}
+@media (max-width:560px){.masthead .issue{display:none}}
+@media (prefers-reduced-motion:reduce){
+  .moment,.rec{opacity:1;transform:none;animation:none}
+  .moment img{filter:none}
+  .thread path{stroke-dashoffset:0;animation:none}
+  .thread circle{opacity:1;animation:none}
+  .routes path{opacity:.85;animation:none}
+  .opp{opacity:1}.opp .why{opacity:1;transform:none}
+}
+</style>
+</head>
+<body>
+<div class="ribbon">R&amp;D prototipas · ne produkcija</div>
+
+<header class="masthead">
+  <div class="wordmark">labourmarket<em>.ai</em></div>
+  <div class="issue">Gyvo pasaulio kryptis A<br>„Darbo diena“ · dokumentinis leidinys</div>
+</header>
+
+<section class="hero-head">
+  <div class="kicker">Viena tikra darbo diena — keturi tikri žmonės</div>
+  <h1>Kiekvienas darbas<br>palieka <b>įrašą</b>.</h1>
+  <p class="lede">Ne anketa. Ne „įkelk CV ir lauk“. <strong>Diena iš tikro gyvenimo</strong>:
+  priežiūra, elektra, šiltnamis, virtuvė. Ką užfiksuoji — tampa tavo profesine istorija,
+  o istorija atveria kelius į tikras galimybes Švedijoje ir ne tik.</p>
+</section>
+
+<section class="day" id="day">
+  <svg class="thread" viewBox="0 0 1200 640" preserveAspectRatio="none" aria-hidden="true">
+    <path pathLength="1" d="M-20,300 C120,240 180,380 320,330 S560,180 640,260 S880,420 960,330 S1140,190 1220,240"/>
+    <circle cx="160" cy="308" r="5"/><circle cx="470" cy="252" r="5"/>
+    <circle cx="760" cy="345" r="5"/><circle cx="1060" cy="268" r="5"/>
+  </svg>
+  <div class="day-rail">
+    <figure class="moment">
+      <span class="t">07:12</span>
+      <img alt="Slaugytoja padeda vyresnio amžiaus porai" src="https://images.unsplash.com/photo-1762955911431-4c44c7c3f408?q=80&w=900&auto=format&fit=crop">
+      <figcaption>Rita · priežiūra, Kaunas → Göteborg<span>rytinė pamaina, 6 gyventojai</span></figcaption>
+    </figure>
+    <figure class="moment">
+      <span class="t">11:48</span>
+      <img alt="Elektrikas matuoja skydinę multimetru" src="https://images.unsplash.com/photo-1758101755915-462eddc23f57?q=80&w=900&auto=format&fit=crop">
+      <figcaption>Andrius · elektrikas, 9 m. patirtis<span>skydinės patikra, aktas pasirašytas</span></figcaption>
+    </figure>
+    <figure class="moment">
+      <span class="t">15:30</span>
+      <img alt="Rankos su ką tik nuskintais agurkais pintame krepšyje" src="https://images.unsplash.com/photo-1628110327712-48e051f233d9?q=80&w=900&auto=format&fit=crop">
+      <figcaption>Ona · šiltnamis, 30 kg derliaus<span>ieško, kur teisėtai parduoti</span></figcaption>
+    </figure>
+    <figure class="moment">
+      <span class="t">19:05</span>
+      <img alt="Virėjas baltu švarku gamina restorano virtuvėje" src="https://images.unsplash.com/photo-1600565193348-f74bd3c7ccdf?q=80&w=900&auto=format&fit=crop">
+      <figcaption>Tomas · virėjas<span>vakaro servisas, 84 svečiai</span></figcaption>
+    </figure>
+  </div>
+  <p class="hint">↓ Slinkite — diena pildo žurnalą, žurnalas atveria galimybes</p>
+</section>
+
+<section class="ledger" id="ledger">
+  <div class="ledger-head">
+    <h2>Profesinės istorijos žurnalas</h2>
+    <p class="note">Fiksuojame darbą, rezultatus ir įrodymus — ne „žmogaus vertę“.
+    Tik susijusi struktūruota informacija tikslina paiešką.</p>
+  </div>
+  <div class="ledger-grid">
+    <div class="records" id="records">
+      <div class="rec" data-opp="0"><span class="when">07:12<br>ĮRAŠAS Nr.147</span>
+        <div class="what">Rytinė priežiūros pamaina — dokumentuota<span>6 gyventojai · higienos ir mobilumo pagalba</span></div>
+        <span class="mark">užfiksuota</span></div>
+      <div class="rec" data-opp="1"><span class="when">11:48<br>ĮRAŠAS Nr.311</span>
+        <div class="what">Skydinės patikra + aktas<span>įrodymas: pasirašytas aktas · nuotrauka</span></div>
+        <span class="mark">su įrodymu</span></div>
+      <div class="rec" data-opp="2"><span class="when">15:30<br>ĮRAŠAS Nr.52</span>
+        <div class="what">30 kg agurkų derlius<span>pasiūla: šviežia produkcija, sava</span></div>
+        <span class="mark">pasiūla</span></div>
+      <div class="rec" data-opp="3"><span class="when">19:05<br>ĮRAŠAS Nr.508</span>
+        <div class="what">Vakaro servisas — 84 svečiai<span>karštas cechas · à la carte</span></div>
+        <span class="mark">užfiksuota</span></div>
+      <svg class="routes" id="routes" viewBox="0 0 700 300" preserveAspectRatio="none" aria-hidden="true">
+        <path d="M640,40 C700,60 720,60 760,70"/>
+        <path d="M640,110 C710,120 720,110 760,120"/>
+        <path d="M640,180 C700,200 730,175 760,178"/>
+      </svg>
+    </div>
+    <aside class="opps" id="opps">
+      <h3>Šiandienos atitikmenys</h3>
+      <div class="opp"><div class="role">Vårdbiträde — Göteborg</div>
+        <div class="meta">Arbetsförmedlingen · aktualus skelbimas · švedų k. — nurodyta</div>
+        <span class="why">atitinka Nr.147 tavo istorijoje</span></div>
+      <div class="opp"><div class="role">Elektriker — Västerås</div>
+        <div class="meta">Arbetsförmedlingen · aktualus skelbimas · sertifikatas — nurodytas</div>
+        <span class="why">atitinka Nr.311 + aktą</span></div>
+      <div class="opp soft"><div class="role">Ūkininkų turgus — teisėta prekyba</div>
+        <div class="meta">vietinė paklausa · pasiūlos kelias, ne darbo skelbimas</div>
+        <span class="why">pasiūla Nr.52 → pirkėjų paklausa</span></div>
+      <div class="opp"><div class="role">Kock — Malmö</div>
+        <div class="meta">Arbetsförmedlingen · aktualus skelbimas</div>
+        <span class="why">atitinka Nr.508 ir 3 ankstesnius</span></div>
+    </aside>
+  </div>
+</section>
+
+<section class="cta-band">
+  <div class="msg">
+    <h2>Dirbk. Fiksuok. <b>Tavo istorija dirba toliau</b> — net kai jau turi darbą.</h2>
+    <p>Neradai tobulo skelbimo šiandien? Įrašai lieka, pasiūla atsinaujina kelis kartus per dieną.
+    Gavai darbą? Žurnalas kaupia naujus rezultatus — kitą galimybę jis pasitiks pasiruošęs.</p>
+  </div>
+  <a class="cta" href="#">Pradėk savo įrašą — nemokamai</a>
+</section>
+<p class="legal">R&amp;D prototipas. Nuotraukos — Unsplash (licencija leidžia naudojimą); galutiniam variantui — savininko patvirtinta fotografija. Jokio „žmogaus vertės“ balo: fiksuojame darbą, rezultatus ir įrodymus.</p>
+
+<script>
+(function(){
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function onSeen(el, cb){ if(reduced){cb();return;}
+    new IntersectionObserver(function(es,o){es.forEach(function(e){if(e.isIntersecting){cb();o.disconnect();}})},{threshold:.25}).observe(el);}
+  var day=document.getElementById('day');
+  onSeen(day,function(){
+    document.querySelectorAll('.moment').forEach(function(m,i){setTimeout(function(){m.classList.add('on')},i*650)});
+    setTimeout(function(){document.querySelector('.thread').classList.add('on')},400);
+  });
+  var ledger=document.getElementById('ledger');
+  onSeen(ledger,function(){
+    var recs=document.querySelectorAll('.rec'), opps=document.querySelectorAll('.opp');
+    recs.forEach(function(r,i){setTimeout(function(){r.classList.add('on');
+      setTimeout(function(){opps[i]&&opps[i].classList.add('lit')},520);},i*700)});
+    document.getElementById('routes').classList.add('on');
+  });
+  // causality on hover/tap: record highlights its opportunity
+  document.querySelectorAll('.rec').forEach(function(r){
+    function hi(on){var o=document.querySelectorAll('.opp')[+r.dataset.opp];
+      r.classList.toggle('hot',on); if(o){o.style.outline=on?'2px solid #e5a13c':'';o.style.outlineOffset='2px';}}
+    r.addEventListener('mouseenter',function(){hi(true)});
+    r.addEventListener('mouseleave',function(){hi(false)});
+    r.addEventListener('click',function(){hi(!r.classList.contains('hot'))});
+  });
+})();
+</script>
+</body>
+</html>

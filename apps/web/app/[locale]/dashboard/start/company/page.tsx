@@ -1,0 +1,483 @@
+import { redirect } from "next/navigation";
+import { PageBack } from "@/components/app/premium/page-back";
+import { setRequestLocale, getTranslations } from "next-intl/server";
+
+import { Link } from "@/lib/i18n/navigation";
+import { createClient } from "@/lib/supabase/server";
+import { COMPANY_TYPES, type CompanyType } from "@/lib/company/company-profile-shared";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
+import {
+  COMPANY_COUNTRY_CODES,
+  getOwnedCompanyById,
+  listOwnedCompanies,
+  type CompanyRow,
+  type CompanyVerificationStatus,
+} from "@/lib/company/company-setup";
+import {
+  resolveEmployerCompanyContext,
+  resolveEmployerCompanyCore,
+} from "@/lib/company/employer-company-context";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { AGENCY_CONNECTION_PENDING_NOTICE } from "@/lib/invitations/model";
+import {
+  CompanySetupForm,
+  type CompanySetupFormLabels,
+} from "@/components/app/company-setup-form";
+import { Card } from "@/components/ui/Card";
+import { PageTitle } from "@/components/app/premium/page-title";
+import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+
+// The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
+export const generateMetadata = dashboardPageMetadata("/dashboard/start/company");
+
+
+/**
+ * Company profile-REQUEST setup (real persistence + honest verification).
+ *
+ * Replaces the old one-field (`name` only) form. A user starts an
+ * organisation profile request from their personal account with real
+ * details (name, country, registration code, address, website, contact,
+ * their role in the company). The row is created with a verification ladder
+ * — draft → pending_verification → unverified → verified — and full company
+ * use is gated on a VERIFIED status that only a human admin can grant. This
+ * page never fakes a verified company.
+ *
+ * When migration 20260604120000 is not yet applied, listOwnedCompanies()
+ * returns kind: "needs-migration" and the page shows an explicit blocker
+ * (mirrors the buyer / customer pattern from migration 0026). No crash, no
+ * fake success.
+ *
+ * M-P0-2: the save target is EXPLICIT (active workspace's company, a single
+ * unambiguous owned company, or ?new=1 to create). Several owned companies
+ * without a company workspace render a fail-closed chooser — never a
+ * first/oldest fallback.
+ */
+
+const KNOWN_REQUESTER_ROLES = ["owner", "director", "manager", "hr", "other"];
+
+const STATUS_TONE: Record<CompanyVerificationStatus, string> = {
+  draft: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+  active_unverified: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  needs_checks: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+  pending_verification: "border-brand-blue/40 bg-brand-blue/5 text-brand-blue",
+  unverified: "border-state-warning/40 bg-state-warning/5 text-state-warning",
+  verified: "border-state-success/40 bg-state-success/5 text-state-success",
+};
+
+export default async function CompanyStartPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ locale: string }>;
+  searchParams?: Promise<{
+    new?: string;
+    type?: string;
+    capability?: string;
+    org?: string;
+    notice?: string;
+  }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+  // Universal first-run router presets (lib/onboarding/first-run-intent.ts):
+  // an agency intent pre-selects the staffing_agency company TYPE, an
+  // education intent declares the training_provider CAPABILITY once the
+  // company exists. Both are validated against the closed vocabularies; an
+  // unknown value is simply ignored.
+  const sp = (await searchParams) ?? {};
+  const presetCompanyType = (COMPANY_TYPES as readonly string[]).includes(sp.type ?? "")
+    ? (sp.type as CompanyType)
+    : undefined;
+  const presetCapability = sp.capability === "training_provider" ? "training_provider" : undefined;
+  // `?notice=agency_connection_pending` (review round 2, 2026-09-24): the
+  // person accepted a staffing agency's connection invitation and holds no
+  // company role yet, so the partners door — where the connection is
+  // confirmed — would refuse them. The invite action lands them here with
+  // the pending connection NAMED. Closed set; an unknown value renders
+  // nothing (an internal token never reaches the screen, doctrine §23).
+  const safeNotice = sp.notice === AGENCY_CONNECTION_PENDING_NOTICE ? sp.notice : null;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect(`/${locale}/auth/login`);
+
+  const t = await getTranslations("roleDashboards.company.setup");
+
+  // M-P0-2 target resolution — the save target is EXPLICIT, never inferred
+  // from "the" company of the profile (a profile may own several):
+  //   1. ?new=1                → CREATE mode (insert-only; existing = null).
+  //   2. active company workspace → EDIT that workspace's company.
+  //   3. else: 0 owned → CREATE; 1 owned → EDIT that single unambiguous row;
+  //      2+ owned without a company workspace → an honest chooser (fail
+  //      closed — no first/oldest fallback).
+  const createRequested = (await searchParams)?.new === "1";
+  const owned = await listOwnedCompanies();
+  const migrationNeeded = owned.kind === "needs-migration";
+  const ownedRows: readonly CompanyRow[] = owned.kind === "ok" ? owned.rows : [];
+
+  // A SHELL is a company row that exists but was never given an identity:
+  // `complete_onboarding` (company intent) and `add_role` insert one with no
+  // legal name before this form is ever seen. It is the person's unfinished
+  // FIRST organisation, so it is the row this form completes — never a reason
+  // to insert a second one. Real pilot 2026-09-02: shell + `?new=1` produced
+  // two organisations, and the workspace resolver (fail-closed on ambiguity)
+  // then showed "no company profile" on the dashboard.
+  const isShellRow = (r: CompanyRow) => r.legalName === null;
+  const shell = ownedRows.find(isShellRow) ?? null;
+
+  let company: CompanyRow | null = null;
+  let targetCompanyId: string = "new";
+  let ambiguous = false;
+
+  // ?org=<id> — "Nurodyti pavadinimą" in the workspace chip names the EXACT
+  // organization (owner program 2026-09-23). This page used to ignore it and
+  // resolve the target from the active workspace, falling back to the single
+  // owned company: for an unnamed agency-backed organization that fallback
+  // opened — and saved — the person's OTHER, verified company (proven on
+  // production). When `org` is given it is the ONLY target:
+  //   ok                  → edit THAT organization's company;
+  //   no-company-binding  → say so, with the one canonical door;
+  //   anything else       → an honest "not available here".
+  // Resolved through the SAME employer chain with that workspace as the
+  // active one, so the membership gate (`workspace.workspaces`) still
+  // decides — a foreign or made-up id resolves to nothing. No fallback.
+  const requestedOrg = typeof sp.org === "string" ? sp.org.trim() : "";
+  let requestedOrgState: "edit" | "no-company-profile" | "not-available" | null = null;
+
+  if (requestedOrg !== "") {
+    requestedOrgState = "not-available";
+    if (!migrationNeeded) {
+      // Only the membership LIST is used (the active id is replaced below),
+      // so the request's one workspace resolution serves it (lane A: the
+      // resolver takes no caller-chosen identity).
+      const memberships = await getWorkspaceContext();
+      const requested = await resolveEmployerCompanyCore(
+        { supabase, userId: user.id },
+        { ...memberships, activeWorkspaceId: requestedOrg },
+      );
+      if (requested.kind === "ok") {
+        // Created by the caller, or governed as an active owner/admin
+        // (`getOwnedCompanyById` re-checks that membership) — never merely
+        // any member: a manager runs operations, not company identity.
+        const row =
+          ownedRows.find((r) => r.id === requested.companyId) ??
+          (await getOwnedCompanyById(requested.companyId).then((res) =>
+            res.kind === "ok" ? res.row : null,
+          ));
+        if (row) {
+          company = row;
+          targetCompanyId = row.id;
+          requestedOrgState = "edit";
+        }
+      } else if (requested.reason === "no-company-binding") {
+        requestedOrgState = "no-company-profile";
+      }
+    }
+  } else if (createRequested && !migrationNeeded && shell) {
+    company = shell;
+    targetCompanyId = shell.id;
+  } else if (!createRequested && !migrationNeeded) {
+    const workspace = await resolveEmployerCompanyContext();
+    // The active workspace's company: one the caller CREATED (in the owned
+    // list) or one they GOVERN as an active owner/admin member (read by id,
+    // membership re-checked inside getOwnedCompanyById). A governed company
+    // is edited, never re-created — a member who reached this form must not
+    // be offered a blank "create" that would duplicate their organisation.
+    let workspaceCompany: CompanyRow | null =
+      workspace.kind === "ok"
+        ? (ownedRows.find((r) => r.id === workspace.companyId) ?? null)
+        : null;
+    if (!workspaceCompany && workspace.kind === "ok") {
+      const governed = await getOwnedCompanyById(workspace.companyId);
+      workspaceCompany = governed.kind === "ok" ? governed.row : null;
+    }
+    if (workspaceCompany) {
+      company = workspaceCompany;
+      targetCompanyId = workspaceCompany.id;
+    } else if (ownedRows.length === 1) {
+      company = ownedRows[0];
+      targetCompanyId = ownedRows[0].id;
+    } else if (ownedRows.length > 1) {
+      ambiguous = true;
+    }
+  }
+
+  // First setup of a shell: the form CREATES the identity (title, presets)
+  // even though it technically edits an existing row.
+  const firstSetup = company !== null && isShellRow(company);
+
+
+  const formLabels: CompanySetupFormLabels = {
+    // Dead-UI rule C (owner smoke 2026-07-05): one route serves create AND
+    // edit — the heading must say WHICH, so an existing company is never
+    // tricked into thinking it is creating a second one.
+    title: company && !firstSetup ? t("formTitleEdit") : t("formTitleCreate"),
+    subtitle: t("formSubtitle"),
+    legalName: t("legalName"),
+    legalNameHelp: t("legalNameHelp"),
+    legalNamePlaceholder: t("legalNamePlaceholder"),
+    companyType: t("companyType"),
+    companyTypeHelp: t("companyTypeHelp"),
+    companyTypeOptions: {
+      construction: t("companyTypeOptions.construction"),
+      staffing_agency: t("companyTypeOptions.staffing_agency"),
+      subcontractor: t("companyTypeOptions.subcontractor"),
+      manufacturing: t("companyTypeOptions.manufacturing"),
+      services: t("companyTypeOptions.services"),
+      client_customer: t("companyTypeOptions.client_customer"),
+      other: t("companyTypeOptions.other"),
+    },
+    country: t("country"),
+    countryPlaceholder: t("countryPlaceholder"),
+    // Only codes the catalogue actually names: a missing key used to print
+    // "roleDashboards.company.setup.countryOptions.FI" in the select (agency
+    // onboarding walk 2026-10-08). Without an override the option keeps the
+    // canonical Intl country name from countryOptionsForLocale.
+    countryOptions: Object.fromEntries(
+      COMPANY_COUNTRY_CODES.filter((code) => t.has(`countryOptions.${code}`)).map((code) => [
+        code,
+        t(`countryOptions.${code}`),
+      ]),
+    ),
+    locale,
+    countryList: countryOptionsForLocale(locale),
+    statusInvalidCountry: t("statusInvalidCountry"),
+    registrationCode: t("registrationCode"),
+    registrationCodeHelp: t("registrationCodeHelp"),
+    optionalDetails: t("optionalDetails"),
+    address: t("address"),
+    addressPlaceholder: t("addressPlaceholder"),
+    website: t("website"),
+    websitePlaceholder: t("websitePlaceholder"),
+    contactEmail: t("contactEmail"),
+    contactPhone: t("contactPhone"),
+    requesterRole: t("requesterRole"),
+    requesterRoleOptions: {
+      owner: t("requesterRoleOptions.owner"),
+      director: t("requesterRoleOptions.director"),
+      manager: t("requesterRoleOptions.manager"),
+      hr: t("requesterRoleOptions.hr"),
+      other: t("requesterRoleOptions.other"),
+    },
+    verificationNotice: t("verificationNotice"),
+    legalLockedNotice: t("legalLockedNotice"),
+    saveDraft: t("saveDraft"),
+    submitRequest: t("submitRequest"),
+    statusDraftSaved: t("statusDraftSaved"),
+    statusSubmitted: t("statusSubmitted"),
+    goToWorkspace: t("goToWorkspace"),
+    capabilityNotDeclared: t("capabilityNotDeclared"),
+    statusNeedsMigration: t("statusNeedsMigration"),
+    statusInvalid: t("statusInvalid"),
+    statusDuplicateCompany: t("statusDuplicateCompany"),
+    statusError: t("statusError"),
+  };
+
+  return (
+    <div className="flex flex-col gap-6" data-testid="company-start-page">
+      <header className="flex flex-col gap-1">
+        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("eyebrow")}
+        </p>
+        <PageTitle>{t("pageTitle")}</PageTitle>
+      </header>
+
+      <PageBack href={"/dashboard/start" as "/dashboard"}>{t("backToStart")}</PageBack>
+
+      {safeNotice === AGENCY_CONNECTION_PENDING_NOTICE ? (
+        <p
+          role="status"
+          className="rounded-card border border-brand-blue/40 bg-brand-blue/10 p-4 text-sm text-text-secondary"
+          data-testid="company-start-agency-connection-pending"
+        >
+          {t("agencyConnectionPending")}
+        </p>
+      ) : null}
+
+      {migrationNeeded ? (
+        <section
+          className="card-border flex flex-col gap-2 p-5"
+          data-testid="company-start-migration-blocker"
+        >
+          <header className="flex items-center gap-2">
+            <span className="rounded bg-state-warning/20 px-2 py-0.5 text-xs text-state-warning">
+              {t("blockedBadge")}
+            </span>
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              {t("migrationBlockerHeading")}
+            </h2>
+          </header>
+          <p className="text-sm text-text-secondary">{t("migrationBlockerBody")}</p>
+        </section>
+      ) : null}
+
+      {company && !firstSetup ? (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="company-start-existing"
+        >
+          <header className="flex flex-wrap items-center gap-2">
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              {t("existingHeading")}
+            </h2>
+            <span
+              className={`rounded-sm border px-2 py-0.5 font-mono text-meta uppercase tracking-label ${STATUS_TONE[company.verificationStatus]}`}
+              data-testid="company-start-verification-status"
+            >
+              {t(`verificationStatus.${company.verificationStatus}`)}
+            </span>
+          </header>
+          <p
+            className="text-xs leading-relaxed text-text-secondary"
+            data-testid="company-start-verification-explainer"
+          >
+            {t(`verificationExplainer.${company.verificationStatus}`)}
+          </p>
+          <dl className="grid grid-cols-1 gap-2 text-sm sm:grid-cols-2">
+            <div>
+              <dt className="text-xs text-text-muted">{t("legalName")}</dt>
+              <dd className="text-text-primary">{company.legalName ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("companyType")}</dt>
+              <dd
+                className="text-text-primary"
+                data-testid="company-start-company-type"
+              >
+                {t(`companyTypeOptions.${company.companyType}`)}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("country")}</dt>
+              <dd className="text-text-primary">{company.country ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("registrationCode")}</dt>
+              <dd className="text-text-primary">
+                {company.registrationCode ?? "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("address")}</dt>
+              <dd className="text-text-primary">{company.address ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("website")}</dt>
+              <dd className="text-text-primary">{company.website ?? "—"}</dd>
+            </div>
+            <div>
+              <dt className="text-xs text-text-muted">{t("requesterRole")}</dt>
+              <dd className="text-text-primary">
+                {company.requesterRole
+                  ? KNOWN_REQUESTER_ROLES.includes(company.requesterRole)
+                    ? t(`requesterRoleOptions.${company.requesterRole}`)
+                    : company.requesterRole
+                  : "—"}
+              </dd>
+            </div>
+          </dl>
+          <Link
+            href={"/dashboard/company" as "/dashboard"}
+            className="self-start text-sm text-brand-blue hover:underline"
+            data-testid="company-start-goto-dashboard"
+          >
+            {t("goToCompanySpace")}
+          </Link>
+        </section>
+      ) : null}
+
+      {requestedOrgState === "no-company-profile" ? (
+        // The organization the chip named has no company profile (a legacy
+        // agency-backed organization): there is nothing here that can carry
+        // its name. Said as that, and why — never a form that would quietly
+        // edit another organization, and no "create a company profile" door
+        // either: that makes a SEPARATE organization, a duplicate of this
+        // one, while the owner decision for it (a RED rename RPC, or
+        // archive/merge into the canonical organization) is open.
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="company-start-org-no-company-profile"
+        >
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("orgNoCompanyProfileHeading")}
+          </h2>
+          <p className="text-sm text-text-secondary">{t("orgNoCompanyProfileBody")}</p>
+        </section>
+      ) : null}
+
+      {requestedOrgState === "not-available" ? (
+        <section
+          className="card-border flex flex-col gap-3 p-5"
+          data-testid="company-start-org-not-available"
+        >
+          <h2 className="font-display text-lg font-semibold text-text-primary">
+            {t("orgNotAvailableHeading")}
+          </h2>
+          <p className="text-sm text-text-secondary">{t("orgNotAvailableBody")}</p>
+        </section>
+      ) : null}
+
+      {!migrationNeeded && ambiguous ? (
+        // M-P0-2 fail-closed chooser: several owned companies and no active
+        // company workspace — the person picks explicitly; nothing is ever
+        // edited by first/oldest fallback.
+        <Card compact>
+          <div
+            className="flex flex-col gap-3"
+            data-testid="company-start-ambiguous-chooser"
+          >
+            <h2 className="font-display text-lg font-semibold text-text-primary">
+              {t("pickOrgHeading")}
+            </h2>
+            <p className="text-sm text-text-secondary">
+              {t("pickOrgBody")}
+            </p>
+            <ul className="flex flex-col gap-1 text-sm text-text-primary">
+              {ownedRows.map((row) => (
+                <li key={row.id} data-testid="company-start-owned-row">
+                  {row.legalName ?? row.displayName ?? row.id.slice(0, 8)}
+                </li>
+              ))}
+            </ul>
+            <Link
+              href={"/dashboard/start/company?new=1" as "/dashboard"}
+              className="self-start text-sm text-brand-blue hover:underline"
+              data-testid="company-start-create-new-link"
+            >
+              {t("createNewOrg")}
+            </Link>
+          </div>
+        </Card>
+      ) : null}
+
+      {!migrationNeeded &&
+      !ambiguous &&
+      (requestedOrgState === null || requestedOrgState === "edit") ? (
+        <section
+          className="card-border flex flex-col gap-4 p-5"
+          data-testid="company-start-form-section"
+        >
+          {company === null || firstSetup ? null : (
+            <Link
+              href={"/dashboard/start/company?new=1" as "/dashboard"}
+              className="self-start text-sm text-brand-blue hover:underline"
+              data-testid="company-start-create-another-link"
+            >
+              {t("createNewOrg")}
+            </Link>
+          )}
+          <CompanySetupForm
+            existing={company}
+            labels={formLabels}
+            targetCompanyId={targetCompanyId}
+            presetCompanyType={presetCompanyType}
+            presetCapability={presetCapability}
+            firstSetup={firstSetup}
+          />
+        </section>
+      ) : null}
+    </div>
+  );
+}

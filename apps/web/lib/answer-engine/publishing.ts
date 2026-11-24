@@ -1,0 +1,281 @@
+/**
+ * Answer Engine — publishing layer (Wave 1).
+ *
+ * The canonical registry (Wave 0) owns question IDENTITY + relations +
+ * classification. THIS layer owns the localized ANSWER content and derives what
+ * is publishable/indexable. A question is published in a locale ONLY when a
+ * HUMAN_APPROVED, complete, non-placeholder answer exists for it. No English
+ * fallback, no machine-draft indexing, no empty page from a bare question ID.
+ *
+ * Content data lives in content/answer-engine/pilot-answers.ts (the versioned
+ * content file — empty until real reviewed answers land). This module is pure:
+ * registry + content in, view models / indexing decisions out.
+ */
+import { ANSWER_QUESTIONS } from "@/lib/answer-engine/registry";
+import { ANSWER_CATEGORY_KEYS, ANSWER_ENGINE_LOCALES } from "@/lib/answer-engine/contract";
+import type { CanonicalQuestion, AnswerCategoryKey } from "@/lib/answer-engine/contract";
+import type { ActiveLocale } from "@/lib/i18n/config";
+import { PILOT_ANSWERS } from "@/content/answer-engine/pilot-answers";
+import { WAVE2B_ANSWERS } from "@/content/answer-engine/wave2b-answers";
+import { WAVE2C_ANSWERS } from "@/content/answer-engine/wave2c-answers";
+import { WAVE2D_ANSWERS } from "@/content/answer-engine/wave2d-answers";
+
+/** Route segments that a question slug may NEVER take (reserved). */
+export const RESERVED_QUESTION_SLUGS: ReadonlySet<string> = new Set([
+  "category",
+  "sitemap",
+  "sitemap.xml",
+]);
+
+/**
+ * An OFFICIAL / primary evidence source that backs factual claims in an answer.
+ * Kept strictly separate from question-discovery signals (which live in the
+ * editorial research module and are never rendered). Evidence sources ARE shown
+ * publicly on the answer page. Only official/primary hosts belong here — a
+ * public forum thread is a discovery signal, never an evidence source.
+ */
+/** Kind of official/primary source. A public forum is NEVER one of these. */
+export type EvidenceSourceType =
+  | "EU_OFFICIAL"
+  | "NATIONAL_OFFICIAL"
+  | "INTERNATIONAL_ORGANIZATION"
+  | "PRIMARY_RESEARCH"
+  | "PRODUCT_DOCUMENTATION";
+
+/** How quickly the cited source's content changes (drives re-check cadence). */
+export type EvidenceFreshnessClass = "evergreen" | "slow-changing" | "volatile";
+
+export interface AnswerEvidenceSource {
+  /** Human-readable source title (e.g. "Professional qualifications — Your Europe"). */
+  readonly title: string;
+  /** Canonical official URL. */
+  readonly url: string;
+  /** Issuing body (e.g. "European Union — Your Europe", "EURES", "CEDEFOP"). */
+  readonly publisher: string;
+  /** Scope of the claim the source backs: "EU", "EEA", or an ISO country code. */
+  readonly scope: string;
+  /** ISO date the source itself was published/last updated, when known. */
+  readonly publishedOrUpdated?: string;
+  /** ISO date an editor last verified this URL resolves and supports the claim. */
+  readonly checkedAt: string;
+  /** Classification of the source (Wave 2D+ source contract). */
+  readonly sourceType?: EvidenceSourceType;
+  /** Freshness class driving the re-check cadence (Wave 2D+ source contract). */
+  readonly freshnessClass?: EvidenceFreshnessClass;
+  /** Short list of the specific claims this source backs (Wave 2D+ source contract). */
+  readonly supportsClaims?: readonly string[];
+}
+
+/** A localized, human-reviewed answer for one (question, locale). */
+export interface LocalizedAnswer {
+  readonly canonicalQuestionId: string;
+  readonly locale: ActiveLocale;
+  /** Localized slug for the URL (kebab-case, per locale). */
+  readonly localizedSlug: string;
+  /** Localized H1 question. */
+  readonly h1: string;
+  /** Short direct answer shown first (AI/search friendly). */
+  readonly shortAnswer: string;
+  /** Full answer paragraphs. */
+  readonly fullAnswer: readonly string[];
+  /** Real practical steps (optional). */
+  readonly practicalActions?: readonly string[];
+  /** Honest limitations (optional). */
+  readonly limitations?: string;
+  /** Country scope note when relevant (optional). */
+  readonly countryScope?: string;
+  /** Unique page title + description (never shared across pages). */
+  readonly title: string;
+  readonly description: string;
+  /** Translation review status; only HUMAN_APPROVED may be indexed. */
+  readonly reviewStatus: "MACHINE_DRAFT" | "LOCAL_REVIEW_REQUIRED" | "HUMAN_APPROVED";
+  /** ISO date of the last human review. */
+  readonly reviewDate: string;
+  /** Editorial responsibility (role label, never a fake person). */
+  readonly editorialResponsibility: string;
+  /**
+   * Official/primary sources backing factual claims in this answer, shown
+   * publicly under the Sources heading. Required for factual/regulatory claims
+   * (MEDIUM/HIGH-risk questions); optional for pure product/editorial answers.
+   */
+  readonly evidenceSources?: readonly AnswerEvidenceSource[];
+}
+
+const REGISTRY_BY_ID = new Map<string, CanonicalQuestion>(
+  ANSWER_QUESTIONS.map((q) => [q.canonicalQuestionId, q]),
+);
+const ANSWERS: readonly LocalizedAnswer[] = [
+  ...PILOT_ANSWERS,
+  ...WAVE2B_ANSWERS,
+  ...WAVE2C_ANSWERS,
+  ...WAVE2D_ANSWERS,
+];
+
+function isComplete(a: LocalizedAnswer): boolean {
+  return (
+    a.h1.trim().length > 0 &&
+    a.shortAnswer.trim().length > 0 &&
+    a.fullAnswer.length > 0 &&
+    a.fullAnswer.every((p) => p.trim().length > 0) &&
+    a.title.trim().length > 0 &&
+    a.description.trim().length > 0
+  );
+}
+
+/**
+ * The single indexability decision. A (question, locale) is indexable ONLY if:
+ *  - a complete answer exists AND is HUMAN_APPROVED;
+ *  - the slug is not reserved;
+ *  - HIGH-risk questions carry sources (registry) — pilot excludes HIGH-risk,
+ *    but the rule is enforced here for later waves.
+ */
+export function isIndexable(id: string, locale: ActiveLocale): boolean {
+  const a = ANSWERS.find((x) => x.canonicalQuestionId === id && x.locale === locale);
+  const q = REGISTRY_BY_ID.get(id);
+  if (!a || !q) return false;
+  if (a.reviewStatus !== "HUMAN_APPROVED") return false;
+  if (!isComplete(a)) return false;
+  if (RESERVED_QUESTION_SLUGS.has(a.localizedSlug)) return false;
+  if (q.riskLevel === "HIGH" && (q.sourceReferences?.length ?? 0) === 0) return false;
+  return true;
+}
+
+/** Active locales in which a question is indexable (published). */
+export function publishedLocales(id: string): ActiveLocale[] {
+  return ANSWER_ENGINE_LOCALES.filter((l) => isIndexable(id, l));
+}
+
+export function getAnswer(id: string, locale: ActiveLocale): LocalizedAnswer | null {
+  return ANSWERS.find((a) => a.canonicalQuestionId === id && a.locale === locale) ?? null;
+}
+
+export function getRegistryQuestion(id: string): CanonicalQuestion | undefined {
+  return REGISTRY_BY_ID.get(id);
+}
+
+/**
+ * Canonical comparison form of a slug route param. Next 15 hands a page the
+ * PERCENT-ENCODED segment during static prerender ("priv%C3%A9" for "privé"),
+ * so an exact compare against the raw content slug misses and the prerendered
+ * page is cached as a 404. Decode (tolerating malformed escapes) and NFC-normalize
+ * both sides so the encoded, raw and NFD forms of one slug all resolve.
+ */
+export function normalizeSlug(slug: string): string {
+  let s = slug;
+  try {
+    s = decodeURIComponent(slug);
+  } catch {
+    // Malformed percent-escape: compare the raw segment as given.
+  }
+  return s.normalize("NFC");
+}
+
+/** Resolve a localized slug to its indexable answer in a locale (or null). */
+export function resolveSlug(slug: string, locale: ActiveLocale): LocalizedAnswer | null {
+  const wanted = normalizeSlug(slug);
+  if (RESERVED_QUESTION_SLUGS.has(wanted)) return null;
+  const a = ANSWERS.find(
+    (x) => x.locale === locale && x.localizedSlug.normalize("NFC") === wanted,
+  );
+  if (!a || !isIndexable(a.canonicalQuestionId, locale)) return null;
+  return a;
+}
+
+/** All (id, locale) pairs that are indexable — the static-params + sitemap set. */
+export function publishedParams(): { id: string; locale: ActiveLocale; slug: string }[] {
+  const out: { id: string; locale: ActiveLocale; slug: string }[] = [];
+  for (const a of ANSWERS) {
+    if (isIndexable(a.canonicalQuestionId, a.locale)) {
+      out.push({ id: a.canonicalQuestionId, locale: a.locale, slug: a.localizedSlug });
+    }
+  }
+  return out;
+}
+
+/**
+ * STATIC PARAMS THAT ARE NEVER EMPTY (production 404 of 2026-11-15).
+ *
+ * The question pages are nested under `[locale]`, whose layout sets
+ * `dynamicParams = false`. Next 15.5 builds their paths per locale; when a
+ * page's generateStaticParams returns `[]` for ONE locale, Next passes that
+ * locale through without the child key (`{ locale: "sv" }`), decides that not
+ * every param set is complete, and pre-renders NO path for the route in ANY
+ * locale. With dynamicParams off, every category and answer page then 404s.
+ * That is what happened when Swedish became a routed locale with its answers
+ * still awaiting review (#3261): 348 pre-rendered pages before, 0 after.
+ *
+ * So a locale with nothing published gets ONE placeholder param whose page
+ * renders notFound() at build time — the same 404 that locale already gets —
+ * and every published page in every other locale is pre-rendered again.
+ */
+export function staticCategoryParams(locale: ActiveLocale): { category: AnswerCategoryKey }[] {
+  const published = publishedCategories(locale).map((category) => ({ category }));
+  return published.length > 0 ? published : [{ category: ANSWER_CATEGORY_KEYS[0] }];
+}
+
+/** The answer pages' static params for a locale; never empty (see above). The
+ *  placeholder is a reserved slug, which `resolveSlug` always refuses → 404. */
+export function staticSlugParams(locale: ActiveLocale): { slug: string }[] {
+  const published = publishedParams()
+    .filter((p) => p.locale === locale)
+    .map((p) => ({ slug: p.slug }));
+  return published.length > 0 ? published : [{ slug: [...RESERVED_QUESTION_SLUGS][0] }];
+}
+
+/** Indexable questions for a category in a locale (for category pages). */
+export function publishedInCategory(
+  category: AnswerCategoryKey,
+  locale: ActiveLocale,
+): { question: CanonicalQuestion; answer: LocalizedAnswer }[] {
+  const out: { question: CanonicalQuestion; answer: LocalizedAnswer }[] = [];
+  for (const q of ANSWER_QUESTIONS) {
+    if (q.category !== category) continue;
+    if (!isIndexable(q.canonicalQuestionId, locale)) continue;
+    const a = getAnswer(q.canonicalQuestionId, locale);
+    if (a) out.push({ question: q, answer: a });
+  }
+  return out;
+}
+
+/** Categories that have at least one indexable question in a locale. */
+export function publishedCategories(locale: ActiveLocale): AnswerCategoryKey[] {
+  const set = new Set<AnswerCategoryKey>();
+  for (const q of ANSWER_QUESTIONS) {
+    if (isIndexable(q.canonicalQuestionId, locale)) set.add(q.category);
+  }
+  return [...set];
+}
+
+/** Locales in which a category page has content (at least one indexable
+ *  question) — the only locales that may be named as its hreflang alternates. */
+export function localesPublishingCategory(category: AnswerCategoryKey): ActiveLocale[] {
+  return ANSWER_ENGINE_LOCALES.filter((l) => publishedCategories(l).includes(category));
+}
+
+/** Locales in which the questions hub has anything to list. A locale whose
+ *  answers are all still awaiting review (sv on 2026-11-12) is not one. */
+export function localesPublishingAnyAnswer(): ActiveLocale[] {
+  return ANSWER_ENGINE_LOCALES.filter((l) => publishedCategories(l).length > 0);
+}
+
+/**
+ * Related questions to show on a page: registry relatedQuestionIds, filtered to
+ * ones INDEXABLE in the same locale (never self, never 404), capped 3..8.
+ */
+export function relatedPublished(id: string, locale: ActiveLocale, max = 8): {
+  question: CanonicalQuestion;
+  answer: LocalizedAnswer;
+}[] {
+  const q = REGISTRY_BY_ID.get(id);
+  if (!q) return [];
+  const out: { question: CanonicalQuestion; answer: LocalizedAnswer }[] = [];
+  for (const rid of q.relatedQuestionIds) {
+    if (rid === id) continue;
+    if (!isIndexable(rid, locale)) continue;
+    const rq = REGISTRY_BY_ID.get(rid);
+    const ra = getAnswer(rid, locale);
+    if (rq && ra) out.push({ question: rq, answer: ra });
+    if (out.length >= max) break;
+  }
+  return out;
+}

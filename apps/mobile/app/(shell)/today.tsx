@@ -1,0 +1,233 @@
+import React from "react";
+import { ScrollView, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { useRouter } from "expo-router";
+
+import type {
+  ContextListData,
+  JournalListData,
+  ProfileGetData,
+  WorkIntelligenceData,
+} from "../../src/capability-shapes";
+import { useLocale } from "../../src/i18n/locale-context";
+import { CapabilityGate } from "../../src/screens/capability-gate";
+import { JournalEntryList } from "../../src/screens/journal-entries";
+import { TodayFigures } from "../../src/screens/work-figures";
+import { Body, Button, Divider, Title } from "../../src/ui/primitives";
+import { theme } from "../../src/ui/theme";
+import { useCapability } from "../../src/use-capability";
+import { useReloadOnReturn } from "../../src/use-reload-on-return";
+import { useProfile } from "../../src/profile-provider";
+
+const RECENT_LIMIT = { limit: 5 } as const;
+/** The week scope: `periods` still carries every window (today included);
+ *  `skills` then describes the last 7 days, which is what the dominant
+ *  skill on ŠIANDIEN is about. */
+const WEEK_SCOPE = { period: "week" } as const;
+
+/**
+ * TODAY (ŠIANDIEN) — who is signed in, what their work adds up to today and
+ * this week, and their most recent recorded work.
+ *
+ * Three reads through the canonical capabilities (`profile.get`,
+ * `journal.work_intelligence.get`, `journal.list`), each gated independently
+ * so a failing figures read cannot take the person's own name or their
+ * entries down with it. The figures are the SAME the website shows — the
+ * one work-time rule on the server — and a failed figures read renders as
+ * the failure it is, never as 0 h (#1314, SEP-7).
+ *
+ * The stations the web reaches from ŠIANDIEN are reachable from here too:
+ * the work journal and the profile with its skills.
+ */
+export default function Screen() {
+  const { t } = useLocale();
+  const router = useRouter();
+  // The SHARED read (ProfileProvider) — one `profile.get` per session, not
+  // one per screen. The rendering below is unchanged: this screen still owns
+  // its loading and failure states.
+  const profile = useProfile();
+  const figures = useCapability<WorkIntelligenceData>(
+    "journal.work_intelligence.get",
+    WEEK_SCOPE,
+  );
+  const journal = useCapability<JournalListData>("journal.list", RECENT_LIMIT);
+  // The workspace axis (`context.list`), never a guessed role: finding
+  // candidates, agency offers and programmes act for an ORGANIZATION, so they
+  // leave Today only when the server says the active workspace is personal.
+  // Loading or a failed read keeps them — their screens report a refusal.
+  const workspaces = useCapability<ContextListData>("context.list");
+  const personal =
+    workspaces.state.status === "loaded" &&
+    workspaces.state.data.workspaces.some((w) => w.active && w.kind === "personal");
+  // Tabs stay mounted: a journal entry logged or corrected elsewhere must
+  // show here on return, not the figures read before it (Codex on #2916).
+  useReloadOnReturn(figures.reload);
+  useReloadOnReturn(journal.reload);
+
+  return (
+    <SafeAreaView style={styles.safe} edges={["bottom"]}>
+      <ScrollView contentContainerStyle={styles.content}>
+        <Title>{t("nav.today")}</Title>
+        <CapabilityGate state={profile.state} reload={profile.reload}>
+          {(data) => (
+            <View style={styles.identity}>
+              <Body muted>{t("today.signedInAs")}</Body>
+              <Body>
+                {data.profile.fullName ?? data.profile.email ?? data.profile.id}
+              </Body>
+            </View>
+          )}
+        </CapabilityGate>
+        <Divider />
+        <Title>{t("today.figuresTitle")}</Title>
+        <CapabilityGate
+          state={figures.state}
+          reload={figures.reload}
+          refusalText={(code) =>
+            code === "no_worker_profile" ? t("profile.noWorkerProfile") : null
+          }
+        >
+          {(data) => <TodayFigures data={data} />}
+        </CapabilityGate>
+        <View style={styles.stations}>
+          <Button
+            variant="quiet"
+            testID="today-open-journal"
+            label={t("today.openJournal")}
+            onPress={() => router.push("/(shell)/journal")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-projects"
+            label={t("today.openProjects")}
+            onPress={() => router.push("/(shell)/projects")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-notifications"
+            label={t("today.openNotifications")}
+            onPress={() => router.push("/(shell)/notifications")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-messages"
+            label={t("today.openMessages")}
+            onPress={() => router.push("/(shell)/messages")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-profile"
+            label={t("today.openProfile")}
+            onPress={() => router.push("/(shell)/profile")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-jobs"
+            label={t("today.openJobs")}
+            onPress={() => router.push("/(shell)/jobs")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-offers"
+            label={t("today.openOffers")}
+            onPress={() => router.push("/(shell)/offers")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-opportunities"
+            label={t("today.openOpportunities")}
+            onPress={() => router.push("/(shell)/opportunities")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-absences"
+            label={t("absences.title")}
+            onPress={() => router.push("/(shell)/absences")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-availability"
+            label={t("today.openAvailability")}
+            onPress={() => router.push("/(shell)/availability")}
+          />
+          <Button
+            variant="quiet"
+            testID="today-open-need"
+            label={t("today.openNeed")}
+            onPress={() => router.push("/(shell)/need")}
+          />
+          {personal ? null : (
+            <>
+              <Button
+                variant="quiet"
+                testID="today-open-candidates"
+                label={t("today.openCandidates")}
+                onPress={() => router.push("/(shell)/candidates")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-agencies"
+                label={t("clientBridge.title")}
+                onPress={() => router.push("/(shell)/agencies")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-agency-offers"
+                label={t("agencyOffers.title")}
+                onPress={() => router.push("/(shell)/agency-offers")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-education"
+                label={t("education.title")}
+                onPress={() => router.push("/(shell)/education")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-review"
+                label={t("review.title")}
+                onPress={() => router.push("/(shell)/review")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-invite-worker"
+                label={t("inviteWorker.title")}
+                onPress={() => router.push("/(shell)/invite-worker")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-agency"
+                label={t("agency.title")}
+                onPress={() => router.push("/(shell)/agency")}
+              />
+              <Button
+                variant="quiet"
+                testID="today-open-sent-proposals"
+                label={t("sentProposals.title")}
+                onPress={() => router.push("/(shell)/sent-proposals")}
+              />
+            </>
+          )}
+        </View>
+        <Divider />
+        <Title>{t("today.recentWork")}</Title>
+        <CapabilityGate
+          state={journal.state}
+          reload={journal.reload}
+          refusalText={(code) =>
+            code === "no_worker_profile" ? t("profile.noWorkerProfile") : null
+          }
+        >
+          {(data) => <JournalEntryList entries={data.entries} />}
+        </CapabilityGate>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: theme.color.background },
+  content: { padding: theme.space.md, gap: theme.space.md },
+  identity: { gap: theme.space.xs },
+  stations: { gap: theme.space.sm },
+});

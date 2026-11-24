@@ -1,0 +1,4 @@
+﻿conceptType,conceptUri,skillType,reuseLevel,preferredLabel,altLabels
+KnowledgeSkillCompetence,http://data.europa.eu/esco/skill/s001,skill/competence,sector-specific,kloti plyteles,plytelių klojimas
+KnowledgeSkillCompetence,http://data.europa.eu/esco/skill/s002,skill/competence,sector-specific,montuoti vamzdžius,vamzdynų montavimas
+KnowledgeSkillCompetence,http://data.europa.eu/esco/skill/s003,knowledge,cross-sector,statybų sauga,objekto sauga

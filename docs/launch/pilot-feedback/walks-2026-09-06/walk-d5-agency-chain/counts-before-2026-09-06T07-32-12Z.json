@@ -1,0 +1,33 @@
+{
+  "snapshot_at": "2026-09-06T07:32:12.313623+00:00",
+  "method": "execute_sql: exact count(*) of every public base table (query_to_xml), production gorgitwvdzxbnaxhrsrw",
+  "touched_tables": {
+    "company_worker_invitations": 8,
+    "company_workers": 7,
+    "agency_candidate_offers": 2,
+    "booking_requests": 1,
+    "booking_request_events": 2,
+    "company_worker_engagements": 1,
+    "project_worker_assignments": 5,
+    "journal_entries": 40,
+    "journal_entry_metrics": 129,
+    "journal_entry_skills": 48,
+    "journal_entry_extractions": 0,
+    "journal_entry_photos": 8,
+    "journal_entry_confirmations": 13,
+    "engagement_contexts": 78,
+    "worker_skills": 50,
+    "profile_skill_claims": 28,
+    "audit_logs": 64,
+    "notification_events": 2,
+    "pilot_events": 2965,
+    "conversations": 5,
+    "conversation_messages": 18,
+    "agency_client_connections": 2,
+    "agency_client_request_shares": 1,
+    "customer_requests": 20,
+    "projects": 9,
+    "booking_requests_seen": 4
+  },
+  "all_tables": {"leads":0,"plans":4,"assets":0,"pilots":0,"skills":161,"ai_runs":37,"defects":0,"matches":0,"workers":55,"agencies":3,"consents":0,"lmc_lots":0,"profiles":55,"projects":9,"waitlist":3,"companies":14,"contracts":0,"countries":10,"customers":0,"proposals":0,"agreements":0,"audit_logs":64,"timesheets":2,"work_tasks":2,"esco_labels":1045186,"esco_skills":13939,"invitations":2,"job_demands":0,"professions":49,"skill_icons":6,"lmc_accounts":0,"lmc_settings":7,"pilot_drafts":0,"pilot_events":2965,"team_details":0,"work_objects":1,"conversations":5,"match_actions":0,"org_documents":0,"organizations":17,"profile_roles":59,"review_cycles":0,"subscriptions":0,"worker_skills":50,"agency_workers":0,"business_trips":0,"document_files":0,"document_types":19,"pilot_outcomes":0,"project_stages":1,"team_enquiries":0,"company_workers":7,"education_types":9,"finance_records":0,"follow_up_tasks":0,"journal_entries":40,"onboarding_runs":0,"project_budgets":0,"project_clients":4,"project_members":0,"worker_absences":0,"agreement_events":0,"booking_requests":1,"candidate_drafts":2,"candidate_skills":0,"demand_shortlist":1,"esco_occupations":3039,"learning_signals":0,"lmc_transactions":0,"offboarding_runs":0,"public_vacancies":77249,"timesheet_events":6,"work_task_events":3,"worker_documents":1,"worker_education":4,"worker_languages":11,"achievement_types":5,"asset_assignments":0,"billing_customers":1,"customer_requests":20,"education_cohorts":1,"employee_requests":0,"language_feedback":0,"profession_skills":232,"service_offerings":2,"task_dependencies":0,"training_programs":0,"usage_cost_events":37,"defect_corrections":0,"education_programs":1,"experience_records":2,"organization_roles":15,"pilot_participants":0,"procurement_events":0,"procurement_offers":0,"productivity_units":10,"relationship_types":10,"worker_professions":17,"workflow_instances":1,"company_memberships":19,"decision_task_links":0,"engagement_contexts":78,"journal_entry_tasks":0,"notification_events":2,"org_document_events":0,"performance_reviews":0,"preferred_locations":2,"team_enquiry_events":0,"worker_achievements":2,"agreement_amendments":0,"business_trip_events":0,"experience_responses":1,"journal_entry_photos":8,"journal_entry_skills":48,"lmc_lot_consumptions":0,"management_decisions":0,"market_rate_averages":0,"marketplace_listings":0,"onboarding_run_items":0,"onboarding_templates":0,"profession_templates":1,"profile_skill_claims":28,"training_assignments":0,"training_skill_links":0,"workflow_definitions":24,"workflow_transitions":4,"billing_subscriptions":0,"booking_requests_seen":4,"conversation_messages":18,"journal_entry_metrics":129,"learning_review_queue":0,"offboarding_run_items":0,"procurement_inquiries":0,"review_evidence_links":0,"skill_seed_benchmarks":0,"work_hour_allocations":5,"booking_request_events":2,"esco_occupation_skills":126051,"leave_balance_policies":0,"payment_webhook_events":0,"privacy_consent_events":8,"vacancy_import_cursors":2,"worker_document_events":2,"workflow_version_steps":24,"agency_candidate_offers":2,"decision_document_links":0,"demand_interest_signals":5,"organization_role_types":10,"workflow_instance_steps":1,"ai_runs_retention_sweeps":29,"company_demand_locations":2,"education_cohort_members":0,"journal_entry_work_items":0,"learning_policy_settings":0,"notification_preferences":0,"privacy_consent_purposes":2,"project_handover_entries":1,"agency_client_connections":2,"agency_worker_invitations":0,"conversation_participants":9,"document_acknowledgements":0,"journal_entry_extractions":0,"onboarding_template_items":0,"performance_review_events":0,"personal_data_disclosures":0,"platform_skill_aggregates":0,"service_offering_requests":1,"company_worker_engagements":1,"company_worker_invitations":8,"management_decision_events":0,"project_worker_assignments":5,"training_assignment_events":0,"worker_saved_opportunities":0,"billing_checkout_operations":1,"company_need_public_intakes":2,"contact_disclosure_requests":0,"engagement_lifecycle_events":0,"journal_entry_confirmations":13,"market_intelligence_sources":7,"workflow_instance_approvers":1,"agency_client_request_shares":1,"customer_request_attachments":0,"public_vacancy_supply_counts":1,"workflow_definition_versions":24,"country_document_requirements":0,"project_worker_readiness_items":14,"service_offering_requests_seen":4,"skill_candidate_clarifications":7,"consented_login_location_signals":1,"conversation_message_attachments":0,"market_intelligence_observations":76,"contact_disclosure_request_events":0,"market_intelligence_insight_queries":0,"project_worker_operational_statuses":0,"worker_display_name_backfill_20260805":22}
+}

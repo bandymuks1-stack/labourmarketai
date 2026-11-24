@@ -1,0 +1,2248 @@
+import { describe, expect, it, vi } from "vitest";
+
+// The one-time spend (lib/security/confirmation-spend) is proven on its own;
+// here every genuine token is spendable once.
+vi.mock("@/lib/security/confirmation-spend", () => ({
+  spendConfirmation: async () => "spent",
+  spendConfirmationForRequest: async () => "spent",
+}));
+import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
+
+vi.mock("@/lib/env", () => ({
+  env: {
+    CONVERSATION_TOKEN_SECRET: "unit-test-secret-with-enough-length",
+    SUPABASE_SERVICE_ROLE_KEY: undefined,
+  },
+}));
+
+// The canonical write is its own module with its own equivalence proofs
+// (journal suites + the live MCP write controls). Here it is a spy: these
+// tests prove the CAPABILITY layer's rules — token verification precedes the
+// write, the FormData mapping matches the conversation executor's, failures
+// map through — not the write itself.
+const coreWrite = vi.fn(async () => ({
+  ok: true as const,
+  entryId: "e-1",
+  skills: {
+    status: "completed",
+    added: 1,
+    strengthened: 0,
+    reviewNeeded: 0,
+    claimsSaved: 0,
+    cvUpdated: true,
+  },
+}));
+// The entry a refused confirm's draft already became (P0-A retry replay);
+// none by default, so every refusal test below stays a refusal.
+const confirmedDraftLookup = vi.fn(async (..._a: unknown[]): Promise<string | null> => null);
+vi.mock("@/lib/journal/journal-write-core", () => ({
+  createJournalEntryCore: (...args: unknown[]) => coreWrite(...(args as [])),
+  projectsToChooseFrom: async () => null,
+  findConfirmedDraftEntry: (...args: unknown[]) => confirmedDraftLookup(...args),
+  runSkillPipeline: async () => ({
+    status: "completed",
+    added: 0,
+    strengthened: 1,
+    reviewNeeded: 0,
+    claimsSaved: 0,
+    cvUpdated: false,
+  }),
+}));
+
+vi.mock("next-intl/server", () => ({
+  getTranslations: async () =>
+    Object.assign((key: string) => key, { has: () => false }),
+}));
+
+// The notification emitters resolve an admin client of their own (recipient
+// resolution AFTER the caller's RLS write) — out of scope here; the spy
+// proves the core reached the emission step with the real signal id.
+const interestEmit = vi.fn(async () => {});
+vi.mock("@/lib/notifications/event-emitters", () => ({
+  INTEREST_UNDELIVERED: "interest_undelivered",
+  emitDemandInterestNotification: (...a: unknown[]) => interestEmit(...(a as [])),
+  emitDemandInterestResponseNotification: async () => {},
+}));
+
+// The employer-workspace gate and the demand submit core have their own
+// suites (lib/company + lib/demand); here they are spies — these tests prove
+// the CAPABILITY layer's rules: the gate refusal mapping, token verification
+// BEFORE the write, write-time org re-resolution, honest failure mapping.
+const employerGate = vi.fn(
+  async (): Promise<
+    | { ok: true; companyId: string; organizationId: string; organizationName: string; role: string }
+    | { ok: false; reason: string }
+  > => ({
+    ok: true,
+    companyId: "comp-1",
+    organizationId: "org-1",
+    organizationName: "Dev Statyba",
+    role: "owner",
+  }),
+);
+vi.mock("@/lib/company/employer-company-context", () => ({
+  requireEmployerCompanyForCaller: (...a: unknown[]) => employerGate(...(a as [])),
+}));
+const demandSubmit = vi.fn(async () => ({ ok: true as const, requestId: "req-1" }));
+const demandFingerprint = vi.fn(async () => "demand:none");
+vi.mock("@/lib/demand/demand-request", () => ({
+  submitDemandRequestCore: (...a: unknown[]) => demandSubmit(...(a as [])),
+  demandStateFingerprint: (...a: unknown[]) => demandFingerprint(...(a as [])),
+}));
+
+// Whether a recorded skill confirmation still STANDS is read from the journal
+// (lib/evidence/skill-confirmation-standing-read.ts); the table stub cannot
+// model that read, so each test states the answer it needs.
+const standingRead = vi.hoisted(() => ({
+  value: null as { ids: ReadonlySet<string>; subjectProfileId: string | null } | null,
+}));
+vi.mock("@/lib/evidence/skill-confirmation-standing-read", () => ({
+  readStandingConfirmedSkillIds: async () => standingRead.value,
+  readOwnStandingConfirmedSkillIds: async () => standingRead.value,
+}));
+
+import {
+  exposedCapabilities,
+  listCapabilities,
+  runCapability,
+} from "./registry";
+import { getConversationAction } from "@/lib/conversation/action-registry";
+import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES, OVERWRITES, SENDS_EMAIL } from "./conversation-action-bridge";
+import type { CapabilityCaller } from "./contract";
+
+/**
+ * Handlers run against a scripted supabase stub — the capability layer's own
+ * rules (validation, honest three-valued reads, the draft→confirm token
+ * chain, the not-yet-executable gate) are what is under test here. The RLS
+ * authority behind the client is proven by the auth-core e2e controls, not
+ * re-proven per capability.
+ */
+
+type TableScript = Record<
+  string,
+  { data: unknown; error: { message: string } | null }
+>;
+
+function stubSupabase(script: TableScript) {
+  return {
+    from(table: string) {
+      const outcome = script[table] ?? { data: null, error: { message: `unscripted table ${table}` } };
+      const chain = {
+        select: () => chain,
+        eq: () => chain,
+        in: () => chain,
+        not: () => chain,
+        order: () => chain,
+        limit: () => chain,
+        update: () => chain,
+        upsert: () => chain,
+        maybeSingle: async () => outcome,
+        then: (resolve: (v: unknown) => unknown) => resolve(outcome),
+      };
+      return chain;
+    },
+    // RPCs are scripted under "rpc:<name>" — the board pipeline reads one.
+    async rpc(fn: string) {
+      return (
+        script[`rpc:${fn}`] ?? { data: null, error: { message: `unscripted rpc ${fn}` } }
+      );
+    },
+  } as unknown as CapabilityCaller["supabase"];
+}
+
+function caller(script: TableScript, transport: "cookie" | "bearer" = "bearer"): CapabilityCaller {
+  return {
+    userId: "00000000-0000-4000-8000-0000000000aa",
+    transport,
+    supabase: stubSupabase(script),
+    locale: "lt",
+  };
+}
+
+const PROFILE_ROW = {
+  id: "00000000-0000-4000-8000-0000000000aa",
+  full_name: "Test Worker",
+  email: "w@example.test",
+  locale: "lt",
+  country: "LT",
+  onboarded: true,
+  active_role: "worker",
+};
+
+/**
+ * Domain actions that honestly declare `destructiveHint` (reviewed list): a
+ * one-step write that REPLACES a stored value, or a confirmed delete.
+ */
+const DOMAIN_DESTRUCTIVE: readonly string[] = [
+  "organization.description.set",
+  "service_offering.update",
+  "marketplace_listing.update",
+  "booking.deadline_set",
+  "notification.mark_read",
+  "notification.mark_all_read",
+  "notification.preference_set",
+  "service_offering.delete_confirm",
+  "marketplace_listing.delete_confirm",
+  "proposal.delete_confirm",
+  "contract.delete_confirm",
+  // Overwrites the organization's stored recompute cadence (audited).
+  "forecast.mode.set_confirm",
+];
+
+describe("the registry itself", () => {
+  it("exposes the reads AND the draft→confirm pair (write extraction landed 2026-08-29)", () => {
+    expect(exposedCapabilities().map((c) => c.id)).toEqual([
+      "profile.get",
+      "living_cv.skills.get",
+      "journal.list",
+      // "Kiek valandų dirbau?" for an authorized assistant (2026-09-13,
+      // #1689 lane B) — the section's own figures over the ONE reader.
+      "journal.work_intelligence.get",
+      "journal.create_draft",
+      "journal.confirm",
+      "journal.correct_draft",
+      "journal.correct_confirm",
+      "interest.express_draft",
+      "interest.express_confirm",
+      "work_card.save_draft",
+      "work_card.save_confirm",
+      "demand.create_draft",
+      "demand.create_confirm",
+      // The READ half of the context pair (2026-09-13). `context.switch`
+      // could already be MADE to list the options by handing it a value it
+      // cannot resolve — but that is a write capability (`readOnlyHint:
+      // false`), and a client that only wants to SHOW a person which
+      // workspaces they hold should not have to propose a write to find out.
+      // Same reader, same labels, no new path.
+      "context.list",
+      "context.switch",
+      // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
+      // company questions to become an authorized action rather than a
+      // chat-only answer, over the SAME core the chat calls.
+      "workforce.availability",
+      // Employer operations (2026-09-30) — demand read, roster, projects,
+      // assignments (draft → confirm) and the review queue, over the SAME
+      // cores/RPCs the web company surfaces call.
+      "demand.list",
+      "demand.close_draft",
+      "demand.close_confirm",
+      "demand.reopen_draft",
+      "demand.reopen_confirm",
+      "roster.list",
+      "projects.list",
+      "project.create_draft",
+      "project.create_confirm",
+      "project.status_set_draft",
+      "project.status_set_confirm",
+      "assignment.create_draft",
+      "assignment.create_confirm",
+      "assignment.end_draft",
+      "assignment.end_confirm",
+      "assignment.keep_draft",
+      "assignment.keep_confirm",
+      "journal.review_queue.get",
+      "counterparty_review.queue.get",
+      "counterparty_review.entry.get",
+      "counterparty_review.decide_draft",
+      "counterparty_review.decide_confirm",
+      "counterparty_review.submit_draft",
+      "counterparty_review.submit_confirm",
+      // WRK-6 — a team assigned as ONE relationship, draft → confirm over the
+      // SAME core the web project page uses.
+      "team_assignment.create_draft",
+      "team_assignment.create_confirm",
+      "team_assignment.replace_draft",
+      "team_assignment.replace_confirm",
+      "team_assignment.end_draft",
+      "team_assignment.end_confirm",
+      // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
+      // scouting cores as the web page; the activation queue names facts.
+      "candidate.search",
+      "shortlist.get",
+      "shortlist.add_draft",
+      "shortlist.add_confirm",
+      "shortlist.remove_draft",
+      "shortlist.remove_confirm",
+      "worker.activation_queue.get",
+      "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
+      // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
+      "company.ingest.preview",
+      "company.ingest.confirm",
+      // Partner registration Slice 1 (2026-11-10): a discovered company's representative takes it over.
+      "company.claims.list",
+      "company.claim.invite.preview",
+      "company.claim.invite.confirm",
+      "company.claim.decide.preview",
+      "company.claim.decide.confirm",
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
+      // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
+      // and in order on purpose: exposing a capability is a reviewed product
+      // decision, so a new one must be added HERE, deliberately, to pass.
+      "evidence.organization.resolve",
+      "evidence.people.list",
+      "evidence.person.create",
+      "evidence.import.create_session",
+      "evidence.import.submit_rows",
+      "evidence.import.stage_file",
+      "evidence.import.preview",
+      "evidence.import.resolve_row",
+      "evidence.import.resolve_label",
+      "evidence.import.resolve_time_semantics",
+      "evidence.import.commit",
+      "evidence.records.list",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
+      // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
+      // same architecture, over `lib/organization-people/ingest-service.ts`,
+      // which the web import panel calls too. Look, answer, commit: the
+      // preview writes nothing and mints the one-time token the commit needs.
+      "people.ingest.preview",
+      "people.ingest.commit",
+      // THE CONVERSATION-ACTION BRIDGE (2026-10-13): the web chat's executable
+      // actions that had no capability, through the ONE dispatcher. A
+      // reversible_write is one tool; an important/strong write is a
+      // prepare -> confirm pair. Order = the conversation registry's order.
+      "worker.add-work-history",
+      "worker.add-document",
+      "worker.add-language",
+      "worker.add-education",
+      "worker.add-achievement",
+      "worker.save-preferences",
+      "worker.respond-booking.prepare",
+      "worker.respond-booking.confirm",
+      "worker.respond-invitation.prepare",
+      "worker.respond-invitation.confirm",
+      "company.confirm-need.prepare",
+      "company.confirm-need.confirm",
+      "company.contact-worker.prepare",
+      "company.contact-worker.confirm",
+      "company.propose-booking.prepare",
+      "company.propose-booking.confirm",
+      "company.move-worker.prepare",
+      "company.move-worker.confirm",
+      "company.invite-worker.prepare",
+      "company.invite-worker.confirm",
+      "company.rename-organization.prepare",
+      "company.rename-organization.confirm",
+      "company.respond-offer.prepare",
+      "company.respond-offer.confirm",
+      "company.respond-team-offer.prepare",
+      "company.respond-team-offer.confirm",
+      "company.accept-connection.prepare",
+      "company.accept-connection.confirm",
+      "company.decline-connection.prepare",
+      "company.decline-connection.confirm",
+      "company.share-request.prepare",
+      "company.share-request.confirm",
+      "company.create-task",
+      "company.update-stage-status",
+      "company.update-task-status",
+      "company.set-readiness-item",
+      "company.seed-readiness-checklist",
+      "company.request-readiness.prepare",
+      "company.request-readiness.confirm",
+      "company.confirm-work.prepare",
+      "company.confirm-work.confirm",
+      "company.enable-journal-review",
+      "company.create-programme.prepare",
+      "company.create-programme.confirm",
+      "company.create-cohort.prepare",
+      "company.create-cohort.confirm",
+      "company.assign-learner.prepare",
+      "company.assign-learner.confirm",
+      "company.invite-learner.prepare",
+      "company.invite-learner.confirm",
+      "agency.invite-client.prepare",
+      "agency.invite-client.confirm",
+      "agency.propose-candidate.prepare",
+      "agency.propose-candidate.confirm",
+      "engagement.end.prepare",
+      "engagement.end.confirm",
+      // WORKSPACE READS (2026-10-13): what the web chat already answers, over
+      // the same loaders (workspace-read-capabilities.ts).
+      "calendar.agenda.get",
+      "calendar.conflicts.get",
+      "capacity.available.get",
+      "organization.today.get",
+      "tasks.open.list",
+      "project.stages.list",
+      "project.risk.get",
+      "project.readiness.get",
+      "project.move.options",
+      "project.move.what_if",
+      "invitations.list",
+      "agency.clients.get",
+      "client.agency_connections.get",
+      "client.agency_offers.get",
+      "education.workspace.get",
+      "worker.projects.list",
+      "worker.engagements.list",
+      "worker.documents.gap",
+      "cv.state.get",
+      "work.find",
+      "opportunities.saved.list",
+      "jobs.new.list",
+      // DOMAIN ACTIONS (2026-10-13): the web's typed canonical actions no earlier
+      // capability covered (domain-action-capabilities.ts).
+      "organization.companies.list",
+      "organization.setup_draft",
+      "organization.setup_confirm",
+      "organization.description.set",
+      "organization.capabilities.get",
+      "organization.capabilities.declare_draft",
+      "organization.capabilities.declare_confirm",
+      "organization.public_profile.get",
+      "organization.public_profile.set_draft",
+      "organization.public_profile.set_confirm",
+      "service_offering.list_own",
+      "service_offering.discover",
+      "service_offering.create",
+      "service_offering.update",
+      "service_offering.status_set_draft",
+      "service_offering.status_set_confirm",
+      "service_offering.delete_draft",
+      "service_offering.delete_confirm",
+      "service_request.outgoing.list",
+      "service_request.incoming.list",
+      "service_request.create_draft",
+      "service_request.create_confirm",
+      "service_request.respond_draft",
+      "service_request.respond_confirm",
+      "service_request.withdraw_draft",
+      "service_request.withdraw_confirm",
+      "marketplace_listing.list_own",
+      "marketplace_listing.discover",
+      "marketplace_listing.create",
+      "marketplace_listing.update",
+      "marketplace_listing.status_set_draft",
+      "marketplace_listing.status_set_confirm",
+      "marketplace_listing.delete_draft",
+      "marketplace_listing.delete_confirm",
+      "commercial.get",
+      "proposal.create",
+      "proposal.status_set_draft",
+      "proposal.status_set_confirm",
+      "proposal.delete_draft",
+      "proposal.delete_confirm",
+      "contract.create",
+      "contract.status_set_draft",
+      "contract.status_set_confirm",
+      "contract.delete_draft",
+      "contract.delete_confirm",
+      "booking.list",
+      "booking.withdraw_draft",
+      "booking.withdraw_confirm",
+      "booking.reschedule_draft",
+      "booking.reschedule_confirm",
+      "booking.deadline_set",
+      "notification.list",
+      "notification.mark_read",
+      "notification.mark_all_read",
+      "notification.preference_set",
+      "absence.mine.list",
+      "absence.pending_review.list",
+      "leave.balances.get",
+      "absence.request_draft",
+      "absence.request_confirm",
+      "absence.review_draft",
+      "absence.review_confirm",
+      "absence.cancel_draft",
+      "absence.cancel_confirm",
+      "journal.review_draft",
+      "journal.review_confirm",
+      "reports.get",
+      "timesheets.overview.get",
+      "finance.records.list",
+      "cv.verified.get",
+      // The public vacancy board for a bearer client (2026-10-16): the same
+      // read the website's /jobs page performs, anonymous projection only.
+      "jobs.search",
+      "jobs.get",
+      // Stage 7 forecasts (2026-10-24): forecast read + cadence draft → confirm.
+      "project.forecast.get",
+      "forecast.mode.set_draft",
+      "forecast.mode.set_confirm",
+    ]);
+    expect(listCapabilities().map((c) => c.id)).toEqual([
+      "profile.get",
+      "living_cv.skills.get",
+      "journal.list",
+      // "Kiek valandų dirbau?" for an authorized assistant (2026-09-13,
+      // #1689 lane B) — the section's own figures over the ONE reader.
+      "journal.work_intelligence.get",
+      "journal.create_draft",
+      "journal.confirm",
+      "journal.correct_draft",
+      "journal.correct_confirm",
+      "interest.express_draft",
+      "interest.express_confirm",
+      "work_card.save_draft",
+      "work_card.save_confirm",
+      "demand.create_draft",
+      "demand.create_confirm",
+      "context.list",
+      "context.switch",
+      // "Kas laisvas kitą savaitę?" (2026-09-07) — the first of the owner's
+      // company questions to become an authorized action rather than a
+      // chat-only answer, over the SAME core the chat calls.
+      "workforce.availability",
+      // Employer operations (2026-09-30) — demand read, roster, projects,
+      // assignments (draft → confirm) and the review queue, over the SAME
+      // cores/RPCs the web company surfaces call.
+      "demand.list",
+      "demand.close_draft",
+      "demand.close_confirm",
+      "demand.reopen_draft",
+      "demand.reopen_confirm",
+      "roster.list",
+      "projects.list",
+      "project.create_draft",
+      "project.create_confirm",
+      "project.status_set_draft",
+      "project.status_set_confirm",
+      "assignment.create_draft",
+      "assignment.create_confirm",
+      "assignment.end_draft",
+      "assignment.end_confirm",
+      "assignment.keep_draft",
+      "assignment.keep_confirm",
+      "journal.review_queue.get",
+      "counterparty_review.queue.get",
+      "counterparty_review.entry.get",
+      "counterparty_review.decide_draft",
+      "counterparty_review.decide_confirm",
+      "counterparty_review.submit_draft",
+      "counterparty_review.submit_confirm",
+      // WRK-6 — a team assigned as ONE relationship, draft → confirm over the
+      // SAME core the web project page uses.
+      "team_assignment.create_draft",
+      "team_assignment.create_confirm",
+      "team_assignment.replace_draft",
+      "team_assignment.replace_confirm",
+      "team_assignment.end_draft",
+      "team_assignment.end_confirm",
+      // Marketplace (2026-09-30) — candidate search + shortlist over the SAME
+      // scouting cores as the web page; the activation queue names facts.
+      "candidate.search",
+      "shortlist.get",
+      "shortlist.add_draft",
+      "shortlist.add_confirm",
+      "shortlist.remove_draft",
+      "shortlist.remove_confirm",
+      "worker.activation_queue.get",
+      "marketplace.funnel.get",
+      // In-app messaging (2026-09-30) over the shared communication core.
+      "conversation.list",
+      "conversation.get",
+      "message.send_draft",
+      "message.send_confirm",
+      // Market companies in as DISCOVERED organizations (2026-09-30, #2000).
+      "company.ingest.preview",
+      "company.ingest.confirm",
+      // Partner registration Slice 1 (2026-11-10): a discovered company's representative takes it over.
+      "company.claims.list",
+      "company.claim.invite.preview",
+      "company.claim.invite.confirm",
+      "company.claim.decide.preview",
+      "company.claim.decide.confirm",
+      // Organization evidence import (2026-09-07) — one flow, thirteen steps (attest and withdraw are draft→confirm pairs),
+      // ALL over `lib/organization-evidence/import-core.ts`. Listed in full
+      // and in order on purpose: exposing a capability is a reviewed product
+      // decision, so a new one must be added HERE, deliberately, to pass.
+      "evidence.organization.resolve",
+      "evidence.people.list",
+      "evidence.person.create",
+      "evidence.import.create_session",
+      "evidence.import.submit_rows",
+      "evidence.import.stage_file",
+      "evidence.import.preview",
+      "evidence.import.resolve_row",
+      "evidence.import.resolve_label",
+      "evidence.import.resolve_time_semantics",
+      "evidence.import.commit",
+      "evidence.records.list",
+      "evidence.record.attest_draft",
+      "evidence.record.attest_confirm",
+      "evidence.import.withdraw_draft",
+      "evidence.import.withdraw_confirm",
+      "evidence.record.correct_draft",
+      "evidence.record.correct_confirm",
+      "evidence.session.correct_date_provenance_draft",
+      "evidence.session.correct_date_provenance_confirm",
+      // Organization PEOPLE ingestion (2026-09-10) — the roster half of that
+      // same architecture, over `lib/organization-people/ingest-service.ts`,
+      // which the web import panel calls too. Look, answer, commit: the
+      // preview writes nothing and mints the one-time token the commit needs.
+      "people.ingest.preview",
+      "people.ingest.commit",
+      // THE CONVERSATION-ACTION BRIDGE (2026-10-13): the web chat's executable
+      // actions that had no capability, through the ONE dispatcher. A
+      // reversible_write is one tool; an important/strong write is a
+      // prepare -> confirm pair. Order = the conversation registry's order.
+      "worker.add-work-history",
+      "worker.add-document",
+      "worker.add-language",
+      "worker.add-education",
+      "worker.add-achievement",
+      "worker.save-preferences",
+      "worker.respond-booking.prepare",
+      "worker.respond-booking.confirm",
+      "worker.respond-invitation.prepare",
+      "worker.respond-invitation.confirm",
+      "company.confirm-need.prepare",
+      "company.confirm-need.confirm",
+      "company.contact-worker.prepare",
+      "company.contact-worker.confirm",
+      "company.propose-booking.prepare",
+      "company.propose-booking.confirm",
+      "company.move-worker.prepare",
+      "company.move-worker.confirm",
+      "company.invite-worker.prepare",
+      "company.invite-worker.confirm",
+      "company.rename-organization.prepare",
+      "company.rename-organization.confirm",
+      "company.respond-offer.prepare",
+      "company.respond-offer.confirm",
+      "company.respond-team-offer.prepare",
+      "company.respond-team-offer.confirm",
+      "company.accept-connection.prepare",
+      "company.accept-connection.confirm",
+      "company.decline-connection.prepare",
+      "company.decline-connection.confirm",
+      "company.share-request.prepare",
+      "company.share-request.confirm",
+      "company.create-task",
+      "company.update-stage-status",
+      "company.update-task-status",
+      "company.set-readiness-item",
+      "company.seed-readiness-checklist",
+      "company.request-readiness.prepare",
+      "company.request-readiness.confirm",
+      "company.confirm-work.prepare",
+      "company.confirm-work.confirm",
+      "company.enable-journal-review",
+      "company.create-programme.prepare",
+      "company.create-programme.confirm",
+      "company.create-cohort.prepare",
+      "company.create-cohort.confirm",
+      "company.assign-learner.prepare",
+      "company.assign-learner.confirm",
+      "company.invite-learner.prepare",
+      "company.invite-learner.confirm",
+      "agency.invite-client.prepare",
+      "agency.invite-client.confirm",
+      "agency.propose-candidate.prepare",
+      "agency.propose-candidate.confirm",
+      "engagement.end.prepare",
+      "engagement.end.confirm",
+      // WORKSPACE READS (2026-10-13): what the web chat already answers, over
+      // the same loaders (workspace-read-capabilities.ts).
+      "calendar.agenda.get",
+      "calendar.conflicts.get",
+      "capacity.available.get",
+      "organization.today.get",
+      "tasks.open.list",
+      "project.stages.list",
+      "project.risk.get",
+      "project.readiness.get",
+      "project.move.options",
+      "project.move.what_if",
+      "invitations.list",
+      "agency.clients.get",
+      "client.agency_connections.get",
+      "client.agency_offers.get",
+      "education.workspace.get",
+      "worker.projects.list",
+      "worker.engagements.list",
+      "worker.documents.gap",
+      "cv.state.get",
+      "work.find",
+      "opportunities.saved.list",
+      "jobs.new.list",
+      // DOMAIN ACTIONS (2026-10-13): the web's typed canonical actions no earlier
+      // capability covered (domain-action-capabilities.ts).
+      "organization.companies.list",
+      "organization.setup_draft",
+      "organization.setup_confirm",
+      "organization.description.set",
+      "organization.capabilities.get",
+      "organization.capabilities.declare_draft",
+      "organization.capabilities.declare_confirm",
+      "organization.public_profile.get",
+      "organization.public_profile.set_draft",
+      "organization.public_profile.set_confirm",
+      "service_offering.list_own",
+      "service_offering.discover",
+      "service_offering.create",
+      "service_offering.update",
+      "service_offering.status_set_draft",
+      "service_offering.status_set_confirm",
+      "service_offering.delete_draft",
+      "service_offering.delete_confirm",
+      "service_request.outgoing.list",
+      "service_request.incoming.list",
+      "service_request.create_draft",
+      "service_request.create_confirm",
+      "service_request.respond_draft",
+      "service_request.respond_confirm",
+      "service_request.withdraw_draft",
+      "service_request.withdraw_confirm",
+      "marketplace_listing.list_own",
+      "marketplace_listing.discover",
+      "marketplace_listing.create",
+      "marketplace_listing.update",
+      "marketplace_listing.status_set_draft",
+      "marketplace_listing.status_set_confirm",
+      "marketplace_listing.delete_draft",
+      "marketplace_listing.delete_confirm",
+      "commercial.get",
+      "proposal.create",
+      "proposal.status_set_draft",
+      "proposal.status_set_confirm",
+      "proposal.delete_draft",
+      "proposal.delete_confirm",
+      "contract.create",
+      "contract.status_set_draft",
+      "contract.status_set_confirm",
+      "contract.delete_draft",
+      "contract.delete_confirm",
+      "booking.list",
+      "booking.withdraw_draft",
+      "booking.withdraw_confirm",
+      "booking.reschedule_draft",
+      "booking.reschedule_confirm",
+      "booking.deadline_set",
+      "notification.list",
+      "notification.mark_read",
+      "notification.mark_all_read",
+      "notification.preference_set",
+      "absence.mine.list",
+      "absence.pending_review.list",
+      "leave.balances.get",
+      "absence.request_draft",
+      "absence.request_confirm",
+      "absence.review_draft",
+      "absence.review_confirm",
+      "absence.cancel_draft",
+      "absence.cancel_confirm",
+      "journal.review_draft",
+      "journal.review_confirm",
+      "reports.get",
+      "timesheets.overview.get",
+      "finance.records.list",
+      "cv.verified.get",
+      // The public vacancy board for a bearer client (2026-10-16): the same
+      // read the website's /jobs page performs, anonymous projection only.
+      "jobs.search",
+      "jobs.get",
+      // Stage 7 forecasts (2026-10-24): forecast read + cadence draft → confirm.
+      "project.forecast.get",
+      "forecast.mode.set_draft",
+      "forecast.mode.set_confirm",
+    ]);
+  });
+
+  it("G4 bridge: a capability that names a conversation action matches its confirmation contract", () => {
+    const bridgeIds = new Set(CONVERSATION_ACTION_BRIDGE_CAPABILITIES.map((c) => c.id));
+    const bridged = listCapabilities().filter((c) => c.conversationActionId && !bridgeIds.has(c.id));
+    // Wagon 1 bridged express-interest; wagon 2 the work card; wagon 3 demand.
+    // (The generic conversation-action bridge has its own test below.)
+    expect(bridged.map((c) => c.id).sort()).toEqual([
+      "demand.close_confirm",
+      "demand.close_draft",
+      "demand.create_confirm",
+      "demand.create_draft",
+      "demand.reopen_confirm",
+      "demand.reopen_draft",
+      "interest.express_confirm",
+      "interest.express_draft",
+      "work_card.save_confirm",
+      "work_card.save_draft",
+    ]);
+    for (const c of bridged) {
+      const action = getConversationAction(c.conversationActionId!);
+      // The named conversation action must exist…
+      expect(action, c.id).toBeTruthy();
+      // …and its write tier maps to the draft→confirm split — an external
+      // client can never run the write with LESS confirmation than the web
+      // chat requires (draft→confirm ≥ a reversible form submit, and equals
+      // the important_write two-phase flow).
+      expect(["important_write", "reversible_write"]).toContain(
+        action!.confirmation,
+      );
+      expect(["draft", "confirm"]).toContain(c.kind);
+    }
+  });
+
+  it("every capability declares HONEST behavior annotations — no spec-default lies", () => {
+    for (const c of listCapabilities()) {
+      // All four hints are explicit, reviewed claims (contract requires them).
+      expect(Object.keys(c.annotations).sort()).toEqual([
+        "destructiveHint",
+        "idempotentHint",
+        "openWorldHint",
+        "readOnlyHint",
+      ]);
+      // Nothing in the registry reaches outside the product's own domain —
+      // except a bridged web action that sends an e-mail invitation, which
+      // says so (reviewed list `SENDS_EMAIL`).
+      // The one non-bridged sender, reviewed 2026-11-10: the company takeover invitation e-mails the
+      // representative from the operator tool itself (company-claim-capabilities.ts).
+      const action = c.conversationActionId;
+      expect(c.annotations.openWorldHint, c.id).toBe(
+        Boolean(action && SENDS_EMAIL.has(action) && c.kind !== "draft") || c.id === "company.claim.invite.confirm",
+      );
+      // Nothing in the registry destroys data (journal writes are append-only)
+      // — except a bridged web action that overwrites a stored value or ends a
+      // relationship for good, which says so (reviewed list `OVERWRITES`).
+      expect(c.annotations.destructiveHint, c.id).toBe(
+        Boolean(action && OVERWRITES.has(action) && c.kind !== "draft") || DOMAIN_DESTRUCTIVE.includes(c.id),
+      );
+    }
+    const byId = Object.fromEntries(listCapabilities().map((c) => [c.id, c]));
+    // Reads AND the write-nothing draft are read-only; the confirm is not.
+    expect(byId["profile.get"].annotations.readOnlyHint).toBe(true);
+    expect(byId["living_cv.skills.get"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.list"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.work_intelligence.get"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.create_draft"].annotations.readOnlyHint).toBe(true);
+    expect(byId["journal.confirm"].annotations.readOnlyHint).toBe(false);
+    // The one-time token makes a duplicate confirm a no-op, not a second row.
+    expect(byId["journal.confirm"].annotations.idempotentHint).toBe(true);
+    // A pointer write: not read-only, never destructive, repeat = no-op.
+    expect(byId["context.switch"].annotations.readOnlyHint).toBe(false);
+    expect(byId["context.switch"].annotations.idempotentHint).toBe(true);
+    // The interest pair mirrors the journal pair's honesty split.
+    expect(byId["interest.express_draft"].annotations.readOnlyHint).toBe(true);
+    expect(byId["interest.express_confirm"].annotations.readOnlyHint).toBe(false);
+    expect(byId["interest.express_confirm"].annotations.idempotentHint).toBe(true);
+    // The work-card pair follows the same split (partial save, repeat = same card).
+    expect(byId["work_card.save_draft"].annotations.readOnlyHint).toBe(true);
+    expect(byId["work_card.save_confirm"].annotations.readOnlyHint).toBe(false);
+    expect(byId["work_card.save_confirm"].annotations.idempotentHint).toBe(true);
+    // Demand creation is honestly NOT idempotent — replay safety is the
+    // one-time token, and the annotation must not claim otherwise.
+    expect(byId["demand.create_draft"].annotations.readOnlyHint).toBe(true);
+    expect(byId["demand.create_confirm"].annotations.readOnlyHint).toBe(false);
+    expect(byId["demand.create_confirm"].annotations.idempotentHint).toBe(false);
+  });
+
+  it("an unknown capability id is refused, never a throw", async () => {
+    const r = await runCapability("db.drop_everything", caller({}), {});
+    expect(r).toMatchObject({ ok: false, code: "unknown_capability" });
+  });
+
+  it("input that fails the schema never reaches a handler", async () => {
+    const r = await runCapability("profile.get", caller({}), { surprise: 1 });
+    expect(r).toMatchObject({ ok: false, code: "invalid" });
+  });
+});
+
+/** The `profile` object profile.get returns — pinned by the first test below. */
+const PROFILE_REPLY_FIELDS = {
+  id: 1,
+  fullName: 1,
+  email: 1,
+  locale: 1,
+  country: 1,
+  onboarded: 1,
+  activeRole: 1,
+} as const;
+
+describe("profile.get", () => {
+  it("returns recorded facts and the worker's three-valued existence", async () => {
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: { id: "worker-1" }, error: null },
+        profile_roles: { data: [{ role: "worker" }, { role: "company" }], error: null },
+      }),
+      {},
+    );
+    expect(r).toEqual({
+      ok: true,
+      data: {
+        profile: {
+          id: PROFILE_ROW.id,
+          fullName: "Test Worker",
+          email: "w@example.test",
+          locale: "lt",
+          country: "LT",
+          onboarded: true,
+          activeRole: "worker",
+        },
+        worker: { status: "exists", workerId: "worker-1" },
+        // The PLURAL of activeRole, as recorded. A person is one person with
+        // several roles at once (I-1) — `activeRole` is which one they are in
+        // right now, never the set they hold.
+        heldRoles: { status: "known", roles: ["worker", "company"] },
+      },
+    });
+    // Ties the reply to the minimisation guard below.
+    const profile = (r as { ok: true; data: { profile: Record<string, unknown> } }).data.profile;
+    expect(Object.keys(profile).sort()).toEqual(Object.keys(PROFILE_REPLY_FIELDS).sort());
+  });
+
+  it("data minimisation: the description names every personal field the reply carries", () => {
+    // An assistant (and the person reading its tool list) must be able to
+    // tell from the description alone that this read returns their e-mail
+    // address. A field added to the reply without being named here fails.
+    const description = listCapabilities().find((c) => c.id === "profile.get")!.description;
+    const named: Record<string, RegExp> = {
+      id: /account id/,
+      fullName: /\bname\b/,
+      email: /email address/,
+      locale: /locale/,
+      country: /country/,
+      onboarded: /onboarding state/,
+      activeRole: /active role/,
+    };
+    expect(Object.keys(named).sort()).toEqual(Object.keys(PROFILE_REPLY_FIELDS).sort());
+    for (const [field, rx] of Object.entries(named)) expect(description, field).toMatch(rx);
+  });
+
+  it("a failed ROLES read is 'unavailable', never 'holds no roles'", async () => {
+    // The live defect this mirrors (web shell, 2026-08-28): a transient
+    // PostgREST failure read as an empty list stripped every role from the
+    // authenticated shell. A person who manages three companies was shown as
+    // holding nothing. The profile itself still answers — one signal failing
+    // does not blank the others.
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: { id: "worker-1" }, error: null },
+        profile_roles: { data: null, error: { message: "pooler hiccup" } },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { heldRoles: { status: "unavailable" } },
+    });
+    expect((r as unknown as { data: { heldRoles: Record<string, unknown> } }).data.heldRoles)
+      .not.toHaveProperty("roles");
+  });
+
+  it("holding nothing is reported as a KNOWN empty set, not as unavailable", async () => {
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: null, error: null },
+        profile_roles: { data: [], error: null },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { heldRoles: { status: "known", roles: [] } },
+    });
+  });
+
+  it("a failed profile read is 'unavailable', never 'no profile' (#1314)", async () => {
+    const r = await runCapability(
+      "profile.get",
+      caller({ profiles: { data: null, error: { message: "boom" } } }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: false, code: "unavailable" });
+  });
+
+  it("a failed WORKER read reports unavailable, not 'no worker'", async () => {
+    const r = await runCapability(
+      "profile.get",
+      caller({
+        profiles: { data: PROFILE_ROW, error: null },
+        workers: { data: null, error: { message: "boom" } },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({
+      ok: true,
+      data: { worker: { status: "unavailable" } },
+    });
+  });
+});
+
+describe("living_cv.skills.get", () => {
+  it("returns the caller's worker_skills rows joined to catalogue slugs", async () => {
+    standingRead.value = { ids: new Set(["s-1"]), subjectProfileId: "profile-1" };
+    const r = await runCapability(
+      "living_cv.skills.get",
+      caller({
+        workers: { data: { id: "worker-1" }, error: null },
+        worker_skills: {
+          data: [
+            {
+              skill_id: "s-1",
+              verified: true,
+              source: "work_journal",
+              verified_at: "2026-08-01T00:00:00Z",
+              skills: { slug: "tiling" },
+            },
+          ],
+          error: null,
+        },
+      }),
+      {},
+    );
+    expect(r).toEqual({
+      ok: true,
+      data: {
+        workerId: "worker-1",
+        // no journal scripted here → the practice read is UNKNOWN, never zero
+        practiceStatus: "unavailable",
+        skills: [
+          {
+            skillId: "s-1",
+            slug: "tiling",
+            verified: true,
+            source: "work_journal",
+            verifiedAt: "2026-08-01T00:00:00Z",
+            practice: null,
+          },
+        ],
+      },
+    });
+  });
+
+  it("a recorded confirmation whose work no longer stands is NOT verified (the act is kept)", async () => {
+    standingRead.value = { ids: new Set(), subjectProfileId: "profile-1" };
+    const r = await runCapability(
+      "living_cv.skills.get",
+      caller({
+        workers: { data: { id: "worker-1" }, error: null },
+        worker_skills: {
+          data: [
+            {
+              skill_id: "s-1",
+              verified: true,
+              source: "work_journal",
+              verified_at: "2026-08-01T00:00:00Z",
+              skills: { slug: "tiling" },
+            },
+          ],
+          error: null,
+        },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: true, data: { skills: [{ skillId: "s-1", verified: false }] } });
+  });
+
+  it("no worker row is an honest no_worker, not an empty success", async () => {
+    const r = await runCapability(
+      "living_cv.skills.get",
+      caller({ workers: { data: null, error: null } }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_worker" });
+  });
+});
+
+describe("journal.list", () => {
+  const ENTRY_ROW = {
+    id: "e-1",
+    original_text: "Klojau plyteles objekte.",
+    created_at: "2026-08-30T08:00:00Z",
+    deleted_at: null,
+    superseded_by: null,
+    engagement_context_id: "00000000-0000-4000-8000-0000000000ec",
+    journal_entry_metrics: [
+      { metric_slug: "work_date", value_text: "2026-08-30", value_numeric: null, unit_slug: null },
+    ],
+    journal_entry_confirmations: [{ confirmation_scope: "entry" }],
+  };
+
+  it("returns the caller's own live entries through the canonical list core", async () => {
+    const r = await runCapability(
+      "journal.list",
+      caller({
+        workers: { data: { id: "worker-1" }, error: null },
+        journal_entries: {
+          data: [ENTRY_ROW, { ...ENTRY_ROW, id: "e-dead", deleted_at: "2026-08-30T09:00:00Z" }],
+          error: null,
+        },
+      }),
+      {},
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      // The soft-deleted row is filtered — live projection only.
+      expect(r.data?.entries).toEqual([
+        {
+          entryId: "e-1",
+          text: ENTRY_ROW.original_text,
+          createdAt: ENTRY_ROW.created_at,
+          engagementContextId: ENTRY_ROW.engagement_context_id,
+          metrics: [
+            { slug: "work_date", valueText: "2026-08-30", valueNumeric: null, unitSlug: null },
+          ],
+          confirmations: 1,
+        },
+      ]);
+    }
+  });
+
+  it("no worker profile is an honest no_worker_profile, not an empty success", async () => {
+    const r = await runCapability(
+      "journal.list",
+      caller({ workers: { data: null, error: null } }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_worker_profile" });
+  });
+
+  it("a failed journal read is 'unavailable', never an empty list (#1314)", async () => {
+    const r = await runCapability(
+      "journal.list",
+      caller({
+        workers: { data: { id: "worker-1" }, error: null },
+        journal_entries: { data: null, error: { message: "boom" } },
+      }),
+      {},
+    );
+    expect(r).toMatchObject({ ok: false, code: "unavailable" });
+  });
+
+  it("rejects an out-of-bounds limit at the schema", async () => {
+    const r = await runCapability("journal.list", caller({}), { limit: 500 });
+    expect(r).toMatchObject({ ok: false, code: "invalid" });
+  });
+});
+
+describe("interest draft → confirm (G4 tail wagon 1)", () => {
+  const REQ = "00000000-0000-4000-8000-0000000000dd";
+  const DEMAND_ROW = {
+    id: REQ,
+    approved_route: true,
+    role_text: "Plytelių klojėjas",
+    company_name: "Dev Statyba",
+    location_label: "Vilnius",
+    country: "LT",
+  };
+
+  /** The caller's own worker world + the visible board + a signal store.
+   *  `signal` scripts the demand_interest_signals outcome: its `status`
+   *  feeds the fingerprint read, its `id` the post-upsert select. */
+  const interestWorld = (
+    signal: { id?: string; status?: string } | null = { id: "sig-1" },
+    overrides: TableScript = {},
+  ): TableScript => ({
+    workers: {
+      data: { id: "worker-1", profile_id: "00000000-0000-4000-8000-0000000000aa" },
+      error: null,
+    },
+    worker_skills: { data: [], error: null },
+    worker_professions: { data: [], error: null },
+    preferred_locations: { data: [], error: null },
+    worker_languages: { data: [], error: null },
+    demand_interest_signals: { data: signal, error: null },
+    "rpc:list_open_demand_for_workers": { data: [DEMAND_ROW], error: null },
+    // The post-write owner resolution (2026-09-17): the gated RPC answers
+    // under the caller's session; the emitter is handed its result.
+    "rpc:contact_demand_owner_v1": {
+      data: [
+        {
+          owner_profile_id: "00000000-0000-4000-8000-0000000000bb",
+          demand_title: "Plytelių klojėjas",
+          has_own_signal: true,
+          demand_open: true,
+          company_verified: true,
+        },
+      ],
+      error: null,
+    },
+    ...overrides,
+  });
+
+  it("draft WITHOUT a requestId → the caller's visible demands as labeled options, NO token", async () => {
+    const r = await runCapability("interest.express_draft", caller(interestWorld()), {});
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("demand_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.options).toEqual([
+        { id: REQ, label: "Plytelių klojėjas — Dev Statyba, Vilnius" },
+      ]);
+    }
+  });
+
+  it("a foreign/unknown requestId gets the SAME options answer (no oracle), NO token", async () => {
+    const r = await runCapability("interest.express_draft", caller(interestWorld()), {
+      requestId: "00000000-0000-4000-8000-0000000000ee",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("demand_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.preview).toBeUndefined();
+    }
+  });
+
+  it("an unreadable board is 'unavailable', never an empty choice (#1314)", async () => {
+    const r = await runCapability(
+      "interest.express_draft",
+      caller(
+        interestWorld(null, {
+          "rpc:list_open_demand_for_workers": { data: null, error: { message: "boom" } },
+        }),
+      ),
+      { requestId: REQ },
+    );
+    expect(r).toMatchObject({ ok: false, code: "unavailable" });
+  });
+
+  it("no visible demands at all → an honest refusal, no options theater", async () => {
+    const r = await runCapability(
+      "interest.express_draft",
+      caller(
+        interestWorld(null, {
+          "rpc:list_open_demand_for_workers": { data: [], error: null },
+        }),
+      ),
+      {},
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_visible_demand" });
+  });
+
+  it("no worker profile → honest refusal, NEVER a token for an unconfirmable draft", async () => {
+    const r = await runCapability(
+      "interest.express_draft",
+      caller(interestWorld(null, { workers: { data: null, error: null } })),
+      { requestId: REQ },
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_worker_profile" });
+  });
+
+  it("a valid draft returns the human preview + a token; alreadyExpressed is honest", async () => {
+    const fresh = await runCapability(
+      "interest.express_draft",
+      caller(interestWorld({ id: "sig-1" })),
+      { requestId: REQ, note: "Galiu pradėti kitą savaitę." },
+    );
+    expect(fresh.ok).toBe(true);
+    if (fresh.ok) {
+      expect(fresh.data?.preview).toEqual({
+        requestId: REQ,
+        demandLabel: "Plytelių klojėjas — Dev Statyba, Vilnius",
+        note: "Galiu pradėti kitą savaitę.",
+        alreadyExpressed: false,
+      });
+      expect(typeof fresh.data?.confirmationToken).toBe("string");
+    }
+
+    const repeat = await runCapability(
+      "interest.express_draft",
+      caller(interestWorld({ id: "sig-1", status: "interested" })),
+      { requestId: REQ },
+    );
+    expect(repeat.ok).toBe(true);
+    if (repeat.ok) {
+      const preview = repeat.data?.preview as Record<string, unknown>;
+      expect(preview.alreadyExpressed).toBe(true);
+    }
+  });
+
+  it("draft → confirm runs THE canonical core: real write path, real emitter key", async () => {
+    interestEmit.mockClear();
+    const world = interestWorld({ id: "sig-1" });
+    const drafted = await runCapability("interest.express_draft", caller(world), {
+      requestId: REQ,
+    });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+
+    const confirmed = await runCapability("interest.express_confirm", caller(world), {
+      requestId: REQ,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({
+      ok: true,
+      data: { status: "interested", structuredDestination: "/dashboard/opportunities" },
+    });
+    // The notification is keyed on the REAL signal row id from the upsert,
+    // and the recipient is the owner the gated RPC revealed — never an id the
+    // client supplied.
+    expect(interestEmit).toHaveBeenCalledTimes(1);
+    expect(interestEmit).toHaveBeenCalledWith({
+      signalId: "sig-1",
+      ownerProfileId: "00000000-0000-4000-8000-0000000000bb",
+      actorProfileId: "00000000-0000-4000-8000-0000000000aa",
+      country: DEMAND_ROW.country ?? null,
+    });
+  });
+
+  it("a TAMPERED note is rejected at the token, before any write", async () => {
+    interestEmit.mockClear();
+    const world = interestWorld({ id: "sig-1" });
+    const drafted = await runCapability("interest.express_draft", caller(world), {
+      requestId: REQ,
+      note: "Original note",
+    });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("interest.express_confirm", caller(world), {
+      requestId: REQ,
+      note: "Different note",
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(interestEmit).not.toHaveBeenCalled();
+  });
+
+  it("STALE/replay: after the signal status moves, the old token is dead", async () => {
+    interestEmit.mockClear();
+    // Token minted while the caller had NO signal (fingerprint interest:none)…
+    const drafted = await runCapability(
+      "interest.express_draft",
+      caller(interestWorld({ id: "sig-1" })),
+      { requestId: REQ },
+    );
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    // …replayed after the express landed (status now `interested`).
+    const replayed = await runCapability(
+      "interest.express_confirm",
+      caller(interestWorld({ id: "sig-1", status: "interested" })),
+      { requestId: REQ, confirmationToken: token },
+    );
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+    expect(interestEmit).not.toHaveBeenCalled();
+  });
+
+  it("another user cannot spend the token", async () => {
+    const world = interestWorld({ id: "sig-1" });
+    const drafted = await runCapability("interest.express_draft", caller(world), {
+      requestId: REQ,
+    });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const other: CapabilityCaller = {
+      ...caller(world),
+      userId: "00000000-0000-4000-8000-0000000000bb",
+    };
+    const confirmed = await runCapability("interest.express_confirm", other, {
+      requestId: REQ,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("a demand that closed between draft and confirm is refused by the write-time gate", async () => {
+    interestEmit.mockClear();
+    const world = interestWorld({ id: "sig-1" });
+    const drafted = await runCapability("interest.express_draft", caller(world), {
+      requestId: REQ,
+    });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    // Same signal state (token still fresh) — but the board no longer shows
+    // the demand: the core's own visibility re-check refuses.
+    const confirmed = await runCapability(
+      "interest.express_confirm",
+      caller(
+        interestWorld({ id: "sig-1" }, {
+          "rpc:list_open_demand_for_workers": { data: [], error: null },
+        }),
+      ),
+      { requestId: REQ, confirmationToken: token },
+    );
+    expect(confirmed).toMatchObject({ ok: false, code: "not_visible" });
+    expect(interestEmit).not.toHaveBeenCalled();
+  });
+});
+
+describe("context.switch", () => {
+  /** One owned org + no governance/engagement memberships + a writable
+   *  profiles pointer — the minimal membership world. */
+  const workspaceWorld = (profilesOutcome?: {
+    data: unknown;
+    error: { message: string; code?: string } | null;
+  }): TableScript => ({
+    organizations: {
+      data: [
+        {
+          id: "00000000-0000-4000-8000-00000000or01",
+          display_name: "Dev Statyba",
+          legal_name: null,
+          organization_type: "company",
+          legacy_company_id: null,
+        },
+      ],
+      error: null,
+    },
+    engagement_contexts: { data: [], error: null },
+    company_memberships: { data: [], error: null },
+    profiles: profilesOutcome ?? { data: null, error: null },
+  });
+
+  it("switches by the organization's exact name through the SAME core the web action runs", async () => {
+    const r = await runCapability("context.switch", caller(workspaceWorld()), {
+      workspace: "Dev Statyba",
+    });
+    expect(r).toMatchObject({
+      ok: true,
+      data: {
+        status: "switched",
+        workspaceId: "00000000-0000-4000-8000-00000000or01",
+        durablePointer: true,
+      },
+    });
+  });
+
+  it("'personal' switches to the personal workspace", async () => {
+    const r = await runCapability("context.switch", caller(workspaceWorld()), {
+      workspace: "personal",
+    });
+    expect(r).toMatchObject({
+      ok: true,
+      data: { status: "switched", workspaceId: "personal" },
+    });
+  });
+
+  it("an unknown or foreign workspace → the labeled options, NOTHING switched", async () => {
+    const r = await runCapability("context.switch", caller(workspaceWorld()), {
+      workspace: "Some Other Company",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("workspace_choice_required");
+      expect(r.data?.options).toEqual([
+        // The translation mock renders keys — the personal label resolves
+        // through the localized catalogue in the app.
+        { id: "personal", label: "workspacePersonal" },
+        { id: "00000000-0000-4000-8000-00000000or01", label: "Dev Statyba" },
+      ]);
+    }
+  });
+
+  it("a missing durable pointer column is an HONEST needs_migration refusal for bearer callers", async () => {
+    const r = await runCapability(
+      "context.switch",
+      caller(
+        workspaceWorld({ data: null, error: { message: "column absent", code: "42703" } }),
+      ),
+      { workspace: "Dev Statyba" },
+    );
+    expect(r).toMatchObject({ ok: false, code: "needs_migration" });
+  });
+});
+
+describe("journal draft → confirm", () => {
+  const DRAFT = {
+    engagementContextId: "00000000-0000-4000-8000-0000000000ec",
+    notes: "Klojau plyteles objekte, 6 valandos.",
+    workDate: "2026-08-29",
+    siteName: "Vilnius A1",
+  };
+
+  /** One active org-linked engagement context the caller can log against —
+   *  the row the capability's context resolution reads. */
+  const EC_ROW = {
+    id: DRAFT.engagementContextId,
+    relationship_slug: "employee",
+    title: null,
+    is_primary: true,
+    organization_id: "org-1",
+    status: "active",
+    started_at: null,
+    ended_at: null,
+    organizations: { display_name: "Dev Statyba", legal_name: null },
+  };
+
+  /** The caller's own worker + journal chain head, as the token fingerprint
+   *  reads them. `head` moves after a successful write — the one-time rule. */
+  const journalState = (head: string | null): TableScript => ({
+    workers: { data: { id: "worker-1" }, error: null },
+    journal_entries: { data: head === null ? null : { hash_self: head }, error: null },
+    engagement_contexts: { data: [EC_ROW], error: null },
+  });
+
+  it("a draft returns the exact preview + a token, and WRITES nothing", async () => {
+    const r = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.preview).toEqual({
+        workDate: "2026-08-29",
+        siteName: "Vilnius A1",
+        notes: DRAFT.notes,
+        engagementContextId: DRAFT.engagementContextId,
+        projectId: null,
+        // The named context — the human sees WHERE the entry lands before
+        // confirming.
+        engagementLabel: "Dev Statyba · employee",
+      });
+      expect(typeof r.data?.confirmationToken).toBe("string");
+    }
+  });
+
+  it("engagementContextId may be OMITTED: one applicable org context resolves (rule B) and is NAMED in the preview", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller(journalState("h0")),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const preview = r.data?.preview as Record<string, unknown>;
+      expect(preview.engagementContextId).toBe(DRAFT.engagementContextId);
+      expect(preview.engagementLabel).toBe("Dev Statyba · employee");
+      expect(typeof r.data?.confirmationToken).toBe("string");
+    }
+  });
+
+  it("a resolved draft's token confirms — the OMITTED id round-trips through the preview", async () => {
+    coreWrite.mockClear();
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const drafted = await runCapability(
+      "journal.create_draft",
+      caller(journalState("h0")),
+      withoutContext,
+    );
+    expect(drafted.ok).toBe(true);
+    const preview = drafted.ok
+      ? (drafted.data?.preview as Record<string, unknown>)
+      : {};
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    // The confirming client copies the PREVIEW back — including the explicit
+    // null siteName it renders — which is exactly what an MCP model does.
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      engagementContextId: preview.engagementContextId,
+      notes: preview.notes,
+      workDate: preview.workDate,
+      siteName: preview.siteName,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: true });
+    expect(coreWrite).toHaveBeenCalledTimes(1);
+  });
+
+  it("several applicable org contexts → the LABELED options, no preselection, NO token (rule C)", async () => {
+    const second = {
+      ...EC_ROW,
+      id: "00000000-0000-4000-8000-0000000000ed",
+      is_primary: false,
+      organizations: { display_name: "Nonstop Group", legal_name: null },
+    };
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({
+        ...journalState("h0"),
+        engagement_contexts: { data: [EC_ROW, second], error: null },
+      }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.options).toEqual([
+        { id: EC_ROW.id, label: "Dev Statyba · employee" },
+        { id: second.id, label: "Nonstop Group · employee" },
+      ]);
+    }
+  });
+
+  it("a requested id that is NOT the caller's own → the labeled options, NEVER a token (fabricated-id E2E 2026-08-30)", async () => {
+    // The real ChatGPT write E2E showed the model inventing the nil UUID —
+    // a valid uuid shape that belongs to nobody. The old pass-through minted
+    // a token for it; now the caller's real options come back instead.
+    const r = await runCapability("journal.create_draft", caller(journalState("h0")), {
+      ...DRAFT,
+      engagementContextId: "00000000-0000-0000-0000-000000000000",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.preview).toBeUndefined();
+      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba · employee" }]);
+      expect(String(r.data?.note)).toMatch(/not one of this account's active work contexts/);
+    }
+  });
+
+  it("a well-formed uuid outside the caller's own list (other user's / stale / inaccessible) → options, NEVER a token", async () => {
+    // Under RLS + the query's own filters (profile_id = caller, status =
+    // active, professional slugs) every one of those classes arrives here
+    // the same way: as an id absent from the caller's visible list.
+    const r = await runCapability("journal.create_draft", caller(journalState("h0")), {
+      ...DRAFT,
+      engagementContextId: "7c9e6679-7425-40de-944b-e07fc1f90ae7",
+    });
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      expect(r.data?.options).toEqual([{ id: EC_ROW.id, label: "Dev Statyba · employee" }]);
+    }
+  });
+
+  it("a foreign requested id with NO contexts of one's own → an honest refusal, no token", async () => {
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({
+        ...journalState("h0"),
+        engagement_contexts: { data: [], error: null },
+      }),
+      {
+        ...DRAFT,
+        engagementContextId: "00000000-0000-0000-0000-000000000000",
+      },
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_engagement_context" });
+  });
+
+  it("two contexts at the same org stay tellable apart — the ONE composer names the relationship", async () => {
+    // The education case from the web selector (worklog-engagements.ts):
+    // employed at the org that also hosts the placement. The shared composer
+    // reads "Org · Relationship", so the two are distinct by construction.
+    const placement = {
+      ...EC_ROW,
+      id: "00000000-0000-4000-8000-0000000000ed",
+      relationship_slug: "student",
+      is_primary: false,
+    };
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({
+        ...journalState("h0"),
+        engagement_contexts: { data: [EC_ROW, placement], error: null },
+      }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      // The translation mock has() => false, so the relationship is the raw
+      // slug here; in the app it is the localized relationshipTypes word.
+      expect(r.data?.options).toEqual([
+        { id: EC_ROW.id, label: "Dev Statyba · employee" },
+        { id: placement.id, label: "Dev Statyba · student" },
+      ]);
+    }
+  });
+
+  // ── ACTIVE WORKSPACE (owner P0 2026-10-29) — the MCP draft resolves with the
+  // SAME signal the web composer and the chat work-log pass: the pointer from
+  // the one transport-neutral workspace core.
+  const ORG_A = "00000000-0000-4000-8000-00000000aa01";
+  const ORG_B = "00000000-0000-4000-8000-00000000bb01";
+  const ORG_ACTING = "00000000-0000-4000-8000-00000000cc01";
+  const ctxAt = (id: string, org: string | null, name: string | null, extra: Record<string, unknown> = {}) => ({
+    ...EC_ROW,
+    id,
+    is_primary: false,
+    organization_id: org,
+    organizations: org
+      ? { display_name: name, legal_name: null, organization_type: "company" }
+      : null,
+    ...extra,
+  });
+  const CTX_A = ctxAt("00000000-0000-4000-8000-0000000000a1", ORG_A, "Alfa");
+  const CTX_B = ctxAt("00000000-0000-4000-8000-0000000000b1", ORG_B, "Beta");
+  const CTX_PERSONAL = ctxAt("00000000-0000-4000-8000-0000000000p1", null, null, { is_primary: true });
+  /** A world where the caller ACTS FOR `pointer` — a governance membership
+   *  lists it (access), and the durable pointer names it. */
+  const actingWorld = (contexts: unknown[], pointer: string, memberOrgName = "Acting Org"): TableScript => ({
+    ...journalState("h0"),
+    engagement_contexts: { data: contexts, error: null },
+    organizations: { data: [], error: null },
+    company_memberships: {
+      data: [
+        {
+          organization_id: pointer,
+          role: "member",
+          organizations: { display_name: memberOrgName, legal_name: null, organization_type: "company" },
+        },
+      ],
+      error: null,
+    },
+    profiles: { data: { active_organization_id: pointer }, error: null },
+  });
+
+  it("rule W: acting for an organization with exactly one context there preselects it — no choice, still NAMED", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller(actingWorld([CTX_PERSONAL, CTX_A, CTX_B], ORG_B)),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const preview = r.data?.preview as Record<string, unknown>;
+      expect(preview.engagementContextId).toBe(CTX_B.id);
+      expect(preview.engagementLabel).toBe("Beta · employee");
+      expect(typeof r.data?.confirmationToken).toBe("string");
+      expect(r.data?.activeWorkspaceNotice).toBeUndefined();
+    }
+  });
+
+  it("CONTROL: the same contexts with NO active organization still ask (rule C) — the signal, not the data, decided", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({ ...journalState("h0"), engagement_contexts: { data: [CTX_PERSONAL, CTX_A, CTX_B], error: null } }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) expect(r.data?.status).toBe("engagement_choice_required");
+  });
+
+  it("membership WITHOUT a work relationship: the choice says so plainly, orders active-first/personal-last, creates nothing", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller(actingWorld([CTX_PERSONAL, CTX_A, CTX_B], ORG_ACTING)),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.status).toBe("engagement_choice_required");
+      expect(r.data?.confirmationToken).toBeUndefined();
+      // The mock renders keys; in the app this is the localized sentence
+      // "You are acting for {org}, but no work relationship … is recorded".
+      expect(r.data?.activeWorkspaceNotice).toBe("activeWorkspaceNoRelationship");
+      const ids = (r.data?.options as { id: string }[]).map((o) => o.id);
+      // The acting org is NOT invented as an option; personal reads last.
+      expect(ids).toEqual([CTX_A.id, CTX_B.id, CTX_PERSONAL.id]);
+    }
+  });
+
+  it("an organization WITHOUT a name says so in the option label — never its bare type or relationship", async () => {
+    const unnamedAgency = ctxAt("00000000-0000-4000-8000-0000000000u1", ORG_B, null, {
+      relationship_slug: "owner",
+      organizations: { display_name: null, legal_name: null, organization_type: "agency" },
+    });
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({ ...journalState("h0"), engagement_contexts: { data: [CTX_PERSONAL, CTX_A, unnamedAgency], error: null } }),
+      withoutContext,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const labels = (r.data?.options as { id: string; label: string }[]).map((o) => o.label);
+      expect(labels).toContain("unnamedOrganization.agency · owner");
+      expect(labels).not.toContain("owner");
+    }
+  });
+
+  it("no usable context at all → an honest refusal, never a guess", async () => {
+    const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
+    const r = await runCapability(
+      "journal.create_draft",
+      caller({
+        ...journalState("h0"),
+        engagement_contexts: { data: [], error: null },
+      }),
+      withoutContext,
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_engagement_context" });
+  });
+
+  it("confirm verifies the token, then performs the canonical write with the executor's exact FormData mapping", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    expect(drafted.ok).toBe(true);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({
+      ok: true,
+      data: { entryId: "e-1", skills: { status: "completed", added: 1 } },
+    });
+
+    expect(coreWrite).toHaveBeenCalledTimes(1);
+    const [deps, formData] = coreWrite.mock.calls[0] as unknown as [
+      { userId: string },
+      FormData,
+    ];
+    expect(deps.userId).toBe("00000000-0000-4000-8000-0000000000aa");
+    // Byte-for-byte the mapping worker-executors.ts "worker.log-work" uses —
+    // one write contract, no ChatGPT-specific fork. Since #1689 that mapping
+    // also carries the time the person stated ("6 valandos") as the same
+    // fragment rows the composer would persist (intake-work-time), so the
+    // canonical work-time rule sees it — with machine-extraction provenance.
+    expect(Object.fromEntries(formData.entries())).toEqual({
+      locale: "lt",
+      engagement_context_id: DRAFT.engagementContextId,
+      notes: DRAFT.notes,
+      work_date: DRAFT.workDate,
+      site_name: DRAFT.siteName,
+      project_id: "",
+      ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
+    });
+    const fragments = JSON.parse(String(formData.get("fragments_json")));
+    expect(fragments).toHaveLength(1);
+    expect(fragments[0]).toMatchObject({ timeValue: 6, timeUnit: "hours", source: "ai_extracted", selected: false });
+  });
+
+  it("a write failure maps through with its real code — never invented success", async () => {
+    coreWrite.mockResolvedValueOnce({
+      ok: false,
+      code: "no_worker_profile",
+      message: "no worker",
+    } as never);
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "no_worker_profile" });
+  });
+
+  it("negative control: a rejected token NEVER reaches the write", async () => {
+    coreWrite.mockClear();
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      confirmationToken: "not-a-real.token",
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(coreWrite).not.toHaveBeenCalled();
+  });
+
+  it("a TAMPERED draft is rejected at the token, before the gate", async () => {
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      notes: "Different notes than were previewed",
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("another user cannot spend the token", async () => {
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+
+    const other: CapabilityCaller = {
+      ...caller(journalState("h0")),
+      userId: "00000000-0000-4000-8000-0000000000bb",
+    };
+    const confirmed = await runCapability("journal.confirm", other, {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("ONE-TIME: after the journal chain head moves, the same token is dead (replay/dup-retry safe)", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+
+    // The successful confirm appended an entry — the head is now h1. The
+    // identical token, replayed, must be rejected WITHOUT reaching the write.
+    const replayed = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+    expect(coreWrite).not.toHaveBeenCalled();
+  });
+
+  // P0-A 2026-10-30: the first confirm WROTE, its response was lost (mobile
+  // network drop, client timeout) and the client retried the same token. It
+  // used to answer "not saved — draft again", inviting a second copy.
+  it("RETRY AFTER A LOST RESPONSE: the spent token answers with the entry the first call recorded — and writes nothing", async () => {
+    coreWrite.mockClear();
+    confirmedDraftLookup.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    confirmedDraftLookup.mockResolvedValueOnce("e-first");
+
+    const retried = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(retried).toMatchObject({
+      ok: true,
+      data: { entryId: "e-first", alreadyRecorded: true, skills: { status: "completed" } },
+    });
+    expect(coreWrite).not.toHaveBeenCalled();
+    // The lookup is bound to THIS draft: worker, context, words, day, project
+    // and only entries recorded after the token was issued.
+    const [, q] = confirmedDraftLookup.mock.calls[0] as unknown as [unknown, Record<string, unknown>];
+    // …with the confirm's OWN FormData mapping: every signed field it writes.
+    expect(q).toMatchObject({ workerId: "worker-1" });
+    expect(q.fields).toEqual({
+      locale: "lt",
+      engagement_context_id: DRAFT.engagementContextId,
+      notes: DRAFT.notes,
+      work_date: DRAFT.workDate,
+      site_name: DRAFT.siteName,
+      project_id: "",
+      ...intakeWorkTimeFields(DRAFT.notes, DRAFT.workDate),
+    });
+    expect(typeof q.issuedAtMs).toBe("number");
+  });
+
+  it("a stale token whose draft was NOT recorded stays refused (draft again)", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const r = await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(coreWrite).not.toHaveBeenCalled();
+  });
+
+  it("a forged or tampered token never even asks whether the entry exists", async () => {
+    confirmedDraftLookup.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      notes: "Different notes than were previewed",
+      confirmationToken: token,
+    });
+    await runCapability("journal.confirm", caller(journalState("h1")), {
+      ...DRAFT,
+      confirmationToken: "not-a-real.token",
+    });
+    expect(confirmedDraftLookup).not.toHaveBeenCalled();
+  });
+});
+
+describe("work card draft → confirm (G4 tail wagon 2)", () => {
+  /** The caller's own workers row, as the core row read returns it. */
+  const workerRow = (confirmedAt: string) => ({
+    id: "worker-1",
+    profile_id: "00000000-0000-4000-8000-0000000000aa",
+    availability_status: "busy",
+    available_from: null,
+    current_location_country: "LT",
+    preferred_countries: ["LT"],
+    preferred_contract_type: null,
+    willing_to_relocate: null,
+    has_transport: null,
+    driving_licence_categories: null,
+    pay_basis_preference: null,
+    night_shifts_ok: null,
+    weekend_shifts_ok: null,
+    overtime_ok: null,
+    own_vehicle: null,
+    own_tools: null,
+    work_card_confirmed_at: confirmedAt,
+  });
+
+  const cardWorld = (confirmedAt = "2026-08-01T00:00:00Z", overrides: TableScript = {}): TableScript => ({
+    workers: { data: workerRow(confirmedAt), error: null },
+    "rpc:save_worker_card": { data: null, error: null },
+    ...overrides,
+  });
+
+  const DRAFT = { availabilityStatus: "available" as const, locationCountry: "NL" };
+
+  it("an empty draft is an honest nothing_to_save, no token", async () => {
+    const r = await runCapability("work_card.save_draft", caller(cardWorld()), {});
+    expect(r).toMatchObject({ ok: false, code: "nothing_to_save" });
+  });
+
+  it("no worker profile → honest refusal, NEVER a token for an unconfirmable draft", async () => {
+    const r = await runCapability(
+      "work_card.save_draft",
+      caller(cardWorld("t", { workers: { data: null, error: null } })),
+      DRAFT,
+    );
+    expect(r).toMatchObject({ ok: false, code: "no_worker_profile" });
+  });
+
+  it("an unreadable workers row is 'unavailable', never 'no worker' (#1314)", async () => {
+    const r = await runCapability(
+      "work_card.save_draft",
+      caller(cardWorld("t", { workers: { data: null, error: { message: "boom" } } })),
+      DRAFT,
+    );
+    expect(r).toMatchObject({ ok: false, code: "unavailable" });
+  });
+
+  it("a valid draft previews exactly the provided fields (current → drafted) and WRITES nothing", async () => {
+    // No save RPC scripted: if the draft reached the write, it would error.
+    const r = await runCapability(
+      "work_card.save_draft",
+      caller(cardWorld("t", { "rpc:save_worker_card": undefined as never })),
+      DRAFT,
+    );
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      const preview = r.data?.preview as { changes: { field: string; from: unknown; to: unknown }[] };
+      expect(preview.changes).toEqual([
+        { field: "availabilityStatus", from: "busy", to: "available" },
+        { field: "locationCountry", from: "LT", to: "NL" },
+      ]);
+      expect(typeof r.data?.confirmationToken).toBe("string");
+    }
+  });
+
+  it("draft → confirm performs the canonical save and names the saved fields", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("work_card.save_confirm", caller(cardWorld()), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed.ok).toBe(true);
+    if (confirmed.ok) {
+      expect(confirmed.data?.status).toBe("saved");
+      expect(confirmed.data?.savedFields).toEqual(["availabilityStatus", "locationCountry"]);
+    }
+  });
+
+  it("a TAMPERED draft is rejected at the token, before any write", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("work_card.save_confirm", caller(cardWorld()), {
+      ...DRAFT,
+      locationCountry: "DE",
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("'clear this field' (null) and 'keep this field' (absent) are DIFFERENT drafts", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    // Adding an explicit availableFrom:null (= clear) to the confirmed input
+    // is a different write than the draft the human saw — rejected.
+    const confirmed = await runCapability("work_card.save_confirm", caller(cardWorld()), {
+      ...DRAFT,
+      availableFrom: null,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("ONE-TIME: after the card changes (confirmed_at moves), the token is dead", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld("t0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const replayed = await runCapability("work_card.save_confirm", caller(cardWorld("t1")), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+  });
+
+  it("another user cannot spend the token", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const other = { ...caller(cardWorld()), userId: "00000000-0000-4000-8000-0000000000bb" };
+    const confirmed = await runCapability("work_card.save_confirm", other, {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+  });
+
+  it("a missing save RPC maps to an honest needs_migration, never invented success", async () => {
+    const drafted = await runCapability("work_card.save_draft", caller(cardWorld()), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability(
+      "work_card.save_confirm",
+      caller(
+        cardWorld("2026-08-01T00:00:00Z", {
+          "rpc:save_worker_card": {
+            data: null,
+            error: { message: "function does not exist", code: "42883" } as { message: string },
+          },
+        }),
+      ),
+      { ...DRAFT, confirmationToken: token },
+    );
+    expect(confirmed).toMatchObject({ ok: false, code: "needs_migration" });
+  });
+});
+
+describe("demand draft → confirm (G4 wagon 3)", () => {
+  const DRAFT = {
+    description: "Reikia 3 plyteliu klojeju objektui Vilniuje",
+    role: "Plyteliu klojejas",
+    teamSize: 3,
+    country: "LT",
+  };
+
+  it("a personal-workspace caller gets an honest refusal naming context.switch, NO token", async () => {
+    employerGate.mockResolvedValueOnce({ ok: false, reason: "personal-workspace" });
+    const r = await runCapability("demand.create_draft", caller({}), DRAFT);
+    expect(r).toMatchObject({ ok: false, code: "personal_workspace" });
+    expect(r.ok === false && /context\.switch/.test(r.message ?? "")).toBe(true);
+  });
+
+  it("no organization at all → no_organization; unresolved context → no_company_context", async () => {
+    employerGate.mockResolvedValueOnce({ ok: false, reason: "no-organization" });
+    const a = await runCapability("demand.create_draft", caller({}), DRAFT);
+    expect(a).toMatchObject({ ok: false, code: "no_organization" });
+    employerGate.mockResolvedValueOnce({ ok: false, reason: "company-not-owned" });
+    const b = await runCapability("demand.create_draft", caller({}), DRAFT);
+    expect(b).toMatchObject({ ok: false, code: "no_company_context" });
+  });
+
+  it("a valid draft names the ACTING organization in the preview, mints a token, and SUBMITS nothing", async () => {
+    demandSubmit.mockClear();
+    const r = await runCapability("demand.create_draft", caller({}), DRAFT);
+    expect(r.ok).toBe(true);
+    if (r.ok) {
+      expect(r.data?.preview).toMatchObject({
+        actingFor: "Dev Statyba",
+        role: "Plyteliu klojejas",
+        teamSize: 3,
+        country: "LT",
+      });
+      expect(typeof r.data?.confirmationToken).toBe("string");
+    }
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a draft WITHOUT a country returns missing: [\"country\"] and NO token (Swedish employer audit CL-1)", async () => {
+    demandSubmit.mockClear();
+    for (const country of [undefined, null, "XX"]) {
+      const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country });
+      expect(r).toMatchObject({ ok: false, code: "country_required", missing: ["country"] });
+      expect(JSON.stringify(r)).not.toContain("confirmationToken");
+    }
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a country NAME (any supported language) or a lower-case code is resolved to ISO — the phone types names", async () => {
+    for (const typed of ["Sweden", "Švedija", "se"]) {
+      const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country: typed });
+      expect(r.ok, typed).toBe(true);
+      if (r.ok) expect(r.data?.preview, typed).toMatchObject({ country: "SE" });
+    }
+  });
+
+  it("a name the resolver does not know is refused as country_required — never a guessed market", async () => {
+    demandSubmit.mockClear();
+    const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country: "Atlantis" });
+    expect(r).toMatchObject({ ok: false, code: "country_required", missing: ["country"] });
+    expect(JSON.stringify(r)).not.toContain("confirmationToken");
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("confirming with the SAME typed name spends the token and submits the resolved code", async () => {
+    demandSubmit.mockClear();
+    const typed = { ...DRAFT, country: "Sweden" };
+    const drafted = await runCapability("demand.create_draft", caller({}), typed);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), { ...typed, confirmationToken: token });
+    expect(confirmed.ok).toBe(true);
+    expect(demandSubmit).toHaveBeenCalledTimes(1);
+    const [, , , fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
+    expect(fieldsArg).toMatchObject({ country: "SE" });
+  });
+
+  it("draft → confirm runs THE canonical submit core with the gate's own organization id", async () => {
+    demandSubmit.mockClear();
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed.ok).toBe(true);
+    if (confirmed.ok) {
+      expect(confirmed.data?.status).toBe("submitted");
+      expect(confirmed.data?.requestId).toBe("req-1");
+      expect(confirmed.data?.actingFor).toBe("Dev Statyba");
+    }
+    expect(demandSubmit).toHaveBeenCalledTimes(1);
+    const [, employerArg, intentArg, fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
+    expect(employerArg).toMatchObject({ organizationId: "org-1" });
+    expect(intentArg).toBe("hire_workers");
+    expect(fieldsArg).toMatchObject({
+      description: DRAFT.description,
+      role: DRAFT.role,
+      teamSize: 3,
+      country: "LT",
+    });
+  });
+
+  it("a TAMPERED description is rejected at the token, before any submit", async () => {
+    demandSubmit.mockClear();
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      description: "Kitas tekstas visai kitam poreikiui, pakeistas po perziuros",
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("ONE-TIME: after a demand exists (fingerprint moved), the token is dead — no second demand from replay", async () => {
+    demandSubmit.mockClear();
+    demandFingerprint.mockResolvedValueOnce("demand:none");
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    demandFingerprint.mockResolvedValue("demand:latest:req-1");
+    const replayed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(replayed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(replayed.ok === false && /stale_state/.test(replayed.message ?? "")).toBe(true);
+    expect(demandSubmit).not.toHaveBeenCalled();
+    demandFingerprint.mockResolvedValue("demand:none");
+  });
+
+  it("another user cannot spend the token", async () => {
+    demandSubmit.mockClear();
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const other = { ...caller({}), userId: "00000000-0000-4000-8000-0000000000bb" };
+    const confirmed = await runCapability("demand.create_confirm", other, {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "confirmation_rejected" });
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("the employer context is RE-RESOLVED at write time — a caller who lost it is refused", async () => {
+    demandSubmit.mockClear();
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    employerGate.mockResolvedValueOnce({ ok: false, reason: "personal-workspace" });
+    const confirmed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "personal_workspace" });
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a submit failure maps through honestly — never invented success", async () => {
+    const drafted = await runCapability("demand.create_draft", caller({}), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    demandSubmit.mockResolvedValueOnce({ ok: false, code: "needs_migration" } as never);
+    const confirmed = await runCapability("demand.create_confirm", caller({}), {
+      ...DRAFT,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: false, code: "needs_migration" });
+  });
+});

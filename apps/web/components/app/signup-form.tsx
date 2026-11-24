@@ -1,0 +1,636 @@
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
+
+import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
+import { Button } from "@/components/ui/Button";
+import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
+import { InAppBrowserNotice } from "@/components/app/in-app-browser-notice";
+import {
+  FacebookButton,
+  GoogleButton,
+  LinkedInButton,
+} from "@/components/app/google-button";
+import { Link, useRouter } from "@/lib/i18n/navigation";
+import { createClient } from "@/lib/supabase/client";
+import { mapAuthError } from "@/lib/auth-errors";
+import {
+  resendAddressedInviteConfirmationAction,
+  signUpAddressedInviteAction,
+} from "@/lib/invitations/signup-accept-action";
+import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
+import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { bindWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
+import { isWorkerProfileDoorNext } from "@/lib/marketing/worker-profile-door";
+import { getSafeReturnPath } from "@/lib/auth/redirect";
+import {
+  RESEND_COOLDOWN_SECONDS,
+  buildEmailConfirmRedirectTo,
+} from "@/lib/auth/email-confirm";
+import { cn } from "@/lib/utils";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { markSignupPending, trackFunnel } from "@/lib/telemetry/task";
+import {
+  captureFirstTouchAttribution,
+  getFirstTouchAttribution,
+} from "@/lib/telemetry/attribution";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
+
+function isValidEmail(v: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+}
+
+const MIN_PASSWORD = 8;
+
+/** Signup form. Social OAuth (shared same-tab buttons) + email/password/
+ *  confirm (`signUp`). Role is no longer picked here — it moves to
+ *  /onboarding. CURRENT PRODUCTION FLOW (verified 2026-10-21 from auth.users):
+ *  Supabase "Confirm email" is ON (since 2026-09-02), so `signUp` returns NO
+ *  session, the form shows the `check_email` state, and the mailed link
+ *  finishes the signup through the auth callback. That is the normal path for
+ *  every email signup today, not a fallback. The session branch below is what
+ *  the local stack (Confirm email OFF) takes.
+ *
+ *  PREPARED, NOT EXECUTED: the frictionless flow (owner requirement
+ *  WORKER_REGISTRATION_FRICTION_REMOVAL; docs/runbooks/frictionless-invite-cutover-v1.md,
+ *  docs/human-gates/worker-registration-friction-gate.md, state
+ *  AWAITING_OWNER_APPLY) would flip "Confirm email" OFF so signUp returns a live
+ *  session and routes straight to /onboarding. That session would prove nothing
+ *  about the mailbox: the SEPARATE verified-email state (migration
+ *  20261003151000) gates only trust-sensitive actions and is requested
+ *  progressively where they happen (see lib/auth/email-verification.ts). After
+ *  that flip the `check_email` branch remains the rollback path. Magic link was
+ *  removed in M1.
+ *
+ *  `linkedinEnabled` / `facebookEnabled` come from the SERVER page component
+ *  (lib/auth/enabled-providers.ts). Default FALSE = fail-closed: a provider
+ *  button never renders unless the auth server confirmed it can complete the
+ *  flow (§18 honesty — and never as a disabled/greyed decoration either). */
+export function SignupForm({
+  linkedinEnabled = false,
+  facebookEnabled = false,
+  invitation,
+  inviteLines,
+}: {
+  linkedinEnabled?: boolean;
+  facebookEnabled?: boolean;
+  /** An ADDRESSED invitation resolved server-side from `?next=`: the form shows
+   *  only the MASKED address (locked); the full address never reaches the
+   *  browser. A server action signs up with it (the e-mail binding still
+   *  compares the session to exactly that address), no confirm-password field
+   *  is asked, and the canonical acceptance continues once the session exists. */
+  /** Who invited the person, to which organization, and what happens next —
+   *  already localized on the server from the invitation's own preview. Shown
+   *  in place of the generic sub-copy (owner P0 2026-11-22). */
+  inviteLines?: readonly string[];
+  invitation?: {
+    token: string;
+    maskedEmail: string;
+    /** The review sentence, already localized, when accepting this invitation
+     *  makes the person an employee of a named organization (owner decision 1).
+     *  Signing up here also accepts, so the person reads it HERE. */
+    reviewNoticeText?: string | null;
+  };
+} = {}) {
+  const t = useTranslations("auth.signup");
+  const tSocial = useTranslations("auth.social");
+  const tErr = useTranslations("auth.errors");
+  const locale = useLocale();
+  const router = useRouter();
+  // Honour the `?next=…` the middleware sets when it bounces an
+  // unauthenticated user from a protected route to login → signup.
+  const searchParams = useSearchParams();
+  const nextParam = searchParams.get("next");
+  const nextPath = getSafeReturnPath(nextParam, locale);
+  const [email, setEmail] = useState(invitation?.maskedEmail ?? "");
+  const [showPw, setShowPw] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [status, setStatus] = useState<
+    "idle" | "signing" | "error" | "check_email"
+  >("idle");
+  const [error, setError] = useState<string | null>(null);
+  // Which field a CLIENT-side validation error belongs to: that input is
+  // marked invalid, points at the message and takes focus, so a phone user
+  // lands on the field to fix instead of hunting for it (P0-1 2026-11-03).
+  const [errorField, setErrorField] = useState<"email" | "password" | "confirm" | null>(null);
+  const emailRef = useRef<HTMLInputElement>(null);
+  const passwordRef = useRef<HTMLInputElement>(null);
+  const confirmRef = useRef<HTMLInputElement>(null);
+  // The message renders directly under its field; server errors keep the
+  // alert above the action.
+  const fieldMessage = (field: "email" | "password" | "confirm") =>
+    error && errorField === field ? (
+      <span id="signup-error" role="alert" className="text-xs text-state-danger">
+        {error}
+      </span>
+    ) : null;
+  function fieldError(field: "email" | "password" | "confirm", message: string) {
+    setError(message);
+    setErrorField(field);
+    ({ email: emailRef, password: passwordRef, confirm: confirmRef })[field].current?.focus();
+  }
+  // When a returning user lands on /signup by mistake, Supabase returns
+  // `user_already_exists`. We surface a one-click "Login instead" CTA
+  // next to the error so they aren't stuck reading body text.
+  const [errorKind, setErrorKind] = useState<"generic" | "alreadyRegistered">(
+    "generic",
+  );
+  // The normal production state today: Supabase withholds the session while
+  // "Confirm email" is ON (production since 2026-09-02; the frictionless flip
+  // is prepared, not executed). The check-your-email
+  // state offers ONE way forward when the mail is slow or lost: a resend,
+  // throttled to the auth server's own per-address limit so the button never
+  // offers what the server would refuse.
+  const [resendState, setResendState] = useState<
+    "idle" | "sending" | "sent" | "error"
+  >("idle");
+  const [resendError, setResendError] = useState<string | null>(null);
+  const [cooldown, setCooldown] = useState(0);
+  useEffect(() => {
+    if (cooldown <= 0) return;
+    const id = window.setTimeout(() => setCooldown((s) => s - 1), 1000);
+    return () => window.clearTimeout(id);
+  }, [cooldown]);
+
+  /** The return target for BOTH the first mail and a resend: our callback
+   *  with the e-mail-flow marker and, when the signup was reached with a
+   *  destination (an assistant's pending authorization, a deep link), that
+   *  destination as `next` — so it survives the round trip through the inbox. */
+  function emailRedirectTo(): string {
+    const origin = typeof window !== "undefined" ? window.location.origin : "";
+    return buildEmailConfirmRedirectTo(
+      origin,
+      locale,
+      nextParam ? nextPath : null,
+    );
+  }
+
+  async function resendConfirmation() {
+    if (cooldown > 0 || resendState === "sending") return;
+    setResendState("sending");
+    setResendError(null);
+    try {
+      if (invitation) {
+        // The form holds only the masked address; the server resolves the
+        // invited one from the token (a browser resend to "x***@…" reached nobody).
+        const res = await resendAddressedInviteConfirmationAction({
+          token: invitation.token,
+          emailRedirectTo: emailRedirectTo(),
+        });
+        if (res.status === "error") throw { code: res.code, message: res.message, status: res.httpStatus };
+        if (res.status === "unavailable") {
+          window.location.assign(`/${locale}/auth/signup`);
+          return;
+        }
+      } else {
+        const supabase = createClient();
+        const { error: err } = await supabase.auth.resend({
+          type: "signup",
+          email: email.trim(),
+          options: { emailRedirectTo: emailRedirectTo() },
+        });
+        if (err) throw err;
+      }
+      setResendState("sent");
+      setCooldown(RESEND_COOLDOWN_SECONDS);
+    } catch (e) {
+      console.error("[signup] resend confirmation failed:", e);
+      const info = mapAuthError(e);
+      setResendError(tErr(info.key, info.params));
+      setResendState("error");
+      if (info.key === "rateLimited") setCooldown(RESEND_COOLDOWN_SECONDS);
+    }
+  }
+
+  async function onSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    setError(null);
+    setErrorField(null);
+    if (!invitation && !isValidEmail(email)) {
+      fieldError("email", t("error_email"));
+      return;
+    }
+    if (password.length < MIN_PASSWORD) {
+      fieldError("password", t("error_password_short", { min: MIN_PASSWORD }));
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      fieldError("password", t("error_password_uppercase"));
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      fieldError("password", t("error_password_number"));
+      return;
+    }
+    if (!/[^A-Za-z0-9]/.test(password)) {
+      fieldError("password", t("error_password_special"));
+      return;
+    }
+    if (!invitation && password !== confirm) {
+      fieldError("confirm", t("error_password_mismatch"));
+      return;
+    }
+    // The intake draft, if this tab has one, is bound to this email only
+    // (decision 0024; lib/staffing/worker-intake-draft.ts).
+    if (!invitation && nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);
+    setStatus("signing");
+    // Registration-started conversion signal (Pre-Advertising Launch
+    // Readiness v1) with first-touch campaign attribution. Fires only after
+    // client validation passes, so it maps to a genuine signup attempt.
+    // Idempotent capture handles a direct ad landing on /auth/signup.
+    captureFirstTouchAttribution();
+    trackFunnel(FUNNEL_EVENTS.registrationStarted, {
+      surface: "email",
+      // The bounded page step (2026-09-22): the admin funnel counts a
+      // registration CONVERSION only for `signup_page`, because the login
+      // page's OAuth buttons emit the same event for returning users.
+      step: "signup_page",
+      ...getFirstTouchAttribution(),
+    });
+    try {
+      if (invitation) {
+        const res = await signUpAddressedInviteAction({
+          token: invitation.token,
+          password,
+          locale,
+          emailRedirectTo: emailRedirectTo(),
+          metadata: { ...getFirstTouchAttribution() },
+          // Only when the sentence was on screen (rendered below).
+          reviewNotice: invitation.reviewNoticeText ? REVIEW_NOTICE_VERSION : null,
+        });
+        if (res.status === "error") {
+          throw { code: res.code, message: res.message, status: res.httpStatus };
+        }
+        if (res.status === "unavailable") {
+          // Used / expired / revoked since the page rendered: reload as an
+          // ordinary signup (nothing is prefilled for an unusable invitation).
+          window.location.assign(`/${locale}/auth/signup`);
+          return;
+        }
+        if (res.status === "check_email") {
+          setStatus("check_email");
+          setCooldown(RESEND_COOLDOWN_SECONDS);
+          return;
+        }
+        markSignupPending("email");
+        // One full navigation lands the person on the profile step (the
+        // acceptance revalidates; a soft router.replace would be superseded).
+        window.location.assign(
+          `/${locale}${nextParam ? `/onboarding?next=${encodeURIComponent(nextPath)}` : "/onboarding"}`,
+        );
+        return;
+      }
+      const supabase = createClient();
+      const { data, error: err } = await supabase.auth.signUp({
+        email: email.trim(),
+        password,
+        options: {
+          // Production requires e-mail confirmation: the link returns to our
+          // callback with the flow marker and the pending `next` (see
+          // lib/auth/email-confirm.ts for the cross-device + resume rules).
+          emailRedirectTo: emailRedirectTo(),
+          // Durable first-touch attribution (social-acquisition readiness
+          // v1): localStorage lives on ONE device/browser only, so the
+          // bounded first-touch fields also ride the signup into
+          // auth.users.raw_user_meta_data — no schema change, no cookie.
+          // Every value passed here has already been through the attribution
+          // sanitizer (control chars stripped, angle brackets removed,
+          // 120-char cap); when nothing was captured the spread adds nothing.
+          data: { locale, ...getFirstTouchAttribution() },
+        },
+      });
+      if (err) throw err;
+      // With "Confirm email" ON, an address that already has an account gets
+      // NO error either: Supabase returns a user with an empty identities
+      // list and sends nothing. Treat it as "already registered" so the
+      // person sees the sign-in door instead of waiting for a mail that never
+      // comes.
+      if (!data.session && data.user && data.user.identities?.length === 0) {
+        throw { code: "user_already_exists", message: "", status: undefined };
+      }
+      // "Confirm email" ON (production since 2026-09-02): signUp returns NO
+      // session and no error. Show the explicit "check your email" state —
+      // the callback finishes the signup when the link is opened. Without
+      // this branch the form would redirect to /onboarding, which bounces an
+      // unauthenticated user back to /login with no message.
+      if (!data.session) {
+        setStatus("check_email");
+        setCooldown(RESEND_COOLDOWN_SECONDS);
+        return;
+      }
+      // Confirm email OFF (local stack) → session is live. Mark this session
+      // as a fresh signup so the first authed surface emits
+      // `signup_completed`, then land on the unified onboarding, propagating
+      // `next` so onboarding completion can fall back to the user's original
+      // destination.
+      markSignupPending("email");
+      const onboardingPath = nextParam
+        ? `/onboarding?next=${encodeURIComponent(nextPath)}`
+        : "/onboarding";
+      router.replace(onboardingPath);
+    } catch (e) {
+      console.error("[signup] signUp failed:", e);
+      setStatus("error");
+      const info = mapAuthError(e);
+      setError(tErr(info.key, info.params));
+      setErrorKind(
+        info.key === "userAlreadyRegistered" ? "alreadyRegistered" : "generic",
+      );
+    }
+  }
+
+  const disabled = status === "signing";
+  const passwordOk =
+    password.length >= MIN_PASSWORD &&
+    /[A-Z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9]/.test(password);
+
+  // Confirm-email state: signUp returned no session (Supabase "Confirm email"
+  // is ON). Tell the user to verify instead of silently bouncing to login.
+  if (status === "check_email") {
+    return (
+      <div className="flex flex-col gap-4" role="status" data-testid="signup-check-email">
+        <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
+          {t("check_email_title")}
+        </h1>
+        <p className="text-sm leading-relaxed text-text-secondary">
+          {t("check_email_body", { email: email.trim() })}
+        </p>
+        <div className="flex flex-col gap-2 text-xs text-text-secondary">
+          {resendState === "sent" && (
+            <p role="status" data-testid="signup-resend-sent">
+              {t("resend_sent")}
+            </p>
+          )}
+          {resendError && (
+            <p className="text-state-danger" role="alert">
+              {resendError}
+            </p>
+          )}
+          {cooldown > 0 ? (
+            <p className="text-text-muted" data-testid="signup-resend-wait">
+              {t("resend_wait", { seconds: cooldown })}
+            </p>
+          ) : (
+            <button
+              type="button"
+              onClick={resendConfirmation}
+              disabled={resendState === "sending"}
+              className="self-start rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-medium text-brand-blue hover:bg-brand-blue/10 disabled:cursor-not-allowed disabled:opacity-50"
+              data-testid="signup-resend"
+            >
+              {t("resend_label")}
+            </button>
+          )}
+        </div>
+        <Link
+          href={
+            nextParam
+              ? `/auth/login?next=${encodeURIComponent(nextPath)}`
+              : "/auth/login"
+          }
+          className="inline-flex min-h-11 items-center text-sm text-brand-blue hover:text-brand-champagne"
+        >
+          {t("login_link")} →
+        </Link>
+      </div>
+    );
+  }
+
+  return (
+    /* `method="post"` — pre-hydration fallback only. See login-form.tsx: without
+       it an early submit GETs the password into the URL. */
+    <form onSubmit={onSubmit} method="post" className="flex flex-col gap-3 sm:gap-6" noValidate>
+      <header>
+        <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
+          {t("headline")}
+        </h1>
+        {inviteLines && inviteLines.length > 0 ? (
+          <div className="mt-2 flex flex-col gap-1 text-sm leading-relaxed text-text-secondary sm:mt-3" data-testid="signup-invite-context">
+            {inviteLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:mt-3">
+            {t("subcopy")}
+          </p>
+        )}
+      </header>
+
+      {/* Owner window 11 §21 — the sentence the visitor typed on the
+          landing travels in `?next=`; this is where they can see that it did. */}
+      <AuthCarriedIntent next={nextParam} />
+
+      {/* One social group (UX friction batch 2026-10-28): the notice and the
+          provider buttons sit tight together (gap-3) instead of each taking
+          the form's gap-6, so the e-mail form and its one primary action
+          move up on a phone. The notice still precedes every account-creating
+          button in document order. */}
+      <div className="flex flex-col gap-2 sm:gap-3" data-testid="auth-social-group">
+        {/* GDPR Art. 13 first-layer notice, rendered ONCE and before the first
+            account-creating control (the Google path collects account data
+            too); the e-mail form below is read past it in document order. A
+            second copy above the submit used to render — a real person read the
+            same paragraph twice on one short form (window 6 walk, 2026-09-06). */}
+        <AuthLegalNotice variant="signup" />
+        <InAppBrowserNotice text={tSocial("inAppBrowser")} />
+
+        {/* ONE provider row on a phone (P0-1b, 360×740): Google keeps its
+            words and the room; LinkedIn and Facebook are 48 px logo squares
+            beside it (full accessible names). From sm up each provider has
+            its own full-width row. The notice above still precedes them all. */}
+        <div className="flex gap-2 sm:flex-col sm:gap-3">
+          <GoogleButton
+            label={t("google_label")}
+            wrapperClassName="min-w-0 flex-1"
+            redirectingLabel={t("google_redirecting")}
+            errorLabel={t("error_generic")}
+            disabled={disabled}
+            nextPath={nextPath}
+            context="signup"
+            registrationStep="signup_page"
+          />
+
+          {/* LinkedIn/Facebook render ONLY when the auth server reports the
+              provider enabled — the same account-creating same-tab flow, behind
+              the same GDPR notice above. */}
+          {linkedinEnabled && (
+            <LinkedInButton
+              label={tSocial("continueWithLinkedIn")}
+              compactLabel=""
+              wrapperClassName="w-12 flex-none sm:w-auto"
+              redirectingLabel={t("google_redirecting")}
+              errorLabel={t("error_generic")}
+              disabled={disabled}
+              nextPath={nextPath}
+              context="signup"
+              registrationStep="signup_page"
+            />
+          )}
+          {facebookEnabled && (
+            <FacebookButton
+              label={tSocial("continueWithFacebook")}
+              compactLabel=""
+              wrapperClassName="w-12 flex-none sm:w-auto"
+              redirectingLabel={t("google_redirecting")}
+              errorLabel={t("error_generic")}
+              disabled={disabled}
+              nextPath={nextPath}
+              context="signup"
+              registrationStep="signup_page"
+            />
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center gap-3" aria-hidden>
+        <span className="h-px flex-1 bg-ink-500" />
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("divider")}
+        </span>
+        <span className="h-px flex-1 bg-ink-500" />
+      </div>
+
+      <label className="flex flex-col gap-1 text-xs text-text-secondary sm:gap-1.5">
+        {t("email_label")}
+        <input
+          type={invitation ? "text" : "email"}
+          name={invitation ? "invited-address" : "email"}
+          autoComplete={invitation ? "off" : "email"}
+          required
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder={t("email_placeholder")}
+          readOnly={Boolean(invitation)}
+          ref={emailRef}
+          aria-invalid={errorField === "email" || undefined}
+          aria-describedby={
+            errorField === "email" ? "signup-error" : invitation ? "invited-email-note" : undefined
+          }
+          data-testid={invitation ? "signup-invited-email" : undefined}
+          className={AUTH_INPUT_CLASS}
+        />
+        {fieldMessage("email")}
+        {invitation && (
+          <span id="invited-email-note" className="text-text-muted">
+            {t("invited_email_note")}
+          </span>
+        )}
+      </label>
+
+      {invitation?.reviewNoticeText ? (
+        <StaffReviewNotice text={invitation.reviewNoticeText} testId="signup-review-notice" />
+      ) : null}
+
+      <label className="flex flex-col gap-1 text-xs text-text-secondary sm:gap-1.5">
+        {t("password_label")}
+        <input
+          type={invitation && showPw ? "text" : "password"}
+          name="password"
+          autoComplete="new-password"
+          required
+          minLength={MIN_PASSWORD}
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          ref={passwordRef}
+          className={AUTH_INPUT_CLASS}
+          aria-invalid={errorField === "password" || undefined}
+          aria-describedby={errorField === "password" ? "password-help signup-error" : "password-help"}
+        />
+        <span
+          id="password-help"
+          className={cn(
+            "flex items-center gap-1 text-text-muted",
+            passwordOk && "text-state-live",
+          )}
+        >
+          {passwordOk && <span aria-hidden>✓</span>}
+          {t("password_help")}
+        </span>
+        {fieldMessage("password")}
+      </label>
+
+      {invitation ? (
+        <button
+          type="button"
+          onClick={() => setShowPw((v) => !v)}
+          aria-pressed={showPw}
+          data-tap-floor="off"
+          className="inline-flex min-h-11 items-center self-start text-xs text-brand-blue hover:underline"
+        >
+          {t("show_password")}
+        </button>
+      ) : (
+        <label className="flex flex-col gap-1 text-xs text-text-secondary sm:gap-1.5">
+          {t("confirm_password_label")}
+          <input
+            type="password"
+            name="confirm_password"
+            autoComplete="new-password"
+            required
+            value={confirm}
+            onChange={(e) => setConfirm(e.target.value)}
+            ref={confirmRef}
+            aria-invalid={errorField === "confirm" || undefined}
+            aria-describedby={errorField === "confirm" ? "signup-error" : undefined}
+            className={AUTH_INPUT_CLASS}
+          />
+          {fieldMessage("confirm")}
+        </label>
+      )}
+
+      {error && !errorField && (
+        // The already-registered case is the most common reason an owner
+        // bounces back here ("I registered yesterday — why am I not in?").
+        // Surface a one-tap "Login instead" CTA right next to the error
+        // text so the user isn't stuck searching for the footer link.
+        <div className="flex flex-col gap-2" role="alert">
+          <p className="text-xs text-state-danger">{error}</p>
+          {errorKind === "alreadyRegistered" && (
+            <Link
+              data-testid="signup-login-instead"
+              href={
+                nextParam
+                  ? `/auth/login?next=${encodeURIComponent(nextPath)}`
+                  : "/auth/login"
+              }
+              className="inline-flex w-fit items-center rounded-md border border-brand-blue/40 bg-brand-blue/5 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:border-brand-blue"
+            >
+              {t("login_link")} →
+            </Link>
+          )}
+        </div>
+      )}
+
+      {/* One primary action: full width on a phone (the sign-in/sign-up
+          link drops beneath it instead of squeezing it), inline from sm up. */}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Button type="submit" className="w-full sm:w-auto" disabled={disabled}>
+          {disabled ? t("signing") : t("submit_label")}
+        </Button>
+        <span className="text-xs text-text-muted">
+          {t("has_account")}{" "}
+          <Link
+            href={
+              nextParam
+                ? `/auth/login?next=${encodeURIComponent(nextPath)}`
+                : "/auth/login"
+            }
+            // Underlined: inside a sentence the gold link is 1.3:1 against the
+            // muted text around it, so colour alone does not mark it as a link
+            // (WCAG 1.4.1, axe link-in-text-block, 390 px audit).
+            className="text-brand-blue underline underline-offset-2 hover:text-brand-champagne"
+          >
+            {t("login_link")}
+          </Link>
+        </span>
+      </div>
+
+    </form>
+  );
+}

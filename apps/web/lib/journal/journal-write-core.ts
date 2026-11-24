@@ -1,0 +1,1228 @@
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { createHash } from "node:crypto";
+import type { getTranslations } from "next-intl/server";
+import { revalidatePath } from "next/cache";
+import type { createClient } from "@/lib/supabase/server";
+import { documentProvenanceMetrics } from "./document-journal-draft-model";
+import {
+  failedPipelineResult,
+  processJournalEntrySkills,
+  type JournalSkillPipelineResult,
+} from "@/lib/journal/skill-pipeline";
+import {
+  readSavedEntryDayCheck,
+  type WorkDayCheck,
+} from "@/lib/journal/work-time-plausibility-read";
+import {
+  allowedModuleSlugsFor,
+  MODULE_METRICS_FIELD,
+  moduleMetricRows,
+  parseModuleFields,
+} from "@/lib/journal/journal-module-fields";
+import { readOwnOccupationPathForUser } from "@/lib/journal/journal-occupation-path";
+import {
+  parseProjectChoice,
+  projectPromptFor,
+  projectsForContext,
+  rpcProjectParams,
+  type AssignedProject,
+} from "@/lib/journal/project-attribution";
+import { readActiveProjectsByOrg } from "@/lib/journal/project-attribution-read";
+import { checkWorkDate } from "@/lib/journal/work-date";
+import { isCommunicationLocale } from "@/lib/i18n/config";
+
+/**
+ * The language code stored on the entry (`original_language`). The form field
+ * carries the UI locale the person wrote in; it is validated against the
+ * communication-locale set the DB CHECK admits, so a tampered or stale value
+ * can never surface as a raw `entry_insert_failed`. An unknown value falls
+ * back to the platform default. Audit 2026-10-16 (J-3).
+ */
+export function resolveEntryLanguage(raw: FormDataEntryValue | null): string {
+  const code = String(raw ?? "").trim().toLowerCase().slice(0, 2);
+  return isCommunicationLocale(code) ? code : "lt";
+}
+
+/** `HH:MM` on a 24-hour clock, or null. Pure. */
+export function parseClockTime(raw: string): string | null {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(raw.trim());
+  if (!m) return null;
+  const h = Number(m[1]);
+  const min = Number(m[2]);
+  if (h < 0 || h > 23 || min < 0 || min > 59) return null;
+  return `${String(h).padStart(2, "0")}:${m[2]}`;
+}
+
+/**
+ * JOURNAL WRITE CORE — the ONE transport-neutral implementation of the
+ * canonical append-only journal save (owner-approved extraction, 2026-08-29
+ * §6; APP_READINESS_MAP step 3).
+ *
+ * Everything here is the byte-faithful body of what `createJournalEntry` in
+ * `actions.ts` used to inline, minus exactly one thing: WHO is calling is now
+ * an input (`deps.supabase` + `deps.userId` from the caller's own transport —
+ * cookie session or the bearer boundary) instead of a cookie resolution baked
+ * into the write. Nothing about the data semantics moved: the same worker
+ * lookup, the same validation order and error codes, the same hash chain, the
+ * same atomic `create_journal_entry_full` RPC with the same legacy fallback,
+ * the same awaited skill pipeline (now running AS THE CALLER via the threaded
+ * `caller` option), the same revalidate.
+ *
+ * NOT a "use server" module on purpose: an exported function taking a live
+ * Supabase client must never be a wire-invokable action endpoint. The server
+ * action wrapper stays in `actions.ts`; route handlers and the capability
+ * registry call this directly.
+ */
+
+type Translator = Awaited<ReturnType<typeof getTranslations>>;
+type ServerSupabase = Awaited<ReturnType<typeof createClient>>;
+
+/** PostgREST / Postgres codes meaning "this function does not exist" — the
+ *  only errors that may fall back to the legacy two-step save (G-12). */
+const MISSING_RPC_CODES = new Set(["PGRST202", "42883"]);
+
+/** Window in which an identical save by the same worker in the same context
+ *  is treated as the SAME submission (double click / network retry). */
+const DUPLICATE_SAVE_WINDOW_MS = 30_000;
+
+/** The facts that make two saves DIFFERENT work even with the same words:
+ *  the day, the durations and the work times. */
+const DUPLICATE_KEY_SLUGS = new Set([
+  "work_date",
+  "quantity",
+  "fragment_time",
+  "work_start",
+  "work_end",
+  "break_minutes",
+]);
+
+type DuplicateKeyMetric = {
+  metric_slug: string;
+  value_numeric?: number | null;
+  value_text?: string | null;
+  unit_slug?: string | null;
+};
+
+/** One comparable string for the day / time facts of a metric list. */
+export function duplicateKeyOf(metrics: readonly DuplicateKeyMetric[]): string {
+  return metrics
+    .filter((m) => DUPLICATE_KEY_SLUGS.has(m.metric_slug))
+    .map((m) => [m.metric_slug, m.value_numeric ?? "", m.value_text ?? "", m.unit_slug ?? ""].join("|"))
+    .sort()
+    .join(";");
+}
+
+/** Id of a LIVE entry this worker saved moments ago that is the SAME
+ *  submission — same engagement, same words, same day and durations, same
+ *  explicit project choice — else null. A failed read is "no duplicate found"
+ *  (the save then proceeds exactly as before).
+ *
+ *  The text alone was the key before (audit 2026-10-20): backfilling
+ *  "Plytelės 8 val." for Monday and then Tuesday, or deleting an entry and
+ *  re-recording it, answered "saved" with the FIRST (or deleted) entry's id
+ *  and wrote nothing — a lost day reported as success. */
+export async function findRecentDuplicateEntry(
+  supabase: ServerSupabase,
+  q: {
+    workerId: string;
+    engagementId: string;
+    originalText: string;
+    metrics?: readonly DuplicateKeyMetric[];
+    /** Present only when the person chose explicitly (a project or none). */
+    explicitProjectId?: string | null;
+  },
+): Promise<string | null> {
+  try {
+    const since = new Date(Date.now() - DUPLICATE_SAVE_WINDOW_MS).toISOString();
+    const { data, error } = await supabase
+      .from("journal_entries")
+      .select("id, project_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug)")
+      .eq("worker_id", q.workerId)
+      .eq("engagement_context_id", q.engagementId)
+      .eq("original_text", q.originalText)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .gte("created_at", since)
+      .order("created_at", { ascending: false })
+      .limit(5);
+    if (error || !Array.isArray(data)) return null;
+    const want = duplicateKeyOf(q.metrics ?? []);
+    for (const row of data as {
+      id?: string;
+      project_id?: string | null;
+      journal_entry_metrics?: DuplicateKeyMetric[] | null;
+    }[]) {
+      if (!row.id) continue;
+      if (duplicateKeyOf(row.journal_entry_metrics ?? []) !== want) continue;
+      if (q.explicitProjectId !== undefined && (row.project_id ?? null) !== q.explicitProjectId) continue;
+      return row.id;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The FormData fields a confirm sends to `createJournalEntryCore` that the
+ * core does NOT persist as a metric row: they are compared elsewhere
+ * (`engagement_context_id`, `notes`, `project_id` are entry columns), or are
+ * transport / provenance details of rows that are compared (`unit_slug`,
+ * `*_source`, `locale`, `voice_disclosure_version`). Every OTHER field in a
+ * confirm's mapping must be covered by `DRAFT_FACT_SLUGS` — a guard test
+ * walks both transports' mappings, so a new signed field cannot be missed.
+ */
+export const DRAFT_FIELDS_NOT_METRICS: ReadonlySet<string> = new Set([
+  "locale",
+  "engagement_context_id",
+  "notes",
+  "project_id",
+  "unit_slug",
+  "quantity_source",
+  "work_time_source",
+  "voice_disclosure_version",
+]);
+
+/** The metric rows a confirmed draft persists, compared one by one. */
+export const DRAFT_FACT_SLUGS: ReadonlySet<string> = new Set([
+  "work_date",
+  "site_name",
+  "input_origin",
+  "voice_language",
+  "quantity",
+  // the fragments field persists as fragment rows; their phrases and
+  // activities derive from the notes (compared), their TIMES are compared
+  "fragments_json",
+  "fragment_time",
+  "work_start",
+  "work_end",
+  "break_minutes",
+]);
+
+const num = (v: unknown): string => {
+  const n = Number(v);
+  return Number.isFinite(n) ? String(n) : "";
+};
+
+/** One comparable string for the facts an entry carries as metric rows —
+ *  day, site, input origin, durations (entry and per fragment, value + unit),
+ *  the fragments' own phrases and activities, and the clock span. */
+export function draftFactsKeyOfRows(rows: readonly DuplicateKeyMetric[]): string {
+  const parts: string[] = [];
+  for (const m of rows) {
+    if (!DRAFT_FACT_SLUGS.has(m.metric_slug)) continue;
+    if (m.metric_slug === "quantity" || m.metric_slug === "fragment_time") {
+      parts.push(`${m.metric_slug}|${num(m.value_numeric)}|${m.unit_slug ?? ""}|${(m.value_text ?? "").trim()}`);
+    } else if (m.metric_slug === "break_minutes") {
+      parts.push(`break_minutes|${num(m.value_numeric)}`);
+    } else {
+      parts.push(`${m.metric_slug}|${(m.value_text ?? "").trim()}`);
+    }
+  }
+  return parts.sort().join(";");
+}
+
+/** The same key for the FormData fields a confirm sends — what the signed
+ *  draft would have recorded, built with the write core's own parsing
+ *  (`parseFragments` → `fragmentMetricRows`, `parseClockTime`). */
+export function draftFactsKeyOfFields(fields: Readonly<Record<string, string>>): string {
+  const rows: DuplicateKeyMetric[] = [];
+  const text = (k: string) => String(fields[k] ?? "").trim();
+  if (text("work_date")) rows.push({ metric_slug: "work_date", value_text: text("work_date") });
+  if (text("site_name")) rows.push({ metric_slug: "site_name", value_text: text("site_name") });
+  if (fields.input_origin === "voice") {
+    rows.push({ metric_slug: "input_origin", value_text: "voice" });
+    const lang = text("voice_language").slice(0, 8);
+    if (lang) rows.push({ metric_slug: "voice_language", value_text: lang });
+  }
+  if (text("quantity")) {
+    rows.push({ metric_slug: "quantity", value_numeric: Number(text("quantity")), unit_slug: text("unit_slug") || "square_meters" });
+  }
+  // Fragment rows come from THE one builder both writers use.
+  rows.push(...fragmentMetricRows(parseFragments(fields.fragments_json ?? null)));
+  const start = parseClockTime(fields.work_start ?? "");
+  const end = parseClockTime(fields.work_end ?? "");
+  if (start) rows.push({ metric_slug: "work_start", value_text: start });
+  if (end) rows.push({ metric_slug: "work_end", value_text: end });
+  if (/^\d{1,4}$/.test(text("break_minutes"))) {
+    rows.push({ metric_slug: "break_minutes", value_numeric: Number(text("break_minutes")) });
+  }
+  return draftFactsKeyOfRows(rows);
+}
+
+/** Clock tolerance between the app server that minted a token and the
+ *  database clock that stamped the entry's `created_at`. */
+const CONFIRMED_DRAFT_CLOCK_SKEW_MS = 5_000;
+
+/**
+ * THE ENTRY A CONFIRMED DRAFT ALREADY BECAME (P0-A 2026-10-30) — id of the
+ * LIVE entry this worker recorded AFTER `issuedAtMs` that carries EVERY fact
+ * the signed draft's FormData mapping would have written: the context, the
+ * words, the project choice (entry columns) and every persisted metric row
+ * (day, site, origin, durations, fragments, clock span — `draftFactsKey*`).
+ * Else null.
+ *
+ * Why: a confirm whose response is lost (mobile network drop, an MCP client
+ * timeout) is retried with the same token. The token is single-use, so the
+ * retry was refused as stale and the person was told "This was not saved"
+ * — false — and invited to draft again, which wrote the day a second time.
+ * The confirm now asks this read first and answers with the entry that
+ * exists. Read-only, RLS-scoped as the caller; a failed read is "none".
+ */
+export async function findConfirmedDraftEntry(
+  supabase: ServerSupabase,
+  q: {
+    workerId: string;
+    /** The exact FormData mapping the confirm sends to the write core. */
+    fields: Readonly<Record<string, string>>;
+    issuedAtMs: number;
+  },
+): Promise<string | null> {
+  try {
+    const engagementId = String(q.fields.engagement_context_id ?? "").trim();
+    const originalText = String(q.fields.notes ?? "").trim();
+    const projectId = String(q.fields.project_id ?? "").trim();
+    if (!engagementId || !originalText) return null;
+    const want = draftFactsKeyOfFields(q.fields);
+    const since = new Date(q.issuedAtMs - CONFIRMED_DRAFT_CLOCK_SKEW_MS).toISOString();
+    const { data, error } = await supabase
+      .from("journal_entries")
+      .select("id, project_id, journal_entry_metrics(metric_slug, value_text, value_numeric, unit_slug)")
+      .eq("worker_id", q.workerId)
+      .eq("engagement_context_id", engagementId)
+      .eq("original_text", originalText)
+      .is("deleted_at", null)
+      .is("superseded_by", null)
+      .gte("created_at", since)
+      .order("created_at", { ascending: true })
+      .limit(5);
+    if (error || !Array.isArray(data)) return null;
+    for (const row of data as {
+      id?: string;
+      project_id?: string | null;
+      journal_entry_metrics?: DuplicateKeyMetric[] | null;
+    }[]) {
+      if (!row.id) continue;
+      if (draftFactsKeyOfRows(row.journal_entry_metrics ?? []) !== want) continue;
+      if (projectId === "none" && row.project_id != null) continue;
+      if (projectId && projectId !== "none" && row.project_id !== projectId) continue;
+      return row.id;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+export type JournalWriteCaller = {
+  /** The caller's OWN RLS-scoped client. Every read and write below runs as
+   *  them — this module adds no authority and no admin/elevated path. */
+  readonly supabase: ServerSupabase;
+  /** `auth.users.id` of the verified caller (from the transport boundary). */
+  readonly userId: string;
+  /** `journal.errors`-namespace translator in the caller's locale. */
+  readonly t: Translator;
+};
+
+export type CreateJournalEntryResult =
+  | {
+      ok: true;
+      entryId: string;
+      skills: JournalSkillPipelineResult;
+      /** Owner §13: the open day-level plausibility check the saved entry
+       *  takes part in (its day now above 24 h / a long day), so the intake
+       *  surface can say so right away. `null` = none, or not readable —
+       *  the save itself is unaffected either way. */
+      dayCheck?: WorkDayCheck | null;
+    }
+  | {
+      ok: false;
+      code: JournalSaveErrorCode;
+      message: string;
+      /** Set with `project_required`: the projects the caller must choose
+       *  between (or answer "not project work"). */
+      projects?: AssignedProject[];
+    };
+
+export type JournalSaveErrorCode =
+  | "not_authenticated"
+  | "no_worker_profile"
+  | "engagement_required"
+  | "notes_required"
+  | "quantity_invalid"
+  | "unit_slug_unknown"
+  /** Wagon C2a: a `source_document_file_id` was supplied but names no
+   *  document the caller can read — a provenance claim that cannot be
+   *  verified is refused, never silently dropped and never stored. */
+  | "source_document_invalid"
+  /** The work date is explicit, never invented: a document-drafted entry
+   *  cannot be saved without one, a malformed one is refused, and a document
+   *  import cannot claim work that has not happened yet. */
+  | "work_date_required"
+  | "work_date_invalid"
+  | "entry_insert_failed"
+  | "metrics_insert_failed"
+  /** P1-B — the target entry was already superseded (stale tab/deep link);
+   *  superseding it again would fork the chain into duplicate live entries. */
+  | "entry_superseded"
+  /** W0 — a selected taxonomy slug failed server-side validation (unknown /
+   *  inactive / malformed). The atomic RPC rolled the whole save back. */
+  | "skill_selection_invalid"
+  /** Owner §12 — a module field was posted that the ENTRY's own engagement
+   *  relationship does not compose (or the engagement is not the caller's).
+   *  Refused, never silently dropped: the composition decides which fields
+   *  an entry may carry, not the request. */
+  | "module_field_invalid"
+  /** Explicit `project_id` the worker is not actively assigned to (or that
+   *  sits in another organization). Refused by the RPC, never re-pointed. */
+  | "project_not_assignable"
+  /** The worker has 2+ active projects in this entry's organization and the
+   *  request named none. Every entry path shares this rule: the hours are
+   *  never silently saved against no project (handoff 2026-10-02 §2). */
+  | "project_required";
+
+export type ParsedFragmentInput = {
+  rawPhrase: string;
+  timeValue?: number | null;
+  timeUnit?: "hours" | "minutes" | "days" | null;
+  activitySlug?: string | null;
+  activityLabel?: string | null;
+  /** v3 — true when the parser flagged the fragment as unrecognised
+   *  (time, no matched activity). */
+  isUnknown?: boolean;
+  /** v3 — worker-typed clarification label for an unknown fragment.
+   *  Persists as `unknown_phrase` metric (review-only, no fake
+   *  taxonomy claim). */
+  userLabel?: string | null;
+  /** P1-A — true ONLY when the worker EXPLICITLY picked this fragment's
+   *  taxonomy skill (compact-editor selection). Only selected fragments may
+   *  be skill-linked by the save; the composer's parser-derived slugs never
+   *  set it, so confirming a time parse can't silently declare a skill. */
+  selected?: boolean;
+  /** True ONLY for a skill row the person ADDED (or re-ticked) in THIS edit
+   *  session — never for a row preloaded from the saved entry. Only such a
+   *  row may supersede an earlier dispute of its skill (an untouched re-save
+   *  must never silently reverse one). */
+  reselected?: boolean;
+  /** Provenance of the fragment's rows. `worker_input` (default) when the
+   *  person reviewed the parse fragment by fragment (the composer);
+   *  `ai_extracted` when a transport persisted the deterministic parse of the
+   *  person's sentence after a summary-level confirmation (conversation, MCP —
+   *  `lib/journal/intake-work-time.ts`). Never a vendor-AI claim. */
+  source?: "worker_input" | "ai_extracted";
+};
+
+export type RpcMetricRow = {
+  metric_slug: string;
+  /** DB CHECK vocabulary (0013). `ai_extracted` is the machine-origin value —
+   *  used here ONLY for document-import provenance rows, whose extractor row
+   *  spells `deterministic-…` so this can never read as a vendor-AI claim. */
+  source: "worker_input" | "ai_extracted";
+  value_text?: string | null;
+  value_numeric?: number | null;
+  unit_slug?: string | null;
+};
+
+/** Defensive parse of the composer's `rejected_slugs_json` FormData field:
+ *  JSON string array, capped at 50, slug-shaped entries only. Anything
+ *  malformed degrades to an empty exclusion list (never a save failure). */
+export function parseRejectedSlugs(raw: string): string[] {
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .filter(
+        (s): s is string =>
+          typeof s === "string" && /^[a-z0-9_-]{1,64}$/i.test(s),
+      )
+      .slice(0, 50);
+  } catch {
+    return [];
+  }
+}
+
+export function parseFragments(raw: string | null): ParsedFragmentInput[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    const out: ParsedFragmentInput[] = [];
+    for (const row of parsed) {
+      if (typeof row !== "object" || row === null) continue;
+      const r = row as Record<string, unknown>;
+      const rawPhrase = String(r.rawPhrase ?? "").trim();
+      if (!rawPhrase) continue;
+      const timeUnitRaw = r.timeUnit;
+      const timeUnit: ParsedFragmentInput["timeUnit"] =
+        timeUnitRaw === "hours" ||
+        timeUnitRaw === "minutes" ||
+        timeUnitRaw === "days"
+          ? timeUnitRaw
+          : null;
+      out.push({
+        rawPhrase,
+        timeValue:
+          typeof r.timeValue === "number" && Number.isFinite(r.timeValue)
+            ? r.timeValue
+            : null,
+        timeUnit,
+        activitySlug:
+          typeof r.activitySlug === "string" ? r.activitySlug : null,
+        activityLabel:
+          typeof r.activityLabel === "string" ? r.activityLabel : null,
+        isUnknown: r.isUnknown === true,
+        userLabel:
+          typeof r.userLabel === "string" && r.userLabel.trim().length > 0
+            ? r.userLabel.trim().slice(0, 200)
+            : null,
+        selected: r.selected === true,
+        reselected: r.selected === true && r.reselected === true,
+        source: r.source === "ai_extracted" ? "ai_extracted" : "worker_input",
+      });
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * The index-paired metric rows ONE fragment list becomes — `parsed_fragment`,
+ * `fragment_time`, `fragment_activity` (+ `unknown_phrase` for a clarified
+ * unknown). The ONE builder for both writers: the create path
+ * (`createJournalEntryCore`) and the supersede path (`actions.ts`). Each
+ * fragment's rows carry the fragment's OWN provenance (`ai_extracted` when a
+ * transport persisted the deterministic parse; `worker_input` when the
+ * person typed or edited it) — a re-save that leaves a fragment untouched
+ * keeps what it was saved with (#1689, measured on production 2026-09-12:
+ * the supersede writer hardcoded `worker_input` and turned 2 h of
+ * `ai_extracted` into the worker's own input on a site-name edit).
+ */
+export function fragmentMetricRows(
+  fragments: readonly ParsedFragmentInput[],
+): RpcMetricRow[] {
+  return fragments.flatMap((f, idx): RpcMetricRow[] => {
+    const fragmentSource: RpcMetricRow["source"] = f.source ?? "worker_input";
+    const rows: RpcMetricRow[] = [
+      {
+        metric_slug: "parsed_fragment",
+        value_text: `${idx + 1}|${f.rawPhrase}`,
+        source: fragmentSource,
+      },
+    ];
+    if (f.timeValue !== null && f.timeValue !== undefined && f.timeUnit) {
+      rows.push({
+        metric_slug: "fragment_time",
+        value_numeric: f.timeValue,
+        unit_slug: f.timeUnit,
+        value_text: String(idx + 1),
+        source: fragmentSource,
+      });
+    }
+    const activityLabel = f.activitySlug ?? f.activityLabel;
+    if (activityLabel) {
+      rows.push({
+        metric_slug: "fragment_activity",
+        value_text: `${idx + 1}|${activityLabel}`,
+        source: fragmentSource,
+      });
+    }
+    // v3 — when the parser flagged the fragment as unknown AND the worker
+    // typed a clarification, persist that as a review-only label. Stored
+    // for future admin / agent dictionary review (no auto-promotion). The
+    // clarification is the worker's word whatever the parse's provenance.
+    if (f.isUnknown && f.userLabel) {
+      rows.push({
+        metric_slug: "unknown_phrase",
+        value_text: `${idx + 1}|${f.rawPhrase}|${f.userLabel}`,
+        source: "worker_input" as const,
+      });
+    }
+    return rows;
+  });
+}
+
+/** Run the canonical skill pipeline for a saved entry AS THE CALLER. A
+ *  pipeline throw must NEVER fail the already-persisted save — it degrades to
+ *  an honest `failed` result the UI can show (with a trace id + reprocess
+ *  path). */
+export async function runSkillPipeline(opts: {
+  entryId: string;
+  text: string;
+  locale: string;
+  excludeSlugs: string[];
+  caller?: { supabase: ServerSupabase; userId: string };
+}): Promise<JournalSkillPipelineResult> {
+  try {
+    return await processJournalEntrySkills(opts);
+  } catch (e) {
+    console.error(
+      "[journal] skill pipeline threw:",
+      e instanceof Error ? e.message : String(e),
+    );
+    return failedPipelineResult();
+  }
+}
+
+/**
+ * Owner §12 — archetype module fields → metric rows, accepted by the
+ * ENGAGEMENT's own relationship AND the worker's OWN professions, both read
+ * under the caller's RLS. The relationship is the context's (a foreign or
+ * unknown id reads as no relationship); the occupation path is the worker's
+ * professions → `esco_uri` → ISCO (`readOwnOccupationPathForUser`), never a
+ * profession slug the request names — so the accept set is what THIS person
+ * may honestly record under THIS context, whatever the form posted. No
+ * field posted → no read, no rows.
+ */
+export async function resolveModuleMetricRows(
+  supabase: ServerSupabase,
+  t: Translator,
+  engagementId: string,
+  raw: string | null | undefined,
+  userId: string,
+): Promise<
+  | { ok: true; rows: RpcMetricRow[] }
+  | { ok: false; code: "module_field_invalid"; message: string }
+> {
+  const values = parseModuleFields(raw);
+  if (Object.keys(values).length === 0) return { ok: true, rows: [] };
+  const [{ data: ctx }, own] = await Promise.all([
+    supabase
+      .from("engagement_contexts")
+      .select("relationship_slug")
+      .eq("id", engagementId)
+      .maybeSingle(),
+    readOwnOccupationPathForUser(supabase, userId),
+  ]);
+  const result = moduleMetricRows(
+    values,
+    allowedModuleSlugsFor({
+      relationshipSlug: ctx?.relationship_slug ?? null,
+      iscoGroups: own.iscoGroups,
+    }),
+  );
+  if (!result.ok) {
+    return {
+      ok: false,
+      code: "module_field_invalid",
+      message: t("moduleFieldInvalid", { fields: result.refused.join(", ") }),
+    };
+  }
+  return { ok: true, rows: result.rows };
+}
+
+export function collectUnitSlugs(args: {
+  quantity: number | null;
+  unitSlug: string;
+  fragments: ParsedFragmentInput[];
+}): Set<string> {
+  const out = new Set<string>();
+  if (args.quantity !== null && args.unitSlug) out.add(args.unitSlug);
+  for (const f of args.fragments) {
+    if (f.timeUnit) out.add(f.timeUnit);
+  }
+  return out;
+}
+
+/** Legacy two-step save — only reached when the RPC is not yet on the
+ *  target DB. Atomicity here is best-effort: if the metric insert fails
+ *  we attempt a compensating delete; if RLS forbids the delete we still
+ *  surface the failure so the worker knows the entry leaked. */
+export async function legacyTwoStepSave(
+  supabase: ServerSupabase,
+  t: Translator,
+  args: {
+    worker_id: string;
+    engagement_context_id: string;
+    entry_type_slug: string;
+    profession_id: string | null;
+    original_text: string;
+    original_language: string;
+    hash_prev: string | null;
+    hash_self: string;
+    visibility_scope: string;
+    metrics: RpcMetricRow[];
+  },
+): Promise<
+  // The skill pipeline runs AFTER this save step, so the legacy path returns
+  // the bare save outcome; the caller attaches the pipeline result.
+  | { ok: true; entryId: string }
+  | { ok: false; code: JournalSaveErrorCode; message: string }
+> {
+  const { metrics, ...entryFields } = args;
+  const { data: entry, error } = await supabase
+    .from("journal_entries")
+    .insert(entryFields)
+    .select("id")
+    .single();
+  if (error || !entry) {
+    return {
+      ok: false,
+      code: "entry_insert_failed",
+      message: t("saveFailed", {
+        reason: error?.message ?? t("unknownReason"),
+      }),
+    };
+  }
+  if (metrics.length === 0) return { ok: true, entryId: entry.id };
+  const rows = metrics.map((m) => ({ ...m, entry_id: entry.id }));
+  const { error: mErr } = await supabase
+    .from("journal_entry_metrics")
+    .insert(rows);
+  if (mErr) {
+    // Best-effort compensation — append-only doctrine blocks DELETE by
+    // default, so the entry likely leaks. The result used to be discarded;
+    // it is now read, so a ghost entry is named in the log instead of being
+    // implied by silence (audit 2026-10-16, J-5).
+    const { error: delErr } = await supabase
+      .from("journal_entries")
+      .delete()
+      .eq("id", entry.id);
+    if (delErr) {
+      console.warn(
+        "[journal] legacy save: metrics failed and the entry could not be removed (append-only) — entry kept without metrics",
+        { entryId: entry.id, code: delErr.code ?? "unknown" },
+      );
+    }
+    return {
+      ok: false,
+      code: "metrics_insert_failed",
+      message: t("metricsInsertFailed", { reason: mErr.message }),
+    };
+  }
+  return { ok: true, entryId: entry.id };
+}
+
+/** The ONE attribution rule applied before a token/save: when the worker has
+ *  2+ ACTIVE projects in this entry's organization the human must choose
+ *  first. `null` = nothing to ask. */
+export async function projectsToChooseFrom(
+  supabase: SupabaseClient,
+  userId: string,
+  engagementContextId: string,
+): Promise<AssignedProject[] | null> {
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (!worker) return null;
+  const { data: ctx } = await supabase
+    .from("engagement_contexts")
+    .select("organization_id")
+    .eq("id", engagementContextId)
+    .maybeSingle();
+  if (!ctx) return null;
+  const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
+  const projects = projectsForContext(byOrg, ctx.organization_id);
+  return projectPromptFor(projects) === "ask" ? projects : null;
+}
+
+/**
+ * Persist a reviewed work-journal entry (M1) as `deps.userId`. Append-only
+ * (§3): composes `original_text` (the worker's own words — never silently
+ * dropped), computes a sha256 hash chained to the worker's previous entry,
+ * inserts the entry + its metric rows atomically. Per-fragment review
+ * metadata is stored as `parsed_fragment` metrics with `source='worker_input'`
+ * so the suggestions stay reviewable but never get marked verified (§7 — no
+ * fake AI / no fake verification).
+ */
+export async function createJournalEntryCore(
+  deps: JournalWriteCaller,
+  formData: FormData,
+): Promise<CreateJournalEntryResult> {
+  const { supabase, userId, t } = deps;
+
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (!worker) {
+    return {
+      ok: false,
+      code: "no_worker_profile",
+      message: t("noWorkerProfile"),
+    };
+  }
+
+  const locale = resolveEntryLanguage(formData.get("locale"));
+  const engagementId = String(formData.get("engagement_context_id") ?? "").trim();
+  const siteName = String(formData.get("site_name") ?? "").trim();
+  const workDirection = String(formData.get("work_direction") ?? "").trim();
+  const quantityRaw = String(formData.get("quantity") ?? "").trim();
+  const unitSlug = String(formData.get("unit_slug") ?? "square_meters").trim();
+  // Provenance of the entry-level quantity: a transport that derived it from
+  // the sentence (intake-work-time) says so; the composer's own field is the
+  // person's input.
+  const quantitySource: RpcMetricRow["source"] =
+    String(formData.get("quantity_source") ?? "") === "ai_extracted"
+      ? "ai_extracted"
+      : "worker_input";
+  const notes = String(formData.get("notes") ?? "").trim();
+  const workDate = String(formData.get("work_date") ?? "").trim();
+  // Time of day the shift ran (audit 2026-10-16, J-4). The chat and MCP
+  // intake parse "nuo 8 iki 17, 30 min pertrauka" deterministically; before
+  // this the start/end/break were a parse PREVIEW only and never reached the
+  // record, so no later reader could place the work inside the day. They are
+  // optional, validated, and carry the same provenance rule as `quantity`.
+  const workStart = parseClockTime(String(formData.get("work_start") ?? ""));
+  const workEnd = parseClockTime(String(formData.get("work_end") ?? ""));
+  const breakMinutesRaw = String(formData.get("break_minutes") ?? "").trim();
+  const breakMinutes =
+    breakMinutesRaw !== "" && /^\d{1,4}$/.test(breakMinutesRaw)
+      ? Number(breakMinutesRaw)
+      : null;
+  const workTimeSource: RpcMetricRow["source"] =
+    String(formData.get("work_time_source") ?? "") === "ai_extracted"
+      ? "ai_extracted"
+      : "worker_input";
+  // v3 — free-text review-only metadata. Capped lengths so a runaway paste
+  // can't blow up a single metric row.
+  const institutionName = String(formData.get("institution_name") ?? "")
+    .trim()
+    .slice(0, 200);
+  const topic = String(formData.get("topic") ?? "").trim().slice(0, 500);
+  // Wagon C2a — document-import provenance (value train 2). When the entry
+  // was drafted from an uploaded work report, the review form carries the
+  // source `document_files` id; the save verifies it under the CALLER'S RLS
+  // and records the provenance metric rows. The extractor version is stamped
+  // server-side from the model constant — never trusted from the client.
+  const sourceDocumentFileId = String(
+    formData.get("source_document_file_id") ?? "",
+  ).trim();
+  const fragments = parseFragments(String(formData.get("fragments_json") ?? "") || null);
+  // P0 Track B: slugs the worker explicitly REJECTED in the review step — the
+  // pipeline must leave no trace for them (not even an evidence link).
+  const rejectedSlugs = parseRejectedSlugs(
+    String(formData.get("rejected_slugs_json") ?? ""),
+  );
+  const quantity = quantityRaw === "" ? null : Number(quantityRaw);
+  // Which project the hours belong to. Absent → the DB auto-link rule; "none"
+  // → a deliberate non-project entry; a uuid → validated server-side against
+  // the worker's active assignment and the entry's own organization.
+  const projectChoice = parseProjectChoice(
+    String(formData.get("project_id") ?? ""),
+  );
+
+  if (!engagementId) {
+    return {
+      ok: false,
+      code: "engagement_required",
+      message: t("engagementRequired"),
+    };
+  }
+  if (!notes) {
+    return {
+      ok: false,
+      code: "notes_required",
+      message: t("notesRequired"),
+    };
+  }
+  if (quantity !== null && (!Number.isFinite(quantity) || quantity < 0)) {
+    return {
+      ok: false,
+      code: "quantity_invalid",
+      message: t("quantityInvalid"),
+    };
+  }
+  // A journal entry is a FACT about work that happened (SEP-1, FACT ≠
+  // FORECAST). Until audit 2026-10-16 only document-drafted entries refused a
+  // future day; the composer, the chat and the MCP door accepted one, and it
+  // then landed in calendar cells the product itself marks "never offered".
+  // Every path now refuses it, keeping the +24 h timezone tolerance.
+  const workDateCheck = checkWorkDate(workDate, {
+    requireDate: sourceDocumentFileId !== "",
+    rejectFuture: true,
+  });
+  if (workDateCheck) {
+    return {
+      ok: false,
+      code: workDateCheck.code,
+      message: t(
+        workDateCheck.code === "work_date_required"
+          ? "workDateRequired"
+          : workDateCheck.reason === "future"
+            ? "workDateFuture"
+            : "workDateInvalid",
+      ),
+    };
+  }
+
+  let professionId: string | null = null;
+  if (workDirection) {
+    const { data: prof } = await supabase
+      .from("professions")
+      .select("id")
+      .eq("slug", workDirection)
+      .maybeSingle();
+    professionId = prof?.id ?? null;
+  }
+
+  const originalText = notes;
+
+  const { data: prev } = await supabase
+    .from("journal_entries")
+    .select("hash_self")
+    .eq("worker_id", worker.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  const hashPrev = prev?.hash_self ?? null;
+  const hashSelf = createHash("sha256")
+    .update(
+      [
+        worker.id,
+        engagementId,
+        originalText,
+        locale,
+        hashPrev ?? "",
+        new Date().toISOString(),
+      ].join("|"),
+    )
+    .digest("hex");
+
+  // Provenance verification (C2a): a claimed source document must be a real
+  // uuid AND readable by this caller, or the save refuses honestly — a
+  // provenance claim that cannot be verified is never stored. RLS answers
+  // with one silence for "missing" and "not yours".
+  if (sourceDocumentFileId) {
+    const UUID_RX =
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const { data: srcDoc, error: srcErr } = UUID_RX.test(sourceDocumentFileId)
+      ? await supabase
+          .from("document_files" as never)
+          .select("id")
+          .eq("id", sourceDocumentFileId)
+          .maybeSingle()
+      : { data: null, error: null };
+    if (srcErr || !srcDoc) {
+      return {
+        ok: false,
+        code: "source_document_invalid",
+        message: t("sourceDocumentInvalid"),
+      };
+    }
+  }
+
+  const hasStructured =
+    quantity !== null || workDirection !== "" || fragments.length > 0;
+
+  // Owner §12 — module fields, accepted by the engagement's own composition.
+  const moduleRows = await resolveModuleMetricRows(
+    supabase,
+    t,
+    engagementId,
+    String(formData.get(MODULE_METRICS_FIELD) ?? ""),
+    userId,
+  );
+  if (!moduleRows.ok) return moduleRows;
+
+  // Pre-validate the unit_slug FK so we fail BEFORE any insert if the
+  // worker's productivity unit isn't registered in `productivity_units`.
+  // This is what surfaced after PR #61: the legacy seed only covered
+  // square_meters / square_meters_per_day / box_per_day, so a confirmed
+  // "hours"-as-fallback quantity (or any fragment_time row) tripped the
+  // FK. Migration 0017 closes the seed; this pre-check makes sure that on
+  // a DB where 0017 hasn't been applied yet, the worker still sees a
+  // human-readable reason instead of a half-saved entry.
+  const unitSlugsToCheck = collectUnitSlugs({ quantity, unitSlug, fragments });
+  if (unitSlugsToCheck.size > 0) {
+    const { data: knownUnits } = await supabase
+      .from("productivity_units")
+      .select("slug")
+      .in("slug", [...unitSlugsToCheck]);
+    const known = new Set((knownUnits ?? []).map((r) => r.slug));
+    const missing = [...unitSlugsToCheck].filter((s) => !known.has(s));
+    if (missing.length > 0) {
+      return {
+        ok: false,
+        code: "unit_slug_unknown",
+        message: t("unitSlugUnknown", { units: missing.join(", ") }),
+      };
+    }
+  }
+
+  // Voice provenance (owner decision U-26): text that was DICTATED and then
+  // reviewed by the worker keeps that fact on the record. Self-declared like
+  // every other worker_input field - a label, never a verification.
+  const voiceOrigin = String(formData.get("input_origin") ?? "") === "voice";
+  const voiceLanguage = String(formData.get("voice_language") ?? "").trim().slice(0, 8);
+  const voiceDisclosure = String(formData.get("voice_disclosure_version") ?? "").trim().slice(0, 40);
+
+  const metrics: RpcMetricRow[] = [
+    ...(voiceOrigin
+      ? [
+          { metric_slug: "input_origin", value_text: "voice", source: "worker_input" as const },
+          ...(voiceLanguage
+            ? [{ metric_slug: "voice_language", value_text: voiceLanguage, source: "worker_input" as const }]
+            : []),
+          ...(voiceDisclosure
+            ? [
+                {
+                  metric_slug: "voice_disclosure_version",
+                  value_text: voiceDisclosure,
+                  source: "worker_input" as const,
+                },
+              ]
+            : []),
+        ]
+      : []),
+    ...(workDirection
+      ? [
+          {
+            metric_slug: "work_direction",
+            value_text: workDirection,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(siteName
+      ? [
+          {
+            metric_slug: "site_name",
+            value_text: siteName,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(quantity !== null
+      ? [
+          {
+            metric_slug: "quantity",
+            value_numeric: quantity,
+            unit_slug: unitSlug,
+            source: quantitySource,
+          },
+        ]
+      : []),
+    ...(workDate
+      ? [
+          {
+            metric_slug: "work_date",
+            value_text: workDate,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(workStart
+      ? [{ metric_slug: "work_start", value_text: workStart, source: workTimeSource }]
+      : []),
+    ...(workEnd
+      ? [{ metric_slug: "work_end", value_text: workEnd, source: workTimeSource }]
+      : []),
+    ...(breakMinutes !== null
+      ? [
+          {
+            metric_slug: "break_minutes",
+            value_numeric: breakMinutes,
+            unit_slug: "minutes",
+            source: workTimeSource,
+          },
+        ]
+      : []),
+    ...(institutionName
+      ? [
+          {
+            metric_slug: "institution_name",
+            value_text: institutionName,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...(topic
+      ? [
+          {
+            metric_slug: "topic",
+            value_text: topic,
+            source: "worker_input" as const,
+          },
+        ]
+      : []),
+    ...fragmentMetricRows(fragments),
+    // C2a — document-import provenance: the verified source file id + the
+    // server-stamped extractor identity (deterministic-structuring@…) ride
+    // the same atomic save, so an imported entry stays attributable forever.
+    ...(sourceDocumentFileId
+      ? documentProvenanceMetrics(sourceDocumentFileId)
+      : []),
+    // Owner §12 — one metric row per archetype module field the person
+    // filled, under the same atomic save (never a core slug, guarded).
+    ...moduleRows.rows,
+  ];
+
+  // Atomic save — the RPC inserts the entry and all metric rows inside one
+  // transaction (see 0017). Any failure rolls back the entry, so the worker
+  // never lands in the half-saved "ghost entry" state where the row exists
+  // but its interpretation does not.
+  // THE ONE ATTRIBUTION RULE for every entry path (composer, work-log flow,
+  // document draft, MCP). A request that names no project while the worker
+  // has two or more ACTIVE projects in this entry's organization is not
+  // saved: the caller must ask which (or "not project work"). One project is
+  // auto-attributed by the database, none asks nothing.
+  if (projectChoice.kind === "absent") {
+    const { data: ctxOrg } = await supabase
+      .from("engagement_contexts")
+      .select("organization_id")
+      .eq("id", engagementId)
+      .maybeSingle();
+    if (ctxOrg) {
+      const byOrg = await readActiveProjectsByOrg(supabase, worker.id);
+      const projects = projectsForContext(byOrg, ctxOrg.organization_id);
+      if (projectPromptFor(projects) === "ask") {
+        return {
+          ok: false,
+          code: "project_required",
+          message: t("projectAmbiguous"),
+          projects,
+        };
+      }
+    }
+  }
+
+  const rpcParams = {
+    p_worker_id: worker.id,
+    p_engagement_context_id: engagementId,
+    p_entry_type_slug: hasStructured ? "hybrid" : "freeform",
+    p_profession_id: professionId,
+    p_original_text: originalText,
+    p_original_language: locale.slice(0, 2),
+    p_hash_prev: hashPrev,
+    p_hash_self: hashSelf,
+    p_visibility_scope: "closed",
+    p_metrics: metrics,
+    ...rpcProjectParams(projectChoice),
+  };
+  // The generated supabase-js types are built from the schema cache and
+  // don't include `create_journal_entry_full` until 0017 is applied AND the
+  // local types are regenerated. The runtime call is correct; the cast just
+  // suppresses the static name check.
+  // G-8: idempotent create. A double click / retry that reaches the server
+  // after the first save committed re-uses that entry instead of writing a
+  // second identical one (Next serialises one client's server actions, so the
+  // second call sees the first's committed row). Limit: two requests truly
+  // in flight at the same instant can both pass this read — closing that
+  // needs a DB unique key (an additive migration, not part of this slice).
+  const projectParams = rpcProjectParams(projectChoice);
+  const duplicateOf = await findRecentDuplicateEntry(supabase, {
+    workerId: worker.id,
+    engagementId,
+    originalText,
+    metrics,
+    ...(projectParams.p_project_explicit ? { explicitProjectId: projectParams.p_project_id } : {}),
+  });
+  if (duplicateOf) {
+    const dupSkills = await runSkillPipeline({
+      entryId: duplicateOf,
+      text: originalText,
+      locale,
+      excludeSlugs: rejectedSlugs,
+      caller: { supabase, userId },
+    });
+    revalidatePath(`/${locale}/dashboard/journal`);
+    return {
+      ok: true,
+      entryId: duplicateOf,
+      skills: dupSkills,
+      dayCheck: await readSavedEntryDayCheck(
+        { supabase, userId },
+        worker.id,
+        duplicateOf,
+      ),
+    };
+  }
+
+  const { data: rpcEntryId, error: rpcErr } = (await (
+    supabase.rpc as unknown as (
+      fn: string,
+      params: typeof rpcParams,
+    ) => Promise<{ data: string | null; error: { code?: string; message?: string } | null }>
+  )("create_journal_entry_full", rpcParams));
+
+  if (rpcErr || typeof rpcEntryId !== "string") {
+    // Fallback path — only entered when the RPC is missing on the target
+    // DB (PostgREST returns `PGRST202` "Could not find the function" /
+    // a 404 schema cache error). On every other failure we surface the
+    // exact reason and DO NOT attempt a second write, so the save stays
+    // all-or-nothing.
+    // G-12: ONLY the PostgREST function-absent codes qualify (PGRST202 =
+    // schema-cache miss, 42883 = undefined_function). Message-text sniffing
+    // ("function", the RPC's own name) used to route permission / validation /
+    // trigger errors into the legacy path, which bypasses project attribution.
+    const isMissingRpc =
+      !!rpcErr && MISSING_RPC_CODES.has((rpcErr.code ?? "").toUpperCase());
+    if (/project_not_assignable/.test(rpcErr?.message ?? "")) {
+      return {
+        ok: false,
+        code: "project_not_assignable",
+        message: t("projectNotAssignable"),
+      };
+    }
+    if (!isMissingRpc) {
+      console.error("[journal] rpc save failed:", rpcErr?.message);
+      return {
+        ok: false,
+        code: "entry_insert_failed",
+        message: t("saveFailed", {
+          reason: rpcErr?.message ?? t("unknownReason"),
+        }),
+      };
+    }
+    console.warn(
+      "[journal] create_journal_entry_full RPC missing — falling back to legacy two-step insert. Apply migration 0017.",
+    );
+    const legacy = await legacyTwoStepSave(supabase, t, {
+      worker_id: worker.id,
+      engagement_context_id: engagementId,
+      entry_type_slug: hasStructured ? "hybrid" : "freeform",
+      profession_id: professionId,
+      original_text: originalText,
+      original_language: locale.slice(0, 2),
+      hash_prev: hashPrev,
+      hash_self: hashSelf,
+      visibility_scope: "closed",
+      metrics: metrics.map((m) => ({ ...m })),
+    });
+    if (!legacy.ok) return legacy;
+    // Canonical save → recognition → evidence → CV pipeline (AWAITED so the
+    // outcome is real, but a pipeline failure never loses the saved entry).
+    const legacySkills = await runSkillPipeline({
+      entryId: legacy.entryId,
+      text: originalText,
+      locale,
+      excludeSlugs: rejectedSlugs,
+      caller: { supabase, userId },
+    });
+    revalidatePath(`/${locale}/dashboard/journal`);
+    return {
+      ok: true,
+      entryId: legacy.entryId,
+      skills: legacySkills,
+      dayCheck: await readSavedEntryDayCheck(
+        { supabase, userId },
+        worker.id,
+        legacy.entryId,
+      ),
+    };
+  }
+
+  const skills = await runSkillPipeline({
+    entryId: rpcEntryId,
+    text: originalText,
+    locale,
+    excludeSlugs: rejectedSlugs,
+    caller: { supabase, userId },
+  });
+  revalidatePath(`/${locale}/dashboard/journal`);
+  // Owner §13 — the day check is read AFTER the save from the same journal
+  // read every surface uses; a failed read leaves the save reported as the
+  // success it is, with the check unknown (never invented).
+  const dayCheck = await readSavedEntryDayCheck(
+    { supabase, userId },
+    worker.id,
+    rpcEntryId,
+  );
+  return { ok: true, entryId: rpcEntryId, skills, dayCheck };
+}

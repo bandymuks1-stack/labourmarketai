@@ -1,0 +1,287 @@
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
+
+import { activeLocales } from "@/lib/i18n/config";
+
+/**
+ * Consent UX honesty guard (required tests 3, 4, 5, 7, 8, 20, 23, 26 +
+ * Phase 6 dark-pattern bans). Source-level invariants over the consent UI,
+ * actions and i18n catalogs.
+ */
+
+const web = join(__dirname, "..", "..");
+const read = (p: string) => readFileSync(join(web, p), "utf8");
+/** Every non-test .ts/.tsx source under a directory, as web-relative paths. */
+function listSources(dir: string, out: string[] = []): string[] {
+  for (const name of readdirSync(join(web, dir))) {
+    if (name === "node_modules" || name.startsWith(".")) continue;
+    const rel = `${dir}/${name}`;
+    if (statSync(join(web, rel)).isDirectory()) listSources(rel, out);
+    else if (/\.tsx?$/.test(name) && !/\.(test|spec)\.tsx?$/.test(name)) out.push(rel);
+  }
+  return out;
+}
+
+const consentComponent = read("components/app/discoverability-consent.tsx");
+const privacyPage = read("app/[locale]/dashboard/privacy/page.tsx");
+const signupForm = read("components/app/signup-form.tsx");
+const actions = read("lib/privacy/discoverability-actions.ts");
+const preview = read("lib/privacy/discoverability-preview.ts");
+const pool = read("lib/staffing/candidate-pool.ts");
+const readiness = read("lib/admin/launch-readiness.ts");
+
+describe("no dark patterns (test 3 + Phase 6)", () => {
+  it("no checkbox exists — nothing can be pre-ticked", () => {
+    expect(consentComponent).not.toMatch(/type="checkbox"/);
+    expect(consentComponent).not.toMatch(/defaultChecked|checked=\{true\}/);
+  });
+
+  it("grant and decline are EQUAL buttons (same classes, adjacent)", () => {
+    const grant = consentComponent.match(
+      /data-testid="discoverability-grant"/,
+    );
+    const decline = consentComponent.match(
+      /data-testid="discoverability-decline"/,
+    );
+    expect(grant && decline).toBeTruthy();
+    // Both buttons carry the identical neutral class string.
+    const cls =
+      "inline-flex min-h-11 items-center rounded-md border border-ink-500 px-4 text-sm font-medium text-text-primary hover:border-brand-blue disabled:opacity-60";
+    expect(consentComponent.split(cls).length).toBeGreaterThanOrEqual(3);
+  });
+
+  it("no coercive or scare copy in any active locale (Phase 6 bans)", () => {
+    for (const locale of activeLocales) {
+      const catalog = JSON.parse(read(`messages/${locale}.json`));
+      const pc = JSON.stringify(catalog.privacyConsent);
+      expect(pc, locale).toBeTruthy();
+      for (const banned of [
+        "privalom", // LT "mandatory"
+        "negalėsite naudotis sistema",
+        "you will lose access",
+        "must accept",
+        "obligatorisk", // SV "mandatory"
+        "du förlorar åtkomst",
+      ]) {
+        expect(pc.toLowerCase(), `${locale}: ${banned}`).not.toContain(banned);
+      }
+    }
+  });
+
+  it("declining is local-only: no server call, nothing deleted (test 5)", () => {
+    const declineHandler = consentComponent
+      .split('data-testid="discoverability-decline"')[0]
+      .split("onClick=")
+      .pop();
+    expect(declineHandler).toContain('setPhase("declined")');
+    expect(declineHandler).not.toContain("withdraw");
+    expect(declineHandler).not.toContain("grant");
+  });
+});
+
+describe("consent is separate from Terms and signup (test 4)", () => {
+  it("signup form contains no discoverability consent and no bundled accept-all control", () => {
+    expect(signupForm).not.toMatch(/discoverab/i);
+    expect(signupForm).not.toMatch(/privacyConsent/);
+  });
+
+  it("the grant action grants ONLY the discoverability purpose", () => {
+    expect(actions).toMatch(/grant_profile_discoverability_consent/);
+    expect(actions).not.toMatch(/terms/i);
+  });
+});
+
+// "Private profile stays usable without consent" was pinned through the
+// PrivacyStatusCard on the second dashboard; W3 Package 4 deleted both. The
+// consent surfaces below (privacy page + consent component) are the
+// remaining canonical homes of that promise.
+
+describe("canonical privacy screen (Phase 6)", () => {
+  it("has the four required sections", () => {
+    for (const id of ["privacy-visibility", "privacy-disclosures", "privacy-history", "privacy-export"]) {
+      expect(privacyPage).toContain(`data-testid="${id}"`);
+    }
+  });
+
+  it("renders the legal text from the versioned registry (hash-exact wording)", () => {
+    expect(privacyPage).toMatch(/PROFILE_DISCOVERABILITY_V1\.texts\[consentLocale\]/);
+  });
+
+  it("withdrawal lives on the same screen as granting (Phase 9: no email/support needed)", () => {
+    expect(consentComponent).toContain('data-testid="discoverability-withdraw"');
+    expect(consentComponent).toContain('data-testid="discoverability-grant"');
+  });
+});
+
+describe("server-side sourcing (tests 7, 8, 21, 26)", () => {
+  it("consent actions and preview never use the service-role client", () => {
+    expect(actions).not.toMatch(/createAdminClient/);
+    expect(preview).not.toMatch(/createAdminClient/);
+    expect(pool).not.toMatch(/createAdminClient/);
+  });
+
+  it("preview exposes ONLY the limited professional summary — no contacts", () => {
+    for (const banned of ["email", "phone", "full_name", "address"]) {
+      expect(preview.toLowerCase()).not.toMatch(
+        new RegExp(`select\\([^)]*${banned}`),
+      );
+    }
+    // 2026-10-18: the preview lists exactly what the discovery projection returns — and companies
+    // see the anonymous label, never the name (list_discoverable_worker_profiles_v1).
+    expect(preview).toMatch(/"id, experience_years, current_location_country, preferred_countries, availability_status, available_from, salary_min_eur, salary_max_eur, preferred_contract_type, pay_basis_preference, night_shifts_ok, weekend_shifts_ok, overtime_ok, driving_licence_categories, own_vehicle, own_tools"/);
+    expect(preview).not.toMatch(/display_name|headline|availability_note|\bbio\b/);
+    // The token only — the view wraps it in the reader's catalogue word, never English.
+    expect(preview).toMatch(/key: "anonymousLabel", value: anonymizedWorkerToken\(/);
+  });
+
+  it("no fixture PII or secrets in the new modules (test 26)", () => {
+    for (const src of [consentComponent, actions, preview, pool]) {
+      expect(src).not.toMatch(/@gmail\.com|\+370\d|bot[0-9]{6,}/);
+    }
+  });
+});
+
+describe("operator surfaces (tests 20 + Phase 8/13)", () => {
+  it("candidate pool exposes the Awaiting-worker-permission state", () => {
+    expect(pool).toMatch(/admin_list_worker_privacy_states/);
+    expect(pool).toMatch(/workerPermission/);
+    const board = read("components/app/candidate-pool-board.tsx");
+    expect(board).toMatch(/permissionAwaiting/);
+  });
+
+  it("launch-readiness consented = real consent-ledger counts, legacy boolean retired", () => {
+    expect(readiness).toMatch(/admin_privacy_readiness_counts/);
+    expect(readiness).not.toMatch(/eq\("consent_data_processing", true\)/);
+  });
+
+  it("no admin UI grants consent on behalf of a user (test 20)", () => {
+    const lrPage = read("app/[locale]/dashboard/admin/launch-readiness/page.tsx");
+    const cpPage = read("app/[locale]/dashboard/admin/candidate-pool/page.tsx");
+    for (const src of [lrPage, cpPage]) {
+      expect(src).not.toMatch(/grant_profile_discoverability|grant_employer_data_disclosure/);
+    }
+  });
+});
+
+describe("i18n completeness for the consent UI (test 23)", () => {
+  const REQUIRED_LEAVES = [
+    "sections.visibility",
+    "sections.disclosures",
+    "sections.history",
+    "sections.rights",
+    "status.hidden",
+    "status.hiddenBody",
+    "status.visible",
+    "status.withdrawn",
+    "actions.grant",
+    "actions.decline",
+    "actions.manage",
+    "actions.review",
+    "preview.title",
+    "labels.declinedNote",
+    "history.action.granted",
+    "history.action.withdrawn",
+  ];
+
+  it.each([...activeLocales])("%s has every consent UI key, none [EN]-marked", (locale) => {
+    const catalog = JSON.parse(read(`messages/${locale}.json`));
+    for (const path of REQUIRED_LEAVES) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      let node: any = catalog.privacyConsent;
+      for (const seg of path.split(".")) node = node?.[seg];
+      expect(typeof node, `${locale}:privacyConsent.${path}`).toBe("string");
+      expect(node, `${locale}:privacyConsent.${path}`).toMatch(/\S/);
+      expect(node, `${locale}:privacyConsent.${path}`).not.toMatch(/^\[EN\]/);
+    }
+    // Admin + pool keys too.
+    expect(typeof catalog.adminLaunchReadiness?.privacy?.title).toBe("string");
+    expect(typeof catalog.candidatePool?.permissionAwaiting).toBe("string");
+  });
+
+  it("LT dashboard states match the owner-specified wording", () => {
+    const lt = JSON.parse(read("messages/lt.json")).privacyConsent;
+    expect(lt.status.hidden).toBe("Profilis darbdaviams nematomas");
+    expect(lt.status.visible).toBe("Profesinis profilis matomas įmonėms");
+    expect(lt.status.withdrawn).toBe("Matomumas išjungtas");
+    expect(lt.actions.grant).toBe("Sutinku ir įjungiu matomumą");
+    expect(lt.actions.decline).toBe("Dabar neįjungti");
+    expect(lt.actions.review).toBe("Peržiūrėti matomumo nustatymus");
+    expect(lt.preview.title).toBe("Taip tavo profilį matys įmonės");
+  });
+});
+
+describe("a consent legal text in another language says so (owner 2026-11-12)", () => {
+  // A routed locale whose legal texts the owner has not approved yet (sv, until
+  // #3232) reads the ENGLISH consent texts inside its own UI. That is honest
+  // only if the screen says it: the reader must never take an English legal
+  // text for a translation that happens to look odd.
+  it("every active locale carries the note, in its own words", () => {
+    const seen = new Set<string>();
+    for (const locale of activeLocales) {
+      const note = JSON.parse(read(`messages/${locale}.json`)).privacyConsent.labels.legalTextInEnglish;
+      expect(typeof note, locale).toBe("string");
+      expect(note.length, locale).toBeGreaterThan(30);
+      expect(note, locale).not.toMatch(/^\[EN\]/);
+      seen.add(note);
+    }
+    expect(seen.size, "one wording per language, not a copied English line").toBe(activeLocales.length);
+    const sv = JSON.parse(read("messages/sv.json")).privacyConsent.labels.legalTextInEnglish;
+    expect(sv).toMatch(/engelska/);
+    expect(sv).toMatch(/inte godkänd/);
+  });
+
+  it("the note is decided by the ONE consent-locale rule and shown by both consent components", () => {
+    const view = read("lib/privacy/discoverability-view.ts");
+    expect(view).toMatch(/toConsentLocale\(locale\) === locale \? null : tc\("labels\.legalTextInEnglish"\)/);
+    // ALL THREE consents — discoverability, partner supply, employer data
+    // disclosure. The third was missed at first (independent review 2026-11-12).
+    for (const file of [
+      "components/app/discoverability-consent.tsx",
+      "components/app/partner-supply-representation.tsx",
+      "components/app/contact-disclosure-requests.tsx",
+    ]) {
+      const src = read(file);
+      expect(src, file).toMatch(/lang=\{labels\.legalLanguageNote \? "en" : undefined\}/);
+      expect(src, file).toMatch(/legal-language-note"/);
+    }
+    // Every component that renders a versioned consent text is one of those three.
+    const consentRenderers = ["components/app", "app"].flatMap((dir) => listSources(dir))
+      .filter((f) => /legal\.(visibleData|invisibleData)\b/.test(read(f)));
+    expect(consentRenderers.sort()).toEqual([
+      "components/app/contact-disclosure-requests.tsx",
+      "components/app/discoverability-consent.tsx",
+      "components/app/partner-supply-representation.tsx",
+    ]);
+    // Every place that renders a consent passes the reader's locale to the rule.
+    for (const file of [
+      "app/[locale]/dashboard/privacy/page.tsx",
+      "components/app/profile-hub-overview.tsx",
+      "lib/conversation/employer-visibility-chat.ts",
+    ]) {
+      expect(read(file), file).toMatch(/discoverabilityConsentLabels\(\w+, locale\)/);
+    }
+    const privacyPage = read("app/[locale]/dashboard/privacy/page.tsx");
+    // partner supply + employer data disclosure labels are built inline there.
+    expect(privacyPage.match(/legalLanguageNote: consentLegalLanguageNote\(tc, locale\)/g)).toHaveLength(2);
+  });
+
+  it("the text a person is SHOWN and the text RECORDED as agreed are picked by one rule", () => {
+    // partner-supply-actions.ts used to carry its own copy that fell back to
+    // "lt": a Swedish reader saw the English text and had the Lithuanian one
+    // recorded. There is ONE toConsentLocale; every consent write imports it.
+    const definitions = ["lib", "app", "components"].flatMap((dir) => listSources(dir))
+      .filter((f) => /function toConsentLocale\b/.test(read(f)));
+    expect(definitions).toEqual(["lib/privacy/discoverability-view.ts"]);
+    expect(read("lib/privacy/discoverability-view.ts")).toMatch(/: "en";/);
+    for (const file of [
+      "lib/privacy/discoverability-actions.ts",
+      "lib/privacy/partner-supply-actions.ts",
+      "lib/privacy/contact-disclosure-actions.ts",
+    ]) {
+      const src = read(file);
+      expect(src, file).toMatch(/import \{ toConsentLocale \} from "@\/lib\/privacy\/discoverability-view";/);
+      expect(src, file).toMatch(/p_locale: toConsentLocale\(input\.locale\)/);
+    }
+  });
+});

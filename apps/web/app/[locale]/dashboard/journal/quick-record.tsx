@@ -1,0 +1,192 @@
+"use client";
+
+import { useEffect, useId, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+
+import {
+  WorkerWorkLogFlow,
+  type WorkLogLabels,
+} from "@/components/app/conversation/worker-worklog-flow";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { extractWorkLog, type WorkLogParse } from "@/lib/conversation/worklog-extract";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import {
+  clearQuickRecordDraft,
+  readQuickRecordDraft,
+  writeQuickRecordDraft,
+} from "@/lib/journal/quick-record-draft";
+
+/**
+ * MANO DARBAS — the default recording path on the journal page (target
+ * worker IA 2026-09-13 §2: "extremely simple: what · where · how long ·
+ * photo → readback → confirm").
+ *
+ * ONE input in the person's own words, ONE button. The sentence is then
+ * handed to the SAME deterministic reader the conversation uses
+ * (`extractWorkLog`) and the SAME readback + confirm surface
+ * (`WorkerWorkLogFlow`): the work day, the timed phrases the record will
+ * carry with their hours, the place, the work context named by the one
+ * label composer, an optional photo — then one confirmation, saved through
+ * the one dispatcher into the canonical `createJournalEntry`. No second
+ * parser, no second write path, no second ledger.
+ *
+ * The full composer stays reachable behind the explicit "detaliau" link
+ * (`?compose=full`) and remains the EDIT surface for an existing entry
+ * (§1.5: nothing removed, nothing made unreachable). The conversation and
+ * the voice door stay as secondary text links.
+ */
+export function JournalQuickRecord({
+  locale,
+  labels,
+  selectedDay = null,
+  selectedDayLabel = null,
+  draftOwner,
+  otherDoors,
+}: {
+  locale: string;
+  labels: WorkLogLabels;
+  /** The day the person picked on the journal calendar (`?date=`). The
+   *  readback carries it unless the sentence names its own day — the person
+   *  never re-picks a day they already chose. */
+  selectedDay?: string | null;
+  /** The same day, formatted by the page for display — passed only when it
+   *  is not today, so the question can name it. */
+  selectedDayLabel?: string | null;
+  /** Who the kept draft belongs to (`quickRecordDraftOwner`): the signed-in
+   *  person in the workspace they act for. A draft of anyone else is dropped. */
+  draftOwner: string;
+  /** The other ways to record (conversation, voice, the full form) — text
+   *  links the page composes, rendered under the recorder so every existing
+   *  door stays one tap away without competing with the one primary action. */
+  otherDoors?: React.ReactNode;
+}) {
+  const t = useTranslations("journal.record");
+  const tJournal = useTranslations("journal");
+  const id = useId();
+  const [text, setText] = useState("");
+  const [draft, setDraft] = useState<WorkLogParse | null>(null);
+  const textRef = useRef<HTMLTextAreaElement>(null);
+  /** `journal_entry_started` fires ONCE per recorder, like the composer's. */
+  const startedRef = useRef(false);
+  // A sentence typed while the page was still loading lives only in the
+  // field: the page's state starts empty, so the button stayed disabled and
+  // the next re-render dropped the words (production walk 2026-10-21). Take
+  // whatever the field already holds once the recorder is live.
+  // The started entry survives a day change, another page and the readback
+  // (owner note 2026-11-22): the words — and whether the readback was open —
+  // come back from this tab's draft, read again for the day now chosen.
+  useEffect(() => {
+    const early = textRef.current?.value ?? "";
+    if (early) {
+      setText((current) => current || early);
+      return;
+    }
+    const kept = readQuickRecordDraft(draftOwner);
+    if (!kept) return;
+    setText(kept.text);
+    if (kept.understood) {
+      const today = personCalendarDay();
+      setDraft(extractWorkLog(kept.text, today, selectedDay ?? today));
+    }
+    // Once, on mount: the recorder is remounted for a new day.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const canUnderstand = text.trim().length >= 3;
+  // A picked PAST day is named in the question itself ("Ką dirbai rugsėjo
+  // 27 d.?") — "Ką šiandien dirbai?" over a readback for the 27th was the
+  // screen contradicting itself (owner walk 2026-09-28).
+  const heading = selectedDayLabel
+    ? t("whatOnDay", { day: selectedDayLabel })
+    : tJournal("whatDidYouDo");
+
+  return (
+    <Card compact className="flex flex-col gap-3" data-testid="journal-quick-record">
+      <div className="flex flex-col gap-0.5">
+        <h2
+          id={`${id}-title`}
+          data-testid="journal-quick-record-day"
+          data-day={selectedDayLabel ? (selectedDay ?? undefined) : undefined}
+          className="font-display text-card-title font-semibold text-text-primary"
+        >
+          {heading}
+        </h2>
+        <p className="text-support leading-relaxed text-text-secondary">{t("hint")}</p>
+      </div>
+
+      {draft === null ? (
+        <>
+          <label className="sr-only" htmlFor={`${id}-text`}>
+            {heading}
+          </label>
+          <textarea
+            ref={textRef}
+            id={`${id}-text`}
+            rows={3}
+            value={text}
+            onChange={(e) => {
+              setText(e.target.value);
+              writeQuickRecordDraft(draftOwner, { text: e.target.value, understood: false });
+            }}
+            placeholder={t("placeholder")}
+            data-testid="journal-quick-record-text"
+            className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-body text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
+          />
+          <div className="flex flex-wrap items-center gap-3">
+            <Button
+              type="button"
+              variant="primary"
+              disabled={!canUnderstand}
+              data-testid="journal-quick-record-understand"
+              onClick={() => {
+                const today = personCalendarDay();
+                // The journal funnel's middle step (activation audit fix #7):
+                // viewed → STARTED → saved, all labelled "journal".
+                if (!startedRef.current) {
+                  startedRef.current = true;
+                  trackFunnel(FUNNEL_EVENTS.journalEntryStarted, { surface: "journal" });
+                }
+                writeQuickRecordDraft(draftOwner, { text, understood: true });
+                setDraft(extractWorkLog(text, today, selectedDay ?? today));
+              }}
+            >
+              {t("understand")}
+            </Button>
+          </div>
+        </>
+      ) : (
+        <div className="flex flex-col gap-2" data-testid="journal-quick-record-readback">
+          <WorkerWorkLogFlow
+            key={draft.notes}
+            draft={draft}
+            locale={locale}
+            labels={labels}
+            // Saves made here are JOURNAL-page saves, not conversation ones
+            // (activation audit fix #7) — same flow, honest funnel label.
+            surface="journal"
+            onSaved={() => clearQuickRecordDraft()}
+            onClose={() => setDraft(null)}
+          />
+          <button
+            type="button"
+            onClick={() => {
+              writeQuickRecordDraft(draftOwner, { text, understood: false });
+              setDraft(null);
+            }}
+            className="inline-flex min-h-11 items-center self-start text-support font-medium text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
+            data-testid="journal-quick-record-restart"
+          >
+            {t("startOver")}
+          </button>
+        </div>
+      )}
+
+      {/* the other doors — every existing way to record stays reachable,
+          as text links, not competing buttons (one primary action per
+          screen) */}
+      {otherDoors}
+    </Card>
+  );
+}

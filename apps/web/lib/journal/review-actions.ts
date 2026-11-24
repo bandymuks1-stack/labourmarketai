@@ -1,0 +1,188 @@
+"use server";
+
+import "server-only";
+import { revalidatePath } from "next/cache";
+
+import { createClient } from "@/lib/supabase/server";
+import { applyApprovalSkillEffects } from "./confirm-actions";
+import { confirmEntryAndVerifySkills } from "@/lib/operations/org-membership";
+import {
+  isTerminalStaleOutcome,
+  terminalStaleFromError,
+} from "@/lib/learning/learning-shared";
+import { REVIEW_DECISIONS, type ReviewDecision } from "./review-status";
+import { notifyJournalReviewDecisions } from "./review-notification";
+
+/**
+ * Manager review → evidence result (slice manager-review-evidence-result-v1).
+ *
+ * The single gated review write: an org manager / admin records an evidence
+ * result (approve / reject / request changes) for a worker's journal entry via
+ * the SECURITY DEFINER RPC `review_journal_entry` (migration 0034). The RPC is
+ * the real security boundary — it re-validates manager/admin scope AND requires
+ * the worker's employment relationship to have `journal_review_enabled = true`
+ * (review is never recorded from a label alone). On approval this also closes
+ * the verified-skill loop, identically to the legacy confirm path.
+ */
+
+/** Block outcomes the RPC can return instead of the decision. */
+export type ReviewBlockCode =
+  | "invalid_decision"
+  | "entry_not_found"
+  | "entry_not_org_scoped"
+  | "not_authorized"
+  | "review_not_enabled"
+  | "no_reviewer_engagement"
+  /** EVID-2: the reviewer is the entry's own author - self-declared work is
+   *  never turned into independent confirmation by reviewing it yourself. */
+  | "self_review_not_allowed"
+  /** The reviewer holds no authority FROM THE WORK RELATIONSHIP over this
+   *  entry (not its employer, not a submitted-to counterparty, or sharing an
+   *  organization with the subject). Never "some other manager exists". */
+  | "review_authority_not_established"
+  /** A counterparty ACCEPT is final for that entry. */
+  | "already_accepted"
+  /** W1 (owner-hold v5): terminal stale outcomes — the entry was edited or
+   *  deleted after the card loaded. The card must stop offering actions. */
+  | "entry_superseded"
+  | "entry_deleted";
+
+export type ReviewActionState =
+  | { ok: true; decision: ReviewDecision }
+  | {
+      ok: false;
+      code: ReviewBlockCode | "error" | "needs_migration";
+      message?: string;
+    };
+
+const RPC_NOT_FOUND_CODE = "42883";
+
+export async function reviewJournalEntry(
+  _prev: ReviewActionState | null,
+  formData: FormData,
+): Promise<ReviewActionState> {
+  const entryId = String(formData.get("entry_id") ?? "").trim();
+  const decisionRaw = String(formData.get("decision") ?? "").trim();
+  const note = String(formData.get("note") ?? "").trim() || null;
+  const locale = String(formData.get("locale") ?? "lt");
+
+  if (entryId === "") return { ok: false, code: "error", message: "entry_id required" };
+  // Bounded free text: the note is stored uncapped by the 0034 RPC.
+  if (note && note.length > 2000) {
+    return { ok: false, code: "error", message: "note too long (max 2000 chars)" };
+  }
+  if (!(REVIEW_DECISIONS as readonly string[]).includes(decisionRaw)) {
+    return { ok: false, code: "invalid_decision" };
+  }
+  const decision = decisionRaw as ReviewDecision;
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "error", message: "Not authenticated" };
+
+  // The 0034 RPC is not in the generated types until applied — cast (the same
+  // graceful pattern the ops-bridge wrappers use; 42883 → needs_migration).
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any).rpc("review_journal_entry", {
+    p_entry_id: entryId,
+    p_decision: decision,
+    p_note: note,
+  });
+  if (error) {
+    if (error.code === RPC_NOT_FOUND_CODE) return { ok: false, code: "needs_migration" };
+    // The confirmation guard trigger RAISES when the entry went stale between
+    // this RPC's pre-check and its confirmation INSERT — an error, not a
+    // tagged return. Map it to the terminal outcome so the card stops offering
+    // actions instead of retrying an impossible one (rev14, Codex P2).
+    if ((error.message ?? "").includes("self_review_not_allowed")) {
+      return { ok: false, code: "self_review_not_allowed" };
+    }
+    if ((error.message ?? "").includes("review_authority_not_established")) {
+      return { ok: false, code: "review_authority_not_established" };
+    }
+    const stale = terminalStaleFromError(error.message);
+    if (stale) {
+      revalidatePath(`/${locale}/dashboard/inbox`);
+      revalidatePath(`/${locale}/dashboard/inbox/quick`);
+      revalidatePath(`/${locale}/dashboard`);
+      return { ok: false, code: stale };
+    }
+    return { ok: false, code: "error", message: error.message };
+  }
+
+  const outcome = data as string;
+  if (outcome !== decision) {
+    if (isTerminalStaleOutcome(outcome)) {
+      // Terminal stale card: refresh the inbox list, the QUICK route and the
+      // counts immediately (reviewable_journal_entry_ids no longer returns this
+      // entry). The quick route is included because the same card is rendered
+      // there and must stop offering actions (owner-hold v5 P2-3).
+      revalidatePath(`/${locale}/dashboard/inbox`);
+      revalidatePath(`/${locale}/dashboard/inbox/quick`);
+      revalidatePath(`/${locale}/dashboard`);
+    }
+    // The RPC returned a block reason instead of the decision.
+    return { ok: false, code: outcome as ReviewBlockCode };
+  }
+
+  // Approval raises the confidence of the entry's linked skills (R-5): a
+  // bounded, idempotent, confidence-only write through a SECURITY DEFINER door.
+  // It does NOT verify any skill.
+  if (decision === "approved") {
+    await applyApprovalSkillEffects(supabase, { entryId, confirmerId: user.id });
+  }
+
+  // DURABLE NOTIFICATION (journal_review_decided): tell the worker the
+  // outcome - all three decisions. The review is committed; this never fails it.
+  await notifyJournalReviewDecisions(supabase, user.id, [
+    { entryId, decision },
+  ]);
+
+  revalidatePath(`/${locale}/dashboard/inbox`);
+  revalidatePath(`/${locale}/dashboard/journal`);
+  return { ok: true, decision };
+}
+
+/**
+ * Approve an entry AND verify the specific declared skills it proves — the
+ * canonical verified-proof path (keystone). Goes through the SECURITY DEFINER
+ * `confirm_entry_and_verify_skills` RPC (via lib/operations/org-membership.ts),
+ * which is the ONLY way a manager can flip a worker's skill to verified
+ * (worker_skills write RLS is owns_worker-only, so the old app-layer update was
+ * silently blocked). The manager picks which of the worker's declared skills
+ * this entry demonstrates; those become manager-confirmed/verified.
+ */
+export type ConfirmSkillsState =
+  | { ok: true; verified: number }
+  | { ok: false; code: string; message?: string };
+
+export async function confirmEntrySkills(
+  _prev: ConfirmSkillsState | null,
+  formData: FormData,
+): Promise<ConfirmSkillsState> {
+  const entryId = String(formData.get("entry_id") ?? "").trim();
+  const note = String(formData.get("note") ?? "").trim() || null;
+  const locale = String(formData.get("locale") ?? "lt");
+  const skillIds = formData
+    .getAll("skill_id")
+    .map((v) => String(v).trim())
+    .filter((v) => v !== "");
+
+  if (entryId === "") return { ok: false, code: "error", message: "entry_id required" };
+  if (skillIds.length === 0) return { ok: false, code: "no_skills" };
+
+  const res = await confirmEntryAndVerifySkills(entryId, skillIds, note, locale);
+  if (res.ok) return { ok: true, verified: res.verified ?? skillIds.length };
+  if (isTerminalStaleOutcome(res.code)) {
+    // Terminal stale card (owner-hold v5): refresh inbox list, quick route and
+    // counts now — the card must vanish from every surface that renders it.
+    revalidatePath(`/${locale}/dashboard/inbox`);
+    revalidatePath(`/${locale}/dashboard/inbox/quick`);
+    revalidatePath(`/${locale}/dashboard`);
+  }
+  // Map the RPC block reasons through unchanged (review_not_enabled,
+  // not_authorized, skill_not_owned, no_reviewer_engagement, error, ...).
+  return { ok: false, code: res.code, message: res.message };
+}

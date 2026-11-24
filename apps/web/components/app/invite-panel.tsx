@@ -1,0 +1,738 @@
+"use client";
+
+import { useMemo, useState } from "react";
+import { useTranslations } from "next-intl";
+
+import { PageTitle } from "@/components/app/premium/page-title";
+import { Check, Copy, Share2 } from "lucide-react";
+
+import { NATIVE_LOCALE_NAMES } from "@/components/marketing/locale-switcher";
+import { activeLocales } from "@/lib/i18n/config";
+import {
+  createAndSendInvitations,
+  createShareableInvitationAction,
+  type CreateInvitationsResult,
+  type InvitationSendOutcome,
+  type ShareableInvitationResult,
+} from "@/lib/invitations/actions";
+import {
+  clampCampaignUses,
+  DEFAULT_RELATIONSHIP_SLUG,
+  DEMAND_INVITATION_TYPES,
+  INVITATION_TYPES,
+  invitationTypeHasContext,
+  MAX_CAMPAIGN_USES_WITH_CONTEXT,
+  MAX_CAMPAIGN_USES_WITHOUT_CONTEXT,
+  MAX_EMAILS_PER_ACTION,
+  ORG_INVITATION_TYPES,
+  RELATIONSHIP_INVITE_CHOICES,
+  relationshipChoiceBlocked,
+  type InvitationType,
+} from "@/lib/invitations/model";
+
+/**
+ * THE canonical "Pakviesti" action (core-network area B). One panel, every
+ * invitation type; reachable from the network surface and linked from the
+ * company workspace / project operations (?invite=1&type=…&org=…&project=…).
+ *
+ * Honesty rules baked in:
+ *  - "Išsiųsta" appears ONLY for a provider-acknowledged send; without a
+ *    configured provider the result is the shareable link (copy / native
+ *    share) — never a fake sent state;
+ *  - invalid addresses are listed, valid ones proceed — one bad address
+ *    never cancels the batch; the per-action cap is stated, not silent;
+ *  - the link is shown once to the inviter who minted it.
+ */
+export function InvitePanel({
+  locale,
+  organizations,
+  projects,
+  demands = [],
+  defaultType,
+  defaultOrganizationId,
+  defaultProjectId,
+  defaultRelationshipSlug,
+  defaultOpen = false,
+  pageTitle,
+}: {
+  locale: string;
+  /**
+   * The caller's OWN open needs (composed from `loadCanonicalDemand`, never a
+   * second reader) — the targets of an `invite_to_demand` invitation:
+   * employer finds person, employer invites, person decides.
+   */
+  demands?: { id: string; label: string }[];
+  /**
+   * `capabilities` are the organization's declared roles (`organization_roles`).
+   * They are used ONLY to explain, before the send, why a capacity is not on
+   * offer — `create_invitation_v1` re-checks server-side and is the actual
+   * enforcement point. Absent (an older caller) reads as "nothing declared",
+   * which is the honest fail-closed answer rather than a silent allow.
+   */
+  organizations: { id: string; name: string; capabilities?: readonly string[] }[];
+  projects: { id: string; title: string | null }[];
+  defaultType?: string;
+  defaultOrganizationId?: string;
+  defaultProjectId?: string;
+  /** Deep-link preset for the relationship control (`?relationship=student`). */
+  defaultRelationshipSlug?: string;
+  /**
+   * Open on arrival without pre-selecting anything (`?invite=1`) — the exit
+   * an empty search or an empty relationships list offers. Presets still open
+   * the panel on their own; this only adds the case with no preset.
+   */
+  defaultOpen?: boolean;
+  /**
+   * The page's own title when the panel IS the page (`/dashboard/network?
+   * invite=1`, the invite action view): rendered as the page's h1 in place of
+   * the panel's h2, so the screen is named after the action the person chose
+   * ("Kviesti studentus") and says it once.
+   */
+  pageTitle?: string;
+}) {
+  const t = useTranslations("network.invite");
+  // The ONE localized relationship vocabulary — the same words the CV prints.
+  const tRelationships = useTranslations("relationshipTypes");
+  /**
+   * THE FORM OPENS WHEN SOMEBODY ASKS FOR IT.
+   *
+   * Eight controls — type, addresses, recipient language, invited name,
+   * proposed role, message, organization, project — used to be unrolled on
+   * every visit to a page whose job is to show existing relationships. Owner
+   * rule for this train: "Forms should open only after an explicit action
+   * such as Pakviesti"; and "an empty feature should normally consume only a
+   * few lines".
+   *
+   * A deep link that already names what to invite (`?invite=1&type=…&org=…`,
+   * used from the company workspace and project operations) is itself the
+   * explicit action, so it still lands on the open form — closing it for
+   * those callers would break a real entry point to make a screenshot
+   * tidier. Nothing is removed and no state is reset: this is the same panel,
+   * behind its own heading.
+   */
+  const [open, setOpen] = useState(
+    Boolean(defaultOpen || defaultType || defaultOrganizationId || defaultProjectId),
+  );
+  const [type, setType] = useState<InvitationType>(
+    (INVITATION_TYPES as readonly string[]).includes(defaultType ?? "")
+      ? (defaultType as InvitationType)
+      : "join_platform",
+  );
+  const [emails, setEmails] = useState("");
+  // The RECIPIENT'S language (V8 W4-B item 6): email subject/body + invite
+  // link land in this language. Defaults to the sender's current locale.
+  const [recipientLocale, setRecipientLocale] = useState(
+    (activeLocales as readonly string[]).includes(locale) ? locale : "lt",
+  );
+  const [invitedName, setInvitedName] = useState("");
+  const [proposedRole, setProposedRole] = useState("");
+  const [message, setMessage] = useState("");
+  const [organizationId, setOrganizationId] = useState(
+    defaultOrganizationId ?? organizations[0]?.id ?? "",
+  );
+  const [projectId, setProjectId] = useState(
+    defaultProjectId ?? projects[0]?.id ?? "",
+  );
+  // Defaults to the historical relationship, so a sender who ignores this
+  // control gets exactly the invitation the product sent before it existed.
+  const [relationshipSlug, setRelationshipSlug] = useState<string>(
+    // A deep link may name the relationship (`?relationship=student` from the
+    // institution's "Invite learners"); anything outside the closed choice
+    // list falls back to the historical default.
+    defaultRelationshipSlug &&
+      RELATIONSHIP_INVITE_CHOICES.some((c) => c.slug === defaultRelationshipSlug)
+      ? defaultRelationshipSlug
+      : DEFAULT_RELATIONSHIP_SLUG,
+  );
+  const [sending, setSending] = useState(false);
+  const [result, setResult] = useState<CreateInvitationsResult | null>(null);
+  const [linkResult, setLinkResult] = useState<ShareableInvitationResult | null>(null);
+  const [copiedLink, setCopiedLink] = useState<string | null>(null);
+  /**
+   * THE DOOR ALREADY SAID WHAT TO INVITE (UX_GAPS 2026-11-18 I-4). A deep link
+   * that names an organization invitation type, one of the caller's own
+   * organizations AND a relationship from the closed choice list (the
+   * institution's "Invite students": `type=join_organization&org=…&relationship=student`)
+   * has nothing left to choose in those three controls. They render as ONE
+   * read-only line, the link is the default way it travels, and the fields are
+   * 44 px targets. Any other address keeps the full panel, unchanged.
+   */
+  const preset =
+    (ORG_INVITATION_TYPES as readonly string[]).includes(defaultType ?? "") &&
+    organizations.some((o) => o.id === defaultOrganizationId) &&
+    RELATIONSHIP_INVITE_CHOICES.some((c) => c.slug === defaultRelationshipSlug);
+  const presetOrganizationName = preset
+    ? (organizations.find((o) => o.id === defaultOrganizationId)?.name ?? "")
+    : "";
+  /** Field height: 44 px when preset (I-4), the panel's own size otherwise. */
+  const fieldHeight = preset ? "min-h-11" : "min-h-9";
+  /**
+   * HOW THE INVITATION TRAVELS (universal network v1). "email": addressed,
+   * mailed when a provider exists — the flow that existed. "link": ONE secure
+   * link with no addressee, copied or shared by hand; optionally a campaign
+   * (many seats, one link, each acceptance its own person). The link is the
+   * distribution primitive; e-mail is one channel over it.
+   */
+  const [mode, setMode] = useState<"email" | "link">(preset ? "link" : "email");
+  const [seats, setSeats] = useState(1);
+  const [campaignLabel, setCampaignLabel] = useState("");
+  const [targetRequestId, setTargetRequestId] = useState(demands[0]?.id ?? "");
+
+  const needsOrg = (ORG_INVITATION_TYPES as readonly string[]).includes(type);
+  const needsProject = type === "join_project";
+  const needsDemand = (DEMAND_INVITATION_TYPES as readonly string[]).includes(type);
+  const maxSeats = invitationTypeHasContext(type)
+    ? MAX_CAMPAIGN_USES_WITH_CONTEXT
+    : MAX_CAMPAIGN_USES_WITHOUT_CONTEXT;
+
+  /**
+   * IN WHAT CAPACITY. Only organization-scoped invitations establish a
+   * person↔organization relationship, so the question is asked only there;
+   * everywhere else the historical default stands and nothing is sent.
+   */
+  const selectedOrgCapabilities = useMemo(
+    () => organizations.find((o) => o.id === organizationId)?.capabilities ?? [],
+    [organizations, organizationId],
+  );
+  /**
+   * Every capacity stays VISIBLE even when the organization cannot offer it
+   * yet. Hiding `student` from a school that has not declared it trains people
+   * produces the worst possible screen — the thing the reader came to do is
+   * simply absent, with no way to find out why. Showing it and saying what is
+   * missing turns a dead end into the next step.
+   */
+  const blockedChoice = useMemo(() => {
+    const choice = RELATIONSHIP_INVITE_CHOICES.find(
+      (c) => c.slug === relationshipSlug,
+    );
+    return choice ? relationshipChoiceBlocked(choice, selectedOrgCapabilities) : false;
+  }, [relationshipSlug, selectedOrgCapabilities]);
+
+  const availableTypes = useMemo(
+    () =>
+      INVITATION_TYPES.filter((v) => {
+        if ((ORG_INVITATION_TYPES as readonly string[]).includes(v)) {
+          return organizations.length > 0;
+        }
+        if (v === "join_project") return projects.length > 0;
+        if ((DEMAND_INVITATION_TYPES as readonly string[]).includes(v)) {
+          return demands.length > 0;
+        }
+        return true;
+      }),
+    [organizations.length, projects.length, demands.length],
+  );
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (sending) return;
+    setSending(true);
+    setResult(null);
+    setLinkResult(null);
+    if (mode === "link" || needsDemand) {
+      try {
+        const r = await createShareableInvitationAction({
+          invitationType: type,
+          locale,
+          recipientLocale,
+          // A demand invitation is addressed when an address was typed —
+          // the employer found a specific person; a campaign never is.
+          email: mode === "email" ? emails : null,
+          organizationId: needsOrg ? organizationId : null,
+          projectId: needsProject ? projectId : null,
+          targetRequestId: needsDemand ? targetRequestId : null,
+          relationshipSlug: needsOrg ? relationshipSlug : null,
+          invitedName: invitedName || null,
+          proposedRole: proposedRole || null,
+          personalMessage: message || null,
+          maxUses: mode === "link" ? clampCampaignUses(type, seats) : 1,
+          campaignLabel: mode === "link" && seats > 1 ? campaignLabel || null : null,
+        });
+        setLinkResult(r);
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
+    try {
+      const r = await createAndSendInvitations({
+        emails,
+        invitationType: type,
+        locale,
+        recipientLocale,
+        organizationId: needsOrg ? organizationId : null,
+        projectId: needsProject ? projectId : null,
+        // Only an organization invitation carries a capacity; anywhere else
+        // there is no organization for the relationship to be WITH.
+        relationshipSlug: needsOrg ? relationshipSlug : null,
+        invitedName: invitedName || null,
+        proposedRole: proposedRole || null,
+        personalMessage: message || null,
+      });
+      setResult(r);
+      if (r.status === "ok" && r.results.some((x) => x.outcome === "sent" || x.outcome === "created")) {
+        setEmails("");
+      }
+    } finally {
+      setSending(false);
+    }
+  }
+
+  async function copyLink(link: string) {
+    try {
+      await navigator.clipboard.writeText(link);
+      setCopiedLink(link);
+      setTimeout(() => setCopiedLink(null), 2500);
+    } catch {
+      /* clipboard unavailable — the link stays visible for manual copy */
+    }
+  }
+
+  async function shareLink(link: string) {
+    try {
+      if (navigator.share) {
+        await navigator.share({ url: link, title: t("shareTitle") });
+      } else {
+        await copyLink(link);
+      }
+    } catch {
+      /* user cancelled the share sheet */
+    }
+  }
+
+  /**
+   * The missing step, then back (owner 2026-11-22): the organisation's
+   * capability card, with a link under it back to THIS invite (same type,
+   * organisation and relationship). It used to open the company home and
+   * leave the person there.
+   */
+  const capabilityFixHref = `/${locale}/dashboard/company/settings?need=training_provider&next=${encodeURIComponent(
+    `/dashboard/network?invite=1&type=${type}${organizationId ? `&org=${organizationId}` : ""}&relationship=${relationshipSlug}`,
+  )}#company-capabilities`;
+  const capacityBlockedNotice = (
+    <span
+      className="text-meta text-state-danger"
+      data-testid="invite-capacity-blocked"
+    >
+      {t("capacityNeedsCapability")}{" "}
+      <a
+        href={capabilityFixHref}
+        className="underline hover:text-text-primary"
+        data-testid="invite-capacity-blocked-cta"
+      >
+        {t("capacityNeedsCapabilityCta")}
+      </a>
+    </span>
+  );
+
+  return (
+    <section
+      className="card-border flex flex-col gap-4 p-4"
+      data-testid="invite-panel"
+    >
+      <header className="flex flex-col gap-1">
+        {/* Closed, the heading IS the trigger — the panel's own title is
+            already the word the owner named for this action ("Pakviesti"), so
+            the compact state needs no new string in any locale, and the
+            reader sees the same word whether it is open or shut. */}
+        {pageTitle ? (
+          <PageTitle data-testid="invite-page-title">{pageTitle}</PageTitle>
+        ) : open ? (
+          <h2 className="font-display text-lg font-bold text-text-primary">
+            {t("title")}
+          </h2>
+        ) : (
+          <button
+            type="button"
+            onClick={() => setOpen(true)}
+            data-testid="invite-panel-open"
+            className="flex min-h-11 items-center gap-2 self-start rounded-md border border-ink-500 px-3 py-1.5 font-display text-lg font-bold text-text-primary transition-colors hover:border-brand-blue"
+          >
+            {t("title")}
+          </button>
+        )}
+        <p className="text-xs text-text-secondary">{t("intro")}</p>
+      </header>
+
+      {open && (
+      <form onSubmit={onSubmit} className="flex flex-col gap-3">
+        {preset ? (
+          <p
+            data-testid="invite-preset"
+            data-type={type}
+            data-organization={organizationId}
+            data-relationship={relationshipSlug}
+            className="text-sm text-text-primary"
+          >
+            {t(`types.${type}`)} · {presetOrganizationName} · {tRelationships(relationshipSlug)}
+          </p>
+        ) : (
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {t("typeLabel")}
+          <select
+            value={type}
+            onChange={(e) => setType(e.target.value as InvitationType)}
+            data-testid="invite-type"
+            className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+          >
+            {availableTypes.map((v) => (
+              <option key={v} value={v}>
+                {t(`types.${v}`)}
+              </option>
+            ))}
+          </select>
+        </label>
+        )}
+
+        {/* HOW IT TRAVELS — addressed e-mail, or one link to hand over. */}
+        <div className="flex flex-wrap items-center gap-2" role="radiogroup" aria-label={t("modeLabel")}>
+          <span className="text-xs text-text-secondary">{t("modeLabel")}</span>
+          {(["email", "link"] as const).map((m) => (
+            <button
+              key={m}
+              type="button"
+              role="radio"
+              aria-checked={mode === m}
+              onClick={() => setMode(m)}
+              data-testid={`invite-mode-${m}`}
+              className={`min-h-9 rounded-md border px-3 py-1.5 text-xs transition-colors ${
+                mode === m
+                  ? "border-brand-blue text-text-primary"
+                  : "border-ink-500 text-text-secondary hover:border-brand-blue"
+              }`}
+            >
+              {t(`modes.${m}`)}
+            </button>
+          ))}
+        </div>
+
+        {needsDemand && (
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("demandLabel")}
+            <select
+              value={targetRequestId}
+              onChange={(e) => setTargetRequestId(e.target.value)}
+              data-testid="invite-demand"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+            >
+              {demands.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.label}
+                </option>
+              ))}
+            </select>
+            <span className="text-meta text-text-muted">{t("demandHint")}</span>
+          </label>
+        )}
+
+        {needsOrg && !preset && (
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("organizationLabel")}
+            <select
+              value={organizationId}
+              onChange={(e) => setOrganizationId(e.target.value)}
+              data-testid="invite-organization"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+            >
+              {organizations.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        {/* IN WHAT CAPACITY — the control that lets an institution connect a
+            learner instead of accidentally declaring them an employee. The
+            names come from the `relationshipTypes` catalogue, never from the
+            slug (invariant I-8). */}
+        {needsOrg && !preset && (
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("capacityLabel")}
+            <select
+              value={relationshipSlug}
+              onChange={(e) => setRelationshipSlug(e.target.value)}
+              data-testid="invite-capacity"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+            >
+              {RELATIONSHIP_INVITE_CHOICES.map((c) => (
+                <option key={c.slug} value={c.slug}>
+                  {tRelationships(c.slug)}
+                </option>
+              ))}
+            </select>
+            <span className="text-meta text-text-muted">{t("capacityHint")}</span>
+            {blockedChoice && capacityBlockedNotice}
+          </label>
+        )}
+        {/* Preset: the capacity is on the line above; what it still needs is said here. */}
+        {preset && blockedChoice && capacityBlockedNotice}
+
+        {needsProject && (
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("projectLabel")}
+            <select
+              value={projectId}
+              onChange={(e) => setProjectId(e.target.value)}
+              data-testid="invite-project"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+            >
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.title ?? t("untitledProject")}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {t("recipientLanguageLabel")}
+          <select
+            value={recipientLocale}
+            onChange={(e) => setRecipientLocale(e.target.value)}
+            data-testid="invite-recipient-language"
+            className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+          >
+            {activeLocales.map((l) => (
+              <option key={l} value={l}>
+                {NATIVE_LOCALE_NAMES[l] ?? l.toUpperCase()}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {mode === "email" ? (
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("emailsLabel", { max: needsDemand ? 1 : MAX_EMAILS_PER_ACTION })}
+            <textarea
+              value={emails}
+              onChange={(e) => setEmails(e.target.value)}
+              rows={2}
+              required
+              placeholder={t("emailsPlaceholder")}
+              data-testid="invite-emails"
+              className="rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+            />
+          </label>
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {/* SEATS — 1 is one person; more is a controlled campaign link
+                ("we need 30 people for this project"), bounded by what the
+                context permits and re-checked by the database. */}
+            <label className="flex flex-col gap-1 text-xs text-text-secondary">
+              {t("seatsLabel", { max: maxSeats })}
+              <input
+                type="number"
+                min={1}
+                max={maxSeats}
+                value={seats}
+                onChange={(e) => setSeats(clampCampaignUses(type, Number(e.target.value)))}
+                data-testid="invite-seats"
+                className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+              />
+              <span className="text-meta text-text-muted">{t("seatsHint")}</span>
+            </label>
+            {seats > 1 && (
+              <label className="flex flex-col gap-1 text-xs text-text-secondary">
+                {t("campaignLabel")}
+                <input
+                  value={campaignLabel}
+                  onChange={(e) => setCampaignLabel(e.target.value)}
+                  maxLength={120}
+                  data-testid="invite-campaign-label"
+                  className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+                />
+              </label>
+            )}
+          </div>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("nameLabel")}
+            <input
+              value={invitedName}
+              onChange={(e) => setInvitedName(e.target.value)}
+              maxLength={120}
+              data-testid="invite-name"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+            />
+          </label>
+          <label className="flex flex-col gap-1 text-xs text-text-secondary">
+            {t("roleLabel")}
+            <input
+              value={proposedRole}
+              onChange={(e) => setProposedRole(e.target.value)}
+              maxLength={80}
+              data-testid="invite-role"
+              className={`${fieldHeight} rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary`}
+            />
+          </label>
+        </div>
+
+        <label className="flex flex-col gap-1 text-xs text-text-secondary">
+          {t("messageLabel")}
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            rows={2}
+            maxLength={500}
+            data-testid="invite-message"
+            className="rounded-md border border-ink-500 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary"
+          />
+        </label>
+
+        <button
+          type="submit"
+          disabled={sending || (mode === "email" && emails.trim().length === 0)}
+          data-testid="invite-submit"
+          className="inline-flex min-h-11 items-center justify-center rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-50"
+        >
+          {sending ? t("sending") : mode === "link" ? t("createLink") : t("send")}
+        </button>
+      </form>
+      )}
+
+      {linkResult && (
+        <div role="status" className="flex flex-col gap-2 text-xs" data-testid="invite-link-result">
+          {linkResult.status === "needs-migration" && (
+            <p className="text-text-muted">{t("notEnabled")}</p>
+          )}
+          {linkResult.status === "not-authed" && (
+            <p className="text-text-muted">{t("notAuthed")}</p>
+          )}
+          {linkResult.status === "ok" && (
+            <ul className="flex flex-col gap-1.5">
+              <ResultRow
+                r={{
+                  email:
+                    (linkResult.maxUses ?? 1) > 1
+                      ? t("campaignSeats", { max: linkResult.maxUses ?? 1 })
+                      : emails.trim() || t("modes.link"),
+                  outcome: linkResult.outcome as InvitationSendOutcome["outcome"],
+                  invitationId: linkResult.invitationId,
+                  inviteLink: linkResult.inviteLink,
+                }}
+                t={t}
+                copiedLink={copiedLink}
+                onCopy={copyLink}
+                onShare={shareLink}
+              />
+            </ul>
+          )}
+        </div>
+      )}
+
+      {result && (
+        <div
+          role="status"
+          className="flex flex-col gap-2 text-xs"
+          data-testid="invite-result"
+        >
+          {result.status === "needs-migration" && (
+            <p className="text-text-muted">{t("notEnabled")}</p>
+          )}
+          {result.status === "not-authed" && (
+            <p className="text-text-muted">{t("notAuthed")}</p>
+          )}
+          {result.status === "ok" && (
+            <>
+              {!result.emailConfigured &&
+                result.results.some((r) => r.outcome === "created") && (
+                  <p className="text-text-secondary" data-testid="invite-link-mode-note">
+                    {t("linkModeNote")}
+                  </p>
+                )}
+              <ul className="flex flex-col gap-1.5">
+                {result.results.map((r) => (
+                  <ResultRow
+                    key={r.email}
+                    r={r}
+                    t={t}
+                    copiedLink={copiedLink}
+                    onCopy={copyLink}
+                    onShare={shareLink}
+                  />
+                ))}
+              </ul>
+              {result.invalid.length > 0 && (
+                <p className="text-state-danger" data-testid="invite-invalid">
+                  {t("invalidEmails")}: {result.invalid.join(", ")}
+                </p>
+              )}
+              {result.overflow.length > 0 && (
+                <p className="text-state-danger" data-testid="invite-overflow">
+                  {t("overflowEmails", { max: MAX_EMAILS_PER_ACTION })}:{" "}
+                  {result.overflow.join(", ")}
+                </p>
+              )}
+            </>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}
+
+function ResultRow({
+  r,
+  t,
+  copiedLink,
+  onCopy,
+  onShare,
+}: {
+  r: InvitationSendOutcome;
+  t: ReturnType<typeof useTranslations>;
+  copiedLink: string | null;
+  onCopy: (link: string) => void;
+  onShare: (link: string) => void;
+}) {
+  return (
+    <li
+      className="flex flex-wrap items-center gap-2 rounded-md border border-ink-600 bg-ink-800/30 px-2.5 py-1.5"
+      data-testid={`invite-result-${r.outcome}`}
+    >
+      <span className="min-w-0 break-all text-text-primary">{r.email}</span>
+      <span
+        className={`font-mono text-meta uppercase tracking-label ${
+          r.outcome === "sent"
+            ? "text-state-success"
+            : r.outcome === "created"
+              ? "text-brand-blue"
+              : "text-state-danger"
+        }`}
+      >
+        {t(`outcomes.${r.outcome}`)}
+      </span>
+      {r.inviteLink && (
+        <span className="ml-auto flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => onCopy(r.inviteLink as string)}
+            data-testid="invite-copy-link"
+            data-invite-link={r.inviteLink}
+            className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
+          >
+            {copiedLink === r.inviteLink ? (
+              <Check className="h-3 w-3" aria-hidden />
+            ) : (
+              <Copy className="h-3 w-3" aria-hidden />
+            )}
+            {copiedLink === r.inviteLink ? t("copied") : t("copyLink")}
+          </button>
+          <button
+            type="button"
+            onClick={() => onShare(r.inviteLink as string)}
+            data-testid="invite-share-link"
+            className="inline-flex items-center gap-1 rounded border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
+          >
+            <Share2 className="h-3 w-3" aria-hidden />
+            {t("share")}
+          </button>
+        </span>
+      )}
+    </li>
+  );
+}

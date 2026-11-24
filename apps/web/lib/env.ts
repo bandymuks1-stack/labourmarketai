@@ -1,0 +1,383 @@
+import { z } from "zod";
+
+import { assertAcceptanceTargetIsLocal } from "@/lib/testing/acceptance-mode";
+
+/**
+ * Validated environment (principle: validate env at boot).
+ *
+ * The Supabase URL is public and defaults to the project's literal value so
+ * local/CI builds pass without secrets. The anon/service/DB secrets are
+ * optional at build time but REQUIRED in production — they are provided via
+ * Vercel environment variables and `.env.local`, never committed.
+ */
+
+/**
+ * Treat a blank string as an ABSENT variable, and trim surrounding whitespace.
+ *
+ * Why this exists (2026-07-22 incident): `BILLING_PROVIDER` was set in the Vercel
+ * dashboard to an empty string in both Production and Preview. `z.enum(...)
+ * .default("none")` does NOT rescue that — a Zod default applies only when the
+ * value is `undefined`, and an empty string is present, so the enum rejected it
+ * with `Invalid input`. Every `main` deploy failed for ~19 hours while the live
+ * site kept serving the last good build.
+ *
+ * A dashboard field that has been cleared, or that carries a stray space or a
+ * trailing newline from a copy-paste, means "not configured" — not "invalid".
+ * This maps that intent onto `undefined` so the documented default applies.
+ *
+ * It deliberately does NOT coerce unknown values. `BILLING_PROVIDER=paypal` or a
+ * legacy provider name must still fail loudly: silently rewriting an unrecognised
+ * billing provider to `none` would turn a misconfiguration into a silent
+ * payments-off state, which is a worse failure than a red build.
+ */
+export function blankAsAbsent(value: unknown): unknown {
+  if (typeof value !== "string") return value;
+  const trimmed = value.trim();
+  return trimmed === "" ? undefined : trimmed;
+}
+
+const schema = z.object({
+  NEXT_PUBLIC_SUPABASE_URL: z
+    .string()
+    .url()
+    .default("https://gorgitwvdzxbnaxhrsrw.supabase.co"),
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1).optional(),
+  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1).optional(),
+  SUPABASE_DB_PASSWORD: z.string().min(1).optional(),
+  /**
+   * Dedicated HMAC key for conversation + capability confirmation tokens
+   * (audit L-02). REQUIRED IN PRODUCTION: at least 32 characters of random
+   * material (`openssl rand -hex 32`); production refuses to sign without it
+   * and never falls back to the service-role key. Outside production the
+   * service-role key is still accepted so local dev works on a fresh checkout.
+   * Optional here so builds pass without secrets — the check is lazy, at sign
+   * time (lib/security/confirmation-key-material.ts).
+   */
+  // A blank hPanel/dashboard field means "not set" — without this an empty
+  // string failed min(16) and took the WHOLE app down at boot (env is read
+  // by nearly every module), not just the confirm steps.
+  CONVERSATION_TOKEN_SECRET: z.preprocess(blankAsAbsent, z.string().min(16).optional()),
+  /**
+   * The public https origin a self-hosted deployment advertises to OAuth and
+   * MCP clients when its hostname is not one of ours (lib/mcp/public-origin.ts).
+   * Unset on Vercel and on production: the request host decides there.
+   */
+  PUBLIC_ORIGIN: z.preprocess(
+    blankAsAbsent,
+    z
+      .string()
+      .url()
+      .refine(
+        (v) => v.startsWith("https://") && new URL(v).origin === v.replace(/\/$/, ""),
+        "PUBLIC_ORIGIN must be an https origin with no path, query or fragment",
+      )
+      .optional(),
+  ),
+  NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS: z
+    .enum(["true", "false"])
+    .default("true"),
+
+  // ── Billing (Stripe TEST-mode only; live is hard-blocked in config) ────────
+  // All default to the OFF state. Payments activate ONLY when the owner injects
+  // a valid test config (sk_test_ + whsec_) via Vercel env / .env.local —
+  // never committed. The safety logic lives in lib/billing/config.ts.
+  PAYMENTS_ENABLED: z.enum(["true", "false"]).default("false"),
+  // Normalised: see `blankAsAbsent` above. A dashboard-set empty string took the
+  // whole production deploy pipeline down on 2026-07-22; `.default()` alone
+  // cannot catch that, because an empty string is present, not absent.
+  BILLING_PROVIDER: z.preprocess(
+    blankAsAbsent,
+    z.enum(["stripe", "none"]).default("none"),
+  ),
+  STRIPE_MODE: z.enum(["test", "live"]).default("test"),
+  STRIPE_SECRET_KEY: z.string().optional(),
+  STRIPE_WEBHOOK_SECRET: z.string().optional(),
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY: z.string().optional(),
+  // Live activation (FINAL COMPLETION D3, 2026-09-02): live mode is reachable
+  // ONLY when this carries the exact owner token AND the price table is owner-
+  // confirmed in code (PRICING_READINESS_STATE) AND every live key is present.
+  // Any other value keeps the historical hard block. See config-core.ts.
+  STRIPE_LIVE_ACTIVATION: z.string().optional(),
+  // PILOT (owner 2026-10-21, payments launch) — DENY BY DEFAULT: a comma-
+  // separated list of organization ids. Billing (checkout, the order button and
+  // plan enforcement) is on ONLY for those organizations; every other workspace
+  // and every public page behaves exactly as with billing off. Unset, blank or a
+  // malformed list admits nobody. Exactly ALL_ORGANIZATIONS = the public launch.
+  // See config-core.ts.
+  BILLING_PILOT_ORGANIZATION_IDS: z.string().optional(),
+  // TRIAL SWITCH (owner 2026-10-21): "false" = a NEW organization subscription
+  // is paid from the first day (no automatic 14-day trial). It changes only
+  // checkouts started from now on — an existing subscription keeps its terms.
+  BILLING_TRIAL_ENABLED: z.enum(["true", "false"]).default("true"),
+  // The organization pilot pass (pilot-pass-core): 1 € once → the paid
+  // Organization plan for the pilot period. Off unless the owner switches it on.
+  BILLING_PILOT_PASS_ENABLED: z.enum(["true", "false"]).default("false"),
+  // TEST price ids (price_…) per paid plan — owner sets these in Stripe test.
+  STRIPE_PRICE_WORKER_PLUS: z.string().optional(),
+  STRIPE_PRICE_COMPANY_PILOT: z.string().optional(),
+  STRIPE_PRICE_AGENCY_PILOT: z.string().optional(),
+  // ── Internal LLM Agents (disabled by default; mock for tests/dev) ──────────
+  // The runtime is `disabled` unless AI_PROVIDER_MODE is `mock` or `live`.
+  // `live` additionally requires AI_API_KEY (owner-set in Vercel env / .env.local,
+  // NEVER committed, NEVER in the client). Safety logic: lib/ai/runtime/config-core.ts.
+  AI_PROVIDER_MODE: z.enum(["disabled", "mock", "live"]).default("disabled"),
+  AI_PROVIDER: z
+    .enum(["local", "anthropic", "openai", "gemini", "xai", "cloudflare", "mistral", "groq"])
+    .default("anthropic"),
+  AI_API_KEY: z.string().optional(),
+  AI_MODEL: z.string().optional(),
+  AI_REQUEST_TIMEOUT_MS: z.string().optional(),
+  AI_MAX_RETRIES: z.string().optional(),
+  AI_MAX_OUTPUT_TOKENS: z.string().optional(),
+  AI_DAILY_RUN_BUDGET: z.string().optional(),
+  // ZERO PAID API BUDGET (owner 2026-10-27): metered AI providers (Gemini,
+  // Anthropic, OpenAI, xAI, DeepL Pro) never run — not even as a fallback —
+  // unless this is exactly "true". Free tiers and local models are unaffected.
+  AI_PAID_PROVIDERS_ALLOWED: z.enum(["true", "false"]).default("false"),
+  // ── AI Router v1 — per-provider adapters (ALL OFF by default) ──────────────
+  // Each non-anthropic adapter is DOUBLE gated: its enable flag must be
+  // "true" AND its key must be present, else the adapter returns the typed
+  // disabled sentinel (lib/ai/runtime/providers/*). Keys are server env only
+  // (Vercel env / .env.local — NEVER committed, NEVER NEXT_PUBLIC).
+  AI_OPENAI_ENABLED: z.enum(["true", "false"]).default("false"),
+  OPENAI_API_KEY: z.string().optional(),
+  AI_GEMINI_ENABLED: z.enum(["true", "false"]).default("false"),
+  GEMINI_API_KEY: z.string().optional(),
+  AI_XAI_ENABLED: z.enum(["true", "false"]).default("false"),
+  XAI_API_KEY: z.string().optional(),
+  // DeepL is a SECONDARY provider (translate_message languageRouting only) —
+  // it is never a primary AI_PROVIDER value.
+  AI_DEEPL_ENABLED: z.enum(["true", "false"]).default("false"),
+  DEEPL_API_KEY: z.string().optional(),
+  AI_LIBRETRANSLATE_ENABLED: z.enum(["true", "false"]).default("false"),
+  AI_LIBRETRANSLATE_SELF_HOSTED: z.enum(["true", "false"]).default("false"),
+  LIBRETRANSLATE_URL: z.string().optional(),
+  LIBRETRANSLATE_API_KEY: z.string().optional(),
+  AI_CLOUDFLARE_ENABLED: z.enum(["true", "false"]).default("false"),
+  CLOUDFLARE_ACCOUNT_ID: z.string().optional(),
+  CLOUDFLARE_API_TOKEN: z.string().optional(),
+  // ── Free API tiers (2026-10-25; ALL OFF by default) ─────────────────────────
+  // OpenAI-compatible bindings in lib/ai/runtime/providers/free-tier.ts. Each is
+  // DOUBLE gated (flag + key) and is a `free_tier` external provider for the
+  // data-egress gate: PUBLIC payloads only. Cloudflare's general LLMs reuse
+  // AI_CLOUDFLARE_ENABLED + CLOUDFLARE_ACCOUNT_ID + CLOUDFLARE_API_TOKEN above.
+  AI_MISTRAL_ENABLED: z.enum(["true", "false"]).default("false"),
+  MISTRAL_API_KEY: z.string().optional(),
+  AI_GROQ_ENABLED: z.enum(["true", "false"]).default("false"),
+  GROQ_API_KEY: z.string().optional(),
+  // ── Local OpenAI-compatible runtime (free_local; OFF by default) ───────────
+  // The ONE provider that needs no key: it authenticates by network location.
+  // Its proof of configuration is instead a VALIDATED base URL plus an explicit
+  // model id (lib/ai/runtime/config-core.ts checkLocalBaseUrl) — two required
+  // values, not one, so nothing is looser here than for a cloud vendor.
+  //
+  // AI_LOCAL_BASE_URL is the origin of an OpenAI-compatible server the operator
+  // runs (Ollama's compatible API, LM Studio, vLLM, …), with or without the
+  // trailing /v1. Plaintext http is accepted ONLY for a loopback host; a remote
+  // runtime must use https, because these prompts carry CVs and journal text.
+  // AI_LOCAL_API_KEY is OPTIONAL — only for a runtime behind a proxy that wants
+  // a bearer token. Leaving it unset is the normal, supported case.
+  AI_LOCAL_ENABLED: z.enum(["true", "false"]).default("false"),
+  AI_LOCAL_BASE_URL: z.string().optional(),
+  AI_LOCAL_MODEL: z.string().optional(),
+  AI_LOCAL_API_KEY: z.string().optional(),
+
+  // ── Owner Telegram alerts (server-only; demand-signal notifications) ───────
+  // Best-effort owner alert on a PERSISTED /company-need intake. OFF by default:
+  // the alert is a no-op unless the owner sets the bot token + chat id (Vercel
+  // env / .env.local — NEVER committed, NEVER NEXT_PUBLIC) AND flips
+  // OWNER_TELEGRAM_ALERTS_ENABLED=true. Helper:
+  // lib/notifications/telegram-owner-alerts.ts. Never breaks the public submit.
+  OWNER_TELEGRAM_ALERTS_ENABLED: z.enum(["true", "false"]).default("false"),
+  OWNER_TELEGRAM_BOT_TOKEN: z.string().optional(),
+  OWNER_TELEGRAM_CHAT_ID: z.string().optional(),
+
+  // ── Agentai OS owner-alert bridge (PREFERRED over standalone Telegram) ─────
+  // When enabled, a persisted /company-need intake POSTs a JSON event to the
+  // owner's Agentai OS alert endpoint (shared-secret bearer token) and Agentai
+  // OS sends it through its existing owner Telegram channel — so LabourMarket.ai
+  // needs NO Telegram bot of its own. All server-only, never NEXT_PUBLIC. OFF by
+  // default; the alert is a no-op unless the endpoint + token are set and
+  // enabled. Requires the owner to deploy a public HTTPS Agentai OS bridge
+  // (Vercel cannot reach a local machine) — see
+  // docs/launch/owner-alert-agentai-os-bridge-plan-v1.md.
+  AGENTAI_OS_ALERTS_ENABLED: z.enum(["true", "false"]).default("false"),
+  AGENTAI_OS_ALERT_ENDPOINT: z.string().url().optional(),
+  AGENTAI_OS_ALERT_TOKEN: z.string().optional(),
+
+  // ── Google sign-in ────────────────────────────────────────────────────────
+  // Owner ruling 2026-07-29 (P0): sign-in is ONE same-tab redirect via
+  // signInWithOAuth + the PKCE callback — the client id is resolved at the
+  // Supabase auth host, so the app needs NO Google env var. The vestigial
+  // NEXT_PUBLIC_GOOGLE_CLIENT_ID declaration (unread since the GIS popup
+  // removal) was deleted in social-acquisition readiness v1.
+
+  // ── Voice Work Journal transcription (server-only, never NEXT_PUBLIC) ──────
+  // Points at the LabourMarket.ai-controlled self-hosted whisper.cpp service
+  // (services/transcribe). OFF unless BOTH are set — the journal voice surface
+  // then shows its honest "transcription server not configured" state.
+  // The browser NEVER talks to the service and never sees the token: audio is
+  // proxied through a server action. See services/transcribe/README.md.
+  VOICE_TRANSCRIBE_URL: z.string().url().optional(),
+  VOICE_TRANSCRIBE_TOKEN: z.string().min(32).optional(),
+});
+
+const parsed = schema.safeParse({
+  NEXT_PUBLIC_SUPABASE_URL: process.env.NEXT_PUBLIC_SUPABASE_URL,
+  NEXT_PUBLIC_SUPABASE_ANON_KEY: process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  SUPABASE_SERVICE_ROLE_KEY: process.env.SUPABASE_SERVICE_ROLE_KEY,
+  SUPABASE_DB_PASSWORD: process.env.SUPABASE_DB_PASSWORD,
+  CONVERSATION_TOKEN_SECRET: process.env.CONVERSATION_TOKEN_SECRET,
+  PUBLIC_ORIGIN: process.env.PUBLIC_ORIGIN,
+  NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS:
+    process.env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS,
+  PAYMENTS_ENABLED: process.env.PAYMENTS_ENABLED,
+  BILLING_PROVIDER: process.env.BILLING_PROVIDER,
+  STRIPE_MODE: process.env.STRIPE_MODE,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  STRIPE_WEBHOOK_SECRET: process.env.STRIPE_WEBHOOK_SECRET,
+  NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY:
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY,
+  STRIPE_LIVE_ACTIVATION: process.env.STRIPE_LIVE_ACTIVATION,
+  BILLING_PILOT_ORGANIZATION_IDS: process.env.BILLING_PILOT_ORGANIZATION_IDS,
+  BILLING_TRIAL_ENABLED: process.env.BILLING_TRIAL_ENABLED,
+  BILLING_PILOT_PASS_ENABLED: process.env.BILLING_PILOT_PASS_ENABLED,
+  STRIPE_PRICE_WORKER_PLUS: process.env.STRIPE_PRICE_WORKER_PLUS,
+  STRIPE_PRICE_COMPANY_PILOT: process.env.STRIPE_PRICE_COMPANY_PILOT,
+  STRIPE_PRICE_AGENCY_PILOT: process.env.STRIPE_PRICE_AGENCY_PILOT,
+  AI_PROVIDER_MODE: process.env.AI_PROVIDER_MODE,
+  AI_PROVIDER: process.env.AI_PROVIDER,
+  AI_API_KEY: process.env.AI_API_KEY,
+  AI_MODEL: process.env.AI_MODEL,
+  AI_REQUEST_TIMEOUT_MS: process.env.AI_REQUEST_TIMEOUT_MS,
+  AI_MAX_RETRIES: process.env.AI_MAX_RETRIES,
+  AI_MAX_OUTPUT_TOKENS: process.env.AI_MAX_OUTPUT_TOKENS,
+  AI_DAILY_RUN_BUDGET: process.env.AI_DAILY_RUN_BUDGET,
+  AI_PAID_PROVIDERS_ALLOWED: process.env.AI_PAID_PROVIDERS_ALLOWED,
+  AI_OPENAI_ENABLED: process.env.AI_OPENAI_ENABLED,
+  OPENAI_API_KEY: process.env.OPENAI_API_KEY,
+  AI_GEMINI_ENABLED: process.env.AI_GEMINI_ENABLED,
+  GEMINI_API_KEY: process.env.GEMINI_API_KEY,
+  AI_XAI_ENABLED: process.env.AI_XAI_ENABLED,
+  XAI_API_KEY: process.env.XAI_API_KEY,
+  AI_DEEPL_ENABLED: process.env.AI_DEEPL_ENABLED,
+  DEEPL_API_KEY: process.env.DEEPL_API_KEY,
+  AI_LIBRETRANSLATE_ENABLED: process.env.AI_LIBRETRANSLATE_ENABLED,
+  AI_LIBRETRANSLATE_SELF_HOSTED: process.env.AI_LIBRETRANSLATE_SELF_HOSTED,
+  LIBRETRANSLATE_URL: process.env.LIBRETRANSLATE_URL,
+  LIBRETRANSLATE_API_KEY: process.env.LIBRETRANSLATE_API_KEY,
+  AI_CLOUDFLARE_ENABLED: process.env.AI_CLOUDFLARE_ENABLED,
+  CLOUDFLARE_ACCOUNT_ID: process.env.CLOUDFLARE_ACCOUNT_ID,
+  CLOUDFLARE_API_TOKEN: process.env.CLOUDFLARE_API_TOKEN,
+  AI_MISTRAL_ENABLED: process.env.AI_MISTRAL_ENABLED,
+  MISTRAL_API_KEY: process.env.MISTRAL_API_KEY,
+  AI_GROQ_ENABLED: process.env.AI_GROQ_ENABLED,
+  GROQ_API_KEY: process.env.GROQ_API_KEY,
+  AI_LOCAL_ENABLED: process.env.AI_LOCAL_ENABLED,
+  AI_LOCAL_BASE_URL: process.env.AI_LOCAL_BASE_URL,
+  AI_LOCAL_MODEL: process.env.AI_LOCAL_MODEL,
+  AI_LOCAL_API_KEY: process.env.AI_LOCAL_API_KEY,
+  OWNER_TELEGRAM_ALERTS_ENABLED: process.env.OWNER_TELEGRAM_ALERTS_ENABLED,
+  OWNER_TELEGRAM_BOT_TOKEN: process.env.OWNER_TELEGRAM_BOT_TOKEN,
+  OWNER_TELEGRAM_CHAT_ID: process.env.OWNER_TELEGRAM_CHAT_ID,
+  AGENTAI_OS_ALERTS_ENABLED: process.env.AGENTAI_OS_ALERTS_ENABLED,
+  AGENTAI_OS_ALERT_ENDPOINT: process.env.AGENTAI_OS_ALERT_ENDPOINT,
+  AGENTAI_OS_ALERT_TOKEN: process.env.AGENTAI_OS_ALERT_TOKEN,
+  VOICE_TRANSCRIBE_URL: process.env.VOICE_TRANSCRIBE_URL,
+  VOICE_TRANSCRIBE_TOKEN: process.env.VOICE_TRANSCRIBE_TOKEN,
+});
+
+if (!parsed.success) {
+  console.error(
+    "Invalid environment variables:",
+    parsed.error.flatten().fieldErrors,
+  );
+  throw new Error("Invalid environment configuration — see .env.example");
+}
+
+export const env = parsed.data;
+
+/**
+ * §18 hardening (PR15): placeholder markers can NEVER be disabled in a
+ * production build. The `NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS="false"`
+ * opt-out exists only for dev/test visual tinkering — in production every
+ * governed placeholder always renders its visible marker, so fabricated
+ * values can never pass as real platform data. ALL marker consumers must
+ * read this constant, never the raw env var (guarded by
+ * lib/guards/placeholder-marker-prod.test.ts).
+ */
+export const showPlaceholderMarkers =
+  process.env.NODE_ENV === "production"
+    ? true
+    : env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS !== "false";
+
+/**
+ * The internal design-system galleries (/design, /design/text-first) are a
+ * DEV TOOL, not a product surface ("Design system preview — dev only").
+ * PR15 hardening: they can never render in a production build — before
+ * this they were gated on the marker env var, whose default ("true") left
+ * them publicly reachable in production.
+ */
+export const designGalleryEnabled =
+  process.env.NODE_ENV !== "production" &&
+  env.NEXT_PUBLIC_SHOW_PLACEHOLDER_MARKERS === "true";
+
+/** Server-only: throws if a required production secret is missing. */
+export function requireServerSecrets() {
+  const missing: string[] = [];
+  if (!env.NEXT_PUBLIC_SUPABASE_ANON_KEY)
+    missing.push("NEXT_PUBLIC_SUPABASE_ANON_KEY");
+  if (!env.SUPABASE_SERVICE_ROLE_KEY)
+    missing.push("SUPABASE_SERVICE_ROLE_KEY");
+  if (missing.length > 0) {
+    throw new Error(
+      `Missing required server secrets: ${missing.join(", ")}. ` +
+        "Set them in Vercel env / .env.local (see .env.example).",
+    );
+  }
+}
+
+/**
+ * Public (URL + anon key) Supabase config for the browser/RSC clients.
+ * Validated lazily at client-construction time (not module load) so build
+ * and SSG succeed without secrets — Vercel injects them at deploy.
+ */
+export function requireSupabaseClientEnv(): {
+  url: string;
+  anonKey: string;
+} {
+  if (!env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    throw new Error(
+      "Missing NEXT_PUBLIC_SUPABASE_ANON_KEY. Set it in Vercel env / " +
+        ".env.local (Supabase Dashboard → Settings → API). See .env.example.",
+    );
+  }
+  // ACCEPTANCE MODE — fail closed before any client can be built. A no-op
+  // unless LM_ACCEPTANCE_MODE=1, so normal dev and production are untouched.
+  // See lib/testing/acceptance-mode.ts for why env precedence is not trusted.
+  assertAcceptanceTargetIsLocal(process.env);
+  return {
+    url: env.NEXT_PUBLIC_SUPABASE_URL,
+    anonKey: env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  };
+}
+
+/** Server-only: validated service-role config for the admin client. */
+export function requireSupabaseServiceEnv(): {
+  url: string;
+  serviceRoleKey: string;
+} {
+  if (!env.SUPABASE_SERVICE_ROLE_KEY) {
+    throw new Error(
+      "Missing SUPABASE_SERVICE_ROLE_KEY. Set it in Vercel env / " +
+        ".env.local (Supabase Dashboard → Settings → API). NEVER commit it.",
+    );
+  }
+  // ACCEPTANCE MODE — the service-role key bypasses RLS, so this is the path
+  // that could actually damage production data. Guarded first, always.
+  assertAcceptanceTargetIsLocal(process.env);
+  return {
+    url: env.NEXT_PUBLIC_SUPABASE_URL,
+    serviceRoleKey: env.SUPABASE_SERVICE_ROLE_KEY,
+  };
+}

@@ -1,0 +1,3 @@
+﻿conceptType,conceptUri,iscoGroup,preferredLabel,altLabels,description
+Occupation,http://data.europa.eu/esco/occupation/0001,7111,namų statybininkas,gyvenamųjų namų statytojas,stato namus
+Occupation,http://data.europa.eu/esco/occupation/0002,7126,santechnikas,vamzdynų montuotojas,montuoja vamzdžius

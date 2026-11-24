@@ -1,0 +1,88 @@
+/**
+ * /llms.txt — the AI-answer-engine face of the product (AEO).
+ *
+ * The llms.txt convention (llmstxt.org) is a plain-Markdown file at the site
+ * root that tells an LLM crawler what the site IS, which public pages carry
+ * the canonical explanation, and which facts must not be inflated. It sits
+ * beside robots.txt / sitemap.xml; it is not a substitute for either.
+ *
+ * Honesty rules (doctrine §18 and the Agentai capability contract's
+ * forbidden-claims list): no counts that drift, no "employers use us" for
+ * imported vacancies, no matching-accuracy claims, no banned "demo" framing.
+ * Everything here is a public, already-published fact.
+ */
+import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
+import { activeLocales, defaultLocale } from "@/lib/i18n/config";
+
+/** Public marketing paths that carry the canonical explanation, in reading order. */
+export const LLMS_TXT_PUBLIC_PATHS: ReadonlyArray<{ path: string; label: string }> = [
+  { path: "", label: "Home — what LabourMarket.ai is" },
+  { path: "/for-workers", label: "For workers — Work Journal, living CV, opportunities" },
+  { path: "/for-companies", label: "For companies — describe a workforce need, reach matching people" },
+  { path: "/for-agencies", label: "For staffing and recruitment agencies" },
+  { path: "/jobs", label: "Public job board (imported market vacancies)" },
+  { path: "/professions", label: "Professions and skills vocabulary" },
+  { path: "/questions", label: "Answers — labour-market questions, editorially approved" },
+  { path: "/pricing", label: "Pricing" },
+  { path: "/about", label: "About" },
+  { path: "/legal/privacy", label: "Privacy" },
+  { path: "/legal/terms", label: "Terms" },
+];
+
+export interface LlmsTxtFacts {
+  /** Whether a live checkout exists RIGHT NOW (billing config, env-gated).
+   *  Defaults to false — the safe claim — so a caller that cannot answer
+   *  never publishes "payments enabled" by accident. */
+  readonly paymentsEnabled?: boolean;
+}
+
+export function buildLlmsTxt(
+  origin: string = MARKETING_ORIGIN,
+  facts: LlmsTxtFacts = {},
+): string {
+  const o = origin.replace(/\/$/, "");
+  const url = (path: string, locale: string = defaultLocale) => `${o}/${locale}${path}`;
+  const pages = LLMS_TXT_PUBLIC_PATHS.map(
+    ({ path, label }) => `- [${label}](${url(path, "en")})`,
+  ).join("\n");
+
+  return [
+    "# LabourMarket.ai",
+    "",
+    "> LabourMarket.ai is an international platform for work, specialists and services, where people and companies find jobs, workers, clients, services and project partners. A person keeps a Work Journal whose entries become evidence, skills and a living CV. It is operated chat-first, on the web and on mobile.",
+    "",
+    "## How to read this site",
+    "",
+    `- Canonical origin: ${o} (www. is a permanent redirect to it).`,
+    `- Every page is served under a locale prefix: ${activeLocales.map((l) => `/${l}`).join(", ")}; the default is /${defaultLocale}. English pages are linked below; swap the prefix for another language.`,
+    "- Authenticated product areas (/{locale}/dashboard, /onboarding, /auth, /cv, /invite, /oauth) are private and excluded from crawling by robots.txt.",
+    "- Sitemaps: /sitemap.xml (marketing pages, with hreflang alternates), /questions-sitemap.xml (answer pages), /jobs-sitemap.xml (public job board, sharded).",
+    "",
+    "## Public pages",
+    "",
+    pages,
+    "",
+    "## Facts to keep straight",
+    "",
+    "- Vacancies on the public job board are imported market data from official public employment services. The employers behind these ads are not customers of LabourMarket.ai and do not publish through it.",
+    "- A signed-out job page shows the occupation, contract type, working time and publication date. The employer, the place and how to apply are for signed-in members, so do not state them from a public page.",
+    "- Ads are shown in the language the source published them in. Do not describe them as automatically translated.",
+    "- Service offers are visible to signed-in members only; there are no public service pages to cite.",
+    "- Work Journals, CVs, profiles and organisation data are private to their owners. Nothing personal is exposed to crawlers or to this file.",
+    "- Matching on the platform is deterministic and explainable; do not attribute accuracy figures or AI-ranking claims to it.",
+    facts.paymentsEnabled
+      ? "- Paid plans can be bought through a live checkout; the pricing page states the current plans and prices."
+      : "- Payments are not enabled; pricing pages describe the intended model, not a live checkout.",
+    "",
+    "## Connect an AI assistant",
+    "",
+    `- MCP server: ${o}/api/mcp (Model Context Protocol, streamable HTTP, POST). ChatGPT, Claude and other MCP clients can connect it as a connector.`,
+    `- Sign-in is OAuth 2.1 with dynamic client registration and PKCE, discovered from ${o}/.well-known/oauth-protected-resource. The person approves the connection on a consent screen and can disconnect it in their account settings.`,
+    "- The assistant acts only with the signed-in person's own permissions. Actions with consequences are prepared as a draft and need a separate confirmation; nothing is published, sent or saved as a fact on the assistant's word alone.",
+    "",
+    "## Security",
+    "",
+    `- Vulnerability disclosure: ${o}/.well-known/security.txt`,
+    "",
+  ].join("\n");
+}

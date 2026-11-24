@@ -1,0 +1,67 @@
+# Dependabot configuration — security audit finding M-05.
+#
+# WHY THIS FILE EXISTS
+# --------------------
+# The audit found `dependabot_security_updates: disabled`, Dependabot alerts
+# disabled, no `dependabot.yml`, and no code scanning. That is WHY 22 dependency
+# vulnerabilities accumulated unnoticed, including the 8 Next.js advisories that
+# became the audit's only HIGH finding (H-01, next 15.5.18 -> 15.5.22).
+#
+# This repository is PUBLIC, so Dependabot, secret scanning and CodeQL are all
+# FREE here. Nothing was blocked by the plan — only unconfigured.
+#
+# OWNER ACTION STILL REQUIRED. This file governs update PRs. It does NOT enable
+# Dependabot ALERTS, which is a repository setting:
+#   Settings -> Code security -> Dependabot alerts -> Enable
+#   Settings -> Code security -> Dependabot security updates -> Enable
+# Until that is done, this file gives scheduled update PRs but no alert feed.
+version: 2
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    # Deliberately low. The point is a reviewable trickle of security-relevant
+    # bumps, not a flood that gets ignored — an ignored queue is the same as no
+    # queue, which is the state this finding describes.
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "chore(deps)"
+      prefix-development: "chore(deps-dev)"
+    labels:
+      - "dependencies"
+    # Majors change APIs and must be a deliberate, separately-reviewed slice —
+    # never an automated PR against a production branch.
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    groups:
+      # One PR for the framework family: next and eslint-config-next ship as a
+      # matched pair upstream, so splitting them creates a broken intermediate
+      # state that trips the lockstep assertion in
+      # lib/guards/nextjs-version-floor.test.ts.
+      next-framework:
+        patterns:
+          - "next"
+          - "eslint-config-next"
+          - "@next/*"
+      dev-tooling:
+        dependency-type: "development"
+        patterns:
+          - "eslint*"
+          - "@typescript-eslint/*"
+          - "vitest"
+          - "@vitest/*"
+          - "prettier*"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+    open-pull-requests-limit: 3
+    commit-message:
+      prefix: "chore(ci)"
+    labels:
+      - "dependencies"

@@ -1,0 +1,870 @@
+"use server";
+
+import { humanBookingNote, previousAgreedTerms } from "@/lib/booking/booking-note";
+import "server-only";
+
+import { cache } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { createClient } from "@/lib/supabase/server";
+import { revalidatePath } from "next/cache";
+import {
+  countOwnerResponsesSince,
+  isOverlapExclusionViolation,
+  normalizeBookingReason,
+  DECLINE_REASON_KINDS,
+  WITHDRAW_REASON_KINDS,
+  type BookingStatus,
+} from "@/lib/booking/booking-state";
+import { hasFeature } from "@/lib/billing/effective-entitlements";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import {
+  COMPANY_REQUEST_LIMITS,
+  evaluateRequestBudget,
+  rollingDayFloorIso,
+} from "@/lib/limits/request-rate-limits";
+import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
+import { notifyBooking } from "@/lib/booking/booking-notify";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { refuseStaleWorkspace } from "@/lib/company/stale-workspace";
+import { sanitizeDemandTitle } from "@/lib/demand/sanitize-demand-title";
+
+/**
+ * Booking server actions (Stage 6) — the live wiring of the booking-state
+ * machine against the PR2 RPCs (propose/respond/withdraw_booking_request).
+ *
+ * HONEST DEGRADATION: the migration is owner-applied (RED). Until applied, the
+ * RPCs/table are absent — every action returns `kind:"needs-migration"` and the
+ * UI shows a calm "not available yet" state, never an error or a fake success.
+ * The worker alone accepts/declines; the company proposes/withdraws; an
+ * overlapping accepted booking is blocked server-side (no double-booking).
+ */
+
+// PostgREST: function/table absent → 42883 (undefined_function), 42P01
+// (undefined_table), or PGRST202 (no function in schema cache).
+const ABSENT = new Set(["42883", "42P01", "PGRST202", "PGRST204"]);
+const CONFLICT = "23P01";
+// Column absent (the owner-gated lifecycle-v2 column is not applied yet).
+const ABSENT_COLUMN = "42703";
+
+/** True exactly when the lifecycle-v2 FUNCTION is not installed yet — the
+ *  compat wrapper falls back to the v1 RPC on these two codes only. */
+function isAbsentFunction(error: { code?: string }): boolean {
+  return error.code === "42883" || error.code === "PGRST202";
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+
+export type BookingActionResult =
+  | {
+      kind: "ok";
+      status?: string;
+      /** A change of dates on an ACCEPTED booking reopened it: the worker
+       *  decides again on the new terms (owner decision 2026-09-28). */
+      reopened?: boolean;
+      /** The dates asked for were already the accepted ones — nothing changed. */
+      unchanged?: boolean;
+      /** Reason-capture outcome tag (P2-PR6). Present ONLY when the caller
+       *  chose a reason: true = the v2 RPC stored it; false = the v2 RPC is
+       *  not installed yet, the v1 RPC completed the action WITHOUT the
+       *  reason (honest partial — the UI says the reason was not saved).
+       *  Undefined = no reason was chosen (plain v1 path, unchanged). */
+      reasonStored?: boolean;
+      /** Accepted-booking engagement outcome (booking-engagement bridge v1).
+       *  Present ONLY on an accept: what the v3 RPC did in the SAME
+       *  transaction ("created" | "already_active" | "already_recorded" |
+       *  "no_company"), or "needs_migration" when the owner-gated v3 RPC is
+       *  not installed yet and the accept completed via the v1 RPC WITHOUT
+       *  an engagement (honest partial). Undefined on declines. */
+      engagement?: string;
+      /**
+       * How many ALREADY-ACCEPTED bookings this accept knowingly overlapped
+       * (RED #5). Present only when the caller passed `acknowledgeClash`.
+       * A receipt row was written per counterpart; the clash itself is not
+       * resolved and both bookings keep their dates.
+       */
+      acknowledgedClashes?: number;
+    }
+  | { kind: "needs-migration" }
+  | { kind: "conflict" }
+  /** The need this proposal belongs to was closed: the database refuses the
+   *  accept ('demand_closed', 20261114100000). Declining stays possible. */
+  | { kind: "need-closed" }
+  /**
+   * The worker ACKNOWLEDGED the clash and the database still refused to
+   * record the accept (production 2026-10-25, walk orders-bookings O-5).
+   *
+   * v4 skips its own clash check when acknowledged, but the table's exclusion
+   * constraint `booking_requests_no_overlapping_accepted` still forbids two
+   * overlapping `accepted` rows for one worker, so the UPDATE fails with
+   * 23P01 and the booking stays `proposed`. Reporting that as `conflict`
+   * re-showed the very question the person had just answered and made the
+   * "accept anyway" button loop. This is its own answer: the overlap cannot
+   * be recorded YET — the person may decline, or leave the offer open for
+   * the company to change its dates. Never a success, never a plain conflict.
+   */
+  | { kind: "overlap-not-recordable" }
+  /** The worker already ACCEPTED this proposal: its terms are an agreement
+   *  and are not rewritten by proposing again. */
+  | { kind: "already-accepted" }
+  /** The propose RPC refused (20261021095200): the worker is not one this
+   *  company may contact, the need is closed, or the worker DECLINED this
+   *  proposal (not re-opened without the worker's new consent). */
+  | { kind: "refused"; reason: ProposeRefusal }
+  | { kind: "not-authed" }
+  | { kind: "not-entitled" }
+  | { kind: "rate-limited" }
+  | { kind: "error"; message: string };
+
+export type ProposeRefusal = "worker-not-reachable" | "need-closed" | "already-answered";
+
+/** The propose RPC's stable refusal words → the action's closed vocabulary.
+ *  null = not one of them (the generic classifier decides). */
+function proposeRefusal(error: { message?: string }): ProposeRefusal | null {
+  const m = error.message ?? "";
+  if (/\bworker_not_reachable\b/.test(m)) return "worker-not-reachable";
+  if (/\bdemand_closed\b/.test(m)) return "need-closed";
+  if (/\bbooking_not_reopenable\b/.test(m)) return "already-answered";
+  return null;
+}
+
+function classify(error: { code?: string; message?: string }): BookingActionResult {
+  if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
+  if (error.code === CONFLICT || /conflicting accepted booking/i.test(error.message ?? "")) {
+    return { kind: "conflict" };
+  }
+  if (/\bdemand_closed\b/.test(error.message ?? "")) return { kind: "need-closed" };
+  return { kind: "error", message: error.message ?? "unknown" };
+}
+
+export interface ProposeBookingInput {
+  locale: string;
+  requestId: string;
+  workerId: string;
+  startDate?: string | null;
+  expectedEndDate?: string | null;
+  locationCountry?: string | null;
+  role?: string | null;
+  note?: string | null;
+  /** The workspace the screen displayed (`refuseStaleWorkspace`). */
+  expectedWorkspaceId?: string;
+}
+
+/** The linked need's role for a booking: structured `payload.role`, else its
+ *  display-sanitised title; "" when unreadable (the RPC treats "" as none). */
+async function readNeedRole(supabase: SupabaseClient, requestId: string): Promise<string> {
+  try {
+    const { data } = await asAny(supabase)
+      .from("customer_requests")
+      .select("title, payload")
+      .eq("id", requestId)
+      .maybeSingle();
+    const payloadRole = (data?.payload as { role?: unknown } | null)?.role;
+    if (typeof payloadRole === "string" && payloadRole.trim()) return payloadRole.trim();
+    return sanitizeDemandTitle(data?.title as string | null);
+  } catch {
+    return "";
+  }
+}
+
+export async function proposeBookingAction(
+  input: ProposeBookingInput,
+): Promise<BookingActionResult> {
+  await refuseStaleWorkspace(input?.expectedWorkspaceId);
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+
+  // W8 slice 1 — WORKSPACE GATE. Proposing a booking is an employer act; it
+  // requires an active company context, not merely a signed-in profile.
+  // Mapped onto the existing `not-entitled` kind (no second vocabulary).
+  if ((await resolveEmployerCompanyContext()).kind !== "ok") return { kind: "not-entitled" };
+
+  // Entitlement enforcement (PR5). Permissive while billing is disabled (pilot
+  // preserved); enforced once test mode is active + no active Company Pilot.
+  if (!(await hasFeature("booking_requests"))) return { kind: "not-entitled" };
+
+  // Bounded request budget (Wagon 1): 10 open proposals + 30/24h per company,
+  // counted over the caller's own RLS-visible booking rows. FAILS CLOSED on
+  // unreadable counts — except while the booking model itself is unapplied,
+  // where the RPC below reports the honest needs-migration state instead.
+  const countOwn = async (
+    filter: (q: unknown) => unknown,
+  ): Promise<{ n: number | null; absent: boolean }> => {
+    try {
+      let q = asAny(supabase)
+        .from("booking_requests")
+        .select("id", { count: "exact", head: true })
+        .eq("owner_id", user.id);
+      q = filter(q);
+      const { count, error } = await q;
+      if (error) {
+        return { n: null, absent: !!(error.code && ABSENT.has(error.code)) };
+      }
+      return { n: typeof count === "number" ? count : null, absent: false };
+    } catch {
+      return { n: null, absent: false };
+    }
+  };
+  const [open, day] = await Promise.all([
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    countOwn((q) => (q as any).eq("status", "proposed")),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    countOwn((q) => (q as any).gt("created_at", rollingDayFloorIso())),
+  ]);
+  if (open.absent || day.absent) return { kind: "needs-migration" };
+  const budget = evaluateRequestBudget(
+    { openCount: open.n, last24hCount: day.n },
+    COMPANY_REQUEST_LIMITS,
+  );
+  if (!budget.allowed) return { kind: "rate-limited" };
+
+  // An ACCEPTED proposal is an agreement. Proposing again for the same need
+  // and worker reaches the same row, and the RPC's upsert rewrote its dates,
+  // role and note while leaving it `accepted` — production walk 2026-09-28:
+  // a worker who accepted 5 October was recorded as having accepted 12
+  // October, which they never saw. Refused here; the terms change through the
+  // conversation. (The RPC-side rule is a separate, owner-gated migration.)
+  const { data: existing, error: existingError } = await asAny(supabase)
+    .from("booking_requests")
+    .select("status")
+    .eq("owner_id", user.id)
+    .eq("request_id", input.requestId)
+    .eq("worker_id", input.workerId)
+    .maybeSingle();
+  if (existingError && !(existingError.code && ABSENT.has(existingError.code))) {
+    return { kind: "error", message: "existing booking unreadable" };
+  }
+  if ((existing as { status?: string } | null)?.status === "accepted") {
+    return { kind: "already-accepted" };
+  }
+  // The worker's "no" stands (20261021095200, owner decision 2026-10-21): a
+  // DECLINED proposal is not re-opened without the worker's new consent. The
+  // RPC refuses the same; this is the clean signal before any write. A
+  // proposal the company withdrew itself may be made again.
+  const existingStatus = (existing as { status?: string } | null)?.status;
+  if (existingStatus === "declined") {
+    return { kind: "refused", reason: "already-answered" };
+  }
+
+  // WHAT the worker is offered is the need's own role. The scouting proposal
+  // sends only dates + a note, so the booking used to reach the worker as a
+  // role-less "Darbo susitarimas" for a need titled "Plytelių klojėjas"
+  // (production walk 2026-09-28). One fact, one source: an explicit role
+  // wins; otherwise the linked need's structured role, then its title — read
+  // under the caller's own session (the RPC below still authorises).
+  const role = input.role?.trim() || (await readNeedRole(supabase, input.requestId));
+  const args = {
+    p_request_id: input.requestId,
+    p_worker_id: input.workerId,
+    p_start_date: input.startDate ?? "",
+    p_expected_end_date: input.expectedEndDate ?? "",
+    p_location_country: input.locationCountry ?? "",
+    p_role_text: role,
+    p_note: input.note ?? "",
+  };
+  // Defense-in-depth: the v3 wrapper (draft migration 20260716121000) also
+  // enforces the caps in the DB. Until the owner applies it, fall back to the
+  // UNCHANGED applied v1 RPC — the app-layer budget above stays active.
+  let { data: newBookingId, error } = await asAny(supabase).rpc("propose_booking_request_v3", args);
+  if (error && isAbsentFunction(error)) {
+    ({ data: newBookingId, error } = await asAny(supabase).rpc("propose_booking_request", args));
+  }
+  if (error) {
+    if (error.code === "P0004" || /limit reached|too many open/i.test(error.message ?? "")) {
+      return { kind: "rate-limited" };
+    }
+    if (/booking already accepted/i.test(error.message ?? "")) return { kind: "already-accepted" };
+    const refusal = proposeRefusal(error);
+    if (refusal) return { kind: "refused", reason: refusal };
+    return classify(error);
+  }
+  revalidatePath(`/${input.locale}/dashboard/bookings`);
+  // W14 mid-funnel: a booking proposal really reached the worker (RPC ok).
+  // No ids in metadata. Fire-and-forget.
+  emitServerFunnelEvent(FUNNEL_EVENTS.bookingProposed, {
+    source: "booking",
+    metadata: { surface: "bookings", role_context: "company" },
+  });
+  // Durable notification for the WORKER — see `notifyBooking` for why it is
+  // awaited and why the facts are read here under the proposer's session.
+  if (typeof newBookingId === "string" && newBookingId) {
+    await notifyBooking(supabase, newBookingId, "booking_proposed");
+  }
+  return { kind: "ok", status: "proposed" };
+}
+
+export async function respondBookingAction(input: {
+  locale: string;
+  bookingId: string;
+  decision: Extract<BookingStatus, "accepted" | "declined">;
+  /** OPTIONAL decline reason (P2-PR6) — closed DECLINE_REASON_KINDS member.
+   *  Ignored unless the decision is "declined"; invalid input degrades to
+   *  "no reason chosen" (the v1 path), never an error. */
+  reasonKind?: string | null;
+  reasonNote?: string | null;
+  /**
+   * THE PERSON HAS SEEN THE CLASH AND STILL WANTS THIS (RED #5).
+   *
+   * Never a default and never inferred: it is set only by an explicit second
+   * action the worker takes AFTER the first attempt came back `conflict`.
+   * Without it this function's behaviour is byte-identical to before — the
+   * same v3 call, the same refusal.
+   */
+  acknowledgeClash?: boolean;
+}): Promise<BookingActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+
+  // Reason capture rides ONLY on a decline and ONLY with a valid closed kind.
+  const reason =
+    input.decision === "declined"
+      ? normalizeBookingReason(input.reasonKind, input.reasonNote, DECLINE_REASON_KINDS)
+      : null;
+
+  if (reason) {
+    // v2 first (stores the reason). If the owner-gated function is not
+    // installed yet, fall back to the v1 RPC — the RESPONSE is never lost,
+    // and the result is tagged so the UI can say the reason was not saved.
+    const v2 = await asAny(supabase).rpc("respond_booking_request_v2", {
+      p_booking_id: input.bookingId,
+      p_decision: input.decision,
+      p_reason_kind: reason.kind,
+      p_reason_note: reason.note ?? "",
+    });
+    if (!v2.error) {
+      revalidatePath(`/${input.locale}/dashboard/bookings`);
+      // AWAITED — a detached emit is killable at serverless return (see
+      // proposeBookingAction); the emitter never throws.
+      await notifyBooking(supabase, input.bookingId, "booking_declined");
+      return { kind: "ok", status: input.decision, reasonStored: true };
+    }
+    if (!isAbsentFunction(v2.error)) return classify(v2.error);
+    const v1 = await asAny(supabase).rpc("respond_booking_request", {
+      p_booking_id: input.bookingId,
+      p_decision: input.decision,
+    });
+    if (v1.error) return classify(v1.error);
+    revalidatePath(`/${input.locale}/dashboard/bookings`);
+    // AWAITED — survives the serverless freeze; never throws.
+    await notifyBooking(supabase, input.bookingId, "booking_declined");
+    return { kind: "ok", status: input.decision, reasonStored: false };
+  }
+
+  if (input.decision === "accepted") {
+    // RED #5 — THE ACKNOWLEDGED OVERLAP. Only reached when the worker has
+    // already been told the dates clash and has explicitly chosen to accept
+    // anyway. v4 is v3 plus that one parameter; it writes a
+    // `clash_acknowledged` receipt per overlapping booking in the SAME
+    // transaction as the accept, and it does NOT resolve, hide or delete the
+    // clash — both bookings keep their dates and the calendar keeps showing
+    // the overlap.
+    //
+    // The default path below is untouched and still calls v3, so an accept
+    // that nobody acknowledged behaves exactly as it always has.
+    if (input.acknowledgeClash === true) {
+      const v4 = await asAny(supabase).rpc("respond_booking_request_v4", {
+        p_booking_id: input.bookingId,
+        p_decision: "accepted",
+        p_reason_kind: "",
+        p_reason_note: "",
+        p_acknowledge_clash: true,
+      });
+      if (!v4.error) {
+        const data = v4.data as
+          | { engagement?: string; acknowledged_clashes?: number }
+          | null;
+        const engagement = data?.engagement ?? "created";
+        revalidatePath(`/${input.locale}/dashboard/bookings`);
+        if (engagement === "created") {
+          emitServerFunnelEvent(FUNNEL_EVENTS.engagementCreated, {
+            source: "booking",
+            metadata: { surface: "bookings", role_context: "worker" },
+          });
+        }
+        await notifyBooking(supabase, input.bookingId, "booking_accepted", engagement === "created");
+        return {
+          kind: "ok",
+          status: "accepted",
+          engagement,
+          acknowledgedClashes: data?.acknowledged_clashes ?? 0,
+        };
+      }
+      // v4 not installed in this environment. Do NOT silently fall through to
+      // v3: v3 would raise 23P01 on the very overlap the person just
+      // acknowledged, and reporting that as a plain conflict would hide the
+      // real reason. Say the capability is missing.
+      if (isAbsentFunction(v4.error)) return { kind: "needs-migration" };
+      // The acknowledgement was given, and the table constraint still refused
+      // the overlapping accept: say exactly that, never the plain conflict the
+      // person has already answered (that is what made the button loop).
+      if (isOverlapExclusionViolation(v4.error)) return { kind: "overlap-not-recordable" };
+      return classify(v4.error);
+    }
+
+    // v3 first — accept + engagement in ONE DB transaction (booking-engagement
+    // bridge v1). If the owner-gated v3 RPC is not installed yet, fall back to
+    // the v1 RPC: the ACCEPT is never lost, and the result carries the honest
+    // "needs_migration" engagement state instead of pretending.
+    const v3 = await asAny(supabase).rpc("respond_booking_request_v3", {
+      p_booking_id: input.bookingId,
+      p_decision: "accepted",
+      p_reason_kind: "",
+      p_reason_note: "",
+    });
+    if (!v3.error) {
+      const engagement =
+        (v3.data as { engagement?: string } | null)?.engagement ?? "created";
+      revalidatePath(`/${input.locale}/dashboard/bookings`);
+      // W14 mid-funnel: the accept+engagement transaction really created an
+      // engagement (v3 RPC reported it). Emitted ONLY on the real creation
+      // outcome — an accept that fell back to v1 has no engagement and emits
+      // nothing. Fire-and-forget.
+      if (engagement === "created") {
+        emitServerFunnelEvent(FUNNEL_EVENTS.engagementCreated, {
+          source: "booking",
+          metadata: { surface: "bookings", role_context: "worker" },
+        });
+      }
+      // AWAITED — a detached emit is killable at serverless return; both
+      // emitters never throw, so the accept that already succeeded cannot
+      // fail on its own notification.
+      await notifyBooking(supabase, input.bookingId, "booking_accepted", engagement === "created");
+      return { kind: "ok", status: "accepted", engagement };
+    }
+    if (!isAbsentFunction(v3.error)) return classify(v3.error);
+    const v1 = await asAny(supabase).rpc("respond_booking_request", {
+      p_booking_id: input.bookingId,
+      p_decision: "accepted",
+    });
+    if (v1.error) return classify(v1.error);
+    revalidatePath(`/${input.locale}/dashboard/bookings`);
+    // AWAITED — survives the serverless freeze; never throws.
+    await notifyBooking(supabase, input.bookingId, "booking_accepted");
+    return { kind: "ok", status: "accepted", engagement: "needs_migration" };
+  }
+
+  const { error } = await asAny(supabase).rpc("respond_booking_request", {
+    p_booking_id: input.bookingId,
+    p_decision: input.decision,
+  });
+  if (error) return classify(error);
+  revalidatePath(`/${input.locale}/dashboard/bookings`);
+  // AWAITED — survives the serverless freeze; never throws.
+  await notifyBooking(supabase, input.bookingId, "booking_declined");
+  return { kind: "ok", status: input.decision };
+}
+
+export async function withdrawBookingAction(input: {
+  locale: string;
+  bookingId: string;
+  /** OPTIONAL withdraw reason (P2-PR6) — closed WITHDRAW_REASON_KINDS member.
+   *  Invalid input degrades to "no reason chosen" (the v1 path). */
+  reasonKind?: string | null;
+  reasonNote?: string | null;
+}): Promise<BookingActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+
+  const reason = normalizeBookingReason(
+    input.reasonKind,
+    input.reasonNote,
+    WITHDRAW_REASON_KINDS,
+  );
+
+  if (reason) {
+    const v2 = await asAny(supabase).rpc("withdraw_booking_request_v2", {
+      p_booking_id: input.bookingId,
+      p_reason_kind: reason.kind,
+      p_reason_note: reason.note ?? "",
+    });
+    if (!v2.error) {
+      revalidatePath(`/${input.locale}/dashboard/bookings`);
+      // AWAITED — a detached emit is killable at serverless return (see
+      // proposeBookingAction); the emitter never throws.
+      await notifyBooking(supabase, input.bookingId, "booking_withdrawn");
+      return { kind: "ok", status: "withdrawn", reasonStored: true };
+    }
+    if (!isAbsentFunction(v2.error)) return classify(v2.error);
+    const v1 = await asAny(supabase).rpc("withdraw_booking_request", {
+      p_booking_id: input.bookingId,
+    });
+    if (v1.error) return classify(v1.error);
+    revalidatePath(`/${input.locale}/dashboard/bookings`);
+    // AWAITED — survives the serverless freeze; never throws.
+    await notifyBooking(supabase, input.bookingId, "booking_withdrawn");
+    return { kind: "ok", status: "withdrawn", reasonStored: false };
+  }
+
+  const { error } = await asAny(supabase).rpc("withdraw_booking_request", {
+    p_booking_id: input.bookingId,
+  });
+  if (error) return classify(error);
+  revalidatePath(`/${input.locale}/dashboard/bookings`);
+  // AWAITED — survives the serverless freeze; never throws.
+  await notifyBooking(supabase, input.bookingId, "booking_withdrawn");
+  return { kind: "ok", status: "withdrawn" };
+}
+
+/**
+ * Change the dates of an outgoing proposal (P2-PR6). Owner-only, enforced by
+ * reschedule_booking_proposal_v1. An ACCEPTED booking never changes while
+ * staying accepted: the RPC reopens it ("reopened"), keeping the previous
+ * accepted terms in the event log, and the worker decides again. Until the owner applies the function, the call classifies as
+ * `needs-migration` and the UI says honestly that the dates were not changed.
+ */
+export async function rescheduleBookingAction(input: {
+  locale: string;
+  bookingId: string;
+  startDate: string;
+  endDate?: string | null;
+  note?: string | null;
+}): Promise<BookingActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  if (!input.startDate?.trim()) {
+    return { kind: "error", message: "start date required" };
+  }
+
+  const note = (input.note ?? "").trim().slice(0, 500);
+  const { data, error } = await asAny(supabase).rpc("reschedule_booking_proposal_v1", {
+    p_booking_id: input.bookingId,
+    p_start_date: input.startDate,
+    p_end_date: input.endDate?.trim() ? input.endDate : null,
+    p_note: note.length > 0 ? note : null,
+  });
+  if (error) return classify(error);
+  if (data === "unchanged") return { kind: "ok", status: "accepted", unchanged: true };
+  revalidatePath(`/${input.locale}/dashboard/bookings`);
+  if (data === "reopened") {
+    // The accepted terms changed: the worker is asked again, exactly like a
+    // new proposal. AWAITED — survives the serverless freeze; never throws.
+    await notifyBooking(supabase, input.bookingId, "booking_proposed");
+    return { kind: "ok", status: "proposed", reopened: true };
+  }
+  return { kind: "ok", status: "proposed" };
+}
+
+/**
+ * Set (or clear) the respond-by date on an OPEN outgoing proposal (P2-PR6).
+ * Owner-only + proposed-only, enforced by the owner-gated
+ * set_booking_response_deadline_v1 RPC. Absent function → `needs-migration`
+ * and the UI says honestly that the deadline was not saved.
+ */
+export async function setBookingDeadlineAction(input: {
+  locale: string;
+  bookingId: string;
+  deadline: string;
+}): Promise<BookingActionResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+  if (!input.deadline?.trim()) {
+    return { kind: "error", message: "deadline required" };
+  }
+
+  const { error } = await asAny(supabase).rpc("set_booking_response_deadline_v1", {
+    p_booking_id: input.bookingId,
+    p_deadline: input.deadline,
+  });
+  if (error) return classify(error);
+  revalidatePath(`/${input.locale}/dashboard/bookings`);
+  return { kind: "ok", status: "proposed" };
+}
+
+export interface BookingRow {
+  id: string;
+  /** customer_requests.id — with workerId, the upsert key the propose RPC
+   *  re-opens on; lets "propose again" reuse the EXISTING propose flow
+   *  pre-scoped to the same request + worker (repeat actions, PR 6b).
+   *  Opaque ids only — no profile/contact data crosses this boundary. */
+  requestId: string;
+  /** workers.id (already client-visible on the scouting propose surface). */
+  workerId: string;
+  status: BookingStatus;
+  startDate: string | null;
+  expectedEndDate: string | null;
+  locationCountry: string | null;
+  roleText: string | null;
+  note: string | null;
+  isOwner: boolean;
+  readinessSnapshot: Record<string, unknown> | null;
+  createdAt: string;
+  /** Set by the respond/withdraw RPCs — backs "responses since last seen". */
+  updatedAt: string;
+  /** Owner-set respond-by date (lifecycle v2). Null while the owner-gated
+   *  column is not applied yet OR simply unset — both render nothing. */
+  responseDeadlineDate: string | null;
+  /** WHO proposes: the booking's organization's public name (owner decision
+   *  2026-09-28), read through booking_proposer_names_v1 for parties only.
+   *  Null while the read is not installed or the booking has no organization. */
+  proposerName: string | null;
+  /** The ACCEPTED terms this open proposal replaced — set only while the
+   *  worker is asked again after the company changed an accepted booking. */
+  changedFrom: { startDate: string | null; expectedEndDate: string | null } | null;
+}
+
+export type BookingsListResult =
+  | { kind: "ok"; incoming: BookingRow[]; outgoing: BookingRow[] }
+  | { kind: "needs-migration" }
+  | { kind: "not-authed" }
+  /** The read itself failed — the bookings are UNKNOWN, never "none". */
+  | { kind: "read-failed" };
+
+// Column lists for the tolerant read: the extended list ALSO asks for the
+// owner-gated lifecycle-v2 deadline column; while it is not applied the
+// select fails with 42703 (undefined column) and we retry with the base list.
+const BASE_BOOKING_COLUMNS =
+  "id, owner_id, request_id, worker_id, status, start_date, expected_end_date, location_country, role_text, note, readiness_snapshot, created_at, updated_at";
+const EXTENDED_BOOKING_COLUMNS = `${BASE_BOOKING_COLUMNS}, response_deadline_date`;
+
+/** Per-REQUEST downgrade memo (React request cache): once the extended
+ *  column list 42703s, every later listMyBookings call in the SAME request
+ *  (badge counts, page render) skips the doomed extended attempt. A new
+ *  request probes again, so the column lights up as soon as it is applied. */
+const deadlineColumnDowngrade = cache((): { absent: boolean } => ({ absent: false }));
+
+/**
+ * The caller's bookings, split into incoming (worker = subject) and outgoing
+ * (company = owner). RLS already scopes rows; we tag ownership by owner_id.
+ *
+ * Read ONCE per server render: Home asked three times per load (the page's
+ * booking offers, Today's attention list and the spine's pending count —
+ * production trace 2026-09-28), each a full `booking_requests` round-trip
+ * on the same 11-connection PostgREST pool. `cache()` is request-scoped
+ * deduplication, not data caching: every navigation re-reads, and a server
+ * action call (no render) runs the read itself. Callers treat the result as
+ * read-only (none mutates it in place).
+ */
+const readMyBookingsOnce = cache(readMyBookings);
+
+export async function listMyBookings(): Promise<BookingsListResult> {
+  return readMyBookingsOnce();
+}
+
+async function readMyBookings(): Promise<BookingsListResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { kind: "not-authed" };
+
+  const downgrade = deadlineColumnDowngrade();
+  let res:
+    | { data: unknown[] | null; error: { code?: string; message?: string } | null }
+    | null = null;
+  if (!downgrade.absent) {
+    res = await asAny(supabase)
+      .from("booking_requests")
+      .select(EXTENDED_BOOKING_COLUMNS)
+      .order("created_at", { ascending: false });
+    if (res?.error?.code === ABSENT_COLUMN) {
+      downgrade.absent = true; // cache the downgrade for this request
+      res = null;
+    }
+  }
+  if (res === null) {
+    res = await asAny(supabase)
+      .from("booking_requests")
+      .select(BASE_BOOKING_COLUMNS)
+      .order("created_at", { ascending: false });
+  }
+  const { data, error } = res!;
+  if (error) {
+    if (error.code && ABSENT.has(error.code)) return { kind: "needs-migration" };
+    // UNKNOWN is not ZERO: a failed read used to come back as an empty "ok"
+    // list, so the worker saw "no proposals yet" while a proposal sat
+    // unreadable — a delivery failure disguised as an empty inbox (row 5.13
+    // follow-up, 2026-10-25). Every consumer already treats a non-ok kind as
+    // unknown; the bookings page says so and offers a retry.
+    console.error("[bookings] list read failed", { code: error.code ?? null });
+    return { kind: "read-failed" };
+  }
+
+  const incoming: BookingRow[] = [];
+  const outgoing: BookingRow[] = [];
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  for (const r of (data ?? []) as any[]) {
+    const row: BookingRow = {
+      id: r.id,
+      requestId: String(r.request_id ?? ""),
+      workerId: String(r.worker_id ?? ""),
+      status: r.status,
+      startDate: r.start_date ?? null,
+      expectedEndDate: r.expected_end_date ?? null,
+      locationCountry: r.location_country ?? null,
+      roleText: r.role_text ?? null,
+      note: humanBookingNote(r.note),
+      isOwner: r.owner_id === user.id,
+      readinessSnapshot: (r.readiness_snapshot as Record<string, unknown> | null) ?? null,
+      createdAt: r.created_at,
+      updatedAt: r.updated_at ?? r.created_at,
+      responseDeadlineDate:
+        typeof r.response_deadline_date === "string" ? r.response_deadline_date : null,
+      proposerName: null,
+      changedFrom: null,
+    };
+    if (row.isOwner) outgoing.push(row);
+    else incoming.push(row);
+  }
+  await attachProposerAndChangedTerms(supabase, incoming);
+  return { kind: "ok", incoming, outgoing };
+}
+
+/**
+ * The two facts a worker needs to decide on an incoming proposal that the
+ * row alone cannot carry: WHO proposes (the organization's public name) and,
+ * after the company changed an accepted booking, WHAT they had agreed to
+ * before. Both reads are tolerant: absent function / column → the row simply
+ * renders without them, never an error.
+ */
+async function attachProposerAndChangedTerms(
+  supabase: SupabaseClient,
+  incoming: BookingRow[],
+): Promise<void> {
+  if (incoming.length === 0) return;
+  const ids = incoming.slice(0, 50).map((r) => r.id);
+  const reopenedIds = incoming.filter((r) => r.status === "proposed").map((r) => r.id);
+  const [names, events] = await Promise.all([
+    asAny(supabase).rpc("booking_proposer_names_v1", { p_booking_ids: ids }),
+    reopenedIds.length > 0
+      ? asAny(supabase)
+          .from("booking_request_events")
+          .select("booking_request_id, previous_terms, created_at")
+          .in("booking_request_id", reopenedIds)
+          .eq("to_status", "proposed")
+          .order("created_at", { ascending: false })
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  const byId = new Map(incoming.map((r) => [r.id, r]));
+  if (!names.error) {
+    for (const n of (names.data ?? []) as { booking_id: string; organization_name: string | null }[]) {
+      const row = byId.get(n.booking_id);
+      if (row && n.organization_name) row.proposerName = n.organization_name;
+    }
+  }
+  if (!events.error) {
+    const seen = new Set<string>();
+    for (const e of (events.data ?? []) as {
+      booking_request_id: string;
+      previous_terms: { start_date?: string | null; expected_end_date?: string | null } | null;
+    }[]) {
+      const row = byId.get(e.booking_request_id);
+      if (!row || seen.has(e.booking_request_id)) continue;
+      // Newest first: only the LATEST move into 'proposed' counts. If that was
+      // the reopening of an accepted booking, show what was agreed before; a
+      // fresh proposal after a decline is not "changed terms" (walk 2026-09-28).
+      seen.add(e.booking_request_id);
+      if (!e.previous_terms) continue;
+      row.changedFrom = previousAgreedTerms({
+        startDate: e.previous_terms.start_date ?? null,
+        expectedEndDate: e.previous_terms.expected_end_date ?? null,
+      });
+    }
+  }
+}
+
+/**
+ * Real count of INCOMING booking proposals awaiting the worker's response
+ * (status = 'proposed'). Used to surface bookings honestly under Žinutės and as
+ * a dashboard next-action — ONLY when the count is real and > 0. Returns 0 on
+ * any non-ok state (needs-migration / not-authed / no rows) so a missing data
+ * model never produces a fake badge. Read-only; no schema/RLS change.
+ */
+export async function getPendingIncomingBookingCount(): Promise<number> {
+  const result = await listMyBookings();
+  if (result.kind !== "ok") return 0;
+  return result.incoming.filter((b) => b.status === "proposed").length;
+}
+
+/**
+ * The caller's booking-loop seen timestamp (audit PR5 — mirrors the
+ * marketplace seen model). Null when never opened or while the owner-gated
+ * booking_requests_seen migration is not applied — both degrade to 0 "new".
+ */
+export async function getBookingRequestsSeenAt(): Promise<string | null> {
+  return readBookingRequestsSeenAtOnce();
+}
+
+/** Read ONCE per server render (perf 2026-10-22): the bell's booking-response
+ *  badge and the opening brief's "workers answered" line both asked for the
+ *  same seen timestamp in one company render. Request-scoped like
+ *  `readMyBookingsOnce` above: every navigation re-reads, and a server action
+ *  (no render — e.g. `markBookingRequestsSeen`) never sees a cached value. */
+const readBookingRequestsSeenAtOnce = cache(readBookingRequestsSeenAt);
+
+async function readBookingRequestsSeenAt(): Promise<string | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const { data, error } = await asAny(supabase)
+    .from("booking_requests_seen")
+    .select("seen_at")
+    .eq("user_id", user.id)
+    .maybeSingle();
+  if (error || !data) return null;
+  return typeof data.seen_at === "string" ? data.seen_at : null;
+}
+
+/**
+ * Real count of the OTHER party's booking responses since the caller last
+ * opened the bookings surface: OWN (proposed-by-me) rows a worker moved to
+ * accepted/declined after seen_at (the respond RPC stamps updated_at). The
+ * caller's own propose/withdraw never counts. 0 when never seen / migration
+ * absent — never a fabricated badge (audit PR5: booking responses were
+ * silent for the proposing company).
+ */
+export async function getBookingResponsesNewCount(opts?: {
+  /** When the bookings surface was NEVER opened, count responses inside this
+   *  many days instead of answering 0 — the opening brief's "what changed"
+   *  must not stay silent for a company that only ever worked in the chat.
+   *  Absent → the badge semantics stay exactly as before (0 until seen). */
+  fallbackDays?: number;
+}): Promise<number> {
+  // The bookings list is request-cached and the spine's pending count reads
+  // it anyway, so it starts beside the seen read instead of after it.
+  const [seen, result] = await Promise.all([getBookingRequestsSeenAt(), listMyBookings()]);
+  const fallback =
+    opts?.fallbackDays && opts.fallbackDays > 0
+      ? new Date(Date.now() - opts.fallbackDays * 86400000).toISOString()
+      : null;
+  const seenAt = seen ?? fallback;
+  if (!seenAt) return 0;
+  if (result.kind !== "ok") return 0;
+  return countOwnerResponsesSince(result.outgoing, seenAt);
+}
+
+/**
+ * Mark the caller's bookings surface as seen (single-row upsert via the
+ * SECURITY DEFINER RPC). Rollout-safe: no-op when unauthenticated or the RPC
+ * is absent — never throws.
+ */
+export async function markBookingRequestsSeen(): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return;
+  try {
+    await asAny(supabase).rpc("mark_booking_requests_seen");
+  } catch {
+    // rollout-safe: absent RPC / transient error → no-op
+  }
+}

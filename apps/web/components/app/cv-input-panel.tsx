@@ -1,0 +1,163 @@
+"use client";
+
+import { useId, useState } from "react";
+import { useTranslations } from "next-intl";
+import { Button } from "@/components/ui/Button";
+import { CvImportUpload } from "@/components/app/cv-import-upload";
+import { cn } from "@/lib/utils";
+
+/**
+ * CV input panel (text-first onboarding). The worker can either UPLOAD a CV
+ * file (PDF / DOCX / TXT) or paste the CV text. Both paths converge on the same
+ * deterministic parser via the caller: the upload extracts the text server-side
+ * (`CvImportUpload` → `/api/cv/extract`) and hands it up through `onPasteSubmit`
+ * exactly like pasted text, so review + save are identical. We store no file.
+ */
+export function CvInputPanel({
+  className,
+  onPasteSubmit,
+  pasting,
+}: {
+  className?: string;
+  /** Receives CV text — whether pasted OR extracted from an uploaded file. */
+  onPasteSubmit: (text: string) => void;
+  pasting?: boolean;
+}) {
+  const t = useTranslations("structuring.cv");
+  const tImport = useTranslations("cvImport");
+  const id = useId();
+  const [pasted, setPasted] = useState("");
+  const canSubmit = pasted.trim().length > 0 && !pasting;
+
+  return (
+    <section
+      className={cn(
+        "card-border flex flex-col gap-3 p-5 sm:p-6",
+        className,
+      )}
+      aria-labelledby={`${id}-title`}
+    >
+      <h2
+        id={`${id}-title`}
+        className="font-display text-lg font-semibold text-text-primary"
+      >
+        {t("title")}
+      </h2>
+      <p className="text-xs leading-relaxed text-text-secondary">
+        {t("helper")}
+      </p>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/50 p-3">
+          <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {t("uploadLabel")}
+          </span>
+          {/* Real upload → server-side text extraction. The extracted text is
+              fed into the SAME review/save path as pasted text. */}
+          <CvImportUpload onExtracted={onPasteSubmit} disabled={pasting} />
+          <span className="text-meta leading-relaxed text-text-muted">
+            {t("uploadHint")}
+          </span>
+          {/* Image OCR — honest FUTURE seam (§18): the input exists, is
+              visibly disabled, and the label says plainly it is not available
+              yet. No fake button, no silent accept-and-fail. */}
+          <div
+            className="flex flex-col gap-1 rounded-md border border-dashed border-ink-600 p-2 opacity-70"
+            data-testid="cv-image-ocr-seam"
+          >
+            {/* W7-S4 (W7-S2 debt A-1): the seam's label was a plain sibling
+                `<span>`, so the file input was the profile's other unnamed
+                perceivable input — a screen reader announced a disabled file
+                control with no idea what it was for. Named from the visible
+                label; the seam stays exactly as disabled and as honest. */}
+            <span
+              id="cv-image-ocr-label"
+              className="font-mono text-meta uppercase tracking-label text-text-muted"
+            >
+              {tImport("imageOcr.label")}
+            </span>
+            <input
+              id="cv-image-ocr-input"
+              aria-labelledby="cv-image-ocr-label"
+              type="file"
+              accept="image/jpeg,image/png"
+              disabled
+              aria-disabled="true"
+              // `w-full` IS LOAD-BEARING. An <input type="file"> with no
+              // explicit width has an intrinsic min-content of ~258px here,
+              // and a grid item's `min-width: auto` floor means the card
+              // CANNOT shrink below it: the card sat at 302px inside a 246px
+              // grid column and pushed the profile 19px past a 320px viewport.
+              // `document.scrollWidth` still read exactly 320, so the page
+              // never reported the overflow it was hiding.
+              //
+              // Measured at 320px, on this input:
+              //   min-w-0      -> 302px card, still +19px   (no effect)
+              //   max-w-full   -> 302px card, still +19px   (no effect)
+              //   w-full       -> 220px card, +0px, input stays visible (202px)
+              //   w-0 min-w-0  -> +0px, but the input renders 0px wide
+              // Same root cause as #1100 (the landing hero ask input), which
+              // needed `w-0` because it was a `flex-1` ROW item that grew back.
+              // This one is a block child, so `w-full` is the variant that
+              // clears the floor WITHOUT hiding the control.
+              className="w-full text-xs text-text-muted"
+            />
+            <span className="text-meta leading-relaxed text-text-muted">
+              {tImport("imageOcr.note")}
+            </span>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/50 p-3">
+          <label
+            htmlFor={`${id}-paste`}
+            className="font-mono text-meta uppercase tracking-label text-text-muted"
+          >
+            {t("pasteLabel")}
+          </label>
+          <textarea
+            id={`${id}-paste`}
+            rows={4}
+            value={pasted}
+            onChange={(e) => setPasted(e.target.value)}
+            placeholder={t("pastePlaceholder")}
+            className="w-full rounded-md border border-ink-500 bg-ink-700 px-3 py-2 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
+          />
+          <Button
+            type="button"
+            size="sm"
+            className="min-h-11"
+            onClick={() => onPasteSubmit(pasted)}
+            disabled={!canSubmit}
+          >
+            {t("pasteSubmit")}
+          </Button>
+        </div>
+      </div>
+
+      {/* Evidence library framing — what each kind of evidence helps show, so a
+          document is collected for a benefit, not as file admin. Benefit-first. */}
+      <div
+        className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-3"
+        data-testid="cv-evidence-types"
+      >
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {t("evidenceTitle")}
+        </span>
+        <ul className="flex flex-col gap-0.5 text-xs leading-relaxed text-text-secondary">
+          <li>{t("evidenceCv")}</li>
+          <li>{t("evidenceCerts")}</li>
+          <li>{t("evidencePhotos")}</li>
+          <li>{t("evidenceRecs")}</li>
+          <li>{t("evidenceLegal")}</li>
+        </ul>
+      </div>
+      <p
+        className="text-meta leading-relaxed text-text-muted"
+        data-testid="cv-privacy-note"
+      >
+        {t("privacyNote")}
+      </p>
+    </section>
+  );
+}

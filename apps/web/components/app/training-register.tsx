@@ -1,0 +1,552 @@
+import { getTranslations } from "next-intl/server";
+
+import {
+  assignTrainingAction,
+  attachTrainingCertificateAction,
+  completeTrainingAction,
+  createTrainingProgramAction,
+  markTrainingExpiredAction,
+  updateTrainingProgramAction,
+} from "@/lib/training/training-actions";
+import {
+  getCertificationRegister,
+  getTrainingAssignees,
+  getTrainingAuthority,
+  getTrainingOverview,
+} from "@/lib/training/training";
+import {
+  TRAINING_COMPLETION_NOTE_MAX,
+  TRAINING_DESCRIPTION_MAX,
+  TRAINING_TITLE_MAX,
+  TRAINING_TITLE_MIN,
+  deriveExpiryState,
+  isTrainingNotice,
+} from "@/lib/training/training-model";
+import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { listOrganizationMembers } from "@/lib/company/memberships";
+import { getOrgDocumentRegister } from "@/lib/documents/document-files";
+
+/**
+ * Training & Certification section (v1) — one section, two audiences,
+ * exactly as the document centre already does it:
+ *   * "Your training" — what THIS person was asked to complete, and the
+ *     single self-only action that records it;
+ *   * "Training programmes" + "Certificates" — the organization's own
+ *     register, visible only to a managing role (RLS decides, not this
+ *     component).
+ *
+ * Honest absence: while the human-gated migration is unapplied the read
+ * answers needs-migration and the section renders a calm note — never an
+ * error, never a fake programme. With the layer present but nothing
+ * assigned, the personal half stays out of the way.
+ *
+ * A certificate here is evidence that a COURSE WAS FINISHED. It is never
+ * shown as proof of skill, and there is no rating anywhere on this surface.
+ * Confirming that someone READ the material is the document centre's
+ * confirmation list, not a second control here.
+ *
+ * A COURSE CAN BE CORRECTED AND RETIRED. `update_training_program_v1` and the
+ * "Course updated." notice have existed in all eleven locales since the module
+ * shipped, and nothing called them: a course name typed wrong stayed wrong,
+ * and a course the organization had stopped running stayed in the list
+ * forever — assignable right up to the point where `assign_training_v1`
+ * refused it as `inactive_program` with no explanation on screen. Each course
+ * now opens in place, says whether it is still running, and can be retired or
+ * brought back. Nothing is deleted: retiring is a flag, and the assignments
+ * already made against a course are untouched by it.
+ *
+ * THE FORMS FOLLOW AUTHORITY, NOT DATA. The register used to open its
+ * organization half only when the reader could already read a course or an
+ * assignment, so an organization with no course could never add its first
+ * one — and every employee of an organization that had one was offered the
+ * add and assign forms the database then refused. Each form now renders from
+ * `getTrainingAuthority()`, which asks the database the same predicates the
+ * write commands enforce. A reader without authority keeps the read view.
+ *
+ * Pure server component, NATIVE-NAV forms: every submit is a server action
+ * that redirects back with an honest `?trn=` outcome.
+ */
+export async function TrainingRegister({
+  locale,
+  notice,
+}: {
+  locale: string;
+  notice?: string;
+}) {
+  const t = await getTranslations("training");
+  const tDoc = await getTranslations("documents");
+  const overview = await getTrainingOverview();
+  if (overview.kind === "not-authed" || overview.kind === "error") return null;
+
+  const outcome = notice && isTrainingNotice(notice) ? notice : null;
+
+  if (overview.kind === "needs-migration") {
+    return (
+      <section
+        id="training"
+        className="flex flex-col gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+        data-testid="training-register"
+      >
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {t("title")}
+        </h2>
+        <p
+          className="rounded-md border border-dashed border-ink-500 p-3 text-sm text-text-muted"
+          data-testid="training-not-available"
+        >
+          {t("notAvailable")}
+        </p>
+      </section>
+    );
+  }
+
+  const today = new Date();
+  // One organization's register in one workspace (decision 0024): RLS lets a
+  // person who belongs to several organizations read all of their courses,
+  // but the organization half shows only the ACTIVE workspace's. A person's
+  // own assignments ("mine") stay visible in every workspace.
+  const workspace = await getWorkspaceContext();
+  const activeOrganizationId =
+    workspace.workspaces.find((w) => w.kind === "organization" && w.id === workspace.activeWorkspaceId)?.id ?? null;
+  const certs = await getCertificationRegister(activeOrganizationId);
+  const programs = overview.programs.filter((p) => p.organizationId === activeOrganizationId);
+  const managed = overview.assignments.filter(
+    (a) => a.assigneeProfileId !== overview.viewerProfileId && a.organizationId === activeOrganizationId,
+  );
+  const authority = await getTrainingAuthority([
+    ...programs.map((p) => p.organizationId),
+    ...managed.map((a) => a.organizationId),
+  ]);
+  const canCreate = authority.createOrganizationId !== null;
+  // The organization half opens for a reader who may add a course (even to
+  // an empty register — the add form plus an honest empty state), or who can
+  // already read courses or managed assignments (the read view).
+  const showOrganization =
+    canCreate || programs.length > 0 || managed.length > 0;
+  // Who a course can be assigned to: the organization's own people in the
+  // four groups of the owner decision (2026-11-18), active links only. Read
+  // only when this reader may assign in the active workspace.
+  const tRel = await getTranslations("relationshipTypes");
+  const assignees =
+    activeOrganizationId && authority.assignOrganizationIds.has(activeOrganizationId)
+      ? await getTrainingAssignees(activeOrganizationId)
+      : [];
+  // Who each managed assignment is for — the organization's own member list,
+  // labelled the way the document register labels its assignees.
+  const members =
+    managed.length > 0 && activeOrganizationId
+      ? await listOrganizationMembers(activeOrganizationId)
+      : null;
+  const assigneeLabel = new Map<string, string>([
+    ...assignees.map((a) => [a.profileId, a.name] as const),
+    ...(members?.kind === "ok"
+      ? members.members.map((m) => [m.profileId, m.fullName || m.email || ""] as const)
+      : []),
+  ]);
+
+  // A certificate is a file version from the organization's OWN document
+  // register (the attach command refuses anything else) — picked from that
+  // register, never typed as an id. Read only when a row can take one.
+  const needsCertificateFiles = managed.some(
+    (a) =>
+      authority.assignOrganizationIds.has(a.organizationId) &&
+      a.status === "completed" &&
+      !a.certificateDocumentFileId,
+  );
+  const documentRegister =
+    needsCertificateFiles && activeOrganizationId
+      ? await getOrgDocumentRegister(activeOrganizationId)
+      : null;
+  const certificateFiles =
+    documentRegister?.kind === "ok"
+      ? documentRegister.entries.flatMap((e) =>
+          e.currentFile
+            ? [{ id: e.currentFile.id, label: `${e.document.title} · ${e.currentFile.originalFilename}` }]
+            : [],
+        )
+      : [];
+
+  return (
+    <section
+      id="training"
+      className="flex flex-col gap-4 rounded-md border border-ink-600 bg-ink-800/30 p-4"
+      data-testid="training-register"
+    >
+      <div className="flex flex-col gap-1">
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {t("title")}
+        </h2>
+        <p className="text-xs text-text-secondary">{t("intro")}</p>
+        <p className="text-meta text-text-muted">{t("evidenceNote")}</p>
+      </div>
+
+      {outcome ? (
+        <p
+          role="status"
+          className="rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm text-text-secondary"
+          data-testid="training-notice"
+        >
+          {t(`notice.${outcome}`)}
+        </p>
+      ) : null}
+
+      {/* ── Your training — the self-only half ─────────────────────────── */}
+      {overview.mine.length > 0 ? (
+        <div className="flex flex-col gap-2" data-testid="training-mine">
+          <h3 className="text-sm font-semibold text-text-primary">
+            {t("mine.heading")}
+          </h3>
+          <ul className="flex flex-col gap-2">
+            {overview.mine.map((a) => (
+              <li
+                key={a.id}
+                className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
+                data-testid="training-mine-row"
+              >
+                <div className="flex min-w-0 flex-col gap-0.5">
+                  <span className="text-sm font-semibold text-text-primary">
+                    {a.programTitle}
+                  </span>
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t(`status.${a.status}`)}
+                    {a.requiredBy ? ` · ${t("mine.requiredBy", { date: a.requiredBy })}` : ""}
+                  </span>
+                </div>
+                {a.status === "assigned" ? (
+                  <form action={completeTrainingAction} className="flex flex-col gap-2 sm:flex-row">
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="assignmentId" value={a.id} />
+                    <input
+                      type="text"
+                      name="note"
+                      maxLength={TRAINING_COMPLETION_NOTE_MAX}
+                      placeholder={t("mine.notePlaceholder")}
+                      aria-label={t("mine.notePlaceholder")}
+                      className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-md border border-brand-blue px-3 py-1 text-sm font-semibold text-brand-blue"
+                    >
+                      {t("mine.complete")}
+                    </button>
+                  </form>
+                ) : (
+                  <p className="text-meta text-text-muted">
+                    {a.completionNote ?? t("mine.completedNote")}
+                  </p>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : null}
+
+      {/* ── The organization's own register ────────────────────────────── */}
+      {showOrganization ? (
+        <div className="flex flex-col gap-3" data-testid="training-org">
+          <h3 className="text-sm font-semibold text-text-primary">
+            {t("org.heading")}
+          </h3>
+
+          {canCreate ? (
+          <form
+            action={createTrainingProgramAction}
+            className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
+            data-testid="training-create-form"
+          >
+            <DisplayedWorkspaceField />
+            <input type="hidden" name="locale" value={locale} />
+            <label className="flex flex-col gap-1 text-meta text-text-muted">
+              {t("org.programTitle")}
+              <input
+                type="text"
+                name="title"
+                required
+                minLength={TRAINING_TITLE_MIN}
+                maxLength={TRAINING_TITLE_MAX}
+                className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+              />
+            </label>
+            <label className="flex flex-col gap-1 text-meta text-text-muted">
+              {t("org.programDescription")}
+              <textarea
+                name="description"
+                rows={2}
+                maxLength={TRAINING_DESCRIPTION_MAX}
+                className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+              />
+            </label>
+            <p className="text-meta text-text-muted">{t("org.materialNote")}</p>
+            <button
+              type="submit"
+              className="self-start rounded-md border border-brand-blue px-3 py-1 text-sm font-semibold text-brand-blue"
+            >
+              {t("org.createProgram")}
+            </button>
+          </form>
+          ) : null}
+
+          {programs.length === 0 ? (
+            <p
+              className="rounded-md border border-dashed border-ink-500 p-3 text-sm text-text-muted"
+              data-testid="training-programs-empty"
+            >
+              {t("org.noPrograms")}
+            </p>
+          ) : (
+            <ul className="flex flex-col gap-2">
+              {programs.map((p) => (
+                <li
+                  key={p.id}
+                  className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
+                  data-testid="training-program-row"
+                >
+                  <span className="flex flex-wrap items-center gap-2">
+                    <span className="text-sm font-semibold text-text-primary">
+                      {p.title}
+                    </span>
+                    {p.isActive ? null : (
+                      <span
+                        className="rounded-md border border-ink-500 px-1.5 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted"
+                        data-testid="training-program-retired"
+                      >
+                        {t("org.retired")}
+                      </span>
+                    )}
+                  </span>
+                  {p.description ? (
+                    <span className="text-xs text-text-secondary">{p.description}</span>
+                  ) : null}
+
+                  {authority.editOrganizationIds.has(p.organizationId) ? (
+                  <details data-testid="training-program-edit">
+                    <summary className="cursor-pointer text-meta text-text-muted">
+                      {t("org.editProgram")}
+                    </summary>
+                    <form
+                      action={updateTrainingProgramAction}
+                      className="mt-2 flex flex-col gap-2"
+                    >
+                      <DisplayedWorkspaceField />
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="programId" value={p.id} />
+                      <input
+                        type="text"
+                        name="title"
+                        defaultValue={p.title}
+                        minLength={TRAINING_TITLE_MIN}
+                        maxLength={TRAINING_TITLE_MAX}
+                        aria-label={t("org.programTitle")}
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      />
+                      <textarea
+                        name="description"
+                        defaultValue={p.description ?? ""}
+                        rows={2}
+                        maxLength={TRAINING_DESCRIPTION_MAX}
+                        aria-label={t("org.programDescription")}
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      />
+                      <label className="flex flex-col gap-1 text-meta text-text-muted">
+                        {t("org.activeLabel")}
+                        <select
+                          name="isActive"
+                          defaultValue={p.isActive ? "true" : "false"}
+                          className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                        >
+                          <option value="true">{t("org.activeYes")}</option>
+                          <option value="false">{t("org.activeNo")}</option>
+                        </select>
+                      </label>
+                      <button
+                        type="submit"
+                        data-testid="training-program-save"
+                        className="self-start rounded-md border border-ink-500 px-3 py-1 text-sm text-text-primary"
+                      >
+                        {t("org.saveProgram")}
+                      </button>
+                    </form>
+                  </details>
+                  ) : null}
+
+                  {authority.assignOrganizationIds.has(p.organizationId) ? (
+                  <form
+                    action={assignTrainingAction}
+                    className="flex flex-col gap-2 sm:flex-row"
+                    data-testid="training-assign-form"
+                  >
+                    <DisplayedWorkspaceField />
+                    <input type="hidden" name="locale" value={locale} />
+                    <input type="hidden" name="programId" value={p.id} />
+                    {assignees.length > 0 ? (
+                      <select
+                        name="assigneeProfileId"
+                        defaultValue=""
+                        aria-label={t("org.assigneePick")}
+                        data-testid="training-assign-person"
+                        className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      >
+                        <option value="">{t("org.assigneePick")}</option>
+                        {assignees.map((a) => (
+                          <option key={a.profileId} value={a.profileId}>
+                            {tRel.has(a.relationship) ? `${a.name} · ${tRel(a.relationship)}` : a.name}
+                          </option>
+                        ))}
+                      </select>
+                    ) : null}
+                    <input
+                      type="email"
+                      name="assigneeEmail"
+                      required={assignees.length === 0}
+                      maxLength={320}
+                      placeholder={t("org.assigneePlaceholder")}
+                      aria-label={t("org.assigneePlaceholder")}
+                      className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                    />
+                    <input
+                      type="date"
+                      name="requiredBy"
+                      aria-label={t("org.requiredByLabel")}
+                      className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                    />
+                    <button
+                      type="submit"
+                      className="rounded-md border border-brand-blue px-3 py-1 text-sm font-semibold text-brand-blue"
+                    >
+                      {t("org.assign")}
+                    </button>
+                  </form>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {managed.length > 0 ? (
+            <ul className="flex flex-col gap-2" data-testid="training-managed">
+              {managed.map((a) => (
+                <li
+                  key={a.id}
+                  className="flex flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
+                  data-testid="training-managed-row"
+                >
+                  <span className="text-sm text-text-primary">{a.programTitle}</span>
+                  {assigneeLabel.get(a.assigneeProfileId) ? (
+                    <span className="text-xs text-text-secondary" data-testid="training-managed-assignee">
+                      {assigneeLabel.get(a.assigneeProfileId)}
+                    </span>
+                  ) : null}
+                  <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                    {t(`status.${a.status}`)}
+                  </span>
+                  {authority.assignOrganizationIds.has(a.organizationId) &&
+                  a.status === "completed" &&
+                  !a.certificateDocumentFileId ? (
+                    <form
+                      action={attachTrainingCertificateAction}
+                      className="flex flex-col gap-2 sm:flex-row"
+                      data-testid="training-attach-form"
+                    >
+                      <DisplayedWorkspaceField />
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="assignmentId" value={a.id} />
+                      <select
+                        name="documentFileId"
+                        required
+                        defaultValue=""
+                        disabled={certificateFiles.length === 0}
+                        aria-label={t("org.certificateFileLabel")}
+                        data-testid="training-certificate-file"
+                        className="min-w-0 flex-1 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      >
+                        <option value="" disabled>
+                          {t("org.certificateFileLabel")}
+                        </option>
+                        {certificateFiles.map((f) => (
+                          <option key={f.id} value={f.id}>
+                            {f.label}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="date"
+                        name="issuedOn"
+                        required
+                        aria-label={t("org.issuedOnLabel")}
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      />
+                      <input
+                        type="date"
+                        name="expiresOn"
+                        aria-label={t("org.expiresOnLabel")}
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary"
+                      />
+                      <button
+                        type="submit"
+                        disabled={certificateFiles.length === 0}
+                        className="rounded-md border border-brand-blue px-3 py-1 text-sm font-semibold text-brand-blue disabled:opacity-50"
+                      >
+                        {t("org.attachCertificate")}
+                      </button>
+                    </form>
+                  ) : null}
+                  {authority.assignOrganizationIds.has(a.organizationId) &&
+                  a.expiresOn &&
+                  a.status !== "expired" ? (
+                    <form action={markTrainingExpiredAction}>
+                      <input type="hidden" name="locale" value={locale} />
+                      <input type="hidden" name="assignmentId" value={a.id} />
+                      <button
+                        type="submit"
+                        className="rounded-md border border-ink-500 px-3 py-1 text-sm text-text-secondary"
+                      >
+                        {t("org.markExpired")}
+                      </button>
+                    </form>
+                  ) : null}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
+      ) : null}
+
+      {/* ── Certificates ──────────────────────────────────────────────── */}
+      {certs.kind === "ok" && certs.rows.length > 0 ? (
+        <div className="flex flex-col gap-2" data-testid="training-certificates">
+          <h3 className="text-sm font-semibold text-text-primary">
+            {t("certificates.heading")}
+          </h3>
+          <p className="text-meta text-text-muted">{t("certificates.note")}</p>
+          <div className="overflow-x-auto">
+            <ul className="flex min-w-full flex-col gap-2">
+              {certs.rows.map((c) => {
+                const state = deriveExpiryState(c.expiresOn, today);
+                return (
+                  <li
+                    key={`${c.source}-${c.id}`}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-ink-500 bg-ink-800/40 p-3"
+                    data-testid="training-certificate-row"
+                  >
+                    <span className="text-sm text-text-primary">
+                      {c.documentTypeSlug
+                        ? tDoc(`types.${c.documentTypeSlug}` as never)
+                        : c.label}
+                    </span>
+                    <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                      {c.expiresOn
+                        ? `${t(`certificates.${state}`)} · ${c.expiresOn}`
+                        : t("certificates.none")}
+                    </span>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}

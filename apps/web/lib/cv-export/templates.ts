@@ -1,0 +1,45 @@
+/**
+ * CV print template registry (Full CV System v1, §10 Lego).
+ *
+ * Template IDENTITY is a slug in this registry; template LABELS live in the
+ * i18n JSON (`cvExport.templates.<slug>`). Adding a template = one registry
+ * row + one label key + its render branch — no hardcoded UI enum spread
+ * across components. Both registered templates are REAL print layouts today
+ * (§18 — no placeholder template ids for layouts that don't exist).
+ */
+
+export interface CvTemplate {
+  id: string;
+}
+
+export const CV_TEMPLATES: readonly CvTemplate[] = [
+  { id: "standard" },
+  { id: "compact" },
+  // Follows the official Europass CV structure as an interoperability
+  // reference (§4B) — Personal information → Work experience → Education and
+  // training → Personal skills → Additional information. A VIEW over the same
+  // Living CV data, never a second store of the person; see
+  // lib/cv-export/eu-format.ts for what is deliberately left blank rather
+  // than guessed.
+  { id: "eu" },
+];
+
+export const DEFAULT_CV_TEMPLATE = "standard";
+
+/** Unknown/absent → the default template (honest fallback, never a 404). */
+export function parseCvTemplateId(raw: string | string[] | undefined): string {
+  const s = (Array.isArray(raw) ? raw[0] : raw)?.trim() ?? "";
+  return CV_TEMPLATES.some((t) => t.id === s) ? s : DEFAULT_CV_TEMPLATE;
+}
+
+/**
+ * The athlete-profile form of the Living CV (owner order 2026-11-07), reachable
+ * only by this query value while its visual direction awaits the owner's
+ * verdict. Deliberately NOT a row in CV_TEMPLATES: that list draws the template
+ * links on the default CV, and this form is neither linked nor a print layout.
+ */
+export const CV_PROFILE_TEMPLATE = "profile";
+
+export function isCvProfileTemplate(raw: string | string[] | undefined): boolean {
+  return (Array.isArray(raw) ? raw[0] : raw)?.trim() === CV_PROFILE_TEMPLATE;
+}

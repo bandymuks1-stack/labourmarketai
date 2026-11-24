@@ -1,0 +1,352 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * OWNER TELEGRAM ALERTS v1 — SAFETY GUARDS + BEHAVIOR.
+ *
+ * Proves the demand-signal alert is: server-only, env-gated (no-op when
+ * unconfigured), plain-text (no markup injection), best-effort (never throws /
+ * never blocks the /company-need submit), fired only after persistence success,
+ * and scoped to the single event that actually exists (company_need_submitted).
+ * All network calls are mocked — no real Telegram request is made.
+ */
+
+const HELPER = join(__dirname, "telegram-owner-alerts.ts");
+const ACTION = join(__dirname, "..", "staffing", "company-need-form-actions.ts");
+const ENV = join(__dirname, "..", "env.ts");
+const readF = (p: string) => readFileSync(p, "utf8");
+
+// The request's Host header as the helper's ONE reader sees it (null = no
+// request scope, the default for every test that does not set it).
+const requestHost = vi.hoisted(() => ({ value: null as string | null }));
+vi.mock("next/headers", () => ({
+  headers: vi.fn(async () => ({
+    get: (name: string) => (name === "host" ? requestHost.value : null),
+  })),
+}));
+
+const configureEnv = () => {
+  vi.stubEnv("OWNER_TELEGRAM_ALERTS_ENABLED", "true");
+  vi.stubEnv("OWNER_TELEGRAM_BOT_TOKEN", "123456:test-token");
+  vi.stubEnv("OWNER_TELEGRAM_CHAT_ID", "999");
+};
+
+const configureBridge = () => {
+  vi.stubEnv("AGENTAI_OS_ALERTS_ENABLED", "true");
+  vi.stubEnv("AGENTAI_OS_ALERT_ENDPOINT", "https://bridge.example.com/alert");
+  vi.stubEnv("AGENTAI_OS_ALERT_TOKEN", "test-bridge-secret");
+};
+
+// env.ts parses process.env at module load, so reset + dynamic-import after
+// stubbing so the helper sees the intended configuration.
+async function loadHelper() {
+  vi.resetModules();
+  return import("./telegram-owner-alerts");
+}
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+  vi.unstubAllGlobals();
+  vi.resetModules();
+  requestHost.value = null;
+});
+
+describe("static safety shape", () => {
+  const src = readF(HELPER);
+
+  it("is server-only and reads token/chat from server env (never NEXT_PUBLIC)", () => {
+    expect(src).toContain('import "server-only"');
+    expect(src).toContain("OWNER_TELEGRAM_BOT_TOKEN");
+    expect(src).toContain("OWNER_TELEGRAM_CHAT_ID");
+    expect(src).not.toMatch(/NEXT_PUBLIC[A-Z_]*(TELEGRAM|TOKEN|CHAT)/);
+  });
+
+  it("sends PLAIN TEXT (no parse_mode) so user fields cannot inject markup", () => {
+    expect(src).not.toContain("parse_mode");
+  });
+
+  it("points at the owner queue route", () => {
+    expect(src).toContain("/dashboard/admin/company-need-intakes");
+  });
+
+  it("defines only the company_need event — no worker/company-search sender", () => {
+    expect(src).not.toMatch(/send(Worker|CompanySearch|JobSearch)[A-Za-z]*Alert/);
+  });
+
+  it("registers the vars in the Zod env allowlist, none as NEXT_PUBLIC", () => {
+    const envSrc = readF(ENV);
+    for (const v of [
+      "OWNER_TELEGRAM_ALERTS_ENABLED",
+      "OWNER_TELEGRAM_BOT_TOKEN",
+      "OWNER_TELEGRAM_CHAT_ID",
+      "AGENTAI_OS_ALERTS_ENABLED",
+      "AGENTAI_OS_ALERT_ENDPOINT",
+      "AGENTAI_OS_ALERT_TOKEN",
+    ]) {
+      expect(envSrc).toContain(v);
+      expect(envSrc).not.toContain(`NEXT_PUBLIC_${v}`);
+    }
+  });
+});
+
+describe("Agentai OS bridge is the preferred path (fetch mocked)", () => {
+  it("POSTs the JSON event to the bridge with a bearer token when configured", async () => {
+    configureBridge();
+    const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+    vi.stubGlobal("fetch", fetchMock);
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    const ok = await sendCompanyNeedOwnerAlert({
+      companyName: "Acme Statyba",
+      country: "LT",
+      sector: "construction",
+    });
+    expect(ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [
+      string,
+      RequestInit,
+    ];
+    expect(url).toBe("https://bridge.example.com/alert");
+    const headers = init.headers as Record<string, string>;
+    expect(headers.Authorization).toBe("Bearer test-bridge-secret");
+    const body = JSON.parse(String(init.body));
+    expect(body.source).toBe("labourmarketai");
+    expect(body.event).toBe("company_need_submitted");
+    expect(body.payload.company_name).toBe("Acme Statyba");
+    expect(body.payload.admin_route).toBe(
+      "/dashboard/admin/company-need-intakes",
+    );
+    // the bridge path never hits the Telegram API directly
+    expect(url).not.toContain("api.telegram.org");
+  });
+
+  it("prefers the bridge over standalone Telegram when both are configured", async () => {
+    configureBridge();
+    configureEnv();
+    const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+    vi.stubGlobal("fetch", fetchMock);
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    await sendCompanyNeedOwnerAlert({ companyName: "Acme" });
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url] = fetchMock.mock.calls[0] as unknown as [string];
+    expect(url).toBe("https://bridge.example.com/alert");
+  });
+
+  /**
+   * PRODUCTION HOST POLICY (2026-09-23). The bridge has NO fallback once it is
+   * configured, so a bridge on a tunnel to a PC would lose every owner alert
+   * while that PC is off. On the production deployment such a host is refused
+   * at the read site: the bridge counts as unconfigured and the standalone
+   * Telegram path carries the alert. NEGATIVE CONTROL: the same value on a
+   * preview deployment still reaches the bridge — the refusal is a production
+   * property, not a validation tightening.
+   */
+  it("PRODUCTION refuses a bridge on a tunnel host and the Telegram fallback carries the alert; preview keeps the bridge", async () => {
+    for (const [deployEnv, expectedUrl] of [
+      ["production", "https://api.telegram.org/bot123456:test-token/sendMessage"],
+      ["preview", "https://abc123.ngrok-free.app/alert"],
+    ] as const) {
+      vi.unstubAllEnvs();
+      vi.stubEnv("VERCEL_ENV", deployEnv);
+      configureBridge();
+      vi.stubEnv("AGENTAI_OS_ALERT_ENDPOINT", "https://abc123.ngrok-free.app/alert");
+      configureEnv();
+      const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+      vi.stubGlobal("fetch", fetchMock);
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { agentaiBridgeConfigured, sendCompanyNeedOwnerAlert } = await loadHelper();
+      expect(agentaiBridgeConfigured(), deployEnv).toBe(deployEnv === "preview");
+      await expect(sendCompanyNeedOwnerAlert({ companyName: "Acme" })).resolves.toBe(true);
+      expect(fetchMock, deployEnv).toHaveBeenCalledOnce();
+      const [url] = fetchMock.mock.calls[0] as unknown as [string];
+      expect(url, deployEnv).toBe(expectedUrl);
+      // The refusal is one structured line naming the class, never the host.
+      const refusals = warn.mock.calls
+        .map((c) => String(c[0]))
+        .filter((l) => l.includes("outbound_host_refused"));
+      expect(refusals, deployEnv).toHaveLength(deployEnv === "production" ? 1 : 0);
+      for (const line of refusals) {
+        expect(line).toContain('"hostKind":"tunnel"');
+        expect(line).not.toContain("ngrok");
+      }
+      warn.mockRestore();
+    }
+  });
+
+  /**
+   * SECOND EVIDENCE (2026-09-24). `VERCEL_ENV` fails open if the system
+   * variables are ever un-exposed. The intake action runs inside a request,
+   * so a request served on the production host engages the same refusal with
+   * the variable missing. NEGATIVE CONTROL: a preview request with the
+   * variable missing keeps the bridge.
+   */
+  it("VERCEL_ENV missing + a request on the production host → the tunnel bridge is refused and Telegram carries the alert; a preview request keeps the bridge", async () => {
+    for (const [host, expectedUrl] of [
+      ["labourmarket.ai", "https://api.telegram.org/bot123456:test-token/sendMessage"],
+      ["lmai-git-feature-x.vercel.app", "https://abc123.ngrok-free.app/alert"],
+    ] as const) {
+      vi.unstubAllEnvs();
+      vi.stubEnv("VERCEL_ENV", "");
+      configureBridge();
+      vi.stubEnv("AGENTAI_OS_ALERT_ENDPOINT", "https://abc123.ngrok-free.app/alert");
+      configureEnv();
+      requestHost.value = host;
+      const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+      vi.stubGlobal("fetch", fetchMock);
+      const warn = vi.spyOn(console, "warn").mockImplementation(() => {});
+      const { agentaiBridgeConfigured, sendCompanyNeedOwnerAlert } = await loadHelper();
+      // The sync probe judges the host it is handed; without one it is env-only.
+      expect(agentaiBridgeConfigured(host), host).toBe(host !== "labourmarket.ai");
+      expect(agentaiBridgeConfigured(), host).toBe(true);
+      await expect(sendCompanyNeedOwnerAlert({ companyName: "Acme" })).resolves.toBe(true);
+      expect(fetchMock, host).toHaveBeenCalledOnce();
+      const [url] = fetchMock.mock.calls[0] as unknown as [string];
+      expect(url, host).toBe(expectedUrl);
+      const refusals = warn.mock.calls
+        .map((c) => String(c[0]))
+        .filter((l) => l.includes("outbound_host_refused"));
+      expect(refusals, host).toHaveLength(host === "labourmarket.ai" ? 1 : 0);
+      for (const line of refusals) {
+        expect(line).toContain('"deployEnv":"unset"');
+        expect(line).toContain('"evidence":"host"');
+        expect(line).not.toContain("ngrok");
+        expect(line).not.toContain("labourmarket.ai");
+      }
+      warn.mockRestore();
+    }
+  });
+
+  it("returns false and never throws when the bridge send fails", async () => {
+    configureBridge();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("bridge down");
+      }),
+    );
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    await expect(
+      sendCompanyNeedOwnerAlert({ companyName: "Acme" }),
+    ).resolves.toBe(false);
+  });
+
+  it("builds a stable, clipped JSON event", async () => {
+    const { buildCompanyNeedEvent } = await loadHelper();
+    const long = "y".repeat(400);
+    const ev = buildCompanyNeedEvent(
+      { companyName: long, sector: "construction", country: "LT" },
+      "2026-07-07T15:00:00Z",
+    ) as {
+      source: string;
+      event: string;
+      severity: string;
+      created_at: string;
+      payload: Record<string, string>;
+    };
+    expect(ev.source).toBe("labourmarketai");
+    expect(ev.event).toBe("company_need_submitted");
+    expect(ev.severity).toBe("info");
+    expect(ev.created_at).toBe("2026-07-07T15:00:00Z");
+    expect(ev.payload.sector).toBe("construction");
+    expect(ev.payload.admin_route).toBe(
+      "/dashboard/admin/company-need-intakes",
+    );
+    // long field clipped, not the raw 400 chars
+    expect(ev.payload.company_name).toContain("…");
+    expect(ev.payload.company_name.length).toBeLessThan(200);
+  });
+});
+
+describe("env gating + best-effort behavior (fetch mocked)", () => {
+  it("is a silent no-op and makes NO network call when unconfigured", async () => {
+    const fetchMock = vi.fn();
+    vi.stubGlobal("fetch", fetchMock);
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    await expect(
+      sendCompanyNeedOwnerAlert({ companyName: "Acme" }),
+    ).resolves.toBe(false);
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("posts plain text to the owner chat when configured", async () => {
+    configureEnv();
+    const fetchMock = vi.fn(async () => ({ ok: true }) as Response);
+    vi.stubGlobal("fetch", fetchMock);
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    const ok = await sendCompanyNeedOwnerAlert({
+      companyName: "Acme Statyba",
+      country: "LT",
+      sector: "construction",
+    });
+    expect(ok).toBe(true);
+    expect(fetchMock).toHaveBeenCalledOnce();
+    const [url, init] = fetchMock.mock.calls[0] as unknown as [
+      string,
+      RequestInit,
+    ];
+    expect(url).toContain(
+      "https://api.telegram.org/bot123456:test-token/sendMessage",
+    );
+    const body = JSON.parse(String(init.body));
+    expect(body.chat_id).toBe("999");
+    expect(body.text).toContain("Acme Statyba");
+    expect(body.text).toContain("/dashboard/admin/company-need-intakes");
+    expect(body).not.toHaveProperty("parse_mode");
+  });
+
+  it("never throws and returns false when the network fails", async () => {
+    configureEnv();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn(async () => {
+        throw new Error("network down");
+      }),
+    );
+    const { sendCompanyNeedOwnerAlert } = await loadHelper();
+    await expect(
+      sendCompanyNeedOwnerAlert({ companyName: "Acme" }),
+    ).resolves.toBe(false);
+  });
+});
+
+describe("message builder", () => {
+  it("includes the key fields + admin route and truncates long values", async () => {
+    const { buildCompanyNeedAlertText } = await loadHelper();
+    const long = "x".repeat(500);
+    const text = buildCompanyNeedAlertText({
+      companyName: long,
+      contact: "Jonas jonas@example.com",
+      sector: "construction",
+      country: "LT",
+      cityRegion: "Vilnius",
+      headcount: 5,
+      urgency: "weeks",
+    });
+    expect(text).toContain("Naujas LabourMarket.ai įmonės poreikis");
+    expect(text).toContain("construction");
+    expect(text).toContain("Vilnius");
+    expect(text).toContain("/dashboard/admin/company-need-intakes");
+    // long field is capped (not the full 500 chars)
+    expect(text).toContain("…");
+    expect(text.length).toBeLessThan(500 + 400);
+  });
+});
+
+describe("wiring into the /company-need action", () => {
+  const action = readF(ACTION);
+
+  it("fires the alert ONLY after persistence success", () => {
+    expect(action).toContain("sendCompanyNeedOwnerAlert");
+    expect(action).toMatch(
+      /if \(persisted\)[\s\S]{0,600}sendCompanyNeedOwnerAlert/,
+    );
+  });
+
+  it("isolates the alert so a failure cannot break submission", () => {
+    // the call site is wrapped in try/catch (defense-in-depth)
+    expect(action).toMatch(
+      /try \{[\s\S]{0,600}sendCompanyNeedOwnerAlert[\s\S]{0,900}catch/,
+    );
+  });
+});

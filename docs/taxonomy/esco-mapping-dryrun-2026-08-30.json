@@ -1,0 +1,3420 @@
+{
+  "title": "ESCO canonical-linkage mapping DRY RUN — no production writes",
+  "measured": "2026-08-30",
+  "status": "DRY_RUN_AWAITING_HUMAN_REVIEW",
+  "method_doc": "docs/taxonomy/ESCO_CANONICAL_LINKAGE_PLAN.md",
+  "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+  "join_path": "skills.esco_uri = esco_skills.esco_uri -> esco_skills.id = esco_labels.concept_id (concept_type='skill'); professions.esco_uri = esco_occupations.esco_uri -> esco_occupations.id = esco_labels.concept_id (concept_type='occupation'). NEVER parse the uuid out of the URI: local esco_skills.id / esco_occupations.id do NOT equal the URI's trailing uuid (verified: 13939/13939 and 3039/3039 differ).",
+  "summary": {
+    "skills": {
+      "EXACT": 4,
+      "HIGH_CONFIDENCE": 27,
+      "AMBIGUOUS": 4,
+      "NO_MATCH": 126
+    },
+    "professions": {
+      "EXACT": 9,
+      "HIGH_CONFIDENCE": 27,
+      "AMBIGUOUS": 5,
+      "NO_MATCH": 8
+    }
+  },
+  "skills": [
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "administration",
+      "name_en": "Administration",
+      "name_lt": "Administravimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "animal-care",
+      "name_en": "Animal care",
+      "name_lt": "Gyvūnų priežiūra",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "appliance-repair",
+      "name_en": "Appliance repair",
+      "name_lt": "Buitinės technikos remontas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "arc-welding",
+      "name_en": "Arc welding",
+      "name_lt": "Lankinis suvirinimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "assembly-work",
+      "name_en": "Assembly work",
+      "name_lt": "Surinkimo darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "auto-repair",
+      "name_en": "Car repair",
+      "name_lt": "Automobilių remontas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "baking",
+      "name_en": "Baking",
+      "name_lt": "Kepimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "barbering",
+      "name_en": "Barbering",
+      "name_lt": "Barberio darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "barcode-scanning",
+      "name_en": "Barcode scanning",
+      "name_lt": "Prekių skenavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "barista-work",
+      "name_en": "Barista work",
+      "name_lt": "Baristos darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "bartending",
+      "name_en": "Bartending",
+      "name_lt": "Barmeno darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "blockwork",
+      "name_en": "Blockwork",
+      "name_lt": "Blokelių mūras",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "blueprint-reading",
+      "name_en": "Blueprint reading",
+      "name_lt": "Brėžinių skaitymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "curated_suggestion": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/68b6ef08-d823-489d-a95c-752ae6f6e6a7",
+          "term": "read standard blueprints",
+          "evid": "en:preferred",
+          "note": "curated phrase only; welding-blueprint hits the same concept — many-to-one needs a human decision"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "bookkeeping",
+      "name_en": "Bookkeeping",
+      "name_lt": "Apskaita",
+      "esco_uri": "http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b",
+      "match_method": [
+        "exact-label:en:alternative",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/ecc18804-a466-40d9-98b4-fba5cd67dd4b",
+          "evid": "en:alternative,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "bricklaying",
+      "name_en": "Bricklaying",
+      "name_lt": "Mūrijimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/13e1c0a2-b90d-46f4-be51-11730360b38d",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/13e1c0a2-b90d-46f4-be51-11730360b38d",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "bulldozer-operator",
+      "name_en": "Bulldozer operation",
+      "name_lt": "Buldozerio valdymas",
+      "esco_uri": "http://data.europa.eu/esco/skill/597d6a3a-0283-4945-8001-4719d210433d",
+      "match_method": [
+        "exact-label:en:alternative",
+        "verb-template:en:preferred(operate bulldozer)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/597d6a3a-0283-4945-8001-4719d210433d",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/597d6a3a-0283-4945-8001-4719d210433d",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "operate bulldozer"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "cable-pulling",
+      "name_en": "Cable pulling",
+      "name_lt": "Kabelių tiesimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "call-centre",
+      "name_en": "Call centre work",
+      "name_lt": "Skambučių centro darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "cargo-transport",
+      "name_en": "Cargo transport",
+      "name_lt": "Krovinių pervežimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/932c9ed1-3197-4b13-a558-bf147313fe88",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/932c9ed1-3197-4b13-a558-bf147313fe88",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "carpentry",
+      "name_en": "Carpentry",
+      "name_lt": "Staliaus darbai",
+      "esco_uri": "http://data.europa.eu/esco/skill/19858dd3-a5fe-4855-b644-6ecfefd1c384",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/19858dd3-a5fe-4855-b644-6ecfefd1c384",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "cashier",
+      "name_en": "Cashier work",
+      "name_lt": "Kasininko darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "ceiling-systems",
+      "name_en": "Suspended ceilings",
+      "name_lt": "Pakabinamų lubų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "childcare",
+      "name_en": "Childcare",
+      "name_lt": "Vaikų priežiūra",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "cleaning-services",
+      "name_en": "Premises cleaning",
+      "name_lt": "Patalpų valymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "compactor-operator",
+      "name_en": "Compactor operation",
+      "name_lt": "Tankinimo volo valdymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "concrete-finishing",
+      "name_en": "Concrete finishing",
+      "name_lt": "Betono paviršių apdaila",
+      "esco_uri": "http://data.europa.eu/esco/skill/2d28964f-0a2d-4aa2-bc2d-c73f7a4442d6",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/2d28964f-0a2d-4aa2-bc2d-c73f7a4442d6",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "concrete-pouring",
+      "name_en": "Concrete pouring",
+      "name_lt": "Betono liejimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/46994031-5490-4a02-9937-c61f6e2d4fc9",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/46994031-5490-4a02-9937-c61f6e2d4fc9",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "concrete-vibration",
+      "name_en": "Concrete vibration",
+      "name_lt": "Betono tankinimas (vibravimas)",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "concrete-works",
+      "name_en": "Concrete works",
+      "name_lt": "Betonavimo darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "cooking",
+      "name_en": "Cooking",
+      "name_lt": "Maisto gaminimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "crane-operator",
+      "name_en": "Crane operator",
+      "name_lt": "Krano operatorius",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "customer-service",
+      "name_en": "Customer service",
+      "name_lt": "Klientų aptarnavimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/15a33d76-4640-438d-ae64-fdc0c1d3eebc",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/15a33d76-4640-438d-ae64-fdc0c1d3eebc",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "data-entry",
+      "name_en": "Data entry",
+      "name_lt": "Duomenų suvedimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "decorative-plaster",
+      "name_en": "Decorative plastering",
+      "name_lt": "Dekoratyvinis tinkavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "delivery-driving",
+      "name_en": "Delivery & courier driving",
+      "name_lt": "Pristatymas / kurjerio darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "demolition",
+      "name_en": "Demolition",
+      "name_lt": "Griovimo darbai",
+      "esco_uri": "http://data.europa.eu/esco/skill/a68d4de0-99a3-4c26-b84a-040e706e4714",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/a68d4de0-99a3-4c26-b84a-040e706e4714",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ],
+      "curated_suggestion": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/a68d4de0-99a3-4c26-b84a-040e706e4714",
+          "term": "demolish structures",
+          "evid": "en:preferred",
+          "note": "same concept as the exact-label hit"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "dishwashing",
+      "name_en": "Dishwashing",
+      "name_lt": "Indų plovimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "document-handling",
+      "name_en": "Document handling",
+      "name_lt": "Dokumentų tvarkymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "door-window-install",
+      "name_en": "Door & window installation",
+      "name_lt": "Durų ir langų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "drainage",
+      "name_en": "Drainage systems",
+      "name_lt": "Nuotekų sistemų montavimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/f7626ae8-eecf-41f4-bc4f-de9e57ed30a6",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/f7626ae8-eecf-41f4-bc4f-de9e57ed30a6",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "driving",
+      "name_en": "Driving",
+      "name_lt": "Vairavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "drywall",
+      "name_en": "Drywall / plasterboard",
+      "name_lt": "Gipso kartono montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "earthworks",
+      "name_en": "Earthworks",
+      "name_lt": "Žemės darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "elderly-care",
+      "name_en": "Elderly care",
+      "name_lt": "Senjorų priežiūra",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "electrical-install",
+      "name_en": "Electrical installation",
+      "name_lt": "Elektros instaliacija",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "electrical-testing",
+      "name_en": "Electrical testing",
+      "name_lt": "Elektros instaliacijos bandymai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "equipment-operation",
+      "name_en": "Equipment & machinery operation",
+      "name_lt": "Įrangos ir mechanizmų valdymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "event-setup",
+      "name_en": "Event setup & support",
+      "name_lt": "Renginių paruošimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "excavator-operator",
+      "name_en": "Excavator operator",
+      "name_lt": "Ekskavatoriaus operatorius",
+      "esco_uri": "http://data.europa.eu/esco/skill/978a76ca-0d14-43b5-a69d-1996dfeb22de",
+      "match_method": [
+        "verb-template:en:preferred(operate excavator)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/978a76ca-0d14-43b5-a69d-1996dfeb22de",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "operate excavator"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "facade-plaster",
+      "name_en": "Façade plastering",
+      "name_lt": "Fasadų tinkavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "farm-work",
+      "name_en": "Farm work",
+      "name_lt": "Žemės ūkio darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "first-aid",
+      "name_en": "First aid",
+      "name_lt": "Pirmoji pagalba",
+      "esco_uri": "http://data.europa.eu/esco/skill/f7464f30-662b-4177-85a0-3df9693e9e58",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 1 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/eaa4cdc0-43e0-4388-9b8a-e2779218d10e",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/f7464f30-662b-4177-85a0-3df9693e9e58",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "flat-roofing",
+      "name_en": "Flat roofing",
+      "name_lt": "Plokščių stogų dengimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "floor-screeding",
+      "name_en": "Floor screeding",
+      "name_lt": "Grindų išlyginamasis sluoksnis",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "flooring",
+      "name_en": "Flooring",
+      "name_lt": "Grindų dangos",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "forklift-operation",
+      "name_en": "Forklift operation",
+      "name_lt": "Krautuvo vairavimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/28cb374e-6261-4133-8371-f9a5470145da",
+      "match_method": [
+        "verb-template:en:preferred(operate forklift)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/28cb374e-6261-4133-8371-f9a5470145da",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "operate forklift"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "forklift-operator",
+      "name_en": "Forklift operator",
+      "name_lt": "Krautuvo operatorius",
+      "esco_uri": "http://data.europa.eu/esco/skill/28cb374e-6261-4133-8371-f9a5470145da",
+      "match_method": [
+        "verb-template:en:preferred(operate forklift)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/28cb374e-6261-4133-8371-f9a5470145da",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "operate forklift"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "formwork",
+      "name_en": "Formwork",
+      "name_lt": "Klojinių montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "formwork-carpentry",
+      "name_en": "Formwork carpentry",
+      "name_lt": "Klojinių stalystė",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "furniture-fitting",
+      "name_en": "Furniture fitting",
+      "name_lt": "Baldų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "gardening",
+      "name_en": "Gardening & grounds care",
+      "name_lt": "Sodo ir aplinkos priežiūra",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "gas-cutting",
+      "name_en": "Gas cutting",
+      "name_lt": "Dujinis pjovimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "general-labour",
+      "name_en": "General construction labour",
+      "name_lt": "Bendrieji statybos darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "glazing",
+      "name_en": "Glazing",
+      "name_lt": "Stiklinimo darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "grader-operator",
+      "name_en": "Grader operation",
+      "name_lt": "Greiderio valdymas",
+      "esco_uri": "http://data.europa.eu/esco/skill/7692b391-9dab-4523-9b8d-93971c48502a",
+      "match_method": [
+        "exact-label:en:alternative",
+        "verb-template:en:preferred(operate grader)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/7692b391-9dab-4523-9b8d-93971c48502a",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/7692b391-9dab-4523-9b8d-93971c48502a",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "operate grader"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "graphic-design",
+      "name_en": "Graphic design",
+      "name_lt": "Grafinis dizainas",
+      "esco_uri": "http://data.europa.eu/esco/skill/7fb699d9-182a-430e-b7a0-6d8ed05c284b",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/7fb699d9-182a-430e-b7a0-6d8ed05c284b",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "grouting",
+      "name_en": "Tile grouting",
+      "name_lt": "Plytelių siūlių užpildymas",
+      "esco_uri": "http://data.europa.eu/esco/skill/5bfdfb74-91dd-408b-a013-670d6961efc1",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/5bfdfb74-91dd-408b-a013-670d6961efc1",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "gutter-install",
+      "name_en": "Gutter installation",
+      "name_lt": "Lietvamzdžių ir latakų montavimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/1f1f1090-b9ab-4373-b44e-ca3d0e3f86af",
+      "match_method": [
+        "exact-label:en:alternative",
+        "verb-template:en:preferred(install gutters)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/1f1f1090-b9ab-4373-b44e-ca3d0e3f86af",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/1f1f1090-b9ab-4373-b44e-ca3d0e3f86af",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "install gutters"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "hairdressing",
+      "name_en": "Hairdressing",
+      "name_lt": "Plaukų kirpimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/d2c5d356-43d9-4118-827c-6801e32a452a",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/d2c5d356-43d9-4118-827c-6801e32a452a",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "hand-tools",
+      "name_en": "Hand tool use",
+      "name_lt": "Rankinių įrankių naudojimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "handyman-work",
+      "name_en": "Handyman work",
+      "name_lt": "Smulkūs remonto darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "heating-install",
+      "name_en": "Heating system installation",
+      "name_lt": "Šildymo sistemų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "housekeeping",
+      "name_en": "Housekeeping",
+      "name_lt": "Kambarių tvarkymas (viešbutis)",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "hvac-install",
+      "name_en": "HVAC installation",
+      "name_lt": "ŠVOK sistemų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "industrial-electric",
+      "name_en": "Industrial electrical",
+      "name_lt": "Pramoninė elektrotechnika",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "insulation",
+      "name_en": "Thermal insulation",
+      "name_lt": "Šiltinimo darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "curated_suggestion": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/7eea6974-d606-4175-b95e-f66554816783",
+          "term": "install insulation material",
+          "evid": "en:preferred",
+          "note": "curated phrase only — no independent exact-label corroboration"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "it-support",
+      "name_en": "IT support",
+      "name_lt": "IT pagalba",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "joinery",
+      "name_en": "Joinery",
+      "name_lt": "Dailidės darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "kitchen-help",
+      "name_en": "Kitchen help",
+      "name_lt": "Virtuvės pagalbininko darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "large-format-tiling",
+      "name_en": "Large-format tiling",
+      "name_lt": "Stambiaformačių plytelių klojimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "laundry",
+      "name_en": "Laundry & ironing",
+      "name_lt": "Skalbimas ir lyginimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "lighting-install",
+      "name_en": "Lighting installation",
+      "name_lt": "Apšvietimo sistemų montavimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/6f8d750e-aba4-459c-b4d7-220bddff9f58",
+      "match_method": [
+        "verb-template:en:preferred(install lighting)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/6f8d750e-aba4-459c-b4d7-220bddff9f58",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "install lighting"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "load-signaling",
+      "name_en": "Load signalling",
+      "name_lt": "Krovinių signalizavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "loader-operator",
+      "name_en": "Wheel loader operation",
+      "name_lt": "Frontalinio krautuvo valdymas",
+      "esco_uri": "http://data.europa.eu/esco/skill/621c6430-46ba-4793-a1b8-a2d30cb816ba",
+      "match_method": [
+        "verb-template:en:alternative(operate loader)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/621c6430-46ba-4793-a1b8-a2d30cb816ba",
+          "evid": "en:alternative",
+          "kind": "verb-template",
+          "term": "operate loader"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "low-voltage",
+      "name_en": "Low-voltage systems",
+      "name_lt": "Žemos įtampos sistemos",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "manual-handling",
+      "name_en": "Manual handling",
+      "name_lt": "Krovinių tvarkymas rankomis",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "material-transport",
+      "name_en": "Material transport",
+      "name_lt": "Medžiagų pernešimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "materials-management",
+      "name_en": "Materials management",
+      "name_lt": "Medžiagų valdymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "merchandising",
+      "name_en": "Merchandising",
+      "name_lt": "Prekių išdėliojimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "mig-mag-welding",
+      "name_en": "MIG/MAG welding",
+      "name_lt": "MIG/MAG suvirinimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "mobile-crane",
+      "name_en": "Mobile crane operation",
+      "name_lt": "Mobiliojo krano valdymas",
+      "esco_uri": "http://data.europa.eu/esco/skill/9fe699e9-3490-4f3d-a50d-9f9d31c98698",
+      "match_method": [
+        "exact-label:en:alternative",
+        "verb-template:en:preferred(operate mobile crane)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/9fe699e9-3490-4f3d-a50d-9f9d31c98698",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/9fe699e9-3490-4f3d-a50d-9f9d31c98698",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "operate mobile crane"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "mortar-prep",
+      "name_en": "Mortar preparation",
+      "name_lt": "Skiedinio paruošimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "mosaic-tiling",
+      "name_en": "Mosaic tiling",
+      "name_lt": "Mozaikos klojimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "nail-care",
+      "name_en": "Manicure & pedicure",
+      "name_lt": "Manikiūras ir pedikiūras",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "negotiation",
+      "name_en": "Negotiation",
+      "name_lt": "Derybos",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "office-software",
+      "name_en": "Office software (Excel, Word)",
+      "name_lt": "Biuro programos (Excel, Word)",
+      "esco_uri": "http://data.europa.eu/esco/skill/cf310cff-0d28-4dbc-9dbb-cc500a3196c2",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/cf310cff-0d28-4dbc-9dbb-cc500a3196c2",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "order-picking",
+      "name_en": "Order picking & packing",
+      "name_lt": "Užsakymų rinkimas / komplektavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "packaging",
+      "name_en": "Packaging",
+      "name_lt": "Pakavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "painting",
+      "name_en": "Painting and decorating",
+      "name_lt": "Dažymo darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "pallet-handling",
+      "name_en": "Pallet handling",
+      "name_lt": "Palečių krovimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "panel-install",
+      "name_en": "Distribution board installation",
+      "name_lt": "Elektros skydų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "partition-walls",
+      "name_en": "Partition walls",
+      "name_lt": "Pertvarų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "partnership-development",
+      "name_en": "Partnership development",
+      "name_lt": "Partnerysčių vystymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "personnel-admin",
+      "name_en": "Personnel administration",
+      "name_lt": "Personalo administravimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/88b406d0-72e2-4087-be19-d5992d259473",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/88b406d0-72e2-4087-be19-d5992d259473",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "pipefitting",
+      "name_en": "Pipefitting",
+      "name_lt": "Vamzdynų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "plastering",
+      "name_en": "Plastering",
+      "name_lt": "Tinkavimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/20f56226-24ed-495f-8bf5-0b2aa6413ba1",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/20f56226-24ed-495f-8bf5-0b2aa6413ba1",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ],
+      "curated_suggestion": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/20f56226-24ed-495f-8bf5-0b2aa6413ba1",
+          "term": "apply plaster",
+          "evid": "en:alternative",
+          "note": "same concept as the exact-label hit"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "plumbing",
+      "name_en": "Plumbing",
+      "name_lt": "Santechnikos darbai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "precast-install",
+      "name_en": "Precast element installation",
+      "name_lt": "Surenkamų konstrukcijų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "presenting",
+      "name_en": "Presenting",
+      "name_lt": "Pristatymai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "production-line",
+      "name_en": "Production line work",
+      "name_lt": "Gamybos linijos darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "programming",
+      "name_en": "Programming",
+      "name_lt": "Programavimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/b105ec9b-0857-41d6-8d07-a83e58b73d90",
+      "match_method": [
+        "exact-label:lt:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/b105ec9b-0857-41d6-8d07-a83e58b73d90",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "project-coordination",
+      "name_en": "Project coordination",
+      "name_lt": "Projektų koordinavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "qa-testing",
+      "name_en": "Software testing (QA)",
+      "name_lt": "Programinės įrangos testavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "quality-control",
+      "name_en": "Quality control",
+      "name_lt": "Kokybės kontrolė",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "quantity-takeoff",
+      "name_en": "Quantity take-off",
+      "name_lt": "Kiekių skaičiavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "rebar-cutting",
+      "name_en": "Rebar cutting & bending",
+      "name_lt": "Armatūros pjovimas ir lankstymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "rebar-detailing",
+      "name_en": "Rebar detailing",
+      "name_lt": "Armatūros brėžiniai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "reception",
+      "name_en": "Reception work",
+      "name_lt": "Registratūros darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "recruitment",
+      "name_en": "Recruitment",
+      "name_lt": "Darbuotojų atranka",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "report-writing",
+      "name_en": "Report writing",
+      "name_lt": "Ataskaitų rengimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "research",
+      "name_en": "Research",
+      "name_lt": "Tyrimai",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "rigging",
+      "name_en": "Rigging",
+      "name_lt": "Krovinių stropavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "roof-insulation",
+      "name_en": "Roof insulation",
+      "name_lt": "Stogų šiltinimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "roof-tiling",
+      "name_en": "Tile roofing",
+      "name_lt": "Čerpių stogų dengimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "2 concepts matched, none via a preferred label",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/4a4f3c77-6fbb-451b-b6b1-f1f247869379",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/a1c3797a-b6b8-43d7-aed6-1686373d1a1a",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "roofing",
+      "name_en": "Roofing",
+      "name_lt": "Stogų dengimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "2 concepts matched, none via a preferred label",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/4a4f3c77-6fbb-451b-b6b1-f1f247869379",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/a1c3797a-b6b8-43d7-aed6-1686373d1a1a",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "safety-officer",
+      "name_en": "Health & safety officer",
+      "name_lt": "Darbų saugos specialistas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "sales-assistant",
+      "name_en": "Sales & customer advising",
+      "name_lt": "Pardavimas ir konsultavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "sanitary-install",
+      "name_en": "Sanitary fixture installation",
+      "name_lt": "Santechnikos prietaisų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "curated_suggestion": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/ef6cb992-07d1-435b-a150-45d92228db1e",
+          "term": "install sanitary equipment",
+          "evid": "en:alternative",
+          "note": "curated phrase only"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "scaffolding",
+      "name_en": "Scaffolding",
+      "name_lt": "Pastolių montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "setting-out",
+      "name_en": "Setting out",
+      "name_lt": "Ašių nužymėjimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "site-cleaning",
+      "name_en": "Site cleaning",
+      "name_lt": "Statybvietės valymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "site-management",
+      "name_en": "Site management",
+      "name_lt": "Statybos vadovavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "site-supervision",
+      "name_en": "Site supervision",
+      "name_lt": "Statybvietės priežiūra",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "skim-coating",
+      "name_en": "Skim coating",
+      "name_lt": "Glaistymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "spray-painting",
+      "name_en": "Spray painting",
+      "name_lt": "Purškiamasis dažymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "stakeholder-engagement",
+      "name_en": "Stakeholder engagement",
+      "name_lt": "Darbas su suinteresuotomis šalimis",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "steel-fixing",
+      "name_en": "Steel fixing",
+      "name_lt": "Armatūros rišimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "stock-taking",
+      "name_en": "Stock-taking",
+      "name_lt": "Inventorizacija",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "stone-masonry",
+      "name_en": "Stone masonry",
+      "name_lt": "Akmens mūras",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "structural-steel",
+      "name_en": "Structural steel erection",
+      "name_lt": "Metalo konstrukcijų montavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "surveying",
+      "name_en": "Site surveying",
+      "name_lt": "Geodeziniai matavimai",
+      "esco_uri": "http://data.europa.eu/esco/skill/1cca610d-2afc-44a7-97fc-f2262fb5fc75",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/1cca610d-2afc-44a7-97fc-f2262fb5fc75",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "teaching",
+      "name_en": "Teaching & training",
+      "name_lt": "Mokymas / paskaitos",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "team-coordination",
+      "name_en": "Team coordination",
+      "name_lt": "Komandos koordinavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "teamwork",
+      "name_en": "Teamwork",
+      "name_lt": "Komandinis darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "tig-welding",
+      "name_en": "TIG welding",
+      "name_lt": "TIG suvirinimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "tiling",
+      "name_en": "Tiling",
+      "name_lt": "Plytelių klojimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "3 concepts matched, none via a preferred label",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/4a4f3c77-6fbb-451b-b6b1-f1f247869379",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/504d99c7-395b-479c-815b-2f77ef769e75",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/a1c3797a-b6b8-43d7-aed6-1686373d1a1a",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ],
+      "curated_suggestion": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/504d99c7-395b-479c-815b-2f77ef769e75",
+          "term": "lay tiles",
+          "evid": "en:preferred",
+          "note": "disambiguates the 3-way alternative-label tie toward this concept; ESCO API cross-checked 2026-08-30"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "timber-framing",
+      "name_en": "Timber framing",
+      "name_lt": "Medinių karkasų statyba",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "tower-crane",
+      "name_en": "Tower crane operation",
+      "name_lt": "Bokštinio krano valdymas",
+      "esco_uri": "http://data.europa.eu/esco/skill/b6426791-8bca-4241-b7a8-716f1f21cec5",
+      "match_method": [
+        "exact-label:en:alternative",
+        "verb-template:en:preferred(operate tower crane)"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/b6426791-8bca-4241-b7a8-716f1f21cec5",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/skill/b6426791-8bca-4241-b7a8-716f1f21cec5",
+          "evid": "en:preferred",
+          "kind": "verb-template",
+          "term": "operate tower crane"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "translation",
+      "name_en": "Translation",
+      "name_lt": "Vertimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "vehicle-cleaning",
+      "name_en": "Vehicle washing",
+      "name_lt": "Automobilių plovimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "ventilation",
+      "name_en": "Ventilation systems",
+      "name_lt": "Vėdinimo sistemos",
+      "esco_uri": "http://data.europa.eu/esco/skill/539edd73-5c9b-4498-96f2-68a9cd2e6073",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/539edd73-5c9b-4498-96f2-68a9cd2e6073",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "waiting-tables",
+      "name_en": "Waiting tables",
+      "name_lt": "Padavėjo darbas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "wallpapering",
+      "name_en": "Wallpapering",
+      "name_lt": "Tapetavimas",
+      "esco_uri": "http://data.europa.eu/esco/skill/3816bddd-0765-48d6-b972-0f9aa7296a46",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/3816bddd-0765-48d6-b972-0f9aa7296a46",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ],
+      "curated_suggestion": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/3816bddd-0765-48d6-b972-0f9aa7296a46",
+          "term": "hang wallpaper",
+          "evid": "en:preferred",
+          "note": "same concept as the exact-label hit"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "warehouse-operations",
+      "name_en": "Warehouse operations",
+      "name_lt": "Sandėlio darbai",
+      "esco_uri": "http://data.europa.eu/esco/skill/089ddb19-1c7a-43ff-ba64-070f7ce4787a",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/089ddb19-1c7a-43ff-ba64-070f7ce4787a",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "waterproofing",
+      "name_en": "Waterproofing",
+      "name_lt": "Hidroizoliacija",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "waterproofing-tiles",
+      "name_en": "Wet-room waterproofing",
+      "name_lt": "Drėgnų patalpų hidroizoliacija",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "web-design",
+      "name_en": "Web design",
+      "name_lt": "Interneto svetainių dizainas",
+      "esco_uri": null,
+      "match_method": [
+        "exact-label:en:hidden"
+      ],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "hidden-label-only match",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/21d2f96d-35f7-4e3f-9745-c533d2dd6e97",
+          "evid": "en:hidden",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "welding-blueprint",
+      "name_en": "Reading welding blueprints",
+      "name_lt": "Suvirinimo brėžinių skaitymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "curated_suggestion": [
+        {
+          "uri": "http://data.europa.eu/esco/skill/68b6ef08-d823-489d-a95c-752ae6f6e6a7",
+          "term": "read standard blueprints",
+          "evid": "en:preferred",
+          "note": "same concept as blueprint-reading — many-to-one needs a human decision"
+        }
+      ]
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "window-cleaning",
+      "name_en": "Window cleaning",
+      "name_lt": "Langų valymas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "winter-service",
+      "name_en": "Snow & ice service",
+      "name_lt": "Sniego valymas / žiemos priežiūra",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "skill",
+      "labourmarket_canonical_slug": "work-scheduling",
+      "name_en": "Work scheduling",
+      "name_lt": "Darbų planavimas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    }
+  ],
+  "professions": [
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "auto_mechanic",
+      "name_en": "Car mechanic",
+      "name_lt": "Automechanikas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/4ad4024e-d1d3-4dea-b6d1-2c7948111dce",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/4ad4024e-d1d3-4dea-b6d1-2c7948111dce",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "baker",
+      "name_en": "Baker",
+      "name_lt": "Kepėjas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/1aadb308-432a-4d01-b54b-b4f7f76dd419",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 2 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/1aadb308-432a-4d01-b54b-b4f7f76dd419",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/8f10ea9b-bfdf-4a4c-9fa7-b6e02daa93e5",
+          "evid": "en:alternative,lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/ff42d44c-34f8-46be-ad3a-2aad9a5e43f0",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "barber",
+      "name_en": "Barber",
+      "name_lt": "Barberis",
+      "esco_uri": "http://data.europa.eu/esco/occupation/4e0c14d6-b170-40f1-bcdc-703c0b92109b",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/4e0c14d6-b170-40f1-bcdc-703c0b92109b",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "barista",
+      "name_en": "Barista",
+      "name_lt": "Barista",
+      "esco_uri": "http://data.europa.eu/esco/occupation/bf7d8b16-4e2c-48ef-b44e-dc25b2d0ab61",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/bf7d8b16-4e2c-48ef-b44e-dc25b2d0ab61",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "builder",
+      "name_en": "Builder",
+      "name_lt": "Statybininkas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/59cc9783-7289-4e1d-b80b-93c1776f49cc",
+      "match_method": [
+        "exact-label:en:alternative",
+        "exact-label:lt:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/59cc9783-7289-4e1d-b80b-93c1776f49cc",
+          "evid": "en:alternative,lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "call_centre_agent",
+      "name_en": "Call centre agent",
+      "name_lt": "Skambučių centro operatorius",
+      "esco_uri": "http://data.europa.eu/esco/occupation/0ededdc2-050a-4ec3-8e70-6295105fcd19",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 2 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/0ededdc2-050a-4ec3-8e70-6295105fcd19",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/30ca97f4-a4fd-4189-a781-ac08f6b09b78",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/6aa78e46-ce22-421f-8a75-e915ac63c9d0",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "caregiver",
+      "name_en": "Caregiver",
+      "name_lt": "Priežiūros darbuotojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/d5954a2b-a525-45b7-b6d9-b62efafc6c78",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/d5954a2b-a525-45b7-b6d9-b62efafc6c78",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "carpenter",
+      "name_en": "Carpenter",
+      "name_lt": "Stalius",
+      "esco_uri": "http://data.europa.eu/esco/occupation/2a22ff9e-de3b-408d-b312-5034896cc4f4",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 1 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/2a22ff9e-de3b-408d-b312-5034896cc4f4",
+          "evid": "en:preferred,lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/34e1c889-0fd1-4d1f-aba9-3b6263ae667a",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "cleaner",
+      "name_en": "Cleaner",
+      "name_lt": "Valytojas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "3 concepts matched, none via a preferred label",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/38eb308f-0075-451e-9c1a-c557fd173022",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/731ecac4-06e8-4ec2-a559-101fecbd9183",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/7cb71c5f-c310-481c-b46b-d0044328758c",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "concrete_worker",
+      "name_en": "Concrete worker",
+      "name_lt": "Betonuotojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/a9068f84-cecd-4cbb-9acb-e20c714435ec",
+      "match_method": [
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/a9068f84-cecd-4cbb-9acb-e20c714435ec",
+          "evid": "lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "cook",
+      "name_en": "Cook",
+      "name_lt": "Virėjas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/90f75f67-495d-49fa-ab57-2f320e251d7e",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 1 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/90f75f67-495d-49fa-ab57-2f320e251d7e",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/a256838b-0843-4ad2-a2fb-4531f94e63d8",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "crane_operator",
+      "name_en": "Crane operator",
+      "name_lt": "Kranininkas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "customer_service_specialist",
+      "name_en": "Customer service specialist",
+      "name_lt": "Klientų aptarnavimo specialistas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/9c9752b7-3e3b-4a08-8553-b63a013f8072",
+      "match_method": [
+        "exact-label:lt:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/9c9752b7-3e3b-4a08-8553-b63a013f8072",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "driver",
+      "name_en": "Driver",
+      "name_lt": "Vairuotojas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "4 concepts matched, none via a preferred label",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/880a6cd1-2356-4994-8983-ac364763beaf",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/af513bd8-4340-4452-aa30-05a073ecc49a",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/b5b8c259-7557-4f5f-9f56-155b038946c1",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/e75305db-9011-4ee0-ab62-8d41a98f807e",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "drywaller",
+      "name_en": "Drywaller",
+      "name_lt": "Gipso kartono montuotojas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "electrician",
+      "name_en": "Electrician",
+      "name_lt": "Elektrikas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/4910419f-b4af-4f59-b544-9dbebc8a74f0",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 11 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/0c328e98-6e4e-4e96-b99c-56851e666ad0",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/33960bab-4423-4808-af6c-ec2b485dba41",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/4910419f-b4af-4f59-b544-9dbebc8a74f0",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/5d009d45-3bb9-4e33-8760-294f59adec8c",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/5dbb9cf0-b226-402c-a295-2f42ef05ff8b",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/5df63943-f1bc-4438-90f1-92768a7a23c8",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/6656337f-67eb-4f48-b1e4-ecccdfa44dd2",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/9422c30d-c5ef-4fcc-a493-d67ee42189c0",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/c07ab008-79c1-4516-8dcc-8289f797dc34",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/d9ab0f3d-078d-42a7-a502-3e739e0aeff6",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/e859428d-6dbd-406b-bb2e-d5a0ae21df29",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/fd86ebe1-bad4-4486-9b76-01a48030e49a",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "event_organizer",
+      "name_en": "Event organizer",
+      "name_lt": "Renginių organizatorius",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "4 concepts matched, none via a preferred label",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/1b38a27d-ef98-4d9f-b1b2-8c109bf47e79",
+          "evid": "en:alternative,lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/21ae429f-a152-46a6-a73c-9ec65c7803f0",
+          "evid": "en:alternative,lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/6662e56e-bc3d-4d9b-bed2-79d510d7c4ff",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/be54b8da-bc71-40f0-b150-45c5e0769375",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "farm_worker",
+      "name_en": "Farm worker",
+      "name_lt": "Žemės ūkio darbininkas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/c9191f7f-28b5-4df8-991d-804c53009b83",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/c9191f7f-28b5-4df8-991d-804c53009b83",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "foreman",
+      "name_en": "Foreman",
+      "name_lt": "Brigadininkas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "furniture_assembler",
+      "name_en": "Furniture assembler",
+      "name_lt": "Baldų surinkėjas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/d7f3d76b-23e8-447e-93d5-da13ff9bc102",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/d7f3d76b-23e8-447e-93d5-da13ff9bc102",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "gardener",
+      "name_en": "Gardener",
+      "name_lt": "Sodininkas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "2 concepts matched, none via a preferred label",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/55f001af-fa48-4c0c-a7e5-fc69babe3d45",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/a10eb17a-3c78-4f7a-a1da-8f31146339d3",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "general_laborer",
+      "name_en": "General laborer",
+      "name_lt": "Bendrasis darbininkas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "hairdresser",
+      "name_en": "Hairdresser",
+      "name_lt": "Kirpėjas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/099c6bb0-22d3-4c5d-8bf5-70910af381ef",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 2 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/099c6bb0-22d3-4c5d-8bf5-70910af381ef",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/82dea303-26e1-4bbc-a07c-cff3cac6b50e",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/f60dc59b-7681-45d4-8114-b3a646e02ab2",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "handyman",
+      "name_en": "Handyman",
+      "name_lt": "Smulkaus remonto meistras",
+      "esco_uri": "http://data.europa.eu/esco/occupation/f4a25243-b06a-42a9-9c69-246853df63ad",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/f4a25243-b06a-42a9-9c69-246853df63ad",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "heavy_equipment_operator",
+      "name_en": "Heavy equipment operator",
+      "name_lt": "Sunkios technikos operatorius",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "kitchen_helper",
+      "name_en": "Kitchen helper",
+      "name_lt": "Virtuvės pagalbininkas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/f756fdab-7726-4c48-bfcc-94ff8810fc08",
+      "match_method": [
+        "exact-label:lt:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/f756fdab-7726-4c48-bfcc-94ff8810fc08",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "laundry_worker",
+      "name_en": "Laundry worker",
+      "name_lt": "Skalbyklos darbuotojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/0da51178-e386-4534-ae71-15ba789ad756",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 3 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/0da51178-e386-4534-ae71-15ba789ad756",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/15ab8475-549d-48a7-9d4a-5bb310015312",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/3d924c0d-ffee-4f11-adc7-c2bfb76fcf73",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/e16e4cb0-6f7d-4bf9-8f90-d1d866ad229b",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "mason",
+      "name_en": "Mason",
+      "name_lt": "Mūrininkas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/05f321f8-055b-407d-bf19-e0ddabda56b7",
+      "match_method": [
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 1 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/05f321f8-055b-407d-bf19-e0ddabda56b7",
+          "evid": "lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/f3fc11ca-9a72-40da-bf0f-b2aab7e33079",
+          "evid": "en:alternative,lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "merchandiser",
+      "name_en": "Merchandiser",
+      "name_lt": "Prekių išdėliotojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/f1fcad3b-fdf0-444a-81b0-e50e96f8966a",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/f1fcad3b-fdf0-444a-81b0-e50e96f8966a",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "nail_technician",
+      "name_en": "Nail technician",
+      "name_lt": "Manikiūrininkas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/bced9b86-d4e7-42f8-bb47-acb2001b9bd0",
+      "match_method": [
+        "exact-label:en:alternative",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/bced9b86-d4e7-42f8-bb47-acb2001b9bd0",
+          "evid": "en:alternative,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "office_administrator",
+      "name_en": "Office administrator",
+      "name_lt": "Biuro administratorius",
+      "esco_uri": "http://data.europa.eu/esco/occupation/6e6839b6-099c-4802-906e-7f2c8203ee69",
+      "match_method": [
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 2 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/044d78cc-f62f-4532-83a5-8e04f2889652",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/6e6839b6-099c-4802-906e-7f2c8203ee69",
+          "evid": "lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/8cce40c1-4479-47e7-b5fc-c976631d919f",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "painter",
+      "name_en": "Painter",
+      "name_lt": "Dažytojas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "AMBIGUOUS",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true,
+      "note": "3 concepts matched, none via a preferred label",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/15620506-fb5d-49cd-87a2-1c9047fb406a",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/21a33619-1959-42e6-8478-64a930f7f225",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/657eeac9-5bb9-449d-a353-aa7d5f47e2b5",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "plumber",
+      "name_en": "Plumber",
+      "name_lt": "Santechnikas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/ed3cf43d-c2c1-4c46-82fc-1375e27e0290",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 1 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/2ff73126-7aff-4233-9d9c-d8725e1c6822",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/ed3cf43d-c2c1-4c46-82fc-1375e27e0290",
+          "evid": "en:preferred,lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "production_worker",
+      "name_en": "Production worker",
+      "name_lt": "Gamybos darbuotojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/af2f3615-63ab-44dc-957d-c9660410d336",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/af2f3615-63ab-44dc-957d-c9660410d336",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "rebar_worker",
+      "name_en": "Rebar Worker",
+      "name_lt": "Armatūrininkas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "receptionist",
+      "name_en": "Receptionist",
+      "name_lt": "Registratorius",
+      "esco_uri": "http://data.europa.eu/esco/occupation/f7b04542-d8c7-42db-8475-e63b507cce82",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 2 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/0bf68df5-e808-4c27-abf2-6f85440f2d7f",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/82025c02-9082-416c-998b-f51eb0359ee6",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/f7b04542-d8c7-42db-8475-e63b507cce82",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "recruiter",
+      "name_en": "Recruiter",
+      "name_lt": "Personalo atrankos specialistas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "roofer",
+      "name_en": "Roofer",
+      "name_lt": "Stogdengys",
+      "esco_uri": "http://data.europa.eu/esco/occupation/b4c6d1b0-929e-48be-9f67-47bd8c30658b",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/b4c6d1b0-929e-48be-9f67-47bd8c30658b",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "safety_specialist",
+      "name_en": "Safety specialist",
+      "name_lt": "Darbų saugos specialistas",
+      "esco_uri": null,
+      "match_method": [],
+      "confidence": "NO_MATCH",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": true
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "sales_assistant",
+      "name_en": "Sales assistant",
+      "name_lt": "Pardavėjas konsultantas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/9ba74e8a-c40c-4228-9998-eb3c7a5c11df",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/9ba74e8a-c40c-4228-9998-eb3c7a5c11df",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "site_engineer",
+      "name_en": "Site engineer",
+      "name_lt": "Aikštelės inžinierius",
+      "esco_uri": "http://data.europa.eu/esco/occupation/2a914d26-42aa-46b5-acf3-097d51ba4617",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/2a914d26-42aa-46b5-acf3-097d51ba4617",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "site_manager",
+      "name_en": "Site Manager",
+      "name_lt": "Statybų vadovas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/faed05c0-c1d1-4e34-b575-0dea96459e56",
+      "match_method": [
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 3 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/0368c4d4-94cf-4168-a84d-283a25880e0d",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/107d21c6-973b-411c-89fd-69da48d29ada",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/ba3bacd4-73e9-4861-a9c0-f89f1f28055a",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/faed05c0-c1d1-4e34-b575-0dea96459e56",
+          "evid": "lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "software_developer",
+      "name_en": "Software developer",
+      "name_lt": "Programuotojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+      "match_method": [
+        "exact-label:en:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/f2b15a0e-e65a-438a-affb-29b9d50b77d1",
+          "evid": "en:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "teacher",
+      "name_en": "Teacher",
+      "name_lt": "Mokytojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/c593ded7-2e97-44a5-a5f3-f6115ff98233",
+      "match_method": [
+        "exact-label:en:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/c593ded7-2e97-44a5-a5f3-f6115ff98233",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "tiler",
+      "name_en": "Tiler",
+      "name_lt": "Plytelių klojėjas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/02447817-ea01-4d8b-b09c-8bc128e447e6",
+      "match_method": [
+        "exact-label:en:alternative",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 1 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/02447817-ea01-4d8b-b09c-8bc128e447e6",
+          "evid": "en:alternative,lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/a50d64e7-2dba-4418-81a7-92b2ba2e508f",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "translator",
+      "name_en": "Translator",
+      "name_lt": "Vertėjas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/1a07bd7d-2e1d-4930-a84a-1a442b8f2a44",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/1a07bd7d-2e1d-4930-a84a-1a442b8f2a44",
+          "evid": "en:preferred,lt:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "waiter",
+      "name_en": "Waiter",
+      "name_lt": "Padavėjas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/d5db9d5c-2ebf-4a54-a79a-1b7e7ff70471",
+      "match_method": [
+        "exact-label:en:alternative",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/d5db9d5c-2ebf-4a54-a79a-1b7e7ff70471",
+          "evid": "en:alternative,lt:preferred",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "warehouse_worker",
+      "name_en": "Warehouse worker",
+      "name_lt": "Sandėlio darbuotojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/bea705fe-06ac-4147-b8e0-6e8ac1208d8f",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:alternative"
+      ],
+      "confidence": "HIGH_CONFIDENCE",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 1 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/bea705fe-06ac-4147-b8e0-6e8ac1208d8f",
+          "evid": "en:preferred,lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/cd94def5-3442-4c2e-ae3d-0761a3008bcb",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    },
+    {
+      "type": "profession",
+      "labourmarket_canonical_slug": "welder",
+      "name_en": "Welder",
+      "name_lt": "Suvirintojas",
+      "esco_uri": "http://data.europa.eu/esco/occupation/7aedaa07-3884-4c5b-88f9-80997b2aa54b",
+      "match_method": [
+        "exact-label:en:preferred",
+        "exact-label:lt:preferred"
+      ],
+      "confidence": "EXACT",
+      "source": "prod public.esco_labels (ESCO v1.2.1, imported 2026-06-10) via read-only SQL, measured 2026-08-30; canonical names from apps/web/messages/{en,lt}/{skill-names,professions}.json at main fe75acce",
+      "human_review_required": false,
+      "note": "preferred-label winner over 4 alternative-only competitor(s)",
+      "evidence_all_candidates": [
+        {
+          "uri": "http://data.europa.eu/esco/occupation/219e7fdd-5889-4517-9e86-620a12d535aa",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/572c9810-e1ee-4f7a-a71f-820f17c0c25b",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/7aedaa07-3884-4c5b-88f9-80997b2aa54b",
+          "evid": "en:preferred,lt:preferred",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/c44f9f8c-46a6-40da-9630-cc568a18cc51",
+          "evid": "lt:alternative",
+          "kind": "exact-label"
+        },
+        {
+          "uri": "http://data.europa.eu/esco/occupation/c81af273-1112-4b3f-a2a5-b85b1290ae22",
+          "evid": "en:alternative",
+          "kind": "exact-label"
+        }
+      ]
+    }
+  ]
+}

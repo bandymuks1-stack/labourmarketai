@@ -1,0 +1,10 @@
+{"step":"health","build":"8be8502c"}
+{"step":"sample","atMs":0,"d":"M0 0","anchorBox":{"w":0,"h":0,"x":1106,"y":130},"mapBox":{"w":319,"h":288},"leafletContainer":{"w":317,"h":286},"tiles":9,"paths":2}
+{"step":"sample","atMs":1000,"d":"M0 0","anchorBox":{"w":0,"h":0,"x":1106,"y":130},"mapBox":{"w":319,"h":288},"leafletContainer":{"w":317,"h":286},"tiles":9,"paths":2}
+{"step":"sample","atMs":2000,"d":"M0 0","anchorBox":{"w":0,"h":0,"x":1106,"y":130},"mapBox":{"w":319,"h":288},"leafletContainer":{"w":317,"h":286},"tiles":9,"paths":2}
+{"step":"sample","atMs":4000,"d":"M0 0","anchorBox":{"w":0,"h":0,"x":1106,"y":130},"mapBox":{"w":319,"h":288},"leafletContainer":{"w":317,"h":286},"tiles":9,"paths":2}
+{"step":"sample","atMs":8000,"d":"M0 0","anchorBox":{"w":0,"h":0,"x":1106,"y":130},"mapBox":{"w":319,"h":288},"leafletContainer":{"w":317,"h":286},"tiles":9,"paths":2}
+{"step":"sample","atMs":15000,"d":"M0 0","anchorBox":{"w":0,"h":0,"x":1106,"y":130},"mapBox":{"w":319,"h":288},"leafletContainer":{"w":317,"h":286},"tiles":9,"paths":2}
+{"step":"click","clicked":"failed: locator.click: Timeout 15000ms exceeded.","url":"https://labourmarket.ai/lt/dashboard?result=market","projectsView":0}
+{"step":"keyboard","url":"https://labourmarket.ai/lt/dashboard?result=market&geo=LT%3Acountry","projectsView":1}
+{"step":"done"}

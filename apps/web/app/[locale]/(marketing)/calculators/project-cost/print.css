@@ -1,0 +1,36 @@
+/*
+ * Print stylesheet for the public project-cost calculator result
+ * (European Work & Project Calculator v1). Scoped by design: on print, only
+ * the calculator result region (#pcc-print-area) is visible, rendered dark
+ * text on white so browser print-to-PDF produces a clean, readable page —
+ * the app has no other print styling, so this file deliberately touches
+ * nothing outside @media print.
+ */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #pcc-print-area,
+  #pcc-print-area * {
+    visibility: visible;
+  }
+  #pcc-print-area {
+    position: absolute;
+    inset: 0 auto auto 0;
+    width: 100%;
+    padding: 16px;
+    background: #ffffff !important;
+    color: #111111 !important;
+  }
+  #pcc-print-area * {
+    background: transparent !important;
+    color: #111111 !important;
+    border-color: #cccccc !important;
+    box-shadow: none !important;
+  }
+  /* The screen theme's warning tint stays readable as plain dark text. */
+  #pcc-print-area [data-testid="estimate-disclaimer"],
+  #pcc-print-area [data-testid="pcc-incomplete"] {
+    border: 1px solid #999999 !important;
+  }
+}

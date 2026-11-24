@@ -1,0 +1,1131 @@
+import { deriveGrowthReading } from "@/lib/journal/growth-reading";
+import { readOwnConfirmedWorkTotals } from "@/lib/evidence/confirmed-work-read";
+import { withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
+import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
+import { organizationAllTime } from "@/lib/journal/organization-all-time";
+import { cvLiveEntries } from "@/lib/cv-export/cv-entries";
+import "server-only";
+import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
+import { orgDisplayName } from "@/lib/company/org-display";
+
+import { createClient } from "@/lib/supabase/server";
+import {
+  countClientAcceptedEntries,
+  selectStandingConfirmations,
+} from "@/lib/cv-export/confirmation-standing";
+import {
+  supportedSkillIds,
+  type EntrySkillLinkRow,
+} from "@/lib/journal/journal-entry-skills";
+import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
+import {
+  isLiveJournalEntry,
+  readAllPages,
+  type LiveJournalEntryFlags,
+} from "@/lib/journal/journal-list-core";
+import {
+  getOwnTrustSignals,
+  type OwnTrustSignals,
+} from "@/lib/profile/trust-signals";
+import { groupCvSkillTiers, type CvSkillTiers } from "./skill-tiers";
+import { buildCvOrganizationHistory, type CvOrganizationHistoryEntry } from "./organization-history";
+import {
+  skillPracticeFromIntelligence,
+  type SkillPracticeFacts,
+} from "./skill-presentation";
+import { deriveProfessionalFacts, type ProfessionalFacts } from "./professional-summary";
+import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
+import {
+  attributedHoursBySlug,
+  confirmedHoursBySlug,
+  type WorkIntelligence,
+} from "@/lib/journal/work-intelligence";
+import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import { readDisputedEntrySkills, withoutDisputedLinks } from "@/lib/journal/entry-skill-disputes";
+import {
+  deriveProfessionalExperience,
+  type ProfessionalExperience,
+} from "@/lib/journal/professional-experience";
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
+import {
+  certificateDocsForCv,
+  projectsFromProof,
+  splitAchievementsForCv,
+  type CvAchievementInput,
+  type CvCertificateDoc,
+  type CvProject,
+} from "./cv-sections";
+import {
+  historyKindOf,
+  isRecordedEngagement,
+  PROFESSIONAL_HISTORY_RELATIONSHIPS,
+  type WorkHistoryKind,
+} from "@/lib/player-card/work-history-model";
+
+/**
+ * Verified CV export (S3.5) — the worker's OWN portable, honest history.
+ *
+ * Every number/label is read under the worker's own RLS from canonical
+ * tables; nothing is invented and nothing renders as confirmed without a
+ * real manager confirmation (see skill-tiers.ts). Privacy is default-closed:
+ * the confirmed-proof list carries the confirmer's ROLE only — never the
+ * confirmer's name or id — and no employer data beyond the project title the
+ * worker's own entry already links to.
+ *
+ * Taxonomy names stay the existing curated slug→JSON set; when the ESCO
+ * canonical layer (#286) is applied, the page swaps to ESCO preferred labels
+ * with no change here (slugs are returned, the page translates).
+ */
+
+/** Worker engagement relationships — the person-as-worker history rows.
+ *  Mirrors the set the profile page renders, so the CV and profile agree. */
+// The ONE work-relationship list lives in work-history-model (W4: three
+// copies had already diverged once) — imported with the rest above.
+
+export type VerifiedCvEngagement = {
+  /** Best display name for the org (display → legal); null when none stored
+   *  (the page falls back to an org-type or relationship label). */
+  orgName: string | null;
+  /** organizations.organization_type (company / agency) — lets the page label
+   *  an unnamed org honestly instead of a bare "—". */
+  organizationType: string | null;
+  /** engagement relationship slug (employee / freelancer / …). */
+  relationship: string;
+  /** Paid/contracted work vs a study placement or volunteering — decided by
+   *  the relationship. The page prints the two under separate headings so a
+   *  placement is never presented as a job. */
+  kind: WorkHistoryKind;
+  /** Free-text engagement title, if the worker gave one. */
+  title: string | null;
+  startedAt: string | null;
+  endedAt: string | null;
+  /** engagement_contexts.id — the key the journal's per-context figures
+   *  (`WorkIntelligence.contexts`) are joined on. */
+  id: string | null;
+  /** The person's own description of the engagement (what the work was),
+   *  as saved — never rewritten. */
+  description: string | null;
+  /** engagement_contexts.operations_role — the operational role slug/text,
+   *  printed only when it adds to the title. */
+  operationsRole: string | null;
+  /** Name of the project the context is bound to (`projects.name`), when
+   *  the context has one and the project row was readable. */
+  projectName: string | null;
+  /** The journal's own figures for THIS context: hours / approved hours /
+   *  entries. `null` when the journal could not be read (unknown), a zero
+   *  row when it was read and holds no entry for the context. */
+  recorded: { hours: number; confirmedHours: number; entries: number } | null;
+};
+
+export type VerifiedCvProofRow = {
+  /** Date of the confirmation (the legally meaningful act). */
+  confirmedAt: string;
+  /** Date of the underlying work entry. */
+  entryDate: string;
+  /** Project title the worker's own entry links to, if any. */
+  projectTitle: string | null;
+  /** Confirmer's relationship ROLE (manager / owner / external_manager) —
+   *  deliberately never the person's name (default-closed, §4). */
+  confirmerRole: string;
+  /** W6 slice 1: true when the confirmation was written by the policy-gated
+   *  auto-confirm RPC — rendered with a factual qualifier, never hidden. */
+  automatic: boolean;
+  /**
+   * TRUE when the confirmer IS the person the entry belongs to (EVID-2).
+   *
+   * This CV is the document a person shows an employer, and until 2026-09-08
+   * a self-confirmation reached it indistinguishable from an employer's:
+   * the row carried only `confirmer_role`, every production row carries
+   * `owner`, and 3 of the 13 confirmations on production are the worker
+   * confirming their own entry. So "Confirmed work proof" silently included
+   * work nobody but the worker had attested.
+   *
+   * SEP-3 (EVIDENCE ≠ VERIFICATION) is the rule being kept here. The row is
+   * NOT hidden and NOT deleted — self-reported work is still real work, and
+   * the register's own history says an import may never quietly reclassify
+   * what a human wrote. It is LABELLED, exactly as `automatic` is, so the
+   * reader can tell an external confirmation from an internal one.
+   *
+   * Derived, never stored: `confirmer_id === the CV subject's profile id`.
+   * That keeps the existing 3 rows untouched while making their provenance
+   * legible, which is what the owner asked for before any data change.
+   */
+  selfConfirmed: boolean;
+  /**
+   * The engagement (`engagement_contexts.id`) the confirmed entry was
+   * recorded for, or null when it was recorded without one. Lets the CV
+   * print a confirmation UNDER the job it confirms — work → confirmation →
+   * history as one chain (premium Living CV, 2026-09-29). An id the person's
+   * own entry already carries; never a name, never the confirmer.
+   */
+  engagementId: string | null;
+};
+
+export type VerifiedCvLanguage = { lang: string; level: string };
+
+export type VerifiedCvEducation = {
+  institutionName: string;
+  programOrField: string | null;
+  educationTypeSlug: string;
+  startYear: number | null;
+  endYear: number | null;
+  isCurrent: boolean;
+};
+
+/** Salary + availability facts from the worker's OWN workers row. Rendered
+ *  on the export ONLY behind the per-export privacy toggle (default OFF,
+ *  never persisted) — the worker chooses whether these print. */
+export type VerifiedCvPrivateDetails = {
+  salaryMinEur: number | null;
+  salaryMaxEur: number | null;
+  availabilityStatus: string | null;
+  availableFrom: string | null;
+  willingToRelocate: boolean | null;
+  hasTransport: boolean | null;
+};
+
+export type VerifiedCvData = {
+  personName: string;
+  /** The worker's own self-written professional summary (`profiles.profile_text`).
+   *  Self-declared, never verified; null/empty when not written. */
+  professionalSummary: string | null;
+  /** Every profession this person states: a registry `slug` to translate, or
+   *  their OWN WORDS in `label`, shown exactly as typed (ledger
+   *  20260927060325). Exactly one of the two is set. */
+  professionSlugs: { slug: string | null; label: string | null; isPrimary: boolean }[];
+  /** Catalogued worker skills, grouped by honest tier (slugs). */
+  tiers: CvSkillTiers;
+  /** Flat catalogued skill facts (slug + real verified flag) — the tailored
+   *  mode's fit subject; same rows the tiers are grouped from. */
+  skillFacts: { slug: string; verified: boolean }[];
+  /** Free-label self-declared claims — ALWAYS the declared tier, NEVER
+   *  presented as verified/confirmed. `origin` says where the claim came
+   *  from: the profile narrative ("profile") or a work-journal entry's
+   *  `skill_claim` metric ("journal", P0 Track B) — the CV UI labels the
+   *  journal-derived ones so provenance stays honest. */
+  declaredClaims: {
+    /** The person's OWN label as saved — casing preserved (the CV used to
+     *  print `normalized_label`, which is how "programavimas" sat beside
+     *  the catalogue's "Programavimas"). */
+    label: string;
+    origin: "profile" | "journal";
+    /** Row id for profile claims (a removal UI folds variants by it). */
+    id?: string;
+    /** Catalogue slugs the deterministic lexicon maps this label to — so
+     *  the presentation can fold a claim into the skill it already is. */
+    mappedSlugs?: string[];
+  }[];
+  /**
+   * The journal's per-skill figures (attributed / confirmed / shared hours,
+   * share, entries, days, contexts, first/last day, trend) keyed by slug —
+   * the SAME `SkillWorkTime` rows the journal's "work in numbers" shows,
+   * for the skill presentation (magnitude, order). `null` when the journal
+   * could not be read: the CV then shows no figure and no zero (SEP-7).
+   */
+  skillPractice: Record<string, SkillPracticeFacts> | null;
+  /**
+   * DERIVED directions adjacent to the person's evidenced skills — the
+   * growth reading's `adjacent_opportunity` kind, over the same work
+   * intelligence. For the person's OWN career-journey horizon only (a
+   * personal forecast, frozen contract §1.7); never printed. `null` when the
+   * journal could not be read.
+   */
+  growthAdjacent?: { professionId: string; sharedSkills: string[]; missingSkills: string[] }[] | null;
+  /** How much of the journal the figures rest on (lane B, #1689): the
+   *  entry read stops at a ceiling, so `truncated` means older entries MAY
+   *  exist outside every figure — the CV then names the window instead of
+   *  calling it "all time". `null` when the journal was unreadable. */
+  journalCoverage: { entriesRead: number; truncated: boolean } | null;
+  /** Deterministic professional facts from the canonical work-intelligence
+   *  reading (all-time hours, entries, span, contexts, top skills, outputs)
+   *  — printed UNDER the person's own summary, never in its place; `null`
+   *  when the journal was unreadable or holds no entry. */
+  professionalFacts: ProfessionalFacts | null;
+  /** Real work history from engagement_contexts (companies, role, dates) —
+   *  the same source the profile renders; empty array when none. */
+  workHistory: VerifiedCvEngagement[];
+  /** Self-stated languages (worker_languages) — empty until the worker adds
+   *  them (or until the draft table is applied). Never verified. */
+  languages: VerifiedCvLanguage[];
+  /** Certificate/licence rows from the worker's document inventory (READY +
+   *  unexpired only — see cv-sections.ts). Worker-entered, not verified. */
+  certificateDocs: CvCertificateDoc[];
+  /** workers.driving_licence_categories (MP-2 column) — [] when unset. */
+  drivingLicenceCategories: string[];
+  /** Text-declared certificates from CV import (worker_achievements rows with
+   *  slug declared_certificate) — always labelled declared-not-verified. */
+  declaredCertificates: CvAchievementInput[];
+  /** Self-declared education entries (worker_education). */
+  education: VerifiedCvEducation[];
+  /** Self-declared achievements (worker_achievements, non-certificate). */
+  achievements: CvAchievementInput[];
+  /** Projects DERIVED from the confirmed-proof rows below — same truth. */
+  projects: CvProject[];
+  /**
+   * Hours the worker's OWN journal attributes to each catalogued skill —
+   * the SAME figures the journal's "work in numbers" shows (issue #1689),
+   * through the one canonical work-time rule. Attributed only: an entry
+   * linked to several skills is never split by guessing, so those hours
+   * appear on neither chip. `null` when the journal could not be read —
+   * the chip then shows no figure rather than a zero (SEP-7).
+   */
+  recordedHoursBySkill: Record<string, number> | null;
+  /**
+   * Of `recordedHoursBySkill`, the hours a manager/client CONFIRMED — the
+   * model's own per-skill figure (re-audit F12), so a chip inside a
+   * verification tier can say in words which of its hours are confirmed
+   * and which are the person's own record. Present at 0 for every slug in
+   * `recordedHoursBySkill`; `null` exactly when that map is null.
+   */
+  confirmedHoursBySkill: Record<string, number> | null;
+  /**
+   * Real work a manager confirmed, as FACTS: how many live entries were
+   * independently confirmed and across how many distinct work days. Not a
+   * score and not a skill certification. `null` = unreadable (never a zero);
+   * `{entries: 0}` = readable and none.
+   */
+  confirmedWorkTotals: { entries: number; days: number } | null;
+  /**
+   * Live entries the CLIENT / customer / contracting counterparty accepted
+   * (counterparty-basis rows, latest wins). A different claim by a different
+   * party than `confirmedWorkTotals` (employer): never added to it, never a
+   * skill certification, never a payment record. `null` = unreadable.
+   */
+  clientAcceptedEntries: number | null;
+  /** All-time recorded hours (every entry once), or null when unreadable. */
+  recordedHoursTotal: number | null;
+  /** Of the total, hours a manager/client confirmed. */
+  recordedHoursConfirmed: number | null;
+  /**
+   * The SECOND hour ledger (owner §19): hours an organization recorded
+   * about the person in its own timesheets or imported documents
+   * (`work_hour_allocations`), read by the same model and kept apart from
+   * `recordedHoursTotal` — never added to it, never attributed to a skill
+   * (an hour record carries no description of the work). `null` when the
+   * ledger could not be read; zero hours when it holds nothing.
+   */
+  organizationRecordedHours: {
+    /** Day records only (timesheet lines + dated imported rows). */
+    hours: number;
+    days: number;
+    importedHours: number;
+    approvedHours: number;
+    /** Period records an imported document stated as one total over a span
+     *  (#2169, owner 2026-10-09): they count in all-time experience, are
+     *  never split into days, and need no invoice or payment to count. */
+    periodHours: number;
+    periodRecords: number;
+    /** hours + periodHours — all-time organization-recorded work. */
+    totalHours: number;
+    from: string | null;
+    to: string | null;
+  } | null;
+  /**
+   * The WORK behind those organization-recorded hours: imported history
+   * grouped by supplying organisation / project / client / capacity, each
+   * entry carrying its source and proof facts and ONLY the hours the records
+   * stated (see organization-history.ts). Organization-provided, never
+   * self-attested; never added to `recordedHoursTotal`. `null` = the ledger
+   * could not be read (UNKNOWN, not "no history"); `[]` = read, none.
+   */
+  organizationHistory: CvOrganizationHistoryEntry[] | null;
+  /**
+   * ONE continuous professional history (decision 0025, 2026-10-17): the
+   * all-time total — every work hour once, whoever recorded it — over the
+   * journal and the organization history, with the breakdown per
+   * organization (roles, ownership and management included, earlier business
+   * periods), per project and per source, and every line listed but not
+   * added, with its reason. The same reading Work in Numbers, the profile and
+   * the MCP `cv.verified.get` hand out. `null` when the journal was
+   * unreadable (UNKNOWN).
+   */
+  professionalExperience: ProfessionalExperience | null;
+  privateDetails: VerifiedCvPrivateDetails;
+  signals: OwnTrustSignals;
+  proof: VerifiedCvProofRow[];
+};
+
+export type VerifiedCvResult =
+  | { ok: true; cv: VerifiedCvData }
+  | { ok: false; code: "not_authenticated" | "no_worker" };
+
+type CvEntryRow = {
+  id: string;
+  created_at: string;
+  project_id: string | null;
+  engagement_context_id: string | null;
+  deleted_at?: string | null;
+  superseded_by?: string | null;
+  correction_of?: string | null;
+};
+
+/** A read keyed by many ids, done in chunks (a 1000-id `.in()` both exceeds
+ *  the server's 1000-row answer and risks the URL limit), every chunk paged
+ *  to the end. Null when any page fails or a chunk passes the ceiling — the
+ *  caller's existing "could not read" path, never a partial answer. */
+async function readByIdChunks<T>(
+  ids: readonly string[],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  build: (chunk: string[]) => any,
+): Promise<T[] | null> {
+  const out: T[] = [];
+  for (let i = 0; i < ids.length; i += 200) {
+    const chunk = ids.slice(i, i + 200);
+    const r = await readAllPages<T>(() => build(chunk));
+    if (r.error || r.truncated) return null;
+    out.push(...r.rows);
+  }
+  return out;
+}
+
+/** Unread relationships (null) leave journal hours unattributed to their
+ *  organization, so an hour inside an organization period would count twice:
+ *  the CV's total is UNKNOWN, never an inflated sum (experienceFiguresOf). */
+function withUnknownTotalWhenUnattributed(
+  pe: ProfessionalExperience,
+  relationships: readonly unknown[] | null | undefined,
+): ProfessionalExperience {
+  return relationships == null ? { ...pe, hours: null } : pe;
+}
+
+export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, code: "not_authenticated" };
+
+  const { data: worker } = await supabase
+    .from("workers")
+    .select("id")
+    .eq("profile_id", user.id)
+    .maybeSingle();
+  if (!worker?.id) return { ok: false, code: "no_worker" };
+  const workerId = worker.id;
+
+  const [
+    profileRes,
+    wpRes,
+    wsRes,
+    linkRes,
+    claims,
+    signals,
+    entriesRes,
+    ecRes,
+    workIntelligence,
+    standingSkills,
+  ] = await Promise.all([
+      supabase
+        .from("profiles")
+        .select("full_name, email, profile_text")
+        .eq("id", user.id)
+        .single(),
+      supabase
+        .from("worker_professions")
+        .select("is_primary, label, professions(slug)")
+        .eq("worker_id", workerId)
+        .order("is_primary", { ascending: false }),
+      supabase
+        .from("worker_skills")
+        .select("skill_id, verified, verified_by, verified_at, source, skills(slug)")
+        .eq("worker_id", workerId)
+        .order("created_at", { ascending: true }),
+      readAllPages<EntrySkillLinkRow>(() =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (supabase as any)
+          .from("journal_entry_skills")
+          .select("journal_entry_id, skill_id")
+          .eq("worker_id", workerId)
+          .order("journal_entry_id", { ascending: true })
+          .order("skill_id", { ascending: true }),
+      ).then((r) => ({ data: r.truncated ? null : r.rows, error: r.error ?? (r.truncated ? { code: "read_ceiling" } : null) })),
+      listProfileSkillClaims(),
+      getOwnTrustSignals(workerId),
+      readAllPages<CvEntryRow>(() =>
+        supabase
+          .from("journal_entries")
+          .select("id, created_at, project_id, engagement_context_id, deleted_at, superseded_by, correction_of")
+          .eq("worker_id", workerId)
+          .order("created_at", { ascending: true })
+          .order("id", { ascending: true }),
+      ).then((r) => ({ data: r.truncated ? null : r.rows, error: r.error ?? (r.truncated ? { code: "read_ceiling" } : null) })),
+      supabase
+        .from("engagement_contexts")
+        .select(
+          "id, relationship_slug, title, description, operations_role, project_id, is_primary, started_at, ended_at, organization_id, organizations(display_name, legal_name, organization_type)",
+        )
+        .eq("profile_id", user.id)
+        .in("relationship_slug", PROFESSIONAL_HISTORY_RELATIONSHIPS)
+        .order("is_primary", { ascending: false })
+        .order("started_at", { ascending: false, nullsFirst: false }),
+      // Recorded hours per skill — the journal's own derivation, read through
+      // the canonical journal-list core under the worker's RLS. Best-effort:
+      // an unreadable journal yields `null`, never invented zeros.
+      loadWorkIntelligence({ supabase, userId: user.id }, workerId).catch(
+        (): WorkIntelligence | null => null,
+      ),
+      // Which recorded skill confirmations still STAND (a later rejection,
+      // correction or deletion of the confirmed work withdraws one; the
+      // person's own "confirmation" never counts). null = unknown.
+      readOwnStandingConfirmedSkillIds(workerId),
+    ]);
+
+  // ── Full CV System v1 sections — ALL best-effort/graceful reads. A table
+  // that is not applied yet (42P01) or an optional column that is missing
+  // (42703) yields an EMPTY section (which the page then omits honestly) —
+  // never an error surface, never fabricated data.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sb = supabase as any;
+  const tolerant = <T>(p: PromiseLike<{ data: T | null; error: unknown }>) =>
+    Promise.resolve(p).then(
+      (r) => (r.error ? { data: null } : r),
+      () => ({ data: null as T | null }),
+    );
+  const [langsRes, docsRes, privBaseRes, privOptRes, eduRes, achRes] =
+    await Promise.all([
+      tolerant(
+        sb
+          .from("worker_languages")
+          .select("lang, level")
+          .eq("worker_id", workerId),
+      ),
+      tolerant(
+        sb
+          .from("worker_documents")
+          .select("document_type_slug, country, status, verification, valid_until")
+          .eq("worker_id", workerId),
+      ),
+      tolerant(
+        sb
+          .from("workers")
+          .select(
+            "salary_min_eur, salary_max_eur, availability_status, available_from",
+          )
+          .eq("id", workerId)
+          .maybeSingle(),
+      ),
+      tolerant(
+        sb
+          .from("workers")
+          .select("willing_to_relocate, has_transport, driving_licence_categories")
+          .eq("id", workerId)
+          .maybeSingle(),
+      ),
+      tolerant(
+        sb
+          .from("worker_education")
+          .select(
+            "id, institution_name, program_or_field, education_type_slug, start_year, end_year, is_current",
+          )
+          .eq("profile_id", user.id)
+          .order("end_year", { ascending: false, nullsFirst: true }),
+      ),
+      tolerant(
+        sb
+          .from("worker_achievements")
+          .select(
+            "title, description, achieved_at, achievement_type_slug, confirmed_by_manager",
+          )
+          .eq("profile_id", user.id)
+          .order("achieved_at", { ascending: false, nullsFirst: false }),
+      ),
+    ]);
+
+  // Real work history (same source the profile renders). Primary first, then
+  // most-recent; org name prefers display → legal, else null so the page can
+  // fall back to an org-type/relationship label (never an invented name).
+  // Projects the contexts are bound to — a separate tolerant read (no FK
+  // embed to depend on); a missing name prints nothing, never a placeholder.
+  const contextProjectIds = [
+    ...new Set(
+      (ecRes.data ?? [])
+        .map((e) => (e as { project_id?: string | null }).project_id ?? null)
+        .filter((id): id is string => typeof id === "string" && id.length > 0),
+    ),
+  ];
+  const projectNamesRes =
+    contextProjectIds.length > 0
+      ? // `projects` names a project in `title`; there is no `name` column.
+        // Asking for `name` failed, the tolerant wrapper turned the failure
+        // into "no rows", and no job on the CV ever showed its project.
+        await tolerant<{ id: string; title: string | null }[]>(
+          sb.from("projects").select("id, title").in("id", contextProjectIds),
+        )
+      : { data: null };
+  const projectNameById = new Map(
+    (projectNamesRes.data ?? []).map((p) => [p.id, p.title?.trim() || null] as const),
+  );
+  // The journal's per-context figures (canonical reader; null = unreadable).
+  // Real work a manager independently confirmed, as facts (entries + distinct
+  // work days). One bounded read as the worker; null = unreadable, not zero.
+  const confirmedWorkTotals = await readOwnConfirmedWorkTotals(
+    supabase,
+    workerId,
+    user.id,
+  );
+  const recordedByContext = workIntelligence
+    ? new Map(
+        workIntelligence.contexts
+          .filter((c) => c.engagementContextId !== null)
+          .map((c) => [
+            c.engagementContextId as string,
+            { hours: c.hours, confirmedHours: c.confirmedHours, entries: c.entries },
+          ]),
+      )
+    : null;
+
+  // Every relationship of the person — jobs, ownership, management, ended
+  // ones too — for the one professional-experience reading (decision 0025).
+  // null = unreadable; the reading then carries the work model alone.
+  const experienceRelationships = await readOwnExperienceRelationships(supabase, user.id).catch(
+    () => null,
+  );
+
+  // An ENDED relationship keeps naming its organization (owner 2026-09-29).
+  const ecNamed = await withHistoricalOrgNames(
+    supabase,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (ecRes.data ?? []) as any[],
+  );
+  const workHistory: VerifiedCvEngagement[] = (ecNamed as NonNullable<typeof ecRes.data>).map((e) => {
+    const org = e.organizations as
+      | {
+          display_name: string | null;
+          legal_name: string | null;
+          organization_type: string | null;
+        }
+      | null;
+    const row = e as typeof e & {
+      id?: string | null;
+      description?: string | null;
+      operations_role?: string | null;
+      project_id?: string | null;
+    };
+    const id = row.id ?? null;
+    return {
+      orgName: orgDisplayName(org?.display_name, org?.legal_name),
+      organizationType: org?.organization_type ?? null,
+      relationship: e.relationship_slug,
+      kind: historyKindOf(e.relationship_slug),
+      title: (e.title as string | null) ?? null,
+      startedAt: e.started_at,
+      endedAt: e.ended_at,
+      id,
+      description: row.description?.trim() || null,
+      operationsRole: row.operations_role?.trim() || null,
+      projectName: row.project_id ? (projectNameById.get(row.project_id) ?? null) : null,
+      recorded: recordedByContext
+        ? (id && recordedByContext.get(id)) || { hours: 0, confirmedHours: 0, entries: 0 }
+        : null,
+    };
+  })
+    // The trigger-provisioned personal context (20260702140000) carries no
+    // organization, no title and no dates — it exists so the journal composer
+    // has something to write against, and it is not a job. Printing it gave
+    // 35 of 36 production profiles a phantom "Employee" with no employer.
+    // Same rule as the profile card, so the two never disagree.
+    .filter((e) =>
+      isRecordedEngagement({
+        title: e.title,
+        started_at: e.startedAt,
+        ended_at: e.endedAt,
+        organizationName: e.orgName,
+      }),
+    );
+
+  // No saved name is "—": the page then says the name is not provided. The
+  // part of the e-mail address before "@" is not a name, and this document is
+  // handed to an employer, so it is never printed in its place.
+  const personName = profileRes.data?.full_name?.trim() || "—";
+
+  const professionalSummary =
+    (
+      (profileRes.data as { profile_text?: string | null } | null)
+        ?.profile_text ?? ""
+    ).trim() || null;
+
+  const professionSlugs = (wpRes.data ?? [])
+    .map((r) => {
+      const slug = (r.professions as { slug: string | null } | null)?.slug ?? null;
+      const label = ((r as { label?: string | null }).label ?? "").trim() || null;
+      // A row names one or the other; a row that names neither cannot exist
+      // (check constraint `worker_professions_names_something`).
+      return slug || label
+        ? { slug, label, isPrimary: r.is_primary === true }
+        : null;
+    })
+    .filter(
+      (p): p is { slug: string | null; label: string | null; isPrimary: boolean } =>
+        p !== null,
+    );
+
+  // Durable journal→skill links — graceful empty set if not readable — and
+  // ONLY links of LIVE, counted-once entries (audit 2026-10-20): a skill the
+  // person removed in a correction kept its link on the superseded entry and
+  // still printed as journal-backed evidence on the Living CV and the EU CV.
+  const countedEntryIds = new Set(
+    cvLiveEntries(((entriesRes.data ?? []) as unknown) as CvEntryRow[]).map((e) => e.id),
+  );
+  // …and never a link the person DISPUTED on its entry, even while the row
+  // itself still exists (lib/journal/entry-skill-disputes.ts).
+  const disputed = linkRes.error ? null : await readDisputedEntrySkills(supabase, workerId);
+  const durableSupported = linkRes.error
+    ? new Set<string>()
+    : supportedSkillIds(
+        withoutDisputedLinks(
+          ((linkRes.data ?? []) as EntrySkillLinkRow[]).filter((l) => countedEntryIds.has(l.journal_entry_id)),
+          disputed,
+        ),
+      );
+
+  // `verified` below is the STANDING confirmation, not the stored flag
+  // (lib/evidence/skill-confirmation-standing.ts). The flag itself is history
+  // and stays in the row untouched.
+  const tierInputs = withStandingConfirmation(
+    (wsRes.data ?? []) as {
+      skill_id: string | null;
+      verified: boolean | null;
+      verified_by: string | null;
+      verified_at?: string | null;
+      source: string | null;
+      skills: unknown;
+    }[],
+    standingSkills,
+  )
+    .map((r) => {
+      const slug = (r.skills as { slug: string | null } | null)?.slug;
+      return slug
+        ? {
+            slug,
+            verified: r.verified === true,
+            source: (r.source as string | null) ?? "self_declared",
+            journalSupported: r.skill_id
+              ? durableSupported.has(r.skill_id)
+              : false,
+          }
+        : null;
+    })
+    .filter((x): x is NonNullable<typeof x> => x !== null);
+  const tiers = groupCvSkillTiers(tierInputs);
+  const skillFacts = tierInputs.map((t) => ({
+    slug: t.slug,
+    verified: t.verified,
+  }));
+
+  // Declared-tier claims: profile narrative claims + DISTINCT journal-derived
+  // `skill_claim` metric labels (P0 Track B). Two-step under the worker's own
+  // RLS: own live entry ids (not deleted / not superseded) → metrics in those
+  // ids. Journal claims dedupe against profile claims by normalized label and
+  // stay in the SAME declared tier — never presented as verified.
+  const liveEntryIds = (entriesRes.data ?? [])
+    .filter((e) => isLiveJournalEntry(e as LiveJournalEntryFlags))
+    .map((e) => e.id);
+  const journalClaimLabels: string[] = [];
+  if (liveEntryIds.length > 0) {
+    const claimMetrics = await readByIdChunks<{
+      entry_id: string | null;
+      value_text: string | null;
+      metric_slug?: string | null;
+    }>(liveEntryIds, (ids) =>
+      sb
+        .from("journal_entry_metrics")
+        .select("id, entry_id, value_text, metric_slug")
+        .in("entry_id", ids)
+        .in("metric_slug", ["skill_claim", "skill_claim_rejected"])
+        .order("id", { ascending: true }),
+    );
+    const profileNormalized = new Set(claims.map((c) => c.normalized_label));
+    journalClaimLabels.push(
+      ...selectJournalClaimLabels(claimMetrics ?? [], profileNormalized),
+    );
+  }
+  // The lexicon mapping of every free label (pure, deterministic — the same
+  // extractor the promotion path trusts), so a claim that IS a catalogued
+  // skill the person already holds is presented as that skill, once.
+  const mappedByLabel = mapClaimLabelsToCatalogSlugs([
+    ...claims.map((c) => c.label),
+    ...journalClaimLabels,
+  ]);
+  const declaredClaims: VerifiedCvData["declaredClaims"] = [
+    ...claims.map((c) => ({
+      id: c.id,
+      label: c.label,
+      origin: "profile" as const,
+      mappedSlugs: mappedByLabel.get(c.label.trim()) ?? [],
+    })),
+    ...journalClaimLabels.map((label) => ({
+      label,
+      origin: "journal" as const,
+      mappedSlugs: mappedByLabel.get(label.trim()) ?? [],
+    })),
+  ];
+
+  // Confirmed Work Proof — REAL confirmations only (action 'confirm' or an
+  // approved review), one row per entry (latest confirmation), role only.
+  // LIVE, COUNTED-ONCE entries only (lib/journal/counted-once.ts): a deleted or
+  // superseded entry is not work the CV may stand behind, and a confirmed
+  // original replaced by its live correction is the withdrawn figure - it must
+  // neither print as "Confirmed Work Proof" nor count as client-accepted. The
+  // correction carries no decision of its own until a party decides it.
+  const entries = cvLiveEntries(
+    (entriesRes.data ?? []) as unknown as {
+      id: string;
+      created_at: string;
+      project_id: string | null;
+      engagement_context_id: string | null;
+      deleted_at?: string | null;
+      superseded_by?: string | null;
+      correction_of?: string | null;
+    }[],
+  );
+  const entryById = new Map(
+    entries.map((e) => [
+      e.id,
+      {
+        createdAt: e.created_at,
+        projectId: (e.project_id as string | null) ?? null,
+        engagementId: (e.engagement_context_id as string | null) ?? null,
+      },
+    ]),
+  );
+  const proof: VerifiedCvProofRow[] = [];
+  let clientAcceptedEntries: number | null = entries.length === 0 ? 0 : null;
+  if (entries.length > 0) {
+    const confs = await readByIdChunks<{
+      entry_id: string;
+      confirmer_role: string;
+      created_at: string;
+      confirmation_scope: string | null;
+    }>(entries.map((e) => e.id), (ids) =>
+      supabase
+        .from("journal_entry_confirmations")
+        .select("id, entry_id, confirmer_role, created_at, confirmation_scope")
+        .in("entry_id", ids)
+        .order("created_at", { ascending: false })
+        .order("id", { ascending: false }),
+    ).then((rows) => rows?.sort((a, b) => (a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0)) ?? null);
+    clientAcceptedEntries = confs ? countClientAcceptedEntries(confs) : null;
+    const projectIds = new Set<string>();
+    const confirmedRows: {
+      entryId: string;
+      confirmedAt: string;
+      confirmerRole: string;
+      automatic: boolean;
+      selfConfirmed: boolean;
+    }[] = [];
+    // LATEST DECISION WINS, WHATEVER IT IS. A later rejection or "changes
+    // requested" RETRACTS an earlier confirmation; the ledger's newest row per
+    // entry is the standing one (`selectStandingConfirmations`). Until
+    // 2026-09-19 this loop skipped non-confirm rows and took the older confirm,
+    // printing "Confirmed Work Proof" for work the manager had withdrawn.
+    for (const c of selectStandingConfirmations(confs ?? [])) {
+      const scope = c.confirmation_scope as {
+        action?: string;
+        decision?: string;
+      } | null;
+      confirmedRows.push({
+        entryId: c.entry_id,
+        confirmedAt: c.created_at,
+        confirmerRole: c.confirmer_role,
+        // W6 slice 1: policy-written rows carry their honest marker through
+        // to the render — automatic never looks identical to hand-confirmed.
+        automatic: scope?.action === "auto_confirm",
+        // EVID-2: filled below, from a query that FILTERS on confirmer_id
+        // without ever selecting it.
+        selfConfirmed: false,
+      });
+      const pid = entryById.get(c.entry_id)?.projectId;
+      if (pid) projectIds.add(pid);
+    }
+
+    // EVID-2 — WHICH of these confirmations did the CV's own subject write?
+    //
+    // The confirmer's identity must never be FETCHED into this path: the
+    // confirmed-proof query carries the ROLE only, and a guard pins that
+    // (`verified-cv-honesty`). So this asks the narrower question instead —
+    // it FILTERS on `confirmer_id` and selects only the row's own coordinates.
+    // No identity is returned, and the only id involved is the subject's own,
+    // which they already know. This fetches strictly LESS than reading the
+    // column would.
+    //
+    // Matched on (entry_id, created_at) rather than entry_id alone, because an
+    // entry can carry more than one confirmation and only the LATEST one is
+    // rendered above. Marking by entry would label a manager-confirmed row as
+    // self-confirmed whenever an older self-confirmation also existed.
+    if (confirmedRows.length > 0) {
+      const { data: selfRows } = await supabase
+        .from("journal_entry_confirmations")
+        .select("entry_id, created_at")
+        .eq("confirmer_id", user.id)
+        .in("entry_id", confirmedRows.map((r) => r.entryId));
+      const selfKeys = new Set(
+        (selfRows ?? []).map((r) => `${r.entry_id}|${r.created_at}`),
+      );
+      for (const row of confirmedRows) {
+        row.selfConfirmed = selfKeys.has(`${row.entryId}|${row.confirmedAt}`);
+      }
+    }
+
+    // Project titles the worker's own entries link to — graceful null when
+    // not linked or not readable under the worker's RLS.
+    const projectTitleById = new Map<string, string | null>();
+    if (projectIds.size > 0) {
+      const { data: projRows } = await supabase
+        .from("projects")
+        .select("id, title")
+        .in("id", [...projectIds]);
+      for (const p of projRows ?? []) {
+        projectTitleById.set(p.id, (p.title as string | null) ?? null);
+      }
+    }
+
+    for (const row of confirmedRows) {
+      const entry = entryById.get(row.entryId);
+      const pid = entry?.projectId ?? null;
+      proof.push({
+        confirmedAt: row.confirmedAt,
+        entryDate: entry?.createdAt ?? row.confirmedAt,
+        projectTitle: pid ? (projectTitleById.get(pid) ?? null) : null,
+        confirmerRole: row.confirmerRole,
+        automatic: row.automatic,
+        selfConfirmed: row.selfConfirmed,
+        engagementId: entry?.engagementId ?? null,
+      });
+    }
+    proof.sort((a, b) => (a.confirmedAt < b.confirmedAt ? 1 : -1));
+  }
+
+  // ── Assemble the Full CV System sections from the graceful reads ──────────
+  const languages: VerifiedCvLanguage[] = (
+    (langsRes.data ?? []) as Array<{ lang: string | null; level: string | null }>
+  )
+    .filter((r): r is { lang: string; level: string } => !!r.lang && !!r.level)
+    .map((r) => ({ lang: r.lang, level: r.level }));
+
+  const certificateDocs = certificateDocsForCv(
+    (
+      (docsRes.data ?? []) as Array<{
+        document_type_slug: string;
+        country: string | null;
+        status: string;
+        verification: string | null;
+        valid_until: string | null;
+      }>
+    ).map((d) => ({
+      documentTypeSlug: d.document_type_slug,
+      country: d.country,
+      storedStatus: d.status,
+      // A row predating the column, or a tolerated read that lost it, is
+      // UNVERIFIED - never silently promoted to verified.
+      verification: d.verification ?? "unverified",
+      validUntil: d.valid_until,
+    })),
+    new Date(),
+  );
+
+  const privBase = privBaseRes.data as {
+    salary_min_eur: number | null;
+    salary_max_eur: number | null;
+    availability_status: string | null;
+    available_from: string | null;
+  } | null;
+  const privOpt = privOptRes.data as {
+    willing_to_relocate: boolean | null;
+    has_transport: boolean | null;
+    driving_licence_categories: string[] | null;
+  } | null;
+
+  const drivingLicenceCategories = Array.isArray(
+    privOpt?.driving_licence_categories,
+  )
+    ? privOpt!.driving_licence_categories.filter(
+        (c): c is string => typeof c === "string",
+      )
+    : [];
+
+  const education: VerifiedCvEducation[] = (
+    (eduRes.data ?? []) as Array<{
+      institution_name: string;
+      program_or_field: string | null;
+      education_type_slug: string;
+      start_year: number | null;
+      end_year: number | null;
+      is_current: boolean | null;
+    }>
+  ).map((e) => ({
+    institutionName: e.institution_name,
+    programOrField: e.program_or_field,
+    educationTypeSlug: e.education_type_slug,
+    startYear: e.start_year,
+    endYear: e.end_year,
+    isCurrent: e.is_current === true,
+  }));
+
+  const { declaredCertificates, achievements } = splitAchievementsForCv(
+    (
+      (achRes.data ?? []) as Array<{
+        title: string;
+        description: string | null;
+        achieved_at: string | null;
+        achievement_type_slug: string;
+        confirmed_by_manager: boolean | null;
+      }>
+    ).map((a) => ({
+      title: a.title,
+      description: a.description,
+      achievedAt: a.achieved_at,
+      achievementTypeSlug: a.achievement_type_slug,
+      confirmedByManager: a.confirmed_by_manager === true,
+    })),
+  );
+
+  return {
+    ok: true,
+    cv: {
+      personName,
+      professionalSummary,
+      professionalFacts: deriveProfessionalFacts(workIntelligence),
+      professionSlugs,
+      tiers,
+      skillFacts,
+      declaredClaims,
+      workHistory,
+      languages,
+      certificateDocs,
+      drivingLicenceCategories,
+      declaredCertificates,
+      education,
+      achievements,
+      projects: projectsFromProof(proof),
+      recordedHoursBySkill: workIntelligence
+        ? Object.fromEntries(attributedHoursBySlug(workIntelligence))
+        : null,
+      confirmedHoursBySkill: workIntelligence
+        ? Object.fromEntries(confirmedHoursBySlug(workIntelligence))
+        : null,
+      skillPractice: workIntelligence ? skillPracticeFromIntelligence(workIntelligence) : null,
+      growthAdjacent: workIntelligence
+        ? deriveGrowthReading(workIntelligence, {
+            primaryProfessionSlug:
+              professionSlugs.find((p) => p.isPrimary && p.slug)?.slug ??
+              professionSlugs.find((p) => p.slug)?.slug ??
+              null,
+          }).directions.flatMap((d) =>
+            d.kind === "adjacent_opportunity"
+              ? [
+                  {
+                    professionId: d.professionId,
+                    sharedSkills: [...d.why.sharedSkills],
+                    missingSkills: [...d.why.missingSkills],
+                  },
+                ]
+              : [],
+          )
+        : null,
+      journalCoverage: workIntelligence
+        ? {
+            entriesRead: workIntelligence.coverage.entriesRead,
+            truncated: workIntelligence.coverage.truncated,
+          }
+        : null,
+      confirmedWorkTotals,
+      clientAcceptedEntries,
+      recordedHoursTotal: workIntelligence ? workIntelligence.totalHours : null,
+      recordedHoursConfirmed: workIntelligence
+        ? (workIntelligence.periods.find((p) => p.key === "all")?.confirmedHours ?? null)
+        : null,
+      organizationRecordedHours: organizationRecordedHoursOf(workIntelligence),
+      professionalExperience: workIntelligence
+        ? withUnknownTotalWhenUnattributed(
+            deriveProfessionalExperience({
+              wi: workIntelligence,
+              relationships: experienceRelationships,
+              projectNames: new Map(
+                [...projectNameById.entries()].flatMap(([id, name]) => (name ? [[id, name] as const] : [])),
+              ),
+            }),
+            experienceRelationships,
+          )
+        : null,
+      organizationHistory: workIntelligence?.organizationContextRecords
+        ? buildCvOrganizationHistory(
+            workIntelligence.organizationContextRecords,
+            workIntelligence.organizationPeriodRecords ?? [],
+          )
+        : null,
+      privateDetails: {
+        salaryMinEur: privBase?.salary_min_eur ?? null,
+        salaryMaxEur: privBase?.salary_max_eur ?? null,
+        availabilityStatus: privBase?.availability_status ?? null,
+        availableFrom: privBase?.available_from ?? null,
+        willingToRelocate: privOpt?.willing_to_relocate ?? null,
+        hasTransport: privOpt?.has_transport ?? null,
+      },
+      signals,
+      proof,
+    },
+  };
+}
+
+/** The all-time organization ledger as the CV states it — the model's own
+ *  figure, no arithmetic here; null when the model or the ledger is unread. */
+function organizationRecordedHoursOf(
+  wi: WorkIntelligence | null,
+): VerifiedCvData["organizationRecordedHours"] {
+  // The ONE all-time rule (lib/journal/organization-all-time.ts): day and
+  // period records, overlaps refused, nothing else consulted.
+  const a = organizationAllTime(wi);
+  if (!a) return null;
+  return {
+    hours: a.dayHours,
+    days: a.days,
+    importedHours: a.importedHours,
+    approvedHours: a.approvedHours,
+    periodHours: a.periodHours,
+    periodRecords: a.periodRecords,
+    totalHours: a.totalHours,
+    from: a.from,
+    to: a.to,
+  };
+}
+
+/**
+ * P2 integrity fix (post-#837 independent review): journal claim → CV
+ * pairing with ENTRY-SCOPED rejections. A `skill_claim_rejected` marker
+ * hides a label ONLY on its own entry (pairing key: entry_id + normalized
+ * label) — the same un-rejected claim from another entry still surfaces.
+ * Pure and exported so the two-entry regression test exercises the exact
+ * production logic.
+ */
+export function selectJournalClaimLabels(
+  claimMetrics: ReadonlyArray<{
+    entry_id: string | null;
+    value_text: string | null;
+    metric_slug?: string | null;
+  }>,
+  profileNormalized: ReadonlySet<string>,
+): string[] {
+  const norm = (v: string) => v.trim().toLowerCase().replace(/\s+/g, " ");
+  const rejectedByEntry = new Set(
+    claimMetrics
+      .filter((m) => m.metric_slug === "skill_claim_rejected" && m.entry_id)
+      .map((m) => `${m.entry_id}|${norm(m.value_text ?? "")}`),
+  );
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const m of claimMetrics) {
+    if (m.metric_slug === "skill_claim_rejected") continue;
+    const label = (m.value_text ?? "").trim();
+    if (!label || !m.entry_id) continue;
+    const normalized = norm(label);
+    if (
+      profileNormalized.has(normalized) ||
+      rejectedByEntry.has(`${m.entry_id}|${normalized}`) ||
+      seen.has(normalized)
+    )
+      continue;
+    seen.add(normalized);
+    out.push(label);
+  }
+  return out;
+}

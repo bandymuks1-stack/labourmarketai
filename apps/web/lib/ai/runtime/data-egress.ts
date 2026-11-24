@@ -1,0 +1,316 @@
+/**
+ * DATA EGRESS GATE — what may leave labourmarket.ai, and to whom.
+ *
+ * OWNER DECISION 2026-08-19 (AI DATA BOUNDARY), binding:
+ *
+ *   No external AI provider may receive labourmarket.ai internal, private or
+ *   user information unless that transfer is explicitly permitted by this
+ *   policy. By default NOTHING non-public leaves the project boundary: CVs and
+ *   profile data, Work Journal content, worker and employer personal data,
+ *   documents, absence / working-time / pay data, organisations' internal
+ *   information, project / task / approval / audit information, contacts,
+ *   credentials and secrets.
+ *
+ *   Local / on-prem models that do not physically move data outside our own
+ *   infrastructure MAY work with internal information, subject to the user's
+ *   own permissions and the task policy.
+ *
+ *   "€0 never grants permission to send data."
+ *
+ * ── WHAT THIS REPLACES, AND WHY THE OLD RULE WAS THE WRONG AXIS ────────────
+ *
+ * `data-sensitivity.ts` already vetoed a FREE cloud tier for personal data, on
+ * the ground that a free service's consideration is sometimes the content. Good
+ * rule, wrong axis: it sorted providers by PRICE, so a PAID cloud provider was
+ * eligible for anyone's CV. The reasoning recorded there was that reaching a
+ * paid provider "already required the owner to enable it under commercial
+ * terms" — an enablement decision treated as if it were a data-transfer
+ * decision. The owner has now separated them, and they are separate: paying a
+ * vendor is not the same act as permitting it to process a worker's journal.
+ *
+ * So the axis is INTERNAL vs EXTERNAL, and permission is explicit:
+ *
+ *   - `local` — inside infrastructure we control. No egress occurs, so there is
+ *     nothing to permit. Unrestricted here; the user's own permissions and the
+ *     task policy still apply upstream.
+ *   - anything else — external. Receives `PUBLIC` only, unless this file
+ *     records a grant raising its ceiling.
+ *
+ * ── DEFAULT DENY IS THE POINT ──────────────────────────────────────────────
+ *
+ * `AI_EGRESS_GRANTS` was EMPTY from 2026-08-19 to 2026-09-05, and that was the
+ * correct state, not an unfinished one. It now holds exactly TWO rows — the
+ * owner's dated, sourced, TASK-SCOPED grants for the conversation intent
+ * proposer (2026-09-05) and for message translation-on-read (RED-2,
+ * 2026-09-17), both for the one production-configured provider — and nothing
+ * else changed: no other external provider is enabled, and no owner decision
+ * has permitted any other category of private content to leave. An empty
+ * grant table means the gate is closed; adding a provider to the runtime
+ * cannot open it as a side effect, because opening it is a separate, dated,
+ * sourced edit here.
+ *
+ * Since no task is classed `PUBLIC` today (see `TASK_SENSITIVITY` — a recorded
+ * finding, not an omission), the live consequence is: every task either runs on
+ * a local model or does not run at all. `BLOCK external → try local → otherwise
+ * fail safely`, which is exactly the owner's stated order.
+ *
+ * ── NO SIDEWAYS FALLBACK ───────────────────────────────────────────────────
+ *
+ * The chain applies this veto in its FIRST pass, so an impermissible provider
+ * is removed from the candidate list entirely — not merely skipped first. It
+ * can therefore never be reached by a fallback after another provider fails,
+ * which is the owner's "no automatic fallback to another external provider with
+ * private data".
+ *
+ * Pure. No IO, no env, no server-only, no SDK import.
+ */
+import type { AiDataSensitivity } from "./data-sensitivity";
+import { termsCeilingFor } from "./provider-catalogue";
+
+/** Ordered least → most restricted. Local copy so this module stays standalone. */
+const SENSITIVITY_RANK: Record<AiDataSensitivity, number> = {
+  PUBLIC: 0,
+  LOW_RISK_PROJECT_DATA: 1,
+  PERSONAL: 2,
+  SENSITIVE_FREE_TEXT: 3,
+};
+
+/**
+ * An explicit permission for ONE external provider to receive data up to ONE
+ * sensitivity class. Every field is required because a grant without a reason
+ * and a date is indistinguishable from a typo.
+ */
+export interface AiEgressGrant {
+  readonly provider: string;
+  /** The HIGHEST class this provider may receive. Never a list — a ceiling. */
+  readonly maxSensitivity: AiDataSensitivity;
+  /** Why this is lawful and agreed: DPA reference, owner decision, terms URL. */
+  readonly basis: string;
+  /** ISO date the grant was made. */
+  readonly grantedOn: string;
+  /**
+   * LEAST PRIVILEGE (owner approval 2026-09-05): the task types this grant
+   * covers. When present, a run for any OTHER task sees no grant at all —
+   * it is refused exactly as before the row existed. Absent = every task
+   * (the shape the 2026-08-19 decision anticipated for a provider-wide
+   * grant, which no owner has made).
+   */
+  readonly tasks?: readonly string[];
+  /**
+   * The grant's legal basis rests on the vendor's PAID-tier data terms (the
+   * free tier lets the vendor use content to improve its products). When
+   * true, the grant answers only while the deployment carries the owner's
+   * explicit confirmation that the key is on the paid tier
+   * (`AI_GEMINI_PAID_TIER_CONFIRMED=1`) — owner 2026-10-15: "jeigu tinkama
+   * asmens duomenų apsauga neįrodyta, apribok neviešų asmens duomenų
+   * perdavimą į Gemini". A code comment saying "paid tier" is not that proof.
+   */
+  readonly requiresPaidTierConfirmation?: boolean;
+  /**
+   * OWNER DECISION 2026-11-22: a free tier whose CURRENT terms were read
+   * first-hand (no training, no retention) may be granted above
+   * `MAX_GRANTABLE_FOR_FREE_TIER` for the tasks of THIS grant only. The record
+   * names the terms read and when. Absent = the free-tier cap applies as before.
+   */
+  readonly freeTierTermsVerified?: { readonly terms: string; readonly readOn: string };
+}
+
+/** The owner's deployment-level confirmation that the Gemini key is on the
+ *  paid tier (billing enabled on its Google project). Absent = not proven. */
+export function geminiPaidTierConfirmed(env: Record<string, string | undefined> = process.env): boolean {
+  return env.AI_GEMINI_PAID_TIER_CONFIRMED === "1";
+}
+
+/**
+ * THE GRANT TABLE. Empty by owner decision.
+ *
+ * Adding a row here permits real user content to leave the platform. It is an
+ * owner act, not an engineering one: it needs the legal basis in `basis`, a
+ * date, and the same scrutiny as any other data-processing decision. A free
+ * tier is not exempt from that scrutiny — see `MAX_GRANTABLE_FOR_FREE_TIER`.
+ */
+export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [
+  {
+    // OWNER APPROVAL 2026-09-05 — "GEMINI CONVERSATION NLU EGRESS" (owner
+    // message in the autonomous run, recorded in
+    // docs/launch/pilot-feedback/2026-09-05-night-continuation.md). Scope:
+    // a sentence the deterministic router could not read may leave for the
+    // EXISTING production Gemini runtime (paid tier — actual costs billed
+    // since 2026-08-28) so that Gemini proposes ONE existing canonical
+    // intent id. Nothing else: CV, journal, match, translation and every
+    // other personal task stay refused for Gemini by the `tasks` scope.
+    // Auditable: every run is an `ai_runs` row (task, provider, model,
+    // blocked_reason). Revocable: delete this row.
+    provider: "gemini",
+    maxSensitivity: "SENSITIVE_FREE_TEXT",
+    tasks: ["propose_conversation_intent"],
+    requiresPaidTierConfirmation: true,
+    basis:
+      "Owner approval 2026-09-05 (GEMINI CONVERSATION NLU EGRESS): conversation intent proposal only; existing approved Gemini runtime, paid tier; least-privilege by task; revocable by deleting this row",
+    grantedOn: "2026-09-05",
+  },
+  {
+    // OWNER APPROVAL 2026-09-17 — "RED-2 translate_message DATA EGRESS",
+    // OPTION 1: GEMINI ONLY (owner decision message in the release lane;
+    // packet recorded in docs/launch/OWNER_RELEASE_GATE_2026-09-17.md).
+    // Scope: a conversation message the viewer has ALREADY read under the
+    // participant-only RLS (lib/communication/translation-read.ts reads
+    // nothing itself) may leave for the EXISTING production Gemini runtime
+    // (paid tier) so that the viewer gets a rendering in their own locale.
+    // Payload is the task policy's allowedFields only: body (≤8000 chars),
+    // source language, target locale, the fixed "work message between
+    // colleagues" context — never ids, names, roles, attachments, other
+    // rows. The rendering is never stored in conversation_messages; the
+    // original stays canonical and one tap away. Every run (and every
+    // refusal) is an `ai_runs` row. DeepL / Anthropic / OpenAI / xAI stay
+    // refused for this task: DeepL authorization is explicitly DEFERRED, not
+    // implied. Revocable: delete this row and redeploy — no data to unwind.
+    provider: "gemini",
+    maxSensitivity: "SENSITIVE_FREE_TEXT",
+    tasks: ["translate_message"],
+    requiresPaidTierConfirmation: true,
+    basis:
+      "Owner approval 2026-09-17 (RED-2 TRANSLATE_MESSAGE EGRESS, option 1 Gemini only): render an already-authorized message into the viewer's locale; existing approved Gemini runtime, paid tier; least-privilege by task; DeepL deferred; revocable by deleting this row",
+    grantedOn: "2026-09-17",
+  },
+  {
+    // OWNER DECISION 2026-11-22 — "CLOUDFLARE WORKERS AI": ONE unclear typed
+    // sentence may leave for Cloudflare Workers AI so that it proposes ONE
+    // existing intent id. Conditions, all enforced in code:
+    //   - the sentence is redacted first (lib/conversation/intent-sentence-
+    //     redaction.ts: names, contacts, ids, numbers → opaque tokens) and is
+    //     NOT sent when it cannot be cleaned safely;
+    //   - no CV, journal, message history, names, contacts, ids or org data
+    //     (the task policy's allowedFields: sentence, locale, identity, intents);
+    //   - the audit row records metadata only (`inputSource` label, no text);
+    //   - the model proposes; the product re-validates and every write stays
+    //     prepare → confirm;
+    //   - AI_DAILY_RUN_BUDGET (200) and the free Neurons allocation cap it;
+    //   - off at once: AI_CLOUDFLARE_ENABLED=false, or delete this row.
+    provider: "cloudflare",
+    maxSensitivity: "SENSITIVE_FREE_TEXT",
+    tasks: ["propose_conversation_intent"],
+    freeTierTermsVerified: {
+      terms:
+        "Workers AI: Cloudflare does not use Customer Content to train AI models; inputs and outputs are not retained after the request (developers.cloudflare.com/workers-ai/platform/data-usage/); no AI Gateway logging is used",
+      readOn: "2026-10-25",
+    },
+    basis:
+      "Owner decision 2026-11-22 (CLOUDFLARE WORKERS AI): one redacted unclear sentence → one existing intent proposal; no training, no retention; metadata-only audit; 200 runs/day; least-privilege by task; revocable by deleting this row",
+    grantedOn: "2026-11-22",
+  },
+];
+
+/**
+ * A free cloud tier may never be granted personal data, whatever a grant says.
+ *
+ * Carried over from the free-provider matrix (docs/ai/free-provider-matrix-2026-08-09.md):
+ * Google's Gemini free tier documents that content IS used to improve their
+ * products while the paid tier documents that it is not. Generalised: when a
+ * service is free the consideration is sometimes the content itself. A vendor
+ * whose current terms genuinely permit the processing is not unblocked by
+ * arguing here — it is unblocked by verifying the terms and moving it out of
+ * `free_tier` with the source recorded.
+ */
+export const MAX_GRANTABLE_FOR_FREE_TIER: AiDataSensitivity =
+  "LOW_RISK_PROJECT_DATA";
+
+/**
+ * `grants` is injectable for the same reason `AI_PROVIDER_PROFILES` is: a rule
+ * whose live subject set is EMPTY is indistinguishable from a rule that does
+ * not work. The grant table is empty by owner decision, so the only way to
+ * prove that a grant actually opens the gate — and that the free-tier ceiling
+ * still caps it — is to inject one in a test.
+ */
+export function egressGrantFor(
+  provider: string,
+  grants: readonly AiEgressGrant[] = AI_EGRESS_GRANTS,
+  task?: string,
+  env: Record<string, string | undefined> = process.env,
+): AiEgressGrant | null {
+  // A task-scoped grant answers only for its tasks; a call that names no
+  // task cannot use one (fail closed — see `tasks` on AiEgressGrant). A
+  // grant that rests on paid-tier terms answers only while the owner's
+  // paid-tier confirmation is deployed (fail closed — not proven = no grant).
+  return (
+    grants.find(
+      (g) =>
+        g.provider === provider &&
+        (!g.tasks || (task !== undefined && g.tasks.includes(task))) &&
+        (!g.requiresPaidTierConfirmation || geminiPaidTierConfirmed(env)),
+    ) ?? null
+  );
+}
+
+/** What this provider is permitted to receive at most. */
+export function maxPermittedSensitivity(
+  profile: { readonly id: string; readonly locality: "local" | "cloud"; readonly costClass: string },
+  grants: readonly AiEgressGrant[] = AI_EGRESS_GRANTS,
+  task?: string,
+): AiDataSensitivity {
+  // Inside our own infrastructure: no egress, nothing to permit.
+  if (profile.locality === "local") return "SENSITIVE_FREE_TEXT";
+
+  const grant = egressGrantFor(profile.id, grants, task);
+  let ceiling: AiDataSensitivity = grant ? grant.maxSensitivity : "PUBLIC";
+
+  // A free tier's ceiling is capped regardless of what the grant claims —
+  // unless the grant itself records the owner's terms verification for its
+  // own tasks (owner decision 2026-11-22).
+  if (
+    profile.costClass === "free_tier" &&
+    !grant?.freeTierTermsVerified &&
+    SENSITIVITY_RANK[ceiling] > SENSITIVITY_RANK[MAX_GRANTABLE_FOR_FREE_TIER]
+  ) {
+    ceiling = MAX_GRANTABLE_FOR_FREE_TIER;
+  }
+
+  // THE VENDOR'S OWN TERMS (provider-catalogue.ts, 2026-10-25) cap it again:
+  // DeepL Free forbids personal data, Mistral's free mode trains by default,
+  // OpenRouter's free routes may log — none of them can be raised past PUBLIC
+  // by a grant. An EXCLUDED vendor is handled in `egressPermitted` (it gets
+  // nothing, not even PUBLIC).
+  const terms = termsCeilingFor(profile.id);
+  if (
+    terms !== null &&
+    terms !== "EXCLUDED" &&
+    SENSITIVITY_RANK[ceiling] > SENSITIVITY_RANK[terms]
+  ) {
+    ceiling = terms;
+  }
+  return ceiling;
+}
+
+export type EgressVerdict =
+  | { readonly permitted: true }
+  | { readonly permitted: false; readonly reason: string };
+
+/** May this payload leave for this provider? Default deny. */
+export function egressPermitted(
+  profile: { readonly id: string; readonly locality: "local" | "cloud"; readonly costClass: string },
+  sensitivity: AiDataSensitivity,
+  grants: readonly AiEgressGrant[] = AI_EGRESS_GRANTS,
+  task?: string,
+): EgressVerdict {
+  if (profile.locality === "local") return { permitted: true };
+
+  if (termsCeilingFor(profile.id) === "EXCLUDED") {
+    return {
+      permitted: false,
+      reason: `data egress gate: "${profile.id}" is excluded by its own terms (provider-catalogue.ts) — it may receive nothing, not even PUBLIC data`,
+    };
+  }
+
+  const ceiling = maxPermittedSensitivity(profile, grants, task);
+  if (SENSITIVITY_RANK[sensitivity] <= SENSITIVITY_RANK[ceiling]) {
+    return { permitted: true };
+  }
+
+  const grant = egressGrantFor(profile.id, grants, task);
+  return {
+    permitted: false,
+    reason: grant
+      ? `data egress gate: "${profile.id}" is permitted up to ${ceiling}, but this task carries ${sensitivity} (owner decision 2026-08-19, AI DATA BOUNDARY)`
+      : `data egress gate: "${profile.id}" is external and holds no egress grant, so it may receive PUBLIC data only — this task carries ${sensitivity} (owner decision 2026-08-19, AI DATA BOUNDARY)`,
+  };
+}

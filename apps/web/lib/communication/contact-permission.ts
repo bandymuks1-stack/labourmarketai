@@ -1,0 +1,194 @@
+import "server-only";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { getTranslations } from "next-intl/server";
+import { createClient } from "@/lib/supabase/server";
+import { deriveIsAdmin } from "@/lib/auth/admin-signal";
+import { getEmployerOwnerProfileId } from "./employer-resolution";
+import { callerSharesTeamWith, managesProjectOf } from "./direct-conversation-core";
+import {
+  evaluateContactPermission,
+  type ContactPermissionState,
+} from "./communication-eligibility";
+import { localizePseudonymousName } from "./pseudonymous-name";
+
+/**
+ * Contact permission resolver + safe counterpart identity reader
+ * (§8.1 — product-tree branch 20).
+ *
+ * PERMISSION: `resolveContactPermission` gathers the REAL relationship facts
+ * server-side (never trusted from the client) and maps them through the pure
+ * `evaluateContactPermission` model:
+ *   - engagement, worker → company: the caller's own accepted invitation
+ *     resolves this profile as their employer (getEmployerOwnerProfileId —
+ *     RLS reads only the caller's own row);
+ *   - engagement, company → worker: the caller owns a company that has a
+ *     company_workers link to this worker (owner-scoped RLS read);
+ *   - admin: the dual admin signal (profiles.active_role + profile_roles).
+ * The scouting state (`allowed_scouting_shortlist`) is NOT resolved here —
+ * it belongs to the Step 4A action that verifies demand ownership +
+ * shortlist + contactability, and is passed in as an already-verified grant.
+ *
+ * IDENTITY: `readCounterpartIdentities` is the safe counterpart identity
+ * reader. It calls ONE gated SECURITY DEFINER read RPC
+ * (`conversation_counterpart_identities`, migration 20260705170000 — DRAFT,
+ * owner-gated apply) that returns ONLY the display name of the other
+ * unrevoked participant of a 2-person direct conversation the CALLER
+ * participates in. It never selects any other profile field and never
+ * exposes a contact channel. Until the owner applies the migration the
+ * reader degrades to an empty map, so the UI keeps today's honest
+ * restricted state — no fabricated names, ever.
+ *
+ * INTERNAL-ONLY BOUNDARY: nothing here sends anything anywhere. A permission
+ * only ever opens an IN-APP conversation.
+ */
+
+const RELATION_NOT_FOUND = "42P01";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(supabase: SupabaseClient): any {
+  return supabase;
+}
+
+/**
+ * Resolve the contact-permission state between the CALLER and one other
+ * profile. Default-closed: unauthenticated, self, blank target, or any
+ * read failure resolves the corresponding fact to false.
+ */
+export async function resolveContactPermission(
+  otherProfileId: string,
+  opts?: {
+    /** Caller already proved the two profiles share an unrevoked direct
+     *  conversation (e.g. the get-or-create dedupe hit). */
+    sharesConversation?: boolean;
+    /** The project the caller opened the contact from: when the caller
+     *  MANAGES it (the database's own `can_manage_project`) and the other
+     *  profile is ACTIVELY assigned to it, that is a real engagement. */
+    projectId?: string | null;
+  },
+): Promise<ContactPermissionState> {
+  if (!otherProfileId) return "no_permission";
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user || otherProfileId === user.id) return "no_permission";
+
+  const caller = { supabase, userId: user.id };
+  const [employerOwnerProfileId, employsWorker, isAdmin, sharesTeam, onManagedProject] =
+    await Promise.all([
+      getEmployerOwnerProfileId(),
+      callerCompanyEmploysProfile(supabase, user.id, otherProfileId),
+      callerIsAdmin(supabase, user.id),
+      callerSharesTeamWith(caller, otherProfileId),
+      opts?.projectId
+        ? managesProjectOf(caller, opts.projectId, otherProfileId)
+        : Promise.resolve(false),
+    ]);
+
+  return evaluateContactPermission({
+    sharesConversation: opts?.sharesConversation === true,
+    hasEngagement:
+      employerOwnerProfileId === otherProfileId || employsWorker || onManagedProject,
+    scoutingAllowed: false, // Step 4A resolves this in its own gated action.
+    isAdmin,
+    sharesTeam,
+  });
+}
+
+/** Company → worker engagement: does a company OWNED by the caller hold a
+ *  company_workers link to the target profile? Owner-scoped RLS reads only;
+ *  degrades to false when the linking migration is absent (42P01). */
+async function callerCompanyEmploysProfile(
+  supabase: SupabaseClient,
+  callerId: string,
+  otherProfileId: string,
+): Promise<boolean> {
+  // EVERY company the caller owns (a person may own several since
+  // 20260805170000): `.maybeSingle()` errored on two rows and answered "no".
+  const { data: companies } = await supabase
+    .from("companies")
+    .select("id")
+    .eq("profile_id", callerId)
+    .limit(50);
+  const companyIds = ((companies ?? []) as { id: string }[]).map((c) => c.id);
+  if (companyIds.length === 0) return false;
+  const { data, error } = await asAny(supabase)
+    .from("company_workers")
+    .select("worker_id, workers!inner(profile_id)")
+    .in("company_id", companyIds)
+    .eq("workers.profile_id", otherProfileId)
+    .limit(1);
+  if (error) {
+    if (error.code !== RELATION_NOT_FOUND) {
+      console.error("[contact-permission] engagement read failed:", error.message);
+    }
+    return false;
+  }
+  return (data ?? []).length > 0;
+}
+
+/** Real dual admin signal (same derivation the conversation detail page uses). */
+async function callerIsAdmin(
+  supabase: SupabaseClient,
+  callerId: string,
+): Promise<boolean> {
+  const [{ data: profile }, { data: rolesRows }] = await Promise.all([
+    supabase.from("profiles").select("active_role").eq("id", callerId).single(),
+    supabase
+      .from("profile_roles")
+      .select("role")
+      .eq("profile_id", callerId)
+      .eq("is_active", true),
+  ]);
+  return deriveIsAdmin({
+    activeRole: profile?.active_role ?? null,
+    profileRoles: rolesRows ?? [],
+  });
+}
+
+/**
+ * Safe counterpart identity reader. Returns conversationId → display name
+ * for the OTHER unrevoked participant of each 2-person direct conversation
+ * the caller participates in — via the gated read RPC only. Empty map on
+ * any error or while the migration is unapplied (honest degradation: the
+ * UI keeps the restricted counterpart state). Only real, non-empty names
+ * are mapped — nothing is fabricated.
+ */
+export async function readCounterpartIdentities(
+  conversationIds: readonly string[],
+): Promise<ReadonlyMap<string, string>> {
+  const out = new Map<string, string>();
+  const ids = [...new Set(conversationIds.filter((id) => !!id))];
+  if (ids.length === 0) return out;
+  const supabase = await createClient();
+  const { data, error } = await asAny(supabase).rpc(
+    "conversation_counterpart_identities",
+    { p_conversation_ids: ids },
+  );
+  if (error || !Array.isArray(data)) return out;
+  // The RPC names a not-yet-disclosed candidate with the fixed English
+  // pseudonym "Candidate XXXXXX" (SQL has no locale). A screen a person reads
+  // wraps the token in its own catalogue word — `people.anonymousName` — so a
+  // Lithuanian employer reads "Kandidatas XXXXXX", never English (UX review
+  // 2026-10-24, 4.16). A real name is returned unchanged.
+  let candidateName: (token: string) => string = (token) => `Candidate ${token}`;
+  try {
+    const t = await getTranslations("people");
+    candidateName = (token) => t("anonymousName", { token });
+  } catch {
+    // outside a request (tests, scripts): keep the neutral fallback
+  }
+  for (const row of data as Array<{
+    conversation_id?: string | null;
+    display_name?: string | null;
+  }>) {
+    const id = typeof row?.conversation_id === "string" ? row.conversation_id : null;
+    const stored =
+      typeof row?.display_name === "string" ? row.display_name.trim() : "";
+    // Only the stored pseudonym's WORD is translated — an empty value stays
+    // empty, so nothing is ever fabricated.
+    const name = stored ? localizePseudonymousName(stored, candidateName) : "";
+    if (id && name) out.set(id, name);
+  }
+  return out;
+}

@@ -1,0 +1,284 @@
+[
+  {
+    "phase": "after",
+    "viewport": "1440",
+    "totalFields": 19,
+    "hiddenFields": 17,
+    "perceivableFields": 2,
+    "unlabelledPerceivable": 0,
+    "unlabelledIncludingHidden": 17,
+    "interactiveTotal": 40,
+    "sub44": 0,
+    "sub44Detail": [],
+    "radiogroups": [
+      {
+        "name": "prefs-tristate-willing_to_relocate-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-needs_accommodation-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-has_transport-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-team_available-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-solo_available-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-night_shifts_ok-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-weekend_shifts_ok-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-overtime_ok-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-own_vehicle-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-own_tools-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      }
+    ],
+    "groups": [
+      {
+        "name": "prefs-licence-categories-label",
+        "children": 5
+      }
+    ],
+    "selectedMarkers": [
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-own_tools-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      }
+    ],
+    "overflow": false,
+    "a11yTree": {
+      "controls": 52,
+      "unnamedControls": 0,
+      "unnamedDetail": [],
+      "ariaSnapshot": "- heading \"Darbo pageidavimai\" [level=2]\n- paragraph: Nurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.\n- text: Galiu persikelti dėl darbo\n- radiogroup \"Galiu persikelti dėl darbo\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Reikalingas apgyvendinimas\n- radiogroup \"Reikalingas apgyvendinimas\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Turiu nuosavą transportą\n- radiogroup \"Turiu nuosavą transportą\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Galiu dirbti komandoje\n- radiogroup \"Galiu dirbti komandoje\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Galiu dirbti vienas\n- radiogroup \"Galiu dirbti vienas\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Ilgiausia komandiruotė (dienomis)\n- spinbutton \"Ilgiausia komandiruotė (dienomis)\"\n- text: Pageidaujama sutarties forma\n- button \"Pageidaujama sutarties forma\": Nenurodyta\n- text: Pastaba apie užimtumą\n- textbox \"Pastaba apie užimtumą\":\n  - /placeholder: Pvz., galiu nuo rugpjūčio, pageidauju 2 savaičių pamainų…\n- group \"Papildomi darbo pageidavimai\":\n  - text: Papildomi darbo pageidavimai\n  - paragraph: Galioja ta pati taisyklė — kas palikta „Nenurodyta“, lieka nenurodyta.\n  - text: Atlygio lūkesčio pagrindas\n  - button \"Atlygio lūkesčio pagrindas\": Nenurodyta\n  - text: Gali dirbti naktinėmis pamainomis\n  - radiogroup \"Gali dirbti naktinėmis pamainomis\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Gali dirbti savaitgaliais\n  - radiogroup \"Gali dirbti savaitgaliais\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Gali dirbti viršvalandžius\n  - radiogroup \"Gali dirbti viršvalandžius\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Turi nuosavą automobilį\n  - radiogroup \"Turi nuosavą automobilį\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Turi nuosavus įrankius\n  - radiogroup \"Turi nuosavus įrankius\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Vairuotojo pažymėjimo kategorijos\n  - group \"Vairuotojo pažymėjimo kategorijos\":\n    - 'button \"Vairuotojo pažymėjimo kategorijos: B\"': B\n    - 'button \"Vairuotojo pažymėjimo kategorijos: BE\"': BE\n    - 'button \"Vairuotojo pažymėjimo kategorijos: C\"': C\n    - 'button \"Vairuotojo pažymėjimo kategorijos: CE\"': CE\n    - 'button \"Vairuotojo pažymėjimo kategorijos: D\"': D\n- button \"Išsaugoti pageidavimus\"",
+      "radios": 30,
+      "checkboxes": 0,
+      "byRole": {
+        "radiogroup": 10,
+        "radio": 30,
+        "spinbutton": 1,
+        "button": 8,
+        "textbox": 1,
+        "group": 2
+      }
+    },
+    "consoleErrors": [],
+    "hydrationWarnings": []
+  },
+  {
+    "phase": "after",
+    "viewport": "375",
+    "totalFields": 19,
+    "hiddenFields": 17,
+    "perceivableFields": 2,
+    "unlabelledPerceivable": 0,
+    "unlabelledIncludingHidden": 17,
+    "interactiveTotal": 40,
+    "sub44": 0,
+    "sub44Detail": [],
+    "radiogroups": [
+      {
+        "name": "prefs-tristate-willing_to_relocate-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-needs_accommodation-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-has_transport-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-team_available-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-solo_available-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-night_shifts_ok-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-weekend_shifts_ok-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-overtime_ok-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-own_vehicle-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      },
+      {
+        "name": "prefs-tristate-own_tools-label",
+        "radios": 3,
+        "tabbableRadios": 1
+      }
+    ],
+    "groups": [
+      {
+        "name": "prefs-licence-categories-label",
+        "children": 5
+      }
+    ],
+    "selectedMarkers": [
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      },
+      {
+        "id": "prefs-tristate-own_tools-not_stated",
+        "text": "Nenurodyta",
+        "hasNonColourMark": true
+      }
+    ],
+    "overflow": false,
+    "a11yTree": {
+      "controls": 52,
+      "unnamedControls": 0,
+      "unnamedDetail": [],
+      "ariaSnapshot": "- heading \"Darbo pageidavimai\" [level=2]\n- paragraph: Nurodykite tik tai, kas jums tikrai galioja — kas palikta kaip „Nenurodyta“, taip ir lieka nenurodyta. Šie pageidavimai dalinami tik pagal jūsų privatumo sutikimus.\n- text: Galiu persikelti dėl darbo\n- radiogroup \"Galiu persikelti dėl darbo\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Reikalingas apgyvendinimas\n- radiogroup \"Reikalingas apgyvendinimas\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Turiu nuosavą transportą\n- radiogroup \"Turiu nuosavą transportą\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Galiu dirbti komandoje\n- radiogroup \"Galiu dirbti komandoje\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Galiu dirbti vienas\n- radiogroup \"Galiu dirbti vienas\":\n  - radio \"Nenurodyta\" [checked]\n  - radio \"Taip\"\n  - radio \"Ne\"\n- text: Ilgiausia komandiruotė (dienomis)\n- spinbutton \"Ilgiausia komandiruotė (dienomis)\"\n- text: Pageidaujama sutarties forma\n- button \"Pageidaujama sutarties forma\": Nenurodyta\n- text: Pastaba apie užimtumą\n- textbox \"Pastaba apie užimtumą\":\n  - /placeholder: Pvz., galiu nuo rugpjūčio, pageidauju 2 savaičių pamainų…\n- group \"Papildomi darbo pageidavimai\":\n  - text: Papildomi darbo pageidavimai\n  - paragraph: Galioja ta pati taisyklė — kas palikta „Nenurodyta“, lieka nenurodyta.\n  - text: Atlygio lūkesčio pagrindas\n  - button \"Atlygio lūkesčio pagrindas\": Nenurodyta\n  - text: Gali dirbti naktinėmis pamainomis\n  - radiogroup \"Gali dirbti naktinėmis pamainomis\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Gali dirbti savaitgaliais\n  - radiogroup \"Gali dirbti savaitgaliais\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Gali dirbti viršvalandžius\n  - radiogroup \"Gali dirbti viršvalandžius\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Turi nuosavą automobilį\n  - radiogroup \"Turi nuosavą automobilį\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Turi nuosavus įrankius\n  - radiogroup \"Turi nuosavus įrankius\":\n    - radio \"Nenurodyta\" [checked]\n    - radio \"Taip\"\n    - radio \"Ne\"\n  - text: Vairuotojo pažymėjimo kategorijos\n  - group \"Vairuotojo pažymėjimo kategorijos\":\n    - 'button \"Vairuotojo pažymėjimo kategorijos: B\"': B\n    - 'button \"Vairuotojo pažymėjimo kategorijos: BE\"': BE\n    - 'button \"Vairuotojo pažymėjimo kategorijos: C\"': C\n    - 'button \"Vairuotojo pažymėjimo kategorijos: CE\"': CE\n    - 'button \"Vairuotojo pažymėjimo kategorijos: D\"': D\n- button \"Išsaugoti pageidavimus\"",
+      "radios": 30,
+      "checkboxes": 0,
+      "byRole": {
+        "radiogroup": 10,
+        "radio": 30,
+        "spinbutton": 1,
+        "button": 8,
+        "textbox": 1,
+        "group": 2
+      }
+    },
+    "consoleErrors": [],
+    "hydrationWarnings": []
+  }
+]

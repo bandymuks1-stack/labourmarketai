@@ -1,0 +1,14 @@
+{
+  "collaborator": "Samenwerkingspartner",
+  "consultant": "Consultant",
+  "employee": "Werknemer",
+  "freelancer": "Freelancer",
+  "manager": "Manager",
+  "owner": "Eigenaar",
+  "student": "Student",
+  "unemployed": "Werkzoekend",
+  "volunteer": "Vrijwilliger",
+  "intern": "Stagiair",
+  "external_manager": "Externe manager (opdrachtgever)",
+  "other": "Andere relatie"
+}

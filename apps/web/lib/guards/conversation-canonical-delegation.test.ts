@@ -1,0 +1,288 @@
+import { describe, expect, it } from "vitest";
+import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
+import { join, relative } from "node:path";
+
+/**
+ * The conversation DELEGATES — it never grows a second copy of a canonical
+ * subsystem.
+ *
+ * `canonical-marketplace-use-case.test.ts` already pins the marketplace half of
+ * this (load / rank / explain / mark-shown). This guard pins the other two
+ * halves the chat-first surface is most likely to duplicate:
+ *
+ *   A. PROFILE — "show my profile" / "what's left?" / "where did I stop?" must
+ *      be answered from the ONE worker read model, never from a second set of
+ *      presence checks or a chat-local completeness rule.
+ *   B. INTEREST — acting on a match must use the ONE canonical control and the
+ *      ONE canonical write path, never a chat-local interest state machine.
+ *
+ * Plus the structural rule underneath both: there is exactly ONE conversation
+ * surface. A dead parallel shell is how two conversation products start.
+ */
+
+const APP_ROOT = join(__dirname, "..", "..");
+const read = (rel: string): string => readFileSync(join(APP_ROOT, rel), "utf8");
+const rel = (p: string): string => relative(APP_ROOT, p).replaceAll("\\", "/");
+
+function walk(dir: string): string[] {
+  const out: string[] = [];
+  for (const entry of readdirSync(dir)) {
+    const p = join(dir, entry);
+    if (statSync(p).isDirectory()) {
+      out.push(...walk(p));
+    } else if (
+      (p.endsWith(".ts") || p.endsWith(".tsx")) &&
+      !p.endsWith(".test.ts") &&
+      !p.endsWith(".test.tsx")
+    ) {
+      out.push(p);
+    }
+  }
+  return out;
+}
+
+/** Comments may DESCRIBE a canonical dependency; only real code may violate. */
+const codeOf = (p: string): string =>
+  readFileSync(p, "utf8")
+    .replace(/\/\*[\s\S]*?\*\//g, " ")
+    .replace(/(^|[^:])\/\/[^\n]*/g, "$1");
+
+const CONVERSATION_LIB = join(APP_ROOT, "lib", "conversation");
+const CONVERSATION_UI = join(APP_ROOT, "components", "app", "conversation");
+const conversationFiles = (): string[] => [
+  ...walk(CONVERSATION_LIB),
+  ...walk(CONVERSATION_UI),
+];
+
+/** The canonical worker read model — the single owner of the presence checks. */
+const ACTIVITY_MODEL = "lib/conversation/worker-activity.ts";
+/** The canonical interest write path. */
+const INTEREST_ACTIONS = "lib/opportunities/interest-actions.ts";
+
+describe("A — the profile summary delegates to the ONE worker read model", () => {
+  const summary = read("lib/conversation/profile-summary.ts");
+
+  it("reads the canonical activity model instead of the profile tables", () => {
+    expect(summary).toMatch(/getWorkerActivity\(/);
+    // Auth identity is the only direct supabase use; no profile/worker/skill
+    // table is read here — that is the read model's single job.
+    expect(summary).not.toMatch(/\.from\(["']/);
+    expect(summary).not.toMatch(/\.rpc\(/);
+  });
+
+  it("derives the acting user server-side — never from a client-supplied id", () => {
+    expect(summary).toMatch(/supabase\.auth\.getUser\(\)/);
+    expect(summary).not.toMatch(/userId\s*[:=]\s*(?:input|params|args)/);
+  });
+
+  it("only the read model READS the worker profile tables", () => {
+    // A second file querying "does this worker have skills / languages / an
+    // availability status?" is a second completeness rule, and the two WILL
+    // drift apart. (Writing through a canonical server action is fine — this
+    // targets direct table reads.)
+    // Scoped to the tables the completeness answer is built from. `workers` /
+    // `engagement_contexts` are deliberately excluded: the dispatcher's role
+    // gate and the work-log's engagement picker read them for unrelated,
+    // pre-existing reasons.
+    const PROFILE_TABLE_READ =
+      /\.from\(\s*["'](profiles|profile_skill_claims|worker_languages|worker_education|worker_achievements)["']/;
+    const offenders = conversationFiles()
+      .filter((p) => rel(p) !== ACTIVITY_MODEL)
+      .filter((p) => PROFILE_TABLE_READ.test(codeOf(p)))
+      .map(rel);
+    expect(offenders, "profile presence checks belong to the read model").toEqual([]);
+  });
+
+  it("no conversation file invents its own completeness percentage", () => {
+    const offenders = conversationFiles()
+      .filter((p) => rel(p) !== ACTIVITY_MODEL)
+      .filter((p) => /completenessPct|\/\s*stepsTotal|Math\.round\([^)]*100\)/.test(codeOf(p)))
+      .map(rel);
+    expect(offenders).toEqual([]);
+  });
+
+  it("what is missing is NAMED, not just counted", () => {
+    // A bare percentage tells a worker nothing actionable. The summary must
+    // carry the concrete missing checkpoints.
+    expect(summary).toMatch(/missing/);
+    expect(read("lib/conversation/profile-summary-contract.ts")).toMatch(
+      /missing:\s*string\[\]/,
+    );
+  });
+});
+
+describe("B — acting on a match uses the ONE canonical interest path", () => {
+  /* W3 consolidation: the chat thread stopped rendering job rows, so these
+     invariants moved with the rows to the Context Panel result and its
+     projection. The guarantees are unchanged — only where they are enforced. */
+  const messages = read("components/app/workspace/opportunities-result.tsx");
+  // The projection lives in ONE module shared by the panel's argument-free
+  // action and the `work.find` capability (#2889); the action must delegate to
+  // it, so these invariants still hold for every row the panel renders.
+  const findWork = read("lib/marketplace/opportunities-result.ts");
+
+  it("the panel action delegates to the ONE projection module", () => {
+    expect(read("lib/marketplace/worker-opportunities-actions.ts")).toMatch(
+      /from\s+["']\.\/opportunities-result["']/,
+    );
+  });
+
+  it("the chat renders the canonical control, not a chat-local one", () => {
+    expect(messages).toMatch(
+      /from\s+["']@\/components\/app\/worker-interest-button["']/,
+    );
+    expect(messages).toMatch(/<WorkerInterestButton\b/);
+  });
+
+  it("no conversation file calls the interest write directly", () => {
+    // The write belongs to the canonical control + its server action. A second
+    // caller is a second interest state machine.
+    const offenders = conversationFiles()
+      .filter((p) => /expressInterestAction\(|withdrawInterestAction\(/.test(codeOf(p)))
+      // The Phase B executor is the registry's THIN adapter over that same
+      // canonical action — the dispatcher path, not a second machine.
+      .filter((p) => rel(p) !== "lib/conversation/worker-executors.ts")
+      .map(rel);
+    expect(offenders).toEqual([]);
+    expect(existsSync(join(APP_ROOT, INTEREST_ACTIONS))).toBe(true);
+  });
+
+  it("the interest status shown is the use case's, never recomputed", () => {
+    expect(findWork).toMatch(/view\.interestStatusByRequestId\[/);
+    // No local defaulting of an absent signal into a concrete status.
+    for (const f of ["worker-opportunities-actions.ts", "opportunities-result.ts"]) {
+      expect(codeOf(join(APP_ROOT, "lib", "marketplace", f))).not.toMatch(
+        /\?\?\s*["']interested["']|\?\?\s*["']withdrawn["']/,
+      );
+    }
+  });
+
+  it("no dead button: the control is offered only when the store exists", () => {
+    expect(findWork).toMatch(/interestAvailable\s*\n?\s*\?/);
+    // …and the result row renders it only when those labels really arrived.
+    // The condition has moved twice now — into `EmployerMatchCard` when the
+    // card became selectable, and into the Context Panel result row when the
+    // card was deleted. The rule has never changed: labels absent ⇒ no
+    // control at all, because a button that cannot write is a lie.
+    expect(messages).toMatch(/\{interestLabels\s*&&/);
+  });
+});
+
+describe("structure — exactly one conversation surface", () => {
+  it("the orphaned second shell does not exist", () => {
+    expect(
+      existsSync(join(APP_ROOT, "components/app/conversation/conversation-shell.tsx")),
+      "a conversation surface no route renders is a parallel product waiting to happen",
+    ).toBe(false);
+  });
+
+  it("its copy bag is gone from every locale — no resurrection kit", () => {
+    const dir = join(APP_ROOT, "messages");
+    for (const file of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+      const doc = JSON.parse(readFileSync(join(dir, file), "utf8")) as {
+        conversation?: Record<string, unknown>;
+      };
+      expect(doc.conversation?.shell, `${file} still carries conversation.shell`).toBeUndefined();
+    }
+  });
+
+  it("/dashboard IS the conversation for every identity — ŠIANDIEN is its opening context, not a second root", () => {
+    // Owner decision 0017 (2026-09-22) retired the 2026-09-13 root split
+    // (ŠIANDIEN page · PAKLAUSK `?ask=1` tab). What is pinned is still "one
+    // chat" — a second `<ConversationChat` would be the parallel product this
+    // guard exists to prevent — and now also "one root": the worker's
+    // ŠIANDIEN renders INSIDE that chat's opening slot, never as a page
+    // returned instead of it.
+    const page = read("app/[locale]/dashboard/page.tsx");
+    expect(page).toMatch(/<ConversationChat\b/);
+    expect(page.match(/<ConversationChat\b/g)).toHaveLength(1);
+    expect(page.match(/<TodayScreen\b/g)).toHaveLength(1);
+    expect(page).toMatch(/openingContext=\{workerToday \? <TodayScreen\b/);
+    // The opening decision is the ONE pure predicate — never a page-local
+    // role check.
+    expect(page).toMatch(/conversationOpeningContext\(\{/);
+    expect(page).not.toMatch(/dashboardRootSurface|hasConversationParams/);
+    expect(read("components/app/dashboard-chrome.tsx")).not.toMatch(/hasConversationParams|useSearchParams/);
+    // ŠIANDIEN carries no conversation of its own.
+    const today = read("components/app/today/today-screen.tsx");
+    expect(today).not.toMatch(/ConversationChat|ConversationThread|useConversation/);
+  });
+});
+
+describe("reachability — no fixed control is buried by the chat's bottom stack", () => {
+  /**
+   * THIS TEST USED TO PIN A WORKAROUND.
+   *
+   * It asserted that the conversation surface lifts the floating feedback
+   * button via `--feedback-fab-bottom`, because the button sat on the
+   * composer's send control and silently ate the tap. That made the workaround
+   * permanent: the guard would have gone red on any attempt to remove it, and
+   * stayed green for as long as a floating control kept covering things
+   * elsewhere (the calendar, the map).
+   *
+   * The cause is fixed instead of compensated — the trigger is a menu item, so
+   * nothing floats over the composer at all. What is pinned now is the property
+   * that actually matters and that the lift was only approximating: the
+   * feedback trigger must not be a fixed-position element.
+   */
+  it("the feedback trigger cannot cover the composer, because nothing floats", () => {
+    const widget = read("components/app/language-feedback-widget.tsx");
+    // No fixed-position TRIGGER. The modal itself is legitimately
+    // `fixed inset-0` while open — that is a dialog the user just asked for,
+    // not a resting control sitting on the page — so the assertion targets the
+    // resting geometry the FAB used, not the string "fixed".
+    expect(widget).not.toMatch(/className="fixed right-3/);
+    // The lift must be gone from the RENDERED geometry. Matched as the Tailwind
+    // utility rather than as the bare variable name, because the widget's
+    // comment explains why the variable was deleted — and prose about a class
+    // must never break an assertion about what the component renders (the same
+    // rule the other half of this guard set already follows).
+    expect(widget).not.toMatch(/bottom-\[var\(--feedback-fab-bottom/);
+    // The workaround must be gone from the stylesheet too, or it will be
+    // re-adopted by the next floating control someone adds.
+    expect(read("app/globals.css")).not.toMatch(/--feedback-fab-bottom:/);
+
+    // The trigger lives in the account menu — one predictable place present on
+    // every dashboard route, obstructing nothing.
+    const menu = read("components/app/account-menu.tsx");
+    expect(menu).toMatch(/data-testid="language-feedback-open"/);
+    expect(menu).toMatch(/FEEDBACK_OPEN_EVENT/);
+  });
+});
+
+describe("honesty — the chat never promises a mechanism it lacks", () => {
+  it("the empty find-work state does not promise a notification", () => {
+    // There is no alert/notification mechanism behind the opportunity board, so
+    // "I'll let you know when one appears" was a fake promise (§7).
+    const dir = join(APP_ROOT, "messages");
+    const PROMISE =
+      /I'll let you know when|pranešiu|Сообщу, когда|Ich melde mich, sobald|Ik laat het weten zodra/i;
+    for (const file of readdirSync(dir).filter((f) => f.endsWith(".json"))) {
+      const doc = JSON.parse(readFileSync(join(dir, file), "utf8")) as {
+        conversation?: { findWork?: { emptyState?: string } };
+      };
+      const empty = doc.conversation?.findWork?.emptyState ?? "";
+      expect(empty, `${file}: empty state promises a notification`).not.toMatch(PROMISE);
+    }
+  });
+
+  it("a weak fit is never painted as success", () => {
+    // The badge colour carries the same fact as the label. A flat
+    // `text-state-success` on every match told the worker "strong" while the
+    // label said "weak" — the colour is the louder signal.
+    const messages = read("components/app/workspace/opportunities-result.tsx");
+    expect(messages).toMatch(/FIT_BADGE/);
+    expect(messages).toMatch(/weak:\s*["'][^"']*state-warning/);
+    expect(messages).toMatch(/insufficient:\s*["'](?![^"']*state-success)/);
+    // …and the status really travels from the use case to the card.
+    expect(read("lib/marketplace/opportunities-result.ts")).toMatch(/fitStatus:\s*m\.status/);
+  });
+
+  it("the chat answers state questions from the server, not from canned copy", () => {
+    const chat = read("components/app/conversation/chat/conversation-chat.tsx");
+    expect(chat).toMatch(/loadProfileSummaryForChat\(/);
+    for (const dead of ["nextActionAnswer", "resumeAnswer", "profileQuestion", "jobsAnswer"]) {
+      expect(chat, `${dead} is a canned answer to a real-state question`).not.toContain(dead);
+    }
+  });
+});

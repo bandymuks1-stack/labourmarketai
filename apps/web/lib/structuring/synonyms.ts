@@ -1,0 +1,90 @@
+/**
+ * Skill synonym sets (Work Journal Text-to-Skill Recognition v1, Layer B).
+ *
+ * The base `SKILL_HINTS_LT` needles in ./keywords.ts are the EXACT tier (high
+ * confidence). This file adds curated SYNONYM phrases per canonical skill slug —
+ * extra LT/RU/EN forms a worker actually writes, including EN words the base
+ * needles lacked. A synonym hit is MEDIUM confidence (weaker than an exact
+ * needle, stronger than fuzzy).
+ *
+ * Rules:
+ *  - Keys MUST be real slugs in messages/{locale}/skill-names.json — never
+ *    invent a skill (doctrine §7, no fake skills).
+ *  - Prefer phrases ≥4 chars; short ambiguous stems belong nowhere.
+ *  - Matched after folding (see ./normalize), so write LT forms once (accents
+ *    optional) — `langu` matches `langų`.
+ */
+export const SKILL_SYNONYMS: Readonly<Record<string, readonly string[]>> = {
+  tiling: ["tile", "tiles", "tiling", "tiled"],
+  // The QUESTION forms a person asks the chat about their own work ("How
+  // much did I program?", issue #1689 line 2 — measured: "did I program" and
+  // "did I code" read NO subject while LT/RU/DE/NL read it). Subject-anchored
+  // ("did i …", "do i …") so the bare stem "program" never brushes
+  // a training programme or an installed program.
+  programming: ["did i program", "do i program", "did i code", "do i code"],
+  drywall: ["gips", "gipsas", "plasterboard", "drywall", "гипс"],
+  "ceiling-systems": ["ceiling", "suspended ceiling", "потолоч"],
+  "partition-walls": ["partition wall", "перегородк"],
+  plastering: ["plaster", "rendering"],
+  "skim-coating": ["skim coat", "skimming", "filler"],
+  painting: ["paint", "painted", "painting", "repaint"],
+  flooring: ["floor", "flooring", "laminate", "parquet", "laid floor"],
+  "floor-screeding": ["screed", "screeding"],
+  plumbing: ["plumb", "plumbing", "pipework", "pipes"],
+  "electrical-install": ["electric", "electrical", "wiring", "rewire"],
+  carpentry: [
+    // Window + door INSTALLATION maps to the carpentry skill, but only when an
+    // installation verb sits WITH the noun. A BARE window/door noun ("langus",
+    // "duris", "window", "door") must NOT resolve to carpentry — a window is
+    // just as often cleaned ("valiau langus") as installed. Install verb+noun
+    // phrases are enumerated for both word orders (LT inflects + reorders).
+    "montavau langus",
+    "montavau duris",
+    "montav langus",
+    "montav duris",
+    "stačiau langus",
+    "stačiau duris",
+    "staciau langus",
+    "staciau duris",
+    "dėjau langus",
+    "dėjau duris",
+    "dejau langus",
+    "dejau duris",
+    "langų montav",
+    "langu montav",
+    "durų montav",
+    "duru montav",
+    "window install",
+    "door install",
+    "carpentry",
+    "joinery",
+    "ставил окна",
+    "ставил двери",
+    "монтаж окон",
+    "монтаж дверей",
+  ],
+  insulation: ["insulate", "insulation", "insulated"],
+  waterproofing: ["waterproof", "waterproofing", "tanking"],
+  bricklaying: ["brick", "bricks", "bricklaying", "blockwork"],
+  "concrete-pouring": [
+    "betona",
+    "betonas",
+    "betono",
+    "liejau beton",
+    "concrete",
+    "concreting",
+    "залив бетон",
+    "бетон",
+  ],
+  "rebar-cutting": ["rebar", "reinforcement bar", "reinforcement"],
+  "welding-blueprint": ["weld", "welding", "welded", "mig", "tig"],
+  scaffolding: ["scaffold", "scaffolding"],
+  demolition: ["demolish", "demolition", "strip out", "tear down"],
+  "site-cleaning": ["clean up", "site clean", "tidy"],
+  earthworks: ["dig", "digging", "excavate", "excavation", "trench"],
+  wallpapering: ["wallpaper", "wallpapering", "обои", "обоев"],
+  "timber-framing": ["timber frame", "framing", "joists", "rafters"],
+  formwork: ["formwork", "shuttering", "klojiniai", "klojinius"],
+  "blueprint-reading": ["blueprint", "drawings", "read plans"],
+  "general-labour": ["labourer", "general labour", "helper", "laborer"],
+};

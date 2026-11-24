@@ -1,0 +1,711 @@
+"use client";
+
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { useLocale } from "next-intl";
+import { Send, Check, X, Undo2, MessageSquare } from "lucide-react";
+import {
+  requestServiceOffering,
+  respondToRequest,
+  withdrawRequest,
+} from "@/lib/marketplace/service-requests";
+import { openServiceRequestConversationAction } from "@/lib/marketplace/service-request-conversation";
+import {
+  canRequestAgain,
+  type DiscoverableOfferingRow,
+  type IncomingRequestRow,
+  type OutgoingRequestRow,
+  type RequestStatus,
+} from "@/lib/marketplace/service-requests-shared";
+import {
+  PLAYER_IDENTITY_AVATAR_BORDER,
+  PLAYER_IDENTITY_FALLBACK_SURFACE,
+} from "@/lib/identity/player-identity";
+import { buildPlayerCardMinimum } from "@/lib/identity/player-card-minimum";
+import { PARTNERSHIP_CATEGORY } from "@/lib/services/service-offerings-shared";
+import { trackFunnel } from "@/lib/telemetry/task";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { EmptyState } from "./empty-state";
+import { StatusChip, type StatusChipVariant } from "@/components/app/status-chip";
+
+/**
+ * P0 Marketplace loop (Phase 1) — one compact surface: discover active offerings
+ * and request one; see your outgoing request status; respond to incoming requests
+ * for your own offerings. Real data only — every row comes from RLS-scoped
+ * queries. NO seed/demo rows. When the migration is not applied yet the parent
+ * passes `needsMigration` and we show a calm "not available yet" state.
+ *
+ * A request is a real intent with a structured status — no payment, no rating.
+ */
+
+export type MarketplaceLabels = {
+  notAvailable: string;
+  discoverHeading: string;
+  discoverEmpty: string;
+  request: string;
+  requested: string;
+  /** Badge + request label for a "looking for partners" offering. */
+  partnershipBadge: string;
+  partnershipRequest: string;
+  /** Placeholder of the optional first message sent WITH a request. */
+  requestMessagePlaceholder: string;
+  remoteBadge: string;
+  outgoingHeading: string;
+  outgoingEmpty: string;
+  incomingHeading: string;
+  incomingEmpty: string;
+  /** Empty discover list is not a dead end — points to /dashboard/services
+   *  (activate your own services to join the loop). Audit finding F-E2. */
+  discoverEmptyCta: string;
+  /** Honest empty states (window 6, lane G): each empty list says WHY it is
+   *  empty and what the next useful step is — only steps that really exist
+   *  (no "we will notify you" — that path does not exist yet). */
+  discoverEmptyWhy: string;
+  discoverEmptyNext: string;
+  /** A filter that matched nothing is a different truth from "nobody offers
+   *  anything yet" — and its way forward is clearing the filter. */
+  discoverFilteredEmpty: string;
+  discoverFilteredEmptyCta: string;
+  outgoingEmptyWhy: string;
+  /** Resolved on the server from the caller's OWN active-offering count:
+   *  "you have no active service, so no request can arrive" vs "your N
+   *  active services are listed; nobody has asked yet". */
+  incomingEmptyWhy: string;
+  /** Present only when the caller has NO active offering — the one real
+   *  next step (activate one) — otherwise null (no fake CTA). */
+  incomingEmptyCta: string | null;
+  /** Country / category discovery filter (G-E1). */
+  filterCountry: string;
+  filterCategory: string;
+  filterApply: string;
+  filterClear: string;
+  /** Optional provider note sent with accept/decline — the requester reads it
+   *  on their side ("Paslaugos teikėjo pastaba"). The RPC always took it; the
+   *  screen never offered it (window 6 readback finding). */
+  responseNoteLabel: string;
+  responseNotePlaceholder: string;
+  accept: string;
+  decline: string;
+  withdraw: string;
+  /** Accepted rows are never a dead end — the next step is the conversation
+   *  (audit PR4: "the loop dies at acceptance"). */
+  messageCta: string;
+  errorGeneric: string;
+  duplicate: string;
+  requesterMessage: string;
+  providerNote: string;
+  responded: string;
+  requestedBy: string;
+  requesterFallback: string;
+  /** Repeat action (Capability G, PR 6b): a concluded (declined/withdrawn)
+   *  outgoing request can be sent AGAIN for the same offering — a NEW request
+   *  via the same RPC, previous message prefilled, provider decides again. */
+  requestAgain: string;
+  requestAgainNote: string;
+  cancel: string;
+  /** Honest permanent "no" when the offering was deactivated meanwhile. */
+  offeringInactive: string;
+  status: Record<RequestStatus, string>;
+};
+
+/** ISO timestamp → locale-independent YYYY-MM-DD (no hydration drift, no extra
+ *  i18n). Returns null for an empty/invalid value so the caller can omit it. */
+function isoDay(ts: string | null): string | null {
+  if (!ts) return null;
+  const day = ts.slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/.test(day) ? day : null;
+}
+
+/** Request status -> the one StatusChip pattern (word + shape). */
+const STATUS_VARIANT: Record<RequestStatus, StatusChipVariant> = {
+  sent: "neutral",
+  accepted: "success",
+  declined: "attention",
+  withdrawn: "neutral",
+};
+
+function RequestStatusChip({ status, label }: { status: RequestStatus; label: string }) {
+  return <StatusChip variant={STATUS_VARIANT[status]}>{label}</StatusChip>;
+}
+
+/**
+ * Repeat action (Capability G, PR 6b) — "Request again" on a CONCLUDED
+ * (declined/withdrawn) outgoing request. Sends a NEW request for the same
+ * offering through the EXISTING `requestServiceOffering` action (the
+ * one-open-request unique index is partial on status='sent', so the DB allows
+ * it); the previous message is prefilled and editable. Honest results only:
+ * `duplicate` (a request is already open) and `inactive` (the offering was
+ * deactivated) surface the server's answer — never a fake success, never a
+ * generic "try again" for a permanent no. Top-level component so its local
+ * state survives parent re-renders.
+ */
+function RequestAgainButton({
+  offeringId,
+  previousMessage,
+  labels,
+  onRequested,
+}: {
+  offeringId: string;
+  previousMessage: string | null;
+  labels: MarketplaceLabels;
+  onRequested: () => void;
+}) {
+  const [open, setOpen] = useState(false);
+  const [message, setMessage] = useState(previousMessage ?? "");
+  const [pending, startTransition] = useTransition();
+  const [state, setState] = useState<
+    "idle" | "sent" | "duplicate" | "inactive" | "error"
+  >("idle");
+
+  function send() {
+    trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, { surface: "marketplace_repeat" });
+    startTransition(async () => {
+      const res = await requestServiceOffering(offeringId, message);
+      if (res.kind === "ok") {
+        setState("sent");
+        trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+          surface: "marketplace_repeat",
+          success: true,
+        });
+        onRequested();
+        return;
+      }
+      trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+        surface: "marketplace_repeat",
+        success: false,
+      });
+      if (res.kind === "duplicate") setState("duplicate");
+      else if (res.kind === "inactive") setState("inactive");
+      else setState("error");
+    });
+  }
+
+  if (state === "sent") {
+    return (
+      <span
+        data-testid="marketplace-request-again-sent"
+        className="inline-flex shrink-0 items-center gap-1 rounded-md border border-state-success/40 px-2 py-1 text-xs text-state-success"
+      >
+        <Check className="h-3 w-3" /> {labels.requested}
+      </span>
+    );
+  }
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        data-testid="marketplace-request-again-open"
+        className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue"
+      >
+        <Send className="h-3 w-3" /> {labels.requestAgain}
+      </button>
+    );
+  }
+
+  return (
+    <div
+      data-testid="marketplace-request-again-form"
+      className="flex w-full max-w-sm flex-col gap-2 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
+    >
+      {/* What this does, up front: a NEW request for the same service — the
+          provider decides again. No re-opening of the concluded row. */}
+      <p className="text-meta text-text-secondary">{labels.requestAgainNote}</p>
+      <textarea
+        value={message}
+        maxLength={2000}
+        rows={3}
+        aria-label={labels.requestAgainNote}
+        onChange={(e) => setMessage(e.target.value)}
+        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+      />
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={pending}
+          onClick={send}
+          className="rounded-md border border-brand-blue/50 px-2.5 py-1 text-meta font-medium text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+        >
+          {labels.request}
+        </button>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-meta text-text-muted hover:text-text-secondary"
+        >
+          {labels.cancel}
+        </button>
+      </div>
+      {state === "duplicate" ? (
+        <span className="text-meta text-state-warning">{labels.duplicate}</span>
+      ) : state === "inactive" ? (
+        <span
+          data-testid="marketplace-request-again-inactive"
+          className="text-meta text-state-warning"
+        >
+          {labels.offeringInactive}
+        </span>
+      ) : state === "error" ? (
+        <span className="text-meta text-state-warning">{labels.errorGeneric}</span>
+      ) : null}
+    </div>
+  );
+}
+
+export function MarketplaceLoopSection({
+  discoverable,
+  outgoing,
+  incoming,
+  needsMigration,
+  labels,
+  filter = { country: "", category: "", active: false },
+}: {
+  discoverable: DiscoverableOfferingRow[];
+  outgoing: OutgoingRequestRow[];
+  incoming: IncomingRequestRow[];
+  needsMigration: boolean;
+  labels: MarketplaceLabels;
+  /** The discovery filter as applied by the page (already normalized) —
+   *  rendered back into the plain GET form so the URL stays the truth. */
+  filter?: { country: string; category: string; active: boolean };
+}) {
+  const router = useRouter();
+  const locale = useLocale();
+  const [pending, startTransition] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+  // Optional provider note per incoming request (sent with accept/decline).
+  const [noteById, setNoteById] = useState<Record<string, string>>({});
+  // Optional first message per discovered offering, sent WITH the request —
+  // the existing request/accept model carries it; the provider sees it first.
+  const [draftById, setDraftById] = useState<Record<string, string>>({});
+
+  // Next step for an ACCEPTED request — opens (or reopens) the buyer↔provider
+  // conversation; the granting fact is re-verified server-side by the action.
+  const MessageCta = ({ requestId, testId }: { requestId: string; testId: string }) => (
+    <form action={openServiceRequestConversationAction}>
+      <input type="hidden" name="requestId" value={requestId} />
+      <input type="hidden" name="locale" value={locale} />
+      <button
+        type="submit"
+        data-testid={testId}
+        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/40 px-3 py-1.5 text-xs text-brand-blue transition-colors hover:border-brand-blue disabled:opacity-50"
+      >
+        <MessageSquare className="h-3 w-3" /> {labels.messageCta}
+      </button>
+    </form>
+  );
+
+  // Offerings the caller already has an OPEN ('sent') request for — derived from
+  // the outgoing rows already fetched (no extra query, no new logic). Used to
+  // reflect an honest "Requested" state on the discover row so a buyer doesn't
+  // re-click and hit the duplicate error.
+  const openRequestOfferingIds = new Set(
+    outgoing.filter((r) => r.status === "sent").map((r) => r.offeringId),
+  );
+
+  if (needsMigration) {
+    return (
+      <div
+        data-testid="marketplace-not-available"
+        className="rounded-lg border border-ink-500 bg-ink-800/40 p-6 text-sm text-text-muted"
+      >
+        {labels.notAvailable}
+      </div>
+    );
+  }
+
+  function run(
+    action: () => Promise<{ kind: string }>,
+    onOk?: () => void,
+    onFail?: () => void,
+  ) {
+    setError(null);
+    startTransition(async () => {
+      const res = await action();
+      if (res.kind === "duplicate") setError(labels.duplicate);
+      else if (res.kind !== "ok") {
+        setError(labels.errorGeneric);
+        // Failed attempt ≠ abandoned attempt (audit F-T5).
+        onFail?.();
+      } else onOk?.();
+      router.refresh();
+    });
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Single top-level title/intro lives on the page (pageTitle/pageLead) —
+          no duplicate section header here. Order follows the real-use journey:
+          find/request → see what I sent → respond to incoming. */}
+
+      {/* 1 — Discover active offerings (find / request a service) */}
+      <section className="space-y-2">
+        <h3 className="text-sm font-medium text-text-secondary">{labels.discoverHeading}</h3>
+        {/* Discovery filter (G-E1): a plain GET form — the URL carries the
+            filter, the server applies the exact country equality (bounded,
+            indexable) and the in-memory category match over the page. Shown
+            whenever there is something to narrow OR a filter is already on
+            (so it can be cleared); hidden on a truly empty market. */}
+        {(discoverable.length > 0 || filter.active) && (
+          <form
+            method="get"
+            data-testid="marketplace-discover-filter"
+            className="flex flex-wrap items-end gap-2 rounded-md border border-ink-600 bg-ink-800/30 p-2.5"
+          >
+            <label className="flex min-w-0 flex-col gap-1 text-meta text-text-muted">
+              {labels.filterCountry}
+              <input
+                name="country"
+                defaultValue={filter.country}
+                maxLength={2}
+                placeholder="LT"
+                autoCapitalize="characters"
+                data-testid="marketplace-filter-country"
+                className="w-20 rounded-md border border-ink-500 bg-ink-900 px-2 py-1.5 text-xs uppercase text-text-primary"
+              />
+            </label>
+            <label className="flex min-w-0 flex-1 flex-col gap-1 text-meta text-text-muted">
+              {labels.filterCategory}
+              <input
+                name="category"
+                defaultValue={filter.category}
+                maxLength={80}
+                data-testid="marketplace-filter-category"
+                className="w-full min-w-32 rounded-md border border-ink-500 bg-ink-900 px-2 py-1.5 text-xs text-text-primary"
+              />
+            </label>
+            <button
+              type="submit"
+              data-testid="marketplace-filter-apply"
+              className="inline-flex min-h-11 items-center rounded-md border border-brand-blue/40 px-3 text-xs text-brand-blue hover:border-brand-blue"
+            >
+              {labels.filterApply}
+            </button>
+            {filter.active && (
+              <a
+                href="?"
+                data-testid="marketplace-filter-clear"
+                className="inline-flex min-h-11 items-center px-2 text-xs text-text-muted hover:text-text-secondary"
+              >
+                {labels.filterClear}
+              </a>
+            )}
+          </form>
+        )}
+        {discoverable.length === 0 ? (
+          filter.active ? (
+            // A filter that matched nothing: say so, offer the one real way
+            // forward (clear it) — never "nobody offers anything".
+            <EmptyState
+              testId="marketplace-discover-filtered-empty"
+              title={labels.discoverFilteredEmpty}
+              cta={{
+                label: labels.discoverFilteredEmptyCta,
+                href: "/dashboard/service-requests",
+                variant: "secondary",
+              }}
+            />
+          ) : (
+            // Shared EmptyState pattern (audit PR8) — renders the same
+            // data-testid="marketplace-discover-empty" (+ derived "-cta").
+            // WHY it is empty + the next step that really exists (activate
+            // your own service). No notification promise — that path is not
+            // live (window 6 honesty rule).
+            <EmptyState
+              testId="marketplace-discover-empty"
+              title={labels.discoverEmpty}
+              why={labels.discoverEmptyWhy}
+              next={labels.discoverEmptyNext}
+              cta={{
+                label: labels.discoverEmptyCta,
+                href: "/dashboard/services",
+                variant: "secondary",
+              }}
+            />
+          )
+        ) : (
+          <ul className="space-y-2">
+            {discoverable.map((o) => (
+              <li
+                key={o.id}
+                id={`offering-${o.id}`}
+                data-testid="marketplace-offer-row"
+                className="scroll-mt-20 flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+              >
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-text-primary">{o.title}</p>
+                  {o.description && (
+                    <p className="mt-0.5 line-clamp-2 text-xs text-text-muted">{o.description}</p>
+                  )}
+                  <p className="mt-1 text-xs text-text-muted">
+                    {[o.categorySlug === PARTNERSHIP_CATEGORY ? labels.partnershipBadge : o.categorySlug, o.locationCountry, o.remote ? labels.remoteBadge : null, o.rateText]
+                      .filter(Boolean)
+                      .join(" · ")}
+                  </p>
+                  {!openRequestOfferingIds.has(o.id) && (
+                    <textarea
+                      rows={2}
+                      maxLength={2000}
+                      value={draftById[o.id] ?? ""}
+                      onChange={(e) =>
+                        setDraftById((d) => ({ ...d, [o.id]: e.target.value }))
+                      }
+                      placeholder={labels.requestMessagePlaceholder}
+                      aria-label={labels.requestMessagePlaceholder}
+                      data-testid="marketplace-offer-message"
+                      className="mt-2 w-full rounded-md border border-ink-500 bg-ink-900/40 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted"
+                    />
+                  )}
+                </div>
+                {openRequestOfferingIds.has(o.id) ? (
+                  <span
+                    data-testid="marketplace-offer-requested"
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-ink-500 px-2 py-1 text-xs text-text-muted"
+                  >
+                    <Check className="h-3 w-3" /> {labels.requested}
+                  </span>
+                ) : (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    data-testid="marketplace-offer-request"
+                    onClick={() => {
+                      trackFunnel(FUNNEL_EVENTS.serviceRequestStarted, {
+                        surface: "marketplace",
+                      });
+                      run(
+                        () => requestServiceOffering(o.id, draftById[o.id] ?? null),
+                        () =>
+                          trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+                            surface: "marketplace",
+                            success: true,
+                          }),
+                        () =>
+                          trackFunnel(FUNNEL_EVENTS.serviceRequestSent, {
+                            surface: "marketplace",
+                            success: false,
+                          }),
+                      );
+                    }}
+                    className="inline-flex shrink-0 items-center gap-1 rounded-md border border-brand-blue/40 px-2 py-1 text-xs text-brand-blue disabled:opacity-50"
+                  >
+                    <Send className="h-3 w-3" /> {o.categorySlug === PARTNERSHIP_CATEGORY ? labels.partnershipRequest : labels.request}
+                  </button>
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* 2 — My requests (see what I sent) — buyer-facing status of my own
+          outgoing requests, shown before the provider inbox per the real-use
+          journey order. */}
+      <section className="space-y-2">
+        <h3 className="text-sm font-medium text-text-secondary">{labels.outgoingHeading}</h3>
+        {outgoing.length === 0 ? (
+          <EmptyState
+            testId="marketplace-outgoing-empty"
+            title={labels.outgoingEmpty}
+            why={labels.outgoingEmptyWhy}
+          />
+        ) : (
+          <ul className="space-y-2">
+            {outgoing.map((r) => (
+              <li
+                key={r.id}
+                data-testid="marketplace-outgoing-row"
+                className="flex items-start justify-between gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3"
+              >
+                <div className="min-w-0 space-y-1">
+                  <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    <RequestStatusChip status={r.status} label={labels.status[r.status]} />
+                    {isoDay(r.respondedAt) && (
+                      <span
+                        data-testid="marketplace-outgoing-responded"
+                        className="text-xs text-text-muted tabular-nums"
+                      >
+                        {labels.responded} {isoDay(r.respondedAt)}
+                      </span>
+                    )}
+                  </div>
+                  {r.responseNote && (
+                    <p
+                      data-testid="marketplace-outgoing-note"
+                      className="line-clamp-3 text-xs text-text-muted"
+                    >
+                      <span className="text-text-secondary">{labels.providerNote}:</span>{" "}
+                      {r.responseNote}
+                    </p>
+                  )}
+                </div>
+                {r.status === "sent" && (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => run(() => withdrawRequest(r.id))}
+                    data-testid="marketplace-outgoing-withdraw"
+                    className="inline-flex min-h-11 shrink-0 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
+                  >
+                    <Undo2 className="h-3 w-3" /> {labels.withdraw}
+                  </button>
+                )}
+                {r.status === "accepted" && (
+                  <MessageCta requestId={r.id} testId="marketplace-outgoing-message-cta" />
+                )}
+                {/* Repeat action (PR 6b): a concluded request is not a dead
+                    end — send a NEW request for the same offering (previous
+                    message prefilled). Hidden while another request for this
+                    offering is already open, so the honest "Requested" state
+                    on the discover row stays the single truth. */}
+                {canRequestAgain(r.status) && !openRequestOfferingIds.has(r.offeringId) && (
+                  <RequestAgainButton
+                    offeringId={r.offeringId}
+                    previousMessage={r.message}
+                    labels={labels}
+                    onRequested={() => router.refresh()}
+                  />
+                )}
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* 3 — Provider inbox (respond to incoming) — incoming requests for my
+          own offerings. */}
+      <section className="space-y-2">
+        <h3 className="text-sm font-medium text-text-secondary">{labels.incomingHeading}</h3>
+        {incoming.length === 0 ? (
+          <EmptyState
+            testId="marketplace-incoming-empty"
+            title={labels.incomingEmpty}
+            why={labels.incomingEmptyWhy}
+            cta={
+              labels.incomingEmptyCta
+                ? {
+                    label: labels.incomingEmptyCta,
+                    href: "/dashboard/services",
+                    variant: "secondary",
+                  }
+                : undefined
+            }
+          />
+        ) : (
+          <ul className="space-y-2">
+            {incoming.map((r) => {
+              // Requester identity through the ONE minimum Player Card contract,
+              // using only the #531-safe display name. Same fallback rules
+              // (clean/trim, neutral "•" initials) as the player card — one
+              // identity everywhere, never a fabricated avatar/role.
+              const requester = buildPlayerCardMinimum({
+                fullName: r.requesterDisplayName,
+              });
+              return (
+              <li
+                key={r.id}
+                data-testid="marketplace-incoming-row"
+                // Stacks on a phone (the note + decision block needs the full
+                // width at 390 px), side by side from `sm` up.
+                className="flex flex-col gap-3 rounded-lg border border-ink-500 bg-ink-800/30 p-3 sm:flex-row sm:items-start sm:justify-between"
+              >
+                <div className="min-w-0 space-y-1.5">
+                  {/* Requester identity — compact request-provider variant of the
+                      Player Identity foundation. Display name + initials only;
+                      neutral "•"/fallback when the buyer set no name or the
+                      identity RPC is not applied yet. */}
+                  <div
+                    className="flex items-center gap-2"
+                    data-testid="marketplace-incoming-requester"
+                  >
+                    <span
+                      aria-hidden
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-meta font-semibold ${PLAYER_IDENTITY_AVATAR_BORDER} ${PLAYER_IDENTITY_FALLBACK_SURFACE}`}
+                    >
+                      {requester.initials}
+                    </span>
+                    <span className="min-w-0 truncate text-xs">
+                      <span className="text-text-muted">{labels.requestedBy}: </span>
+                      <span className="text-text-secondary">
+                        {requester.displayName ?? labels.requesterFallback}
+                      </span>
+                    </span>
+                  </div>
+                  <p className="truncate text-sm text-text-primary">{r.offeringTitle ?? "—"}</p>
+                  <RequestStatusChip status={r.status} label={labels.status[r.status]} />
+                  {r.message && (
+                    <p
+                      data-testid="marketplace-incoming-message"
+                      className="line-clamp-3 text-xs text-text-muted"
+                    >
+                      <span className="text-text-secondary">{labels.requesterMessage}:</span>{" "}
+                      {r.message}
+                    </p>
+                  )}
+                </div>
+                {r.status === "sent" && (
+                  <div className="flex w-full max-w-xs shrink-0 flex-col gap-2 sm:w-auto">
+                    {/* Optional note travels with the decision (the RPC's
+                        p_note) and is read back by the requester as
+                        "Paslaugos teikėjo pastaba" — a decline with a reason
+                        is not a dead end. */}
+                    <label className="flex flex-col gap-1 text-meta text-text-muted">
+                      {labels.responseNoteLabel}
+                      <textarea
+                        value={noteById[r.id] ?? ""}
+                        maxLength={2000}
+                        rows={2}
+                        placeholder={labels.responseNotePlaceholder}
+                        onChange={(e) =>
+                          setNoteById((cur) => ({ ...cur, [r.id]: e.target.value }))
+                        }
+                        data-testid="marketplace-incoming-note"
+                        className="rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+                      />
+                    </label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        disabled={pending}
+                        data-testid="marketplace-incoming-accept"
+                        onClick={() =>
+                          run(() => respondToRequest(r.id, "accepted", noteById[r.id] ?? null))
+                        }
+                        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-state-success/40 px-3 py-1.5 text-xs text-state-success disabled:opacity-50"
+                      >
+                        <Check className="h-3 w-3" /> {labels.accept}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={pending}
+                        data-testid="marketplace-incoming-decline"
+                        onClick={() =>
+                          run(() => respondToRequest(r.id, "declined", noteById[r.id] ?? null))
+                        }
+                        className="inline-flex min-h-11 items-center gap-1 rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-muted disabled:opacity-50"
+                      >
+                        <X className="h-3 w-3" /> {labels.decline}
+                      </button>
+                    </div>
+                  </div>
+                )}
+                {r.status === "accepted" && (
+                  <MessageCta requestId={r.id} testId="marketplace-incoming-message-cta" />
+                )}
+              </li>
+              );
+            })}
+          </ul>
+        )}
+      </section>
+
+      {error && (
+        <p role="alert" className="text-sm text-state-warning" data-testid="marketplace-loop-error">
+          {error}
+        </p>
+      )}
+    </div>
+  );
+}

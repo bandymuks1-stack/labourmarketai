@@ -1,0 +1,149 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync, readdirSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * Window 6 follow-up doors (production ca96605b, measured 2026-09-06). Each
+ * pin names a dead end a real person hit and the EXISTING door the answer
+ * now offers. Structural: the source is read, not executed, so the pins hold
+ * without a browser.
+ */
+const WEB = join(__dirname, "..", "..");
+const read = (...p: string[]) => readFileSync(join(WEB, ...p), "utf8");
+
+describe("A1 — a country the person has not chosen is answered with doors, honestly", () => {
+  const wf = read("lib", "ai-workspace", "workflows.ts");
+  const reads = read("lib", "conversation", "country-next-steps-server.ts");
+  it("the missed-country branch offers the work card (prefilled with ALL countries) and the documents gap", () => {
+    expect(wf).toContain('import { loadUnchosenCountryNextSteps } from "@/lib/conversation/country-next-steps-server";');
+    expect(wf).toContain("f:worker.save-work-card?preferredCountries=${country.nextCountries.join(\",\")}");
+    expect(wf).toContain('{ id: "documents-gap", label: t("chipDocsGap") }');
+    // The list REPLACES on save, so the current countries ride along.
+    expect(reads).toMatch(/const nextCountries = current\.includes\(upper\) \? current : \[\.\.\.current, upper\];/);
+  });
+  it("the public-ads claim comes from the ONE bounded indexed read, and a failed read is `unknown`, never `no`", () => {
+    expect(reads).toContain('import { readSupplyLastRefreshedAt } from "@/lib/vacancy-store/vacancy-read";');
+    expect(reads).toMatch(/if \(read\.status === "ok"\) supply = read\.lastRefreshedAt \? "yes" : "no";/);
+    expect(reads).toMatch(/catch \{\s*supply = "unknown";/);
+    expect(reads).not.toMatch(/count\(\*\)|\.select\(|\.from\(/);
+    // The workflow module itself stays free of any client (W4 guard).
+    expect(wf).not.toMatch(/createClient|supabase/);
+    for (const key of ["countryNotChosenListings", "countryNotChosenNoListings", "countryNotChosenSupplyUnknown", "countryNotChosenDoors"]) {
+      expect(wf).toContain(`t("${key}")`);
+    }
+  });
+  it("a `f:` chip may carry prefill, parsed by the ONE form opener", () => {
+    const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
+    expect(chat).toMatch(/const \[formAction, query\] = chip\.id\.slice\(2\)\.split\("\?"\);/);
+    expect(chat).toMatch(/case "documents-gap":[\s\S]{0,600}runWorkflow\(\(\) => runDocumentsReadiness\(\)\)/);
+  });
+});
+
+describe("A2 — the journal request never becomes the journal entry", () => {
+  const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
+  const flow = read("components", "app", "conversation", "worker-worklog-flow.tsx");
+  const schema = read("lib", "conversation", "worker-schemas.ts");
+  // Owner P0 2026-09-23 re-anchored this block: the META REQUEST stays refused
+  // on both layers, but the form is never STRICTER than the server — it used
+  // to refuse every sentence its keyword recogniser could not read as work
+  // ("Buvau pas klientą", "Rašau kodą"), which the server accepted.
+  it("the chat opens the flow with EMPTY evidence for a request sentence and asks what was done", () => {
+    const fn = chat.slice(chat.indexOf("const startWorkLog = useCallback("), chat.indexOf("* Voice hand-off"));
+    // Judged on the DRAFT it built (evidence-goal prefill included) and
+    // blanked ONLY for the meta request.
+    expect(fn).toContain("const readiness = journalDraftReadiness(draft.notes);");
+    expect(fn).toContain('const isRequest = readiness === "meta-request";');
+    expect(fn).toMatch(/draft=\{isRequest \? \{ \.\.\.draft, notes: "" \} : draft\}/);
+    expect(fn).toContain('assistant(t("journalAskWhatYouDid"))');
+    // NEGATIVE CONTROL: the raw-text judgement that blanked the prefill.
+    expect(fn).not.toContain("journalDraftReadiness(text)");
+    expect(fn).not.toMatch(/carriesWork \? draft : \{ \.\.\.draft, notes: "" \}/);
+  });
+  it("the flow refuses exactly what the server refuses — through the schema's own rule", () => {
+    const begin = flow.slice(flow.indexOf("function beginConfirm()"), flow.indexOf("function confirm()"));
+    expect(begin).toContain("const refusal = logWorkNotesRefusal(notes);");
+    expect(begin).toMatch(/if \(refusal !== null\) \{/);
+    expect(begin).toContain("labels.errorNoWorkContent");
+    // A missing Rule-C pick is a question, not "could not save".
+    expect(begin).toContain("labels.contextAmbiguous");
+    // NEGATIVE CONTROL: the client-only keyword gate is gone from the refusal.
+    expect(begin).not.toMatch(/journalDraftReadiness\(notes\) !== "ok"/);
+    // The verdict IS the schema's notes rule, not a restated copy of it.
+    expect(schema).toMatch(/workerLogWorkSchema\.shape\.notes\.safeParse\(notes\)/);
+  });
+  it("no-signal text proceeds to the explicit confirm with a NEUTRAL hint", () => {
+    expect(flow).toMatch(/journalDraftReadiness\(notes\) === "no-content" \? \(\s*<p\s+className="text-meta leading-relaxed text-text-muted"\s+data-testid="worklog-no-signal-hint"/);
+  });
+  it("an edit clears a shown error — no stale red line beside corrected text", () => {
+    for (const setter of ["setWorkDate", "setSite", "setNotes", "setEngagementId"]) {
+      expect(flow).toMatch(new RegExp(`${setter}\\(e\\.target\\.value\\);\\s*clearError\\(\\);`));
+    }
+  });
+  it("the server schema is the floor", () => {
+    expect(schema).toMatch(/\.refine\(\(v\) => !isJournalMetaRequest\(v\), \{ message: "journal_meta_request" \}\)/);
+  });
+});
+
+describe("A3 — availability is registered and opens the ONE work-card form with the date", () => {
+  const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
+  const registry = read("lib", "conversation", "intent-registry.ts");
+  it("registry row + handler", () => {
+    expect(registry).toMatch(/availability: \{ domain: "profile", access: "write", handler: "availabilityStatement"/);
+    const handler = chat.slice(chat.indexOf("availabilityStatement: () => {"), chat.indexOf("skillGap: () =>"));
+    expect(handler).toContain("const from = parseStartDate(text, todayIso());");
+    // Owner P0 2026-09-22 (section A): the SAME one form, now reached by two
+    // sentence shapes. A STATEMENT ("galiu dirbti nuo pirmadienio") still
+    // pre-fills the card with the availability the person stated; a change
+    // REQUEST ("pakeisk mano prieinamumą") opens the card with nothing
+    // pre-filled, because that sentence states no fact to record. Still ONE
+    // form and still no direct write — only which fields arrive pre-filled.
+    expect(handler).toContain("const changeRequest = isAvailabilityChangeRequest(text);");
+    expect(handler).toMatch(/openForm\(\s*"worker\.save-work-card",/);
+    expect(handler).toMatch(/changeRequest\s*\?\s*\{\}/);
+    expect(handler).toMatch(/availabilityStatus: "available",/);
+    expect(handler).not.toMatch(/dispatch|execute|\.from\(/);
+  });
+});
+
+describe("G1 — the company context never runs the person's job search", () => {
+  const chat = read("components", "app", "conversation", "chat", "conversation-chat.tsx");
+  it("one line + the personal-space chip, before any search", () => {
+    const handler = chat.slice(chat.indexOf("findWork: () => runWorkflow(async () => {"), chat.indexOf("professionStatement: () => {"));
+    const guard = handler.indexOf('if (identity === "company" || Boolean(auth?.activeOrganizationId || auth?.activeOrgName)) {');
+    expect(guard).toBeGreaterThan(-1);
+    expect(guard).toBeLessThan(handler.indexOf("return runFindWork(text, goalRef.current?.filters);"));
+    expect(handler).toContain('t("findWorkInCompanyContext")');
+    expect(handler).toContain('explanation: { why: t("findWorkInCompanyWhy") }');
+    expect(handler).toMatch(/id: `ws:\$\{personal\.id\}`, label: t\("workspacePersonal"\)/);
+  });
+});
+
+describe("every locale carries the follow-up copy", () => {
+  const locales = readdirSync(join(WEB, "messages")).filter((f) => f.endsWith(".json"));
+  it("11 locales, every key, placeholders intact", () => {
+    expect(locales.length).toBeGreaterThanOrEqual(11);
+    for (const file of locales) {
+      const json = JSON.parse(read("messages", file)) as {
+        conversation: {
+          chat: { availability?: Record<string, string>; findWorkInCompanyContext?: string; journalAskWhatYouDid?: string };
+          worklog: { errorNoWorkContent?: string };
+          forms: { fields: { availableFrom?: string } };
+        };
+        workspace: { ai: Record<string, string> };
+      };
+      const chat = json.conversation.chat as typeof json.conversation.chat & { findWorkInCompanyWhy?: string };
+      expect(typeof chat.findWorkInCompanyContext, file).toBe("string");
+      expect(typeof chat.findWorkInCompanyWhy, file).toBe("string");
+      expect(typeof chat.journalAskWhatYouDid, file).toBe("string");
+      for (const k of ["understood", "understoodFrom", "notInCompany"]) {
+        expect(typeof chat.availability?.[k], `${file}: availability.${k}`).toBe("string");
+      }
+      expect(chat.availability?.understoodFrom).toContain("{date}");
+      expect(typeof json.conversation.worklog.errorNoWorkContent, file).toBe("string");
+      expect(typeof json.conversation.forms.fields.availableFrom, file).toBe("string");
+      for (const k of ["countryNotChosenListings", "countryNotChosenNoListings", "countryNotChosenSupplyUnknown", "countryNotChosenDoors", "chipAddCountry", "chipDocsGap"]) {
+        expect(typeof json.workspace.ai[k], `${file}: workspace.ai.${k}`).toBe("string");
+      }
+    }
+  });
+});

@@ -1,0 +1,92 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+/**
+ * Read-only project/client context expansion (post-PR #198) — honesty guard.
+ *
+ * Adds a worker-facing "Project context" note on the journal page + an explicit
+ * "linking not enabled yet" line on the company card. Pure read-only display:
+ * no writes, no create/edit/delete CTA, no fabricated project data, copy honest
+ * in LT + EN.
+ */
+
+const root = join(__dirname, "..", "..");
+const read = (rel: string) => readFileSync(join(root, rel), "utf8");
+
+const journalPage = read("app/[locale]/dashboard/journal/page.tsx");
+// Re-anchored 2026-09-16: the projects card lives on the Work door
+// (/dashboard/projects, manager branch), beside the projects it counts.
+const companyPage = read("app/[locale]/dashboard/projects/page.tsx");
+
+describe("journal page — project-context note removed (P0 UX rescue)", () => {
+  it("no longer renders the read-only project-context note (noise removed)", () => {
+    // The journal is now a single clear path (entries → create → links); the
+    // non-actionable project-context note was removed. The company-side linking
+    // note + copy below are unaffected. See journal-profile-single-path.test.ts.
+    expect(journalPage).not.toMatch(/data-testid="journal-project-context"/);
+    expect(journalPage).not.toMatch(/t\("projectContext\./);
+  });
+});
+
+describe("company card — explicit linking-not-enabled line", () => {
+  it("renders the linking note", () => {
+    expect(companyPage).toMatch(/data-testid="company-ops-projects-linking"/);
+    expect(companyPage).toMatch(/tOps\("projectsLinkingNote"\)/);
+  });
+});
+
+describe("no project write surface introduced by this slice", () => {
+  // The project-context section markup must carry no create/edit/delete action.
+  function projectContextRegion(src: string, anchor: string): string {
+    const i = src.indexOf(anchor);
+    return i < 0 ? "" : src.slice(i, i + 2200);
+  }
+  it("journal project-context note stays read-only (no create/edit/delete CTA)", () => {
+    const region = projectContextRegion(journalPage, 'data-testid="journal-project-context"');
+    expect(region).not.toMatch(/<form|<button|onClick|createProject|new project|sukurti projekt/i);
+  });
+  it("company projects card exposes ONLY the create-context link (no inline form/button/edit/delete)", () => {
+    const region = projectContextRegion(companyPage, 'data-testid="company-ops-projects"');
+    // The intended create entry point is a navigation Link to the gated route.
+    expect(region).toMatch(/data-testid="company-ops-projects-create"/);
+    // …and nothing mutates inline or offers edit/delete.
+    expect(region).not.toMatch(/<form|<button|onClick|editProject|deleteProject|delete project|remove project/i);
+  });
+  it("the read-only helper still performs no writes", () => {
+    const helper = read("lib/company/project-context.ts");
+    expect(helper).not.toMatch(/\.insert\(|\.update\(|\.upsert\(|\.delete\(/);
+  });
+});
+
+describe("copy is honest in LT + EN (no fake project data, states the truth)", () => {
+  for (const locale of ["lt", "en"] as const) {
+    const base = JSON.parse(read(`messages/${locale}.json`)) as {
+      companyOps: Record<string, string>;
+    };
+    const journal = JSON.parse(read(`messages/${locale}/journal.json`)) as {
+      projectContext: Record<string, string>;
+    };
+    it(`${locale} has the new keys`, () => {
+      for (const k of ["title", "readyBadge", "body"]) {
+        expect(journal.projectContext[k], `${locale} journal.projectContext.${k}`).toBeTruthy();
+      }
+      expect(base.companyOps.projectsLinkingNote, `${locale} companyOps.projectsLinkingNote`).toBeTruthy();
+    });
+    it(`${locale} states linking is not active/enabled + nothing auto-filled`, () => {
+      const body = journal.projectContext.body.toLowerCase();
+      const link = base.companyOps.projectsLinkingNote.toLowerCase();
+      expect(body).toMatch(/neaktyv|not active/);
+      expect(body).toMatch(/automati/);
+      // 2026-10-09: journal entries ARE attributed to projects in production
+      // (by the people who record them); the note says that, and that nothing
+      // is filled in automatically. It no longer claims linking is off.
+      expect(link).toMatch(/priskiria|attributed/);
+      expect(link).toMatch(/automati/);
+    });
+    it(`${locale} new copy contains no fake/mock/demo/sample wording`, () => {
+      const blob = (journal.projectContext.body + base.companyOps.projectsLinkingNote).toLowerCase();
+      expect(blob).not.toMatch(/sample|demo|fake|mock|placeholder/);
+    });
+  }
+});

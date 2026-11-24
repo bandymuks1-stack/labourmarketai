@@ -1,0 +1,53 @@
+# Billing recovery cadence — OBSOLETE as a caller (2026-10-23). Kept only as the reviewable static gate.
+#
+# The recovery sweep (/api/cron/billing-recovery) reads Stripe for subscriptions awaiting provider sync
+# and applies them through the SAME canonical primitive as the webhook. It never creates, changes, cancels
+# or refunds a payment.
+#
+# WHY THIS WORKFLOW NO LONGER CALLS THE ROUTE: since the hosting move (2026-10-17) every /api/cron/* path is
+# reachable ONLY from the VPS itself. nginx answers 404 to the public internet
+# (ops/vps/labourmarket.ai.nginx.conf: `location ^~ /api/cron/ { return 404; }`), so an HTTP call from a
+# GitHub runner could never succeed — it would only produce a red run, or, worse, be mistaken for a cadence.
+#
+# THE ONE RUNNER is the VPS: `sh /root/lm-prod/bin/lm-cron.sh billing-recovery` (ops/vps/lm-cron.sh), which
+# calls the active release on 127.0.0.1 with CRON_SECRET. Scheduling it is the cron.d line documented in
+# ops/vps/labourmarket.cron, added only with the owner's Stripe GO (lm-cron-install.sh refuses it until then).
+#
+# Two independent server switches still apply there: CRON_SECRET and BILLING_RECOVERY_ENABLED=true
+# (default OFF; a valid CRON_SECRET alone never permits recovery writes).
+name: billing-recovery-cadence
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: billing-recovery-cadence
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Gate
+        id: gate
+        env:
+          ENABLED: ${{ vars.BILLING_RECOVERY_SCHEDULE_ENABLED }}
+          HAS_SECRET: ${{ secrets.CRON_SECRET != '' }}
+        run: |
+          if [ "$ENABLED" != "true" ] || [ "$HAS_SECRET" != "true" ]; then
+            echo "gated=true" >> "$GITHUB_OUTPUT"
+            echo "Inert: BILLING_RECOVERY_SCHEDULE_ENABLED / CRON_SECRET not configured (designed no-op)."
+          else
+            echo "gated=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Run the recovery sweep
+        if: steps.gate.outputs.gated == 'false'
+        run: |
+          # No HTTP call: the public host 404s every /api/cron/* path (see the header). Failing loudly is the
+          # honest answer; a green run here would claim a sweep that never happened.
+          echo "::error::billing recovery cannot run from GitHub Actions: /api/cron/* is reachable only on the VPS. Run 'sh /root/lm-prod/bin/lm-cron.sh billing-recovery' there (ops/vps/lm-cron.sh)."
+          exit 1

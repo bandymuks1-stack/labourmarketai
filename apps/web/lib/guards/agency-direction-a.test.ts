@@ -1,0 +1,175 @@
+import { describe, expect, it } from "vitest";
+import { isCanonicallyRedirected } from "./canonical-redirects";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
+
+/**
+ * Agency Direction A guard (owner decision, 2026-07-05).
+ *
+ * An agency/recruiter is a TYPED staffing-agency VIEW inside the canonical
+ * COMPANY workspace — a company whose `companies.company_type` is
+ * 'staffing_agency' (roles.ts pins this; migration 20260612090000 provides
+ * the enum value). There is NO separate agency persona, NO separate agency
+ * dashboard, NO duplicate agency candidate/demand system.
+ *
+ * This guard pins:
+ *   1. the staffing-agency mode renders ONLY behind the
+ *      company_type === 'staffing_agency' condition on the company room;
+ *   2. the three legacy routes are bookmark-preserving redirect stubs
+ *      (marketplace / player-card precedent);
+ *   3. the canonical company path never imports lib/agency/* (the legacy
+ *      `agencies`-table world stays out of the canonical view);
+ *   4. the route-truth-map drift cap was LOWERED (7 → 4) and the trio is
+ *      classified REDIRECT_STUB;
+ *   5. agency-mode copy exists in en/lt/ru and stays honest — no invented
+ *      agency features, no old separate-world terminology.
+ */
+
+const APP = join(__dirname, "..", "..");
+const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
+
+const companyPage = read("app/[locale]/dashboard/company/partners/page.tsx");
+const truthMap = read("lib/guards/route-truth-map.test.ts");
+
+// W1: these three were redirect-only page files. The files are gone; the
+// redirects moved to next.config, so the URLs still resolve to the same place.
+const STUBS = [
+  { route: "/dashboard/agency", destination: "/dashboard/company" },
+  { route: "/dashboard/agency/pool", destination: "/dashboard/company" },
+  { route: "/dashboard/start/agency", destination: "/dashboard/start/company" },
+] as const;
+
+describe("staffing-agency mode is a typed view on the company room", () => {
+  it("renders only behind the ONE agency rule (type OR declared workforce role)", () => {
+    // Owner decision 2026-09-28: a construction company that declared
+    // workforce_provider / recruitment_partner is an agency too. The section
+    // testid appears exactly once, inside that conditional.
+    expect(companyPage).toMatch(/const isStaffingAgency = await readActsAsAgency\(/);
+    expect(
+      companyPage.match(/data-testid="company-agency-mode"/g) ?? [],
+    ).toHaveLength(1);
+    const condIdx = companyPage.indexOf("if (isStaffingAgency) {");
+    const modeIdx = companyPage.indexOf('data-testid="company-agency-mode"');
+    expect(condIdx).toBeGreaterThan(-1);
+    expect(modeIdx).toBeGreaterThan(condIdx);
+  });
+
+  it("surfaces ONLY real, source-backed agency actions (roster / offer / scouting)", () => {
+    for (const key of ["roster", "offer", "scouting"] as const) {
+      expect(companyPage).toMatch(
+        new RegExp(`company-agency-mode-action-\\$\\{a\\.key\\}|company-agency-mode-action-${key}`),
+      );
+    }
+    // Each action targets an existing canonical surface — no new panels.
+    // "offer" is a plain anchor link since W3 rows 7/8/25: the wizard lives
+    // ON this page under #demand-intake, so the old workspace-switching
+    // detour is unnecessary here.
+    // The three actions are the organization's doors (IA 2026-09-16).
+    expect(companyPage).toMatch(/\/dashboard\/company\/people#company-team/);
+    // "Offer workers" opens the needs page in OFFER mode (button = action).
+    expect(companyPage).toMatch(/\/dashboard\/company\/needs\?audience=offer#demand-intake/);
+    expect(companyPage).toMatch(/\/dashboard\/company\/scouting/);
+  });
+
+  it("the canonical company path imports nothing from the LEGACY lib/agency world", () => {
+    // P5 (canonical journey) added lib/agency/clients* — the client-management
+    // module that reuses the canonical customer_requests demand model (see
+    // lib/guards/agency-client-management.test.ts). The legacy `agencies`-table
+    // modules (pool / pool-actions / actions / agency-workers) stay banned.
+    expect(companyPage).not.toMatch(
+      /@\/lib\/agency\/(pool|pool-actions|actions|agency-workers)/,
+    );
+    const agencyImports =
+      companyPage.match(/@\/lib\/agency\/[a-z-]+/g) ?? [];
+    for (const imp of agencyImports) {
+      expect([
+        "@/lib/agency/clients",
+        "@/lib/agency/clients-model",
+        "@/lib/agency/clients-actions",
+        // real two-subject bridge (issue #859) — read service imported by the page
+        "@/lib/agency/bridge-read",
+        // the agency's delegated demand + placement lifecycle (owner 2026-09-28)
+        "@/lib/agency/delegation-read",
+      ]).toContain(imp);
+    }
+    // The components the company room mounts stay clean too.
+    for (const comp of [
+      "components/app/company-workers-section.tsx",
+      "components/app/company-next-actions.tsx",
+      "components/app/company-scouting-bridge.tsx",
+    ]) {
+      expect(read(comp), `${comp} must not import lib/agency`).not.toMatch(
+        /@\/lib\/agency\//,
+      );
+    }
+    expect(companyPage).not.toMatch(/AgencyWorkersSection|getOwnAgency/);
+  });
+});
+
+describe("the three legacy agency routes still resolve to the company room", () => {
+  for (const s of STUBS) {
+    it(`${s.route} redirects to its canonical target and renders nothing`, () => {
+      // W1: stronger than the old assertion. The stub page no longer exists at
+      // all, so it cannot gate, fetch or render anything — and the URL still
+      // lands on the canonical surface via next.config.
+      expect(isCanonicallyRedirected(s.route, s.destination)).toBe(true);
+    });
+  }
+});
+
+describe("route-truth-map ratchet honoured", () => {
+  it("the trio left the route truth map entirely (W1), and the drift cap held", () => {
+    // They used to be classified REDIRECT_STUB. W1 deleted the route files, so
+    // the honest classification is "not a route at all": the map must no longer
+    // claim them, and w1-route-retirement proves the URLs still resolve.
+    for (const route of [
+      "dashboard/agency",
+      "dashboard/agency/pool",
+      "dashboard/start/agency",
+    ]) {
+      // Plain substring, not a hand-escaped RegExp: the routes are literals,
+      // and hand-rolled escaping is the exact defect CodeQL flags
+      // (js/incomplete-sanitization — backslashes are not escaped).
+      expect(truthMap).not.toContain(`"${route}":`);
+    }
+    expect(truthMap).toMatch(/toBeLessThanOrEqual\(4\)/);
+    expect(truthMap).not.toMatch(/toBeLessThanOrEqual\(7\)/);
+  });
+});
+
+describe("agency-mode copy: present (en/lt/ru), honest, no old terminology", () => {
+  for (const locale of activeLocales) {
+    const json = JSON.parse(read(`messages/${locale}.json`)) as {
+      roleDashboards?: { company?: { agencyMode?: Record<string, unknown> } };
+    };
+    const mode = json.roleDashboards?.company?.agencyMode;
+
+    it(`${locale}: agencyMode keys present`, () => {
+      expect(mode, `${locale} agencyMode missing`).toBeTruthy();
+      const m = mode as {
+        title?: string;
+        intro?: string;
+        legacyNote?: string;
+        actions?: Record<string, { label?: string; note?: string }>;
+      };
+      expect(m.title).toBeTruthy();
+      expect(m.intro).toBeTruthy();
+      expect(m.legacyNote).toBeTruthy();
+      for (const k of ["roster", "offer", "scouting"] as const) {
+        expect(m.actions?.[k]?.label, `${locale} actions.${k}.label`).toBeTruthy();
+        expect(m.actions?.[k]?.note, `${locale} actions.${k}.note`).toBeTruthy();
+      }
+    });
+
+    it(`${locale}: copy is honest — no invented features, no separate-world framing`, () => {
+      const flat = JSON.stringify(mode ?? {}).toLowerCase();
+      // No fake capability claims.
+      expect(flat).not.toMatch(/\bverified\b|\bguaranteed\b|\bpatvirtinta\b|подтвержд/);
+      expect(flat).not.toMatch(/ai match|instant/);
+      // No old separate-world terminology or legacy route pointers.
+      expect(flat).not.toMatch(/dashboard\/agency|start\/agency/);
+      expect(flat).not.toMatch(/separate agency dashboard|agentūros dashboard/);
+    });
+  }
+});

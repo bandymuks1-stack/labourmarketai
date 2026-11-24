@@ -1,0 +1,184 @@
+import "server-only";
+
+import { cache } from "react";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { getSessionProfile } from "@/lib/auth/session-profile";
+import { getWorkerCoreRow } from "@/lib/data/worker-core";
+import { createClient } from "@/lib/supabase/server";
+import {
+  ABSENCE_STATUSES,
+  ABSENCE_TYPES,
+  canReviewAbsences,
+  pendingAbsenceReviews,
+  type AbsenceStatus,
+  type AbsenceType,
+  type ManagerAbsencesData,
+  type MyAbsencesData,
+  type WorkerAbsence,
+} from "@/lib/leave/absences-model";
+
+/**
+ * Leave & absence read models (Wagon 7 slice). RLS scopes every row to the
+ * worker themselves or a real manager of that worker. Honest degradation: a
+ * missing relation (owner-gated migration unapplied) returns { applied: false }.
+ */
+
+export {
+  ABSENCE_STATUSES,
+  ABSENCE_TYPES,
+  type AbsenceStatus,
+  type AbsenceType,
+  type ManagerAbsencesData,
+  type MyAbsencesData,
+  type WorkerAbsence,
+} from "@/lib/leave/absences-model";
+
+const RELATION_NOT_FOUND = "42P01";
+const UNDEFINED_COLUMN = "42703";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+
+type Row = {
+  id: string;
+  worker_id: string;
+  absence_type: string;
+  start_date: string;
+  end_date: string;
+  half_day: boolean;
+  note: string | null;
+  status: string;
+};
+
+function toAbsence(r: Row, workerName: string | null): WorkerAbsence | null {
+  if (!(ABSENCE_TYPES as readonly string[]).includes(r.absence_type)) return null;
+  if (!(ABSENCE_STATUSES as readonly string[]).includes(r.status)) return null;
+  return {
+    id: r.id,
+    workerId: r.worker_id,
+    workerName,
+    absenceType: r.absence_type as AbsenceType,
+    startDate: r.start_date,
+    endDate: r.end_date,
+    halfDay: !!r.half_day,
+    note: r.note,
+    status: r.status as AbsenceStatus,
+  };
+}
+
+/** The signed-in worker's own absences (+ their worker_id for the request form). */
+export async function getMyAbsences(): Promise<MyAbsencesData> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { applied: false };
+
+  const workerId = await callerWorkerId();
+  if (!workerId) return { applied: true, workerId: null, absences: [] };
+
+  const res = await asAny(supabase)
+    .from("worker_absences")
+    .select("id, worker_id, absence_type, start_date, end_date, half_day, note, status")
+    .eq("worker_id", workerId)
+    .order("start_date", { ascending: false })
+    .limit(100);
+
+  if (res.error) {
+    if (res.error.code === RELATION_NOT_FOUND || res.error.code === UNDEFINED_COLUMN) {
+      return { applied: false };
+    }
+    return { applied: true, workerId, absences: [] };
+  }
+  const absences = ((res.data ?? []) as Row[])
+    .map((r) => toAbsence(r, null))
+    .filter((a): a is WorkerAbsence => a !== null);
+  return { applied: true, workerId, absences };
+}
+
+/** The caller's own worker row id, or null when they have none (an
+ *  unanswered read included — exactly as before). It is the `id` of THE
+ *  request-cached session `workers` row (`getWorkerCoreRow`, perf 2026-10-23):
+ *  the bell, the company home, the opening brief and the worker surfaces read
+ *  that row in the same render, so this no longer adds an id-only query. */
+async function callerWorkerId(): Promise<string | null> {
+  return (await getWorkerCoreRow())?.id ?? null;
+}
+
+/** Pending absence requests for workers the caller manages (RLS-scoped).
+ *  ONE read per server render per client (perf 2026-10-23: the bell, the
+ *  company home and the opening brief each read the same list) — request
+ *  deduplication only; a decision is a server action and the next render
+ *  reads again. Callers treat the result as read-only. */
+export async function getManagerPendingAbsences(): Promise<ManagerAbsencesData> {
+  return readManagerPendingAbsencesOnce(await createClient());
+}
+
+const readManagerPendingAbsencesOnce = cache(async function readManagerPendingAbsences(
+  supabase: SupabaseClient,
+): Promise<ManagerAbsencesData> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { applied: false };
+
+  // The own worker id only filters the result (nobody reviews their own time
+  // off), so it is read alongside the list, not before it.
+  const [selfWorkerId, res] = await Promise.all([
+    callerWorkerId(),
+    asAny(supabase)
+      .from("worker_absences")
+      .select("id, worker_id, absence_type, start_date, end_date, half_day, note, status, workers(display_name)")
+      .eq("status", "requested")
+      .order("start_date", { ascending: true })
+      .limit(200),
+  ]);
+
+  if (res.error) {
+    if (res.error.code === RELATION_NOT_FOUND || res.error.code === UNDEFINED_COLUMN) {
+      return { applied: false };
+    }
+    return { applied: true, pending: [] };
+  }
+  const rows = ((res.data ?? []) as (Row & { workers?: { display_name?: string | null } })[])
+    .map((r) => toAbsence(r, r.workers?.display_name ?? null))
+    .filter((a): a is WorkerAbsence => a !== null);
+  // The `self` branch of the SELECT policy hands back the caller's OWN
+  // request; nobody reviews their own time off. See pendingAbsenceReviews.
+  return { applied: true, pending: pendingAbsenceReviews(rows, selfWorkerId) };
+});
+
+/**
+ * How many absence requests are waiting on THIS person — the notification
+ * spine's count.
+ *
+ * Carries its own role gate on purpose. The absences PAGE only calls
+ * `getManagerPendingAbsences` for company/agency roles, but the spine loads
+ * every count for every role in one pass, so without this gate a worker's bell
+ * would carry a review row the page would never show them.
+ *
+ * Returns 0 — never throws — on: signed out, a non-reviewing role, and the
+ * unapplied-migration states the read model already reports as
+ * `applied: false`.
+ */
+export async function getPendingAbsenceReviewCount(): Promise<number> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return 0;
+
+  // The role comes from the request-cached session profile row (perf
+  // 2026-10-23) — the same `profiles.active_role` this used to re-read. A
+  // failed profile read is `profile: null` there, which reviews nothing:
+  // exactly what the old `.single()` read answered on an error.
+  const { profile } = await getSessionProfile();
+  if (!canReviewAbsences(profile?.active_role)) return 0;
+
+  const data = await getManagerPendingAbsences();
+  return data.applied ? data.pending.length : 0;
+}

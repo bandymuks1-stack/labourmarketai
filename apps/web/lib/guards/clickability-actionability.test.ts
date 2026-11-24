@@ -1,0 +1,178 @@
+import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { activeLocales } from "@/lib/i18n/config";
+
+/**
+ * Clickability / actionability guard (owner browser-smoke repair,
+ * 2026-07-05 — "Daugiau niekas nepasispaudžia").
+ *
+ * The one rule, pinned: if it looks clickable it must be clickable; if it is
+ * not clickable it must look like plain information; if an action is
+ * unavailable, the UI explains why; every numeric card either navigates to
+ * what it counts or sits under an explicit monitoring-only note.
+ */
+const ROOT = join(__dirname, "..", "..");
+const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
+
+// NOTE (dedup v1): components/app/work-card.tsx was removed; its worker
+// stat-tile / hover / tap-target assertions below were dropped with it. The
+// shared worker-player-card + missing-chip still carry the same contract.
+const playerCard = read("components/app/worker-player-card.tsx");
+const adminPage = read("app/[locale]/dashboard/admin/page.tsx");
+const adminReviewLib = read("lib/buyer/admin-request-review.ts");
+const launchBoard = read("components/app/admin-launch-board.tsx");
+const companyPage = read("app/[locale]/dashboard/company/page.tsx");
+const companyNext = read("components/app/company-next-actions.tsx");
+const startCompany = read("app/[locale]/dashboard/start/company/page.tsx");
+const brigades = read("components/app/team-brigades-panel.tsx");
+const readback = read("components/app/demand-requests-readback.tsx");
+const mapShell = read("components/app/market-map-shell.tsx");
+const mapPage = read("app/[locale]/dashboard/market-map/page.tsx");
+const mapControls = read("components/app/market-map/map-location-controls.tsx");
+const notifPanel = read("components/app/notification-panel.tsx");
+const evidenceStrip = read("components/app/evidence-status-strip.tsx");
+const readinessPanel = read("components/app/worker-readiness-panel.tsx");
+
+describe("1+2. counters navigate or are covered by monitoring-only notes", () => {
+  it("worker player-card stat tiles are Links with real targets", () => {
+    expect(playerCard).toMatch(/href="\/dashboard\/profile#capabilities"/);
+    expect(playerCard).toMatch(/href="\/dashboard\/profile#candidate-skills"/);
+    expect(playerCard).toMatch(/href="\/dashboard\/journal#journal-entries"/);
+    expect(playerCard).toMatch(/href="\/dashboard\/communication"/);
+    // The Stat renderer itself is a Link (rule A: real element + focus state).
+    expect(playerCard).toMatch(/function Stat\([\s\S]{0,700}<Link/);
+  });
+  it("admin attention band: every counter IS a queue door; non-queue numbers are a sentence, not tiles", () => {
+    // Owner directive 2026-09-16 §8/§10: no monitoring-only prose — a number
+    // that leads nowhere is not rendered as a tile at all.
+    expect(adminPage).toMatch(/href: "#request-review"/);
+    expect(adminPage).toMatch(/dashboard\/admin\/need-structuring/);
+    expect(adminPage).not.toMatch(/monitoringNote/);
+    expect(adminPage).toMatch(/data-testid="admin-platform-summary"/);
+    expect(adminPage).toMatch(/data-testid="admin-drafts-summary"/);
+    expect(adminPage).toMatch(/id="request-review"/);
+  });
+  it("launch signal tiles carry the monitoring-only note", () => {
+    expect(launchBoard).toMatch(/data-testid="admin-launch-signals-monitoring-note"/);
+  });
+  it("organization decisions navigate to their doors; people counts are one sentence on the People door", () => {
+    // Re-anchored 2026-09-16: the ops KPI tiles became the People door's
+    // summary line; the decisions strip on Dabar links each queue's door.
+    expect(companyPage).toMatch(/href: `\/\$\{locale\}\/dashboard\/inbox`/);
+    expect(companyPage).toMatch(/dashboard\/company\/people#company-invitations/);
+    expect(read("app/[locale]/dashboard/company/people/page.tsx")).toMatch(
+      /data-testid="company-people-summary"/,
+    );
+  });
+});
+
+describe("3. readiness incomplete rows act", () => {
+  // The `id="work-card"` anchor lived on the second dashboard, deleted by
+  // W3 Package 4 — the editor's open-event contract stays pinned by the
+  // click-target guard (work-card-missing-chip → work-card-editor).
+  it("worker readiness panel unmet rows are Links (pre-existing model, pinned)", () => {
+    expect(readinessPanel).toMatch(/<Link[\s\S]{0,400}ArrowRight/);
+  });
+});
+
+describe("4. admin action queue has a click path (P0)", () => {
+  it("review rows fetch profile_id and link to the inspect page", () => {
+    expect(adminReviewLib).toMatch(/select\("id, title, need_summary, status, created_at, profile_id"\)/);
+    expect(adminReviewLib).toMatch(/readonly profileId: string;/);
+    expect(adminPage).toMatch(/admin-request-review-open-/);
+    expect(adminPage).toMatch(/\/dashboard\/admin\/users\/\$\{r\.profileId\}/);
+  });
+});
+
+describe("5+6. company identity and create-vs-edit", () => {
+  it("company name opens the identity readback", () => {
+    expect(companyNext).toMatch(/data-testid="company-name-link"/);
+    expect(companyNext).toMatch(/href="\/dashboard\/start\/company"/);
+  });
+  it("setup heading says CREATE for new, EDIT for existing", () => {
+    // `firstSetup` (2026-09-04): an unnamed onboarding shell is EDITED row-wise
+    // but is a CREATE for the person — the heading must say so.
+    expect(startCompany).toMatch(
+      /company && !firstSetup \? t\("formTitleEdit"\) : t\("formTitleCreate"\)/,
+    );
+    for (const loc of activeLocales) {
+      const setup = JSON.parse(read(`messages/${loc}.json`)).roleDashboards
+        .company.setup;
+      expect(typeof setup.formTitleCreate).toBe("string");
+      expect(typeof setup.formTitleEdit).toBe("string");
+      expect(setup.formTitleCreate).not.toBe(setup.formTitleEdit);
+    }
+  });
+});
+
+describe("7. waiting-review chip explains itself", () => {
+  it("active awaiting_confirmation links to the evidence-report explanation", () => {
+    expect(evidenceStrip).toMatch(/data-testid="evidence-awaiting-review-link"/);
+    expect(evidenceStrip).toMatch(/href="\/dashboard\/reports\/evidence"/);
+  });
+});
+
+describe("8. map surfaces", () => {
+  it("no fake filter pills — scope note is plain text", () => {
+    const filters = mapShell.slice(
+      mapShell.indexOf('data-testid="market-map-filters"'),
+      mapShell.indexOf('data-testid="market-map-filters"') + 900,
+    );
+    expect(filters).not.toMatch(/rounded-full/);
+  });
+  it("the location + radius controls of the one map keep their anchor", () => {
+    // The incomplete-layer legend rows (and their fix links) were removed with
+    // the layers catalogue; the controls remain addressable on the map page.
+    expect(mapControls).toMatch(/id="market-map-base"/);
+    expect(mapPage).toMatch(/<WorldDiscovery\b/);
+  });
+  it("my-signals place chips are neutral data, not filter-styled", () => {
+    const sig = read("components/app/market-map-my-signals.tsx");
+    expect(sig).not.toMatch(/rounded-full border border-brand-blue\/40 bg-brand-blue\/5 px-2 py-0\.5 text-xs text-brand-blue/);
+  });
+});
+
+describe("9. notifications honest", () => {
+  it("raw type enum never rendered — mapped with neutral fallback", () => {
+    expect(notifPanel).not.toMatch(/>\{n\.type\}</);
+    expect(notifPanel).toMatch(/tTypes\("generic"\)/);
+    for (const loc of activeLocales) {
+      const g = JSON.parse(read(`messages/${loc}.json`)).auth.notifications
+        .types?.generic;
+      expect(typeof g === "string" && g.length > 0, `${loc} generic`).toBe(true);
+    }
+  });
+});
+
+describe("B. passive elements look passive (no hover-glow on dead cards)", () => {
+  it("player-card sections dropped the hover lift", () => {
+    expect(playerCard).not.toMatch(/glow-hover/);
+    expect(playerCard).not.toMatch(/hover:shadow-card-hover/);
+  });
+  it("brigade member names are plain text, not button-pills", () => {
+    const seg = brigades.slice(
+      brigades.indexOf("team.members.map"),
+      brigades.indexOf("team.members.map") + 400,
+    );
+    expect(seg).not.toMatch(/rounded-full border/);
+  });
+  it("readback never prints a raw status enum", () => {
+    expect(readback).toMatch(/labels\.status\[r\.status\] \?\? labels\.statusOther/);
+    expect(readback).not.toMatch(/\?\? r\.status\}/);
+  });
+});
+
+describe("10+11. tap targets and no payment work", () => {
+  it("new interactive tiles/chips carry mobile-safe min-height", () => {
+    expect(playerCard).toMatch(/min-h-11 flex-col gap-0\.5 rounded-md/);
+    // The missing-dim chip moved into its own shared component (audit PR4).
+    const missingChip = read("components/app/work-card-missing-chip.tsx");
+    expect(missingChip).toMatch(/min-h-11 items-center gap-1 rounded-md border border-brand-orange/);
+  });
+  it("no payment strings entered any touched file", () => {
+    for (const src of [playerCard, adminPage, companyPage, mapShell, notifPanel]) {
+      expect(src).not.toMatch(/stripe|checkout|payment_intent/i);
+    }
+  });
+});

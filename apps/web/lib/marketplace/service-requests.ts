@@ -1,0 +1,402 @@
+"use server";
+
+import "server-only";
+
+import { cache } from "react";
+import type { SupabaseClient } from "@supabase/supabase-js";
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import { hideQaMarked, isQaViewer } from "@/lib/marketplace/qa-marked";
+import {
+  DISCOVERY_READ_LIMIT,
+  RESPOND_DECISIONS,
+  computeNewCounts,
+  normalizeDiscoveryCountry,
+  type DiscoverableOfferingRow,
+  type DiscoveryListResult,
+  type IncomingListResult,
+  type IncomingRequestRow,
+  type OutgoingListResult,
+  type OutgoingRequestRow,
+  type OutgoingRequestSummary,
+  type RequestMutateResult,
+  rpcOutcome,
+  type RespondDecision,
+  type ServiceRequestsNewCounts,
+} from "@/lib/marketplace/service-requests-shared";
+
+/**
+ * P0 Marketplace — service-offering request loop (Phase 1) server actions.
+ *
+ * Discovery is authenticated + active-only (RLS does the gating). Writes go only
+ * through the three SECURITY DEFINER RPCs, which re-check live identity + scope.
+ * No payment, no ratings, no fake rows.
+ *
+ * HONEST DEGRADATION: the migration is owner-applied (RED). Until applied, the
+ * table/policy/RPCs are absent — every function returns `needs-migration` and the
+ * UI shows a calm "not available yet" state, never an error, never a fake row.
+ */
+
+const ABSENT = new Set(["42P01", "42883", "PGRST202", "PGRST204", "PGRST205"]);
+const UNIQUE_VIOLATION = "23505";
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+function isAbsent(error: { code?: string } | null): boolean {
+  return !!error?.code && ABSENT.has(error.code);
+}
+
+async function uid(): Promise<{
+  supabase: SupabaseClient;
+  userId: string;
+  /** The viewer is a documented QA identity (may see QA-labelled rows). */
+  qaViewer: boolean;
+} | null> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  return { supabase, userId: user.id, qaViewer: isQaViewer(user) };
+}
+
+function offeringTitle(r: Record<string, unknown>): string | null {
+  const o = r.service_offerings as { title?: unknown } | null | undefined;
+  return o && typeof o.title === "string" ? o.title : null;
+}
+
+/**
+ * Minimum-safe requester identity for the provider inbox: maps request id →
+ * buyer display name, via the provider-scoped `requester_identities_for_provider`
+ * SECURITY DEFINER RPC. Rollout-safe by design — the RPC re-checks provider
+ * scope, and if it is absent (not applied yet) or errors, this returns an EMPTY
+ * map so the inbox still renders without names (never throws, never a fake name).
+ * Only `display_name` ever crosses this boundary.
+ */
+async function requesterDisplayNames(
+  ctx: { supabase: SupabaseClient; userId: string },
+  requestIds: string[],
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (requestIds.length === 0) return out;
+  const { data, error } = await asAny(ctx.supabase).rpc("requester_identities_for_provider", {
+    p_request_ids: requestIds,
+  });
+  if (error || !Array.isArray(data)) return out;
+  for (const row of data as Record<string, unknown>[]) {
+    const id = typeof row.request_id === "string" ? row.request_id : null;
+    const name = typeof row.display_name === "string" ? row.display_name.trim() : "";
+    if (id && name) out.set(id, name);
+  }
+  return out;
+}
+
+/**
+ * Active offerings the caller can DISCOVER — excludes the caller's own.
+ * BOUNDED (DISCOVERY_READ_LIMIT, newest first) and optionally narrowed by an
+ * exact country code (G-E1, window 6) — the only server-side filter, because
+ * it is an equality an index can serve; category is matched in memory over
+ * the page (see `filterByCategory`).
+ */
+export async function listDiscoverableOfferings(
+  filter: { country?: string | null } = {},
+): Promise<DiscoveryListResult> {
+  const ctx = await uid();
+  if (!ctx) return { kind: "not-authed" };
+  const country = normalizeDiscoveryCountry(filter.country);
+  let query = asAny(ctx.supabase)
+    .from("service_offerings")
+    .select(
+      "id, title, description, category_slug, location_country, remote, rate_text, created_at",
+    )
+    .eq("status", "active")
+    .neq("provider_id", ctx.userId);
+  if (country) query = query.eq("location_country", country);
+  const { data, error } = await query
+    .order("created_at", { ascending: false })
+    .limit(DISCOVERY_READ_LIMIT);
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    return { kind: "unavailable" };
+  }
+  const rows: DiscoverableOfferingRow[] = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+    id: String(r.id),
+    title: String(r.title ?? ""),
+    description: (r.description as string | null) ?? null,
+    categorySlug: (r.category_slug as string | null) ?? null,
+    locationCountry: (r.location_country as string | null) ?? null,
+    remote: r.remote === true,
+    rateText: (r.rate_text as string | null) ?? null,
+    createdAt: String(r.created_at ?? ""),
+  }));
+  // QA-labelled rows never reach real people (owner order 2026-10-01): discovery
+  // is open to every authenticated user, so a QA-labelled service published for a
+  // production proof was visible to anyone. Only a documented QA viewer sees them.
+  return {
+    kind: "ok",
+    rows: hideQaMarked(rows, ctx.qaViewer, (r) => [r.title, r.description]),
+  };
+}
+
+/** The caller's own outgoing requests (buyer status view). */
+async function readOutgoingRequests(): Promise<OutgoingListResult> {
+  const ctx = await uid();
+  if (!ctx) return { kind: "not-authed" };
+  const { data, error } = await asAny(ctx.supabase)
+    .from("service_offering_requests")
+    .select(
+      "id, offering_id, status, message, response_note, responded_at, created_at, service_offerings(title)",
+    )
+    .eq("buyer_id", ctx.userId)
+    .order("created_at", { ascending: false });
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    console.error("[service-requests] outgoing read failed:", error.code ?? "unknown");
+    return { kind: "error" };
+  }
+  const rows: OutgoingRequestRow[] = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+    id: String(r.id),
+    offeringId: String(r.offering_id ?? ""),
+    offeringTitle: offeringTitle(r),
+    status: (r.status as OutgoingRequestRow["status"]) ?? "sent",
+    message: (r.message as string | null) ?? null,
+    responseNote: (r.response_note as string | null) ?? null,
+    respondedAt: (r.responded_at as string | null) ?? null,
+    createdAt: String(r.created_at ?? ""),
+  }));
+  return { kind: "ok", rows };
+}
+
+/** Requests addressed to the caller's offerings (provider inbox). */
+async function readIncomingRequests(): Promise<IncomingListResult> {
+  const ctx = await uid();
+  if (!ctx) return { kind: "not-authed" };
+  const { data, error } = await asAny(ctx.supabase)
+    .from("service_offering_requests")
+    .select(
+      "id, offering_id, status, message, response_note, responded_at, created_at, service_offerings(title)",
+    )
+    .eq("provider_id", ctx.userId)
+    .order("created_at", { ascending: false });
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    console.error("[service-requests] incoming read failed:", error.code ?? "unknown");
+    return { kind: "error" };
+  }
+  const baseRows = ((data ?? []) as Record<string, unknown>[]).map((r) => ({
+    id: String(r.id),
+    offeringId: String(r.offering_id ?? ""),
+    offeringTitle: offeringTitle(r),
+    status: (r.status as IncomingRequestRow["status"]) ?? "sent",
+    message: (r.message as string | null) ?? null,
+    responseNote: (r.response_note as string | null) ?? null,
+    respondedAt: (r.responded_at as string | null) ?? null,
+    createdAt: String(r.created_at ?? ""),
+  }));
+
+  // Minimum-safe requester identity (display name only), via the provider-scoped
+  // SECURITY DEFINER RPC. Rollout-safe: if the RPC is absent or errors, we leave
+  // every name null and still return the inbox — never a regression, never an
+  // error. The RPC re-checks provider scope, so a caller only gets names for
+  // their OWN requests.
+  const names = await requesterDisplayNames(
+    ctx,
+    baseRows.map((r) => r.id),
+  );
+  const rows: IncomingRequestRow[] = baseRows.map((r) => ({
+    ...r,
+    requesterDisplayName: names.get(r.id) ?? null,
+  }));
+  return { kind: "ok", rows };
+}
+
+/** Buyer requests an active offering (via the SECURITY DEFINER RPC). */
+export async function requestServiceOffering(
+  offeringId: string,
+  message?: string | null,
+): Promise<RequestMutateResult> {
+  const ctx = await uid();
+  if (!ctx) return { kind: "not-authed" };
+  if (!offeringId) return { kind: "invalid", field: "offeringId" };
+  const cleanMsg = typeof message === "string" ? message.trim().slice(0, 2000) || null : null;
+
+  const { data, error } = await asAny(ctx.supabase).rpc("request_service_offering", {
+    p_offering_id: offeringId,
+    p_message: cleanMsg,
+  });
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    if (error.code === UNIQUE_VIOLATION) return { kind: "duplicate" };
+    // The RPC raises 'offering_not_active' when the offering was deactivated —
+    // an honest, permanent "no", not a transient failure (repeat actions, PR 6b).
+    if (/offering_not_active/.test(error.message ?? "")) return { kind: "inactive" };
+    return { kind: "error", message: error.message ?? "unknown" };
+  }
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
+  return { kind: "ok", id: typeof data === "string" ? data : undefined };
+}
+
+/** Provider accepts/declines an incoming request (via the RPC). */
+export async function respondToRequest(
+  id: string,
+  decision: RespondDecision,
+  note?: string | null,
+): Promise<RequestMutateResult> {
+  const ctx = await uid();
+  if (!ctx) return { kind: "not-authed" };
+  if (!id) return { kind: "invalid", field: "id" };
+  if (!RESPOND_DECISIONS.includes(decision)) return { kind: "invalid", field: "decision" };
+  const cleanNote = typeof note === "string" ? note.trim().slice(0, 2000) || null : null;
+
+  const { data, error } = await asAny(ctx.supabase).rpc("respond_service_offering_request", {
+    p_id: id,
+    p_decision: decision,
+    p_note: cleanNote,
+  });
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message ?? "unknown" };
+  }
+  // The RPC reports a refusal as a returned status ('not_provider', 'not_found',
+  // 'not_pending', ...), not as an exception. Only 'ok' is a success - anything
+  // else must never be shown to the actor as a completed action.
+  const outcome = rpcOutcome(data);
+  if (outcome !== "ok") return { kind: "error", message: outcome };
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
+  return { kind: "ok", detail: outcome };
+}
+
+/** Buyer withdraws their own pending request (via the RPC). */
+export async function withdrawRequest(id: string): Promise<RequestMutateResult> {
+  const ctx = await uid();
+  if (!ctx) return { kind: "not-authed" };
+  if (!id) return { kind: "invalid", field: "id" };
+
+  const { data, error } = await asAny(ctx.supabase).rpc("withdraw_service_offering_request", {
+    p_id: id,
+  });
+  if (error) {
+    if (isAbsent(error)) return { kind: "needs-migration" };
+    return { kind: "error", message: error.message ?? "unknown" };
+  }
+  // The RPC reports a refusal as a returned status ('not_provider', 'not_found',
+  // 'not_pending', ...), not as an exception. Only 'ok' is a success - anything
+  // else must never be shown to the actor as a completed action.
+  const outcome = rpcOutcome(data);
+  if (outcome !== "ok") return { kind: "error", message: outcome };
+  revalidatePath("/[locale]/dashboard/service-requests", "page");
+  return { kind: "ok", detail: outcome };
+}
+
+/**
+ * Count of OPEN incoming requests ('sent') addressed to the caller's offerings —
+ * the dashboard's provider next-action signal. Returns 0 on any non-ok state
+ * (not-authed / needs-migration / read failure), so the dashboard simply shows
+ * no badge rather than an error or a fake count.
+ */
+export async function getPendingIncomingRequestCount(): Promise<number> {
+  const result = await listIncomingRequests();
+  if (result.kind !== "ok") return 0;
+  return result.rows.filter((r) => r.status === "sent").length;
+}
+
+/**
+ * Real status counts for the caller's OWN outgoing requests — the buyer's
+ * dashboard next-action signal. Returns all-zero on any non-ok state
+ * (not-authed / needs-migration / read failure), so the dashboard shows no card
+ * rather than an error or a fabricated count. 'withdrawn' is the buyer's own
+ * closed intent, so it is intentionally not surfaced as a next action.
+ */
+export async function getOutgoingRequestSummary(): Promise<OutgoingRequestSummary> {
+  const result = await listOutgoingRequests();
+  if (result.kind !== "ok") return { sent: 0, accepted: 0, declined: 0 };
+  const rows = result.rows;
+  return {
+    sent: rows.filter((r) => r.status === "sent").length,
+    accepted: rows.filter((r) => r.status === "accepted").length,
+    declined: rows.filter((r) => r.status === "declined").length,
+  };
+}
+
+/**
+ * The caller's own "last opened the request loop" timestamp, from the dedicated
+ * one-row-per-user seen table. Rollout-safe: returns null when the table is
+ * absent (not applied yet), the row does not exist (never opened), or on any
+ * read error — so "new" simply resolves to 0, never an error, never fabricated.
+ */
+export async function getServiceRequestsSeenAt(): Promise<string | null> {
+  const ctx = await uid();
+  if (!ctx) return null;
+  const { data, error } = await asAny(ctx.supabase)
+    .from("service_offering_requests_seen")
+    .select("seen_at")
+    .eq("user_id", ctx.userId)
+    .maybeSingle();
+  if (error || !data) return null;
+  return typeof data.seen_at === "string" ? data.seen_at : null;
+}
+
+/**
+ * "New since last seen" counts for the dashboard markers. Computed app-side from
+ * data already fetched by the loop:
+ *   providerNew = incoming 'sent' requests CREATED after my last visit (a buyer
+ *                 acted) — never my own respond/withdraw.
+ *   buyerNew    = outgoing requests a provider RESPONDED to (accepted/declined)
+ *                 after my last visit — never my own request.
+ * seen_at null (never opened) → { 0, 0 }. Rollout-safe end to end.
+ *
+ * `cache()`-wrapped (Wagon 2 — nav performance): getSpineCounts() AND the
+ * dashboard overview both call this per navigation; request-scoped dedup
+ * halves the read. Dedup only, never time-based caching — a new navigation
+ * always recomputes.
+ */
+export const getServiceRequestsNewCounts = cache(
+  async (): Promise<ServiceRequestsNewCounts> => {
+    const seenAt = await getServiceRequestsSeenAt();
+    if (!seenAt) return { providerNew: 0, buyerNew: 0 };
+    const [inc, out] = await Promise.all([listIncomingRequests(), listOutgoingRequests()]);
+    return computeNewCounts(
+      seenAt,
+      inc.kind === "ok" ? inc.rows : [],
+      out.kind === "ok" ? out.rows : [],
+    );
+  },
+);
+
+/**
+ * Mark the request loop as seen for the caller (upsert their single seen row via
+ * the SECURITY DEFINER RPC). Rollout-safe: no-op when unauthenticated or the RPC
+ * is absent/errors — never throws.
+ */
+export async function markServiceRequestsSeen(): Promise<void> {
+  const ctx = await uid();
+  if (!ctx) return;
+  try {
+    await asAny(ctx.supabase).rpc("mark_service_requests_seen");
+  } catch {
+    // rollout-safe: absent RPC / transient error → no-op
+  }
+}
+
+/**
+ * Request-scoped (React `cache`), the same pattern as `listMyBookings`: the
+ * notification spine's pending count and its "new since seen" count both read
+ * the provider inbox on EVERY dashboard page, and each read is two round trips
+ * (the rows + the requester-identity RPC). Production 2026-10-15: the pooled
+ * PostgREST connections queue, so a duplicate read costs every other read on
+ * the page. A new navigation always re-reads.
+ */
+const readIncomingOnce = cache(readIncomingRequests);
+const readOutgoingOnce = cache(readOutgoingRequests);
+
+/** The caller's own outgoing requests (buyer status view). */
+export async function listOutgoingRequests(): Promise<OutgoingListResult> {
+  return readOutgoingOnce();
+}
+
+/** Requests addressed to the caller's offerings (provider inbox). */
+export async function listIncomingRequests(): Promise<IncomingListResult> {
+  return readIncomingOnce();
+}

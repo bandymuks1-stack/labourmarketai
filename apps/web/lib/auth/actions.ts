@@ -1,0 +1,488 @@
+"use server";
+
+import "server-only";
+import { redirect } from "next/navigation";
+import { revalidatePath } from "next/cache";
+import { createClient } from "@/lib/supabase/server";
+import { activeLocales } from "@/lib/i18n/config";
+import { getSafeReturnPath, isSafeReturnPath } from "@/lib/auth/redirect";
+import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
+import { acceptInvitationByIdAction } from "@/lib/invitations/actions";
+import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
+import {
+  parseSelfDeclaredProfessions,
+  recordableInputLanguage,
+} from "@/lib/worker/self-declared-profession";
+import { LIVE_ROLE_IDS, baseIdentityForRole, type LiveRoleId } from "@/lib/config/roles";
+import { setActiveRoleCore } from "@/lib/auth/active-role-core";
+import { clearActiveOrganization } from "@/lib/company/organization-actions";
+
+/**
+ * THE PARTICIPATION MODE A PERSON ONBOARDS INTO — one of FOUR concepts this
+ * codebase keeps deliberately apart. See `lib/guards/actor-role-plan-boundary.test.ts`.
+ *
+ *   1. ACTOR TYPE          what an actor IS (human, ai_agent, organization).
+ *                          `lib/product-gate/entity-model.ts` — an OPEN
+ *                          registry that already declares `ai_agent`.
+ *   2. PARTICIPATION MODE  what a person signs up to DO — this type, and
+ *                          `profile_roles.role`.
+ *   3. PERMISSION ROLE     authority INSIDE an organization: `MembershipRole`
+ *                          / `GovernanceRole` (owner, admin, manager,
+ *                          external_manager, member), `relationship_slug`,
+ *                          `confirmer_role`.
+ *   4. PLAN / ENTITLEMENT  what an actor may spend: `usage_cost_events`
+ *                          (`plan_key`, `payer`, `feature_code`).
+ *
+ * An AI agent is concept 1. It must NEVER be added here: an AI agent that
+ * does work holds the `worker` participation mode like anyone else, while
+ * being `actor_type = 'ai_agent'`. Collapsing the two would make "what you
+ * are" and "what you do" the same field, and there would be no way back.
+ *
+ * DERIVED, NOT RE-DECLARED. `lib/config/roles.ts` is the catalogue — it
+ * already carries availability, labels, setup routes and forward-looking ids
+ * (`freelancer`, `team_lead`, `service_provider`), and its own header says
+ * adding a role is a one-row change there. This union was a second, hand-kept
+ * copy of the same four ids, and its comment in that file even said so
+ * ("matches the `Role` union elsewhere"). One vocabulary, one source.
+ *
+ * NOT the set of roles a profile may HOLD. Production `profile_roles` also
+ * contains `admin`, which nobody onboards into — see `HeldProfileRole` in
+ * `lib/auth/profile-roles.ts`.
+ */
+export type Role = LiveRoleId;
+
+import {
+  asksForCurrentEducation,
+  parseFirstRunIntents,
+} from "@/lib/onboarding/first-run-intent";
+import { validateEducationInput } from "@/lib/worker/worker-education-model";
+
+const ONBOARDING_ROLES = new Set<Role>(LIVE_ROLE_IDS);
+
+/** CANONICAL PRIORITY, not merely the list: the first role in this order
+ *  becomes the primary (active) workspace. Kept explicit because the ORDER is
+ *  load-bearing and a reader must be able to see it; a guard asserts it stays
+ *  a permutation of `LIVE_ROLE_IDS`, so it cannot drift out of the set. */
+const ROLE_ORDER: Role[] = ["worker", "company", "agency", "customer"];
+
+/** Finish the first onboarding — person-first, multi-role. `roles` is a
+ *  comma-separated list (1–4); the first in canonical order becomes the
+ *  primary (active workspace) via `complete_onboarding`, and each extra is
+ *  added via `add_role`. Both RPCs upsert `profile_roles` + the role's entity
+ *  row (`workers` | `companies` | `agencies`) idempotently (0006/0007).
+ *  Falls back to a single `role` field for backward compatibility. */
+export async function completeOnboarding(formData: FormData): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  const rawRoles = String(formData.get("roles") ?? formData.get("role") ?? "");
+  let roles = [
+    ...new Set(rawRoles.split(",").map((r) => r.trim()).filter(Boolean)),
+  ] as Role[];
+  if (roles.length === 0 || roles.some((r) => !ONBOARDING_ROLES.has(r))) {
+    throw new Error(`Invalid onboarding roles: ${rawRoles}`);
+  }
+  // THE INVITATION SETTLES THE ROLE (2026-10-27). When the server can prove
+  // from the person's own invitation that they were invited as a worker — the
+  // same decision that made the page skip the role question — the role is
+  // `worker`, whatever the submitted form says.
+  const rawNext = formData.get("next");
+  const invited = await resolveInvitedWorkerContext(
+    typeof rawNext === "string" && isSafeReturnPath(rawNext) ? rawNext : null,
+  );
+  if (invited.workerImplied) roles = ["worker"];
+  const primary = ROLE_ORDER.find((r) => roles.includes(r)) as Role;
+  const extras = roles.filter((r) => r !== primary);
+
+  const display_name = String(formData.get("display_name") ?? "").trim();
+  const country = String(formData.get("country") ?? "").trim();
+  // WHAT WORK THIS PERSON DOES. Closed set — every value must be one of the
+  // slugs the platform's own registry holds, so a hand-crafted POST cannot
+  // record a profession nothing else in the product understands.
+  //
+  // A LIST since the owner direction of 2026-09-27: one person, several
+  // professions. `profession_slugs` carries all of them in the order the
+  // person named them; `profession_slug` remains the PRIMARY and is what
+  // `complete_onboarding` writes, so an older client sending only that field
+  // behaves exactly as before. Bounded by construction: the registry is a
+  // closed 49-slug set and the list is deduped, so there is nothing unbounded
+  // to insert however the form is posted.
+  const professionSlugList = [
+    ...new Set(
+      [
+        String(formData.get("profession_slug") ?? ""),
+        ...String(formData.get("profession_slugs") ?? "").split(","),
+      ]
+        .map((s) => s.trim())
+        .filter((s) => s.length > 0 && PROFESSION_SLUGS.includes(s)),
+    ),
+  ];
+  const professionSlug = professionSlugList[0] ?? null;
+  // THE PERSON'S OWN WORDS for what they do — a profession the 49-row registry
+  // does not carry (owner direction 2026-09-27: the classifier may suggest, it
+  // may not be the list of permitted human answers). Stored verbatim, never
+  // matched against the catalogue and never corrected.
+  const professionLabels = parseSelfDeclaredProfessions(
+    formData.get("profession_labels") as string | null,
+  );
+  // The language they wrote in: the REAL locale of the submitting session,
+  // never detected from the text. Read from the RAW form field rather than the
+  // `locale` variable below, because that one falls back to "lt" — a fallback
+  // that is right for the profile row and would be a fabricated language here.
+  const professionLanguage = recordableInputLanguage(
+    formData.get("locale") as string | null,
+  );
+  const locale = String(formData.get("locale") ?? "lt");
+  // Universal first-run router: what the person came to do. Optional — a
+  // legacy submit without it behaves exactly as before.
+  const intents = parseFirstRunIntents(String(formData.get("intents") ?? ""));
+
+  // First-login bootstrap resilience (auth-owner-access-bootstrap-p0): ensure
+  // the caller's OWN profile shell exists before the RPC. handle_new_user
+  // (migration 0001) normally creates it on signup, but if that trigger did not
+  // run for a Google OAuth user, complete_onboarding's UPDATE would affect zero
+  // rows and the user would loop back to /onboarding forever. Idempotent +
+  // RLS-safe (profiles_insert allows id = auth.uid(); ON CONFLICT DO NOTHING
+  // never overwrites an existing row). No DB migration, no fake data — only the
+  // user's own shell, exactly what the trigger provides.
+  const { error: ensureProfileErr } = await supabase
+    .from("profiles")
+    .upsert(
+      { id: user.id, email: user.email ?? null, locale },
+      { onConflict: "id", ignoreDuplicates: true },
+    );
+  if (ensureProfileErr) {
+    console.error("[completeOnboarding] ensure profile row failed", {
+      code: ensureProfileErr.code,
+      message: ensureProfileErr.message,
+    });
+  }
+
+  // Legacy submits (no first-run intents) seed a draft company/agency name
+  // from role_data.name. The first-run router NEVER does: `display_name` is
+  // the PERSON's name there, and "<person> UAB" is a legal entity nobody
+  // stated (doctrine §7 — no fabricated data). The company row stays an
+  // unnamed shell for the few seconds until the canonical setup form, which
+  // onboarding opens next, gives it its real identity.
+  const roleData = (r: Role): Record<string, string> =>
+    (r === "company" || r === "agency") && display_name && intents.length === 0
+      ? { name: `${display_name} UAB` }
+      : {};
+
+  // The RPC takes the registry ROW id, not the slug — resolve it here (same
+  // idiom as `lib/journal/actions.ts`) so the client never handles a uuid and
+  // an unknown slug simply yields null rather than a failed onboarding.
+  //
+  // WHY THIS MATTERS MORE THAN IT LOOKS. `complete_onboarding` has accepted
+  // `p_profession_id` since the M1 C-scope migration and writes the primary
+  // `worker_professions` row from it — the client had never sent it. Measured
+  // in production 2026-08-19: 36 workers, 26 with a country (onboarding asks),
+  // 4 with a profession (onboarding did not). Everything downstream — the
+  // match engine's subject, the profile-directed external ad pool, the CV's
+  // work direction — reads that one field, so 32 of 36 people could not be
+  // matched to anything, however good the engine was.
+  //
+  // ONE read for the whole list (the person's order preserved): the primary
+  // goes into the RPC as before, and any further profession is written after
+  // it, into the SAME `worker_professions` table that has carried a worker's
+  // additional directions since 0008 — no new table, no second write path.
+  let professionId: string | null = null;
+  let extraProfessionIds: string[] = [];
+  if (primary === "worker" && professionSlug) {
+    const { data: profRows } = await supabase
+      .from("professions")
+      .select("id, slug")
+      .in("slug", professionSlugList)
+      .eq("is_active", true);
+    const idBySlug = new Map(
+      ((profRows ?? []) as { id: string; slug: string }[]).map((r) => [
+        r.slug,
+        r.id,
+      ]),
+    );
+    professionId = idBySlug.get(professionSlug) ?? null;
+    extraProfessionIds = professionSlugList
+      .slice(1)
+      .map((slug) => idBySlug.get(slug))
+      .filter((id): id is string => typeof id === "string");
+  }
+
+  const { error } = await supabase.rpc("complete_onboarding", {
+    p_role: primary,
+    // RPC nullif()s empty strings; pass the (possibly empty) string rather
+    // than null to match the generated arg types.
+    p_display_name: display_name,
+    p_country: country,
+    p_role_data: roleData(primary),
+    ...(professionId ? { p_profession_id: professionId } : {}),
+  });
+  if (error) {
+    console.error("[completeOnboarding] RPC failed", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+    throw new Error(`complete_onboarding RPC failed: ${error.message}`);
+  }
+
+  // THE ACCOUNT LANGUAGE IS THE ONE THE PERSON ONBOARDED IN (audit 2026-10-20).
+  // The shell upsert above never overwrites (ignoreDuplicates), the signup
+  // trigger defaults to 'lt' when OAuth carries no locale, and
+  // complete_onboarding does not write it — so a Google/LinkedIn/Facebook
+  // person who onboarded on /en was later redirected to /lt and pinned there
+  // by the account-preference rule (lib/auth/locale-preference.ts). Only an
+  // ACTIVE locale from the form is written; the person's own row (RLS).
+  const onboardedLocale = String(formData.get("locale") ?? "");
+  if ((activeLocales as readonly string[]).includes(onboardedLocale)) {
+    const { error: localeErr } = await supabase
+      .from("profiles")
+      .update({ locale: onboardedLocale })
+      .eq("id", user.id);
+    if (localeErr) console.error("[completeOnboarding] account language write failed", { code: localeErr.code });
+  }
+
+  // THE FURTHER PROFESSIONS the person named. The RPC wrote the primary; these
+  // are the equal, non-primary rows — the same shape `addWorkerDirection` (the
+  // profile's own "add a work direction") writes, under the same
+  // `worker_professions_write` policy (`owns_worker`), so nothing new is
+  // granted and nothing else in the product has to learn a new place to look.
+  //
+  // `ignoreDuplicates` covers the re-submit and the primary the RPC just
+  // inserted. A failure here is logged, not fatal: the person is onboarded and
+  // their primary profession is recorded — losing the signup over a second
+  // direction they can add on the profile would be the worse outcome.
+  if (
+    primary === "worker" &&
+    (extraProfessionIds.length > 0 || professionLabels.length > 0)
+  ) {
+    const { data: workerRow } = await supabase
+      .from("workers")
+      .select("id")
+      .eq("profile_id", user.id)
+      .maybeSingle();
+    const workerId = (workerRow?.id as string | null) ?? null;
+    if (workerId && extraProfessionIds.length > 0) {
+      const { error: dirErr } = await supabase
+        .from("worker_professions")
+        .upsert(
+          extraProfessionIds.map((profession_id) => ({
+            worker_id: workerId,
+            profession_id,
+            is_primary: false,
+          })),
+          { onConflict: "worker_id,profession_id", ignoreDuplicates: true },
+        );
+      if (dirErr) {
+        console.error("[completeOnboarding] extra professions insert failed", {
+          code: dirErr.code,
+          message: dirErr.message,
+        });
+      }
+    }
+    // THE PERSON'S OWN WORDS, into the same canonical table — a row with no
+    // `profession_id` and no `is_primary`, which the schema has allowed since
+    // ledger 20260927060325. `normalized_label` is GENERATED in the database
+    // and is never written here. A failure is logged, not fatal: the person is
+    // onboarded and can add these on their profile rather than losing a signup.
+    // ONE ROW AT A TIME, not one batch (Codex P1 on #1880, verified). The
+    // partial unique index `worker_professions_one_label` cannot be an ON
+    // CONFLICT target through PostgREST, so a single duplicate — a retried
+    // onboarding, the same words typed twice in different sessions — would
+    // reject the whole statement and take every OTHER new profession with it.
+    // Bounded by SELF_DECLARED_PROFESSION_MAX_PER_SUBMIT, so this is a handful
+    // of inserts, and a duplicate means the words are already stored.
+    if (workerId && professionLabels.length > 0) {
+      for (const label of professionLabels) {
+        const { error: ownErr } = await supabase
+          .from("worker_professions")
+          .insert({ worker_id: workerId, label, original_language: professionLanguage });
+        if (ownErr && ownErr.code !== "23505") {
+          console.error("[completeOnboarding] self-declared profession insert failed", {
+            code: ownErr.code,
+            message: ownErr.message,
+          });
+        }
+      }
+    }
+  }
+
+  // Additional roles. add_role flips active_role to the role it adds, so we
+  // reset active_role back to the chosen primary afterwards.
+  for (const r of extras) {
+    const { error: e } = await supabase.rpc("add_role", {
+      p_role: r,
+      p_role_data: roleData(r),
+    });
+    if (e) {
+      console.error("[completeOnboarding] add_role failed", {
+        role: r,
+        message: e.message,
+      });
+      throw new Error(`add_role RPC failed: ${e.message}`);
+    }
+  }
+  if (extras.length > 0) {
+    await supabase
+      .from("profiles")
+      .update({ active_role: primary })
+      .eq("id", user.id);
+  }
+
+  // Student intent: "I am studying" is a real, canonical state — a CURRENT
+  // worker_education row, the same table the profile and the verified CV
+  // read and the row an institution link later sits beside. Written under
+  // the caller's own RLS (profile_id = auth.uid()); validated by the same
+  // model as the profile's education editor, never coerced. A failure here
+  // is logged, not fatal: onboarding stands and the profile offers the same
+  // entry — an honest gap, never a silent invention.
+  if (asksForCurrentEducation(intents) && roles.includes("worker")) {
+    const edu = validateEducationInput({
+      institutionName: String(formData.get("institution_name") ?? ""),
+      programOrField: String(formData.get("program_or_field") ?? ""),
+      educationTypeSlug: String(formData.get("education_type_slug") ?? "other"),
+      isCurrent: true,
+    });
+    if (edu) {
+      const { error: eduErr } = await supabase.from("worker_education").insert({
+        profile_id: user.id,
+        institution_name: edu.institutionName,
+        program_or_field: edu.programOrField,
+        education_type_slug: edu.educationTypeSlug,
+        start_year: edu.startYear,
+        end_year: edu.endYear,
+        is_current: true,
+        note: edu.note,
+      });
+      if (eduErr) {
+        console.error("[completeOnboarding] student education insert failed", {
+          code: eduErr.code,
+          message: eduErr.message,
+        });
+      }
+    }
+  }
+
+  // THE ADDRESSED INVITATION IS ACCEPTED HERE, on the server, AFTER the role
+  // was settled from it while it was still pending (review on #2846: when the
+  // wizard accepted it first, it left the pending read and the role override
+  // above never ran). Same canonical by-id door as the network page: verified
+  // e-mail, address binding, accept_invitation_apply_v2. A failure is logged,
+  // not fatal — the person is onboarded and the home still offers it.
+  if (invited.addressedInvitationId) {
+    try {
+      await acceptInvitationByIdAction({
+        invitationId: invited.addressedInvitationId,
+        locale,
+        noticeSurface: "onboarding",
+      });
+    } catch (e) {
+      console.error("[completeOnboarding] addressed invitation accept failed", {
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  }
+
+  revalidatePath(`/${locale}/dashboard`);
+  // Deep-link continuity (core-network area B): a safe ?next= carried
+  // through login -> onboarding (e.g. an invitation link) wins over the
+  // role dashboard, so an invited new user lands back on the invitation.
+  const nextRaw = formData.get("next");
+  if (typeof nextRaw === "string" && isSafeReturnPath(nextRaw)) {
+    redirect(getSafeReturnPath(nextRaw, locale));
+  }
+  // Role-aware first-login destination. A company/agency/customer who
+  // just picked their primary role should land on THEIR workspace, not
+  // the generic /dashboard cockpit (which surfaces worker-shaped
+  // prompts like "Profession / Skills / Journal"). A fresh WORKER lands
+  // in the conversation (`/dashboard`): the owner contract 2026-09-04
+  // §3/§4A/§7 makes the conversation the primary control layer with ONE
+  // clear next action, and the chat's first turn already greets the
+  // person, names what the profile still lacks and offers the profile as
+  // a chip. The Wagon 4 setup journey still renders on
+  // `/dashboard/profile#setup-journey` — one click away, not the wall the
+  // person hits first (window 6 real-person walk, 2026-09-06, measured the
+  // wall as the first screen and the chat as the screen that said what to
+  // do next).
+  const ROLE_DASHBOARD: Record<Role, string> = {
+    worker: `/${locale}/dashboard`,
+    company: `/${locale}/dashboard/company`,
+    agency: `/${locale}/dashboard/company`,
+    customer: `/${locale}/dashboard/buyer`,
+  };
+  redirect(ROLE_DASHBOARD[primary]);
+}
+
+/** Switch the workspace the user is currently looking at. */
+export async function switchActiveRole(role: Role): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  // THE role write (held-role check, admin preservation, the active_role
+  // UPDATE) is one core shared with the workspace switch and the MCP
+  // `context.switch` — lib/auth/active-role-core.ts. Its UPDATE error is now
+  // checked: a refused write used to return as if the switch had happened.
+  const result = await setActiveRoleCore({ supabase, userId: user.id }, role);
+  if (!result.ok) {
+    throw new Error(
+      result.code === "not-held" ? "Role not held by user" : "Role switch failed",
+    );
+  }
+
+  // ONE POINTER RULE (owner program 2026-09-23): choosing to act as a PERSON
+  // is choosing the personal workspace. Leaving the organization pointer in
+  // place would let the two pointers disagree — the chat identity follows the
+  // workspace, so the person would still be greeted as that organization. The
+  // clear runs through the SAME action (and core) the workspace chip uses.
+  if (baseIdentityForRole(role) === "person") {
+    const cleared = await clearActiveOrganization();
+    if (!cleared.ok) throw new Error("Workspace clear failed");
+  }
+
+  revalidatePath("/", "layout");
+}
+
+/** Add an additional role to the user's catalogue and switch into it.
+ *  Atomic: catalogue upsert + role-specific entity row creation
+ *  (`workers` | `companies` | `agencies`) happen in one transaction via
+ *  the `public.add_role` RPC (migration 0007). Idempotent on retry. */
+export async function addRole(role: Role, formData?: FormData): Promise<void> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) throw new Error("Not authenticated");
+
+  if (!ONBOARDING_ROLES.has(role)) {
+    throw new Error(`Invalid role: ${role}`);
+  }
+
+  const role_data: Record<string, string> = {};
+  if (formData) {
+    for (const [k, v] of formData.entries()) {
+      if (typeof v === "string") role_data[k] = v.trim();
+    }
+  }
+
+  const { error } = await supabase.rpc("add_role", {
+    p_role: role,
+    p_role_data: role_data,
+  });
+  if (error) {
+    console.error("[addRole] RPC failed", {
+      code: error.code,
+      message: error.message,
+      details: error.details,
+      hint: error.hint,
+    });
+    throw new Error(`add_role RPC failed: ${error.message}`);
+  }
+
+  revalidatePath("/", "layout");
+}

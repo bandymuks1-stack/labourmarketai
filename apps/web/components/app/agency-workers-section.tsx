@@ -1,0 +1,393 @@
+"use client";
+
+import { useActionState, useState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
+
+import {
+  inviteAgencyWorkerAction,
+  assignAgencyWorkerRoleAction,
+  provisionAgencyWorkerEngagementContextAction,
+  setAgencyWorkerJournalReviewAction,
+  type InviteFormState,
+} from "@/lib/agency/actions";
+import type {
+  AgencyWorkerInvitation,
+  LinkedAgencyWorker,
+} from "@/lib/agency/agency-workers";
+import { computeEmploymentJournalContext } from "@/lib/operations/employment-journal-context";
+import type { OpsCellLabels } from "@/components/app/company-workers-section";
+import { WorkerOperationsRoleForm } from "@/components/app/worker-operations-role-form";
+import { PersonPresence, PlaceTimeStamp } from "@/components/app/work-world/primitives";
+
+/**
+ * Stage 2 PR 2 — Agency workers + invitations panel.
+ *
+ * Pure client renderer fed by the server-component parent. The parent
+ * passes:
+ *   - `workersResult` / `invitationsResult` — RLS-respected reads of
+ *     public.agency_workers and public.agency_worker_invitations.
+ *     When either list comes back as kind="needs-migration", we render
+ *     the literal migration blocker copy (one canonical message).
+ *   - `lt` — i18n labels (passed as strings so the client component
+ *     stays free of next-intl imports and can render in unit tests
+ *     without a provider).
+ */
+
+type ListState<T> =
+  | { kind: "ok"; rows: readonly T[] }
+  | { kind: "needs-migration" }
+  | { kind: "error"; message: string };
+
+export interface AgencyWorkersSectionLabels {
+  readonly title: string;
+  readonly subtitle: string;
+  readonly emptyState: string;
+  readonly emptyCta: string;
+  readonly inviteHeading: string;
+  readonly inviteDescription: string;
+  readonly inviteEmailLabel: string;
+  readonly inviteEmailPlaceholder: string;
+  readonly inviteNoteLabel: string;
+  readonly inviteNoteHint: string;
+  readonly inviteSubmit: string;
+  readonly invitationsHeading: string;
+  readonly invitationsEmpty: string;
+  readonly statusInvited: string;
+  readonly statusAlreadyPending: string;
+  readonly statusAlreadyLinked: string;
+  readonly statusNotOwner: string;
+  readonly statusInvalidEmail: string;
+  readonly statusError: string;
+  readonly statusNoAgency: string;
+  readonly migrationBlockerHeading: string;
+  readonly migrationBlockerBody: string;
+  readonly activeWorkersHeading: string;
+  readonly columnEmail: string;
+  readonly columnStatus: string;
+  readonly columnInvitedAt: string;
+  readonly noWorkersHeading: string;
+  readonly noWorkersBody: string;
+  readonly coordinationHeading: string;
+  readonly coordinationBody: string;
+  readonly coordinationNextAction: string;
+  readonly operations: OpsCellLabels;
+}
+
+/** Subtle left status rail per review capability (Step 9, visual only). */
+const REVIEW_RAIL: Record<string, string> = {
+  can_review: "border-l-2 border-l-state-success/60",
+  can_view: "border-l-2 border-l-brand-blue/50",
+  not_enabled: "border-l-2 border-l-ink-500",
+};
+
+export function AgencyWorkersSection({
+  workersResult,
+  invitationsResult,
+  labels,
+  roleCoordinationEnabled,
+  canAssignRoles = false,
+}: {
+  readonly workersResult: ListState<LinkedAgencyWorker>;
+  readonly invitationsResult: ListState<AgencyWorkerInvitation>;
+  readonly labels: AgencyWorkersSectionLabels;
+  /** From the operations role-capability map — false today. */
+  readonly roleCoordinationEnabled: boolean;
+  /** Owner/admin viewing their own agency → show the role-select control. */
+  readonly canAssignRoles?: boolean;
+}) {
+  const [state, formAction, isPending] = useActionState<
+    InviteFormState | null,
+    FormData
+  >(inviteAgencyWorkerAction, null);
+  const [shouldShowOutcome, setShouldShowOutcome] = useState(true);
+
+  const migrationNeeded =
+    workersResult.kind === "needs-migration" ||
+    invitationsResult.kind === "needs-migration";
+
+  const activeWorkers =
+    workersResult.kind === "ok" ? workersResult.rows : ([] as LinkedAgencyWorker[]);
+  const pendingInvitations =
+    invitationsResult.kind === "ok"
+      ? invitationsResult.rows.filter((i) => i.status === "pending")
+      : ([] as AgencyWorkerInvitation[]);
+
+  const outcomeLabel: string | null = (() => {
+    if (!state || !shouldShowOutcome) return null;
+    if (state.ok) {
+      switch (state.outcome) {
+        case "invited":
+          return labels.statusInvited;
+        case "already_pending":
+          return labels.statusAlreadyPending;
+        case "already_linked":
+          return labels.statusAlreadyLinked;
+        case "not_owner":
+          return labels.statusNotOwner;
+        case "invalid_email":
+          return labels.statusInvalidEmail;
+      }
+    }
+    if (state.code === "no_agency") return labels.statusNoAgency;
+    if (state.code === "needs_migration") return labels.migrationBlockerHeading;
+    return state.message ?? labels.statusError;
+  })();
+
+  return (
+    <section
+      className="card-border flex flex-col gap-5 p-5"
+      data-testid="agency-workers-section"
+    >
+      <header className="flex flex-col gap-1">
+        <h2 className="font-display text-lg font-semibold text-text-primary">
+          {labels.title}
+        </h2>
+        <p className="text-sm text-text-secondary">{labels.subtitle}</p>
+      </header>
+
+      {migrationNeeded ? (
+        <div
+          className="rounded-md border border-state-warning bg-state-warning/10 p-3"
+          data-testid="agency-workers-migration-blocker"
+        >
+          <p className="font-mono text-meta uppercase tracking-label text-state-warning">
+            {labels.migrationBlockerHeading}
+          </p>
+          <p className="mt-1 text-xs text-text-secondary">
+            {labels.migrationBlockerBody}
+          </p>
+        </div>
+      ) : null}
+
+      {/* Active workers */}
+      <section
+        className="flex flex-col gap-2"
+        data-testid="agency-workers-active-list"
+      >
+        <h3 className="font-display text-sm font-semibold text-text-primary">
+          {labels.activeWorkersHeading}
+        </h3>
+        {activeWorkers.length === 0 ? (
+          <div
+            className="rounded-md border border-dashed border-ink-500 p-3"
+            data-testid="agency-workers-empty"
+          >
+            <p className="text-xs font-semibold text-text-primary">
+              {labels.noWorkersHeading}
+            </p>
+            <p className="text-xs text-text-secondary">{labels.noWorkersBody}</p>
+          </div>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {activeWorkers.map((w) => {
+                const ctx = computeEmploymentJournalContext({
+                  relationship: "agency",
+                  operationsRole: w.operationsRole,
+                  journalReviewEnabled: w.journalReviewEnabled,
+                });
+                const roleLabel =
+                  ctx.operationsRole === "not_enabled"
+                    ? labels.operations.notAssigned
+                    : (labels.operations.roleLabels[ctx.operationsRole] ??
+                      labels.operations.notAssigned);
+                return (
+                  <li
+                    key={w.workerId}
+                    className={`card-border flex flex-col gap-2 p-3 ${REVIEW_RAIL[ctx.reviewCapability] ?? ""}`}
+                    data-testid={`agency-worker-row-${w.workerId}`}
+                    data-review-capability={ctx.reviewCapability}
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      {/* A linked worker is a real PRESENCE (work-world
+                          grammar): their permitted display name first, the
+                          invitation e-mail beneath it — never an e-mail
+                          standing in for a person when a name exists. The
+                          agency sees only its own linked workers (RLS). */}
+                      <PersonPresence
+                        name={w.displayName?.trim() || w.email || "—"}
+                        role={w.displayName?.trim() && w.email ? w.email : null}
+                        size={36}
+                      />
+                      <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">{w.status ?? "active"}</span>
+                    </div>
+                    <div className="flex flex-col gap-1 text-xs text-text-secondary">
+                      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.operations.columnHeading}</span>
+                        <span>
+                          {w.operationsTitle?.trim()
+                            ? w.operationsTitle
+                            : roleLabel}
+                          <span className="ml-1 text-meta text-text-muted">
+                            ·{" "}
+                            {ctx.reviewCapability === "can_review"
+                              ? labels.operations.reviewEnabled
+                              : labels.operations.reviewNotEnabled}
+                          </span>
+                        </span>
+                        <span
+                          className="text-meta text-text-muted"
+                          data-testid={`agency-worker-next-action-${w.workerId}`}
+                        >
+                          {labels.operations.nextActionLabels[ctx.nextAction] ??
+                            ""}
+                        </span>
+                        {canAssignRoles ? (
+                          <WorkerOperationsRoleForm
+                            workerId={w.workerId}
+                            currentRole={w.operationsRole}
+                            currentTitle={w.operationsTitle}
+                            journalReviewEnabled={w.journalReviewEnabled}
+                            engagementContextLinked={w.engagementContextLinked}
+                            action={assignAgencyWorkerRoleAction}
+                            provisionAction={
+                              provisionAgencyWorkerEngagementContextAction
+                            }
+                            setReviewAction={setAgencyWorkerJournalReviewAction}
+                            labels={{
+                              ...labels.operations.assign,
+                              roleOptionLabels: labels.operations.roleLabels,
+                            }}
+                          />
+                        ) : null}
+                    </div>
+                    <PlaceTimeStamp>
+                      {labels.columnInvitedAt}: {w.createdAt.slice(0, 10)}
+                    </PlaceTimeStamp>
+                  </li>
+                );
+              })}
+          </ul>
+        )}
+      </section>
+
+      {activeWorkers.length > 0 &&
+      activeWorkers.every((w) => !w.operationsRole?.trim()) ? (
+        <p
+          className="rounded-md border border-ink-700 bg-surface-1 px-3 py-2 text-meta text-text-secondary"
+          data-testid="agency-workers-ops-setup-note"
+        >
+          {labels.operations.setupNote}
+        </p>
+      ) : null}
+
+      {!roleCoordinationEnabled ? (
+        <div
+          className="rounded-md border border-ink-700 bg-surface-1 p-3"
+          data-testid="agency-workers-coordination-note"
+        >
+          <p className="font-mono text-meta uppercase tracking-label text-text-muted">
+            {labels.coordinationHeading}
+          </p>
+          <p className="mt-1 text-xs text-text-secondary">
+            {labels.coordinationBody}
+          </p>
+          <p className="mt-1 text-meta text-text-muted">
+            {labels.coordinationNextAction}
+          </p>
+        </div>
+      ) : null}
+
+      {/* Invite worker form */}
+      <form
+        action={(fd) => {
+          setShouldShowOutcome(true);
+          return formAction(fd);
+        }}
+        className="flex flex-col gap-3"
+        data-testid="agency-workers-invite-form"
+      >
+        <header className="flex flex-col gap-1">
+          <h3 className="font-display text-sm font-semibold text-text-primary">
+            {labels.inviteHeading}
+          </h3>
+          <p className="text-xs text-text-secondary">
+            {labels.inviteDescription}
+          </p>
+        </header>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-text-secondary">{labels.inviteEmailLabel}</span>
+          <Input
+            type="email"
+            name="email"
+            required
+            placeholder={labels.inviteEmailPlaceholder}
+            className="max-sm:min-h-11 max-sm:text-base"
+            data-testid="agency-workers-invite-email"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-text-secondary">{labels.inviteNoteLabel}</span>
+          <Textarea
+            name="note"
+            rows={2}
+            maxLength={500}
+            className="max-sm:text-base"
+            data-testid="agency-workers-invite-note"
+          />
+          <span className="text-meta text-text-muted">
+            {labels.inviteNoteHint}
+          </span>
+        </label>
+        <Button
+          type="submit"
+          variant="primary"
+          size="sm"
+          disabled={isPending}
+          className="min-h-11 self-start"
+          data-testid="agency-workers-invite-submit"
+        >
+          {labels.inviteSubmit}
+        </Button>
+        {outcomeLabel ? (
+          <p
+            className={
+              state?.ok && state.outcome === "invited"
+                ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
+                : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
+            }
+            role="status"
+            data-testid="agency-workers-invite-result"
+          >
+            {outcomeLabel}
+          </p>
+        ) : null}
+      </form>
+
+      {/* Pending invitations */}
+      <section
+        className="flex flex-col gap-2"
+        data-testid="agency-workers-pending-list"
+      >
+        <h3 className="font-display text-sm font-semibold text-text-primary">
+          {labels.invitationsHeading}
+        </h3>
+        {pendingInvitations.length === 0 ? (
+          <p className="text-xs text-text-secondary">
+            {labels.invitationsEmpty}
+          </p>
+        ) : (
+          <ul className="flex flex-col gap-2">
+            {pendingInvitations.map((inv) => (
+              <li
+                key={inv.id}
+                className="card-border flex flex-col gap-1 p-3"
+                data-testid={`agency-invitation-row-${inv.id}`}
+              >
+                {/* Every row here IS pending (the list is filtered and titled so); the
+                    raw enum badge that used to repeat the word is gone — an enum is
+                    never rendered as copy (lib/guards/no-raw-enum-in-jsx.test.ts). */}
+                <div className="flex items-start justify-between gap-2">
+                  <span className="break-all text-sm text-text-primary">{inv.invitedEmail}</span>
+                </div>
+                <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                  {labels.columnInvitedAt}: {inv.createdAt.slice(0, 10)}
+                </span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+    </section>
+  );
+}

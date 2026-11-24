@@ -1,0 +1,1137 @@
+import "server-only";
+
+import type { SupabaseClient } from "@supabase/supabase-js";
+
+import { createClient } from "@/lib/supabase/server";
+import { listMyBookings } from "@/lib/booking/booking-actions";
+import { callerCompanyId } from "@/lib/projects/projects";
+import { readMyTeamWorkContexts } from "@/lib/projects/team-work-context";
+import { listMyTasks } from "@/lib/tasks/tasks";
+import { isOpen } from "@/lib/tasks/task-model";
+import { readWorkPlanItems } from "@/lib/planning/work-plan";
+import { listMyFinanceRecords } from "@/lib/finance/finance";
+import {
+  listInvitationsForMe,
+  listMySentInvitations,
+} from "@/lib/invitations/network";
+import { getMyAbsences } from "@/lib/leave/absences";
+import { getOwnWorkerId } from "@/lib/projects/worker-project-access";
+import { correctedOriginalIds } from "@/lib/journal/counted-once";
+import {
+  deriveEntryWorkTime,
+  workTimeDurationLabel,
+  type WorkTimeMetricRow,
+} from "@/lib/journal/work-time";
+import {
+  deriveIndependentReviewResult,
+  type ConfirmationRow,
+} from "@/lib/journal/review-status";
+import {
+  PLANNING_PROJECT_READ_LIMIT,
+  clockTime,
+  combineInvitationItems,
+  daySpanDays,
+  hrefForSource,
+  journalStartDay,
+  planningMeta,
+  projectAbsenceItem,
+  projectFinanceItem,
+  projectTripItem,
+  PLANNED_TRIP_STATUSES,
+  projectIncomingInvitationItem,
+  projectSentInvitationItem,
+  projectStageItem,
+  statusKeyForSource,
+  toIsoDay,
+  type PlanningItem,
+} from "@/lib/planning/planning-model";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
+
+/**
+ * Planning composition (control room PR E, capability gap map §4) — the
+ * server read that feeds /dashboard/planning. It COMPOSES the existing
+ * RLS-scoped reads and duplicates no source record:
+ *
+ *  - bookings  → listMyBookings() (both directions; the RLS the bookings
+ *                page already relies on). Proposed + accepted rows are part
+ *                of a plan; declined/withdrawn/expired are history and stay
+ *                on the bookings page.
+ *  - projects  → the caller's own company's projects (callerCompanyId() +
+ *                the `projects` RLS the project pages already read).
+ *                MANAGERS ONLY, honestly: no worker-side "my assigned
+ *                projects" read exists in lib/projects today, and this
+ *                slice does not build new privileged queries — workers see
+ *                an honest per-source note instead of an invented schedule.
+ *  - tasks     → listMyTasks() (PR D layer): OPEN tasks WITH a due date.
+ *                Degrades to the honest "not available yet" note while the
+ *                owner-gated work_tasks migration is unapplied.
+ *
+ * Every source degrades independently — a failed or missing source becomes
+ * a per-source note, never a crash and never fake rows. All reads are
+ * bounded (the source libs bound theirs; the project read is bounded here).
+ *
+ * INTERNAL ONLY: this layer sends nothing anywhere — no email, no push, no
+ * Telegram, no webhook, no outbound call of any kind. Read-only: no insert,
+ * no update, no delete, no RPC.
+ */
+
+/** Per-source honest state. `managers-only` = the source exists but only a
+ *  manager-side read exists today (workers get the note, not fake data);
+ *  `workers-only` mirrors it for the journal (fact source of a worker). */
+export type PlanningSourceStatus =
+  | "ok"
+  | "unavailable" /* owner-gated migration not applied yet */
+  | "managers-only"
+  | "workers-only"
+  | "error";
+
+export interface PlanningSourceState {
+  readonly status: PlanningSourceStatus;
+  readonly count: number;
+}
+
+export interface PlanningSources {
+  readonly booking: PlanningSourceState;
+  readonly project: PlanningSourceState;
+  readonly task: PlanningSourceState;
+  readonly journal: PlanningSourceState;
+  readonly finance: PlanningSourceState;
+  /** ONE combined state for both invitation directions (sent + incoming) —
+   *  the projection dedupes overlapping scopes into single items. */
+  readonly invitation: PlanningSourceState;
+  /** Time Engine W2: the caller's own leave/absence bands (W7 model). */
+  readonly absence: PlanningSourceState;
+  readonly trip: PlanningSourceState;
+  /** CAL-8: planned work windows (work_plan_entries) — a FORECAST. "unavailable"
+   *  while the store is not provisioned; that is not a failed read. */
+  readonly plan: PlanningSourceState;
+  /** Time Engine W2: dated stages of visible projects (W6 model). */
+  readonly stage: PlanningSourceState;
+}
+
+export type PlanningReadResult =
+  | { readonly status: "not-authed" }
+  | {
+      readonly status: "ok";
+      readonly items: readonly PlanningItem[];
+      readonly sources: PlanningSources;
+      /**
+       * Journal item ids (`journal:<entryId>`) whose latest review decision
+       * by someone OTHER than the worker is "approved"
+       * (`deriveIndependentReviewResult`) — the only state the calendar may
+       * paint as confirmed. Null when the review rows could not be read: the
+       * calendar then shows no confirmation mark at all, never "unconfirmed"
+       * (SEP-7: unknown ≠ zero).
+       */
+      readonly journalConfirmedIds: ReadonlySet<string> | null;
+    };
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function asAny(c: SupabaseClient): any {
+  return c;
+}
+
+/** Booking statuses that belong on a forward plan. */
+const PLANNED_BOOKING_STATUSES = new Set(["proposed", "accepted"]);
+
+/**
+ * Project lifecycle states with a forward date band.
+ *
+ * W11 pins the semantics rather than changing the behaviour: the TERMINAL
+ * status is excluded, so a finished project can never produce a FUTURE
+ * conflict — it stays history on the projects surface. `paused` remains
+ * readable (the person still sees the project) but W11's shared model is the
+ * authority on whether it counts as ACTIVE work: `isActivePlanningStatus` is
+ * true for `live` only, because a paused project is precisely the case where
+ * nobody's time is claimed, and flagging it as a clash would invent a problem
+ * no record proves.
+ *
+ * The list previously named `closed`, a value nothing ever wrote; the
+ * canonical terminal status is now `completed` (owner decision D1). W12's
+ * booking-overlap invariant is untouched by any of this.
+ */
+const PLANNED_PROJECT_STATUSES = ["draft", "live", "paused"] as const;
+
+async function readBookingItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+}> {
+  const result = await listMyBookings();
+  if (result.kind === "needs-migration") {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  if (result.kind !== "ok") {
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+  const items: PlanningItem[] = [];
+  for (const [rows, roleContext] of [
+    [result.incoming, "incoming"],
+    [result.outgoing, "outgoing"],
+  ] as const) {
+    for (const row of rows) {
+      if (!PLANNED_BOOKING_STATUSES.has(row.status)) continue;
+      items.push({
+        id: `booking:${row.id}`,
+        sourceType: "booking",
+        sourceId: row.id,
+        label: row.roleText?.trim() ? row.roleText : null,
+        detail: row.locationCountry?.trim() ? row.locationCountry : null,
+        startDate: toIsoDay(row.startDate),
+        endDate: toIsoDay(row.expectedEndDate),
+        status: row.status,
+        statusKey: statusKeyForSource("booking", row.status),
+        href: hrefForSource("booking", row.id),
+        roleContext,
+        // §7.1: a booking states its place (country) and its day span; the
+        // counterpart name is NOT read here — contact identity stays behind
+        // the platform's own disclosure flow (§20).
+        ...planningMeta({
+          place: row.locationCountry,
+          duration: daySpanDays(toIsoDay(row.startDate), toIsoDay(row.expectedEndDate)),
+        }),
+      });
+    }
+  }
+  return { state: { status: "ok", count: items.length }, items };
+}
+
+/**
+ * The caller's OWN assigned-project date bands (Time Engine W2) — the
+ * worker-side dated read the calendar contract listed as a blocker. Own
+ * assignments only (`project_worker_assignments.worker_id = own worker`),
+ * project rows under the projects RLS the worker pages already read. These
+ * items carry roleContext "assigned", which makes the ALREADY-SHIPPED
+ * conflict branch in isConflictEligible reachable for the first time.
+ */
+async function readAssignedProjectItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+  projectRefs: { id: string; title: string | null }[];
+}> {
+  const workerId = await getOwnWorkerId();
+  if (!workerId) {
+    return { state: { status: "ok", count: 0 }, items: [], projectRefs: [] };
+  }
+  const supabase = await createClient();
+  const assignRes = await asAny(supabase)
+    .from("project_worker_assignments")
+    .select("project_id, status")
+    .eq("worker_id", workerId)
+    .eq("status", "active")
+    .limit(PLANNING_PROJECT_READ_LIMIT);
+  if (assignRes.error) {
+    return { state: { status: "error", count: 0 }, items: [], projectRefs: [] };
+  }
+  // A project reached through a team that is ACTIVELY assigned is "assigned"
+  // for the planner too (20261003150700) - the same context the journal uses.
+  const teamRows = await readMyTeamWorkContexts(supabase);
+  const ids = [
+    ...new Set([
+      ...((assignRes.data ?? []) as { project_id: string }[]).map(
+        (a) => a.project_id,
+      ),
+      ...teamRows.map((r) => r.project_id),
+    ]),
+  ];
+  if (ids.length === 0) {
+    return { state: { status: "ok", count: 0 }, items: [], projectRefs: [] };
+  }
+  const res = await asAny(supabase)
+    .from("projects")
+    .select("id, title, city, start_date, end_date, status")
+    .in("id", ids)
+    .in("status", [...PLANNED_PROJECT_STATUSES])
+    .limit(PLANNING_PROJECT_READ_LIMIT);
+  if (res.error) {
+    return { state: { status: "error", count: 0 }, items: [], projectRefs: [] };
+  }
+  type Row = {
+    id: string;
+    title: string | null;
+    city: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    status: string;
+  };
+  const rows = (res.data ?? []) as Row[];
+  const items: PlanningItem[] = rows.map((p) => ({
+    id: `project:${p.id}`,
+    sourceType: "project" as const,
+    sourceId: p.id,
+    label: p.title?.trim() ? p.title : null,
+    detail: p.city?.trim() ? p.city : null,
+    startDate: toIsoDay(p.start_date),
+    endDate: toIsoDay(p.end_date),
+    status: p.status,
+    statusKey: statusKeyForSource("project", p.status),
+    href: hrefForSource("project", p.id),
+    roleContext: "assigned" as const,
+    // §7.1: the project IS the project context; its city is the place and
+    // the band is the duration.
+    ...planningMeta({
+      project: p.title,
+      place: p.city,
+      duration: daySpanDays(toIsoDay(p.start_date), toIsoDay(p.end_date)),
+    }),
+  }));
+  return {
+    state: { status: "ok", count: items.length },
+    items,
+    projectRefs: rows.map((p) => ({ id: p.id, title: p.title })),
+  };
+}
+
+const ASSIGNEE_NAMES_SHOWN = 4;
+
+/** projectId → "Name, Name, +N" for the people ACTIVELY assigned to it. */
+async function readActiveAssigneeNames(
+  supabase: SupabaseClient,
+  projectIds: readonly string[],
+): Promise<Map<string, string>> {
+  const out = new Map<string, string>();
+  if (projectIds.length === 0) return out;
+  try {
+    const pwa = await asAny(supabase)
+      .from("project_worker_assignments")
+      .select("project_id, worker_id")
+      .in("project_id", projectIds as string[])
+      .eq("status", "active")
+      .is("ended_at", null)
+      .limit(500);
+    if (pwa.error || !Array.isArray(pwa.data) || pwa.data.length === 0) return out;
+    const rowsPwa = pwa.data as { project_id: string; worker_id: string }[];
+    const workerIds = [...new Set(rowsPwa.map((r) => r.worker_id))];
+    const namesRes = await asAny(supabase)
+      .from("workers")
+      .select("id, display_name")
+      .in("id", workerIds)
+      .limit(500);
+    if (namesRes.error || !Array.isArray(namesRes.data)) return out;
+    const nameOf = new Map<string, string>();
+    for (const w of namesRes.data as { id: string; display_name: string | null }[]) {
+      if (w.display_name?.trim()) nameOf.set(w.id, w.display_name.trim());
+    }
+    const byProject = new Map<string, string[]>();
+    for (const r of rowsPwa) {
+      const name = nameOf.get(r.worker_id);
+      if (!name) continue;
+      const list = byProject.get(r.project_id) ?? [];
+      if (!list.includes(name)) list.push(name);
+      byProject.set(r.project_id, list);
+    }
+    for (const [pid, names] of byProject) {
+      const shown = names.slice(0, ASSIGNEE_NAMES_SHOWN).join(", ");
+      const more = names.length - ASSIGNEE_NAMES_SHOWN;
+      out.set(pid, more > 0 ? `${shown}, +${more}` : shown);
+    }
+  } catch {
+    // names are an enrichment — the dated project item stands without them
+  }
+  return out;
+}
+
+async function readProjectItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+  projectRefs: { id: string; title: string | null }[];
+}> {
+  // Manager-side date bands. (The worker-side assigned read now exists too —
+  // readAssignedProjectItems above; getPlanning merges both, assigned wins.)
+  // Scope = the caller's legacy company channel PLUS the organizations the
+  // caller owns — both reads stay under the projects RLS (fail-closed).
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  const companyId = await callerCompanyId();
+
+  const ownedOrgsRes = user
+    ? await asAny(supabase)
+        .from("organizations")
+        .select("id")
+        .eq("owner_profile_id", user.id)
+        .limit(50)
+    : { data: null, error: null };
+  const ownedOrgIds: string[] = ((ownedOrgsRes.data ?? []) as { id: string }[]).map(
+    (o) => o.id,
+  );
+  // MANAGED, NOT ONLY OWNED. `manages_organization()` — the predicate the
+  // projects RLS and `can_manage_project()` use — also admits an ACTIVE
+  // membership (owner/admin/manager/external_manager) and an ACTIVE manager
+  // engagement. A manager who does not own the organization can open its
+  // projects, yet this scope used to lose them. Same predicate, the caller's
+  // own rows only; the projects RLS below remains the gate.
+  if (user) {
+    const [membershipsRes, engagementsRes] = await Promise.all([
+      asAny(supabase)
+        .from("company_memberships")
+        .select("organization_id")
+        .eq("profile_id", user.id)
+        .eq("status", "active")
+        .in("role", ["owner", "admin", "manager", "external_manager"])
+        .limit(50),
+      asAny(supabase)
+        .from("engagement_contexts")
+        .select("organization_id")
+        .eq("profile_id", user.id)
+        .eq("status", "active")
+        .in("relationship_slug", ["manager", "owner", "external_manager"])
+        .limit(50),
+    ]);
+    for (const res of [membershipsRes, engagementsRes]) {
+      for (const r of (res.data ?? []) as { organization_id: string | null }[]) {
+        if (r.organization_id && !ownedOrgIds.includes(r.organization_id)) {
+          ownedOrgIds.push(r.organization_id);
+        }
+      }
+    }
+  }
+
+  if (!companyId && ownedOrgIds.length === 0) {
+    return {
+      state: { status: "managers-only", count: 0 },
+      items: [],
+      projectRefs: [],
+    };
+  }
+
+  const orFilter = [
+    ...(companyId ? [`company_id.eq.${companyId}`] : []),
+    ...(ownedOrgIds.length > 0
+      ? [`organization_id.in.(${ownedOrgIds.join(",")})`]
+      : []),
+  ].join(",");
+
+  const res = await asAny(supabase)
+    .from("projects")
+    .select("id, title, city, start_date, end_date, status")
+    .or(orFilter)
+    .in("status", [...PLANNED_PROJECT_STATUSES])
+    .order("start_date", { ascending: true, nullsFirst: false })
+    .order("created_at", { ascending: false })
+    .limit(PLANNING_PROJECT_READ_LIMIT);
+  if (res.error) {
+    return { state: { status: "error", count: 0 }, items: [], projectRefs: [] };
+  }
+
+  type Row = {
+    id: string;
+    title: string | null;
+    city: string | null;
+    start_date: string | null;
+    end_date: string | null;
+    status: string;
+  };
+  const seen = new Set<string>();
+  const rows = ((res.data ?? []) as Row[]).filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return (PLANNED_PROJECT_STATUSES as readonly string[]).includes(p.status);
+  });
+  // WHO IS ON IT — the same calendar, more of what the caller may already
+  // see. The manager's own RLS-scoped read of the ACTIVE assignments on these
+  // projects, and the display names the roster surfaces already show
+  // (`workers.display_name`). It adds no table and no widening: a failed or
+  // empty read simply names nobody, the dates stay.
+  const assignees = await readActiveAssigneeNames(
+    supabase,
+    rows.map((p) => p.id),
+  );
+  const items: PlanningItem[] = rows.map((p) => ({
+    id: `project:${p.id}`,
+    sourceType: "project" as const,
+    sourceId: p.id,
+    label: p.title?.trim() ? p.title : null,
+    detail: p.city?.trim() ? p.city : null,
+    startDate: toIsoDay(p.start_date),
+    endDate: toIsoDay(p.end_date),
+    status: p.status,
+    statusKey: statusKeyForSource("project", p.status),
+    href: hrefForSource("project", p.id),
+    roleContext: "managed" as const,
+    ...planningMeta({
+      project: p.title,
+      place: p.city,
+      counterpart: assignees.get(p.id) ?? null,
+      duration: daySpanDays(toIsoDay(p.start_date), toIsoDay(p.end_date)),
+    }),
+  }));
+  return {
+    state: { status: "ok", count: items.length },
+    items,
+    projectRefs: rows.map((p) => ({ id: p.id, title: p.title })),
+  };
+}
+
+/**
+ * The caller's own leave/absence bands (Time Engine W2). Reuses the W7
+ * surface's OWN read (`getMyAbsences` — worker-scoped RLS) and the pure
+ * `projectAbsenceItem` mapper. Approved absences join conflict detection —
+ * approved leave overlapping an accepted booking is a real impossible plan.
+ */
+async function readAbsenceItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+}> {
+  const result = await getMyAbsences();
+  if (!result.applied) {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  const items: PlanningItem[] = [];
+  for (const absence of result.absences) {
+    const item = projectAbsenceItem({
+      id: absence.id,
+      startDate: absence.startDate,
+      endDate: absence.endDate,
+      status: absence.status,
+    });
+    if (item) items.push(item);
+  }
+  return { state: { status: "ok", count: items.length }, items };
+}
+
+/** The person's own plan never streams: a trip read is bounded like the rest. */
+const PLANNING_TRIP_READ_LIMIT = 200;
+
+/**
+ * The caller's OWN business trips (2026-09-14).
+ *
+ * NO NEW AUTHORITY. `business_trips_select` (20260817222000) already reads
+ * `profile_id = auth.uid() OR manages_organization(organization_id) OR
+ * is_admin()`, so a person has always been allowed to read their own trips —
+ * this is a read that existed and was never taken. The filter below is
+ * `profile_id = the caller`, so the person's plan shows THEIR trips and
+ * nobody else's, and RLS would enforce that even if this line were wrong.
+ *
+ * NO PARALLEL CALENDAR. The trip becomes a `PlanningItem` through the pure
+ * `projectTripItem` mapper and joins the canonical planning pipeline beside
+ * bookings, projects, stages, tasks, journal, finance, invitations and
+ * absences — same merge, same conflict detection, same rendering.
+ *
+ * `purpose` IS NOT READ. Free text up to 1000 characters, and drawing a date
+ * band needs none of it. The select list is the boundary, exactly as it is
+ * for an absence's reason and for the employer-side commitment read.
+ *
+ * WHICH STATUSES OCCUPY TIME is `PLANNED_TRIP_STATUSES`, the same constant
+ * the employer-side commitment read imports — so the person's calendar and
+ * the employer's capacity answer cannot disagree about whether a trip is
+ * real. An unapplied store or a failed read reports `unavailable`, never an
+ * empty plan.
+ */
+async function readTripItems(
+  profileId: string,
+): Promise<{ state: PlanningSourceState; items: PlanningItem[] }> {
+  const supabase = await createClient();
+  const res = await asAny(supabase)
+    .from("business_trips")
+    .select("id, destination, date_from, date_to, status")
+    .eq("profile_id", profileId)
+    .in("status", [...PLANNED_TRIP_STATUSES])
+    .limit(PLANNING_TRIP_READ_LIMIT);
+  if (res.error) {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  type Row = {
+    id: string;
+    destination: string | null;
+    date_from: string | null;
+    date_to: string | null;
+    status: string;
+  };
+  const items: PlanningItem[] = [];
+  for (const row of (res.data ?? []) as Row[]) {
+    const item = projectTripItem({
+      id: row.id,
+      destination: row.destination,
+      startDate: row.date_from,
+      endDate: row.date_to,
+      status: row.status,
+    });
+    if (item) items.push(item);
+  }
+  return { state: { status: "ok", count: items.length }, items };
+}
+
+/** Bounded stage read across the visible projects (managed + assigned). */
+const PLANNING_STAGE_READ_LIMIT = 300;
+
+/**
+ * Dated stages of the projects the caller can already see (Time Engine W2).
+ * Scope = the SAME project ids the project sources returned — no wider read,
+ * `project_stages` RLS (manager or actively assigned worker) still applies
+ * row-level. Date semantics come from the pure `projectStageItem` mapper
+ * (actual overrides planned — identical to the stage gantt).
+ */
+async function readStageItems(
+  projectRefs: readonly { id: string; title: string | null }[],
+): Promise<{ state: PlanningSourceState; items: PlanningItem[] }> {
+  if (projectRefs.length === 0) {
+    return { state: { status: "ok", count: 0 }, items: [] };
+  }
+  const supabase = await createClient();
+  const titleById = new Map(projectRefs.map((p) => [p.id, p.title] as const));
+  const res = await asAny(supabase)
+    .from("project_stages")
+    .select(
+      "id, project_id, name, status, planned_start, planned_end, actual_start, actual_end",
+    )
+    .in("project_id", [...titleById.keys()])
+    .limit(PLANNING_STAGE_READ_LIMIT);
+  if (res.error) {
+    const code = (res.error as { code?: string }).code;
+    if (code === "42P01" || code === "42703") {
+      return { state: { status: "unavailable", count: 0 }, items: [] };
+    }
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+  type Row = {
+    id: string;
+    project_id: string;
+    name: string;
+    status: string;
+    planned_start: string | null;
+    planned_end: string | null;
+    actual_start: string | null;
+    actual_end: string | null;
+  };
+  const items: PlanningItem[] = [];
+  for (const row of (res.data ?? []) as Row[]) {
+    const item = projectStageItem({
+      id: row.id,
+      projectId: row.project_id,
+      projectTitle: titleById.get(row.project_id) ?? null,
+      name: row.name,
+      status: row.status,
+      plannedStart: row.planned_start,
+      plannedEnd: row.planned_end,
+      actualStart: row.actual_start,
+      actualEnd: row.actual_end,
+    });
+    if (item) items.push(item);
+  }
+  return { state: { status: "ok", count: items.length }, items };
+}
+
+async function readTaskItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+}> {
+  const result = await listMyTasks();
+  if (result.status === "needs-migration") {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  if (result.status !== "ok") {
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+  // Only OPEN, DUE-DATED tasks join the plan — a finished task is history
+  // and an undated task has no calendar meaning (it stays on /tasks).
+  const items: PlanningItem[] = [];
+  for (const task of result.tasks) {
+    if (!isOpen(task.status)) continue;
+    const due = toIsoDay(task.dueAt);
+    if (!due) continue;
+    items.push({
+      id: `task:${task.id}`,
+      sourceType: "task",
+      sourceId: task.id,
+      label: task.title,
+      detail: null,
+      startDate: due,
+      endDate: null,
+      status: task.status,
+      statusKey: statusKeyForSource("task", task.status),
+      href: hrefForSource("task", task.id, task.projectId),
+      roleContext: "mine",
+      // A due-dated task carries its real clock time when one was set.
+      ...planningMeta({ startTime: clockTime(task.dueAt) }),
+    });
+  }
+  const state: PlanningSourceState = result.error
+    ? { status: "error", count: items.length }
+    : { status: "ok", count: items.length };
+  return { state, items };
+}
+
+/** Bounded read cap for journal facts inside the visible range. */
+const PLANNING_JOURNAL_READ_LIMIT = 200;
+
+async function readJournalItems(
+  userId: string,
+  rangeStart: string,
+  rangeEnd: string,
+): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+  /** See `PlanningReadResult.journalConfirmedIds`; absent = not read. */
+  confirmedIds?: ReadonlySet<string> | null;
+}> {
+  // The journal is FACT (calendar = plan; journal = what really happened):
+  // the caller's OWN entries only, shown at their real recorded day and
+  // deep-linked to the entry itself. Managers keep reading team journals on
+  // the journal/review surfaces — the personal calendar never widens reads.
+  const supabase = await createClient();
+  const workerRes = await asAny(supabase)
+    .from("workers")
+    .select("id")
+    .eq("profile_id", userId)
+    .maybeSingle();
+  if (workerRes.error) {
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+  if (!workerRes.data) {
+    return { state: { status: "workers-only", count: 0 }, items: [] };
+  }
+
+  const ENTRY_COLUMNS =
+    "id, original_text, created_at, deleted_at, superseded_by, correction_of, engagement_context_id";
+  const liveEntries = () =>
+    asAny(supabase)
+      .from("journal_entries")
+      .select(ENTRY_COLUMNS)
+      .eq("worker_id", workerRes.data.id)
+      .is("deleted_at", null)
+      .is("superseded_by", null);
+
+  // WHICH ENTRIES THE VISIBLE RANGE CONTAINS — asked of the day the work
+  // HAPPENED, not the day the row was typed.
+  //
+  // THE DEFECT THIS EXISTS FOR (D-13). The projection places an entry on its
+  // own `work_date` (journalStartDay), but this read bounded the query by
+  // `created_at`. The two columns disagree by design — logging Monday's shift
+  // on Friday is the normal case, and "I am filling in last month now" is the
+  // exact behaviour the Work Journal invites. So an entry worked in June and
+  // typed in August was never READ while looking at June: the day rendered
+  // empty, and a worker asking "which days did I fill?" was told "none".
+  // Nothing errored and no test failed — the row simply was not in the result
+  // set. A worker can only trust "this day is empty" if the query asked about
+  // that day.
+  //
+  // Two bounded, RLS-scoped reads instead of one, merged by id:
+  //   A. entries whose stated work_date falls in the range (the metrics table
+  //      is the only place that day lives), and
+  //   B. entries CREATED in the range — which keeps every entry that never
+  //      carried a work_date at all, exactly where `created_at` still puts it.
+  // Neither read can widen scope: both are filtered to this worker's own live
+  // entries, and the metrics table's own SELECT policy re-checks the parent.
+  const workDateIdsRes = await asAny(supabase)
+    .from("journal_entry_metrics")
+    .select("entry_id")
+    .eq("metric_slug", "work_date")
+    .gte("value_text", rangeStart)
+    .lte("value_text", rangeEnd)
+    .limit(PLANNING_JOURNAL_READ_LIMIT);
+  const workDateIds = [
+    ...new Set(
+      ((workDateIdsRes.data ?? []) as { entry_id: string }[]).map(
+        (m) => m.entry_id,
+      ),
+    ),
+  ];
+
+  const [createdRes, workedRes] = await Promise.all([
+    liveEntries()
+      .gte("created_at", `${rangeStart}T00:00:00Z`)
+      .lte("created_at", `${rangeEnd}T23:59:59.999Z`)
+      .order("created_at", { ascending: true })
+      .limit(PLANNING_JOURNAL_READ_LIMIT),
+    workDateIds.length > 0
+      ? liveEntries().in("id", workDateIds).limit(PLANNING_JOURNAL_READ_LIMIT)
+      : Promise.resolve({ data: [], error: null }),
+  ]);
+  // A failed work_date lookup must not silently shrink the answer back to the
+  // defect above, so it is a real error rather than a quiet fallback.
+  if (createdRes.error || workedRes.error || workDateIdsRes.error) {
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+
+  type Row = {
+    id: string;
+    original_text: string | null;
+    created_at: string;
+    correction_of: string | null;
+    engagement_context_id: string | null;
+  };
+  const byId = new Map<string, Row>();
+  for (const row of [
+    ...((createdRes.data ?? []) as Row[]),
+    ...((workedRes.data ?? []) as Row[]),
+  ]) {
+    if (!byId.has(row.id)) byId.set(row.id, row);
+  }
+  const res = {
+    data: [...byId.values()].sort((a, b) =>
+      a.created_at.localeCompare(b.created_at),
+    ),
+    error: null,
+  };
+  // ONE ACTIVE ENTRY PER CHAIN (owner audit P0.7). Editing a CONFIRMED entry
+  // creates a correction row whose `correction_of` points at the original —
+  // the original deliberately stays visible in the journal's audit trail,
+  // but the CALENDAR is a projection of what happened, and showing both made
+  // one edited entry appear as several similar rows. An entry that a live
+  // correction points at is therefore replaced by that correction here —
+  // through THE counted-once rule (`lib/journal/counted-once.ts`), the same
+  // one the journal list, the section and the CV apply, never a local copy.
+  const rows = (res.data ?? []) as Row[];
+  const correctedIds = correctedOriginalIds(rows);
+  // §7.1 THE FULL FIELD SET for the source the owner reads most. Two
+  // bounded, RLS-scoped follow-up reads over the SAME entry ids: the entry's
+  // own metrics (real hours + site name, written by the save action) and the
+  // entry's engagement context (the workspace/organization it was logged
+  // against). A failed follow-up degrades to null meta — the entry still
+  // renders, it just says less (never something invented).
+  const liveRows = rows.filter((e) => !correctedIds.has(e.id));
+  const entryIds = liveRows.map((e) => e.id);
+  const metricsByEntry = new Map<
+    string,
+    { hours: string | null; site: string | null; workDate: string | null }
+  >();
+  const orgByEngagement = new Map<string, string | null>();
+  // WHO CONFIRMED (premium calendar, 2026-09-29): the same entry ids' review
+  // rows, under `journal_entry_confirmations_select` (rows on the caller's own
+  // entries). `confirmer_id` is selected so a self-approval is never painted
+  // as someone else's confirmation (review-status.ts). Null = not readable.
+  let confirmedIds: Set<string> | null = entryIds.length > 0 ? null : new Set();
+  if (entryIds.length > 0) {
+    const [metricsRes, ecRes, reviewRes] = await Promise.all([
+      asAny(supabase)
+        .from("journal_entry_metrics")
+        // The FK column is `entry_id`. This read asked for `journal_entry_id`,
+        // which does not exist — so the request errored on every call, the
+        // "degrades to null meta" branch swallowed it, and the hours and site
+        // this block exists to show were silently never rendered. An honest
+        // degradation path hides a typo forever; the column name is pinned by
+        // a test now.
+        .select(
+          "id, entry_id, metric_slug, value_text, value_numeric, unit_slug, source, created_at",
+        )
+        .in("entry_id", entryIds)
+        .limit(PLANNING_JOURNAL_READ_LIMIT * 8),
+      (async () => {
+        const ecIds = [
+          ...new Set(
+            liveRows
+              .map((e) => e.engagement_context_id)
+              .filter((v): v is string => Boolean(v)),
+          ),
+        ];
+        if (ecIds.length === 0) return { data: [], error: null };
+        return asAny(supabase)
+          .from("engagement_contexts")
+          .select("id, organizations(display_name, legal_name)")
+          .in("id", ecIds);
+      })(),
+      asAny(supabase)
+        .from("journal_entry_confirmations")
+        .select("entry_id, confirmation_scope, confirmer_role, confirmer_id, created_at")
+        .in("entry_id", entryIds)
+        .order("created_at", { ascending: true })
+        .limit(PLANNING_JOURNAL_READ_LIMIT * 4),
+    ]);
+    if (!reviewRes.error) {
+      const reviewsByEntry = new Map<string, ConfirmationRow[]>();
+      for (const r of (reviewRes.data ?? []) as (ConfirmationRow & { entry_id: string })[]) {
+        const list = reviewsByEntry.get(r.entry_id);
+        if (list) list.push(r);
+        else reviewsByEntry.set(r.entry_id, [r]);
+      }
+      confirmedIds = new Set(
+        [...reviewsByEntry.entries()]
+          .filter(([, rows]) => deriveIndependentReviewResult(rows, userId) === "approved")
+          .map(([entryId]) => `journal:${entryId}`),
+      );
+    }
+    if (!metricsRes.error) {
+      type MetricRow = WorkTimeMetricRow & { entry_id: string };
+      const rowsByEntry = new Map<string, WorkTimeMetricRow[]>();
+      for (const m of (metricsRes.data ?? []) as MetricRow[]) {
+        const list = rowsByEntry.get(m.entry_id);
+        if (list) list.push(m);
+        else rowsByEntry.set(m.entry_id, [m]);
+        const cur = metricsByEntry.get(m.entry_id) ?? {
+          hours: null,
+          site: null,
+          workDate: null,
+        };
+        if (m.metric_slug === "site_name" && m.value_text?.trim()) {
+          cur.site = m.value_text.trim();
+        }
+        // THE DAY THE WORK HAPPENED, as the worker stated it. Already stored
+        // by the save action (`work_date`, source `worker_input`) — it was
+        // simply never read here, so "įrašyk vakarykštį darbą" landed on the
+        // day the row was TYPED. A plain ISO day needs no timezone conversion
+        // (W12: one UTC-pinned formatter, and this value never enters it);
+        // anything not exactly YYYY-MM-DD is ignored rather than guessed at.
+        if (m.metric_slug === "work_date" && m.value_text?.trim()) {
+          cur.workDate = m.value_text.trim();
+        }
+        metricsByEntry.set(m.entry_id, cur);
+      }
+      // THE DURATION — one canonical rule, not a second opinion. This block
+      // used to read ONLY the entry-level `quantity` metric when it carried a
+      // time unit, so an entry whose worker recorded 5 h + 1 h + 3 h across
+      // three activities was labelled "5 h" on the calendar while the reviewer
+      // inbox said 9 h and the timesheet said nothing at all. All three now
+      // resolve through `deriveEntryWorkTime` (owner ruling 2026-08-18): the
+      // per-fragment times win when present, the entry-level duration applies
+      // only when there are none, and the two are never summed.
+      for (const row of liveRows) {
+        const cur = metricsByEntry.get(row.id);
+        if (!cur) continue;
+        cur.hours = workTimeDurationLabel(
+          deriveEntryWorkTime({
+            entryId: row.id,
+            createdAt: row.created_at,
+            originalText: row.original_text,
+            metrics: rowsByEntry.get(row.id) ?? [],
+          }),
+        );
+      }
+    }
+    if (!ecRes.error) {
+      type EcRow = {
+        id: string;
+        organizations: { display_name: string | null; legal_name: string | null } | null;
+      };
+      for (const ec of (ecRes.data ?? []) as EcRow[]) {
+        orgByEngagement.set(
+          ec.id,
+          ec.organizations?.display_name?.trim() ||
+            ec.organizations?.legal_name?.trim() ||
+            null,
+        );
+      }
+    }
+  }
+
+  const items: PlanningItem[] = liveRows
+    .map((e) => {
+    const firstLine = (e.original_text ?? "").trim().split(/\r?\n/, 1)[0] ?? "";
+    const metrics = metricsByEntry.get(e.id);
+    return {
+      id: `journal:${e.id}`,
+      sourceType: "journal" as const,
+      sourceId: e.id,
+      label: firstLine ? (firstLine.length > 80 ? `${firstLine.slice(0, 79)}…` : firstLine) : null,
+      detail: null,
+      // THE DAY WORKED, not the day typed. `created_at` is when the row was
+      // written, so an entry logged in the evening for yesterday's shift —
+      // "įrašyk vakarykštį darbą į žurnalą", a first-class journal phrase —
+      // appeared on the wrong calendar day, and a worker checking which days
+      // they had filled was reading fiction. The worker's own `work_date` wins
+      // when present; `created_at` stays the fallback for entries that never
+      // carried one.
+      startDate: journalStartDay(metrics?.workDate, e.created_at),
+      endDate: null,
+      status: "recorded",
+      ...(() => {
+        const m = metrics;
+        const org = e.engagement_context_id
+          ? (orgByEngagement.get(e.engagement_context_id) ?? null)
+          : null;
+        return planningMeta({
+          startTime: clockTime(e.created_at),
+          duration: m?.hours ?? null,
+          workspace: org,
+          organization: org,
+          place: m?.site ?? null,
+        });
+      })(),
+      statusKey: statusKeyForSource("journal", "recorded"),
+      href: hrefForSource("journal", e.id),
+      roleContext: "mine" as const,
+    };
+  });
+  return { state: { status: "ok", count: items.length }, items, confirmedIds };
+}
+
+/**
+ * Finance records as calendar items (Timeline Source Expansion v1). Reuses
+ * the finance surface's OWN RLS-scoped read (`listMyFinanceRecords` —
+ * creator / admin / company owner; bounded, deterministically ordered) and
+ * projects each record through the pure `projectFinanceItem` mapper. The
+ * projection deliberately drops every money field and third-party name —
+ * the calendar shows only safe operational facts (title, status, day) and
+ * links to /dashboard/finance where the full record lives under its
+ * existing permissions.
+ */
+async function readFinanceItems(todayIso: string): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+}> {
+  const result = await listMyFinanceRecords();
+  if (result.status === "not-authed") {
+    return { state: { status: "error", count: 0 }, items: [] };
+  }
+  if (result.status === "needs-migration") {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  const items: PlanningItem[] = [];
+  for (const record of result.records) {
+    const item = projectFinanceItem(
+      {
+        id: record.id,
+        title: record.title,
+        status: record.status,
+        dueDate: record.dueDate,
+        paidAt: record.paidAt,
+      },
+      todayIso,
+    );
+    if (item) items.push(item);
+  }
+  const state: PlanningSourceState = result.error
+    ? { status: "error", count: items.length }
+    : { status: "ok", count: items.length };
+  return { state, items };
+}
+
+/**
+ * Invitations as calendar items — BOTH directions through their existing
+ * reads (`listMySentInvitations`: inviter-scoped RLS; `listInvitationsForMe`:
+ * the pending-for-my-verified-email RPC the dashboard invitations card
+ * already uses). Lifecycle days come from real timestamps only (expiry /
+ * accepted_at / declined_at / revoked_at); creation time is never presented
+ * as a scheduled event. Overlapping scopes (self-invitation) dedupe to one
+ * item via `combineInvitationItems`.
+ */
+async function readInvitationItems(): Promise<{
+  state: PlanningSourceState;
+  items: PlanningItem[];
+}> {
+  const [sent, incoming] = await Promise.all([
+    listMySentInvitations(),
+    listInvitationsForMe(),
+  ]);
+  if (sent.status === "needs-migration" && incoming.status === "needs-migration") {
+    return { state: { status: "unavailable", count: 0 }, items: [] };
+  }
+  const outgoingItems =
+    sent.status === "ok" ? sent.items.map(projectSentInvitationItem) : [];
+  const incomingItems =
+    incoming.status === "ok"
+      ? incoming.items.map(projectIncomingInvitationItem)
+      : [];
+  const items = combineInvitationItems(outgoingItems, incomingItems);
+  const failed = sent.status === "error" || incoming.status === "error";
+  return {
+    state: { status: failed ? "error" : "ok", count: items.length },
+    items,
+  };
+}
+
+export interface PlanningRange {
+  /** Inclusive "YYYY-MM-DD" bounds of the visible view — drives the
+   *  bounded journal-fact read (plan sources stay bounded on their own). */
+  readonly rangeStart: string;
+  readonly rangeEnd: string;
+}
+
+/**
+ * The caller's combined planning read — one auth check, eight RLS-scoped
+ * sources, each degrading on its own. Project bands merge BOTH directions:
+ * the manager-side scope and the caller's own assignments — when the same
+ * project appears in both, the ASSIGNED item wins (it is the personal
+ * commitment that participates in conflict detection). Stages read over the
+ * union of visible project ids (chained — never a wider scope).
+ */
+export async function getPlanning(
+  range?: PlanningRange,
+): Promise<PlanningReadResult> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "not-authed" };
+
+  const today = (await viewerWorkToday()).todayIso;
+  const rangeStart = range?.rangeStart ?? today;
+  const rangeEnd =
+    range && range.rangeEnd >= rangeStart ? range.rangeEnd : rangeStart;
+
+  const managedPromise = readProjectItems();
+  const assignedPromise = readAssignedProjectItems();
+  const stagePromise = Promise.all([managedPromise, assignedPromise]).then(
+    ([managed, assigned]) => {
+      const refs = new Map<string, { id: string; title: string | null }>();
+      for (const p of [...managed.projectRefs, ...assigned.projectRefs]) {
+        if (!refs.has(p.id)) refs.set(p.id, p);
+      }
+      return readStageItems([...refs.values()]);
+    },
+  );
+
+  const [
+    booking,
+    managed,
+    assigned,
+    stage,
+    task,
+    journal,
+    finance,
+    invitation,
+    absence,
+    trip,
+    plan,
+  ] = await Promise.all([
+      readBookingItems(),
+      managedPromise,
+      assignedPromise,
+      stagePromise,
+      readTaskItems(),
+      readJournalItems(user.id, rangeStart, rangeEnd),
+      readFinanceItems(today),
+      readInvitationItems(),
+      readAbsenceItems(),
+      readTripItems(user.id),
+      readWorkPlanItems(rangeStart, rangeEnd),
+    ]);
+
+  // Merge project directions — assigned (personal commitment) wins on id
+  // collision, so conflict detection sees the caller's own band exactly once.
+  const assignedIds = new Set(assigned.items.map((i) => i.id));
+  const projectItems = [
+    ...assigned.items,
+    ...managed.items.filter((i) => !assignedIds.has(i.id)),
+  ];
+  const projectState: PlanningSourceState =
+    managed.state.status === "managers-only" &&
+    assigned.state.status !== "ok"
+      ? managed.state
+      : {
+          status:
+            managed.state.status === "error" || assigned.state.status === "error"
+              ? "error"
+              : "ok",
+          count: projectItems.length,
+        };
+
+  return {
+    status: "ok",
+    items: [
+      ...booking.items,
+      ...projectItems,
+      ...stage.items,
+      ...task.items,
+      ...journal.items,
+      ...finance.items,
+      ...invitation.items,
+      ...absence.items,
+      ...trip.items,
+      ...plan.items,
+    ],
+    sources: {
+      booking: booking.state,
+      project: projectState,
+      task: task.state,
+      journal: journal.state,
+      finance: finance.state,
+      invitation: invitation.state,
+      absence: absence.state,
+      stage: stage.state,
+      trip: trip.state,
+      plan: plan.state,
+    },
+    journalConfirmedIds: journal.confirmedIds ?? null,
+  };
+}

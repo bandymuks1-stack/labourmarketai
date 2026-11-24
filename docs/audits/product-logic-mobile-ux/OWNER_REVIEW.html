@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="lt">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Product Logic + Mobile UX Correction v1 — Owner Review</title>
+<style>
+  :root { color-scheme: light; }
+  body { font: 16px/1.6 -apple-system, system-ui, "Segoe UI", Roboto, sans-serif;
+         max-width: 880px; margin: 2rem auto; padding: 0 1.1rem; color: #14181f; background: #fafbfc; }
+  h1 { font-size: 1.6rem; margin-bottom: .2rem; }
+  h2 { font-size: 1.2rem; margin-top: 2rem; border-bottom: 2px solid #e6e9ee; padding-bottom: .3rem; }
+  h3 { font-size: 1.02rem; margin-top: 1.3rem; }
+  .sub { color: #5b6472; margin-top: 0; }
+  .pill { display:inline-block; padding:.15rem .55rem; border-radius:999px; font-size:.72rem; font-weight:700; }
+  .ok { background:#e7f7ec; color:#11633a; } .no { background:#fdecec; color:#a01818; }
+  table { border-collapse: collapse; width: 100%; margin: .7rem 0; font-size: .9rem; }
+  th, td { border: 1px solid #dde1e7; padding: .45rem .6rem; text-align: left; vertical-align: top; }
+  th { background: #f1f3f6; }
+  .before { color:#8a3b3b; } .after { color:#1d6b3a; font-weight:600; }
+  .card { border:1px solid #dde1e7; border-radius:10px; padding:1rem 1.1rem; margin:1rem 0; background:#fff; }
+  code { background:#eef1f4; padding:1px 5px; border-radius:4px; font-size:.86em; }
+  .mock { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size:.8rem; white-space:pre;
+          background:#0f1620; color:#cfe3ff; border-radius:10px; padding:1rem; overflow:auto; }
+  .sel { color:#7fd0ff; } .chk { color:#74e39b; }
+  ul { margin:.4rem 0 .4rem 1.1rem; } li { margin:.25rem 0; }
+  .tap { background:#fff7e6; border:1px solid #ffe1a8; border-radius:10px; padding:.9rem 1.1rem; }
+  small { color:#6b7480; }
+</style>
+</head>
+<body>
+
+<h1>Product Logic + Mobile UX Correction — v1</h1>
+<p class="sub">Branch <code>feat/product-logic-mobile-ux-v1</code> ·
+<span class="pill ok">production DB nepaliesta</span>
+<span class="pill ok">jokios migracijos</span>
+<span class="pill ok">jokių fake duomenų</span></p>
+
+<div class="card">
+<strong>Ką taisėme (pagal jūsų mobile review):</strong>
+<ul>
+  <li>Organizacija nebėra įkalta į vieną kietą „įmonės tipą“.</li>
+  <li>Veiklos sritis (ką darote) ir projekto rolė (kuo esate konkrečiame poreikyje) atskirtos.</li>
+  <li>Agentūra — veikimo modelis, ne atskiras pasaulis.</li>
+  <li>Mobile dropdown'ai pakeisti į vieno bakstelėjimo korteles.</li>
+  <li>Darbo žurnalo tekstas trumpesnis.</li>
+  <li>Įgūdžių pasiūlymai neberodo plataus nesusijusio „debesies“.</li>
+</ul>
+</div>
+
+<h2>1. Organizacijos modelis: tipas → veikla + rolė</h2>
+<p>Anksčiau vienas laukas maišė tris skirtingus lygius. Dabar:</p>
+<table>
+  <tr><th>Lygis</th><th>Klausimas</th><th>Kur</th></tr>
+  <tr><td><b>Organizacijos profilis</b></td><td>Vienas profilis, be narvo</td><td>Įmonės nustatymai</td></tr>
+  <tr><td><b>Pagrindinė veikla</b></td><td>„Ką jūsų organizacija dažniausiai daro?“</td><td>Įmonės nustatymai (radio kortelės)</td></tr>
+  <tr><td><b>Projekto / poreikio rolė</b></td><td>„Jūsų rolė šiame poreikyje?“ — užsakovas / rangovas / subrangovas / tiekėjas…</td><td>Poreikio forma (NAUJA, radio kortelės)</td></tr>
+</table>
+<p><small>Rolė priklauso nuo situacijos, ne nuo amžinos tapatybės. Saugoma esamame
+<code>customer_requests.payload</code> (jsonb) — <b>be DB migracijos</b>.</small></p>
+
+<h3>Tekstas: prieš / po</h3>
+<table>
+  <tr><th>Vieta</th><th class="before">Prieš</th><th class="after">Po</th></tr>
+  <tr><td>Veiklos laukas</td><td class="before">„Įmonės tipas“</td><td class="after">„Pagrindinė veiklos sritis“</td></tr>
+  <tr><td>Paaiškinimas</td><td class="before">Vienas įmonės profilis visiems tipams. Keičiant tipą… keičiasi tik pavadinimai ir matomi blokai.</td><td class="after">Tai tik pagrindinė veikla — ji jūsų neužrakina. Konkrečią rolę pasirinksite kurdami kiekvieną poreikį.</td></tr>
+  <tr><td>Agentūros pastaba</td><td class="before">Dirbate personalo agentūros režimu — tas pats profilis, pakeistas tik tipas.</td><td class="after">Personalo agentūra — tai veikimo modelis, ne atskiras pasaulis. Tas pats įmonės profilis.</td></tr>
+</table>
+
+<h2>2. Mobile: dropdown → vieno bakstelėjimo kortelės</h2>
+<p>Pakeisti laukai (2–7 reikšmės): <b>pagrindinė veikla</b>, <b>vaidmuo įmonėje</b>,
+<b>projekto rolė</b>, <b>apgyvendinimas</b>. Vietoj gremėzdiško native modal — kortelės,
+kurias matote iškart ir pasirenkate vienu bakstelėjimu, neprarasdami puslapio.</p>
+
+<div class="mock">  Apgyvendinimas
+  <span class="chk">●</span> Suteikiamas     ○ Nesuteikiamas     ○ Dar nežinia
+
+  Jūsų rolė šiame poreikyje
+  <span class="chk">●</span> Užsakovas / klientas    ○ Generalinis rangovas
+  ○ Rangovas                ○ Subrangovas
+  ○ Darbuotojų tiekėjas     ○ Paslaugų teikėjas
+  ○ Kita
+  <span class="sel">Rolė priklauso nuo konkretaus projekto, ne nuo įmonės tipo.</span></div>
+
+<h2>3. Darbo žurnalo tekstas — trumpiau, ta pati prasmė</h2>
+<table>
+  <tr><th class="before">Prieš</th><th class="after">Po</th></tr>
+  <tr><td class="before">Įrašą gali patvirtinti tik vadovas, savininkas arba išorinis (kliento) vadovas — tie, kurie prižiūri jūsų darbą. Iki tol tai jūsų paties nurodytas įrašas.</td>
+      <td class="after">Patvirtinti gali tik jūsų darbą prižiūrintis vadovas, savininkas ar kliento vadovas. Iki tol — jūsų paties nurodytas įrašas.</td></tr>
+  <tr><td class="before">Šie įgūdžiai pasiūlyti pagal jūsų pačių įrašą. Patvirtinę juos, įrašote kaip paties nurodytus — jie dar nėra patikrinti kito žmogaus ar dokumentų.</td>
+      <td class="after">Pasiūlyta pagal jūsų įrašą. Patvirtinti įgūdžiai lieka jūsų pačių nurodyti — dar nepatikrinti.</td></tr>
+  <tr><td class="before">Aprašykite viską laisvai: darbą arba veiklą, kiekius, vienetus, laiką, vietą ir pastabas. Sistema pabandys pasiūlyti struktūrą, bet faktais ji taps tik tada, kai patvirtinsite.</td>
+      <td class="after">Aprašykite darbą laisvai: kiekius, laiką, vietą. Sistema pasiūlys struktūrą — faktais ji tampa tik jums patvirtinus.</td></tr>
+</table>
+<p><small>Honest framing išlaikytas: „dar nepatikrinti“, „tik žmogus patvirtina“ — jokio fake verification, jokio AI overclaim (tikrina automatiniai guard'ai).</small></p>
+
+<h2>4. Įgūdžių pasiūlymai — be plataus debesies</h2>
+<ul>
+  <li>Pasiūlymai <b>reitinguojami pagal tekstą</b> (konkretesnis žodis = aukščiau) ir <b>apriboti iki 4</b>.</li>
+  <li>Jei aiškaus ryšio nėra → sąžininga tuščia būsena: <i>„Aiškiai susijusių įgūdžių neradome — įgūdžius pasirinkite rankiniu būdu.“</i></li>
+  <li>Niekas nerodoma kaip įrodyta ar patvirtinta, kol žmogus nesusieja.</li>
+  <li>Deterministinis (be external AI), padengtas testais.</li>
+</ul>
+
+<h2>Kur paspausti telefone (patikrinti)</h2>
+<div class="tap">
+<p><b>Įmonės kelias:</b> Mano erdvė → Įmonės erdvė → atidarykite <b>Įmonės nustatymus</b> →
+„Pagrindinė veiklos sritis“ ir „Vaidmuo įmonėje“ dabar yra kortelės.
+Tada <b>Sukurti poreikį</b> (skiltis „company-requests“) → naujas laukas <b>„Jūsų rolė šiame poreikyje“</b>
+ir <b>Apgyvendinimas</b> — abu kortelės, vienas bakstelėjimas.</p>
+<p><b>Darbuotojo kelias:</b> Profilis → Darbo kortelė → <b>Darbo įrodymai</b> → įveskite trumpą įrašą →
+„Pasiūlykite struktūrą“: tekstas trumpesnis, įgūdžių pasiūlymų mažai; jei nieko aiškaus — matysite
+sąžiningą tuščios būsenos žinutę.</p>
+</div>
+
+<h2>Saugumas / ribos</h2>
+<ul>
+  <li><span class="pill ok">OK</span> typecheck · lint · 3305 testai · build · route-smoke · migration-safety · i18n — visi žali.</li>
+  <li>Jokio production DB apply, db push, RLS/grant/policy keitimo, billing ar external AI.</li>
+  <li>Naujos i18n raktai pridėti aktyviems locale: <b>lt / en / ru</b>.</li>
+  <li><b>Žinoma riba:</b> veiklos sritys kol kas lieka vienas pasirinkimas (esamas <code>company_type</code>
+      stulpelis); tikras <b>multi-select</b> reikalautų additive migracijos — paliktas owner sprendimui.</li>
+  <li><b>Žinoma riba:</b> realių mobile screenshot'ų čia nėra — puslapiai už login; pateiktos kontrolės
+      maketuotos. Norint realių kadrų, reikia prisijungusios sesijos staging'e.</li>
+</ul>
+
+<p><small>Generated for Product Logic + Mobile UX Correction Sprint v1. Owner approval required before merge (brand/product-logic sensitive).</small></p>
+
+</body>
+</html>

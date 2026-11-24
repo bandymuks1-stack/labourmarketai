@@ -1,0 +1,2536 @@
+[
+  {
+    "identity": "worker",
+    "route": "/lt/dashboard",
+    "label": "dashboard-home",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 2842,
+    "console": [
+      "warning: [pilot-events] fire failed {eventName: login_succeeded, name: TypeError, message: Failed to fetch}",
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 900,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Labas, Dev. Kuo šiandien galiu padėti?"
+    ],
+    "h2": [
+      "Mano erdvė",
+      "Tavo darbas dabar"
+    ],
+    "cardBorders": 1,
+    "sections": 2,
+    "buttons": 15,
+    "links": 0,
+    "chatRoot": {
+      "y": 0,
+      "h": 900,
+      "w": 1440
+    },
+    "panel": {
+      "y": 65,
+      "h": 835,
+      "w": 352
+    },
+    "map": null,
+    "composer": {
+      "y": 732,
+      "h": 52,
+      "w": 632
+    },
+    "intro": {
+      "y": 198,
+      "h": 341,
+      "w": 702
+    },
+    "smallTargets": 3,
+    "unlabelledInputs": 1,
+    "testids": [
+      {
+        "id": "conversation-chat",
+        "y": 0,
+        "h": 900,
+        "w": 1440
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 155
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "conversation-thread",
+        "y": 65,
+        "h": 835,
+        "w": 1088
+      },
+      {
+        "id": "personal-workspace-intro",
+        "y": 198,
+        "h": 341,
+        "w": 702
+      },
+      {
+        "id": "personal-workspace-intro-known",
+        "y": 394,
+        "h": 22,
+        "w": 702
+      },
+      {
+        "id": "personal-workspace-intro-next",
+        "y": 422,
+        "h": 22,
+        "w": 702
+      },
+      {
+        "id": "personal-workspace-intro-self-declared",
+        "y": 461,
+        "h": 18,
+        "w": 702
+      },
+      {
+        "id": "personal-workspace-intro-primary",
+        "y": 495,
+        "h": 44,
+        "w": 223
+      },
+      {
+        "id": "personal-workspace-intro-secondary-completeWorkProfile",
+        "y": 495,
+        "h": 44,
+        "w": 214
+      },
+      {
+        "id": "personal-workspace-intro-secondary-addExperienceEvidence",
+        "y": 495,
+        "h": 44,
+        "w": 190
+      },
+      {
+        "id": "msg-greeting",
+        "y": 576,
+        "h": 136,
+        "w": 736
+      },
+      {
+        "id": "assistant-mark",
+        "y": 576,
+        "h": 20,
+        "w": 20
+      },
+      {
+        "id": "chat-chip-logwork",
+        "y": 668,
+        "h": 44,
+        "w": 144
+      },
+      {
+        "id": "chat-chip-cv",
+        "y": 668,
+        "h": 44,
+        "w": 90
+      },
+      {
+        "id": "chat-chip-jobs",
+        "y": 668,
+        "h": 44,
+        "w": 121
+      },
+      {
+        "id": "conversation-opening-composer",
+        "y": 732,
+        "h": 52,
+        "w": 736
+      },
+      {
+        "id": "composer-attach",
+        "y": 740,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "composer-input",
+        "y": 732,
+        "h": 52,
+        "w": 632
+      },
+      {
+        "id": "composer-send",
+        "y": 740,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "context-panel",
+        "y": 65,
+        "h": 835,
+        "w": 352
+      },
+      {
+        "id": "context-panel-work",
+        "y": 108,
+        "h": 40,
+        "w": 319
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 780,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nLabourMarket\nAsmeninė erdvė\nLietuvių\nD\n\nDEV WORKER · ASMENINĖ ERDVĖ\n\nMano erdvė\n\nČia susidėlioji savo darbo profilį, matai, ką sistema apie tave jau žino, ir ką verta padaryti toliau. Pats darbas prasideda pokalbyje žemiau.\n\nMANO DARBO PROFILIS\nKą moku\nKo ieškau\nKada galiu dirbti\nKur galiu dirbti\nKokio atlygio tikiuosi\nKuo galiu pagrįsti patirtį\nDARBO PASIRUOŠIMAS\n\nJau nurodyta: Profesija nurodyta · Darbo žurnalo įrašai\n\nSvarbiausia dabar: Prieinamumas nurodytas\n\nTai, ką pasakoji apie save. Dar neperžiūrėta žmogaus — ir tai normalu.\n\nNurodyti, kada galiu dirbti\nPapildyti mano darbo profilį\nPridėti patirties įrodymų\n\nL\nLABOURMARKET AI\n\nLabas, Dev. Kuo šiandien galiu padėti?\nUžfiksuoti darbą\nĮkelti CV\nIeškau darbo\nTavo darbas dabar\n\nTavo laikotarpyje nieko nesuplanuota ir nieko nevėluoja.\n\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\worker-dashboard-home-1440.png"
+  },
+  {
+    "identity": "worker",
+    "route": "/lt/dashboard/profile",
+    "label": "profile",
+    "viewport": "1440",
+    "status": 200,
+    "ttfbMs": 5655,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/profile",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 6104,
+    "scrollWidth": 1440,
+    "innerWidth": 1440,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Mano profilis"
+    ],
+    "h2": [
+      "Parenkime jūsų profilį",
+      "Įmonės kanalai",
+      "Štai ką apie jus jau žinome.",
+      "CV užpildymas",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "cardBorders": 19,
+    "sections": 16,
+    "buttons": 57,
+    "links": 39,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 73,
+    "unlabelledInputs": 34,
+    "testids": [
+      {
+        "id": "back-to-chat",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 155
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "profile-opportunities-link",
+        "y": 94,
+        "h": 26,
+        "w": 182
+      },
+      {
+        "id": "profile-cv-export-link",
+        "y": 94,
+        "h": 26,
+        "w": 144
+      },
+      {
+        "id": "profile-documents-link",
+        "y": 94,
+        "h": 26,
+        "w": 125
+      },
+      {
+        "id": "profile-gallery-link",
+        "y": 94,
+        "h": 26,
+        "w": 65
+      },
+      {
+        "id": "room-my-spaces-link",
+        "y": 94,
+        "h": 26,
+        "w": 113
+      },
+      {
+        "id": "page-quick-nav",
+        "y": 177,
+        "h": 58,
+        "w": 1360
+      },
+      {
+        "id": "profile-state-strip",
+        "y": 276,
+        "h": 64,
+        "w": 1310
+      },
+      {
+        "id": "profile-state-readiness",
+        "y": 276,
+        "h": 64,
+        "w": 431
+      },
+      {
+        "id": "profile-state-freshness",
+        "y": 276,
+        "h": 64,
+        "w": 431
+      },
+      {
+        "id": "profile-state-activity",
+        "y": 276,
+        "h": 64,
+        "w": 431
+      },
+      {
+        "id": "live-profile-section",
+        "y": 381,
+        "h": 299,
+        "w": 1344
+      },
+      {
+        "id": "live-profile-missing",
+        "y": 405,
+        "h": 24,
+        "w": 1344
+      },
+      {
+        "id": "live-profile-history",
+        "y": 477,
+        "h": 44,
+        "w": 1344
+      },
+      {
+        "id": "live-profile-evidence",
+        "y": 591,
+        "h": 20,
+        "w": 1344
+      },
+      {
+        "id": "live-profile-opportunity",
+        "y": 659,
+        "h": 20,
+        "w": 1344
+      },
+      {
+        "id": "worker-setup-journey",
+        "y": 704,
+        "h": 506,
+        "w": 1344
+      },
+      {
+        "id": "setup-journey-count",
+        "y": 737,
+        "h": 18,
+        "w": 52
+      },
+      {
+        "id": "setup-step-goal",
+        "y": 834,
+        "h": 48,
+        "w": 1294
+      },
+      {
+        "id": "setup-step-experience",
+        "y": 890,
+        "h": 68,
+        "w": 1294
+      },
+      {
+        "id": "setup-step-review",
+        "y": 966,
+        "h": 68,
+        "w": 1294
+      },
+      {
+        "id": "setup-step-location",
+        "y": 1041,
+        "h": 68,
+        "w": 1294
+      },
+      {
+        "id": "setup-step-availability",
+        "y": 1117,
+        "h": 68,
+        "w": 1294
+      },
+      {
+        "id": "profile-avatar-section",
+        "y": 1233,
+        "h": 122,
+        "w": 1344
+      },
+      {
+        "id": "profile-avatar",
+        "y": 1254,
+        "h": 80,
+        "w": 1302
+      },
+      {
+        "id": "avatar-monogram",
+        "y": 1254,
+        "h": 80,
+        "w": 80
+      },
+      {
+        "id": "profile-avatar-label",
+        "y": 1266,
+        "h": 30,
+        "w": 136
+      },
+      {
+        "id": "profile-managed-companies",
+        "y": 1379,
+        "h": 180,
+        "w": 1344
+      },
+      {
+        "id": "profile-add-company",
+        "y": 1472,
+        "h": 34,
+        "w": 126
+      },
+      {
+        "id": "feature-note-profile",
+        "y": 1583,
+        "h": 38,
+        "w": 1344
+      },
+      {
+        "id": "profile-hub-overview",
+        "y": 1644,
+        "h": 257,
+        "w": 1344
+      },
+      {
+        "id": "profile-hub-pillars",
+        "y": 1733,
+        "h": 64,
+        "w": 1302
+      },
+      {
+        "id": "profile-hub-pillar-cv",
+        "y": 1733,
+        "h": 64,
+        "w": 320
+      },
+      {
+        "id": "profile-hub-pillar-skills",
+        "y": 1733,
+        "h": 64,
+        "w": 320
+      },
+      {
+        "id": "profile-hub-pillar-journal",
+        "y": 1733,
+        "h": 64,
+        "w": 320
+      },
+      {
+        "id": "profile-hub-pillar-availability",
+        "y": 1733,
+        "h": 64,
+        "w": 320
+      },
+      {
+        "id": "profile-hub-not-verified",
+        "y": 1813,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "profile-hub-primary-action",
+        "y": 1848,
+        "h": 32,
+        "w": 163
+      },
+      {
+        "id": "profile-hub-journal-link",
+        "y": 1854,
+        "h": 20,
+        "w": 121
+      },
+      {
+        "id": "profile-hub-cv-import-link",
+        "y": 1854,
+        "h": 20,
+        "w": 254
+      },
+      {
+        "id": "profile-hub-opportunities-link",
+        "y": 1854,
+        "h": 20,
+        "w": 243
+      },
+      {
+        "id": "cv-completeness-grid",
+        "y": 1925,
+        "h": 224,
+        "w": 1344
+      },
+      {
+        "id": "cv-section-card-summary",
+        "y": 2008,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-summary",
+        "y": 2037,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-workHistory",
+        "y": 2008,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-workHistory",
+        "y": 2037,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-education",
+        "y": 2008,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-education",
+        "y": 2037,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-languages",
+        "y": 2008,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-languages",
+        "y": 2037,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-certificates",
+        "y": 2008,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-certificates",
+        "y": 2037,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-skills",
+        "y": 2072,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-skills",
+        "y": 2101,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-projects",
+        "y": 2072,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-projects",
+        "y": 2101,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-achievements",
+        "y": 2072,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-achievements",
+        "y": 2101,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-salary",
+        "y": 2072,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-salary",
+        "y": 2101,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "cv-section-card-availability",
+        "y": 2072,
+        "h": 56,
+        "w": 254
+      },
+      {
+        "id": "cv-section-state-availability",
+        "y": 2101,
+        "h": 18,
+        "w": 228
+      },
+      {
+        "id": "profile-trust-block",
+        "y": 2173,
+        "h": 186,
+        "w": 1344
+      },
+      {
+        "id": "trust-verified-skills",
+        "y": 2292,
+        "h": 32,
+        "w": 400
+      },
+      {
+        "id": "trust-confirmations",
+        "y": 2292,
+        "h": 32,
+        "w": 400
+      },
+      {
+        "id": "trust-entries",
+        "y": 2292,
+        "h": 32,
+        "w": 400
+      },
+      {
+        "id": "worker-availability-prefs",
+        "y": 2382,
+        "h": 946,
+        "w": 1344
+      },
+      {
+        "id": "worker-availability-prefs-form",
+        "y": 2465,
+        "h": 843,
+        "w": 1302
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate",
+        "y": 2465,
+        "h": 56,
+        "w": 643
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "y": 2488,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-yes",
+        "y": 2488,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-no",
+        "y": 2488,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation",
+        "y": 2465,
+        "h": 56,
+        "w": 643
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "y": 2488,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-yes",
+        "y": 2488,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-no",
+        "y": 2488,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-has_transport",
+        "y": 2537,
+        "h": 56,
+        "w": 643
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "y": 2560,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-has_transport-yes",
+        "y": 2560,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-has_transport-no",
+        "y": 2560,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-team_available",
+        "y": 2537,
+        "h": 56,
+        "w": 643
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "y": 2560,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-team_available-yes",
+        "y": 2560,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-team_available-no",
+        "y": 2560,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-solo_available",
+        "y": 2609,
+        "h": 56,
+        "w": 643
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "y": 2632,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-solo_available-yes",
+        "y": 2632,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-tristate-solo_available-no",
+        "y": 2632,
+        "h": 32,
+        "w": 214
+      },
+      {
+        "id": "prefs-max-trip-days",
+        "y": 2703,
+        "h": 46,
+        "w": 643
+      },
+      {
+        "id": "prefs-contract-type",
+        "y": 2703,
+        "h": 46,
+        "w": 643
+      },
+      {
+        "id": "prefs-note",
+        "y": 2787,
+        "h": 86,
+        "w": 1302
+      },
+      {
+        "id": "prefs-v2-fieldset",
+        "y": 2889,
+        "h": 367,
+        "w": 1302
+      },
+      {
+        "id": "prefs-pay-basis",
+        "y": 2980,
+        "h": 46,
+        "w": 626
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok",
+        "y": 2958,
+        "h": 68,
+        "w": 626
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "y": 2981,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-yes",
+        "y": 2981,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-no",
+        "y": 2981,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok",
+        "y": 3042,
+        "h": 56,
+        "w": 626
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-not_stated",
+        "y": 3065,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-yes",
+        "y": 3065,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-no",
+        "y": 3065,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-overtime_ok",
+        "y": 3042,
+        "h": 56,
+        "w": 626
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-not_stated",
+        "y": 3065,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-yes",
+        "y": 3065,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-no",
+        "y": 3065,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-own_vehicle",
+        "y": 3114,
+        "h": 56,
+        "w": 626
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-not_stated",
+        "y": 3137,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-yes",
+        "y": 3137,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-no",
+        "y": 3137,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-own_tools",
+        "y": 3114,
+        "h": 56,
+        "w": 626
+      },
+      {
+        "id": "prefs-tristate-own_tools-not_stated",
+        "y": 3137,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-own_tools-yes",
+        "y": 3137,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-tristate-own_tools-no",
+        "y": 3137,
+        "h": 32,
+        "w": 208
+      },
+      {
+        "id": "prefs-licence-categories",
+        "y": 3186,
+        "h": 52,
+        "w": 1268
+      },
+      {
+        "id": "prefs-licence-B",
+        "y": 3208,
+        "h": 30,
+        "w": 34
+      },
+      {
+        "id": "prefs-licence-BE",
+        "y": 3208,
+        "h": 30,
+        "w": 41
+      },
+      {
+        "id": "prefs-licence-C",
+        "y": 3208,
+        "h": 30,
+        "w": 35
+      },
+      {
+        "id": "prefs-licence-CE",
+        "y": 3208,
+        "h": 30,
+        "w": 42
+      },
+      {
+        "id": "prefs-licence-D",
+        "y": 3208,
+        "h": 30,
+        "w": 35
+      },
+      {
+        "id": "prefs-save",
+        "y": 3271,
+        "h": 36,
+        "w": 192
+      },
+      {
+        "id": "worker-languages",
+        "y": 3352,
+        "h": 283,
+        "w": 1344
+      },
+      {
+        "id": "worker-languages-empty",
+        "y": 3435,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "worker-languages-add-form",
+        "y": 3467,
+        "h": 116,
+        "w": 1302
+      },
+      {
+        "id": "worker-languages-lang",
+        "y": 3489,
+        "h": 46,
+        "w": 645
+      },
+      {
+        "id": "worker-languages-level",
+        "y": 3489,
+        "h": 46,
+        "w": 645
+      },
+      {
+        "id": "worker-languages-add",
+        "y": 3547,
+        "h": 36,
+        "w": 116
+      },
+      {
+        "id": "worker-languages-self-stated",
+        "y": 3595,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "worker-education",
+        "y": 3659,
+        "h": 203,
+        "w": 1344
+      },
+      {
+        "id": "worker-education-empty",
+        "y": 3742,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "worker-education-add-open",
+        "y": 3774,
+        "h": 36,
+        "w": 89
+      },
+      {
+        "id": "worker-education-self-stated",
+        "y": 3822,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "worker-achievements",
+        "y": 3886,
+        "h": 203,
+        "w": 1344
+      },
+      {
+        "id": "worker-achievements-empty",
+        "y": 3969,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "worker-achievements-add-open",
+        "y": 4001,
+        "h": 36,
+        "w": 89
+      },
+      {
+        "id": "worker-achievements-self-stated",
+        "y": 4049,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "external-profiles",
+        "y": 4113,
+        "h": 346,
+        "w": 1344
+      },
+      {
+        "id": "external-profiles-empty",
+        "y": 4196,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "external-profiles-visibility-note",
+        "y": 4228,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "external-profiles-add-form",
+        "y": 4259,
+        "h": 116,
+        "w": 1302
+      },
+      {
+        "id": "external-profiles-platform",
+        "y": 4281,
+        "h": 46,
+        "w": 645
+      },
+      {
+        "id": "external-profiles-url",
+        "y": 4281,
+        "h": 46,
+        "w": 645
+      },
+      {
+        "id": "external-profiles-add",
+        "y": 4339,
+        "h": 36,
+        "w": 136
+      },
+      {
+        "id": "external-profiles-import-note",
+        "y": 4387,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "external-profiles-import-link",
+        "y": 4389,
+        "h": 16,
+        "w": 277
+      },
+      {
+        "id": "external-profiles-self-managed",
+        "y": 4419,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "profile-text-flow-compose",
+        "y": 4483,
+        "h": 927,
+        "w": 1344
+      },
+      {
+        "id": "cv-import-upload",
+        "y": 4938,
+        "h": 84,
+        "w": 615
+      },
+      {
+        "id": "cv-upload-cost-note",
+        "y": 5002,
+        "h": 20,
+        "w": 615
+      },
+      {
+        "id": "cv-image-ocr-seam",
+        "y": 5057,
+        "h": 86,
+        "w": 615
+      },
+      {
+        "id": "cv-evidence-types",
+        "y": 5168,
+        "h": 154,
+        "w": 1294
+      },
+      {
+        "id": "cv-privacy-note",
+        "y": 5333,
+        "h": 20,
+        "w": 1294
+      },
+      {
+        "id": "profile-mano-cv-records-link",
+        "y": 5473,
+        "h": 18,
+        "w": 173
+      },
+      {
+        "id": "capability-profile-manual-add",
+        "y": 5571,
+        "h": 86,
+        "w": 1310
+      },
+      {
+        "id": "capability-profile-manual-input",
+        "y": 5606,
+        "h": 38,
+        "w": 1206
+      },
+      {
+        "id": "capability-profile-manual-add-button",
+        "y": 5606,
+        "h": 38,
+        "w": 70
+      },
+      {
+        "id": "add-experience-form",
+        "y": 5928,
+        "h": 208,
+        "w": 1308
+      },
+      {
+        "id": "add-experience-title",
+        "y": 5950,
+        "h": 34,
+        "w": 1284
+      },
+      {
+        "id": "add-experience-current",
+        "y": 6066,
+        "h": 13,
+        "w": 13
+      },
+      {
+        "id": "add-experience-save",
+        "y": 6094,
+        "h": 30,
+        "w": 116
+      },
+      {
+        "id": "skill-clarify-section",
+        "y": 5498,
+        "h": 575,
+        "w": 1344
+      },
+      {
+        "id": "skill-clarify-form",
+        "y": 5559,
+        "h": 417,
+        "w": 1344
+      },
+      {
+        "id": "esco-typeahead-skill",
+        "y": 5600,
+        "h": 34,
+        "w": 1302
+      },
+      {
+        "id": "skill-clarify-self-declared",
+        "y": 5856,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "esco-attribution",
+        "y": 5888,
+        "h": 20,
+        "w": 1302
+      },
+      {
+        "id": "skill-clarify-empty",
+        "y": 6018,
+        "h": 54,
+        "w": 1344
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 848,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nLabourMarket\nAsmeninė erdvė\nLietuvių\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nPROFILIO PARENGTIS\n↓\nTik pradėtas\nAKTUALUMAS\n→\nPaskutinis įrašas — 2026-07-25\nŠIANDIENOS AKTYVUMAS\n→\nŠiandien dar nieko neįrašėte\nDAR TRŪKSTA\nNurodyti prieinamumą\nPridėti įgūdžių\nPridėti darbo įrašą\nPateikti kortelę\nKUR DIRBAI\n(organizacija nerodoma) · (nėra pradžios datos) · dabar\nDev Construction · (nėra pradžios datos) · dabar\n\n2 vyksta dabar.\n\nKĄ RODO TAVO ĮRAŠAI\n\n0 įrašyti įgūdžiai · 0 paremti tavo žurnalu · 0 su vadovo įrašu · 14 žurnalo įrašai.\n\nTAU TINKANČIOS GALIMYBĖS\n\n0 šiuo metu matomos galimybės atitinka tavo profilį.\n\nParenkime jūsų profilį\n1 IŠ 5\n\nKeli žingsniai — ir darbdaviai matys, ką mokate. Kiekvienas žingsnis atsidaro toje vietoje, kur jį užbaigsite.\n\n1. Kokio darbo ieškote?\n2. Įkelkite CV arba atsakykite į kelis klausimus\nPapasakokite apie savo patirtį — įkelkite CV arba įrašykite ją patys.\n3. Patikrinkite, ką radome\nPatvirtinkite, pataisykite arba pašalinkite pasiūlytus įrašus.\n4. Kur norite dirbti?\nNurodykite šalį ir pageidaujamas šalis darbo kortelėje.\n5. Kada galite pradėti?\nPažymėkite savo prieinamumą.\nDW\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\n\nDar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.\n\n+ Pridėti įmonę\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.\nŠtai ką apie jus jau žinome.\n\nPagal tai darbdavys sprendžia, kokiam darbui tinkate.\n\nCV\n↓\nNepateiktas\nĮGŪDŽIAI\n↓\nDar nenurodyta\nDARBO ĮRAŠAI\n→\nŽurnalo įrašai: 14\nPRIEINAMUMAS\n→\nDar nenustatyta\n\nTai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.\n\nPridėti, ko trūksta ↓\nDarbo žurnalas →\nPridėk savo CV — įklijuok arba įkelk ↓\nPeržiūrėti atitinkančias galimybes →\nCV užpildymas\n\nPradėkite nuo bet kurios dalies — eiliškumas nesvarbus.\n\nAprašymas\n○ NEUŽPILDYTA\nDarbo patirtis\n● UŽPILDYTA\nIšsilavinimas\n○ NEUŽPILDYTA\nKalbos\n○ NEUŽPILDYTA\nSertifikatai ir pažymėjimai\n● UŽPILDYTA\nĮgūdžiai\n○ NEUŽPILDYTA\nProjektai\n● UŽPILDYTA\nPasiekimai\n○ NEUŽPILDYTA\nAtlyginimo lūkestis\n○ NEUŽPILDYTA\nPrieinamumas\n○ NEUŽPILDYTA\nPasitikėjimo signalai\n\nŠie skaičiai — tiesiai iš jūsų darbo įrašų.\n\nVADOVO PATVIRTINTI ĮGŪDŽIAI\n0\n",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\worker-profile-1440.png"
+  },
+  {
+    "identity": "worker",
+    "route": "/lt/dashboard",
+    "label": "dashboard-home",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 2205,
+    "console": [
+      "warning: [pilot-events] fire failed {eventName: login_succeeded, name: TypeError, message: Failed to fetch}",
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 812,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Labas, Dev. Kuo šiandien galiu padėti?"
+    ],
+    "h2": [
+      "Mano erdvė",
+      "Tavo darbas dabar"
+    ],
+    "cardBorders": 1,
+    "sections": 2,
+    "buttons": 15,
+    "links": 0,
+    "chatRoot": {
+      "y": 0,
+      "h": 812,
+      "w": 375
+    },
+    "panel": {
+      "y": 757,
+      "h": 55,
+      "w": 375
+    },
+    "map": null,
+    "composer": {
+      "y": 704,
+      "h": 52,
+      "w": 239
+    },
+    "intro": {
+      "y": -135,
+      "h": 574,
+      "w": 309
+    },
+    "smallTargets": 2,
+    "unlabelledInputs": 1,
+    "testids": [
+      {
+        "id": "conversation-chat",
+        "y": 0,
+        "h": 812,
+        "w": 375
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 155
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "conversation-thread",
+        "y": 65,
+        "h": 692,
+        "w": 375
+      },
+      {
+        "id": "personal-workspace-intro",
+        "y": -135,
+        "h": 574,
+        "w": 309
+      },
+      {
+        "id": "personal-workspace-intro-known",
+        "y": 150,
+        "h": 45,
+        "w": 309
+      },
+      {
+        "id": "personal-workspace-intro-next",
+        "y": 200,
+        "h": 22,
+        "w": 309
+      },
+      {
+        "id": "personal-workspace-intro-self-declared",
+        "y": 239,
+        "h": 36,
+        "w": 309
+      },
+      {
+        "id": "personal-workspace-intro-primary",
+        "y": 291,
+        "h": 44,
+        "w": 223
+      },
+      {
+        "id": "personal-workspace-intro-secondary-completeWorkProfile",
+        "y": 343,
+        "h": 44,
+        "w": 214
+      },
+      {
+        "id": "personal-workspace-intro-secondary-addExperienceEvidence",
+        "y": 395,
+        "h": 44,
+        "w": 190
+      },
+      {
+        "id": "msg-greeting",
+        "y": 476,
+        "h": 209,
+        "w": 343
+      },
+      {
+        "id": "assistant-mark",
+        "y": 476,
+        "h": 20,
+        "w": 20
+      },
+      {
+        "id": "chat-chip-logwork",
+        "y": 588,
+        "h": 44,
+        "w": 144
+      },
+      {
+        "id": "chat-chip-cv",
+        "y": 588,
+        "h": 44,
+        "w": 90
+      },
+      {
+        "id": "chat-chip-jobs",
+        "y": 640,
+        "h": 44,
+        "w": 121
+      },
+      {
+        "id": "conversation-opening-composer",
+        "y": 704,
+        "h": 52,
+        "w": 343
+      },
+      {
+        "id": "composer-attach",
+        "y": 712,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "composer-input",
+        "y": 704,
+        "h": 52,
+        "w": 239
+      },
+      {
+        "id": "composer-send",
+        "y": 712,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "context-panel",
+        "y": 757,
+        "h": 55,
+        "w": 375
+      },
+      {
+        "id": "context-panel-toggle",
+        "y": 768,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 628,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nAsmeninė erdvė\nD\n\nDEV WORKER · ASMENINĖ ERDVĖ\n\nMano erdvė\n\nČia susidėlioji savo darbo profilį, matai, ką sistema apie tave jau žino, ir ką verta padaryti toliau. Pats darbas prasideda pokalbyje žemiau.\n\nMANO DARBO PROFILIS\nKą moku\nKo ieškau\nKada galiu dirbti\nKur galiu dirbti\nKokio atlygio tikiuosi\nKuo galiu pagrįsti patirtį\nDARBO PASIRUOŠIMAS\n\nJau nurodyta: Profesija nurodyta · Darbo žurnalo įrašai\n\nSvarbiausia dabar: Prieinamumas nurodytas\n\nTai, ką pasakoji apie save. Dar neperžiūrėta žmogaus — ir tai normalu.\n\nNurodyti, kada galiu dirbti\nPapildyti mano darbo profilį\nPridėti patirties įrodymų\n\nL\nLABOURMARKET AI\n\nLabas, Dev. Kuo šiandien galiu padėti?\nUžfiksuoti darbą\nĮkelti CV\nIeškau darbo\nTavo darbas dabar\nIšskleisti\n✎",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\worker-dashboard-home-375.png"
+  },
+  {
+    "identity": "worker",
+    "route": "/lt/dashboard/profile",
+    "label": "profile",
+    "viewport": "375",
+    "status": 200,
+    "ttfbMs": 3913,
+    "console": [
+      "error: The Content Security Policy directive 'upgrade-insecure-requests' is ignored when delivered in a report-only policy."
+    ],
+    "url": "http://127.0.0.1:3450/lt/dashboard/profile",
+    "title": "LabourMarket.ai — darbuotojai, darbdaviai, įgūdžiai ir darbo galimybės Europoje",
+    "docHeight": 8823,
+    "scrollWidth": 375,
+    "innerWidth": 375,
+    "horizontalOverflow": false,
+    "skeletonStillMounted": false,
+    "h1": [
+      "Mano profilis"
+    ],
+    "h2": [
+      "Parenkime jūsų profilį",
+      "Įmonės kanalai",
+      "Štai ką apie jus jau žinome.",
+      "CV užpildymas",
+      "Pasitikėjimo signalai",
+      "Darbo pageidavimai",
+      "Kalbos",
+      "Išsilavinimas",
+      "Pasiekimai ir nurodyti sertifikatai",
+      "Išoriniai profiliai",
+      "Papasakokite, ką mokate",
+      "CV — pirmasis jūsų įrašas",
+      "Įgūdžiai ir patirtis",
+      "Mano įgūdžiai"
+    ],
+    "cardBorders": 19,
+    "sections": 16,
+    "buttons": 57,
+    "links": 39,
+    "chatRoot": null,
+    "panel": null,
+    "map": null,
+    "composer": null,
+    "intro": null,
+    "smallTargets": 72,
+    "unlabelledInputs": 34,
+    "testids": [
+      {
+        "id": "back-to-chat",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "workspace-chip",
+        "y": 10,
+        "h": 44,
+        "w": 155
+      },
+      {
+        "id": "chat-command-search",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "account-menu-trigger",
+        "y": 10,
+        "h": 44,
+        "w": 44
+      },
+      {
+        "id": "profile-opportunities-link",
+        "y": 137,
+        "h": 42,
+        "w": 168
+      },
+      {
+        "id": "profile-cv-export-link",
+        "y": 137,
+        "h": 42,
+        "w": 168
+      },
+      {
+        "id": "profile-documents-link",
+        "y": 187,
+        "h": 26,
+        "w": 168
+      },
+      {
+        "id": "profile-gallery-link",
+        "y": 187,
+        "h": 26,
+        "w": 168
+      },
+      {
+        "id": "room-my-spaces-link",
+        "y": 221,
+        "h": 26,
+        "w": 168
+      },
+      {
+        "id": "page-quick-nav",
+        "y": 319,
+        "h": 58,
+        "w": 359
+      },
+      {
+        "id": "profile-state-strip",
+        "y": 418,
+        "h": 208,
+        "w": 309
+      },
+      {
+        "id": "profile-state-readiness",
+        "y": 418,
+        "h": 64,
+        "w": 309
+      },
+      {
+        "id": "profile-state-freshness",
+        "y": 490,
+        "h": 64,
+        "w": 309
+      },
+      {
+        "id": "profile-state-activity",
+        "y": 562,
+        "h": 64,
+        "w": 309
+      },
+      {
+        "id": "live-profile-section",
+        "y": 667,
+        "h": 349,
+        "w": 343
+      },
+      {
+        "id": "live-profile-missing",
+        "y": 691,
+        "h": 54,
+        "w": 343
+      },
+      {
+        "id": "live-profile-history",
+        "y": 793,
+        "h": 44,
+        "w": 343
+      },
+      {
+        "id": "live-profile-evidence",
+        "y": 907,
+        "h": 40,
+        "w": 343
+      },
+      {
+        "id": "live-profile-opportunity",
+        "y": 996,
+        "h": 20,
+        "w": 343
+      },
+      {
+        "id": "worker-setup-journey",
+        "y": 1040,
+        "h": 607,
+        "w": 343
+      },
+      {
+        "id": "setup-journey-count",
+        "y": 1073,
+        "h": 18,
+        "w": 52
+      },
+      {
+        "id": "setup-step-goal",
+        "y": 1193,
+        "h": 48,
+        "w": 293
+      },
+      {
+        "id": "setup-step-experience",
+        "y": 1249,
+        "h": 107,
+        "w": 293
+      },
+      {
+        "id": "setup-step-review",
+        "y": 1364,
+        "h": 87,
+        "w": 293
+      },
+      {
+        "id": "setup-step-location",
+        "y": 1459,
+        "h": 87,
+        "w": 293
+      },
+      {
+        "id": "setup-step-availability",
+        "y": 1554,
+        "h": 68,
+        "w": 293
+      },
+      {
+        "id": "profile-avatar-section",
+        "y": 1670,
+        "h": 122,
+        "w": 343
+      },
+      {
+        "id": "profile-avatar",
+        "y": 1691,
+        "h": 80,
+        "w": 301
+      },
+      {
+        "id": "avatar-monogram",
+        "y": 1691,
+        "h": 80,
+        "w": 80
+      },
+      {
+        "id": "profile-avatar-label",
+        "y": 1694,
+        "h": 30,
+        "w": 136
+      },
+      {
+        "id": "profile-managed-companies",
+        "y": 1816,
+        "h": 219,
+        "w": 343
+      },
+      {
+        "id": "profile-add-company",
+        "y": 1929,
+        "h": 34,
+        "w": 126
+      },
+      {
+        "id": "feature-note-profile",
+        "y": 2059,
+        "h": 77,
+        "w": 343
+      },
+      {
+        "id": "profile-hub-overview",
+        "y": 2160,
+        "h": 576,
+        "w": 343
+      },
+      {
+        "id": "profile-hub-pillars",
+        "y": 2268,
+        "h": 280,
+        "w": 301
+      },
+      {
+        "id": "profile-hub-pillar-cv",
+        "y": 2268,
+        "h": 64,
+        "w": 301
+      },
+      {
+        "id": "profile-hub-pillar-skills",
+        "y": 2340,
+        "h": 64,
+        "w": 301
+      },
+      {
+        "id": "profile-hub-pillar-journal",
+        "y": 2412,
+        "h": 64,
+        "w": 301
+      },
+      {
+        "id": "profile-hub-pillar-availability",
+        "y": 2484,
+        "h": 64,
+        "w": 301
+      },
+      {
+        "id": "profile-hub-not-verified",
+        "y": 2564,
+        "h": 39,
+        "w": 301
+      },
+      {
+        "id": "profile-hub-primary-action",
+        "y": 2619,
+        "h": 32,
+        "w": 163
+      },
+      {
+        "id": "profile-hub-journal-link",
+        "y": 2625,
+        "h": 20,
+        "w": 121
+      },
+      {
+        "id": "profile-hub-cv-import-link",
+        "y": 2663,
+        "h": 20,
+        "w": 254
+      },
+      {
+        "id": "profile-hub-opportunities-link",
+        "y": 2695,
+        "h": 20,
+        "w": 243
+      },
+      {
+        "id": "cv-completeness-grid",
+        "y": 2760,
+        "h": 451,
+        "w": 343
+      },
+      {
+        "id": "cv-section-card-summary",
+        "y": 2862,
+        "h": 56,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-summary",
+        "y": 2891,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-workHistory",
+        "y": 2862,
+        "h": 56,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-workHistory",
+        "y": 2891,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-education",
+        "y": 2926,
+        "h": 56,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-education",
+        "y": 2955,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-languages",
+        "y": 2926,
+        "h": 56,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-languages",
+        "y": 2955,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-certificates",
+        "y": 2990,
+        "h": 72,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-certificates",
+        "y": 3035,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-skills",
+        "y": 2990,
+        "h": 72,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-skills",
+        "y": 3019,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-projects",
+        "y": 3070,
+        "h": 56,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-projects",
+        "y": 3099,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-achievements",
+        "y": 3070,
+        "h": 56,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-achievements",
+        "y": 3099,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-salary",
+        "y": 3134,
+        "h": 56,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-salary",
+        "y": 3163,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "cv-section-card-availability",
+        "y": 3134,
+        "h": 56,
+        "w": 147
+      },
+      {
+        "id": "cv-section-state-availability",
+        "y": 3163,
+        "h": 18,
+        "w": 121
+      },
+      {
+        "id": "profile-trust-block",
+        "y": 3235,
+        "h": 370,
+        "w": 343
+      },
+      {
+        "id": "trust-verified-skills",
+        "y": 3354,
+        "h": 32,
+        "w": 275
+      },
+      {
+        "id": "trust-confirmations",
+        "y": 3446,
+        "h": 32,
+        "w": 275
+      },
+      {
+        "id": "trust-entries",
+        "y": 3538,
+        "h": 32,
+        "w": 275
+      },
+      {
+        "id": "worker-availability-prefs",
+        "y": 3628,
+        "h": 1500,
+        "w": 343
+      },
+      {
+        "id": "worker-availability-prefs-form",
+        "y": 3769,
+        "h": 1338,
+        "w": 301
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate",
+        "y": 3769,
+        "h": 56,
+        "w": 301
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-not_stated",
+        "y": 3792,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-yes",
+        "y": 3792,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-willing_to_relocate-no",
+        "y": 3792,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation",
+        "y": 3841,
+        "h": 56,
+        "w": 301
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-not_stated",
+        "y": 3864,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-yes",
+        "y": 3864,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-needs_accommodation-no",
+        "y": 3864,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-has_transport",
+        "y": 3913,
+        "h": 56,
+        "w": 301
+      },
+      {
+        "id": "prefs-tristate-has_transport-not_stated",
+        "y": 3936,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-has_transport-yes",
+        "y": 3936,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-has_transport-no",
+        "y": 3936,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-team_available",
+        "y": 3985,
+        "h": 56,
+        "w": 301
+      },
+      {
+        "id": "prefs-tristate-team_available-not_stated",
+        "y": 4008,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-team_available-yes",
+        "y": 4008,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-team_available-no",
+        "y": 4008,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-solo_available",
+        "y": 4057,
+        "h": 56,
+        "w": 301
+      },
+      {
+        "id": "prefs-tristate-solo_available-not_stated",
+        "y": 4080,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-solo_available-yes",
+        "y": 4080,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-tristate-solo_available-no",
+        "y": 4080,
+        "h": 32,
+        "w": 100
+      },
+      {
+        "id": "prefs-max-trip-days",
+        "y": 4151,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "prefs-contract-type",
+        "y": 4235,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "prefs-note",
+        "y": 4319,
+        "h": 86,
+        "w": 301
+      },
+      {
+        "id": "prefs-v2-fieldset",
+        "y": 4421,
+        "h": 634,
+        "w": 301
+      },
+      {
+        "id": "prefs-pay-basis",
+        "y": 4532,
+        "h": 46,
+        "w": 267
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok",
+        "y": 4594,
+        "h": 72,
+        "w": 267
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-not_stated",
+        "y": 4633,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-yes",
+        "y": 4633,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-night_shifts_ok-no",
+        "y": 4633,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok",
+        "y": 4682,
+        "h": 56,
+        "w": 267
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-not_stated",
+        "y": 4705,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-yes",
+        "y": 4705,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-weekend_shifts_ok-no",
+        "y": 4705,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-overtime_ok",
+        "y": 4754,
+        "h": 56,
+        "w": 267
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-not_stated",
+        "y": 4777,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-yes",
+        "y": 4777,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-overtime_ok-no",
+        "y": 4777,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-own_vehicle",
+        "y": 4826,
+        "h": 56,
+        "w": 267
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-not_stated",
+        "y": 4849,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-yes",
+        "y": 4849,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-own_vehicle-no",
+        "y": 4849,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-own_tools",
+        "y": 4898,
+        "h": 56,
+        "w": 267
+      },
+      {
+        "id": "prefs-tristate-own_tools-not_stated",
+        "y": 4921,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-own_tools-yes",
+        "y": 4921,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-tristate-own_tools-no",
+        "y": 4921,
+        "h": 32,
+        "w": 88
+      },
+      {
+        "id": "prefs-licence-categories",
+        "y": 4970,
+        "h": 68,
+        "w": 267
+      },
+      {
+        "id": "prefs-licence-B",
+        "y": 5008,
+        "h": 30,
+        "w": 34
+      },
+      {
+        "id": "prefs-licence-BE",
+        "y": 5008,
+        "h": 30,
+        "w": 41
+      },
+      {
+        "id": "prefs-licence-C",
+        "y": 5008,
+        "h": 30,
+        "w": 35
+      },
+      {
+        "id": "prefs-licence-CE",
+        "y": 5008,
+        "h": 30,
+        "w": 42
+      },
+      {
+        "id": "prefs-licence-D",
+        "y": 5008,
+        "h": 30,
+        "w": 35
+      },
+      {
+        "id": "prefs-save",
+        "y": 5071,
+        "h": 36,
+        "w": 192
+      },
+      {
+        "id": "worker-languages",
+        "y": 5152,
+        "h": 363,
+        "w": 343
+      },
+      {
+        "id": "worker-languages-empty",
+        "y": 5235,
+        "h": 20,
+        "w": 301
+      },
+      {
+        "id": "worker-languages-add-form",
+        "y": 5267,
+        "h": 196,
+        "w": 301
+      },
+      {
+        "id": "worker-languages-lang",
+        "y": 5289,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "worker-languages-level",
+        "y": 5369,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "worker-languages-add",
+        "y": 5427,
+        "h": 36,
+        "w": 116
+      },
+      {
+        "id": "worker-languages-self-stated",
+        "y": 5475,
+        "h": 20,
+        "w": 301
+      },
+      {
+        "id": "worker-education",
+        "y": 5539,
+        "h": 203,
+        "w": 343
+      },
+      {
+        "id": "worker-education-empty",
+        "y": 5622,
+        "h": 20,
+        "w": 301
+      },
+      {
+        "id": "worker-education-add-open",
+        "y": 5654,
+        "h": 36,
+        "w": 89
+      },
+      {
+        "id": "worker-education-self-stated",
+        "y": 5702,
+        "h": 20,
+        "w": 301
+      },
+      {
+        "id": "worker-achievements",
+        "y": 5766,
+        "h": 223,
+        "w": 343
+      },
+      {
+        "id": "worker-achievements-empty",
+        "y": 5868,
+        "h": 20,
+        "w": 301
+      },
+      {
+        "id": "worker-achievements-add-open",
+        "y": 5900,
+        "h": 36,
+        "w": 89
+      },
+      {
+        "id": "worker-achievements-self-stated",
+        "y": 5948,
+        "h": 20,
+        "w": 301
+      },
+      {
+        "id": "external-profiles",
+        "y": 6013,
+        "h": 582,
+        "w": 343
+      },
+      {
+        "id": "external-profiles-empty",
+        "y": 6115,
+        "h": 20,
+        "w": 301
+      },
+      {
+        "id": "external-profiles-visibility-note",
+        "y": 6147,
+        "h": 59,
+        "w": 301
+      },
+      {
+        "id": "external-profiles-add-form",
+        "y": 6217,
+        "h": 196,
+        "w": 301
+      },
+      {
+        "id": "external-profiles-platform",
+        "y": 6239,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "external-profiles-url",
+        "y": 6319,
+        "h": 46,
+        "w": 301
+      },
+      {
+        "id": "external-profiles-add",
+        "y": 6377,
+        "h": 36,
+        "w": 136
+      },
+      {
+        "id": "external-profiles-import-note",
+        "y": 6425,
+        "h": 78,
+        "w": 301
+      },
+      {
+        "id": "external-profiles-import-link",
+        "y": 6466,
+        "h": 36,
+        "w": 278
+      },
+      {
+        "id": "external-profiles-self-managed",
+        "y": 6515,
+        "h": 59,
+        "w": 301
+      },
+      {
+        "id": "profile-text-flow-compose",
+        "y": 6619,
+        "h": 1447,
+        "w": 343
+      },
+      {
+        "id": "cv-import-upload",
+        "y": 7187,
+        "h": 103,
+        "w": 276
+      },
+      {
+        "id": "cv-upload-cost-note",
+        "y": 7251,
+        "h": 39,
+        "w": 276
+      },
+      {
+        "id": "cv-image-ocr-seam",
+        "y": 7345,
+        "h": 143,
+        "w": 276
+      },
+      {
+        "id": "cv-evidence-types",
+        "y": 7719,
+        "h": 211,
+        "w": 301
+      },
+      {
+        "id": "cv-privacy-note",
+        "y": 7941,
+        "h": 39,
+        "w": 301
+      },
+      {
+        "id": "profile-mano-cv-records-link",
+        "y": 8128,
+        "h": 18,
+        "w": 173
+      },
+      {
+        "id": "capability-profile-manual-add",
+        "y": 8286,
+        "h": 104,
+        "w": 309
+      },
+      {
+        "id": "capability-profile-manual-input",
+        "y": 8339,
+        "h": 38,
+        "w": 205
+      },
+      {
+        "id": "capability-profile-manual-add-button",
+        "y": 8339,
+        "h": 38,
+        "w": 70
+      },
+      {
+        "id": "add-experience-form",
+        "y": 8661,
+        "h": 276,
+        "w": 307
+      },
+      {
+        "id": "add-experience-title",
+        "y": 8683,
+        "h": 34,
+        "w": 283
+      },
+      {
+        "id": "add-experience-current",
+        "y": 8868,
+        "h": 13,
+        "w": 13
+      },
+      {
+        "id": "add-experience-save",
+        "y": 8895,
+        "h": 30,
+        "w": 116
+      },
+      {
+        "id": "skill-clarify-section",
+        "y": 8153,
+        "h": 630,
+        "w": 343
+      },
+      {
+        "id": "skill-clarify-form",
+        "y": 8215,
+        "h": 472,
+        "w": 343
+      },
+      {
+        "id": "esco-typeahead-skill",
+        "y": 8256,
+        "h": 34,
+        "w": 301
+      },
+      {
+        "id": "skill-clarify-self-declared",
+        "y": 8528,
+        "h": 39,
+        "w": 301
+      },
+      {
+        "id": "esco-attribution",
+        "y": 8579,
+        "h": 39,
+        "w": 301
+      },
+      {
+        "id": "skill-clarify-empty",
+        "y": 8729,
+        "h": 54,
+        "w": 343
+      },
+      {
+        "id": "language-feedback-open",
+        "y": 696,
+        "h": 36,
+        "w": 36
+      }
+    ],
+    "text": "L\nAsmeninė erdvė\nD\nMano profilis\nMan tinkamos galimybės →\nEksportuoti CV (PDF)\nMano dokumentai\nGalerija\nMano erdvės →\n\nKą dirbate, ką mokate ir kuo galite tai parodyti — viskas vienoje vietoje.\n\nVIRŠUS\nKORTELĖ\nĮMONĖS\nĮGŪDŽIAI\nPROFILIO PARENGTIS\n↓\nTik pradėtas\nAKTUALUMAS\n→\nPaskutinis įrašas — 2026-07-25\nŠIANDIENOS AKTYVUMAS\n→\nŠiandien dar nieko neįrašėte\nDAR TRŪKSTA\nNurodyti prieinamumą\nPridėti įgūdžių\nPridėti darbo įrašą\nPateikti kortelę\nKUR DIRBAI\n(organizacija nerodoma) · (nėra pradžios datos) · dabar\nDev Construction · (nėra pradžios datos) · dabar\n\n2 vyksta dabar.\n\nKĄ RODO TAVO ĮRAŠAI\n\n0 įrašyti įgūdžiai · 0 paremti tavo žurnalu · 0 su vadovo įrašu · 14 žurnalo įrašai.\n\nTAU TINKANČIOS GALIMYBĖS\n\n0 šiuo metu matomos galimybės atitinka tavo profilį.\n\nParenkime jūsų profilį\n1 IŠ 5\n\nKeli žingsniai — ir darbdaviai matys, ką mokate. Kiekvienas žingsnis atsidaro toje vietoje, kur jį užbaigsite.\n\n1. Kokio darbo ieškote?\n2. Įkelkite CV arba atsakykite į kelis klausimus\nPapasakokite apie savo patirtį — įkelkite CV arba įrašykite ją patys.\n3. Patikrinkite, ką radome\nPatvirtinkite, pataisykite arba pašalinkite pasiūlytus įrašus.\n4. Kur norite dirbti?\nNurodykite šalį ir pageidaujamas šalis darbo kortelėje.\n5. Kada galite pradėti?\nPažymėkite savo prieinamumą.\nDW\nĮkelti nuotrauką\n\nJPG, PNG arba WebP, iki 5 MB. Nuotrauka rodoma tik jums.\n\nĮmonės kanalai\n\nDar neturi įmonės. Sukurk pirmąją, kad atsirastų įmonės kanalas.\n\n+ Pridėti įmonę\n\nVeik kaip savarankiškas tiekėjas — tvarkoma tavo asmeniniame profilyje.\n\nJūsų profesinis pasas: CV, įgūdžiai ir darbo žurnalas vienoje vietoje. Įgūdžiai rodomi sąžiningai — kas savarankiškai nurodyta, kas paremta.\nŠtai ką apie jus jau žinome.\n\nPagal tai darbdavys sprendžia, kokiam darbui tinkate.\n\nCV\n↓\nNepateiktas\nĮGŪDŽIAI\n↓\nDar nenurodyta\nDARBO ĮRAŠAI\n→\nŽurnalo įrašai: 14\nPRIEINAMUMAS\n→\nDar nenustatyta\n\nTai jūsų pačių pateikta informacija. Galite ją papildyti vėliau.\n\nPridėti, ko trūksta ↓\nDarbo žurnalas →\nPridėk savo CV — įklijuok arba įkelk ↓\nPeržiūrėti atitinkančias galimybes →\nCV užpildymas\n\nPradėkite nuo bet kurios dalies — eiliškumas nesvarbus.\n\nAprašymas\n○ NEUŽPILDYTA\nDarbo patirtis\n● UŽPILDYTA\nIšsilavinimas\n○ NEUŽPILDYTA\nKalbos\n○ NEUŽPILDYTA\nSertifikatai ir pažymėjimai\n● UŽPILDYTA\nĮgūdžiai\n○ NEUŽPILDYTA\nProjektai\n● UŽPILDYTA\nPasiekimai\n○ NEUŽPILDYTA\nAtlyginimo lūkestis\n○ NEUŽPILDYTA\nPrieinamumas\n○ NEUŽPILDYTA\nPasitikėjimo signalai\n\nŠie skaičiai — tiesiai iš jūsų darbo įrašų.\n\nVADOVO PATVIRTINTI ĮGŪDŽIAI\n0\nVADOVO PATVIRTINIMAI\n0",
+    "screenshot": "C:\\Users\\Mano\\Documents\\lm-w7-ux-audit\\docs\\audits\\evidence\\w7-ux-audit\\worker-profile-375.png"
+  }
+]

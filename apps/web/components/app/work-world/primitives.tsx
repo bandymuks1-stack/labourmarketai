@@ -1,0 +1,392 @@
+import type { ReactNode } from "react";
+
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
+import { playerInitials } from "@/lib/identity/player-identity";
+
+/**
+ * WORK-WORLD PRIMITIVES — the shared visual grammar of LabourMarket.ai.
+ *
+ * The owner-accepted "Living Work World" direction (2026-09-18) is propagated
+ * to the real product through THESE primitives, not page-by-page redesigns.
+ * Every one is presentational and token-driven: it renders canonical facts a
+ * caller already holds, adds no data source and no authority, and uses only
+ * the canonical Tailwind tokens (brand = gold, brand-cyan = EVIDENCE,
+ * trust-accent = VERIFICATION, text-* / surface-* / border-*). No raw hex.
+ *
+ * The one semantic rule these encode, once, for every surface:
+ *   EVIDENCE (cyan) ≠ CONFIRMATION (green).
+ * `EvidenceState`/`EvidenceDot` colour by that rule and nothing else, so a
+ * surface can never accidentally paint a self-attestation as confirmed.
+ *
+ * DESIGN RULE #4 (owner-ratified 2026-09-22): employer-confirmed =
+ * trust-accent GREEN; gold never means confirmation. So an organisation's or
+ * a third party's attestation (`attested`) wears the SAME trust-accent token
+ * as independent verification (`verified`) — it used to wear champagne, a
+ * gold, which made a manager's confirmation read like a brand accent. The
+ * two stay separate VARIANTS (`data-variant` still tells them apart, and only
+ * INDEPENDENTLY_VERIFIED is `verified`); they share the confirmation colour.
+ */
+
+/** The canonical evidence standings, mirrored from
+ *  `lib/organization-evidence/evidence-state.ts` (kept as a string union so a
+ *  presentational primitive never imports the domain module). */
+export type EvidenceStanding =
+  | "ORGANIZATION_REPORTED"
+  | "SELF_REPORTED"
+  | "SELF_ATTESTED"
+  | "ORGANIZATION_ATTESTED"
+  | "THIRD_PARTY_ATTESTED"
+  | "INDEPENDENTLY_VERIFIED"
+  | "DISPUTED"
+  | "CORRECTED"
+  | "WITHDRAWN"
+  | "UNKNOWN";
+
+type Variant = "evidence" | "verified" | "attested" | "reported" | "unknown" | "contested";
+
+/** The ONE mapping from a standing to a colour role. Only a confirmation by
+ *  someone else is green (independent verification, or an organisation /
+ *  third party attesting); a self-attestation is cyan evidence, never green. */
+export function evidenceVariant(state: EvidenceStanding): Variant {
+  switch (state) {
+    case "INDEPENDENTLY_VERIFIED":
+      return "verified";
+    case "ORGANIZATION_ATTESTED":
+    case "THIRD_PARTY_ATTESTED":
+      return "attested";
+    case "SELF_ATTESTED":
+    case "SELF_REPORTED":
+      return "evidence";
+    case "DISPUTED":
+    case "CORRECTED":
+      return "contested";
+    case "WITHDRAWN":
+    case "UNKNOWN":
+      return "unknown";
+    default:
+      return "reported";
+  }
+}
+
+const VARIANT_CLASS: Record<Variant, string> = {
+  // brand-cyan = EVIDENCE_SUPPORTED in the provenance ladder
+  evidence: "text-brand-cyan border-brand-cyan/40",
+  // trust-accent = the ONLY confirmation colour (design rule #4): verified
+  // and attested share it; gold/champagne never means confirmation.
+  verified: "text-trust-accent border-trust-accent/50",
+  attested: "text-trust-accent border-trust-accent/40",
+  reported: "text-text-muted border-border-subtle",
+  unknown: "text-text-muted border-border-subtle border-dashed",
+  contested: "text-state-amber border-state-amber/40",
+};
+
+/** The evidence-standing chip. `label` is caller-localized (the primitive
+ *  stays i18n-agnostic). `data-variant` lets a guard assert the colour rule. */
+export function EvidenceState({
+  state,
+  label,
+  className = "",
+}: {
+  state: EvidenceStanding;
+  label: string;
+  className?: string;
+}) {
+  const variant = evidenceVariant(state);
+  return (
+    <span
+      data-testid="ww-evidence-state"
+      data-state={state}
+      data-variant={variant}
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${VARIANT_CLASS[variant]} ${className}`}
+    >
+      <EvidenceDot state={state} />
+      {label}
+    </span>
+  );
+}
+
+const DOT_CLASS: Record<Variant, string> = {
+  evidence: "bg-brand-cyan",
+  verified: "bg-trust-accent",
+  attested: "bg-trust-accent",
+  reported: "bg-ink-500",
+  unknown: "bg-transparent ring-1 ring-inset ring-ink-500",
+  contested: "bg-state-amber",
+};
+
+/** The diamond node marker — the recurring evidence glyph. */
+export function EvidenceDot({ state, className = "" }: { state: EvidenceStanding; className?: string }) {
+  const variant = evidenceVariant(state);
+  return (
+    <span
+      aria-hidden
+      data-testid="ww-evidence-dot"
+      className={`inline-block h-[7px] w-[7px] rotate-45 rounded-[2px] ${DOT_CLASS[variant]} ${className}`}
+    />
+  );
+}
+
+/** A person as a real presence: a photo when one exists (and is permitted),
+ *  an intentional initial fallback otherwise — never a fabricated face. */
+export function PersonPresence({
+  name,
+  role,
+  photoUrl,
+  available,
+  gold = false,
+  size = 44,
+}: {
+  name: string;
+  role?: string | null;
+  photoUrl?: string | null;
+  available?: boolean;
+  gold?: boolean;
+  size?: number;
+}) {
+  const initial = (name.trim()[0] ?? "·").toUpperCase();
+  return (
+    <span className="flex items-center gap-3" data-testid="ww-person">
+      <PersonPortrait
+        name={name}
+        avatarUrl={photoUrl ?? null}
+        initials={playerInitials(name)}
+        width={`${Math.round(size * 0.8)}px`}
+        working={available}
+      />
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-semibold text-text-primary">{name}</span>
+        {role ? <span className="block truncate text-xs text-text-muted">{role}</span> : null}
+        {available ? (
+          <span className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-text-secondary">
+            <span className="h-2 w-2 rounded-full bg-state-live shadow-[0_0_10px_rgb(var(--c-state-live))]" />
+            available
+          </span>
+        ) : null}
+      </span>
+    </span>
+  );
+}
+
+/** Work × time × place: N filled positions of a total, as a capacity band. */
+export function CapacityBand({
+  filled,
+  total,
+  leftLabel,
+  rightLabel,
+}: {
+  filled: number;
+  total: number;
+  leftLabel: string;
+  rightLabel: string;
+}) {
+  const pct = total > 0 ? Math.min(100, Math.max(0, (filled / total) * 100)) : 0;
+  return (
+    <span
+      data-testid="ww-capacity-band"
+      className="relative block h-14 overflow-hidden rounded-lg border border-border-subtle bg-surface-1"
+    >
+      <span
+        className="absolute inset-y-0 left-0 border-r-2 border-brand-blue bg-brand-blue/20"
+        style={{ width: `${pct}%` }}
+      />
+      <span className="absolute inset-0 flex items-center justify-between px-3.5 font-mono text-xs text-text-secondary">
+        <span>{leftLabel}</span>
+        <span>{rightLabel}</span>
+      </span>
+    </span>
+  );
+}
+
+/** A period of real work as a TIME RIBBON, not a lump. One continuous band
+ *  over the whole period, divided into the months it touches, each labelled
+ *  with its DERIVED even share. The total is the one canonical figure; the
+ *  month segments are a display allocation, never source-observed days — the
+ *  caller supplies both the total figure and that warning label. Renders
+ *  nothing when there is nothing honest to derive. */
+export function PeriodBand({
+  totalLabel,
+  derivedLabel,
+  months,
+  activeMonth = null,
+}: {
+  /** The canonical total, already formatted (e.g. "800 h"). */
+  totalLabel: string;
+  /** "Derived equal monthly share · not source days." */
+  derivedLabel: string;
+  /** Oldest→newest month shares from the canonical projection. */
+  months: readonly { readonly month: string; readonly hours: number }[];
+  /** `YYYY-MM` — the month a calendar is looking at; its segment is drawn
+   *  emphasised so the reader can locate "this month's share" on the band.
+   *  Null (the default) draws every segment alike. */
+  activeMonth?: string | null;
+}) {
+  if (months.length === 0) return null;
+  return (
+    <div data-testid="ww-period-band" className="flex flex-col gap-1.5">
+      <div className="flex items-baseline justify-between gap-2">
+        <span className="font-mono text-sm font-semibold text-brand-cyan" data-testid="ww-period-total">
+          {totalLabel}
+        </span>
+        <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+          {months[0].month} → {months[months.length - 1].month}
+        </span>
+      </div>
+      {/* The band: one cyan-edged span, divided into equal month segments. */}
+      <div className="flex h-9 overflow-hidden rounded-md border border-brand-cyan/40 bg-brand-cyan/5">
+        {months.map((m, i) => (
+          <div
+            key={m.month}
+            data-month={m.month}
+            data-hours={m.hours.toFixed(2)}
+            data-active={m.month === activeMonth ? "true" : undefined}
+            className={`flex flex-1 items-center justify-center ${
+              i === 0 ? "" : "border-l border-brand-cyan/25"
+            } ${m.month === activeMonth ? "bg-brand-cyan/15 ring-1 ring-inset ring-brand-cyan/60" : ""}`}
+          >
+            <span className="font-mono text-meta tabular-nums text-brand-cyan">{m.hours.toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
+      <span className="font-mono text-meta uppercase tracking-label text-text-muted">{derivedLabel}</span>
+    </div>
+  );
+}
+
+/** The six temporal realities a calendar may state about a row. The names
+ *  are the product's, not a scheduler's: a journal entry is OBSERVED (it
+ *  happened), a month share of a period record is DERIVED (an allocation,
+ *  never a source day), a task due day or a proposed booking is PLANNED, an
+ *  accepted booking / assigned project / approved absence or trip is
+ *  COMMITTED (the person is physically bound), two committed rows on one day
+ *  are a CONFLICT, and a row with no date is UNKNOWN — never zero, never
+ *  today. */
+export type TimeRealityKind =
+  | "observed"
+  | "derived"
+  | "planned"
+  | "committed"
+  | "conflict"
+  | "unknown";
+
+const REALITY_CLASS: Record<TimeRealityKind, string> = {
+  // observed = cyan EVIDENCE (the same colour the journal wears everywhere)
+  observed: "text-brand-cyan border-brand-cyan/40",
+  // derived = the same evidence colour, dashed: real total, allocated months
+  derived: "text-brand-cyan border-dashed border-brand-cyan/40",
+  // committed = gold, the canonical / selected colour: this binds the person
+  committed: "text-brand-blue border-brand-blue/50",
+  planned: "text-text-secondary border-border-subtle",
+  conflict: "text-state-danger border-state-danger/50 bg-state-danger/10",
+  unknown: "text-text-muted border-dashed border-border-subtle",
+};
+
+/** The temporal-reality chip. `label` is caller-localized; `data-kind` lets a
+ *  guard assert that a plan is never painted as an observation. */
+export function TimeReality({
+  kind,
+  label,
+  className = "",
+}: {
+  kind: TimeRealityKind;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <span
+      data-testid="ww-time-reality"
+      data-kind={kind}
+      className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${REALITY_CLASS[kind]} ${className}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+/** How precisely a place is known. COUNTRY ≠ CITY ≠ ADDRESS ≠ UNKNOWN, and
+ *  the map never infers one from the other: a country-level position is drawn
+ *  as country-level (dashed), a stated city or address as stated (cyan), and
+ *  an unknown place stays UNKNOWN — never a centroid pretending to be a pin. */
+export type PlacePrecisionKind = "address" | "city" | "country" | "unknown";
+
+const PRECISION_CLASS: Record<PlacePrecisionKind, string> = {
+  // a stated place is a FACT of the record — the evidence colour
+  address: "text-brand-cyan border-brand-cyan/40",
+  city: "text-brand-cyan border-brand-cyan/40",
+  // country only = an approximate, derived position — dashed, never cyan
+  country: "text-text-secondary border-dashed border-border-subtle",
+  unknown: "text-text-muted border-dashed border-border-subtle",
+};
+
+/** The place-precision chip. `label` is caller-localized; `data-kind` lets a
+ *  guard assert a country-level place is never painted as a stated one. */
+export function PlacePrecision({
+  kind,
+  label,
+  className = "",
+}: {
+  kind: PlacePrecisionKind;
+  label: string;
+  className?: string;
+}) {
+  return (
+    <span
+      data-testid="ww-place-precision"
+      data-kind={kind}
+      className={`inline-flex shrink-0 items-center rounded-md border px-2 py-0.5 font-mono text-meta font-semibold uppercase tracking-label ${PRECISION_CLASS[kind]} ${className}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+/** Canonical spatial/temporal context. Mono, because it is machine-precise. */
+export function PlaceTimeStamp({ children }: { children: ReactNode }) {
+  return (
+    <span data-testid="ww-place-time" className="font-mono text-xs tracking-label text-text-muted">
+      {children}
+    </span>
+  );
+}
+
+/** THE WORK SPINE — the signature motif. Real work anchored to org · time ·
+ *  place · evidence, on a continuous cyan line. Reused on identity, journal,
+ *  history and demand so the whole product reads as one work world. */
+export function WorkSpine({ children }: { children: ReactNode }) {
+  return (
+    <ol data-testid="ww-spine" className="relative flex list-none flex-col pl-7">
+      <span
+        aria-hidden
+        className="absolute bottom-1.5 left-[6px] top-1.5 w-0.5 bg-gradient-to-b from-brand-cyan/55 to-brand-cyan/10"
+      />
+      {children}
+    </ol>
+  );
+}
+
+export function WorkSpineNode({
+  state = "ORGANIZATION_REPORTED",
+  solid,
+  children,
+}: {
+  state?: EvidenceStanding;
+  solid?: boolean;
+  children: ReactNode;
+}) {
+  const variant = evidenceVariant(state);
+  // Design rule #4: a confirmation by someone else — verified OR attested —
+  // is drawn in the trust-accent green; everything else is cyan evidence.
+  const border =
+    variant === "verified" || variant === "attested"
+      ? "border-trust-accent"
+      : "border-brand-cyan";
+  const fill = solid ? DOT_CLASS[variant] : "bg-ink-900";
+  return (
+    <li data-testid="ww-spine-node" className="relative pb-5 last:pb-0">
+      <span
+        aria-hidden
+        className={`absolute left-[-25px] top-1.5 h-3 w-3 rotate-45 rounded-[3px] border-2 ${border} ${fill}`}
+      />
+      {children}
+    </li>
+  );
+}
