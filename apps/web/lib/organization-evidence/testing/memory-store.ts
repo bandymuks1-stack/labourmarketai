@@ -427,10 +427,13 @@ function memoryStore(db: MemoryEvidenceDb, actor: MemoryActor): EvidenceStore {
       return ok(t.parties.filter((p) => recordIds.includes(p.record_id as string)).map(clone));
     },
 
-    async readRecordIdsNamingOrganization(partyOrganizationId) {
+    async readRecordIdsNamingOrganization(partyOrganizationId, roles) {
       return ok([
         ...new Set(
-          t.parties.filter((p) => p.party_organization_id === partyOrganizationId).map((p) => p.record_id as string),
+          t.parties
+            .filter((p) => p.party_organization_id === partyOrganizationId)
+            .filter((p) => !roles || roles.includes(p.party_role as string))
+            .map((p) => p.record_id as string),
         ),
       ]);
     },

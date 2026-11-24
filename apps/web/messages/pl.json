@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Reprezentuję instytucję edukacyjną",
-            "desc": "Zapraszanie uczących się, wgląd w ich udział i łączenie ich z praktykami i pracą."
+            "desc": "Zapraszanie uczących się, prowadzenie programów i śledzenie ich praktyk oraz wyników."
           }
         },
         "heading": "Zaczynają Państwo jako osoba czy jako firma?",
@@ -5084,7 +5084,15 @@
         "event_invitation_accepted": "Ktoś przyjął Państwa zaproszenie",
         "event_weekly_digest_profile_completion": "Aby pokazać pasujące oferty, proszę potwierdzić, jaką pracę Państwo wykonują",
         "event_weekly_digest_journal": "Podsumowanie Państwa dziennika pracy z tego tygodnia jest gotowe",
-        "event_history_link_offered": "Organizacja zaproponowała powiązanie zarejestrowanej historii Państwa pracy z Państwa kontem"
+        "event_history_link_offered": "Organizacja zaproponowała powiązanie zarejestrowanej historii Państwa pracy z Państwa kontem",
+        "event_team_offer_received": "Zespół zgłosił się do Państwa zapotrzebowania",
+        "event_team_offer_answered": "Odpowiedziano na ofertę Państwa zespołu",
+        "event_team_offer_answered_accepted": "Oferta Państwa zespołu została przyjęta",
+        "event_team_offer_answered_declined": "Oferta Państwa zespołu została odrzucona",
+        "event_candidate_offer_received": "Agencja zaproponowała kandydata do Państwa zapotrzebowania",
+        "event_candidate_offer_answered": "Odpowiedziano na zaproponowanego przez Państwa kandydata",
+        "event_candidate_offer_answered_accepted": "Zaproponowany przez Państwa kandydat został przyjęty",
+        "event_candidate_offer_answered_declined": "Zaproponowany przez Państwa kandydat został odrzucony"
       },
       "label": "Moje powiadomienia",
       "emptyTitle": "Nic nie wymaga teraz Państwa uwagi.",
@@ -5822,9 +5830,9 @@
       "confirmedTitle": "Usunięcie potwierdzone",
       "confirmedBody": "System usunie konto w ciągu kilku minut i wyśle potwierdzenie na adres e-mail konta. Jeśli coś będzie wymagało przeglądu, poinformujemy Państwa.",
       "inReview": "Automatyczne usunięcie wstrzymano do przeglądu: konto zawiera dane, które mogą wymagać przechowywania na mocy prawa lub dotyczą innych osób. Decyzję i jej uzasadnienie otrzymają Państwo e-mailem w ciągu miesiąca. Do tego czasu Państwa profil nie jest widoczny w wyszukiwaniu.",
-      "confirmLabelWaiting": "Rozumiem, że konto i jego dane zostaną usunięte nieodwracalnie 30 dni po potwierdzeniu, chyba że wcześniej anuluję.",
-      "confirmStepBodyWaiting": "Państwa wniosek o usunięcie konta został złożony. Proszę go potwierdzić — konto zostanie zachowane przez 30 dni i w tym czasie mogą Państwo anulować na tej stronie. Potem system usunie konto automatycznie i wyśle potwierdzenie e-mailem.",
-      "confirmedBodyWaiting": "Konto zostanie usunięte za 30 dni. Do tego czasu mogą Państwo anulować na tej stronie. Po usunięciu wyślemy potwierdzenie na adres e-mail konta.",
+      "confirmLabelWaiting": "Rozumiem, że konto i jego dane zostaną usunięte nieodwracalnie najpóźniej 30 dni po potwierdzeniu i najpóźniej miesiąc od mojego wniosku, chyba że wcześniej anuluję.",
+      "confirmStepBodyWaiting": "Państwa wniosek o usunięcie konta został złożony. Proszę go potwierdzić — konto zostanie zachowane przez najwyżej 30 dni (nie dłużej niż miesiąc od wniosku) i w tym czasie mogą Państwo anulować na tej stronie. Potem system usunie konto automatycznie i wyśle potwierdzenie e-mailem.",
+      "confirmedBodyWaiting": "Konto zostanie usunięte w ciągu 30 dni, najpóźniej miesiąc od wniosku. Do tego czasu mogą Państwo anulować na tej stronie. Po usunięciu wyślemy potwierdzenie na adres e-mail konta.",
       "status": {
         "pending": "Państwa wniosek o usunięcie konta został złożony.",
         "pendingConfirmed": "Usunięcie konta jest potwierdzone i zaplanowane.",
@@ -5832,7 +5840,7 @@
         "inProgress": "Usuwanie konta już trwa — nie można go już anulować.",
         "done": "Konto zostało usunięte.",
         "submittedAt": "Złożono: {date}",
-        "scheduledAt": "Konto zostanie usunięte {date} (po 30 dniach oczekiwania).",
+        "scheduledAt": "Konto zostanie usunięte {date}.",
         "cancelUntil": "Do tego czasu mogą Państwo anulować.",
         "loadError": "Nie udało się wczytać stanu usuwania konta. Proszę odświeżyć stronę i spróbować ponownie."
       },
@@ -15970,7 +15978,6 @@
     },
     "v3": {
       "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
-      "moreChoices": "Więcej opcji",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
       "market": {
@@ -19391,6 +19398,19 @@
       "period": "Zapisano",
       "basis": "Z {entries} wpisów w dzienniku, które osoby zapisały w tej organizacji. Liczone osobno od zaimportowanej historii powyżej i nigdy do niej nie dodawane.",
       "unavailable": "Nie udało się teraz odczytać pracy zapisanej w dzienniku w tej organizacji."
+    },
+    "forClient": {
+      "title": "Prace podwykonawców",
+      "confirmed": "Potwierdzone wpisy",
+      "unconfirmed": "Niepotwierdzone wpisy",
+      "periodHours": "{hours} h podano jako sumę za okres; nie dodano do pojedynczych dni.",
+      "basis": "Z {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}} w ewidencji podwykonawców. Liczone osobno od własnej pracy organizacji.",
+      "unreadable": "Nie udało się teraz odczytać prac zapisanych w ewidencji partnerów. Nie oznacza to, że ich nie ma."
+    },
+    "clients": {
+      "title": "Klienci",
+      "unnamed": "Organizacja klienta",
+      "records": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
     }
   },
   "workPlan": {
@@ -19635,7 +19655,8 @@
       "heading": "Państwa oferty",
       "none": "Brak ofert.",
       "withdraw": "Wycofaj",
-      "message": "Napisz do zleceniodawcy"
+      "message": "Napisz do zleceniodawcy",
+      "orgNext": "Zleceniodawca wstępnie się zgodził (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
     },
     "status": {
       "offered": "Czeka na odpowiedź",
@@ -19736,7 +19757,7 @@
       "message": "Napisz do zespołu",
       "messageCompany": "Napisz do firmy",
       "kindOrganization": "Oferta firmy",
-      "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, proszę ustalić w rozmowie."
+      "orgNext": "Uzgodnione wstępnie (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
     },
     "orgHeading": "Zaoferuj naszą firmę do otwartej potrzeby",
     "orgIntro": "Proszę zaoferować samą firmę — swoich ludzi, swoją usługę lub jako podwykonawca — do jednej otwartej potrzeby. Nie trzeba najpierw tworzyć brygady.",

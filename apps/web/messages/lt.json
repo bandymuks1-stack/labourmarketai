@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Atstovauju mokymo įstaigai",
-            "desc": "Kvieskite besimokančiuosius, matykite jų dalyvavimą ir junkite juos prie praktikų ir darbų."
+            "desc": "Kvieskite besimokančiuosius, vykdykite programas ir sekite jų praktiką bei rezultatus."
           }
         },
         "heading": "Pradedate kaip asmuo ar įmonė?",
@@ -5084,7 +5084,15 @@
         "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą",
         "event_weekly_digest_profile_completion": "Norint pamatyti jums tinkamus darbus, patvirtinkite, kokį darbą dirbate",
         "event_weekly_digest_journal": "Paruošta jūsų savaitės darbo žurnalo apžvalga",
-        "event_history_link_offered": "Organizacija pasiūlė susieti jūsų užfiksuotą darbo istoriją su jūsų paskyra"
+        "event_history_link_offered": "Organizacija pasiūlė susieti jūsų užfiksuotą darbo istoriją su jūsų paskyra",
+        "event_team_offer_received": "Komanda pasiūlė save jūsų poreikiui",
+        "event_team_offer_answered": "Į jūsų komandos pasiūlymą atsakyta",
+        "event_team_offer_answered_accepted": "Jūsų komandos pasiūlymas priimtas",
+        "event_team_offer_answered_declined": "Jūsų komandos pasiūlymas atmestas",
+        "event_candidate_offer_received": "Agentūra pasiūlė kandidatą jūsų poreikiui",
+        "event_candidate_offer_answered": "Į jūsų pasiūlytą kandidatą atsakyta",
+        "event_candidate_offer_answered_accepted": "Jūsų pasiūlytas kandidatas priimtas",
+        "event_candidate_offer_answered_declined": "Jūsų pasiūlytas kandidatas atmestas"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",
@@ -5822,9 +5830,9 @@
       "confirmedTitle": "Ištrynimas patvirtintas",
       "confirmedBody": "Sistema paskyrą ištrins per artimiausias kelias minutes ir atsiųs patvirtinimą paskyros el. paštu. Jei kažką reikės peržiūrėti, apie tai pranešime.",
       "inReview": "Automatinis ištrynimas sustabdytas peržiūrai: paskyroje yra duomenų, kuriuos gali tekti saugoti pagal įstatymą arba kurie susiję su kitais žmonėmis. Sprendimą ir priežastis gausite el. paštu per vieną mėnesį. Tuo metu jūsų profilis nerodomas paieškoje.",
-      "confirmLabelWaiting": "Suprantu, kad paskyra ir jos duomenys bus ištrinti negrįžtamai po 30 dienų nuo patvirtinimo, nebent iki tol atšauksiu.",
-      "confirmStepBodyWaiting": "Jūsų paskyros šalinimo užklausa pateikta. Patvirtinkite ją — paskyra bus išlaikyta 30 dienų, per tą laiką galite atšaukti šiame puslapyje. Po to sistema paskyrą ištrins automatiškai ir atsiųs patvirtinimą el. paštu.",
-      "confirmedBodyWaiting": "Paskyra bus ištrinta po 30 dienų. Iki tol galite atšaukti šiame puslapyje. Ištrynus atsiųsime patvirtinimą į paskyros el. paštą.",
+      "confirmLabelWaiting": "Suprantu, kad paskyra ir jos duomenys bus ištrinti negrįžtamai ne vėliau kaip po 30 dienų nuo patvirtinimo ir ne vėliau kaip per mėnesį nuo mano prašymo, nebent iki tol atšauksiu.",
+      "confirmStepBodyWaiting": "Jūsų paskyros šalinimo užklausa pateikta. Patvirtinkite ją — paskyra bus išlaikyta iki 30 dienų (ne ilgiau kaip mėnesį nuo prašymo), per tą laiką galite atšaukti šiame puslapyje. Po to sistema paskyrą ištrins automatiškai ir atsiųs patvirtinimą el. paštu.",
+      "confirmedBodyWaiting": "Paskyra bus ištrinta per 30 dienų, bet ne vėliau kaip per mėnesį nuo prašymo. Iki tol galite atšaukti šiame puslapyje. Ištrynus atsiųsime patvirtinimą į paskyros el. paštą.",
       "status": {
         "pending": "Paskyros ištrynimo užklausa pateikta.",
         "pendingConfirmed": "Paskyros ištrynimas patvirtintas ir suplanuotas.",
@@ -5832,7 +5840,7 @@
         "inProgress": "Paskyros ištrynimas jau vyksta — jo atšaukti nebegalima.",
         "done": "Paskyra ištrinta.",
         "submittedAt": "Pateikta: {date}",
-        "scheduledAt": "Paskyra bus ištrinta {date} (po 30 dienų laukimo).",
+        "scheduledAt": "Paskyra bus ištrinta {date}.",
         "cancelUntil": "Iki tol galite atšaukti.",
         "loadError": "Nepavyko įkelti paskyros ištrynimo būsenos. Atnaujinkite puslapį ir pabandykite dar kartą."
       },
@@ -15970,7 +15978,6 @@
     },
     "v3": {
       "lead": "Darbuotojams, darbdaviams ir paslaugų teikėjams – visų profesijų ir sektorių. Registracija ir pagrindinis poreikio skelbimas nemokami.",
-      "moreChoices": "Daugiau pasirinkimų",
       "or": "arba aprašykite savo žodžiais",
       "needFree": "Užklausą galite pateikti be registracijos. Pateikimas nemokamas; paslaugų sąlygos ir kaina derinamos atskirai.",
       "market": {
@@ -19391,6 +19398,19 @@
       "period": "Įrašyta",
       "basis": "Iš {entries} žurnalo įrašų, kuriuos žmonės įrašė šioje organizacijoje. Skaičiuojama atskirai nuo aukščiau esančios importuotos istorijos ir niekada su ja nesumuojama.",
       "unavailable": "Šiuo metu nepavyko perskaityti šioje organizacijoje žurnale įrašyto darbo."
+    },
+    "forClient": {
+      "title": "Subrangovų atlikti darbai",
+      "confirmed": "Patvirtinti įrašai",
+      "unconfirmed": "Nepatvirtinti įrašai",
+      "periodHours": "{hours} val. nurodyta kaip laikotarpio suma, nepridėta prie atskirų dienų.",
+      "basis": "Iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} jūsų subrangovų apskaitoje. Skaičiuojama atskirai nuo jūsų pačių darbų.",
+      "unreadable": "Partnerių apskaitoje užfiksuotų darbų šiuo metu nepavyko perskaityti. Tai nereiškia, kad jų nėra."
+    },
+    "clients": {
+      "title": "Užsakovai",
+      "unnamed": "Užsakovo organizacija",
+      "records": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
     }
   },
   "workPlan": {
@@ -19635,7 +19655,8 @@
       "heading": "Jūsų pasiūlymai",
       "none": "Pasiūlymų dar nėra.",
       "withdraw": "Atšaukti",
-      "message": "Rašyti užsakovui"
+      "message": "Rašyti užsakovui",
+      "orgNext": "Užsakovas iš esmės sutiko (tai nėra sutartis). Pradėti darbus pagal įmonės pasiūlymą per platformą dar negalima: detales ir dirbsiančius žmones suderinkite pokalbyje."
     },
     "status": {
       "offered": "Laukiama atsakymo",
@@ -19736,7 +19757,7 @@
       "message": "Rašyti komandai",
       "messageCompany": "Rašyti įmonei",
       "kindOrganization": "Įmonės pasiūlymas",
-      "orgNext": "Sutarta iš esmės (ne sutartis). Detales ir dirbsiančius žmones suderinkite pokalbyje."
+      "orgNext": "Iš esmės sutarta (tai nėra sutartis). Pradėti darbus pagal įmonės pasiūlymą per platformą dar negalima: detales ir dirbsiančius žmones suderinkite pokalbyje."
     },
     "orgHeading": "Pasiūlyti savo įmonę atviram poreikiui",
     "orgIntro": "Pasiūlykite pačią įmonę — savo žmones, paslaugą ar kaip subrangovą — vienam atviram poreikiui. Brigados kurti nereikia.",

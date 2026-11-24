@@ -387,7 +387,15 @@
         "event_journal_review_decided_changes_requested": "Det er bedt om endringer i journalinnlegget ditt",
         "event_weekly_digest_profile_completion": "For å vise deg passende jobber, bekreft hvilket arbeid du gjør",
         "event_weekly_digest_journal": "Ukens oversikt over arbeidsjournalen din er klar",
-        "event_history_link_offered": "En organisasjon tilbyr å koble din registrerte arbeidshistorikk til kontoen din"
+        "event_history_link_offered": "En organisasjon tilbyr å koble din registrerte arbeidshistorikk til kontoen din",
+        "event_team_offer_received": "Et team har tilbudt seg til behovet ditt",
+        "event_team_offer_answered": "Teamets tilbud er besvart",
+        "event_team_offer_answered_accepted": "Teamets tilbud er akseptert",
+        "event_team_offer_answered_declined": "Teamets tilbud er avslått",
+        "event_candidate_offer_received": "Et byrå har foreslått en kandidat til behovet ditt",
+        "event_candidate_offer_answered": "Kandidaten du foreslo er besvart",
+        "event_candidate_offer_answered_accepted": "Kandidaten du foreslo er akseptert",
+        "event_candidate_offer_answered_declined": "Kandidaten du foreslo er avslått"
       },
       "email": {
         "open": "Åpne i LabourMarket.ai:",
@@ -456,7 +464,7 @@
           },
           "education": {
             "title": "Jeg representerer et utdanningssted",
-            "desc": "Inviter elever, se deltakelsen deres og koble dem til praksis og jobber."
+            "desc": "Inviter elever, driv programmer og følg praksisen og resultatene deres."
           }
         },
         "agency": {
@@ -4813,7 +4821,6 @@
     },
     "v3": {
       "lead": "For arbeidstakere, arbeidsgivere og tjenesteleverandører i alle yrker og bransjer. Registrering og grunnleggende publisering av et behov er gratis.",
-      "moreChoices": "Flere valg",
       "or": "eller beskriv det med egne ord",
       "needFree": "Du kan sende en forespørsel uten å registrere deg. Det er gratis å sende den; vilkår og pris for tjenestene avtales separat.",
       "market": {
@@ -7137,6 +7144,19 @@
       "period": "Registrert",
       "basis": "Fra {entries} journalinnføringer som personer registrerte under denne organisasjonen. Telt atskilt fra den importerte historikken ovenfor og aldri lagt til den.",
       "unavailable": "Arbeidet registrert i journalen under denne organisasjonen kunne ikke leses akkurat nå."
+    },
+    "forClient": {
+      "title": "Arbeid utført av underleverandørene deres",
+      "confirmed": "Bekreftede poster",
+      "unconfirmed": "Ikke bekreftede poster",
+      "periodHours": "{hours} t oppgitt som periodesum, ikke lagt til enkeltdager.",
+      "basis": "Fra {count, plural, one {# post} other {# poster}} i underleverandørenes egne registre. Telt separat fra deres eget arbeid.",
+      "unreadable": "Arbeid i partneres registre kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes."
+    },
+    "clients": {
+      "title": "Oppdragsgivere",
+      "unnamed": "Oppdragsgivers organisasjon",
+      "records": "{count, plural, one {# post} other {# poster}}"
     }
   },
   "workLifecycle": {

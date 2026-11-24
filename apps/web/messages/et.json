@@ -387,7 +387,15 @@
         "event_journal_review_decided_changes_requested": "Sinu töölogi kande kohta on küsitud muudatusi",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
         "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis",
-        "event_history_link_offered": "Organisatsioon pakub siduda sinu registreeritud tööajaloo sinu kontoga"
+        "event_history_link_offered": "Organisatsioon pakub siduda sinu registreeritud tööajaloo sinu kontoga",
+        "event_team_offer_received": "Meeskond pakkus end teie vajadusele",
+        "event_team_offer_answered": "Teie meeskonna pakkumisele vastati",
+        "event_team_offer_answered_accepted": "Teie meeskonna pakkumine võeti vastu",
+        "event_team_offer_answered_declined": "Teie meeskonna pakkumine lükati tagasi",
+        "event_candidate_offer_received": "Agentuur pakkus teie vajadusele kandidaadi",
+        "event_candidate_offer_answered": "Teie pakutud kandidaadile vastati",
+        "event_candidate_offer_answered_accepted": "Teie pakutud kandidaat võeti vastu",
+        "event_candidate_offer_answered_declined": "Teie pakutud kandidaat lükati tagasi"
       },
       "email": {
         "open": "Ava LabourMarket.ai-s:",
@@ -456,7 +464,7 @@
           },
           "education": {
             "title": "Esindan õppeasutust",
-            "desc": "Kutsu õppijaid, näe nende osalust ning ühenda nad praktika ja tööga."
+            "desc": "Kutsu õppijaid, vii läbi programme ning jälgi nende praktikat ja tulemusi."
           }
         },
         "agency": {
@@ -4813,7 +4821,6 @@
     },
     "v3": {
       "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine ja põhivajaduse avaldamine on tasuta.",
-      "moreChoices": "Rohkem valikuid",
       "or": "või kirjeldage oma sõnadega",
       "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
       "market": {
@@ -7137,6 +7144,19 @@
       "period": "Kirja pandud",
       "basis": "{entries} päevikukirjest, mille inimesed selle organisatsiooni all tegid. Loetakse eraldi ülaltoodud imporditud ajaloost ja sellele kunagi ei liideta.",
       "unavailable": "Selle organisatsiooni all päevikusse kirja pandud tööd ei õnnestunud praegu lugeda."
+    },
+    "forClient": {
+      "title": "Teie alltöövõtjate töö",
+      "confirmed": "Kinnitatud kirjed",
+      "unconfirmed": "Kinnitamata kirjed",
+      "periodHours": "{hours} h on märgitud perioodi summana, üksikute päevade hulka lisamata.",
+      "basis": "{count, plural, one {# kirjest} other {# kirjest}} teie alltöövõtjate enda arvestuses. Loetud eraldi teie enda tööst.",
+      "unreadable": "Partnerite arvestuses olevat tööd ei õnnestunud praegu lugeda. See ei tähenda, et seda pole."
+    },
+    "clients": {
+      "title": "Tellijad",
+      "unnamed": "Tellija organisatsioon",
+      "records": "{count, plural, one {# kirje} other {# kirjet}}"
     }
   },
   "workLifecycle": {

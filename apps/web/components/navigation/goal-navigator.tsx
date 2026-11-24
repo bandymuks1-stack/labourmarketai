@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useEffect, useMemo, useState, useSyncExternalStore } from "react";
-import { ChevronDown, X } from "lucide-react";
+import { X } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
 import {
@@ -124,8 +124,6 @@ export function GoalNavigator({
   labels,
   locale,
   headingLevel = "h2",
-  phoneLayout = "rail",
-  phoneMore,
   lead,
 }: {
   goals: readonly NavigatorGoal[];
@@ -142,15 +140,6 @@ export function GoalNavigator({
   labels: NavigatorLabels;
   locale: string;
   headingLevel?: "h1" | "h2";
-  /** How the goal cards are laid out below `sm`: one scrolling rail, or all
-   *  of them in a three-column grid (no swipe). Wider screens are the same. */
-  phoneLayout?: "rail" | "grid";
-  /**
-   * On a phone, show only the goals NOT listed here first (two columns) and
-   * put these under one clearly marked "more choices" part. Wider screens
-   * show every goal in the one row. All goals stay reachable everywhere.
-   */
-  phoneMore?: { readonly ids: readonly string[]; readonly label: string };
   /** One supporting line directly under the heading: who it is for and what
    *  is free. Above the goals, so it is read before the choice. */
   lead?: string;
@@ -318,8 +307,6 @@ export function GoalNavigator({
         label={labels.heading}
         testId="goal-rail"
         size="compact"
-        phoneGrid={phoneMore ? 2 : phoneLayout === "grid"}
-        phoneHiddenIds={phoneMore?.ids}
         cards={goals}
         activeId={activeId}
         onSelect={select}
@@ -327,39 +314,6 @@ export function GoalNavigator({
         prevLabel={labels.previous}
         nextLabel={labels.next}
       />
-
-      {/* PHONE ONLY: the remaining goals, one tap away, in the same cards.
-          A native <details>, so it opens with no script; it is open when one
-          of its goals is the chosen one. */}
-      {phoneMore && (
-        <details
-          data-testid="goal-more-choices"
-          open={(activeId !== null && phoneMore.ids.includes(activeId)) || undefined}
-          className="group sm:hidden"
-        >
-          <summary className="flex min-h-11 cursor-pointer list-none items-center justify-center gap-2 rounded-xl border border-ink-600 px-4 text-sm font-medium text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue [&::-webkit-details-marker]:hidden">
-            {phoneMore.label}
-            <ChevronDown
-              aria-hidden
-              className="size-4 text-text-muted transition-transform group-open:rotate-180 motion-reduce:transition-none"
-            />
-          </summary>
-          <div className="pt-2">
-            <CardRail
-              label={phoneMore.label}
-              testId="goal-rail-more"
-              size="compact"
-              phoneGrid={2}
-              cards={goals.filter((g) => phoneMore.ids.includes(g.id))}
-              activeId={activeId}
-              onSelect={select}
-              swipeHint={labels.swipe}
-              prevLabel={labels.previous}
-              nextLabel={labels.next}
-            />
-          </div>
-        </details>
-      )}
 
       {/* Before the scripts are alive: one hidden panel per goal, shown by
           `:target` alone. The anchor sits at the top of the navigator so the
@@ -413,7 +367,6 @@ export function GoalNavigator({
               <CardRail
                 label={labels.functions}
                 testId="function-rail-early"
-                phoneGrid={phoneMore ? 2 : false}
                 cards={goal.functions}
                 swipeHint={labels.swipe}
                 prevLabel={labels.previous}
@@ -461,7 +414,6 @@ export function GoalNavigator({
             <CardRail
               label={labels.functions}
               testId="function-rail"
-              phoneGrid={phoneMore ? 2 : false}
               cards={active.functions}
               swipeHint={labels.swipe}
               prevLabel={labels.previous}
@@ -493,10 +445,7 @@ export function GoalNavigator({
               </form>
 
               <div
-                className={cn(
-                  "flex gap-2 py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
-                  phoneMore ? "flex-wrap sm:flex-nowrap sm:overflow-x-auto" : "overflow-x-auto",
-                )}
+                className="flex gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
                 data-testid="sector-chips"
               >
                 <button
@@ -522,7 +471,6 @@ export function GoalNavigator({
               </div>
 
               {!fullList && (
-                <div className={phoneMore ? "max-sm:hidden" : undefined}>
                 <CardRail
                   label={labels.professions}
                   testId="profession-rail"
@@ -531,15 +479,11 @@ export function GoalNavigator({
                   prevLabel={labels.previous}
                   nextLabel={labels.next}
                 />
-                </div>
               )}
-              {(fullList || Boolean(phoneMore)) && (
+              {fullList && (
                 <ul
                   data-testid="profession-list"
-                  className={cn(
-                    "grid grid-cols-2 gap-x-4 sm:grid-cols-3 lg:grid-cols-4",
-                    !fullList && "sm:hidden",
-                  )}
+                  className="grid grid-cols-2 gap-x-4 sm:grid-cols-3 lg:grid-cols-4"
                 >
                   {shown.map((p) => (
                     <li key={p.id}>
