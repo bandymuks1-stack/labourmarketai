@@ -211,8 +211,9 @@ for (const size of SIZES) {
       await expect(block).toHaveAttribute("data-records", String(RECORDS.length));
       await expect(block).toHaveAttribute("data-confirmed", "0");
       await expect(block.getByRole("heading")).toHaveText("Work by your subcontractors");
-      await expect(block, "single-day hours only, the period total kept apart").toContainText("15 h");
-      await expect(block).toContainText("120 h");
+      // ONE total, every hour once (decision 0025, #3773): 8 + 7 single days and
+      // the June period, which no recorded day overlaps, so it is counted.
+      await expect(block, "one total: 8 + 7 + 120").toContainText("135 h");
       const main = (await page.getByRole("main").first().innerText()).toLowerCase();
       for (const name of [SP_NAME, PLACE, ORG_S]) {
         expect(main.includes(name.toLowerCase()), `C's page never names "${name}"`).toBe(false);
