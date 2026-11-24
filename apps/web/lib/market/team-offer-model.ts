@@ -234,6 +234,29 @@ export type TeamOfferRefusal =
   | "terms_limit_reached"
   | "terms_await_other_side"
   | "organization_offer_not_a_unit"
+  /** Company offer to work (20261122200000). */
+  | "terms_missing"
+  | "terms_not_agreed"
+  | "unit_not_named"
+  | "unit_not_yours"
+  /** The brigade has no member on the offering company's active roster. */
+  | "unit_not_of_company"
+  /** The work on this offer was already started (on another project). */
+  | "already_started"
+  | "unit_has_no_members"
+  | "not_an_organization_offer"
+  /** Agency candidates on an open need (20261122210000). */
+  | "not_an_agency_offer"
+  | "worker_not_on_roster"
+  | "candidate_limit_reached"
+  | "candidate_not_open"
+  | "candidate_already_selected"
+  /** The worker has not chosen to be visible to companies. */
+  | "worker_not_discoverable"
+  /** The worker left the agency's roster or withdrew their consent. */
+  | "candidate_not_available"
+  | "connection_conflict"
+  | "client_company_unknown"
   | "needs_migration"
   | "error";
 
@@ -259,6 +282,22 @@ const STABLE_WORDS: readonly TeamOfferRefusal[] = [
   "terms_limit_reached",
   "terms_await_other_side",
   "organization_offer_not_a_unit",
+  "terms_missing",
+  "terms_not_agreed",
+  "unit_not_named",
+  "unit_not_yours",
+  "unit_not_of_company",
+  "unit_has_no_members",
+  "not_an_organization_offer",
+  "not_an_agency_offer",
+  "worker_not_on_roster",
+  "candidate_limit_reached",
+  "candidate_not_open",
+  "candidate_already_selected",
+  "worker_not_discoverable",
+  "candidate_not_available",
+  "connection_conflict",
+  "client_company_unknown",
 ];
 
 const MISSING_CODES = new Set(["42P01", "42703", "42883", "PGRST202", "PGRST205"]);
@@ -338,9 +377,16 @@ export interface OfferTermsVersion {
   readonly endDate: string | null;
   readonly scopeText: string | null;
   readonly conditionsText: string | null;
+  /** Where the work is done (v2; null on v1). */
+  readonly placeText: string | null;
   readonly status: "proposed" | "superseded" | "accepted" | "declined";
   readonly createdAt: string;
   readonly decidedAt: string | null;
+  /** Explicit confirmations after the client's preliminary yes (v2; false on v1).
+   *  Both on the same, latest version = the terms both parties agreed. */
+  readonly supplierConfirmed: boolean;
+  readonly receiverConfirmed: boolean;
+  readonly confirmedByMe: boolean;
 }
 
 const TERMS_STATUSES = new Set(["proposed", "superseded", "accepted", "declined"]);
@@ -363,9 +409,13 @@ export function parseTermsVersion(raw: unknown): OfferTermsVersion | null {
     endDate: s(r.end_date),
     scopeText: s(r.scope_text),
     conditionsText: s(r.conditions_text),
+    placeText: s(r.place_text),
     status: r.status as OfferTermsVersion["status"],
     createdAt: s(r.created_at) ?? "",
     decidedAt: s(r.decided_at),
+    supplierConfirmed: r.supplier_confirmed === true,
+    receiverConfirmed: r.receiver_confirmed === true,
+    confirmedByMe: r.confirmed_by_me === true,
   };
 }
 
@@ -382,6 +432,7 @@ export interface OfferTermsInput {
   readonly endDate: string | null;
   readonly scopeText: string | null;
   readonly conditionsText: string | null;
+  readonly placeText: string | null;
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -400,6 +451,127 @@ export function normalizeTermsInput(raw: Partial<Record<keyof OfferTermsInput, u
     endDate: date(raw.endDate),
     scopeText: text(raw.scopeText, 2000),
     conditionsText: text(raw.conditionsText, 2000),
+    placeText: text(raw.placeText, 300),
   };
   return Object.values(out).some((v) => v !== null) ? out : null;
+}
+
+// ── Company offer to work (20261122200000) ────────────────────────────────
+
+/** The latest terms version both parties may confirm after the preliminary
+ *  yes: the newest one, unless it was superseded or declined. */
+export function confirmableTerms(versions: readonly OfferTermsVersion[]): OfferTermsVersion | null {
+  const latest = versions[0];
+  return latest && (latest.status === "proposed" || latest.status === "accepted") ? latest : null;
+}
+
+/** Where one offer stands, for either party (no person, no profile id). */
+export interface OfferProgress {
+  readonly mySide: "supplier" | "receiver";
+  readonly offerKind: OfferKind;
+  readonly status: TeamOfferStatus;
+  readonly unitNamed: boolean;
+  readonly unitName: string | null;
+  readonly unitMemberCount: number;
+  readonly latestVersion: number | null;
+  readonly supplierConfirmed: boolean;
+  readonly receiverConfirmed: boolean;
+  /** Both parties confirmed the latest terms version. */
+  readonly agreed: boolean;
+}
+
+export function parseOfferProgress(raw: unknown): OfferProgress | null {
+  if (!isRow(raw)) return null;
+  const side = raw.my_side;
+  if ((side !== "supplier" && side !== "receiver") || !isStatus(raw.status)) return null;
+  return {
+    mySide: side,
+    offerKind: raw.offer_kind === "organization" ? "organization" : "team",
+    status: raw.status,
+    unitNamed: raw.unit_named === true,
+    unitName: str(raw.unit_name),
+    unitMemberCount: num(raw.unit_member_count) ?? 0,
+    latestVersion: num(raw.latest_version),
+    supplierConfirmed: raw.supplier_confirmed === true,
+    receiverConfirmed: raw.receiver_confirmed === true,
+    agreed: raw.agreed === true,
+  };
+}
+
+/** What a company offer still needs before the client can start the work. */
+export function startWorkBlockers(p: OfferProgress): readonly ("terms_not_agreed" | "unit_not_named")[] {
+  if (p.offerKind !== "organization") return [];
+  const out: ("terms_not_agreed" | "unit_not_named")[] = [];
+  if (!p.agreed) out.push("terms_not_agreed");
+  if (!p.unitNamed) out.push("unit_not_named");
+  return out;
+}
+
+// ── Agency candidates on an open need (20261122210000) ────────────────────
+
+/** One worker an agency attached to its company offer. The client's read is
+ *  a pseudonym and professional facts only; the agency's read names its own
+ *  roster worker. Never a contact, document, photo or worker id. */
+export interface OfferCandidate {
+  readonly candidateId: string;
+  readonly label: string;
+  readonly status: "offered" | "withdrawn" | "selected";
+  readonly experienceYears: number | null;
+  readonly workCountry: string | null;
+  readonly availability: string | null;
+  readonly availableFrom: string | null;
+  readonly languages: readonly { readonly lang: string; readonly level: string | null }[];
+  readonly skills: readonly { readonly slug: string; readonly confirmed: boolean }[];
+  /** The booking the client's choice proposed to the worker, once chosen. */
+  readonly bookingStatus: string | null;
+  /** Still on the agency's active roster AND discoverable by the worker's own
+   *  consent. The client never receives an open candidate that is not. */
+  readonly available: boolean;
+}
+
+/** The worker's own view: one time an agency proposed them (never the client). */
+export interface MyOfferCandidacy {
+  readonly candidateId: string;
+  readonly agencyName: string;
+  readonly role: string | null;
+  readonly status: "offered" | "withdrawn" | "selected";
+  readonly createdAt: string;
+  readonly bookingStatus: string | null;
+}
+
+const CANDIDATE_STATUSES = new Set(["offered", "withdrawn", "selected"]);
+
+export function parseOfferCandidate(raw: unknown): OfferCandidate | null {
+  if (!isRow(raw)) return null;
+  const candidateId = str(raw.candidate_id);
+  if (!candidateId || typeof raw.status !== "string" || !CANDIDATE_STATUSES.has(raw.status)) return null;
+  const arr = (v: unknown): Row[] => (Array.isArray(v) ? v.filter(isRow) : []);
+  return {
+    candidateId,
+    label: str(raw.label) ?? "-",
+    status: raw.status as OfferCandidate["status"],
+    experienceYears: num(raw.experience_years),
+    workCountry: str(raw.work_country),
+    availability: str(raw.availability),
+    availableFrom: str(raw.available_from),
+    languages: arr(raw.languages).flatMap((l) => (str(l.lang) ? [{ lang: str(l.lang)!, level: str(l.level) }] : [])),
+    skills: arr(raw.skills).flatMap((k) => (str(k.slug) ? [{ slug: str(k.slug)!, confirmed: k.confirmed === true }] : [])),
+    bookingStatus: str(raw.booking_status),
+    available: raw.available !== false,
+  };
+}
+
+export function parseMyOfferCandidacy(raw: unknown): MyOfferCandidacy | null {
+  if (!isRow(raw)) return null;
+  const candidateId = str(raw.candidate_id);
+  const createdAt = str(raw.created_at);
+  if (!candidateId || !createdAt || typeof raw.status !== "string" || !CANDIDATE_STATUSES.has(raw.status)) return null;
+  return {
+    candidateId,
+    agencyName: str(raw.agency_name) ?? "-",
+    role: str(raw.role),
+    status: raw.status as MyOfferCandidacy["status"],
+    createdAt,
+    bookingStatus: str(raw.booking_status),
+  };
 }

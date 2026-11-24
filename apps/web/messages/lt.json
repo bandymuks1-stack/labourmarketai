@@ -13104,7 +13104,8 @@
     "getLink": "Gauti nuorodą",
     "newLink": "Nauja nuoroda",
     "messageButton": "Parašyti žinutę",
-    "deliveryAccepted": "Pristatyta — klientas priėmė kvietimą ir dabar patvirtina ryšį savo puslapyje „Klientai ir partneriai“."
+    "deliveryAccepted": "Pristatyta — klientas priėmė kvietimą ir dabar patvirtina ryšį savo puslapyje „Klientai ir partneriai“.",
+    "openNeedClient": "Užsakovas iš atviro poreikio (pasirinko jūsų kandidatą)"
   },
   "clientBridge": {
     "title": "Personalo agentūros",
@@ -15146,7 +15147,8 @@
       "whatChangedUnavailable": "Dabar nepavyko patikrinti, kas pasikeitė. Jūsų įrašai niekur nedingo — pabandykite po akimirkos arba atidarykite žurnalą.",
       "planIntro": "{count, plural, one {Tai # žingsnis.} few {Tai # žingsniai, iš eilės. Štai pirmasis — paspauskite kitą, kai norėsite tęsti.} other {Tai # žingsnių, iš eilės. Štai pirmasis — paspauskite kitą, kai norėsite tęsti.}}",
       "planNextOffer": "Kitas žingsnis:",
-      "planStep": "{n} žingsnis iš {count}"
+      "planStep": "{n} žingsnis iš {count}",
+      "agencyClientOpenNeed": "užsakovas, pasirinkęs jūsų kandidatą atvirame poreikyje"
     },
     "worklog": {
       "understood": "Supratau taip — išsaugoti?",
@@ -19655,8 +19657,7 @@
       "heading": "Jūsų pasiūlymai",
       "none": "Pasiūlymų dar nėra.",
       "withdraw": "Atšaukti",
-      "message": "Rašyti užsakovui",
-      "orgNext": "Užsakovas iš esmės sutiko (tai nėra sutartis). Pradėti darbus pagal įmonės pasiūlymą per platformą dar negalima: detales ir dirbsiančius žmones suderinkite pokalbyje."
+      "message": "Rašyti užsakovui"
     },
     "status": {
       "offered": "Laukiama atsakymo",
@@ -19696,7 +19697,27 @@
       "terms_limit_reached": "Šis pasiūlymas jau turi 50 sąlygų versijų.",
       "terms_await_other_side": "Tai jūsų sąlygos — atsako kita pusė.",
       "organization_offer_not_a_unit": "Įmonės pasiūlymas nepriskiriamas kaip komanda; žmones suderinkite pokalbyje.",
-      "terms_changed": "Kita pusė ką tik pasiūlė naujas sąlygas. Peržiūrėkite naujausią versiją ir tada atsakykite."
+      "terms_changed": "Kita pusė ką tik pasiūlė naujas sąlygas. Peržiūrėkite naujausią versiją ir tada atsakykite.",
+      "no_company": "Pirmiausia atidarykite įmonės darbo erdvę.",
+      "unit_has_no_members": "Ši brigada neturi aktyvių narių.",
+      "already_started": "Darbai pagal šį pasiūlymą jau pradėti kitame projekte.",
+      "unit_not_of_company": "Šioje brigadoje nėra nė vieno nario iš siūlančios įmonės žmonių sąrašo.",
+      "terms_not_agreed": "Pirmiausia abi šalys turi patvirtinti tas pačias sąlygas.",
+      "unit_not_named": "Įmonė dar nenurodė savo brigados.",
+      "unit_not_yours": "Ši brigada nėra Jūsų organizacijos brigada.",
+      "not_an_organization_offer": "Brigadą nurodo tik įmonės pasiūlymas.",
+      "terms_missing": "Patvirtinti dar nėra ką: sąlygos nepasiūlytos.",
+      "project_not_created": "Projekto sukurti nepavyko.",
+      "invalid_title": "Projekto pavadinimas turi būti nuo 2 iki 120 simbolių.",
+      "worker_not_discoverable": "Šis žmogus nepasirinko būti matomas įmonėms. Tai jis gali įjungti savo privatumo nustatymuose.",
+      "candidate_not_open": "Šio kandidato pasirinkti nebegalima.",
+      "candidate_not_available": "Šis kandidatas nebeprieinamas.",
+      "client_company_unknown": "Nepavyko nustatyti poreikio įmonės.",
+      "worker_not_on_roster": "Šio žmogaus nėra Jūsų aktyviame sąraše.",
+      "candidate_already_selected": "Užsakovas šį kandidatą jau pasirinko.",
+      "connection_conflict": "Ryšys su šia agentūra tuo metu pasikeitė. Atnaujinkite puslapį ir bandykite dar kartą.",
+      "candidate_limit_reached": "Viename pasiūlyme galima pasiūlyti ne daugiau kaip 10 kandidatų.",
+      "not_an_agency_offer": "Kandidatus gali nurodyti tik įdarbinimo agentūros pasiūlymas."
     },
     "received": {
       "title": "Šiam poreikiui pasiūlytos komandos",
@@ -19757,7 +19778,7 @@
       "message": "Rašyti komandai",
       "messageCompany": "Rašyti įmonei",
       "kindOrganization": "Įmonės pasiūlymas",
-      "orgNext": "Iš esmės sutarta (tai nėra sutartis). Pradėti darbus pagal įmonės pasiūlymą per platformą dar negalima: detales ir dirbsiančius žmones suderinkite pokalbyje."
+      "orgNext": "Preliminariai sutarta (tai ne sutartis). Toliau: suderinkite sąlygas žemiau ir abu jas patvirtinkite; įmonė nurodo savo brigadą; tada darbai pradedami projekte."
     },
     "orgHeading": "Pasiūlyti savo įmonę atviram poreikiui",
     "orgIntro": "Pasiūlykite pačią įmonę — savo žmones, paslaugą ar kaip subrangovą — vienam atviram poreikiui. Brigados kurti nereikia.",
@@ -19783,18 +19804,106 @@
       "start": "Pradžia",
       "end": "Pabaiga",
       "scope": "Darbų apimtis",
-      "conditions": "Sąlygos",
+      "conditions": "Sąlygos ir atsakomybės",
       "agree": "Sutikti su {version} versija",
       "agreeNote": "Sutikimas reiškia sutarimą iš esmės — tai ne pasirašyta sutartis.",
       "agreed": "Sutarta iš esmės.",
       "proposeFirst": "Pasiūlyti sąlygas",
       "proposeNext": "Pasiūlyti pakeistas sąlygas (nauja versija)",
       "propose": "Siųsti sąlygas",
-      "proposed": "{version} versija išsiųsta."
+      "proposed": "{version} versija išsiųsta.",
+      "place": "Darbų vieta",
+      "placePlaceholder": "pvz. Vilnius, Žirmūnų g. 1, užsakovo objektas",
+      "confirm": "Patvirtinti {version} versiją",
+      "confirmedMine": "Patvirtinta. Laukiama kitos šalies.",
+      "confirmNeedsTerms": "Pasiūlykite sąlygas čia. Tada abi šalys patvirtina tą pačią versiją.",
+      "confirmNote": "Abi šalys patvirtina tą pačią versiją. Taip užfiksuojamos suderintos sąlygos; tai nėra parašas ir savaime nesukuria sutarties.",
+      "otherNotConfirmed": "kita šalis jos dar nepatvirtino",
+      "otherConfirmed": "kita šalis ją patvirtino",
+      "confirmedByYou": "Jūs patvirtinote {version} versiją",
+      "agreedBoth": "Abiejų šalių suderinta: {version} versija",
+      "notConfirmedByYou": "Jūs dar nepatvirtinote {version} versijos"
     },
     "threadContext": "Pokalbis apie pasiūlymą: {subject}",
     "messageAbout": "Dėl pasiūlymo: {subject}",
-    "threadContextShared": "Visi pasiūlymai tarp jūsų vyksta šiame viename pokalbyje; šis atidarytas apie aukščiau nurodytą."
+    "threadContextShared": "Visi pasiūlymai tarp jūsų vyksta šiame viename pokalbyje; šis atidarytas apie aukščiau nurodytą.",
+    "progress": {
+      "heading": "Kelias iki darbų pradžios",
+      "loading": "Įkeliama…",
+      "notYet": "Šis žingsnis čia dar neatidarytas.",
+      "agreed": "Sąlygas patvirtino abi šalys ({version} versija).",
+      "noTerms": "Sąlygų dar nėra: pasiūlykite jas skiltyje „Sąlygos ir derybos“.",
+      "waitingOther": "Jūs patvirtinote {version} versiją. Laukiama kitos šalies.",
+      "waitingYou": "{version} versija laukia Jūsų patvirtinimo.",
+      "crew": "Brigada: {name}, {count, plural, one {# žmogus} few {# žmonės} other {# žmonių}}",
+      "crewNotNamedSupplier": "Nurodykite brigadą, kuri atliks šiuos darbus.",
+      "crewNotNamedReceiver": "Įmonė dar nenurodė savo brigados.",
+      "noCrews": "Brigados dar negalima nurodyti: brigadoje turi būti bent vienas narys iš jūsų įmonės žmonių sąrašo.",
+      "createCrew": "Sukurkite ją puslapyje „Žmonės“",
+      "crewLabel": "Brigada",
+      "crewPlaceholder": "Pasirinkite brigadą",
+      "crewSubmit": "Nurodyti šią brigadą",
+      "crewNamed": "Brigada nurodyta.",
+      "crewNamedReconfirm": "Brigada nurodyta. Sąlygos buvo patvirtintos kitai brigadai, todėl abi pusės jas patvirtina iš naujo.",
+      "startNeeds": "Darbus galima pradėti, kai abi šalys patvirtina sąlygas ir įmonė nurodo savo brigadą.",
+      "startIntro": "Abi šalys patvirtino sąlygas, brigada nurodyta. Sukurkite projektą: brigada bus į jį įtraukta ir darbai prasidės ten.",
+      "titleLabel": "Projekto pavadinimas",
+      "startSubmit": "Sukurti projektą ir pradėti darbus",
+      "titleInvalid": "Projekto pavadinimas turi būti nuo 2 iki 120 simbolių.",
+      "startedReceiver": "Darbai pradėti: brigada įtraukta į Jūsų projektą.",
+      "startedSupplier": "Darbai pradėti: Jūsų brigada įtraukta į užsakovo projektą."
+    },
+    "candidates": {
+      "heading": "Siūlomi kandidatai",
+      "introSupplier": "Pasiūlykite konkrečius žmones iš savo sąrašo. Pasiūlyti galima tik tuos, kurie pasirinko būti matomi įmonėms, ir kiekvienas savo užimtumo puslapyje mato, kad jį pasiūlėte. Užsakovas kiekvieną mato be vardo: patirtis, šalis, prieinamumas, kalbos ir įgūdžiai. Vardas parodomas tik užsakovui pasirinkus žmogų ir šiam sutikus.",
+      "introReceiver": "Agentūros siūlomi žmonės, rodomi be vardo ir kontaktų. Pasirinkus kandidatą, jam siunčiamas užimtumo prašymas; vardas parodomas, kai jis sutinka. Bendraujate su agentūra.",
+      "experience": "Patirtis",
+      "years": "{count, plural, one {# metai} few {# metai} other {# metų}}",
+      "country": "Dirba",
+      "availability": "Prieinamumas",
+      "availableFrom": "nuo {date}",
+      "availabilityValue": {
+        "available": "laisvas",
+        "busy": "užimtas",
+        "unavailable": "neprieinamas",
+        "unknown": "nenurodyta"
+      },
+      "languages": "Kalbos",
+      "skills": "Įgūdžiai",
+      "confirmed": "patvirtinta",
+      "status": {
+        "offered": "Pasiūlytas",
+        "withdrawn": "Atšauktas",
+        "selected": "Užsakovo pasirinktas"
+      },
+      "booking": {
+        "proposed": "Užimtumo prašymas išsiųstas, laukiama žmogaus atsakymo",
+        "accepted": "Žmogus sutiko",
+        "declined": "Žmogus atsisakė",
+        "withdrawn": "Prašymas atšauktas",
+        "expired": "Prašymas nebegalioja"
+      },
+      "withdraw": "Atšaukti",
+      "withdrawn": "Kandidatas atšauktas.",
+      "selectNote": "Pasirinkus jūsų įmonė susiejama su šia agentūra, ir ji matys jūsų įmonės pavadinimą: tai ilgalaikis ryšys, kurį galite nutraukti partnerių puslapyje. Šiam žmogui taip pat siunčiamas užimtumo prašymas. Tai nėra sutartis.",
+      "noteLabel": "Žinutė žmogui (neprivaloma)",
+      "select": "Pasirinkti šį kandidatą",
+      "selected": "Užimtumo prašymas išsiųstas. Sprendžia pats žmogus.",
+      "noRoster": "Jūsų sąraše dar nėra žmonių.",
+      "addLabel": "Žmogus iš Jūsų sąrašo",
+      "addPlaceholder": "Pasirinkite žmogų",
+      "add": "Pasiūlyti šį žmogų",
+      "added": "Kandidatas pasiūlytas.",
+      "unavailable": "Nebeprieinamas: nėra jūsų sąraše arba nėra matomas įmonėms"
+    },
+    "mine": {
+      "heading": "Agentūros jus pasiūlė",
+      "intro": "Agentūra, kurios sąraše esate, pasiūlė jus be vardo įmonės poreikiui. Įmonė jūsų vardą mato tik jei jus pasirenka ir jūs sutinkate su užimtumu. Galite paprašyti, kad jūsų nesiūlytų šiam poreikiui.",
+      "role": "kam: {role}",
+      "since": "pasiūlyta {date}",
+      "withdraw": "Manęs šiam poreikiui nesiūlyti",
+      "withdrawn": "Jūsų nebesiūlys šiam poreikiui."
+    }
   },
   "teamAssignment": {
     "title": "Komandos šiame projekte",

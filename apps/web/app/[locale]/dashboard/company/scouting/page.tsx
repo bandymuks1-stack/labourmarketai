@@ -1292,7 +1292,13 @@ export default async function CompanyScoutingPage({
       ) : null}
 
       {teamOffers && teamOffers.offers.length > 0 ? (
-        <TeamOffersReceived requestId={selected!} offers={teamOffers.offers} projects={teamOfferProjects} needOpen={needOpen} />
+        <TeamOffersReceived
+          requestId={selected!}
+          offers={teamOffers.offers}
+          projects={teamOfferProjects}
+          needOpen={needOpen}
+          needTitle={result?.kind === "ok" ? result.demand.title : null}
+        />
       ) : null}
 
       {result?.kind === "ok" && result.candidates.length > 0 ? (

@@ -13104,7 +13104,8 @@
     "getLink": "Get link",
     "newLink": "New link",
     "messageButton": "Message",
-    "deliveryAccepted": "Delivered — the client accepted the invitation and now confirms the connection on their Partners page."
+    "deliveryAccepted": "Delivered — the client accepted the invitation and now confirms the connection on their Partners page.",
+    "openNeedClient": "Client from an open need (chose your candidate)"
   },
   "clientBridge": {
     "title": "Staffing agencies",
@@ -15146,7 +15147,8 @@
       "whatChangedUnavailable": "I couldn't check what changed right now. Your records are safe; try again in a moment or open the journal.",
       "planIntro": "{count, plural, one {That is # step.} other {That is # steps, in order. Here is the first — tap the next one when you are ready.}}",
       "planNextOffer": "Next step:",
-      "planStep": "Step {n} of {count}"
+      "planStep": "Step {n} of {count}",
+      "agencyClientOpenNeed": "a client who chose your candidate on an open need"
     },
     "worklog": {
       "understood": "Here's what I understood — save it?",
@@ -19655,8 +19657,7 @@
       "heading": "Your offers",
       "none": "No offers yet.",
       "withdraw": "Withdraw",
-      "message": "Message the client",
-      "orgNext": "The client agreed in principle (not a contract). Starting the work from a company offer through the platform is not available yet: settle the details and the people who will work in the conversation."
+      "message": "Message the client"
     },
     "status": {
       "offered": "Waiting for an answer",
@@ -19696,7 +19697,27 @@
       "terms_limit_reached": "This offer already has 50 versions of terms.",
       "terms_await_other_side": "These are your own terms — the other side answers them.",
       "organization_offer_not_a_unit": "A company offer is not assigned as a team; agree the people in the conversation.",
-      "terms_changed": "The other side has just proposed new terms. Review the latest version, then answer."
+      "terms_changed": "The other side has just proposed new terms. Review the latest version, then answer.",
+      "no_company": "Open the company workspace first.",
+      "unit_has_no_members": "That crew has no active members.",
+      "already_started": "The work on this offer has already started on another project.",
+      "unit_not_of_company": "This crew has no member on the offering company's people list.",
+      "terms_not_agreed": "Both sides must confirm the same terms first.",
+      "unit_not_named": "The company has not named its crew yet.",
+      "unit_not_yours": "That crew is not one of your organization's own brigades.",
+      "not_an_organization_offer": "Only a company offer names a crew.",
+      "terms_missing": "There are no terms to confirm yet.",
+      "project_not_created": "The project could not be created.",
+      "invalid_title": "The project name needs 2 to 120 characters.",
+      "worker_not_discoverable": "This person has not chosen to be visible to companies. They can turn it on in their privacy settings.",
+      "candidate_not_open": "This candidate can no longer be chosen.",
+      "candidate_not_available": "This candidate is no longer available.",
+      "client_company_unknown": "The need's company could not be identified.",
+      "worker_not_on_roster": "That person is not on your active roster.",
+      "candidate_already_selected": "The client has already chosen this candidate.",
+      "connection_conflict": "The connection with this agency changed meanwhile. Reload and try again.",
+      "candidate_limit_reached": "At most 10 candidates can be proposed on one offer.",
+      "not_an_agency_offer": "Only a staffing agency's offer can name candidates."
     },
     "received": {
       "title": "Teams offered for this need",
@@ -19757,7 +19778,7 @@
       "message": "Message the team",
       "messageCompany": "Message the company",
       "kindOrganization": "Company offer",
-      "orgNext": "Agreed in principle (not a contract). Starting the work from a company offer through the platform is not available yet: settle the details and the people who will work in the conversation."
+      "orgNext": "Agreed in principle (not a contract). Next: agree the terms below and both confirm them; the company names its crew; then the work starts on a project."
     },
     "orgHeading": "Offer our company to an open need",
     "orgIntro": "Offer your company itself — your people, your service, or as a subcontractor — against one open need. No brigade to set up first.",
@@ -19783,18 +19804,106 @@
       "start": "Start",
       "end": "End",
       "scope": "Scope of work",
-      "conditions": "Conditions",
+      "conditions": "Conditions and responsibilities",
       "agree": "Agree to version {version}",
       "agreeNote": "Agreeing means agreed in principle — not a signed contract.",
       "agreed": "Agreed in principle.",
       "proposeFirst": "Propose terms",
       "proposeNext": "Propose changed terms (a new version)",
       "propose": "Send terms",
-      "proposed": "Version {version} sent."
+      "proposed": "Version {version} sent.",
+      "place": "Place of work",
+      "placePlaceholder": "e.g. Vilnius, Žirmūnų g. 1, the client's site",
+      "confirm": "Confirm version {version}",
+      "confirmedMine": "Confirmed. Waiting for the other side.",
+      "confirmNeedsTerms": "Propose the terms here. Both sides then confirm the same version.",
+      "confirmNote": "Both sides confirm the same version. That records the agreed terms; it is not a signature and does not create a contract by itself.",
+      "otherNotConfirmed": "the other side has not confirmed it yet",
+      "otherConfirmed": "the other side confirmed it",
+      "confirmedByYou": "You confirmed version {version}",
+      "agreedBoth": "Agreed by both sides: version {version}",
+      "notConfirmedByYou": "You have not confirmed version {version}"
     },
     "threadContext": "About the offer: {subject}",
     "messageAbout": "Re: {subject}",
-    "threadContextShared": "Every offer between you is discussed in this one conversation; it was opened for the one above."
+    "threadContextShared": "Every offer between you is discussed in this one conversation; it was opened for the one above.",
+    "progress": {
+      "heading": "Way to the start of work",
+      "loading": "Loading…",
+      "notYet": "This step is not open here yet.",
+      "agreed": "Terms agreed by both sides (version {version}).",
+      "noTerms": "No terms yet: propose them under Terms and negotiation.",
+      "waitingOther": "You confirmed version {version}. Waiting for the other side.",
+      "waitingYou": "Version {version} is waiting for your confirmation.",
+      "crew": "Crew: {name}, {count, plural, one {# person} other {# people}}",
+      "crewNotNamedSupplier": "Name the crew that will do this work.",
+      "crewNotNamedReceiver": "The company has not named its crew yet.",
+      "noCrews": "No crew can be named yet: a crew (brigade) needs at least one member who is on your company's people list.",
+      "createCrew": "Create one on the People page",
+      "crewLabel": "Crew",
+      "crewPlaceholder": "Choose a crew",
+      "crewSubmit": "Name this crew",
+      "crewNamed": "Crew named.",
+      "crewNamedReconfirm": "Crew named. The terms were confirmed for another crew, so both sides confirm them again.",
+      "startNeeds": "The work can start when both sides have confirmed the terms and the company has named its crew.",
+      "startIntro": "Both sides confirmed the terms and the crew is named. Create the project: the crew is added to it and the work starts there.",
+      "titleLabel": "Project name",
+      "startSubmit": "Create the project and start the work",
+      "titleInvalid": "The project name needs 2 to 120 characters.",
+      "startedReceiver": "The work has started: the crew is on your project.",
+      "startedSupplier": "The work has started: your crew is on the client's project."
+    },
+    "candidates": {
+      "heading": "Named candidates",
+      "introSupplier": "Propose specific people from your roster. Only people who chose to be visible to companies can be proposed, and each one sees on their Bookings page that you proposed them. The client sees each one without a name: experience, country, availability, languages and skills. The name is shown only after the client chooses the person and the person accepts.",
+      "introReceiver": "People this agency proposes, shown without a name or contact. Choosing one sends a booking request to that person; the name is shown once they accept. You deal with the agency.",
+      "experience": "Experience",
+      "years": "{count, plural, one {# year} other {# years}}",
+      "country": "Works in",
+      "availability": "Availability",
+      "availableFrom": "from {date}",
+      "availabilityValue": {
+        "available": "available",
+        "busy": "busy",
+        "unavailable": "not available",
+        "unknown": "not stated"
+      },
+      "languages": "Languages",
+      "skills": "Skills",
+      "confirmed": "confirmed",
+      "status": {
+        "offered": "Proposed",
+        "withdrawn": "Withdrawn",
+        "selected": "Chosen by the client"
+      },
+      "booking": {
+        "proposed": "Booking request sent, waiting for the person",
+        "accepted": "The person accepted",
+        "declined": "The person declined",
+        "withdrawn": "Booking withdrawn",
+        "expired": "Booking expired"
+      },
+      "withdraw": "Withdraw",
+      "withdrawn": "Candidate withdrawn.",
+      "selectNote": "Choosing connects your company with this agency, which will then see your company's name: a lasting connection, which you can end on the Partners page. It also sends a booking request to this person. It is not a contract.",
+      "noteLabel": "Note to the person (optional)",
+      "select": "Choose this candidate",
+      "selected": "Booking request sent. The person decides.",
+      "noRoster": "No one is on your roster yet.",
+      "addLabel": "Person from your roster",
+      "addPlaceholder": "Choose a person",
+      "add": "Propose this person",
+      "added": "Candidate proposed.",
+      "unavailable": "No longer available: not on your roster or not visible to companies"
+    },
+    "mine": {
+      "heading": "Agencies proposed you",
+      "intro": "An agency whose roster you are on proposed you, without your name, for a company's need. The company sees your name only if it chooses you and you accept the booking. You can ask not to be proposed for a need.",
+      "role": "for: {role}",
+      "since": "proposed on {date}",
+      "withdraw": "Do not propose me for this",
+      "withdrawn": "You will not be proposed for this need."
+    }
   },
   "teamAssignment": {
     "title": "Teams on this project",

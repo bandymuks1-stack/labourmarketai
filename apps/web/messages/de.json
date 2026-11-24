@@ -13104,7 +13104,8 @@
     "getLink": "Link holen",
     "newLink": "Neuer Link",
     "messageButton": "Nachricht",
-    "deliveryAccepted": "Zugestellt — der Kunde hat die Einladung angenommen und bestätigt die Verbindung nun auf seiner Partnerseite."
+    "deliveryAccepted": "Zugestellt — der Kunde hat die Einladung angenommen und bestätigt die Verbindung nun auf seiner Partnerseite.",
+    "openNeedClient": "Auftraggeber aus einem offenen Bedarf (hat Ihren Kandidaten gewählt)"
   },
   "clientBridge": {
     "title": "Personalagenturen",
@@ -15146,7 +15147,8 @@
       "whatChangedUnavailable": "Ich konnte gerade nicht prüfen, was sich geändert hat. Ihre Einträge sind sicher – versuchen Sie es gleich erneut oder öffnen Sie das Journal.",
       "planIntro": "{count, plural, one {Das ist # Schritt.} other {Das sind # Schritte, der Reihe nach. Hier ist der erste — tippen Sie auf den nächsten, wenn Sie so weit sind.}}",
       "planNextOffer": "Nächster Schritt:",
-      "planStep": "Schritt {n} von {count}"
+      "planStep": "Schritt {n} von {count}",
+      "agencyClientOpenNeed": "ein Auftraggeber, der Ihren Kandidaten bei einem offenen Bedarf gewählt hat"
     },
     "worklog": {
       "understood": "So habe ich es verstanden — speichern?",
@@ -19655,8 +19657,7 @@
       "heading": "Ihre Angebote",
       "none": "Noch keine Angebote.",
       "withdraw": "Zurückziehen",
-      "message": "Dem Auftraggeber schreiben",
-      "orgNext": "Der Auftraggeber hat grundsätzlich zugestimmt (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
+      "message": "Dem Auftraggeber schreiben"
     },
     "status": {
       "offered": "Wartet auf Antwort",
@@ -19696,7 +19697,27 @@
       "terms_limit_reached": "Dieses Angebot hat bereits 50 Versionen.",
       "terms_await_other_side": "Das sind Ihre eigenen Bedingungen — die andere Seite antwortet.",
       "organization_offer_not_a_unit": "Ein Unternehmensangebot wird nicht als Team zugewiesen; klären Sie die Personen im Gespräch.",
-      "terms_changed": "Die andere Seite hat gerade neue Bedingungen vorgeschlagen. Prüfen Sie die neueste Version und antworten Sie dann."
+      "terms_changed": "Die andere Seite hat gerade neue Bedingungen vorgeschlagen. Prüfen Sie die neueste Version und antworten Sie dann.",
+      "no_company": "Öffnen Sie zuerst den Unternehmensbereich.",
+      "unit_has_no_members": "Diese Kolonne hat keine aktiven Mitglieder.",
+      "already_started": "Die Arbeit zu diesem Angebot wurde bereits in einem anderen Projekt begonnen.",
+      "unit_not_of_company": "Diese Kolonne hat kein Mitglied auf der Personenliste des anbietenden Unternehmens.",
+      "terms_not_agreed": "Zuerst müssen beide Seiten dieselben Bedingungen bestätigen.",
+      "unit_not_named": "Das Unternehmen hat seine Kolonne noch nicht benannt.",
+      "unit_not_yours": "Diese Kolonne gehört nicht zu Ihrer eigenen Organisation.",
+      "not_an_organization_offer": "Nur ein Unternehmensangebot benennt eine Kolonne.",
+      "terms_missing": "Es gibt noch keine Bedingungen zu bestätigen.",
+      "project_not_created": "Das Projekt konnte nicht angelegt werden.",
+      "invalid_title": "Der Projektname braucht 2 bis 120 Zeichen.",
+      "worker_not_discoverable": "Diese Person hat nicht gewählt, für Unternehmen sichtbar zu sein. Sie kann das in ihren Datenschutzeinstellungen einschalten.",
+      "candidate_not_open": "Dieser Kandidat kann nicht mehr gewählt werden.",
+      "candidate_not_available": "Dieser Kandidat ist nicht mehr verfügbar.",
+      "client_company_unknown": "Das Unternehmen des Bedarfs konnte nicht bestimmt werden.",
+      "worker_not_on_roster": "Diese Person ist nicht in Ihrem aktiven Bestand.",
+      "candidate_already_selected": "Der Kunde hat diesen Kandidaten bereits gewählt.",
+      "connection_conflict": "Die Verbindung mit dieser Agentur hat sich inzwischen geändert. Laden Sie neu und versuchen Sie es erneut.",
+      "candidate_limit_reached": "Auf einem Angebot können höchstens 10 Kandidaten vorgeschlagen werden.",
+      "not_an_agency_offer": "Nur das Angebot einer Personalagentur kann Kandidaten nennen."
     },
     "received": {
       "title": "Für diesen Bedarf angebotene Teams",
@@ -19757,7 +19778,7 @@
       "message": "Dem Team schreiben",
       "messageCompany": "Dem Unternehmen schreiben",
       "kindOrganization": "Unternehmensangebot",
-      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
+      "orgNext": "Grundsätzlich zugestimmt (kein Vertrag). Als Nächstes: Bedingungen unten vereinbaren und beidseitig bestätigen; das Unternehmen benennt seine Kolonne; dann beginnt die Arbeit in einem Projekt."
     },
     "orgHeading": "Unser Unternehmen für einen offenen Bedarf anbieten",
     "orgIntro": "Bieten Sie Ihr Unternehmen selbst an — Ihre Leute, Ihre Leistung oder als Subunternehmer — für einen offenen Bedarf. Kein Team muss zuerst angelegt werden.",
@@ -19783,18 +19804,106 @@
       "start": "Beginn",
       "end": "Ende",
       "scope": "Leistungsumfang",
-      "conditions": "Bedingungen",
+      "conditions": "Bedingungen und Verantwortlichkeiten",
       "agree": "Version {version} zustimmen",
       "agreeNote": "Zustimmung heißt grundsätzlich vereinbart — kein unterschriebener Vertrag.",
       "agreed": "Grundsätzlich vereinbart.",
       "proposeFirst": "Bedingungen vorschlagen",
       "proposeNext": "Geänderte Bedingungen vorschlagen (neue Version)",
       "propose": "Bedingungen senden",
-      "proposed": "Version {version} gesendet."
+      "proposed": "Version {version} gesendet.",
+      "place": "Arbeitsort",
+      "placePlaceholder": "z. B. Vilnius, Žirmūnų g. 1, Baustelle des Kunden",
+      "confirm": "Version {version} bestätigen",
+      "confirmedMine": "Bestätigt. Warten auf die andere Seite.",
+      "confirmNeedsTerms": "Schlagen Sie hier die Bedingungen vor. Danach bestätigen beide Seiten dieselbe Version.",
+      "confirmNote": "Beide Seiten bestätigen dieselbe Version. Damit werden die vereinbarten Bedingungen festgehalten; das ist keine Unterschrift und begründet für sich keinen Vertrag.",
+      "otherNotConfirmed": "die andere Seite hat sie noch nicht bestätigt",
+      "otherConfirmed": "die andere Seite hat sie bestätigt",
+      "confirmedByYou": "Sie haben Version {version} bestätigt",
+      "agreedBoth": "Von beiden Seiten vereinbart: Version {version}",
+      "notConfirmedByYou": "Sie haben Version {version} noch nicht bestätigt"
     },
     "threadContext": "Zum Angebot: {subject}",
     "messageAbout": "Betrifft Angebot: {subject}",
-    "threadContextShared": "Alle Angebote zwischen Ihnen werden in diesem einen Gespräch besprochen; es wurde für das obige geöffnet."
+    "threadContextShared": "Alle Angebote zwischen Ihnen werden in diesem einen Gespräch besprochen; es wurde für das obige geöffnet.",
+    "progress": {
+      "heading": "Weg zum Arbeitsbeginn",
+      "loading": "Wird geladen…",
+      "notYet": "Dieser Schritt ist hier noch nicht offen.",
+      "agreed": "Bedingungen von beiden Seiten bestätigt (Version {version}).",
+      "noTerms": "Noch keine Bedingungen: schlagen Sie sie unter Bedingungen und Verhandlung vor.",
+      "waitingOther": "Sie haben Version {version} bestätigt. Warten auf die andere Seite.",
+      "waitingYou": "Version {version} wartet auf Ihre Bestätigung.",
+      "crew": "Kolonne: {name}, {count, plural, one {# Person} other {# Personen}}",
+      "crewNotNamedSupplier": "Benennen Sie die Kolonne, die diese Arbeit ausführt.",
+      "crewNotNamedReceiver": "Das Unternehmen hat seine Kolonne noch nicht benannt.",
+      "noCrews": "Noch keine Kolonne benennbar: Eine Kolonne braucht mindestens ein Mitglied, das auf der Personenliste Ihres Unternehmens steht.",
+      "createCrew": "Legen Sie eine auf der Seite Personen an",
+      "crewLabel": "Kolonne",
+      "crewPlaceholder": "Kolonne wählen",
+      "crewSubmit": "Diese Kolonne benennen",
+      "crewNamed": "Kolonne benannt.",
+      "crewNamedReconfirm": "Kolonne benannt. Die Bedingungen waren für eine andere Kolonne bestätigt, daher bestätigen beide Seiten sie erneut.",
+      "startNeeds": "Die Arbeit kann beginnen, wenn beide Seiten die Bedingungen bestätigt haben und das Unternehmen seine Kolonne benannt hat.",
+      "startIntro": "Beide Seiten haben die Bedingungen bestätigt und die Kolonne ist benannt. Legen Sie das Projekt an: die Kolonne wird hinzugefügt und die Arbeit beginnt dort.",
+      "titleLabel": "Projektname",
+      "startSubmit": "Projekt anlegen und Arbeit beginnen",
+      "titleInvalid": "Der Projektname braucht 2 bis 120 Zeichen.",
+      "startedReceiver": "Die Arbeit hat begonnen: die Kolonne ist in Ihrem Projekt.",
+      "startedSupplier": "Die Arbeit hat begonnen: Ihre Kolonne ist im Projekt des Kunden."
+    },
+    "candidates": {
+      "heading": "Vorgeschlagene Kandidaten",
+      "introSupplier": "Schlagen Sie bestimmte Personen aus Ihrem Bestand vor. Vorgeschlagen werden können nur Personen, die für Unternehmen sichtbar sein wollen, und jede sieht auf ihrer Seite Buchungen, dass Sie sie vorgeschlagen haben. Der Auftraggeber sieht jede Person ohne Namen: Erfahrung, Land, Verfügbarkeit, Sprachen und Fähigkeiten. Der Name wird erst angezeigt, wenn der Auftraggeber die Person wählt und sie zusagt.",
+      "introReceiver": "Personen, die diese Agentur vorschlägt, ohne Namen oder Kontaktdaten. Wenn Sie eine wählen, geht eine Buchungsanfrage an diese Person; der Name wird gezeigt, sobald sie zustimmt. Sie verhandeln mit der Agentur.",
+      "experience": "Erfahrung",
+      "years": "{count, plural, one {# Jahr} other {# Jahre}}",
+      "country": "Arbeitet in",
+      "availability": "Verfügbarkeit",
+      "availableFrom": "ab {date}",
+      "availabilityValue": {
+        "available": "verfügbar",
+        "busy": "ausgelastet",
+        "unavailable": "nicht verfügbar",
+        "unknown": "nicht angegeben"
+      },
+      "languages": "Sprachen",
+      "skills": "Fähigkeiten",
+      "confirmed": "bestätigt",
+      "status": {
+        "offered": "Vorgeschlagen",
+        "withdrawn": "Zurückgezogen",
+        "selected": "Vom Kunden gewählt"
+      },
+      "booking": {
+        "proposed": "Buchungsanfrage gesendet, wartet auf die Person",
+        "accepted": "Die Person hat zugestimmt",
+        "declined": "Die Person hat abgelehnt",
+        "withdrawn": "Buchung zurückgezogen",
+        "expired": "Buchung abgelaufen"
+      },
+      "withdraw": "Zurückziehen",
+      "withdrawn": "Kandidat zurückgezogen.",
+      "selectNote": "Die Wahl verbindet Ihr Unternehmen mit dieser Agentur, die dann den Namen Ihres Unternehmens sieht: eine dauerhafte Verbindung, die Sie auf der Seite Partner beenden können. Außerdem geht eine Buchungsanfrage an diese Person. Es ist kein Vertrag.",
+      "noteLabel": "Nachricht an die Person (optional)",
+      "select": "Diesen Kandidaten wählen",
+      "selected": "Buchungsanfrage gesendet. Die Person entscheidet.",
+      "noRoster": "In Ihrem Bestand ist noch niemand.",
+      "addLabel": "Person aus Ihrem Bestand",
+      "addPlaceholder": "Person wählen",
+      "add": "Diese Person vorschlagen",
+      "added": "Kandidat vorgeschlagen.",
+      "unavailable": "Nicht mehr verfügbar: nicht in Ihrem Bestand oder nicht für Unternehmen sichtbar"
+    },
+    "mine": {
+      "heading": "Agenturen haben Sie vorgeschlagen",
+      "intro": "Eine Agentur, in deren Bestand Sie sind, hat Sie ohne Namen für den Bedarf eines Unternehmens vorgeschlagen. Das Unternehmen sieht Ihren Namen nur, wenn es Sie wählt und Sie die Buchung annehmen. Sie können bitten, für einen Bedarf nicht vorgeschlagen zu werden.",
+      "role": "für: {role}",
+      "since": "vorgeschlagen am {date}",
+      "withdraw": "Mich hierfür nicht vorschlagen",
+      "withdrawn": "Sie werden für diesen Bedarf nicht vorgeschlagen."
+    }
   },
   "teamAssignment": {
     "title": "Teams in diesem Projekt",

@@ -13104,7 +13104,8 @@
     "getLink": "Link ophalen",
     "newLink": "Nieuwe link",
     "messageButton": "Bericht",
-    "deliveryAccepted": "Bezorgd — de klant heeft de uitnodiging geaccepteerd en bevestigt de verbinding nu op zijn pagina Partners."
+    "deliveryAccepted": "Bezorgd — de klant heeft de uitnodiging geaccepteerd en bevestigt de verbinding nu op zijn pagina Partners.",
+    "openNeedClient": "Opdrachtgever via een open behoefte (koos uw kandidaat)"
   },
   "clientBridge": {
     "title": "Uitzendbureaus",
@@ -15146,7 +15147,8 @@
       "whatChangedUnavailable": "Ik kon nu niet nagaan wat er veranderde. Uw registraties zijn veilig — probeer het zo opnieuw of open het logboek.",
       "planIntro": "{count, plural, one {Dat is # stap.} other {Dat zijn # stappen, op volgorde. Hier is de eerste — tik op de volgende wanneer u klaar bent.}}",
       "planNextOffer": "Volgende stap:",
-      "planStep": "Stap {n} van {count}"
+      "planStep": "Stap {n} van {count}",
+      "agencyClientOpenNeed": "een opdrachtgever die uw kandidaat koos op een open behoefte"
     },
     "worklog": {
       "understood": "Dit heb ik begrepen — opslaan?",
@@ -19655,8 +19657,7 @@
       "heading": "Uw aanbiedingen",
       "none": "Nog geen aanbiedingen.",
       "withdraw": "Intrekken",
-      "message": "Bericht aan de opdrachtgever",
-      "orgNext": "De opdrachtgever ging in principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
+      "message": "Bericht aan de opdrachtgever"
     },
     "status": {
       "offered": "Wacht op antwoord",
@@ -19696,7 +19697,27 @@
       "terms_limit_reached": "Dit aanbod heeft al 50 versies van voorwaarden.",
       "terms_await_other_side": "Dit zijn uw eigen voorwaarden — de andere partij antwoordt.",
       "organization_offer_not_a_unit": "Een bedrijfsaanbod wordt niet als ploeg toegewezen; spreek de mensen af in het gesprek.",
-      "terms_changed": "De andere partij heeft zojuist nieuwe voorwaarden voorgesteld. Bekijk de nieuwste versie en antwoord dan."
+      "terms_changed": "De andere partij heeft zojuist nieuwe voorwaarden voorgesteld. Bekijk de nieuwste versie en antwoord dan.",
+      "no_company": "Open eerst de werkruimte van het bedrijf.",
+      "unit_has_no_members": "Die ploeg heeft geen actieve leden.",
+      "already_started": "Het werk voor dit aanbod is al gestart in een ander project.",
+      "unit_not_of_company": "Deze ploeg heeft geen lid op de personenlijst van het aanbiedende bedrijf.",
+      "terms_not_agreed": "Beide partijen moeten eerst dezelfde voorwaarden bevestigen.",
+      "unit_not_named": "Het bedrijf heeft zijn ploeg nog niet genoemd.",
+      "unit_not_yours": "Die ploeg is geen ploeg van uw eigen organisatie.",
+      "not_an_organization_offer": "Alleen een bedrijfsaanbod noemt een ploeg.",
+      "terms_missing": "Er zijn nog geen voorwaarden om te bevestigen.",
+      "project_not_created": "Het project kon niet worden aangemaakt.",
+      "invalid_title": "De projectnaam moet 2 tot 120 tekens hebben.",
+      "worker_not_discoverable": "Deze persoon koos er niet voor zichtbaar te zijn voor bedrijven. Dat kan in de privacy-instellingen worden aangezet.",
+      "candidate_not_open": "Deze kandidaat kan niet meer worden gekozen.",
+      "candidate_not_available": "Deze kandidaat is niet meer beschikbaar.",
+      "client_company_unknown": "Het bedrijf van de behoefte kon niet worden bepaald.",
+      "worker_not_on_roster": "Die persoon staat niet in uw actieve bestand.",
+      "candidate_already_selected": "De klant heeft deze kandidaat al gekozen.",
+      "connection_conflict": "De verbinding met dit bureau is intussen gewijzigd. Laad opnieuw en probeer het nog eens.",
+      "candidate_limit_reached": "Op één aanbod kunnen hoogstens 10 kandidaten worden voorgesteld.",
+      "not_an_agency_offer": "Alleen het aanbod van een uitzendbureau kan kandidaten noemen."
     },
     "received": {
       "title": "Voor deze vraag aangeboden teams",
@@ -19757,7 +19778,7 @@
       "message": "Bericht aan het team",
       "messageCompany": "Bericht aan het bedrijf",
       "kindOrganization": "Bedrijfsaanbod",
-      "orgNext": "In principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
+      "orgNext": "In principe akkoord (geen contract). Volgende stap: spreek hieronder de voorwaarden af en bevestig ze allebei; het bedrijf noemt zijn ploeg; daarna begint het werk in een project."
     },
     "orgHeading": "Ons bedrijf aanbieden voor een open behoefte",
     "orgIntro": "Bied uw bedrijf zelf aan — uw mensen, uw dienst of als onderaannemer — voor één open behoefte. Eerst een ploeg aanmaken is niet nodig.",
@@ -19783,18 +19804,106 @@
       "start": "Begin",
       "end": "Einde",
       "scope": "Omvang van het werk",
-      "conditions": "Voorwaarden",
+      "conditions": "Voorwaarden en verantwoordelijkheden",
       "agree": "Akkoord met versie {version}",
       "agreeNote": "Akkoord betekent in principe akkoord — geen getekend contract.",
       "agreed": "In principe akkoord.",
       "proposeFirst": "Voorwaarden voorstellen",
       "proposeNext": "Gewijzigde voorwaarden voorstellen (nieuwe versie)",
       "propose": "Voorwaarden versturen",
-      "proposed": "Versie {version} verstuurd."
+      "proposed": "Versie {version} verstuurd.",
+      "place": "Werklocatie",
+      "placePlaceholder": "bijv. Vilnius, Žirmūnų g. 1, de locatie van de klant",
+      "confirm": "Versie {version} bevestigen",
+      "confirmedMine": "Bevestigd. Wachten op de andere partij.",
+      "confirmNeedsTerms": "Stel hier de voorwaarden voor. Daarna bevestigen beide partijen dezelfde versie.",
+      "confirmNote": "Beide partijen bevestigen dezelfde versie. Zo worden de afgesproken voorwaarden vastgelegd; het is geen handtekening en vormt op zich geen contract.",
+      "otherNotConfirmed": "de andere partij heeft die nog niet bevestigd",
+      "otherConfirmed": "de andere partij heeft die bevestigd",
+      "confirmedByYou": "U hebt versie {version} bevestigd",
+      "agreedBoth": "Door beide partijen afgesproken: versie {version}",
+      "notConfirmedByYou": "U hebt versie {version} nog niet bevestigd"
     },
     "threadContext": "Over het aanbod: {subject}",
     "messageAbout": "Betreft aanbod: {subject}",
-    "threadContextShared": "Alle aanbiedingen tussen u beiden worden in dit ene gesprek besproken; het is geopend voor het aanbod hierboven."
+    "threadContextShared": "Alle aanbiedingen tussen u beiden worden in dit ene gesprek besproken; het is geopend voor het aanbod hierboven.",
+    "progress": {
+      "heading": "Weg naar de start van het werk",
+      "loading": "Laden…",
+      "notYet": "Deze stap is hier nog niet open.",
+      "agreed": "Voorwaarden door beide partijen bevestigd (versie {version}).",
+      "noTerms": "Nog geen voorwaarden: stel ze voor onder Voorwaarden en onderhandeling.",
+      "waitingOther": "U hebt versie {version} bevestigd. Wachten op de andere partij.",
+      "waitingYou": "Versie {version} wacht op uw bevestiging.",
+      "crew": "Ploeg: {name}, {count, plural, one {# persoon} other {# personen}}",
+      "crewNotNamedSupplier": "Noem de ploeg die dit werk doet.",
+      "crewNotNamedReceiver": "Het bedrijf heeft zijn ploeg nog niet genoemd.",
+      "noCrews": "Er kan nog geen ploeg worden aangewezen: een ploeg heeft minstens één lid nodig dat op de personenlijst van uw bedrijf staat.",
+      "createCrew": "Maak er een aan op de pagina Mensen",
+      "crewLabel": "Ploeg",
+      "crewPlaceholder": "Kies een ploeg",
+      "crewSubmit": "Deze ploeg noemen",
+      "crewNamed": "Ploeg genoemd.",
+      "crewNamedReconfirm": "Ploeg aangewezen. De voorwaarden waren bevestigd voor een andere ploeg, dus beide partijen bevestigen ze opnieuw.",
+      "startNeeds": "Het werk kan beginnen wanneer beide partijen de voorwaarden hebben bevestigd en het bedrijf zijn ploeg heeft genoemd.",
+      "startIntro": "Beide partijen hebben de voorwaarden bevestigd en de ploeg is genoemd. Maak het project aan: de ploeg wordt eraan toegevoegd en het werk begint daar.",
+      "titleLabel": "Projectnaam",
+      "startSubmit": "Project aanmaken en het werk starten",
+      "titleInvalid": "De projectnaam moet 2 tot 120 tekens hebben.",
+      "startedReceiver": "Het werk is gestart: de ploeg staat op uw project.",
+      "startedSupplier": "Het werk is gestart: uw ploeg staat op het project van de klant."
+    },
+    "candidates": {
+      "heading": "Voorgestelde kandidaten",
+      "introSupplier": "Stel specifieke mensen uit uw bestand voor. Alleen mensen die ervoor kozen zichtbaar te zijn voor bedrijven kunnen worden voorgesteld, en ieder ziet op de pagina Boekingen dat u hen voorstelde. De opdrachtgever ziet ieder zonder naam: ervaring, land, beschikbaarheid, talen en vaardigheden. De naam wordt pas getoond nadat de opdrachtgever de persoon kiest en die accepteert.",
+      "introReceiver": "Mensen die dit bureau voorstelt, zonder naam of contactgegevens. Als u er een kiest, gaat er een boekingsverzoek naar die persoon; de naam wordt getoond zodra die akkoord gaat. U handelt met het bureau.",
+      "experience": "Ervaring",
+      "years": "{count, plural, one {# jaar} other {# jaar}}",
+      "country": "Werkt in",
+      "availability": "Beschikbaarheid",
+      "availableFrom": "vanaf {date}",
+      "availabilityValue": {
+        "available": "beschikbaar",
+        "busy": "bezet",
+        "unavailable": "niet beschikbaar",
+        "unknown": "niet opgegeven"
+      },
+      "languages": "Talen",
+      "skills": "Vaardigheden",
+      "confirmed": "bevestigd",
+      "status": {
+        "offered": "Voorgesteld",
+        "withdrawn": "Ingetrokken",
+        "selected": "Gekozen door de klant"
+      },
+      "booking": {
+        "proposed": "Boekingsverzoek verzonden, wacht op de persoon",
+        "accepted": "De persoon heeft geaccepteerd",
+        "declined": "De persoon heeft geweigerd",
+        "withdrawn": "Boeking ingetrokken",
+        "expired": "Boeking verlopen"
+      },
+      "withdraw": "Intrekken",
+      "withdrawn": "Kandidaat ingetrokken.",
+      "selectNote": "Kiezen verbindt uw bedrijf met dit bureau, dat dan de naam van uw bedrijf ziet: een blijvende verbinding, die u op de pagina Partners kunt beëindigen. Het stuurt ook een boekingsverzoek naar deze persoon. Het is geen contract.",
+      "noteLabel": "Bericht aan de persoon (optioneel)",
+      "select": "Deze kandidaat kiezen",
+      "selected": "Boekingsverzoek verzonden. De persoon beslist.",
+      "noRoster": "Er staat nog niemand in uw bestand.",
+      "addLabel": "Persoon uit uw bestand",
+      "addPlaceholder": "Kies een persoon",
+      "add": "Deze persoon voorstellen",
+      "added": "Kandidaat voorgesteld.",
+      "unavailable": "Niet meer beschikbaar: niet in uw bestand of niet zichtbaar voor bedrijven"
+    },
+    "mine": {
+      "heading": "Bureaus stelden u voor",
+      "intro": "Een bureau in wiens bestand u staat, stelde u zonder naam voor bij de behoefte van een bedrijf. Het bedrijf ziet uw naam alleen als het u kiest en u de boeking accepteert. U kunt vragen om niet voor een behoefte te worden voorgesteld.",
+      "role": "voor: {role}",
+      "since": "voorgesteld op {date}",
+      "withdraw": "Stel mij hiervoor niet voor",
+      "withdrawn": "U wordt niet voor deze behoefte voorgesteld."
+    }
   },
   "teamAssignment": {
     "title": "Teams in dit project",

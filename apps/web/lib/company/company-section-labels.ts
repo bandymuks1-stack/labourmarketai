@@ -209,6 +209,7 @@ export async function readAgencyBridgeLabels() {
     gatedHeading: tAB("gatedHeading"),
     gatedBody: tAB("gatedBody"),
     connectionsHeading: tAB("connectionsHeading"),
+    openNeedClient: tAB("openNeedClient"),
     inviteEmailLabel: tAB("inviteEmailLabel"),
     inviteButton: tAB("inviteButton"),
     revokeButton: tAB("revokeButton"),

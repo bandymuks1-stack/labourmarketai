@@ -59,6 +59,7 @@ import {
 } from "@/lib/conversation/education-question";
 import { readStatedProgress } from "@/lib/conversation/progress-status-phrase";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
+import { isOpenNeedConnection } from "@/lib/agency/bridge-model";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
 import { TeamDemandOfferForm } from "@/components/app/team-demand-offer-form";
@@ -724,6 +725,7 @@ export type ChatLabels = {
   agencyClientDemandIntro: string;
   agencyClientsLine: string;
   agencyClientActive: string;
+  agencyClientOpenNeed: string;
   agencyClientPending: string;
   agencyClientDemandNone: string;
   agencyProposalsIntro: string;
@@ -4064,7 +4066,7 @@ export function ConversationChat({
               ? labels.agencyClientsLine.replace(
                   "{list}",
                   res.connections
-                    .map((c) => `${c.invitedEmail} (${c.status === "active" ? labels.agencyClientActive : labels.agencyClientPending})`)
+                    .map((c) => `${isOpenNeedConnection(c.invitedEmail) ? labels.agencyClientOpenNeed : c.invitedEmail} (${c.status === "active" ? labels.agencyClientActive : labels.agencyClientPending})`)
                     .join(", "),
                 )
               : null;

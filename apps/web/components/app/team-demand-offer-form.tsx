@@ -17,6 +17,8 @@ import type { TeamOfferRefusal } from "@/lib/market/team-offer-model";
 import { openTeamOfferConversationAction } from "@/lib/company/team-offer-conversation";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
 import { TeamOfferTerms } from "@/components/app/team-offer-terms";
+import { OfferProgressPanel } from "@/components/app/offer-progress-panel";
+import { OfferCandidatesPanel } from "@/components/app/offer-candidates-panel";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
@@ -257,16 +259,17 @@ export function TeamDemandOfferForm({
                         </Button>
                       ) : null}
                       </div>
-                      {org && o.status === "accepted" ? (
-                        // Owner P0 2026-11-23: what is not built says so. A company
-                        // offer cannot yet be handed off to a project (a crew is
-                        // needed: #3649, RED, not applied) — never imply it can.
-                        <p className="text-text-secondary" data-testid={`team-offer-sent-org-next-${o.offerId}`}>
-                          {t("sent.orgNext")}
-                        </p>
-                      ) : null}
                       {o.status === "offered" || o.status === "accepted" || o.status === "assigned" ? (
-                        <TeamOfferTerms offerId={o.offerId} offerOpen={o.status === "offered"} canAgree />
+                        <TeamOfferTerms offerId={o.offerId} offerStatus={o.status} canAgree />
+                      ) : null}
+                      {org && (o.status === "offered" || o.status === "accepted" || o.status === "assigned") ? (
+                        // A company offer: name the crew that will do the work,
+                        // and see where the agreement and the start stand.
+                        <OfferProgressPanel offerId={o.offerId} side="supplier" />
+                      ) : null}
+                      {org && (o.status === "offered" || o.status === "accepted") ? (
+                        // An agency names specific workers on its company offer.
+                        <OfferCandidatesPanel offerId={o.offerId} side="supplier" />
                       ) : null}
                     </li>
                   ))}

@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import {
+  isOpenNeedConnection,
   clientInviteRowState,
   deliveryByEmail,
   effectiveReviewStage,
@@ -59,6 +60,8 @@ export interface AgencyBridgeLabels {
   readonly gatedHeading: string;
   readonly gatedBody: string;
   readonly connectionsHeading: string;
+  /** A connection made by the client choosing a candidate on an open need (no address). */
+  readonly openNeedClient: string;
   readonly inviteEmailLabel: string;
   readonly inviteButton: string;
   readonly revokeButton: string;
@@ -272,7 +275,9 @@ export function AgencyBridgeSection({
                   return (
                     <li key={c.id} className="flex flex-col gap-1.5 rounded-md border border-ink-600 bg-ink-800/40 px-3 py-2" data-testid="agency-bridge-connection-row">
                       <div className="flex flex-wrap items-center gap-2">
-                        <span className="min-w-0 flex-1 truncate text-sm text-text-primary">{c.invitedEmail}</span>
+                        <span className="min-w-0 flex-1 truncate text-sm text-text-primary">
+                          {isOpenNeedConnection(c.invitedEmail) ? labels.openNeedClient : c.invitedEmail}
+                        </span>
                         <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-muted">
                           {labels.statusLabels[c.status] ?? c.status}
                         </span>

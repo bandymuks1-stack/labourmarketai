@@ -8,6 +8,7 @@ import { BookingWithdrawButton } from "@/components/app/booking-withdraw-button"
 import { BookingManageControls } from "@/components/app/booking-manage-controls";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { MarkBookingsSeen } from "@/components/app/mark-bookings-seen";
+import { MyOfferCandidacies } from "@/components/app/my-offer-candidacies";
 import { HomeRetry } from "@/components/app/home/home-retry";
 import { Link } from "@/lib/i18n/navigation";
 import {
@@ -101,6 +102,9 @@ export default async function BookingsPage({
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("intro")}</p>
       </header>
+      {/* Where an agency proposed this person (no name) — their notice and
+          their own "do not propose me". Nothing renders when there is none. */}
+      <MyOfferCandidacies />
       {/* Mutual, neutral pre-agreement recommendation — advice to both
           parties, never a gate (decision 0021 extension, 2026-10-24). */}
       <CollaborationChecksNote context={{ dealKind: "work_engagement" }} testId="bookings-collaboration-checks" />

@@ -2,8 +2,24 @@
 
 import { revalidatePath } from "next/cache";
 
+import { createClient } from "@/lib/supabase/server";
+import { requireEmployerCompany } from "@/lib/company/employer-company-context";
+import { hasOrganizationCapability } from "@/lib/company/role-capabilities";
+import { insertProjectForCompany, rollbackCreatedProject } from "@/lib/projects/create-project-core";
+import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { listActiveCompanyWorkers } from "@/lib/company/company-workers";
+import { readActsAsAgency } from "@/lib/company/agency-capability-read";
 import {
+  addOfferCandidate,
+  listOfferCandidates,
+  selectOfferCandidate,
+  withdrawOfferCandidate,
+  listMyOfferCandidacies,
+  confirmOfferTerms,
   handOffTeamOffer,
+  listOfferCrewOptions,
+  loadOfferProgress,
+  nameOfferUnit,
   listOfferableDemand,
   listOfferTerms,
   listSentOffers,
@@ -16,6 +32,10 @@ import {
 import {
   answerableTerms,
   normalizeTermsInput,
+  startWorkBlockers,
+  type OfferCandidate,
+  type MyOfferCandidacy,
+  type OfferProgress,
   type OfferTermsInput,
   type OfferTermsVersion,
   type OfferableDemand,
@@ -144,4 +164,155 @@ export async function loadTeamOfferPanelAction(input: {
   if (demands.status === "needs_migration" || sent.status === "needs_migration") return { status: "needs_migration" };
   if (demands.status !== "ok" || sent.status !== "ok") return { status: "unavailable" };
   return { status: "ok", demands: demands.rows, sent: sent.rows };
+}
+
+// ── Company offer to work (owner decision 2026-11-22, item 2) ─────────────
+
+export async function confirmOfferTermsAction(input: { offerId: string; expectedVersion: number }) {
+  if (!UUID.test(input.offerId) || !Number.isInteger(input.expectedVersion) || input.expectedVersion < 1) return BAD;
+  const result = await confirmOfferTerms(input.offerId, input.expectedVersion);
+  if (result.status === "ok") revalidatePath("/", "layout");
+  return result;
+}
+
+export async function nameOfferUnitAction(input: { offerId: string; unitTeamOrgId: string }) {
+  if (!UUID.test(input.offerId) || !UUID.test(input.unitTeamOrgId)) return BAD;
+  const result = await nameOfferUnit(input.offerId, input.unitTeamOrgId);
+  if (result.status === "ok") revalidatePath("/", "layout");
+  return result;
+}
+
+export type OfferProgressData =
+  | { status: "ok"; progress: OfferProgress; crews: readonly { id: string; name: string; memberCount: number }[] }
+  | { status: "needs_migration" | "unavailable" | "error" };
+
+/** Where the offer stands; for the supplier also the crews it may name. */
+export async function loadOfferProgressAction(input: { offerId: string }): Promise<OfferProgressData> {
+  if (!UUID.test(input.offerId)) return { status: "error" };
+  const r = await loadOfferProgress(input.offerId);
+  if (r.status !== "ok") return { status: r.status };
+  const progress = r.rows[0];
+  if (!progress) return { status: "unavailable" };
+  const crews =
+    progress.mySide === "supplier" && progress.offerKind === "organization"
+      ? await listOfferCrewOptions(input.offerId).then((c) => (c.status === "ok" ? c.rows : []))
+      : [];
+  return { status: "ok", progress, crews };
+}
+
+export type StartWorkResult =
+  | { status: "ok"; projectId: string }
+  | { status: TeamOfferRefusal | "invalid_title" | "no_company" | "project_not_created" };
+
+/**
+ * The client starts the work: ONE new project of its own (the same create
+ * core and the same manage-projects gate as the projects page), then the
+ * existing hand-off puts the supplier's crew on it. If the hand-off is
+ * refused, the just-created empty project is removed again, so a refusal
+ * never leaves a stray project behind.
+ */
+export async function startWorkFromOfferAction(input: { offerId: string; title: string }): Promise<StartWorkResult> {
+  if (!UUID.test(input.offerId)) return BAD;
+  const title = String(input.title ?? "").trim();
+  const before = await loadOfferProgress(input.offerId);
+  if (before.status === "ok" && before.rows[0]) {
+    const blockers = startWorkBlockers(before.rows[0]);
+    if (blockers.length > 0) return { status: blockers[0]! };
+    if (before.rows[0].status !== "accepted") return { status: "offer_not_accepted" };
+  }
+  const company = await requireEmployerCompany();
+  if (!company.ok) return { status: "no_company" };
+  if (!hasOrganizationCapability(company.role, "manage-projects")) return { status: "not_authorized" };
+  const supabase = await createClient();
+  const created = await insertProjectForCompany(supabase, company.companyId, { title, city: null });
+  if (!created.ok) return { status: created.reason === "invalid_title" ? "invalid_title" : "project_not_created" };
+  const handed = await handOffTeamOffer({ offerId: input.offerId, projectId: created.id });
+  // A refusal, or a second start (the crew is already on another project):
+  // the project created a moment ago would stay empty, so it goes again.
+  if (handed.status !== "ok" || handed.outcome === "already_assigned") {
+    const removed = await rollbackCreatedProject(supabase, created.id);
+    if (!removed) console.error("[team-offer] start-work: the empty project could not be removed", { projectId: created.id });
+    return { status: handed.status === "ok" ? "already_started" : handed.status };
+  }
+  revalidatePath("/", "layout");
+  return { status: "ok", projectId: created.id };
+}
+
+// ── Agency candidates on an open need (owner decision 2026-11-22, item 3) ──
+
+export type OfferCandidatesData =
+  | {
+      status: "ok";
+      candidates: readonly OfferCandidate[];
+      /** The supplier's own active roster when the acting organization is a
+       *  staffing agency; null for anyone else (no picker is shown). */
+      roster: readonly { workerId: string; label: string }[] | null;
+    }
+  | { status: "needs_migration" | "unavailable" | "error" };
+
+export async function loadOfferCandidatesAction(input: {
+  offerId: string;
+  side: "supplier" | "receiver";
+}): Promise<OfferCandidatesData> {
+  if (!UUID.test(input.offerId)) return { status: "error" };
+  const r = await listOfferCandidates(input.offerId);
+  if (r.status !== "ok") return { status: r.status };
+  let roster: { workerId: string; label: string }[] | null = null;
+  if (input.side === "supplier") {
+    const ctx = await resolveEmployerCompanyContext();
+    if (ctx.kind === "ok") {
+      const supabase = await createClient();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const { data: company } = await (supabase as any)
+        .from("companies")
+        .select("company_type")
+        .eq("id", ctx.companyId)
+        .maybeSingle();
+      // The ONE agency rule (ORG-2): the type OR a declared workforce role.
+      if (await readActsAsAgency(company?.company_type ?? null, ctx.organizationId)) {
+        const workers = await listActiveCompanyWorkers(ctx.companyId);
+        roster =
+          workers.kind === "ok"
+            ? workers.rows
+                .filter((w) => w.status === "active")
+                .map((w) => ({
+                  workerId: w.workerId,
+                  label: w.displayName ?? (w.email ? w.email.split("@")[0]! : `#${w.workerId.slice(0, 6)}`),
+                }))
+            : [];
+      }
+    }
+  }
+  return { status: "ok", candidates: r.rows, roster };
+}
+
+export async function addOfferCandidateAction(input: { offerId: string; workerId: string }) {
+  if (!UUID.test(input.offerId) || !UUID.test(input.workerId)) return BAD;
+  const result = await addOfferCandidate(input.offerId, input.workerId);
+  if (result.status === "ok") revalidatePath("/", "layout");
+  return result;
+}
+
+export async function withdrawOfferCandidateAction(input: { candidateId: string }) {
+  if (!UUID.test(input.candidateId)) return BAD;
+  const result = await withdrawOfferCandidate(input.candidateId);
+  if (result.status === "ok") revalidatePath("/", "layout");
+  return result;
+}
+
+export type MyOfferCandidaciesData =
+  | { status: "ok"; rows: readonly MyOfferCandidacy[] }
+  | { status: "needs_migration" | "unavailable" };
+
+/** The worker's own proposals (read under their own session). */
+export async function loadMyOfferCandidaciesAction(): Promise<MyOfferCandidaciesData> {
+  const r = await listMyOfferCandidacies();
+  return r.status === "ok" ? { status: "ok", rows: r.rows } : { status: r.status === "needs_migration" ? "needs_migration" : "unavailable" };
+}
+
+export async function selectOfferCandidateAction(input: { candidateId: string; note?: string | null }) {
+  if (!UUID.test(input.candidateId)) return BAD;
+  const result = await selectOfferCandidate(input.candidateId, input.note?.trim().slice(0, 500) || null);
+  if (result.status === "ok") revalidatePath("/", "layout");
+  return result;
 }

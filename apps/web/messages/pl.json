@@ -13104,7 +13104,8 @@
     "getLink": "Pobierz link",
     "newLink": "Nowy link",
     "messageButton": "Wiadomość",
-    "deliveryAccepted": "Dostarczone — klient zaakceptował zaproszenie i teraz potwierdza połączenie na swojej stronie Partnerzy."
+    "deliveryAccepted": "Dostarczone — klient zaakceptował zaproszenie i teraz potwierdza połączenie na swojej stronie Partnerzy.",
+    "openNeedClient": "Zleceniodawca z otwartej potrzeby (wybrał Państwa kandydata)"
   },
   "clientBridge": {
     "title": "Agencje pracy",
@@ -15146,7 +15147,8 @@
       "whatChangedUnavailable": "Nie udało się teraz sprawdzić, co się zmieniło. Państwa wpisy są bezpieczne — proszę spróbować za chwilę lub otworzyć dziennik.",
       "planIntro": "{count, plural, one {To # krok.} few {To # kroki, po kolei. Oto pierwszy — proszę dotknąć następnego, gdy będą Państwo gotowi.} many {To # kroków, po kolei. Oto pierwszy — proszę dotknąć następnego, gdy będą Państwo gotowi.} other {To # kroku, po kolei. Oto pierwszy — proszę dotknąć następnego, gdy będą Państwo gotowi.}}",
       "planNextOffer": "Następny krok:",
-      "planStep": "Krok {n} z {count}"
+      "planStep": "Krok {n} z {count}",
+      "agencyClientOpenNeed": "zleceniodawca, który wybrał Państwa kandydata w otwartej potrzebie"
     },
     "worklog": {
       "understood": "Oto, co zrozumiałem — zapisać?",
@@ -19655,8 +19657,7 @@
       "heading": "Państwa oferty",
       "none": "Brak ofert.",
       "withdraw": "Wycofaj",
-      "message": "Napisz do zleceniodawcy",
-      "orgNext": "Zleceniodawca wstępnie się zgodził (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
+      "message": "Napisz do zleceniodawcy"
     },
     "status": {
       "offered": "Czeka na odpowiedź",
@@ -19696,7 +19697,27 @@
       "terms_limit_reached": "Ta oferta ma już 50 wersji warunków.",
       "terms_await_other_side": "To Państwa własne warunki — odpowiada druga strona.",
       "organization_offer_not_a_unit": "Oferta firmy nie jest przypisywana jako zespół; ludzi proszę ustalić w rozmowie.",
-      "terms_changed": "Druga strona właśnie zaproponowała nowe warunki. Proszę sprawdzić najnowszą wersję, a potem odpowiedzieć."
+      "terms_changed": "Druga strona właśnie zaproponowała nowe warunki. Proszę sprawdzić najnowszą wersję, a potem odpowiedzieć.",
+      "no_company": "Proszę najpierw otworzyć przestrzeń firmy.",
+      "unit_has_no_members": "Ta brygada nie ma aktywnych członków.",
+      "already_started": "Prace w ramach tej oferty zostały już rozpoczęte w innym projekcie.",
+      "unit_not_of_company": "Ta brygada nie ma żadnego członka z listy osób firmy składającej ofertę.",
+      "terms_not_agreed": "Najpierw obie strony muszą potwierdzić te same warunki.",
+      "unit_not_named": "Firma nie wskazała jeszcze swojej brygady.",
+      "unit_not_yours": "Ta brygada nie należy do Państwa organizacji.",
+      "not_an_organization_offer": "Brygadę wskazuje tylko oferta firmy.",
+      "terms_missing": "Nie ma jeszcze warunków do potwierdzenia.",
+      "project_not_created": "Nie udało się utworzyć projektu.",
+      "invalid_title": "Nazwa projektu musi mieć od 2 do 120 znaków.",
+      "worker_not_discoverable": "Ta osoba nie zdecydowała się być widoczna dla firm. Może to włączyć w ustawieniach prywatności.",
+      "candidate_not_open": "Tego kandydata nie można już wybrać.",
+      "candidate_not_available": "Ten kandydat nie jest już dostępny.",
+      "client_company_unknown": "Nie udało się ustalić firmy potrzeby.",
+      "worker_not_on_roster": "Tej osoby nie ma na Państwa aktywnej liście.",
+      "candidate_already_selected": "Klient już wybrał tego kandydata.",
+      "connection_conflict": "Połączenie z tą agencją w międzyczasie się zmieniło. Prosimy odświeżyć stronę i spróbować ponownie.",
+      "candidate_limit_reached": "W jednej ofercie można zaproponować najwyżej 10 kandydatów.",
+      "not_an_agency_offer": "Kandydatów może wskazać tylko oferta agencji pracy."
     },
     "received": {
       "title": "Zespoły zaproponowane do tego zapotrzebowania",
@@ -19757,7 +19778,7 @@
       "message": "Napisz do zespołu",
       "messageCompany": "Napisz do firmy",
       "kindOrganization": "Oferta firmy",
-      "orgNext": "Uzgodnione wstępnie (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
+      "orgNext": "Wstępna zgoda (to nie umowa). Dalej: proszę uzgodnić warunki poniżej i oboje je potwierdzić; firma wskazuje swoją brygadę; następnie praca rozpoczyna się w projekcie."
     },
     "orgHeading": "Zaoferuj naszą firmę do otwartej potrzeby",
     "orgIntro": "Proszę zaoferować samą firmę — swoich ludzi, swoją usługę lub jako podwykonawca — do jednej otwartej potrzeby. Nie trzeba najpierw tworzyć brygady.",
@@ -19783,18 +19804,106 @@
       "start": "Początek",
       "end": "Koniec",
       "scope": "Zakres prac",
-      "conditions": "Warunki",
+      "conditions": "Warunki i odpowiedzialność",
       "agree": "Zgoda na wersję {version}",
       "agreeNote": "Zgoda oznacza uzgodnienie wstępne — nie podpisaną umowę.",
       "agreed": "Uzgodnione wstępnie.",
       "proposeFirst": "Zaproponuj warunki",
       "proposeNext": "Zaproponuj zmienione warunki (nowa wersja)",
       "propose": "Wyślij warunki",
-      "proposed": "Wersja {version} wysłana."
+      "proposed": "Wersja {version} wysłana.",
+      "place": "Miejsce pracy",
+      "placePlaceholder": "np. Wilno, ul. Žirmūnų 1, budowa klienta",
+      "confirm": "Potwierdź wersję {version}",
+      "confirmedMine": "Potwierdzone. Oczekiwanie na drugą stronę.",
+      "confirmNeedsTerms": "Proszę zaproponować tu warunki. Następnie obie strony potwierdzają tę samą wersję.",
+      "confirmNote": "Obie strony potwierdzają tę samą wersję. W ten sposób zapisane zostają uzgodnione warunki; nie jest to podpis i samo w sobie nie tworzy umowy.",
+      "otherNotConfirmed": "druga strona jeszcze jej nie potwierdziła",
+      "otherConfirmed": "druga strona ją potwierdziła",
+      "confirmedByYou": "Potwierdzili Państwo wersję {version}",
+      "agreedBoth": "Uzgodnione przez obie strony: wersja {version}",
+      "notConfirmedByYou": "Nie potwierdzili Państwo jeszcze wersji {version}"
     },
     "threadContext": "Dotyczy oferty: {subject}",
     "messageAbout": "Dotyczy oferty: {subject}",
-    "threadContextShared": "Wszystkie oferty między stronami są omawiane w tej jednej rozmowie; otwarto ją dla oferty powyżej."
+    "threadContextShared": "Wszystkie oferty między stronami są omawiane w tej jednej rozmowie; otwarto ją dla oferty powyżej.",
+    "progress": {
+      "heading": "Droga do rozpoczęcia pracy",
+      "loading": "Wczytywanie…",
+      "notYet": "Ten krok nie jest tu jeszcze dostępny.",
+      "agreed": "Warunki potwierdzone przez obie strony (wersja {version}).",
+      "noTerms": "Brak warunków: proszę je zaproponować w sekcji Warunki i negocjacje.",
+      "waitingOther": "Potwierdzili Państwo wersję {version}. Oczekiwanie na drugą stronę.",
+      "waitingYou": "Wersja {version} czeka na Państwa potwierdzenie.",
+      "crew": "Brygada: {name}, {count, plural, one {# osoba} few {# osoby} many {# osób} other {# osoby}}",
+      "crewNotNamedSupplier": "Proszę wskazać brygadę, która wykona tę pracę.",
+      "crewNotNamedReceiver": "Firma nie wskazała jeszcze swojej brygady.",
+      "noCrews": "Nie można jeszcze wskazać brygady: brygada potrzebuje co najmniej jednego członka z listy osób Państwa firmy.",
+      "createCrew": "Proszę ją utworzyć na stronie Ludzie",
+      "crewLabel": "Brygada",
+      "crewPlaceholder": "Wybierz brygadę",
+      "crewSubmit": "Wskaż tę brygadę",
+      "crewNamed": "Brygada wskazana.",
+      "crewNamedReconfirm": "Brygada wskazana. Warunki były potwierdzone dla innej brygady, więc obie strony potwierdzają je ponownie.",
+      "startNeeds": "Pracę można rozpocząć, gdy obie strony potwierdzą warunki, a firma wskaże swoją brygadę.",
+      "startIntro": "Obie strony potwierdziły warunki, a brygada jest wskazana. Proszę utworzyć projekt: brygada zostanie do niego dodana i tam rozpocznie się praca.",
+      "titleLabel": "Nazwa projektu",
+      "startSubmit": "Utwórz projekt i rozpocznij pracę",
+      "titleInvalid": "Nazwa projektu musi mieć od 2 do 120 znaków.",
+      "startedReceiver": "Praca rozpoczęta: brygada jest w Państwa projekcie.",
+      "startedSupplier": "Praca rozpoczęta: Państwa brygada jest w projekcie klienta."
+    },
+    "candidates": {
+      "heading": "Proponowani kandydaci",
+      "introSupplier": "Prosimy proponować konkretne osoby z Państwa listy. Zaproponować można tylko osoby, które zdecydowały się być widoczne dla firm, a każda widzi na stronie Rezerwacje, że ją zaproponowano. Zleceniodawca widzi każdą bez nazwiska: doświadczenie, kraj, dostępność, języki i umiejętności. Nazwisko jest pokazywane dopiero, gdy zleceniodawca wybierze osobę, a ona się zgodzi.",
+      "introReceiver": "Osoby proponowane przez agencję, bez nazwiska i kontaktów. Wybór wysyła prośbę o zatrudnienie do tej osoby; nazwisko pojawia się, gdy się zgodzi. Kontakt prowadzą Państwo z agencją.",
+      "experience": "Doświadczenie",
+      "years": "{count, plural, one {# rok} few {# lata} many {# lat} other {# roku}}",
+      "country": "Pracuje w",
+      "availability": "Dostępność",
+      "availableFrom": "od {date}",
+      "availabilityValue": {
+        "available": "dostępny",
+        "busy": "zajęty",
+        "unavailable": "niedostępny",
+        "unknown": "nie podano"
+      },
+      "languages": "Języki",
+      "skills": "Umiejętności",
+      "confirmed": "potwierdzone",
+      "status": {
+        "offered": "Zaproponowany",
+        "withdrawn": "Wycofany",
+        "selected": "Wybrany przez klienta"
+      },
+      "booking": {
+        "proposed": "Prośba wysłana, czeka na odpowiedź osoby",
+        "accepted": "Osoba się zgodziła",
+        "declined": "Osoba odmówiła",
+        "withdrawn": "Prośba wycofana",
+        "expired": "Prośba wygasła"
+      },
+      "withdraw": "Wycofaj",
+      "withdrawn": "Kandydat wycofany.",
+      "selectNote": "Wybór łączy Państwa firmę z tą agencją, która zobaczy wtedy nazwę Państwa firmy: to trwałe połączenie, które można zakończyć na stronie Partnerzy. Wysyła też tej osobie prośbę o rezerwację. To nie jest umowa.",
+      "noteLabel": "Wiadomość do osoby (opcjonalnie)",
+      "select": "Wybierz tego kandydata",
+      "selected": "Prośba wysłana. Decyduje sama osoba.",
+      "noRoster": "Na Państwa liście nie ma jeszcze nikogo.",
+      "addLabel": "Osoba z Państwa listy",
+      "addPlaceholder": "Wybierz osobę",
+      "add": "Zaproponuj tę osobę",
+      "added": "Kandydat zaproponowany.",
+      "unavailable": "Już niedostępny: nie ma na Państwa liście lub nie jest widoczny dla firm"
+    },
+    "mine": {
+      "heading": "Agencje zaproponowały Państwa kandydaturę",
+      "intro": "Agencja, na której liście Państwo są, zaproponowała Państwa bez nazwiska do potrzeby firmy. Firma zobaczy Państwa nazwisko tylko, jeśli Państwa wybierze, a Państwo przyjmą rezerwację. Można poprosić, aby nie proponowano Państwa do tej potrzeby.",
+      "role": "do: {role}",
+      "since": "zaproponowano {date}",
+      "withdraw": "Proszę mnie do tego nie proponować",
+      "withdrawn": "Nie będą Państwo proponowani do tej potrzeby."
+    }
   },
   "teamAssignment": {
     "title": "Zespoły w tym projekcie",
