@@ -456,7 +456,7 @@
           },
           "education": {
             "title": "Jeg repræsenterer et uddannelsessted",
-            "desc": "Inviter elever, se deres deltagelse og forbind dem med praktik og job."
+            "desc": "Inviter elever, driv forløb og følg deres praktik og resultater."
           }
         },
         "agency": {
@@ -4813,7 +4813,6 @@
     },
     "v3": {
       "lead": "For medarbejdere, arbejdsgivere og tjenesteudbydere i alle fag og sektorer. Registrering og grundlæggende opslag af et behov er gratis.",
-      "moreChoices": "Flere muligheder",
       "or": "eller beskriv det med dine egne ord",
       "needFree": "Du kan sende en forespørgsel uden at registrere dig. Det er gratis at sende den; vilkår og pris for ydelserne aftales særskilt.",
       "market": {
@@ -7138,6 +7137,19 @@
       "period": "Registreret",
       "basis": "Fra {entries} journalposter, som personer registrerede under denne organisation. Talt adskilt fra den importerede historik ovenfor og aldrig lagt til den.",
       "unavailable": "Arbejdet registreret i journalen under denne organisation kunne ikke læses lige nu."
+    },
+    "forClient": {
+      "title": "Arbejde udført af jeres underleverandører",
+      "confirmed": "Bekræftede poster",
+      "unconfirmed": "Ikke-bekræftede poster",
+      "periodHours": "{hours} t angivet som periodesum, ikke lagt til enkelte dage.",
+      "basis": "Fra {count, plural, one {# post} other {# poster}} i jeres underleverandørers egne registre. Talt adskilt fra jeres eget arbejde.",
+      "unreadable": "Arbejde i partneres registre kunne ikke læses lige nu. Det betyder ikke, at der ikke er noget."
+    },
+    "clients": {
+      "title": "Kunder",
+      "unnamed": "Kundeorganisation",
+      "records": "{count, plural, one {# post} other {# poster}}"
     }
   },
   "workLifecycle": {

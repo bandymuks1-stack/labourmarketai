@@ -456,7 +456,7 @@
           },
           "education": {
             "title": "Pārstāvu mācību iestādi",
-            "desc": "Aiciniet izglītojamos, redziet viņu dalību un savienojiet viņus ar praksēm un darbu."
+            "desc": "Aiciniet izglītojamos, vadiet programmas un sekojiet viņu praksei un rezultātiem."
           }
         },
         "agency": {
@@ -4813,7 +4813,6 @@
     },
     "v3": {
       "lead": "Darbiniekiem, darba devējiem un pakalpojumu sniedzējiem — visās profesijās un nozarēs. Reģistrācija un pamata vajadzības publicēšana ir bez maksas.",
-      "moreChoices": "Vairāk iespēju",
       "or": "vai aprakstiet saviem vārdiem",
       "needFree": "Pieprasījumu varat iesniegt bez reģistrācijas. Iesniegšana ir bez maksas; pakalpojumu nosacījumi un cena tiek saskaņoti atsevišķi.",
       "market": {
@@ -7138,6 +7137,19 @@
       "period": "Ierakstīts",
       "basis": "No {entries} žurnāla ierakstiem, ko cilvēki veica šajā organizācijā. Skaitīts atsevišķi no augstāk redzamās importētās vēstures un nekad tai nepieskaitīts.",
       "unavailable": "Šobrīd neizdevās nolasīt šajā organizācijā žurnālā ierakstīto darbu."
+    },
+    "forClient": {
+      "title": "Jūsu apakšuzņēmēju darbs",
+      "confirmed": "Apstiprinātie ieraksti",
+      "unconfirmed": "Neapstiprinātie ieraksti",
+      "periodHours": "{hours} st. norādītas kā perioda summa, nav pieskaitītas atsevišķām dienām.",
+      "basis": "No {count, plural, zero {# ierakstiem} one {# ieraksta} other {# ierakstiem}} jūsu apakšuzņēmēju uzskaitē. Skaitīts atsevišķi no jūsu pašu darba.",
+      "unreadable": "Partneru uzskaitē reģistrēto darbu pašlaik neizdevās nolasīt. Tas nenozīmē, ka tā nav."
+    },
+    "clients": {
+      "title": "Pasūtītāji",
+      "unnamed": "Pasūtītāja organizācija",
+      "records": "{count, plural, zero {# ierakstu} one {# ieraksts} other {# ieraksti}}"
     }
   },
   "workLifecycle": {

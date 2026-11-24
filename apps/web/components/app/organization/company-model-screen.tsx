@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
 import { AreaSwitcher } from "@/components/app/area-switcher";
+import { SignedInGoalNavigation } from "@/components/navigation/signed-in-goal-navigation";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { Link } from "@/lib/i18n/navigation";
 import { learnerInviteHref, ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
@@ -77,6 +79,14 @@ export async function CompanyModelScreen({
       ) : (
         <NeedDoorLink surface="company_model" testId="company-model-primary" className={primaryClassName} />
       )}
+      {/* THE SIX GOALS (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC N4):
+          the public home's navigator, each goal opening what this
+          organization may use. After the approvals and the one primary
+          action, which stay on the first screen (owner P0 2026-11-07); the
+          area switcher below stays until N6 retires it. */}
+      <Suspense fallback={<div data-testid="signed-in-goals-pending" className="min-h-[13rem]" aria-hidden />}>
+        <SignedInGoalNavigation />
+      </Suspense>
       {/* Every door of the company, by priority (the everyday six first),
           as the light 3D area switcher — one source: ORGANIZATION_WORK_AREAS.
           The carousel replaces the six-tile grid + "More" disclosure: the

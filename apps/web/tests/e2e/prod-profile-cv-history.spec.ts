@@ -763,7 +763,14 @@ test("P-15 (2.24). the experience records about the worker open, with the right 
   const result = inMain(page).getByTestId("experiences-result");
   const unavailable = inMain(page).getByTestId("experiences-result-unavailable").first();
   const error = inMain(page).getByTestId("experiences-result-error");
-  await expect(result.or(unavailable).or(error).first()).toBeVisible({ timeout: 45_000 });
+  try {
+    await expect(result.or(unavailable).or(error).first()).toBeVisible({ timeout: 45_000 });
+  } catch (e) {
+    // Say whether the phone's sheet was open: a closed sheet hides a rendered result.
+    const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+    const sheet = (await toggle.count()) ? `aria-expanded=${await toggle.getAttribute("aria-expanded")}` : "no sheet button";
+    throw new Error(`${(e as Error).message}\n[P-15] context panel: ${sheet}`);
+  }
   if (await error.isVisible()) throw new Error("experience records did not load");
   if (!(await result.isVisible())) throw new Error("experience records report themselves unavailable");
   await expect(result.getByTestId("experiences-about-me")).toBeVisible();

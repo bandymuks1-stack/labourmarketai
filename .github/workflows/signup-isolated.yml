@@ -81,6 +81,10 @@ on:
       - "apps/web/components/app/worker-education-section.tsx"
       - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
       - "apps/web/tests/e2e/experience-integration-isolated.spec.ts"
+      # A client is not the performer (#3739, decision 0033).
+      - "apps/web/tests/e2e/history-client-aggregate-isolated.spec.ts"
+      - "apps/web/lib/organization-evidence/work-for-client.ts"
+      - "apps/web/lib/organization-evidence/company-work-history-read.ts"
       # Register 2.36, a profession journal template prefills an entry.
       - "apps/web/tests/e2e/journal-template-isolated.spec.ts"
       # The journal opens with the work day (owner P1 2026-11-21).
@@ -237,7 +241,7 @@ jobs:
       # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
       # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts tests/e2e/pay-placeholder-isolated.spec.ts tests/e2e/hiring-chain-isolated.spec.ts tests/e2e/employer-journey-isolated.spec.ts
+      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/sv-journey-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/history-client-aggregate-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts tests/e2e/pay-placeholder-isolated.spec.ts tests/e2e/hiring-chain-isolated.spec.ts tests/e2e/employer-journey-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
@@ -449,8 +453,9 @@ jobs:
         run: pnpm exec playwright test $SPEC $SPEC_P0 --reporter=list --trace=off
 
       # One continuous professional history across organizations
-      # (experience-integration-isolated.spec.ts, issue #3354): synthetic
-      # accounts on this stack only, 375 / 1440 px. Kept as a CI artifact.
+      # (experience-integration-isolated.spec.ts, issue #3354), and the client
+      # aggregate (history-client-aggregate-isolated.spec.ts, #3739, at 1440 /
+      # 390 / 375 px): synthetic accounts on this stack only. Kept as a CI artifact.
       - name: Upload the experience-integration screenshots
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
