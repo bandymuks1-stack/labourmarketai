@@ -12654,7 +12654,7 @@
       },
       "verify": {
         "title": "Patvirtinkite el. paštą, kad matytumėte jam skirtus pakvietimus",
-        "body": "Pakvietimai, adresuoti el. pašto adresui, rodomi tik tam, kas gali atidaryti tą pašto dėžutę. Visa kita jūsų paskyroje veikia kaip veikė; tai reikalinga tik šiems pakvietimams matyti ar priimti.",
+        "body": "Pakvietimai, adresuoti el. pašto adresui, rodomi tik tam, kas gali atidaryti tą pašto dėžutę.",
         "send": "Atsiųskite man vienkartinę nuorodą",
         "sending": "Siunčiama…",
         "sent": "Išsiuntėme vienkartinę nuorodą adresu {email}. Atidarykite ją šiame įrenginyje, kad užbaigtumėte.",

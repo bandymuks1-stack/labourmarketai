@@ -12654,7 +12654,7 @@
       },
       "verify": {
         "title": "Verifiera din e-post för att se inbjudningar som skickats till den",
-        "body": "Inbjudningar som är adresserade till en e-postadress visas bara för den som kan öppna den brevlådan. Allt annat i ditt konto fungerar som vanligt; detta behövs bara för att se eller acceptera de här inbjudningarna.",
+        "body": "Inbjudningar som är adresserade till en e-postadress visas bara för den som kan öppna den brevlådan.",
         "send": "Skicka mig en engångslänk",
         "sending": "Skickar…",
         "sent": "Vi har skickat en engångslänk till {email}. Öppna den på den här enheten för att slutföra.",

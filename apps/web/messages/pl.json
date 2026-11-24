@@ -12654,7 +12654,7 @@
       },
       "verify": {
         "title": "Proszę potwierdzić e-mail, aby zobaczyć zaproszenia wysłane na ten adres",
-        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę. Wszystko inne na koncie działa jak dotąd; potwierdzenie jest potrzebne tylko do zobaczenia lub przyjęcia tych zaproszeń.",
+        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę.",
         "send": "Wyślij mi jednorazowy link",
         "sending": "Wysyłanie…",
         "sent": "Wysłaliśmy jednorazowy link na {email}. Proszę go otworzyć na tym urządzeniu, aby dokończyć.",
