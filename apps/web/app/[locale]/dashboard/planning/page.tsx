@@ -1,3 +1,4 @@
+import { OrganizationDoorsServer } from "@/components/app/organization/organization-doors-server";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -160,6 +161,7 @@ export default async function PlanningPage({
   const range = visibleRange(view, anchor);
 
   const t = await getTranslations("planning");
+  const tDoors = await getTranslations("organizationDoors");
   // Un-namespaced translator for the source-native status keys the items
   // carry (bookings.status.*, tasks.status.*, planning.*Status.*).
   const tAll = await getTranslations();
@@ -541,6 +543,10 @@ export default async function PlanningPage({
 
   return (
     <div className="flex flex-col gap-6" data-testid="planning-page">
+      {/* The calendar is one of the organization's doors: the strip stays in
+          view here too (carousel spec N7a). It renders nothing outside an
+          organization context, so a person's own calendar is unchanged. */}
+      <OrganizationDoorsServer ariaLabel={tDoors("label")} />
       {header}
 
       <SourceNotes sources={result.sources} t={t} />
