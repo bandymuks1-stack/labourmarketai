@@ -180,7 +180,41 @@
       "actionPhone": "Call",
       "actionWebsite": "Open the company's website",
       "heroContact": "How to get in touch",
-      "provenance": "The company filled in this page itself."
+      "provenance": "The company filled in this page itself.",
+      "living": {
+        "eyebrow": "Living CV",
+        "figures": {
+          "years": "{count, plural, one {year active} other {years active}}",
+          "hours": "hours worked",
+          "people": "{count, plural, one {person worked here} other {people worked here}}",
+          "projects": "{count, plural, one {project} other {projects}}",
+          "places": "{count, plural, one {work site} other {work sites}}",
+          "team": "{count, plural, one {team member} other {team members}}"
+        },
+        "doTitle": "Competencies",
+        "team": "{count, plural, one {# person on the team} other {# people on the team}}",
+        "experienceTitle": "Hours worked",
+        "confirmedLabel": "Confirmed",
+        "confirmedSource": "Recorded by the worker, approved by the organization",
+        "recordedLabel": "Own records",
+        "recordedSource": "The organization's records, not confirmed by another party",
+        "pending": "{hours} waiting for approval",
+        "hours": "{hours} h",
+        "running": "Ongoing",
+        "completed": "Completed",
+        "clients": "Work done for: {names}",
+        "tabs": {
+          "overview": "Overview",
+          "projects": "Projects",
+          "experience": "Experience",
+          "gallery": "Gallery",
+          "team": "Team"
+        },
+        "pendingLabel": "Waiting for approval",
+        "ringLabel": "{share}% of journal hours confirmed",
+        "open": "Open the Living CV",
+        "clientsMore": "Work done for: {names} and {count} more"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1186,7 @@
     "calendar": "Calendar",
     "addEntry": "Add entry",
     "details": "Personal details",
+    "background": "Languages & education",
     "improve": "What to improve",
     "capabilities": "Skills & work history",
     "fullRecordsInCv": "All work records",

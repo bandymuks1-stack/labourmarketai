@@ -6,6 +6,16 @@ import { test, expect, type Browser, type BrowserContext, type Locator, type Pag
 
 import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures";
 
+/** The profile's block that holds a section (decision 0034: one block per screen, `?tab=`). */
+function profileTabOf(hash: string): string {
+  if (hash === "profile-edit") return "edit";
+  if (hash === "capabilities" || hash === "candidate-skills") return "skills";
+  if (hash === "profile-about") return "about";
+  if (hash === "cv-languages" || hash === "cv-education" || hash === "cv-achievements") return "background";
+  return "details";
+}
+
+
 /**
  * PRODUCTION PROFILE · LIVING CV · HISTORY — owner areas 1 / 3 / 15: the
  * person's own profile, the Living CV, skills and the one continuous
@@ -92,7 +102,7 @@ async function profileAt(page: Page, hash: string): Promise<Locator> {
       return false;
     }
   })();
-  await page.goto(`/lt/dashboard/profile#${hash}`);
+  await page.goto(`/lt/dashboard/profile?tab=${profileTabOf(hash)}#${hash}`);
   if (already) await page.reload();
   const main = inMain(page);
   await expect(main.locator(`#${hash}`).first()).toBeVisible({ timeout: 30_000 });
@@ -236,7 +246,7 @@ async function openWorkCard(page: Page): Promise<Locator> {
   // The persistence check needs a FRESH document. Going to the same URL and
   // hash again is a same-document fragment navigation: nothing reloads, the
   // editor stays open, and the toggle then CLOSED it (run 39970719710).
-  const again = page.url().includes("/dashboard/profile#cv-availability");
+  const again = page.url().includes("/dashboard/profile?tab=details#cv-availability");
   let main = await profileAt(page, "cv-availability");
   if (again) {
     await page.reload();

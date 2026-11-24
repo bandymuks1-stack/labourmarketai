@@ -50,6 +50,7 @@ const DISCLOSURES = [
   "organization-history",
   "profile-edit",
   "cv-details",
+  "cv-background",
   "capabilities",
   "profile-about",
 ] as const;
@@ -80,6 +81,7 @@ describe("what stands OPEN on arrival — summary, current state, action", () =>
       PAGE.indexOf("<ProfileHubOverview"),
       PAGE.indexOf('id="profile-edit"'),
       PAGE.indexOf('id="cv-details"'),
+      PAGE.indexOf('id="cv-background"'),
       PAGE.indexOf('id="capabilities"'),
       PAGE.indexOf('id="profile-about"'),
     ];
@@ -127,12 +129,12 @@ describe("every moved section lives INSIDE its disclosure", () => {
     });
   }
 
-  it("the evidence card's OTHER mount is only the empty / not-enabled state inside #cv-details", () => {
+  it("the evidence card's OTHER mount is only the empty / not-enabled state inside #cv-background", () => {
     // Two mounts by design: the records inside `#organization-history`, and —
     // when there are none — the quiet "nothing recorded" card among the
     // personal details. Never a second, open copy of the records.
     expect(PAGE.split("<OrganizationEvidenceSection").length - 1).toBe(2);
-    const details = block("cv-details").text;
+    const details = block("cv-background").text;
     const at = details.indexOf("<OrganizationEvidenceSection");
     expect(at).toBeGreaterThan(-1);
     expect(details.slice(at, details.indexOf("/>", at))).toContain("records={[]}");
@@ -177,7 +179,8 @@ describe("DetailsHashOpener's decision, proven against the page's REAL nesting",
     // A section INSIDE a bar — the nested case every moved section relies on.
     ["#profile-identity", "cv-details"],
     ["#cv-availability", "cv-details"],
-    ["#cv-languages", "cv-details"],
+    ["#cv-background", "cv-background"],
+    ["#cv-languages", "cv-background"],
     ["#candidate-skills", "capabilities"],
     ["#roster-link-withdrawals", "organization-history"],
     ["#team-link-withdrawals", "organization-history"],
@@ -193,6 +196,8 @@ describe("DetailsHashOpener's decision, proven against the page's REAL nesting",
   const NEGATIVE: ReadonlyArray<[string, string]> = [
     // A section that lives in ANOTHER bar must not open this one.
     ["#candidate-skills", "cv-details"],
+    ["#cv-languages", "cv-details"],
+    ["#cv-availability", "cv-background"],
     ["#profile-identity", "capabilities"],
     ["#cv-availability", "organization-history"],
     ["#roster-link-withdrawals", "profile-about"],
@@ -213,7 +218,7 @@ describe("DetailsHashOpener's decision, proven against the page's REAL nesting",
   }
 
   it("the model is not vacuous: every bar resolved at least one id inside it", () => {
-    for (const id of ["organization-history", "cv-details", "capabilities"] as const) {
+    for (const id of ["organization-history", "cv-details", "cv-background", "capabilities"] as const) {
       expect(children.get(id)?.size ?? 0, `#${id} children`).toBeGreaterThan(0);
     }
   });

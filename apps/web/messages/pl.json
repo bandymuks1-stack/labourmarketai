@@ -180,7 +180,41 @@
       "actionPhone": "Zadzwoń",
       "actionWebsite": "Otwórz stronę firmy",
       "heroContact": "Jak się skontaktować",
-      "provenance": "Firma sama wypełniła tę stronę."
+      "provenance": "Firma sama wypełniła tę stronę.",
+      "living": {
+        "eyebrow": "Żywe CV",
+        "figures": {
+          "years": "{count, plural, one {rok działalności} few {lata działalności} many {lat działalności} other {lat działalności}}",
+          "hours": "przepracowanych godzin",
+          "people": "{count, plural, one {osoba pracowała} few {osoby pracowały} many {osób pracowało} other {osób pracowało}}",
+          "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
+          "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}",
+          "team": "{count, plural, one {członek zespołu} few {członków zespołu} many {członków zespołu} other {członków zespołu}}"
+        },
+        "doTitle": "Kompetencje",
+        "team": "{count, plural, one {W zespole # osoba} few {W zespole # osoby} many {W zespole # osób} other {W zespole # osób}}",
+        "experienceTitle": "Przepracowane godziny",
+        "confirmedLabel": "Potwierdzone",
+        "confirmedSource": "Zapisane przez pracownika, zatwierdzone przez organizację",
+        "recordedLabel": "Własne zapisy",
+        "recordedSource": "Zapisy organizacji, niepotwierdzone przez drugą stronę",
+        "pending": "{hours} czeka na zatwierdzenie",
+        "hours": "{hours} godz.",
+        "running": "W toku",
+        "completed": "Zakończone",
+        "clients": "Prace wykonane dla: {names}",
+        "tabs": {
+          "overview": "Przegląd",
+          "projects": "Projekty",
+          "experience": "Doświadczenie",
+          "gallery": "Galeria",
+          "team": "Zespół"
+        },
+        "pendingLabel": "Czeka na zatwierdzenie",
+        "ringLabel": "Potwierdzono {share}% godzin z dziennika",
+        "open": "Otwórz Żywe CV",
+        "clientsMore": "Prace wykonane dla: {names} i {count} więcej"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1186,7 @@
     "calendar": "Kalendarz",
     "addEntry": "Dodaj wpis",
     "details": "Dane osobowe",
+    "background": "Języki i wykształcenie",
     "improve": "Co poprawić",
     "capabilities": "Umiejętności i historia pracy",
     "fullRecordsInCv": "Wszystkie dowody z pracy",

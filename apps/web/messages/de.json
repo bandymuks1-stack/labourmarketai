@@ -180,7 +180,41 @@
       "actionPhone": "Anrufen",
       "actionWebsite": "Website des Unternehmens öffnen",
       "heroContact": "So erreichen Sie es",
-      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt."
+      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt.",
+      "living": {
+        "eyebrow": "Lebendiger Lebenslauf",
+        "figures": {
+          "years": "{count, plural, one {Jahr aktiv} other {Jahre aktiv}}",
+          "hours": "geleistete Stunden",
+          "people": "{count, plural, one {Person hat hier gearbeitet} other {Personen haben hier gearbeitet}}",
+          "projects": "{count, plural, one {Projekt} other {Projekte}}",
+          "places": "{count, plural, one {Baustelle} other {Baustellen}}",
+          "team": "{count, plural, one {Teammitglied} other {Teammitglieder}}"
+        },
+        "doTitle": "Kompetenzen",
+        "team": "{count, plural, one {# Person im Team} other {# Personen im Team}}",
+        "experienceTitle": "Geleistete Stunden",
+        "confirmedLabel": "Bestätigt",
+        "confirmedSource": "Vom Mitarbeiter erfasst, von der Organisation freigegeben",
+        "recordedLabel": "Eigene Aufzeichnungen",
+        "recordedSource": "Aufzeichnungen der Organisation, von keiner anderen Seite bestätigt",
+        "pending": "{hours} warten auf Freigabe",
+        "hours": "{hours} Std.",
+        "running": "Laufend",
+        "completed": "Abgeschlossen",
+        "clients": "Arbeiten ausgeführt für: {names}",
+        "tabs": {
+          "overview": "Übersicht",
+          "projects": "Projekte",
+          "experience": "Erfahrung",
+          "gallery": "Galerie",
+          "team": "Mitarbeitende"
+        },
+        "pendingLabel": "Wartet auf Freigabe",
+        "ringLabel": "{share}% der Journalstunden bestätigt",
+        "open": "Lebendigen Lebenslauf öffnen",
+        "clientsMore": "Arbeiten ausgeführt für: {names} und {count} weitere"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1186,7 @@
     "calendar": "Kalender",
     "addEntry": "Eintrag hinzufügen",
     "details": "Persönliche Daten",
+    "background": "Sprachen & Ausbildung",
     "improve": "Verbesserungspunkte",
     "capabilities": "Fähigkeiten & Arbeitshistorie",
     "fullRecordsInCv": "Alle Arbeitseinträge",
