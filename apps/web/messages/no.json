@@ -7013,7 +7013,8 @@
       "heading": "Invitasjoner fra organisasjoner",
       "explainer": "Ledelsesinvitasjoner adressert til deg. Når du godtar, vises organisasjonen i arbeidsområdevelgeren din.",
       "accept": "Godta",
-      "decline": "Avslå"
+      "decline": "Avslå",
+      "invitedBy": "Invitert av {name}"
     },
     "members": {
       "heading": "Organisasjonens medlemmer",

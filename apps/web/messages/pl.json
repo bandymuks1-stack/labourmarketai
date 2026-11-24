@@ -18940,7 +18940,8 @@
       "heading": "Zaproszenia od organizacji",
       "explainer": "Skierowane do Państwa zaproszenia do zarządu. Po przyjęciu organizacja pojawi się w przełączniku przestrzeni.",
       "accept": "Przyjmij",
-      "decline": "Odrzuć"
+      "decline": "Odrzuć",
+      "invitedBy": "Zaproszenie od {name}"
     },
     "members": {
       "heading": "Członkowie organizacji",
@@ -19671,6 +19672,14 @@
     "noDemand": "Obecnie nie ma otwartego zapotrzebowania, do którego można złożyć ofertę.",
     "demandLabel": "Zapotrzebowanie",
     "demandPlaceholder": "Wybierz zapotrzebowanie",
+    "need": {
+      "people": "Osoby",
+      "start": "Początek",
+      "duration": "Czas trwania",
+      "language": "Język",
+      "skills": "Umiejętności",
+      "tools": "Narzędzia"
+    },
     "alreadyOffered": "już zaproponowano",
     "noteLabel": "Wiadomość do firmy (opcjonalnie)",
     "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",

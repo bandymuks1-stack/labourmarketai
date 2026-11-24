@@ -7013,7 +7013,8 @@
       "heading": "Invitationer fra organisationer",
       "explainer": "Ledelsesinvitationer stilet til dig. Når du accepterer, vises organisationen i din arbejdsområdevælger.",
       "accept": "Acceptér",
-      "decline": "Afvis"
+      "decline": "Afvis",
+      "invitedBy": "Inviteret af {name}"
     },
     "members": {
       "heading": "Organisationens medlemmer",
