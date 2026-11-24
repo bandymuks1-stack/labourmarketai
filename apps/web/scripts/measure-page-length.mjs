@@ -18,7 +18,8 @@
  * Read-only: it only opens pages. No data is written.
  */
 import { readdirSync, statSync, writeFileSync } from "node:fs";
-import { join, relative, sep } from "node:path";
+import { dirname, join, relative, sep } from "node:path";
+import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 const args = process.argv.slice(2);
@@ -50,7 +51,8 @@ const VIEWPORTS = [
 
 /** Static routes under app/[locale]/dashboard (no [param] segment). */
 function dashboardRoutes() {
-  const root = join(process.cwd(), "app", "[locale]");
+  // Relative to this script (apps/web/scripts), so it runs from any directory.
+  const root = join(dirname(fileURLToPath(import.meta.url)), "..", "app", "[locale]");
   const found = [];
   const walk = (dir) => {
     for (const name of readdirSync(dir)) {
