@@ -4392,7 +4392,7 @@
           },
           "education": {
             "title": "Jag representerar en utbildningsanordnare",
-            "desc": "Bjud in studerande, se deras deltagande och koppla dem till praktik och jobb."
+            "desc": "Bjud in studerande, driv program och följ deras praktik och resultat."
           }
         },
         "heading": "Börjar du som person eller som företag?",
@@ -5822,9 +5822,9 @@
       "confirmedTitle": "Raderingen är bekräftad",
       "confirmedBody": "Systemet raderar kontot inom de närmaste minuterna och skickar en bekräftelse till kontots e-postadress. Om något behöver granskas meddelar vi dig.",
       "inReview": "Den automatiska raderingen är pausad för granskning: kontot innehåller uppgifter som kan behöva sparas enligt lag eller som rör andra personer. Du får beslutet och skälen för det via e-post inom en månad. Under tiden visas din profil inte i sökningar.",
-      "confirmLabelWaiting": "Jag förstår att kontot och dess uppgifter raderas oåterkalleligt 30 dagar efter bekräftelsen, om jag inte avbryter före dess.",
-      "confirmStepBodyWaiting": "Din begäran om radering av kontot är inlämnad. Bekräfta den – kontot sparas i 30 dagar, och du kan avbryta på den här sidan under den tiden. Därefter raderar systemet kontot automatiskt och mejlar dig en bekräftelse.",
-      "confirmedBodyWaiting": "Kontot raderas om 30 dagar. Fram till dess kan du avbryta på den här sidan. När det har raderats skickar vi en bekräftelse till kontots e-postadress.",
+      "confirmLabelWaiting": "Jag förstår att kontot och dess uppgifter raderas oåterkalleligt senast 30 dagar efter bekräftelsen och senast en månad efter min begäran, om jag inte avbryter före dess.",
+      "confirmStepBodyWaiting": "Din begäran om radering av kontot är inlämnad. Bekräfta den – kontot sparas i högst 30 dagar (aldrig längre än en månad från din begäran), och du kan avbryta på den här sidan under den tiden. Därefter raderar systemet kontot automatiskt och mejlar dig en bekräftelse.",
+      "confirmedBodyWaiting": "Kontot raderas inom 30 dagar, och senast en månad efter din begäran. Fram till dess kan du avbryta på den här sidan. När det har raderats skickar vi en bekräftelse till kontots e-postadress.",
       "status": {
         "pending": "Din begäran om radering av kontot är inlämnad.",
         "pendingConfirmed": "Raderingen av kontot är bekräftad och schemalagd.",
@@ -5832,7 +5832,7 @@
         "inProgress": "Raderingen av kontot pågår redan – den kan inte längre avbrytas.",
         "done": "Kontot har raderats.",
         "submittedAt": "Inlämnad: {date}",
-        "scheduledAt": "Kontot raderas den {date} (efter en väntetid på 30 dagar).",
+        "scheduledAt": "Kontot raderas den {date}.",
         "cancelUntil": "Fram till dess kan du avbryta.",
         "loadError": "Det gick inte att läsa in status för radering av kontot. Uppdatera sidan och försök igen."
       },
@@ -15970,7 +15970,6 @@
     },
     "v3": {
       "lead": "För arbetstagare, arbetsgivare och tjänsteleverantörer i alla yrken och branscher. Registrering och grundläggande publicering av ett behov är gratis.",
-      "moreChoices": "Fler alternativ",
       "or": "eller beskriv det med egna ord",
       "needFree": "Du kan skicka en förfrågan utan att registrera dig. Det är kostnadsfritt att skicka den; villkor och pris för tjänsterna avtalas separat.",
       "market": {
@@ -19391,6 +19390,19 @@
       "period": "Registrerat",
       "basis": "Från {entries} journalposter som personer registrerade under den här organisationen. Räknas separat från den importerade historiken ovan och läggs aldrig till den.",
       "unavailable": "Arbetet som registrerats i journalen under den här organisationen kunde inte läsas just nu."
+    },
+    "forClient": {
+      "title": "Arbete av era underentreprenörer",
+      "confirmed": "Bekräftade poster",
+      "unconfirmed": "Ej bekräftade poster",
+      "periodHours": "{hours} h angivna som periodsumma, inte lagda till enskilda dagar.",
+      "basis": "Från {count, plural, one {# post} other {# poster}} i era underentreprenörers egna register. Räknas separat från ert eget arbete.",
+      "unreadable": "Arbete i partners register kunde inte läsas just nu. Det betyder inte att det saknas."
+    },
+    "clients": {
+      "title": "Beställare",
+      "unnamed": "Beställande organisation",
+      "records": "{count, plural, one {# post} other {# poster}}"
     }
   },
   "workPlan": {
@@ -19635,7 +19647,8 @@
       "heading": "Dina erbjudanden",
       "none": "Inga erbjudanden ännu.",
       "withdraw": "Återkalla",
-      "message": "Skicka meddelande till kunden"
+      "message": "Skicka meddelande till kunden",
+      "orgNext": "Beställaren har i princip tackat ja (inget avtal). Att starta arbetet från ett företagserbjudande via plattformen är inte tillgängligt än: kom överens om detaljerna och vilka som ska arbeta i samtalet."
     },
     "status": {
       "offered": "Väntar på svar",
@@ -19736,7 +19749,7 @@
       "message": "Skicka meddelande till teamet",
       "messageCompany": "Skicka meddelande till företaget",
       "kindOrganization": "Företagserbjudande",
-      "orgNext": "Överenskommet i princip (inget avtal). Kom överens om detaljerna och vilka personer som ska arbeta i samtalet."
+      "orgNext": "I princip överenskommet (inget avtal). Att starta arbetet från ett företagserbjudande via plattformen är inte tillgängligt än: kom överens om detaljerna och vilka som ska arbeta i samtalet."
     },
     "orgHeading": "Erbjud vårt företag till ett öppet behov",
     "orgIntro": "Erbjud själva företaget – era personer, er tjänst eller som underentreprenör – mot ett öppet behov. Inget arbetslag behöver skapas först.",
