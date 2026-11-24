@@ -98,7 +98,7 @@ jobs:
     env:
       APP_ORIGIN: http://127.0.0.1:3000
       # Owner P0 2026-11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
-      SPEC_P0: tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts tests/e2e/cv-shown-twice-isolated.spec.ts
+      SPEC_P0: tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts tests/e2e/cv-shown-twice-isolated.spec.ts tests/e2e/history-read-grant-isolated.spec.ts
       # The walks share this one throwaway stack: self-serve sign-up, the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV

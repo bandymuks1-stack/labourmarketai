@@ -77,6 +77,15 @@ describe("the walk is read-only and prints no names", () => {
     expect(lib).toMatch(/\[3-6\]\\d\{10\}/);
   });
 
+  it("reads only the two grant-aware pages, naming the organization, with no workspace chip or people list", () => {
+    expect(spec).toMatch(/rpc\/my_history_read_grants_v1/);
+    expect(spec).toMatch(/\/dashboard\/company\/history\?org=\$\{encodeURIComponent\(orgId\)\}/);
+    expect(spec).toMatch(/\/dashboard\/company\/people\/\$\{personId\}\?org=\$\{encodeURIComponent\(orgId\)\}/);
+    expect(spec).not.toMatch(/workspace-chip|workspace-option|"\/dashboard\/company\/people"\)/);
+    // A page the grant was not served (redirect, hidden) is a FAIL without an image.
+    expect(spec).toMatch(/redirected: the page was not served to the grant/);
+  });
+
   it("loads no stored photos or documents", () => {
     expect(spec).toMatch(/type === "image" \|\| type === "media"/);
     expect(spec).toMatch(/return route\.abort\(\)/);
@@ -131,6 +140,24 @@ describe("the workflow publishes only ciphertext", () => {
   it("the screens never reach the ordinary result upload", () => {
     const result = workflow.slice(workflow.indexOf("- name: Upload result"));
     expect(result.slice(0, result.indexOf("\n      - "))).not.toMatch(/lcv|\.png|\.enc/);
+  });
+
+  it("runs only as a one-shot pair, never as a plan pair that re-runs after a deploy", () => {
+    const tick = read("../../.github/workflows/launch-readiness-walks.yml");
+    const plan = tick.slice(tick.indexOf('PLAN="'), tick.indexOf('"', tick.indexOf('PLAN="') + 6));
+    expect(plan).not.toMatch(/living-cv-screens/);
+    expect(tick).toMatch(/ONE-SHOT pairs/);
+    expect(tick).toMatch(/settled by ONE run after ONCE_START that reached production/);
+    // The plan cap never blocks the one-shot pair, and the pair is not counted as a plan walk.
+    expect(tick.indexOf("One-shot pairs first")).toBeLessThan(tick.indexOf("today's cap reached"));
+  });
+
+  it("the account is created only by the owner's provisioning workflow, never by a walk", () => {
+    const prov = read("../../.github/workflows/prod-qa-fresh-provision.yml");
+    expect(prov).toMatch(/OWNER-DISPATCH ONLY/);
+    expect(prov).toMatch(/- livingcv\n/);
+    expect(prov).toMatch(/targets="qa\.livingcv\+read1@labourmarket\.ai"/);
+    expect(workflow).toMatch(/mint_existing "qa\.livingcv\+read1@labourmarket\.ai" livingcv/);
   });
 
   it("only a public key is committed", () => {

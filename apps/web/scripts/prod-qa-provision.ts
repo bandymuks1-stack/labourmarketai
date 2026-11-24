@@ -49,6 +49,7 @@ import {
   PROD_QA_AGENCY_EMAIL,
   PROD_QA_BUYER_EMAIL,
   PROD_QA_FRESH_IDENTITIES,
+  PROD_QA_LIVING_CV_EMAIL,
   PROD_QA_WORKER_EMAIL,
   ProdQaGuardError,
   assertProdQaTarget,
@@ -150,7 +151,9 @@ async function main(): Promise<void> {
     app_metadata: {
       qa_synthetic: true,
       qa_purpose: fresh
-        ? target.email === PROD_QA_BUYER_EMAIL
+        ? target.email === PROD_QA_LIVING_CV_EMAIL
+          ? "labourmarket.ai production — read-only Living CV screens (coordinator order 2026-11-23, owner-approved grant)"
+          : target.email === PROD_QA_BUYER_EMAIL
           ? "labourmarket.ai production E2E — buyer workspace 6.4 (owner decision 2026-10-26)"
           : "labourmarket.ai production E2E — fresh activation (owner decision 2026-10-26)"
         : "labourmarket.ai production E2E — EMPLOYEE_BETA_PRODUCTION_GATE",
@@ -158,8 +161,12 @@ async function main(): Promise<void> {
     },
     // The buyer carries the customer role exactly as a customer sign-up does
     // (the profile trigger reads `role`); the fresh pair carries none.
+    // The Living CV screens account is not proving onboarding: it starts as an ordinary worker, as the
+    // rest of the cast does, and holds no organization until the owner-approved read grant adds it.
     user_metadata: target.email === PROD_QA_BUYER_EMAIL
       ? { role: "customer" }
+      : target.email === PROD_QA_LIVING_CV_EMAIL
+      ? { role: "worker", locale: "lt" }
       : fresh
       ? {}
       : {
