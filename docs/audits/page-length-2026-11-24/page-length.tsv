@@ -1,0 +1,879 @@
+rank	screens	role	viewport	route	doc_height_px	status	h1
+1	7.68	institution	390	/dashboard/listings	6485	200	Marketplace
+2	7.68	company	390	/dashboard/listings	6485	200	Marketplace
+3	7.68	agency	390	/dashboard/listings	6485	200	Marketplace
+4	5.6	worker	390	/dashboard/listings	4729	200	Marketplace
+5	5.6	learner	390	/dashboard/listings	4729	200	Marketplace
+6	5.6	buyer	390	/dashboard/listings	4729	200	Marketplace
+7	4.73	institution	390	/dashboard/intelligence	3992	200	Market intelligence
+8	4.73	company	390	/dashboard/intelligence	3992	200	Market intelligence
+9	4.73	agency	390	/dashboard/intelligence	3992	200	Market intelligence
+10	4.57	learner	390	/dashboard/profile	3856	200	My profile
+11	4.46	institution	390	/dashboard/profile	3767	200	My profile
+12	4.46	company	390	/dashboard/profile	3767	200	My profile
+13	4.46	agency	390	/dashboard/profile	3768	200	My profile
+14	4.43	worker	390	/dashboard/intelligence	3742	200	Market intelligence
+15	4.43	learner	390	/dashboard/intelligence	3742	200	Market intelligence
+16	4.43	buyer	390	/dashboard/intelligence	3742	200	Market intelligence
+17	4.39	buyer	390	/dashboard/buyer	3707	200	My requests
+18	3.67	learner	1440	/dashboard/profile	3303	200	My profile
+19	3.62	worker	390	/dashboard/privacy	3059	200	Privacy and your data
+20	3.62	learner	390	/dashboard/privacy	3059	200	Privacy and your data
+21	3.62	buyer	390	/dashboard/privacy	3059	200	Privacy and your data
+22	3.6	institution	390	/dashboard/privacy	3035	200	Privacy and your data
+23	3.6	company	390	/dashboard/privacy	3035	200	Privacy and your data
+24	3.6	agency	390	/dashboard/privacy	3035	200	Privacy and your data
+25	3.47	worker	390	/dashboard/profile	2932	200	My profile
+26	3.47	buyer	390	/dashboard/profile	2932	200	My profile
+27	3.46	institution	1440	/dashboard/profile	3116	200	My profile
+28	3.46	company	1440	/dashboard/profile	3116	200	My profile
+29	3.46	agency	1440	/dashboard/profile	3116	200	My profile
+30	3.39	institution	390	/dashboard/start/company	2859	200	Company profile
+31	3.39	company	390	/dashboard/start/company	2859	200	Company profile
+32	3.39	agency	390	/dashboard/start/company	2859	200	Company profile
+33	3.36	institution	1440	/dashboard/listings	3024	200	Marketplace
+34	3.36	company	1440	/dashboard/listings	3024	200	Marketplace
+35	3.36	agency	1440	/dashboard/listings	3024	200	Marketplace
+36	3.27	institution	390	/dashboard/finance	2757	200	Finance records
+37	3.27	company	390	/dashboard/finance	2757	200	Finance records
+38	3.27	agency	390	/dashboard/finance	2757	200	Finance records
+39	3.24	worker	390	/dashboard/documents	2732	200	My documents
+40	3.24	learner	390	/dashboard/documents	2732	200	My documents
+41	3.24	buyer	390	/dashboard/documents	2732	200	My documents
+42	3.09	institution	390	/dashboard/reports	2609	200	Reports
+43	3.09	company	390	/dashboard/reports	2609	200	Reports
+44	3.09	agency	390	/dashboard/reports	2609	200	Reports
+45	3.07	worker	390	/dashboard/finance	2589	200	Finance records
+46	3.07	learner	390	/dashboard/finance	2589	200	Finance records
+47	3.07	buyer	390	/dashboard/finance	2589	200	Finance records
+48	3.03	institution	390	/dashboard/company/history	2556	200	Data import and history
+49	3.03	company	390	/dashboard/company/history	2556	200	Data import and history
+50	3.03	agency	390	/dashboard/company/history	2556	200	Data import and history
+51	2.91	buyer	1440	/dashboard/buyer	2620	200	My requests
+52	2.88	worker	1440	/dashboard/profile	2593	200	My profile
+53	2.88	buyer	1440	/dashboard/profile	2593	200	My profile
+54	2.86	institution	390	/dashboard/company/needs	2416	200	Workforce needs
+55	2.83	agency	390	/dashboard/company/needs	2388	200	Your supply and the market's needs
+56	2.79	institution	1440	/dashboard/intelligence	2507	200	Market intelligence
+57	2.79	company	1440	/dashboard/intelligence	2507	200	Market intelligence
+58	2.79	agency	1440	/dashboard/intelligence	2507	200	Market intelligence
+59	2.7	agency	390	/dashboard/company/partners	2279	200	Clients and partners
+60	2.64	worker	390	/dashboard/account	2227	200	Settings
+61	2.64	learner	390	/dashboard/account	2227	200	Settings
+62	2.64	institution	390	/dashboard/account	2227	200	Settings
+63	2.64	company	390	/dashboard/account	2227	200	Settings
+64	2.64	agency	390	/dashboard/account	2227	200	Settings
+65	2.64	buyer	390	/dashboard/account	2227	200	Settings
+66	2.62	worker	1440	/dashboard/intelligence	2361	200	Market intelligence
+67	2.62	learner	1440	/dashboard/intelligence	2361	200	Market intelligence
+68	2.62	buyer	1440	/dashboard/intelligence	2361	200	Market intelligence
+69	2.61	institution	390	/dashboard/company/scouting	2200	200	Scouting
+70	2.61	company	390	/dashboard/company/scouting	2200	200	Scouting
+71	2.61	agency	390	/dashboard/company/scouting	2200	200	Scouting
+72	2.61	institution	390	/dashboard/documents	2199	200	My documents
+73	2.61	company	390	/dashboard/documents	2199	200	My documents
+74	2.61	agency	390	/dashboard/documents	2199	200	My documents
+75	2.52	company	390	/dashboard/company/needs	2130	200	Workforce needs
+76	2.49	institution	390	/dashboard/commercial	2105	200	Commercial
+77	2.49	company	390	/dashboard/commercial	2105	200	Commercial
+78	2.49	agency	390	/dashboard/commercial	2105	200	Commercial
+79	2.44	institution	390	/dashboard/journal	2061	200	Work journal
+80	2.44	company	390	/dashboard/journal	2061	200	Work journal
+81	2.44	agency	390	/dashboard/journal	2061	200	Work journal
+82	2.4	worker	1440	/dashboard/listings	2158	200	Marketplace
+83	2.4	learner	1440	/dashboard/listings	2158	200	Marketplace
+84	2.4	buyer	1440	/dashboard/listings	2158	200	Marketplace
+85	2.32	worker	390	/dashboard/journal	1957	200	Work journal
+86	2.32	learner	390	/dashboard/journal	1957	200	Work journal
+87	2.32	buyer	390	/dashboard/journal	1957	200	Work journal
+88	2.25	institution	1440	/dashboard/company/history	2021	200	Data import and history
+89	2.25	company	1440	/dashboard/company/history	2021	200	Data import and history
+90	2.25	agency	1440	/dashboard/company/history	2021	200	Data import and history
+91	2.18	worker	1440	/dashboard/documents	1962	200	My documents
+92	2.18	learner	1440	/dashboard/documents	1962	200	My documents
+93	2.18	buyer	1440	/dashboard/documents	1962	200	My documents
+94	2.17	worker	390	/dashboard/service-requests	1828	200	Discover & request services
+95	2.17	learner	390	/dashboard/service-requests	1828	200	Discover & request services
+96	2.17	buyer	390	/dashboard/service-requests	1828	200	Discover & request services
+97	2.15	institution	1440	/dashboard/reports	1935	200	Reports
+98	2.15	company	1440	/dashboard/reports	1935	200	Reports
+99	2.15	agency	1440	/dashboard/reports	1935	200	Reports
+100	2.15	institution	390	/dashboard/service-requests	1818	200	Discover & request services
+101	2.15	company	390	/dashboard/service-requests	1818	200	Discover & request services
+102	2.15	agency	390	/dashboard/service-requests	1818	200	Discover & request services
+103	2.12	institution	390	/dashboard/projects	1787	200	Projects and assignments
+104	2.12	company	390	/dashboard/projects	1787	200	Projects and assignments
+105	2.12	agency	390	/dashboard/projects	1787	200	Projects and assignments
+106	2.1	company	390	/dashboard/company	1769	200	Company workspace
+107	2.1	institution	390	/dashboard/company/people	1776	200	People and team
+108	2.1	company	390	/dashboard/company/people	1776	200	People and team
+109	2.1	agency	390	/dashboard/company/people	1776	200	People and team
+110	2.09	worker	1440	/dashboard/privacy	1877	200	Privacy and your data
+111	2.09	learner	1440	/dashboard/privacy	1877	200	Privacy and your data
+112	2.09	institution	1440	/dashboard/privacy	1877	200	Privacy and your data
+113	2.09	company	1440	/dashboard/privacy	1877	200	Privacy and your data
+114	2.09	agency	1440	/dashboard/privacy	1877	200	Privacy and your data
+115	2.09	buyer	1440	/dashboard/privacy	1877	200	Privacy and your data
+116	2.08	institution	1440	/dashboard/start/company	1869	200	Company profile
+117	2.08	company	1440	/dashboard/start/company	1869	200	Company profile
+118	2.08	agency	1440	/dashboard/start/company	1869	200	Company profile
+119	2.07	institution	390	/dashboard/company	1745	200	Company workspace
+120	2.05	worker	1440	/dashboard/account	1842	200	Settings
+121	2.05	learner	1440	/dashboard/account	1842	200	Settings
+122	2.05	institution	1440	/dashboard/account	1842	200	Settings
+123	2.05	company	1440	/dashboard/account	1842	200	Settings
+124	2.05	agency	1440	/dashboard/account	1842	200	Settings
+125	2.05	buyer	1440	/dashboard/account	1842	200	Settings
+126	2.03	institution	1440	/dashboard/company/needs	1829	200	Workforce needs
+127	2.02	agency	390	/dashboard/company	1702	200	Company workspace
+128	2	agency	1440	/dashboard/company/needs	1804	200	Your supply and the market's needs
+129	2	institution	1440	/dashboard/finance	1800	200	Finance records
+130	2	company	1440	/dashboard/finance	1800	200	Finance records
+131	2	agency	1440	/dashboard/finance	1800	200	Finance records
+132	1.98	buyer	390	/dashboard/start/buyer	1671	200	Buyer / client account
+133	1.98	worker	390	/dashboard/start/company	1673	200	Company profile
+134	1.98	learner	390	/dashboard/start/company	1673	200	Company profile
+135	1.98	buyer	390	/dashboard/start/company	1673	200	Company profile
+136	1.96	agency	390	/dashboard/company/settings	1652	200	Organization settings
+137	1.94	institution	390	/dashboard/company/education	1634	200	Learning and programmes
+138	1.93	institution	1440	/dashboard/company/scouting	1737	200	Scouting
+139	1.93	company	1440	/dashboard/company/scouting	1737	200	Scouting
+140	1.93	agency	1440	/dashboard/company/scouting	1737	200	Scouting
+141	1.89	worker	390	/dashboard/assist	1591	200	Assistance centre
+142	1.89	learner	390	/dashboard/assist	1591	200	Assistance centre
+143	1.89	buyer	390	/dashboard/assist	1591	200	Assistance centre
+144	1.89	institution	390	/dashboard/network	1593	200	Network
+145	1.89	company	390	/dashboard/network	1593	200	Network
+146	1.88	institution	390	/dashboard/company/settings	1588	200	Organization settings
+147	1.88	company	390	/dashboard/company/settings	1588	200	Organization settings
+148	1.86	agency	390	/dashboard/network	1567	200	Network
+149	1.84	worker	1440	/dashboard/finance	1652	200	Finance records
+150	1.84	learner	1440	/dashboard/finance	1652	200	Finance records
+151	1.84	buyer	1440	/dashboard/finance	1652	200	Finance records
+152	1.83	institution	390	/dashboard/company/planning	1542	200	Workforce planning
+153	1.83	company	390	/dashboard/company/planning	1542	200	Workforce planning
+154	1.83	agency	390	/dashboard/company/planning	1542	200	Workforce planning
+155	1.83	institution	1440	/dashboard/journal	1648	200	Work journal
+156	1.83	company	1440	/dashboard/journal	1648	200	Work journal
+157	1.83	agency	1440	/dashboard/journal	1648	200	Work journal
+158	1.8	worker	390	/dashboard/commercial	1522	200	Commercial
+159	1.8	learner	390	/dashboard/commercial	1522	200	Commercial
+160	1.8	buyer	390	/dashboard/commercial	1522	200	Commercial
+161	1.8	worker	390	/dashboard/network	1517	200	Network
+162	1.8	learner	390	/dashboard/network	1517	200	Network
+163	1.8	buyer	390	/dashboard/network	1517	200	Network
+164	1.78	worker	1440	/dashboard/journal	1602	200	Work journal
+165	1.78	learner	1440	/dashboard/journal	1602	200	Work journal
+166	1.78	buyer	1440	/dashboard/journal	1602	200	Work journal
+167	1.76	company	1440	/dashboard/company/needs	1581	200	Workforce needs
+168	1.73	institution	1440	/dashboard/documents	1557	200	My documents
+169	1.73	company	1440	/dashboard/documents	1557	200	My documents
+170	1.73	agency	1440	/dashboard/documents	1557	200	My documents
+171	1.71	institution	390	/dashboard/candidates	1445	200	Candidate & provider drafts
+172	1.71	company	390	/dashboard/candidates	1445	200	Candidate & provider drafts
+173	1.71	agency	390	/dashboard/candidates	1445	200	Candidate & provider drafts
+174	1.7	worker	390	/dashboard/reports/evidence	1438	200	Records report
+175	1.7	learner	390	/dashboard/reports/evidence	1438	200	Records report
+176	1.7	institution	390	/dashboard/reports/evidence	1438	200	Records report
+177	1.7	company	390	/dashboard/reports/evidence	1438	200	Records report
+178	1.7	agency	390	/dashboard/reports/evidence	1438	200	Records report
+179	1.7	buyer	390	/dashboard/reports/evidence	1438	200	Records report
+180	1.69	institution	1440	/dashboard/company/people	1517	200	People and team
+181	1.69	company	1440	/dashboard/company/people	1517	200	People and team
+182	1.69	agency	1440	/dashboard/company/people	1517	200	People and team
+183	1.69	worker	390	/dashboard/reports	1429	200	Reports
+184	1.69	learner	390	/dashboard/reports	1429	200	Reports
+185	1.69	buyer	390	/dashboard/reports	1429	200	Reports
+186	1.68	agency	1440	/dashboard/company/partners	1516	200	Clients and partners
+187	1.65	institution	1440	/dashboard/projects	1489	200	Projects and assignments
+188	1.65	company	1440	/dashboard/projects	1489	200	Projects and assignments
+189	1.65	agency	1440	/dashboard/projects	1489	200	Projects and assignments
+190	1.63	institution	390	/dashboard/absences	1376	200	Leave & absence
+191	1.63	company	390	/dashboard/absences	1376	200	Leave & absence
+192	1.63	agency	390	/dashboard/absences	1376	200	Leave & absence
+193	1.62	worker	390	/dashboard/market-map	1365	200	Map
+194	1.62	learner	390	/dashboard/market-map	1365	200	Map
+195	1.62	institution	390	/dashboard/market-map	1365	200	Map
+196	1.62	company	390	/dashboard/market-map	1365	200	Map
+197	1.62	agency	390	/dashboard/market-map	1365	200	Map
+198	1.62	buyer	390	/dashboard/market-map	1365	200	Map
+199	1.6	institution	1440	/dashboard/company/education	1439	200	Learning and programmes
+200	1.59	institution	390	/dashboard/planning	1341	200	Calendar
+201	1.59	company	390	/dashboard/planning	1341	200	Calendar
+202	1.59	agency	390	/dashboard/planning	1341	200	Calendar
+203	1.57	institution	390	/dashboard/assist	1323	200	Assistance centre
+204	1.57	company	390	/dashboard/assist	1323	200	Assistance centre
+205	1.57	agency	390	/dashboard/assist	1323	200	Assistance centre
+206	1.53	institution	1440	/dashboard/service-requests	1377	200	Discover & request services
+207	1.53	company	1440	/dashboard/service-requests	1377	200	Discover & request services
+208	1.53	agency	1440	/dashboard/service-requests	1377	200	Discover & request services
+209	1.53	buyer	1440	/dashboard/start/buyer	1373	200	Buyer / client account
+210	1.5	worker	390	/dashboard/planning	1269	200	Calendar
+211	1.5	learner	390	/dashboard/planning	1269	200	Calendar
+212	1.5	buyer	390	/dashboard/planning	1269	200	Calendar
+213	1.49	institution	1440	/dashboard/commercial	1337	200	Commercial
+214	1.49	company	1440	/dashboard/commercial	1337	200	Commercial
+215	1.49	agency	1440	/dashboard/commercial	1337	200	Commercial
+216	1.49	worker	390	/dashboard/start/buyer	1257	200	Buyer / client account
+217	1.49	learner	390	/dashboard/start/buyer	1257	200	Buyer / client account
+218	1.49	institution	390	/dashboard/start/buyer	1257	200	Buyer / client account
+219	1.49	company	390	/dashboard/start/buyer	1257	200	Buyer / client account
+220	1.49	agency	390	/dashboard/start/buyer	1257	200	Buyer / client account
+221	1.48	worker	390	/dashboard/candidates	1249	200	Candidate & provider drafts
+222	1.48	learner	390	/dashboard/candidates	1249	200	Candidate & provider drafts
+223	1.48	buyer	390	/dashboard/candidates	1249	200	Candidate & provider drafts
+224	1.47	institution	390	/dashboard/bookings	1237	200	Bookings
+225	1.47	company	390	/dashboard/bookings	1237	200	Bookings
+226	1.47	agency	390	/dashboard/bookings	1237	200	Bookings
+227	1.46	institution	1440	/dashboard/planning	1311	200	Calendar
+228	1.46	company	1440	/dashboard/planning	1311	200	Calendar
+229	1.46	agency	1440	/dashboard/planning	1311	200	Calendar
+230	1.46	worker	1440	/dashboard/service-requests	1313	200	Discover & request services
+231	1.46	learner	1440	/dashboard/service-requests	1313	200	Discover & request services
+232	1.46	buyer	1440	/dashboard/service-requests	1313	200	Discover & request services
+233	1.45	institution	390	/dashboard/work-in-numbers	1227	200	My work in numbers
+234	1.45	company	390	/dashboard/work-in-numbers	1227	200	My work in numbers
+235	1.45	agency	390	/dashboard/work-in-numbers	1227	200	My work in numbers
+236	1.38	worker	1440	/dashboard/planning	1239	200	Calendar
+237	1.38	learner	1440	/dashboard/planning	1239	200	Calendar
+238	1.38	buyer	1440	/dashboard/planning	1239	200	Calendar
+239	1.37	worker	390	/dashboard/work-in-numbers	1154	200	My work in numbers
+240	1.37	learner	390	/dashboard/work-in-numbers	1154	200	My work in numbers
+241	1.37	buyer	390	/dashboard/work-in-numbers	1154	200	My work in numbers
+242	1.34	worker	1440	/dashboard/market-map	1209	200	Map
+243	1.34	learner	1440	/dashboard/market-map	1209	200	Map
+244	1.34	institution	1440	/dashboard/market-map	1209	200	Map
+245	1.34	company	1440	/dashboard/market-map	1209	200	Map
+246	1.34	agency	1440	/dashboard/market-map	1209	200	Map
+247	1.34	buyer	1440	/dashboard/market-map	1209	200	Map
+248	1.33	institution	1440	/dashboard/network	1200	200	Network
+249	1.33	company	1440	/dashboard/network	1200	200	Network
+250	1.33	agency	1440	/dashboard/network	1200	200	Network
+251	1.29	institution	1440	/dashboard/company	1160	200	Company workspace
+252	1.29	company	1440	/dashboard/company	1160	200	Company workspace
+253	1.28	institution	390	/dashboard/start	1077	200	Where to start
+254	1.28	company	390	/dashboard/start	1077	200	Where to start
+255	1.28	agency	390	/dashboard/start	1077	200	Where to start
+256	1.26	worker	390	/dashboard/bookings	1061	200	Bookings
+257	1.26	learner	390	/dashboard/bookings	1061	200	Bookings
+258	1.26	buyer	390	/dashboard/bookings	1061	200	Bookings
+259	1.26	worker	1440	/dashboard/network	1130	200	Network
+260	1.26	learner	1440	/dashboard/network	1130	200	Network
+261	1.26	buyer	1440	/dashboard/network	1130	200	Network
+262	1.23	worker	1440	/dashboard/start/buyer	1111	200	Buyer / client account
+263	1.23	learner	1440	/dashboard/start/buyer	1111	200	Buyer / client account
+264	1.23	institution	1440	/dashboard/start/buyer	1111	200	Buyer / client account
+265	1.23	company	1440	/dashboard/start/buyer	1111	200	Buyer / client account
+266	1.23	agency	1440	/dashboard/start/buyer	1111	200	Buyer / client account
+267	1.22	institution	1440	/dashboard/absences	1102	200	Leave & absence
+268	1.22	company	1440	/dashboard/absences	1102	200	Leave & absence
+269	1.22	agency	1440	/dashboard/absences	1102	200	Leave & absence
+270	1.22	worker	1440	/dashboard/start/company	1097	200	Company profile
+271	1.22	learner	1440	/dashboard/start/company	1097	200	Company profile
+272	1.22	buyer	1440	/dashboard/start/company	1097	200	Company profile
+273	1.21	agency	1440	/dashboard/company	1090	200	Company workspace
+274	1.2	institution	1440	/dashboard/company/settings	1083	200	Organization settings
+275	1.2	company	1440	/dashboard/company/settings	1083	200	Organization settings
+276	1.2	agency	1440	/dashboard/company/settings	1083	200	Organization settings
+277	1.19	institution	1440	/dashboard/candidates	1069	200	Candidate & provider drafts
+278	1.19	company	1440	/dashboard/candidates	1069	200	Candidate & provider drafts
+279	1.19	agency	1440	/dashboard/candidates	1069	200	Candidate & provider drafts
+280	1.19	institution	1440	/dashboard/company/planning	1067	200	Workforce planning
+281	1.19	company	1440	/dashboard/company/planning	1067	200	Workforce planning
+282	1.19	agency	1440	/dashboard/company/planning	1067	200	Workforce planning
+283	1.17	worker	1440	/dashboard/commercial	1054	200	Commercial
+284	1.17	learner	1440	/dashboard/commercial	1054	200	Commercial
+285	1.17	buyer	1440	/dashboard/commercial	1054	200	Commercial
+286	1.17	worker	1440	/dashboard/reports/evidence	1050	200	Records report
+287	1.17	learner	1440	/dashboard/reports/evidence	1050	200	Records report
+288	1.17	institution	1440	/dashboard/reports/evidence	1050	200	Records report
+289	1.17	company	1440	/dashboard/reports/evidence	1050	200	Records report
+290	1.17	agency	1440	/dashboard/reports/evidence	1050	200	Records report
+291	1.17	buyer	1440	/dashboard/reports/evidence	1050	200	Records report
+292	1.15	worker	1440	/dashboard/reports	1035	200	Reports
+293	1.15	learner	1440	/dashboard/reports	1035	200	Reports
+294	1.15	buyer	1440	/dashboard/reports	1035	200	Reports
+295	1.14	worker	390	/dashboard	961	200	Hi, QA-SYNTHETIC. How can I help you today?
+296	1.14	learner	390	/dashboard	961	200	Hi, QA-SYNTHETIC. How can I help you today?
+297	1.14	institution	390	/dashboard	961	200	Hi, QA-SYNTHETIC. How can I help you today?
+298	1.14	company	390	/dashboard	961	200	Hi, QA-SYNTHETIC. How can I help you today?
+299	1.14	agency	390	/dashboard	961	200	Hi, QA-SYNTHETIC. How can I help you today?
+300	1.14	buyer	390	/dashboard	961	200	Hi, QA-SYNTHETIC. How can I help you today?
+301	1.14	worker	390	/dashboard/absences	961	200	Leave & absence
+302	1.14	learner	390	/dashboard/absences	961	200	Leave & absence
+303	1.14	buyer	390	/dashboard/absences	961	200	Leave & absence
+304	1.14	worker	390	/dashboard/activity	961	200	Activity
+305	1.14	learner	390	/dashboard/activity	961	200	Activity
+306	1.14	institution	390	/dashboard/activity	961	200	Activity
+307	1.14	company	390	/dashboard/activity	961	200	Activity
+308	1.14	agency	390	/dashboard/activity	961	200	Activity
+309	1.14	buyer	390	/dashboard/activity	961	200	Activity
+310	1.14	worker	390	/dashboard/assets	961	200	Assets & logistics
+311	1.14	learner	390	/dashboard/assets	961	200	Assets & logistics
+312	1.14	institution	390	/dashboard/assets	961	200	Assets & logistics
+313	1.14	company	390	/dashboard/assets	961	200	Assets & logistics
+314	1.14	agency	390	/dashboard/assets	961	200	Assets & logistics
+315	1.14	buyer	390	/dashboard/assets	961	200	Assets & logistics
+316	1.14	worker	390	/dashboard/communication	961	200	Messages
+317	1.14	learner	390	/dashboard/communication	961	200	Messages
+318	1.14	institution	390	/dashboard/communication	961	200	Messages
+319	1.14	company	390	/dashboard/communication	961	200	Messages
+320	1.14	agency	390	/dashboard/communication	961	200	Messages
+321	1.14	buyer	390	/dashboard/communication	961	200	Messages
+322	1.14	institution	390	/dashboard/company/partners	961	200	Clients and partners
+323	1.14	company	390	/dashboard/company/partners	961	200	Clients and partners
+324	1.14	institution	390	/dashboard/company/projects/new	961	200	Create project context
+325	1.14	company	390	/dashboard/company/projects/new	961	200	Create project context
+326	1.14	agency	390	/dashboard/company/projects/new	961	200	Create project context
+327	1.14	worker	390	/dashboard/gallery	961	200	Gallery
+328	1.14	learner	390	/dashboard/gallery	961	200	Gallery
+329	1.14	institution	390	/dashboard/gallery	961	200	Gallery
+330	1.14	company	390	/dashboard/gallery	961	200	Gallery
+331	1.14	agency	390	/dashboard/gallery	961	200	Gallery
+332	1.14	buyer	390	/dashboard/gallery	961	200	Gallery
+333	1.14	worker	390	/dashboard/hours	961	200	Work hours
+334	1.14	learner	390	/dashboard/hours	961	200	Work hours
+335	1.14	institution	390	/dashboard/hours	961	200	Work hours
+336	1.14	company	390	/dashboard/hours	961	200	Work hours
+337	1.14	agency	390	/dashboard/hours	961	200	Work hours
+338	1.14	buyer	390	/dashboard/hours	961	200	Work hours
+339	1.14	worker	390	/dashboard/inbox	961	200	Entries to confirm
+340	1.14	learner	390	/dashboard/inbox	961	200	Entries to confirm
+341	1.14	institution	390	/dashboard/inbox	961	200	Entries to confirm
+342	1.14	company	390	/dashboard/inbox	961	200	Entries to confirm
+343	1.14	agency	390	/dashboard/inbox	961	200	Entries to confirm
+344	1.14	buyer	390	/dashboard/inbox	961	200	Entries to confirm
+345	1.14	worker	390	/dashboard/inbox/counterparty	961	200	Client review
+346	1.14	learner	390	/dashboard/inbox/counterparty	961	200	Client review
+347	1.14	institution	390	/dashboard/inbox/counterparty	961	200	Client review
+348	1.14	company	390	/dashboard/inbox/counterparty	961	200	Client review
+349	1.14	agency	390	/dashboard/inbox/counterparty	961	200	Client review
+350	1.14	buyer	390	/dashboard/inbox/counterparty	961	200	Client review
+351	1.14	worker	390	/dashboard/inbox/quick	961	200	Quick confirm
+352	1.14	learner	390	/dashboard/inbox/quick	961	200	Quick confirm
+353	1.14	institution	390	/dashboard/inbox/quick	961	200	Quick confirm
+354	1.14	company	390	/dashboard/inbox/quick	961	200	Quick confirm
+355	1.14	agency	390	/dashboard/inbox/quick	961	200	Quick confirm
+356	1.14	buyer	390	/dashboard/inbox/quick	961	200	Quick confirm
+357	1.14	worker	390	/dashboard/inbox/report	961	200	Review report
+358	1.14	learner	390	/dashboard/inbox/report	961	200	Review report
+359	1.14	institution	390	/dashboard/inbox/report	961	200	Review report
+360	1.14	company	390	/dashboard/inbox/report	961	200	Review report
+361	1.14	agency	390	/dashboard/inbox/report	961	200	Review report
+362	1.14	buyer	390	/dashboard/inbox/report	961	200	Review report
+363	1.14	worker	390	/dashboard/instructions	961	200	My instructions
+364	1.14	learner	390	/dashboard/instructions	961	200	My instructions
+365	1.14	institution	390	/dashboard/instructions	961	200	Instruction to a worker
+366	1.14	company	390	/dashboard/instructions	961	200	Instruction to a worker
+367	1.14	agency	390	/dashboard/instructions	961	200	Instruction to a worker
+368	1.14	buyer	390	/dashboard/instructions	961	200	My instructions
+369	1.14	worker	390	/dashboard/journal/voice	961	200	Voice entry
+370	1.14	learner	390	/dashboard/journal/voice	961	200	Voice entry
+371	1.14	institution	390	/dashboard/journal/voice	961	200	Voice entry
+372	1.14	company	390	/dashboard/journal/voice	961	200	Voice entry
+373	1.14	agency	390	/dashboard/journal/voice	961	200	Voice entry
+374	1.14	buyer	390	/dashboard/journal/voice	961	200	Voice entry
+375	1.14	worker	390	/dashboard/learning	961	200	Learning & review
+376	1.14	learner	390	/dashboard/learning	961	200	Learning & review
+377	1.14	institution	390	/dashboard/learning	961	200	Learning & review
+378	1.14	company	390	/dashboard/learning	961	200	Learning & review
+379	1.14	agency	390	/dashboard/learning	961	200	Learning & review
+380	1.14	buyer	390	/dashboard/learning	961	200	Learning & review
+381	1.14	worker	390	/dashboard/market/recognize	961	200	What do you offer or need?
+382	1.14	learner	390	/dashboard/market/recognize	961	200	What do you offer or need?
+383	1.14	institution	390	/dashboard/market/recognize	961	200	What do you offer or need?
+384	1.14	company	390	/dashboard/market/recognize	961	200	What do you offer or need?
+385	1.14	agency	390	/dashboard/market/recognize	961	200	What do you offer or need?
+386	1.14	buyer	390	/dashboard/market/recognize	961	200	What do you offer or need?
+387	1.14	worker	390	/dashboard/opportunities	961	200	Your opportunities
+388	1.14	learner	390	/dashboard/opportunities	961	200	Your opportunities
+389	1.14	buyer	390	/dashboard/opportunities	961	200	Your opportunities
+390	1.14	worker	390	/dashboard/projects	961	200	My projects
+391	1.14	learner	390	/dashboard/projects	961	200	My projects
+392	1.14	buyer	390	/dashboard/projects	961	200	My projects
+393	1.14	worker	390	/dashboard/services	961	200	Services
+394	1.14	learner	390	/dashboard/services	961	200	Services
+395	1.14	institution	390	/dashboard/services	961	200	Services
+396	1.14	company	390	/dashboard/services	961	200	Services
+397	1.14	agency	390	/dashboard/services	961	200	Services
+398	1.14	buyer	390	/dashboard/services	961	200	Services
+399	1.14	worker	390	/dashboard/start	961	200	Where to start
+400	1.14	learner	390	/dashboard/start	961	200	Where to start
+401	1.14	buyer	390	/dashboard/start	961	200	Where to start
+402	1.14	worker	390	/dashboard/tasks	961	200	Tasks
+403	1.14	learner	390	/dashboard/tasks	961	200	Tasks
+404	1.14	institution	390	/dashboard/tasks	961	200	Tasks
+405	1.14	company	390	/dashboard/tasks	961	200	Tasks
+406	1.14	agency	390	/dashboard/tasks	961	200	Tasks
+407	1.14	buyer	390	/dashboard/tasks	961	200	Tasks
+408	1.09	worker	1440	/dashboard/assist	985	200	Assistance centre
+409	1.09	learner	1440	/dashboard/assist	985	200	Assistance centre
+410	1.09	buyer	1440	/dashboard/assist	985	200	Assistance centre
+411	1.07	worker	1440	/dashboard	965	200	Hi, QA-SYNTHETIC. How can I help you today?
+412	1.07	learner	1440	/dashboard	965	200	Hi, QA-SYNTHETIC. How can I help you today?
+413	1.07	institution	1440	/dashboard	965	200	Hi, QA-SYNTHETIC. How can I help you today?
+414	1.07	company	1440	/dashboard	965	200	Hi, QA-SYNTHETIC. How can I help you today?
+415	1.07	agency	1440	/dashboard	965	200	Hi, QA-SYNTHETIC. How can I help you today?
+416	1.07	buyer	1440	/dashboard	965	200	Hi, QA-SYNTHETIC. How can I help you today?
+417	1.07	worker	1440	/dashboard/absences	965	200	Leave & absence
+418	1.07	learner	1440	/dashboard/absences	965	200	Leave & absence
+419	1.07	buyer	1440	/dashboard/absences	965	200	Leave & absence
+420	1.07	worker	1440	/dashboard/activity	965	200	Activity
+421	1.07	learner	1440	/dashboard/activity	965	200	Activity
+422	1.07	institution	1440	/dashboard/activity	965	200	Activity
+423	1.07	company	1440	/dashboard/activity	965	200	Activity
+424	1.07	agency	1440	/dashboard/activity	965	200	Activity
+425	1.07	buyer	1440	/dashboard/activity	965	200	Activity
+426	1.07	worker	1440	/dashboard/assets	965	200	Assets & logistics
+427	1.07	learner	1440	/dashboard/assets	965	200	Assets & logistics
+428	1.07	institution	1440	/dashboard/assets	965	200	Assets & logistics
+429	1.07	company	1440	/dashboard/assets	965	200	Assets & logistics
+430	1.07	agency	1440	/dashboard/assets	965	200	Assets & logistics
+431	1.07	buyer	1440	/dashboard/assets	965	200	Assets & logistics
+432	1.07	institution	1440	/dashboard/assist	965	200	Assistance centre
+433	1.07	company	1440	/dashboard/assist	965	200	Assistance centre
+434	1.07	agency	1440	/dashboard/assist	965	200	Assistance centre
+435	1.07	worker	1440	/dashboard/bookings	965	200	Bookings
+436	1.07	learner	1440	/dashboard/bookings	965	200	Bookings
+437	1.07	institution	1440	/dashboard/bookings	965	200	Bookings
+438	1.07	company	1440	/dashboard/bookings	965	200	Bookings
+439	1.07	agency	1440	/dashboard/bookings	965	200	Bookings
+440	1.07	buyer	1440	/dashboard/bookings	965	200	Bookings
+441	1.07	worker	1440	/dashboard/candidates	965	200	Candidate & provider drafts
+442	1.07	learner	1440	/dashboard/candidates	965	200	Candidate & provider drafts
+443	1.07	buyer	1440	/dashboard/candidates	965	200	Candidate & provider drafts
+444	1.07	worker	1440	/dashboard/communication	965	200	Messages
+445	1.07	learner	1440	/dashboard/communication	965	200	Messages
+446	1.07	institution	1440	/dashboard/communication	965	200	Messages
+447	1.07	company	1440	/dashboard/communication	965	200	Messages
+448	1.07	agency	1440	/dashboard/communication	965	200	Messages
+449	1.07	buyer	1440	/dashboard/communication	965	200	Messages
+450	1.07	institution	1440	/dashboard/company/partners	965	200	Clients and partners
+451	1.07	company	1440	/dashboard/company/partners	965	200	Clients and partners
+452	1.07	institution	1440	/dashboard/company/projects/new	965	200	Create project context
+453	1.07	company	1440	/dashboard/company/projects/new	965	200	Create project context
+454	1.07	agency	1440	/dashboard/company/projects/new	965	200	Create project context
+455	1.07	worker	1440	/dashboard/gallery	965	200	Gallery
+456	1.07	learner	1440	/dashboard/gallery	965	200	Gallery
+457	1.07	institution	1440	/dashboard/gallery	965	200	Gallery
+458	1.07	company	1440	/dashboard/gallery	965	200	Gallery
+459	1.07	agency	1440	/dashboard/gallery	965	200	Gallery
+460	1.07	buyer	1440	/dashboard/gallery	965	200	Gallery
+461	1.07	worker	1440	/dashboard/hours	965	200	Work hours
+462	1.07	learner	1440	/dashboard/hours	965	200	Work hours
+463	1.07	institution	1440	/dashboard/hours	965	200	Work hours
+464	1.07	company	1440	/dashboard/hours	965	200	Work hours
+465	1.07	agency	1440	/dashboard/hours	965	200	Work hours
+466	1.07	buyer	1440	/dashboard/hours	965	200	Work hours
+467	1.07	worker	1440	/dashboard/inbox	965	200	Entries to confirm
+468	1.07	learner	1440	/dashboard/inbox	965	200	Entries to confirm
+469	1.07	institution	1440	/dashboard/inbox	965	200	Entries to confirm
+470	1.07	company	1440	/dashboard/inbox	965	200	Entries to confirm
+471	1.07	agency	1440	/dashboard/inbox	965	200	Entries to confirm
+472	1.07	buyer	1440	/dashboard/inbox	965	200	Entries to confirm
+473	1.07	worker	1440	/dashboard/inbox/counterparty	965	200	Client review
+474	1.07	learner	1440	/dashboard/inbox/counterparty	965	200	Client review
+475	1.07	institution	1440	/dashboard/inbox/counterparty	965	200	Client review
+476	1.07	company	1440	/dashboard/inbox/counterparty	965	200	Client review
+477	1.07	agency	1440	/dashboard/inbox/counterparty	965	200	Client review
+478	1.07	buyer	1440	/dashboard/inbox/counterparty	965	200	Client review
+479	1.07	worker	1440	/dashboard/inbox/quick	965	200	Quick confirm
+480	1.07	learner	1440	/dashboard/inbox/quick	965	200	Quick confirm
+481	1.07	institution	1440	/dashboard/inbox/quick	965	200	Quick confirm
+482	1.07	company	1440	/dashboard/inbox/quick	965	200	Quick confirm
+483	1.07	agency	1440	/dashboard/inbox/quick	965	200	Quick confirm
+484	1.07	buyer	1440	/dashboard/inbox/quick	965	200	Quick confirm
+485	1.07	worker	1440	/dashboard/inbox/report	965	200	Review report
+486	1.07	learner	1440	/dashboard/inbox/report	965	200	Review report
+487	1.07	institution	1440	/dashboard/inbox/report	965	200	Review report
+488	1.07	company	1440	/dashboard/inbox/report	965	200	Review report
+489	1.07	agency	1440	/dashboard/inbox/report	965	200	Review report
+490	1.07	buyer	1440	/dashboard/inbox/report	965	200	Review report
+491	1.07	worker	1440	/dashboard/instructions	965	200	My instructions
+492	1.07	learner	1440	/dashboard/instructions	965	200	My instructions
+493	1.07	institution	1440	/dashboard/instructions	965	200	Instruction to a worker
+494	1.07	company	1440	/dashboard/instructions	965	200	Instruction to a worker
+495	1.07	agency	1440	/dashboard/instructions	965	200	Instruction to a worker
+496	1.07	buyer	1440	/dashboard/instructions	965	200	My instructions
+497	1.07	worker	1440	/dashboard/journal/voice	965	200	Voice entry
+498	1.07	learner	1440	/dashboard/journal/voice	965	200	Voice entry
+499	1.07	institution	1440	/dashboard/journal/voice	965	200	Voice entry
+500	1.07	company	1440	/dashboard/journal/voice	965	200	Voice entry
+501	1.07	agency	1440	/dashboard/journal/voice	965	200	Voice entry
+502	1.07	buyer	1440	/dashboard/journal/voice	965	200	Voice entry
+503	1.07	worker	1440	/dashboard/learning	965	200	Learning & review
+504	1.07	learner	1440	/dashboard/learning	965	200	Learning & review
+505	1.07	institution	1440	/dashboard/learning	965	200	Learning & review
+506	1.07	company	1440	/dashboard/learning	965	200	Learning & review
+507	1.07	agency	1440	/dashboard/learning	965	200	Learning & review
+508	1.07	buyer	1440	/dashboard/learning	965	200	Learning & review
+509	1.07	worker	1440	/dashboard/market/recognize	965	200	What do you offer or need?
+510	1.07	learner	1440	/dashboard/market/recognize	965	200	What do you offer or need?
+511	1.07	institution	1440	/dashboard/market/recognize	965	200	What do you offer or need?
+512	1.07	company	1440	/dashboard/market/recognize	965	200	What do you offer or need?
+513	1.07	agency	1440	/dashboard/market/recognize	965	200	What do you offer or need?
+514	1.07	buyer	1440	/dashboard/market/recognize	965	200	What do you offer or need?
+515	1.07	worker	1440	/dashboard/opportunities	965	200	Your opportunities
+516	1.07	learner	1440	/dashboard/opportunities	965	200	Your opportunities
+517	1.07	buyer	1440	/dashboard/opportunities	965	200	Your opportunities
+518	1.07	worker	1440	/dashboard/projects	965	200	My projects
+519	1.07	learner	1440	/dashboard/projects	965	200	My projects
+520	1.07	buyer	1440	/dashboard/projects	965	200	My projects
+521	1.07	worker	1440	/dashboard/services	965	200	Services
+522	1.07	learner	1440	/dashboard/services	965	200	Services
+523	1.07	institution	1440	/dashboard/services	965	200	Services
+524	1.07	company	1440	/dashboard/services	965	200	Services
+525	1.07	agency	1440	/dashboard/services	965	200	Services
+526	1.07	buyer	1440	/dashboard/services	965	200	Services
+527	1.07	worker	1440	/dashboard/start	965	200	Where to start
+528	1.07	learner	1440	/dashboard/start	965	200	Where to start
+529	1.07	institution	1440	/dashboard/start	965	200	Where to start
+530	1.07	company	1440	/dashboard/start	965	200	Where to start
+531	1.07	agency	1440	/dashboard/start	965	200	Where to start
+532	1.07	buyer	1440	/dashboard/start	965	200	Where to start
+533	1.07	worker	1440	/dashboard/tasks	965	200	Tasks
+534	1.07	learner	1440	/dashboard/tasks	965	200	Tasks
+535	1.07	institution	1440	/dashboard/tasks	965	200	Tasks
+536	1.07	company	1440	/dashboard/tasks	965	200	Tasks
+537	1.07	agency	1440	/dashboard/tasks	965	200	Tasks
+538	1.07	buyer	1440	/dashboard/tasks	965	200	Tasks
+539	1.07	worker	1440	/dashboard/work-in-numbers	965	200	My work in numbers
+540	1.07	learner	1440	/dashboard/work-in-numbers	965	200	My work in numbers
+541	1.07	institution	1440	/dashboard/work-in-numbers	965	200	My work in numbers
+542	1.07	company	1440	/dashboard/work-in-numbers	965	200	My work in numbers
+543	1.07	agency	1440	/dashboard/work-in-numbers	965	200	My work in numbers
+544	1.07	buyer	1440	/dashboard/work-in-numbers	965	200	My work in numbers
+
+not_reached	role	viewport	route	landed_on	status
+-	worker	390	/dashboard/admin	/dashboard	200
+-	worker	390	/dashboard/admin/agent-os	/dashboard	200
+-	worker	390	/dashboard/admin/billing	/dashboard	200
+-	worker	390	/dashboard/admin/candidate-pool	/dashboard	200
+-	worker	390	/dashboard/admin/company-need-intakes	/dashboard	200
+-	worker	390	/dashboard/admin/company-verification	/dashboard	200
+-	worker	390	/dashboard/admin/import-sandbox	/dashboard	200
+-	worker	390	/dashboard/admin/intelligence-observations	/dashboard	200
+-	worker	390	/dashboard/admin/language-feedback	/dashboard	200
+-	worker	390	/dashboard/admin/launch-readiness	/dashboard	200
+-	worker	390	/dashboard/admin/league	/dashboard	200
+-	worker	390	/dashboard/admin/market	/dashboard	200
+-	worker	390	/dashboard/admin/matching	/dashboard	200
+-	worker	390	/dashboard/admin/need-structuring	/dashboard	200
+-	worker	390	/dashboard/admin/pilots	/dashboard	200
+-	worker	390	/dashboard/admin/pipeline	/dashboard	200
+-	worker	390	/dashboard/admin/project-truth	/dashboard	200
+-	worker	390	/dashboard/admin/readiness	/dashboard	200
+-	worker	390	/dashboard/admin/support	/dashboard	200
+-	worker	390	/dashboard/admin/telemetry	/dashboard	200
+-	worker	390	/dashboard/buyer	/dashboard	200
+-	worker	390	/dashboard/company	/dashboard	200
+-	worker	390	/dashboard/company/education	/dashboard	200
+-	worker	390	/dashboard/company/history	/dashboard	200
+-	worker	390	/dashboard/company/needs	/dashboard	200
+-	worker	390	/dashboard/company/partners	/dashboard	200
+-	worker	390	/dashboard/company/people	/dashboard	200
+-	worker	390	/dashboard/company/planning	/dashboard	200
+-	worker	390	/dashboard/company/projects/new	/dashboard	200
+-	worker	390	/dashboard/company/scouting	/dashboard	200
+-	worker	390	/dashboard/company/settings	/dashboard	200
+-	worker	390	/dashboard/talent	/dashboard	200
+-	worker	1440	/dashboard/admin	/dashboard	200
+-	worker	1440	/dashboard/admin/agent-os	/dashboard	200
+-	worker	1440	/dashboard/admin/billing	/dashboard	200
+-	worker	1440	/dashboard/admin/candidate-pool	/dashboard	200
+-	worker	1440	/dashboard/admin/company-need-intakes	/dashboard	200
+-	worker	1440	/dashboard/admin/company-verification	/dashboard	200
+-	worker	1440	/dashboard/admin/import-sandbox	/dashboard	200
+-	worker	1440	/dashboard/admin/intelligence-observations	/dashboard	200
+-	worker	1440	/dashboard/admin/language-feedback	/dashboard	200
+-	worker	1440	/dashboard/admin/launch-readiness	/dashboard	200
+-	worker	1440	/dashboard/admin/league	/dashboard	200
+-	worker	1440	/dashboard/admin/market	/dashboard	200
+-	worker	1440	/dashboard/admin/matching	/dashboard	200
+-	worker	1440	/dashboard/admin/need-structuring	/dashboard	200
+-	worker	1440	/dashboard/admin/pilots	/dashboard	200
+-	worker	1440	/dashboard/admin/pipeline	/dashboard	200
+-	worker	1440	/dashboard/admin/project-truth	/dashboard	200
+-	worker	1440	/dashboard/admin/readiness	/dashboard	200
+-	worker	1440	/dashboard/admin/support	/dashboard	200
+-	worker	1440	/dashboard/admin/telemetry	/dashboard	200
+-	worker	1440	/dashboard/buyer	/dashboard	200
+-	worker	1440	/dashboard/company	/dashboard	200
+-	worker	1440	/dashboard/company/education	/dashboard	200
+-	worker	1440	/dashboard/company/history	/dashboard	200
+-	worker	1440	/dashboard/company/needs	/dashboard	200
+-	worker	1440	/dashboard/company/partners	/dashboard	200
+-	worker	1440	/dashboard/company/people	/dashboard	200
+-	worker	1440	/dashboard/company/planning	/dashboard	200
+-	worker	1440	/dashboard/company/projects/new	/dashboard	200
+-	worker	1440	/dashboard/company/scouting	/dashboard	200
+-	worker	1440	/dashboard/company/settings	/dashboard	200
+-	worker	1440	/dashboard/talent	/dashboard	200
+-	learner	390	/dashboard/admin	/dashboard	200
+-	learner	390	/dashboard/admin/agent-os	/dashboard	200
+-	learner	390	/dashboard/admin/billing	/dashboard	200
+-	learner	390	/dashboard/admin/candidate-pool	/dashboard	200
+-	learner	390	/dashboard/admin/company-need-intakes	/dashboard	200
+-	learner	390	/dashboard/admin/company-verification	/dashboard	200
+-	learner	390	/dashboard/admin/import-sandbox	/dashboard	200
+-	learner	390	/dashboard/admin/intelligence-observations	/dashboard	200
+-	learner	390	/dashboard/admin/language-feedback	/dashboard	200
+-	learner	390	/dashboard/admin/launch-readiness	/dashboard	200
+-	learner	390	/dashboard/admin/league	/dashboard	200
+-	learner	390	/dashboard/admin/market	/dashboard	200
+-	learner	390	/dashboard/admin/matching	/dashboard	200
+-	learner	390	/dashboard/admin/need-structuring	/dashboard	200
+-	learner	390	/dashboard/admin/pilots	/dashboard	200
+-	learner	390	/dashboard/admin/pipeline	/dashboard	200
+-	learner	390	/dashboard/admin/project-truth	/dashboard	200
+-	learner	390	/dashboard/admin/readiness	/dashboard	200
+-	learner	390	/dashboard/admin/support	/dashboard	200
+-	learner	390	/dashboard/admin/telemetry	/dashboard	200
+-	learner	390	/dashboard/buyer	/dashboard	200
+-	learner	390	/dashboard/company	/dashboard	200
+-	learner	390	/dashboard/company/education	/dashboard	200
+-	learner	390	/dashboard/company/history	/dashboard	200
+-	learner	390	/dashboard/company/needs	/dashboard	200
+-	learner	390	/dashboard/company/partners	/dashboard	200
+-	learner	390	/dashboard/company/people	/dashboard	200
+-	learner	390	/dashboard/company/planning	/dashboard	200
+-	learner	390	/dashboard/company/projects/new	/dashboard	200
+-	learner	390	/dashboard/company/scouting	/dashboard	200
+-	learner	390	/dashboard/company/settings	/dashboard	200
+-	learner	390	/dashboard/talent	/dashboard	200
+-	learner	1440	/dashboard/admin	/dashboard	200
+-	learner	1440	/dashboard/admin/agent-os	/dashboard	200
+-	learner	1440	/dashboard/admin/billing	/dashboard	200
+-	learner	1440	/dashboard/admin/candidate-pool	/dashboard	200
+-	learner	1440	/dashboard/admin/company-need-intakes	/dashboard	200
+-	learner	1440	/dashboard/admin/company-verification	/dashboard	200
+-	learner	1440	/dashboard/admin/import-sandbox	/dashboard	200
+-	learner	1440	/dashboard/admin/intelligence-observations	/dashboard	200
+-	learner	1440	/dashboard/admin/language-feedback	/dashboard	200
+-	learner	1440	/dashboard/admin/launch-readiness	/dashboard	200
+-	learner	1440	/dashboard/admin/league	/dashboard	200
+-	learner	1440	/dashboard/admin/market	/dashboard	200
+-	learner	1440	/dashboard/admin/matching	/dashboard	200
+-	learner	1440	/dashboard/admin/need-structuring	/dashboard	200
+-	learner	1440	/dashboard/admin/pilots	/dashboard	200
+-	learner	1440	/dashboard/admin/pipeline	/dashboard	200
+-	learner	1440	/dashboard/admin/project-truth	/dashboard	200
+-	learner	1440	/dashboard/admin/readiness	/dashboard	200
+-	learner	1440	/dashboard/admin/support	/dashboard	200
+-	learner	1440	/dashboard/admin/telemetry	/dashboard	200
+-	learner	1440	/dashboard/buyer	/dashboard	200
+-	learner	1440	/dashboard/company	/dashboard	200
+-	learner	1440	/dashboard/company/education	/dashboard	200
+-	learner	1440	/dashboard/company/history	/dashboard	200
+-	learner	1440	/dashboard/company/needs	/dashboard	200
+-	learner	1440	/dashboard/company/partners	/dashboard	200
+-	learner	1440	/dashboard/company/people	/dashboard	200
+-	learner	1440	/dashboard/company/planning	/dashboard	200
+-	learner	1440	/dashboard/company/projects/new	/dashboard	200
+-	learner	1440	/dashboard/company/scouting	/dashboard	200
+-	learner	1440	/dashboard/company/settings	/dashboard	200
+-	learner	1440	/dashboard/talent	/dashboard	200
+-	institution	390	/dashboard/admin	/dashboard	200
+-	institution	390	/dashboard/admin/agent-os	/dashboard	200
+-	institution	390	/dashboard/admin/billing	/dashboard	200
+-	institution	390	/dashboard/admin/candidate-pool	/dashboard	200
+-	institution	390	/dashboard/admin/company-need-intakes	/dashboard	200
+-	institution	390	/dashboard/admin/company-verification	/dashboard	200
+-	institution	390	/dashboard/admin/import-sandbox	/dashboard	200
+-	institution	390	/dashboard/admin/intelligence-observations	/dashboard	200
+-	institution	390	/dashboard/admin/language-feedback	/dashboard	200
+-	institution	390	/dashboard/admin/launch-readiness	/dashboard	200
+-	institution	390	/dashboard/admin/league	/dashboard	200
+-	institution	390	/dashboard/admin/market	/dashboard	200
+-	institution	390	/dashboard/admin/matching	/dashboard	200
+-	institution	390	/dashboard/admin/need-structuring	/dashboard	200
+-	institution	390	/dashboard/admin/pilots	/dashboard	200
+-	institution	390	/dashboard/admin/pipeline	/dashboard	200
+-	institution	390	/dashboard/admin/project-truth	/dashboard	200
+-	institution	390	/dashboard/admin/readiness	/dashboard	200
+-	institution	390	/dashboard/admin/support	/dashboard	200
+-	institution	390	/dashboard/admin/telemetry	/dashboard	200
+-	institution	390	/dashboard/buyer	/dashboard	200
+-	institution	390	/dashboard/opportunities	/dashboard	200
+-	institution	390	/dashboard/talent	/dashboard	200
+-	institution	1440	/dashboard/admin	/dashboard	200
+-	institution	1440	/dashboard/admin/agent-os	/dashboard	200
+-	institution	1440	/dashboard/admin/billing	/dashboard	200
+-	institution	1440	/dashboard/admin/candidate-pool	/dashboard	200
+-	institution	1440	/dashboard/admin/company-need-intakes	/dashboard	200
+-	institution	1440	/dashboard/admin/company-verification	/dashboard	200
+-	institution	1440	/dashboard/admin/import-sandbox	/dashboard	200
+-	institution	1440	/dashboard/admin/intelligence-observations	/dashboard	200
+-	institution	1440	/dashboard/admin/language-feedback	/dashboard	200
+-	institution	1440	/dashboard/admin/launch-readiness	/dashboard	200
+-	institution	1440	/dashboard/admin/league	/dashboard	200
+-	institution	1440	/dashboard/admin/market	/dashboard	200
+-	institution	1440	/dashboard/admin/matching	/dashboard	200
+-	institution	1440	/dashboard/admin/need-structuring	/dashboard	200
+-	institution	1440	/dashboard/admin/pilots	/dashboard	200
+-	institution	1440	/dashboard/admin/pipeline	/dashboard	200
+-	institution	1440	/dashboard/admin/project-truth	/dashboard	200
+-	institution	1440	/dashboard/admin/readiness	/dashboard	200
+-	institution	1440	/dashboard/admin/support	/dashboard	200
+-	institution	1440	/dashboard/admin/telemetry	/dashboard	200
+-	institution	1440	/dashboard/buyer	/dashboard	200
+-	institution	1440	/dashboard/opportunities	/dashboard	200
+-	institution	1440	/dashboard/talent	/dashboard	200
+-	company	390	/dashboard/admin	/dashboard	200
+-	company	390	/dashboard/admin/agent-os	/dashboard	200
+-	company	390	/dashboard/admin/billing	/dashboard	200
+-	company	390	/dashboard/admin/candidate-pool	/dashboard	200
+-	company	390	/dashboard/admin/company-need-intakes	/dashboard	200
+-	company	390	/dashboard/admin/company-verification	/dashboard	200
+-	company	390	/dashboard/admin/import-sandbox	/dashboard	200
+-	company	390	/dashboard/admin/intelligence-observations	/dashboard	200
+-	company	390	/dashboard/admin/language-feedback	/dashboard	200
+-	company	390	/dashboard/admin/launch-readiness	/dashboard	200
+-	company	390	/dashboard/admin/league	/dashboard	200
+-	company	390	/dashboard/admin/market	/dashboard	200
+-	company	390	/dashboard/admin/matching	/dashboard	200
+-	company	390	/dashboard/admin/need-structuring	/dashboard	200
+-	company	390	/dashboard/admin/pilots	/dashboard	200
+-	company	390	/dashboard/admin/pipeline	/dashboard	200
+-	company	390	/dashboard/admin/project-truth	/dashboard	200
+-	company	390	/dashboard/admin/readiness	/dashboard	200
+-	company	390	/dashboard/admin/support	/dashboard	200
+-	company	390	/dashboard/admin/telemetry	/dashboard	200
+-	company	390	/dashboard/buyer	/dashboard	200
+-	company	390	/dashboard/company/education	/dashboard/company	200
+-	company	390	/dashboard/opportunities	/dashboard	200
+-	company	390	/dashboard/talent	/dashboard	200
+-	company	1440	/dashboard/admin	/dashboard	200
+-	company	1440	/dashboard/admin/agent-os	/dashboard	200
+-	company	1440	/dashboard/admin/billing	/dashboard	200
+-	company	1440	/dashboard/admin/candidate-pool	/dashboard	200
+-	company	1440	/dashboard/admin/company-need-intakes	/dashboard	200
+-	company	1440	/dashboard/admin/company-verification	/dashboard	200
+-	company	1440	/dashboard/admin/import-sandbox	/dashboard	200
+-	company	1440	/dashboard/admin/intelligence-observations	/dashboard	200
+-	company	1440	/dashboard/admin/language-feedback	/dashboard	200
+-	company	1440	/dashboard/admin/launch-readiness	/dashboard	200
+-	company	1440	/dashboard/admin/league	/dashboard	200
+-	company	1440	/dashboard/admin/market	/dashboard	200
+-	company	1440	/dashboard/admin/matching	/dashboard	200
+-	company	1440	/dashboard/admin/need-structuring	/dashboard	200
+-	company	1440	/dashboard/admin/pilots	/dashboard	200
+-	company	1440	/dashboard/admin/pipeline	/dashboard	200
+-	company	1440	/dashboard/admin/project-truth	/dashboard	200
+-	company	1440	/dashboard/admin/readiness	/dashboard	200
+-	company	1440	/dashboard/admin/support	/dashboard	200
+-	company	1440	/dashboard/admin/telemetry	/dashboard	200
+-	company	1440	/dashboard/buyer	/dashboard	200
+-	company	1440	/dashboard/company/education	/dashboard/company	200
+-	company	1440	/dashboard/opportunities	/dashboard	200
+-	company	1440	/dashboard/talent	/dashboard	200
+-	agency	390	/dashboard/admin	/dashboard	200
+-	agency	390	/dashboard/admin/agent-os	/dashboard	200
+-	agency	390	/dashboard/admin/billing	/dashboard	200
+-	agency	390	/dashboard/admin/candidate-pool	/dashboard	200
+-	agency	390	/dashboard/admin/company-need-intakes	/dashboard	200
+-	agency	390	/dashboard/admin/company-verification	/dashboard	200
+-	agency	390	/dashboard/admin/import-sandbox	/dashboard	200
+-	agency	390	/dashboard/admin/intelligence-observations	/dashboard	200
+-	agency	390	/dashboard/admin/language-feedback	/dashboard	200
+-	agency	390	/dashboard/admin/launch-readiness	/dashboard	200
+-	agency	390	/dashboard/admin/league	/dashboard	200
+-	agency	390	/dashboard/admin/market	/dashboard	200
+-	agency	390	/dashboard/admin/matching	/dashboard	200
+-	agency	390	/dashboard/admin/need-structuring	/dashboard	200
+-	agency	390	/dashboard/admin/pilots	/dashboard	200
+-	agency	390	/dashboard/admin/pipeline	/dashboard	200
+-	agency	390	/dashboard/admin/project-truth	/dashboard	200
+-	agency	390	/dashboard/admin/readiness	/dashboard	200
+-	agency	390	/dashboard/admin/support	/dashboard	200
+-	agency	390	/dashboard/admin/telemetry	/dashboard	200
+-	agency	390	/dashboard/buyer	/dashboard	200
+-	agency	390	/dashboard/company/education	/dashboard/company	200
+-	agency	390	/dashboard/opportunities	/dashboard	200
+-	agency	390	/dashboard/talent	/dashboard	200
+-	agency	1440	/dashboard/admin	/dashboard	200
+-	agency	1440	/dashboard/admin/agent-os	/dashboard	200
+-	agency	1440	/dashboard/admin/billing	/dashboard	200
+-	agency	1440	/dashboard/admin/candidate-pool	/dashboard	200
+-	agency	1440	/dashboard/admin/company-need-intakes	/dashboard	200
+-	agency	1440	/dashboard/admin/company-verification	/dashboard	200
+-	agency	1440	/dashboard/admin/import-sandbox	/dashboard	200
+-	agency	1440	/dashboard/admin/intelligence-observations	/dashboard	200
+-	agency	1440	/dashboard/admin/language-feedback	/dashboard	200
+-	agency	1440	/dashboard/admin/launch-readiness	/dashboard	200
+-	agency	1440	/dashboard/admin/league	/dashboard	200
+-	agency	1440	/dashboard/admin/market	/dashboard	200
+-	agency	1440	/dashboard/admin/matching	/dashboard	200
+-	agency	1440	/dashboard/admin/need-structuring	/dashboard	200
+-	agency	1440	/dashboard/admin/pilots	/dashboard	200
+-	agency	1440	/dashboard/admin/pipeline	/dashboard	200
+-	agency	1440	/dashboard/admin/project-truth	/dashboard	200
+-	agency	1440	/dashboard/admin/readiness	/dashboard	200
+-	agency	1440	/dashboard/admin/support	/dashboard	200
+-	agency	1440	/dashboard/admin/telemetry	/dashboard	200
+-	agency	1440	/dashboard/buyer	/dashboard	200
+-	agency	1440	/dashboard/company/education	/dashboard/company	200
+-	agency	1440	/dashboard/opportunities	/dashboard	200
+-	agency	1440	/dashboard/talent	/dashboard	200
+-	buyer	390	/dashboard/admin	/dashboard	200
+-	buyer	390	/dashboard/admin/agent-os	/dashboard	200
+-	buyer	390	/dashboard/admin/billing	/dashboard	200
+-	buyer	390	/dashboard/admin/candidate-pool	/dashboard	200
+-	buyer	390	/dashboard/admin/company-need-intakes	/dashboard	200
+-	buyer	390	/dashboard/admin/company-verification	/dashboard	200
+-	buyer	390	/dashboard/admin/import-sandbox	/dashboard	200
+-	buyer	390	/dashboard/admin/intelligence-observations	/dashboard	200
+-	buyer	390	/dashboard/admin/language-feedback	/dashboard	200
+-	buyer	390	/dashboard/admin/launch-readiness	/dashboard	200
+-	buyer	390	/dashboard/admin/league	/dashboard	200
+-	buyer	390	/dashboard/admin/market	/dashboard	200
+-	buyer	390	/dashboard/admin/matching	/dashboard	200
+-	buyer	390	/dashboard/admin/need-structuring	/dashboard	200
+-	buyer	390	/dashboard/admin/pilots	/dashboard	200
+-	buyer	390	/dashboard/admin/pipeline	/dashboard	200
+-	buyer	390	/dashboard/admin/project-truth	/dashboard	200
+-	buyer	390	/dashboard/admin/readiness	/dashboard	200
+-	buyer	390	/dashboard/admin/support	/dashboard	200
+-	buyer	390	/dashboard/admin/telemetry	/dashboard	200
+-	buyer	390	/dashboard/company	/dashboard	200
+-	buyer	390	/dashboard/company/education	/dashboard	200
+-	buyer	390	/dashboard/company/history	/dashboard	200
+-	buyer	390	/dashboard/company/needs	/dashboard	200
+-	buyer	390	/dashboard/company/partners	/dashboard	200
+-	buyer	390	/dashboard/company/people	/dashboard	200
+-	buyer	390	/dashboard/company/planning	/dashboard	200
+-	buyer	390	/dashboard/company/projects/new	/dashboard	200
+-	buyer	390	/dashboard/company/scouting	/dashboard	200
+-	buyer	390	/dashboard/company/settings	/dashboard	200
+-	buyer	390	/dashboard/talent	/dashboard	200
+-	buyer	1440	/dashboard/admin	/dashboard	200
+-	buyer	1440	/dashboard/admin/agent-os	/dashboard	200
+-	buyer	1440	/dashboard/admin/billing	/dashboard	200
+-	buyer	1440	/dashboard/admin/candidate-pool	/dashboard	200
+-	buyer	1440	/dashboard/admin/company-need-intakes	/dashboard	200
+-	buyer	1440	/dashboard/admin/company-verification	/dashboard	200
+-	buyer	1440	/dashboard/admin/import-sandbox	/dashboard	200
+-	buyer	1440	/dashboard/admin/intelligence-observations	/dashboard	200
+-	buyer	1440	/dashboard/admin/language-feedback	/dashboard	200
+-	buyer	1440	/dashboard/admin/launch-readiness	/dashboard	200
+-	buyer	1440	/dashboard/admin/league	/dashboard	200
+-	buyer	1440	/dashboard/admin/market	/dashboard	200
+-	buyer	1440	/dashboard/admin/matching	/dashboard	200
+-	buyer	1440	/dashboard/admin/need-structuring	/dashboard	200
+-	buyer	1440	/dashboard/admin/pilots	/dashboard	200
+-	buyer	1440	/dashboard/admin/pipeline	/dashboard	200
+-	buyer	1440	/dashboard/admin/project-truth	/dashboard	200
+-	buyer	1440	/dashboard/admin/readiness	/dashboard	200
+-	buyer	1440	/dashboard/admin/support	/dashboard	200
+-	buyer	1440	/dashboard/admin/telemetry	/dashboard	200
+-	buyer	1440	/dashboard/company	/dashboard	200
+-	buyer	1440	/dashboard/company/education	/dashboard	200
+-	buyer	1440	/dashboard/company/history	/dashboard	200
+-	buyer	1440	/dashboard/company/needs	/dashboard	200
+-	buyer	1440	/dashboard/company/partners	/dashboard	200
+-	buyer	1440	/dashboard/company/people	/dashboard	200
+-	buyer	1440	/dashboard/company/planning	/dashboard	200
+-	buyer	1440	/dashboard/company/projects/new	/dashboard	200
+-	buyer	1440	/dashboard/company/scouting	/dashboard	200
+-	buyer	1440	/dashboard/company/settings	/dashboard	200
+-	buyer	1440	/dashboard/talent	/dashboard	200
