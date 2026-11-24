@@ -244,6 +244,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-23 owner P0 #3679 (duplication audit SEC-1/2/4): three bypassed v1 doors revoked from
       // authenticated (REVOKE only; RED draft, needs-human-gate, NOT applied).
       "20261123060000_",
+      // 2026-11-24 owner request: time-boxed read-only history grant (RED draft, NOT applied).
+      "20261124053000_",
       // 2026-11-22 owner decision: a demoted owner loses owner rights at once (SECURITY DEFINER bodies + four
       // narrowed company/agency policies; RED draft, needs-human-gate, NOT applied).
       "20261122140000_",

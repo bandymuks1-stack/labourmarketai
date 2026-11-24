@@ -3,11 +3,8 @@ import { ClipboardCheck, CheckCircle2 } from "lucide-react";
 
 import { getActiveOrganizationContext } from "@/lib/company/active-organization";
 import { Link } from "@/lib/i18n/navigation";
-import { readOrganizationApprovalFacts } from "@/lib/journal/organization-approvals";
-import { organizationApprovalsView } from "@/lib/journal/organization-approvals-model";
+import { loadOrganizationApprovals } from "@/lib/company/organization-today-view";
 import { quickConfirmEntryView } from "@/lib/journal/quick-confirm-model";
-import { reviewScopeOf, rowsInScope } from "@/lib/journal/review-scope";
-import { fetchQuickReviewQueue, type QuickQueueEntry } from "@/lib/journal/review-queue";
 import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { countCounterpartyToDecide } from "@/lib/journal/counterparty-to-decide-count";
 import { QuickConfirmQueue } from "@/components/app/quick-confirm-queue";
@@ -123,46 +120,33 @@ const ON_THE_CARD = 3;
  * says why, including the two reasons that look like a missing feature.
  */
 export async function OrganizationApprovalsCard() {
-  // All asked together: the facts need only the active organization, which the layout
-  // has already resolved, so they cost this render no wave of their own.
-  const [context, facts, pending, clientToDecide, t, tPulse, tSkill, tUnit] = await Promise.all([
-    getActiveOrganizationContext(),
-    getActiveOrganizationContext().then((context) =>
-      context.activeOrganizationId
-        ? readOrganizationApprovalFacts(context.activeOrganizationId)
-        : { employees: null, ownUnconfirmed: null, otherReviewer: null },
-    ),
-    countReviewablePendingEntries(),
+  // The one approvals view model (ORG-6): the today view shows the same count of the
+  // same rows. The active organization is already resolved by the layout.
+  const context = await getActiveOrganizationContext();
+  const [{ approvals: view }, clientToDecide, t, tToday, tPulse, tSkill, tUnit] = await Promise.all([
+    loadOrganizationApprovals({ organizationId: context.activeOrganizationId, exceptions: false }),
     countCounterpartyToDecide(),
     getTranslations("companyModel.approvals"),
+    getTranslations("companyModel.today"),
     getTranslations("projects.pulse"),
     getTranslations("skillNames"),
     getTranslations("productivityUnits"),
   ]);
-  // The rows are read only when the count says some wait. The set spans every organization
-  // the reader reviews; the count is this organization's, and so are the rows.
-  const scope = reviewScopeOf(context.activeOrganizationId);
-  const queue = pending
-    ? await fetchQuickReviewQueue()
-        .then((rows) => rowsInScope(rows, scope).rows)
-        .catch((): readonly QuickQueueEntry[] | null => null)
-    : [];
-  const view = organizationApprovalsView({
-    // The rows failed: the card cannot offer them, so it does not count them either.
-    pending: queue === null ? null : pending,
-    employees: facts.employees,
-    ownUnconfirmed: facts.ownUnconfirmed,
-    otherReviewer: facts.otherReviewer,
-  });
-  const entries = (queue ?? []).slice(0, ON_THE_CARD).map((e) => quickConfirmEntryView(e, tSkill, tUnit));
+  const reason = view.reason;
+  const waiting = view.waiting ?? 0;
+  const entries = view.cards.slice(0, ON_THE_CARD).map((e) => quickConfirmEntryView(e, tSkill, tUnit));
   const lineLink = "inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue hover:underline";
 
   return (
     <Card className="flex flex-col gap-3" data-testid="organization-approvals" data-state={view.state}>
       <h3 className="font-display text-base font-semibold text-text-primary" data-testid="organization-approvals-title">
-        {view.state === "unreadable" ? t("titleUnknown") : t("title", { n: pending ?? 0 })}
+        {view.waiting === null ? t("titleUnknown") : t("title", { n: waiting })}
       </h3>
-      {view.state === "unreadable" ? (
+      {view.state === "not-reviewer" ? (
+        <p className="text-sm leading-relaxed text-text-secondary" data-testid="organization-approvals-not-reviewer">
+          {tToday("notReviewer")}
+        </p>
+      ) : view.state === "unreadable" ? (
         <>
           <p className="text-sm leading-relaxed text-text-secondary" data-testid="organization-approvals-unread">
             {tPulse("unreadable")}
@@ -181,35 +165,35 @@ export async function OrganizationApprovalsCard() {
             exceptions={{}}
             empty={
               <p className="text-sm leading-relaxed text-text-secondary" data-testid="organization-approvals-empty">
-                {view.noEmployees ? t("noEmployees") : view.reviewOff ? t("emptyTitle") : `${t("emptyTitle")} ${t("emptyNext")}`}
+                {reason.noEmployees ? t("noEmployees") : reason.reviewOff ? t("emptyTitle") : `${t("emptyTitle")} ${t("emptyNext")}`}
               </p>
             }
           />
-          {(pending ?? 0) > entries.length ? (
+          {waiting > entries.length ? (
             <Link href={"/dashboard/inbox/quick" as "/dashboard"} className={lineLink} data-testid="organization-approvals-all">
-              {t("seeAll", { n: pending ?? 0 })} →
+              {t("seeAll", { n: waiting })} →
             </Link>
           ) : null}
         </>
       )}
-      {view.noEmployees && view.state === "empty" ? (
+      {reason.noEmployees && view.state === "empty" ? (
         <Link href={"/dashboard/company/people" as "/dashboard"} className={`${lineLink} inline-flex min-h-11 items-center`} data-testid="organization-approvals-people">
           {t("people")} →
         </Link>
       ) : null}
-      {view.reviewOff ? (
+      {view.state !== "not-reviewer" && reason.reviewOff ? (
         <div className="flex flex-col gap-1" data-testid="organization-approvals-review-off">
           <p className="text-sm leading-relaxed text-text-secondary">
-            {t("reviewOff", { off: view.reviewOff.reviewOff, total: view.reviewOff.total })}
+            {t("reviewOff", { off: reason.reviewOff.reviewOff, total: reason.reviewOff.total })}
           </p>
           <Link href={"/dashboard/company/people#org-members" as "/dashboard"} className={lineLink} data-testid="organization-approvals-enable">
             {t("enable")} →
           </Link>
         </div>
       ) : null}
-      {view.ownUnconfirmed > 0 ? (
+      {reason.ownUnconfirmed > 0 ? (
         <p className="text-xs leading-relaxed text-text-muted" data-testid="organization-approvals-own">
-          {t(view.otherReviewer === true ? "own" : view.otherReviewer === false ? "ownAlone" : "ownUnknown", { n: view.ownUnconfirmed })}
+          {t(reason.otherReviewer === true ? "own" : reason.otherReviewer === false ? "ownAlone" : "ownUnknown", { n: reason.ownUnconfirmed })}
         </p>
       ) : null}
       {clientToDecide !== null && clientToDecide > 0 ? (
