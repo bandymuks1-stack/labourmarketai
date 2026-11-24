@@ -77,6 +77,15 @@ describe("the walk is read-only and prints no names", () => {
     expect(lib).toMatch(/\[3-6\]\\d\{10\}/);
   });
 
+  it("reads only the two grant-aware pages, naming the organization, with no workspace chip or people list", () => {
+    expect(spec).toMatch(/rpc\/my_history_read_grants_v1/);
+    expect(spec).toMatch(/\/dashboard\/company\/history\?org=\$\{encodeURIComponent\(orgId\)\}/);
+    expect(spec).toMatch(/\/dashboard\/company\/people\/\$\{personId\}\?org=\$\{encodeURIComponent\(orgId\)\}/);
+    expect(spec).not.toMatch(/workspace-chip|workspace-option|"\/dashboard\/company\/people"\)/);
+    // A page the grant was not served (redirect, hidden) is a FAIL without an image.
+    expect(spec).toMatch(/redirected: the page was not served to the grant/);
+  });
+
   it("loads no stored photos or documents", () => {
     expect(spec).toMatch(/type === "image" \|\| type === "media"/);
     expect(spec).toMatch(/return route\.abort\(\)/);

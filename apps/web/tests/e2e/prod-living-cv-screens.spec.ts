@@ -13,20 +13,25 @@ import {
   stripPngMetadata,
   type Pseudonyms,
 } from "../../lib/testing/living-cv-deidentify";
+import { bearerOf, qaApi } from "./prod-qa-api";
 import { test } from "./prod-walk";
 
 /**
  * prod-living-cv-screens — the owner's Living CV screens, de-identified and encrypted
  * (coordinator order 2026-11-23, owner-approved read-only grant).
  *
- * Read-only. The synthetic `livingcv` account holds a READ-ONLY membership in exactly two
- * organizations. The walk only opens pages and switches the active workspace; it never presses a
- * save, export, send or confirm control.
+ * Read-only. The synthetic `livingcv` account holds an owner-granted, time-boxed READ grant
+ * (`organization_history_read_grants_v1`, #3754) on exactly two organizations, and no membership.
+ * Only the two grant-aware pages are opened, each naming its organization (`?org=`), one
+ * organization per pass: the company history (`loadCompanyWorkHistory`) and one person's page
+ * (`loadCompanyPerson`). No workspace chip, no people list. The walk never presses a save, export,
+ * send or confirm control.
  *
  * De-identification happens BEFORE rendering:
- *   1. Discovery (no screenshot): the people list, the company history and one person's page are
- *      read in each organization; every person name, and every other organization named on the
- *      person's history, is collected IN MEMORY only.
+ *   1. Discovery (no screenshot): the granted organizations come from `my_history_read_grants_v1`
+ *      and each one's roster names from `organization_people`, through the account's own session and
+ *      the grant's SELECT policies; then the company history and one person's page are read for the
+ *      names shown there and the other organizations on the person's history. All IN MEMORY only.
  *   2. Every same-origin document, RSC and fetch body is rewritten on the way to the browser:
  *      people become "Darbuotojas A/B/…", other organizations "Uzsakovas 1/2/…". The two chosen
  *      organizations stay. Photos and other images from storage are not loaded at all.
@@ -64,7 +69,6 @@ const SLOT = "livingcv";
 const STATE = resolve(__dirname, `.storage-state.prod-qa.${SLOT}.json`);
 const ORIGIN = new URL(process.env.E2E_BASE_URL || "https://labourmarket.ai").origin;
 const LOCALE = "lt";
-const PERSONAL = "personal";
 const PERSON_HREF = /\/dashboard\/company\/people\/([0-9a-f-]{36})(?:[/?#]|$)/;
 
 const VIEWPORTS = [
@@ -109,39 +113,38 @@ async function open(page: Page, path: string): Promise<void> {
   if (!(await page.locator("main").first().isVisible({ timeout: 30_000 }))) throw new Error("no main");
 }
 
-/** The organization workspaces of this account: ids and display names, in menu order. */
-async function organizations(page: Page): Promise<Array<{ id: string; name: string }>> {
-  await open(page, "/dashboard");
-  const chip = page.getByTestId("workspace-chip").first();
-  await chip.getByRole("button").first().click();
-  const menu = page.getByTestId("workspace-chip-menu");
-  await menu.waitFor({ state: "visible", timeout: 30_000 });
-  const found = await menu.locator('[data-testid^="workspace-option-"]').evaluateAll((els) =>
-    els.map((el) => ({
-      id: (el.getAttribute("data-testid") ?? "").replace("workspace-option-", ""),
-      name: ((el as HTMLElement).innerText ?? "").split("\n")[0]!.trim(),
-    })),
-  );
-  await page.keyboard.press("Escape");
-  return found.filter((o) => o.id && o.id !== PERSONAL);
+/** The organizations this account may read now: its live grants, through its own session. */
+async function grants(): Promise<Array<{ id: string; name: string }>> {
+  const res = await qaApi("/rest/v1/rpc/my_history_read_grants_v1", bearerOf(SLOT), { method: "POST", body: {} });
+  if (res.status !== 200) throw new Error("grants unreadable");
+  const rows = (await res.json()) as Array<{ organization_id: string; organization_name: string | null }>;
+  return rows.map((g) => ({ id: g.organization_id, name: (g.organization_name ?? "").trim() }));
 }
 
-/** Make an organization the active workspace through the real header chip (no text matching). */
-async function activate(page: Page, orgId: string): Promise<void> {
-  await open(page, "/dashboard");
-  const chip = page.getByTestId("workspace-chip").first();
-  await chip.getByRole("button").first().click();
-  const option = page.getByTestId(`workspace-option-${orgId}`);
-  if ((await option.getAttribute("aria-current")) !== "true") {
-    await option.click();
-    await page.waitForLoadState("networkidle", { timeout: 30_000 }).catch(() => undefined);
-    await open(page, "/dashboard");
-    await chip.getByRole("button").first().click();
+/** One granted organization's roster: every person's id and name, read under the grant. */
+async function roster(orgId: string): Promise<Array<{ id: string; name: string }>> {
+  const res = await qaApi(
+    `/rest/v1/organization_people?organization_id=eq.${encodeURIComponent(orgId)}&select=id,display_name&order=created_at.asc&limit=5000`,
+    bearerOf(SLOT),
+  );
+  if (res.status !== 200) throw new Error("roster unreadable");
+  const rows = (await res.json()) as Array<{ id: string; display_name: string }>;
+  return rows.map((r) => ({ id: r.id, name: r.display_name }));
+}
+
+/** A grant-aware page for one organization, by its own address: `?org=` names the organization. */
+const historyPath = (orgId: string) => `/dashboard/company/history?org=${encodeURIComponent(orgId)}`;
+const personPath = (orgId: string, personId: string) =>
+  `/dashboard/company/people/${personId}?org=${encodeURIComponent(orgId)}`;
+
+/** The page really served to the grant: not redirected elsewhere, and its own root rendered. */
+async function served(page: Page, path: string, rootTestId: string): Promise<void> {
+  await open(page, path);
+  const want = path.split("?")[0]!;
+  if (!new URL(page.url()).pathname.endsWith(want)) throw new Error("redirected: the page was not served to the grant");
+  if (!(await page.getByTestId(rootTestId).first().isVisible({ timeout: 30_000 }).catch(() => false))) {
+    throw new Error("the page rendered without its content: hidden from the grant");
   }
-  if ((await page.getByTestId(`workspace-option-${orgId}`).getAttribute("aria-current")) !== "true") {
-    throw new Error("workspace did not switch");
-  }
-  await page.keyboard.press("Escape");
 }
 
 /** Person names on the people list and the company history, and links to people's pages. */
@@ -310,7 +313,7 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
   }
   mkdirSync(OUT, { recursive: true, mode: 0o700 });
 
-  // 1. Discovery: names into memory, nothing rendered for a screen.
+  // 1. Discovery: names into memory, nothing rendered for a screen. One organization per pass.
   const discovery = await context(browser, VIEWPORTS[0].options);
   const page = await discovery.newPage();
   let orgs: Array<{ id: string; name: string }> = [];
@@ -318,23 +321,22 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
   const companies: string[] = [];
   let personId = "";
   try {
-    orgs = await at("read the organization workspaces", () => organizations(page));
-    if (orgs.length !== 2) throw new Error(`living-cv-screens failed at: expected exactly two organization workspaces, found ${orgs.length}`);
+    orgs = await at("read the granted organizations", () => grants());
+    if (orgs.length !== 2) throw new Error(`living-cv-screens failed at: expected exactly two read grants, found ${orgs.length}`);
     for (const [i, org] of orgs.entries()) {
       await at(`discover organization ${i + 1}`, async () => {
-        await activate(page, org.id);
-        await open(page, "/dashboard/company/people");
-        const a = await peopleOnPage(page);
-        await open(page, "/dashboard/company/history");
-        const b = await peopleOnPage(page);
-        people.push(...a.names, ...b.names);
-        if (i === 0) personId = b.personIds[0] ?? a.personIds[0] ?? "";
+        const list = await roster(org.id);
+        people.push(...list.map((x) => x.name));
+        await served(page, historyPath(org.id), "company-history");
+        const shown = await peopleOnPage(page);
+        people.push(...shown.names);
+        // The person comes from the history page itself when it links one; else the roster's first.
+        if (i === 0) personId = shown.personIds.find((id) => list.some((x) => x.id === id)) ?? list[0]?.id ?? "";
       });
     }
-    if (!personId) throw new Error("living-cv-screens failed at: no person page in the first organization");
+    if (!personId) throw new Error("living-cv-screens failed at: no person in the first organization");
     await at("discover the person", async () => {
-      await activate(page, orgs[0]!.id);
-      await open(page, `/dashboard/company/people/${personId}`);
+      await served(page, personPath(orgs[0]!.id, personId), "company-person");
       people.push(...(await peopleOnPage(page)).names);
       companies.push(...(await organizationsOnPage(page)));
     });
@@ -351,8 +353,11 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
   const attempt = async (screen: string, viewport: string, go: () => Promise<ScreenResult>) => {
     try {
       results.push(await go());
-    } catch {
-      results.push({ screen, viewport, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: [`not generated: the page did not open (${step})`] });
+    } catch (e) {
+      // Only the walk's own fixed messages are kept; anything else (a URL, a page text) is not.
+      const own = e instanceof Error && /^(page did not open|no main|redirected: |the page rendered without its content)/.test(e.message);
+      const why = own ? (e as Error).message : "the page did not open";
+      results.push({ screen, viewport, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: [`not generated: ${why} (${step})`] });
     }
   };
   for (const vp of VIEWPORTS) {
@@ -363,26 +368,22 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
     try {
       await attempt(SCREENS[0], vp.key, async () => {
         step = `${vp.key}: worker overview`;
-        await activate(view, orgs[0]!.id);
-        await open(view, `/dashboard/company/people/${personId}`);
+        await served(view, personPath(orgs[0]!.id, personId), "company-person");
         return shoot(view, p, SCREENS[0], vp.key, false, fit);
       });
       await attempt(SCREENS[1], vp.key, async () => {
         step = `${vp.key}: worker history`;
-        await activate(view, orgs[0]!.id);
-        await open(view, `/dashboard/company/people/${personId}`);
+        await served(view, personPath(orgs[0]!.id, personId), "company-person");
         return shoot(view, p, SCREENS[1], vp.key, true, fit);
       });
       await attempt(SCREENS[2], vp.key, async () => {
         step = `${vp.key}: first organization's company Living CV`;
-        await activate(view, orgs[0]!.id);
-        await open(view, "/dashboard/company/history");
+        await served(view, historyPath(orgs[0]!.id), "company-history");
         return shoot(view, p, SCREENS[2], vp.key, true, fit);
       });
       await attempt(SCREENS[3], vp.key, async () => {
         step = `${vp.key}: second organization's company Living CV`;
-        await activate(view, orgs[1]!.id);
-        await open(view, "/dashboard/company/history");
+        await served(view, historyPath(orgs[1]!.id), "company-history");
         return shoot(view, p, SCREENS[3], vp.key, true, fit);
       });
     } finally {
