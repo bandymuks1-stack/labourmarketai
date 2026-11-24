@@ -12654,7 +12654,7 @@
       },
       "verify": {
         "title": "Verifiera din e-post för att se inbjudningar som skickats till den",
-        "body": "Inbjudningar som är adresserade till en e-postadress visas bara för den som kan öppna den brevlådan. Allt annat i ditt konto fungerar som vanligt; detta behövs bara för att se eller acceptera de här inbjudningarna.",
+        "body": "Inbjudningar som är adresserade till en e-postadress visas bara för den som kan öppna den brevlådan.",
         "send": "Skicka mig en engångslänk",
         "sending": "Skickar…",
         "sent": "Vi har skickat en engångslänk till {email}. Öppna den på den här enheten för att slutföra.",
@@ -14462,7 +14462,7 @@
       "navCalendar": "Kalender",
       "navProfile": "Profil",
       "clarifyWorkLog": "Vilken dag och hur länge arbetade du? Till exempel: ”I dag 8–17, 30 min rast, monterade fönster”.",
-      "calendarHint": "Du hittar din plan under fliken ”Kalender”. Här kan jag hjälpa dig att registrera arbetstid eller granska erbjudanden.",
+      "calendarHint": "Du hittar din plan under fliken ”Kalender”.",
       "messagesHint": "Här är dina meddelanden – länken nedan öppnar dem.",
       "reminderBlocked": "Jag kan inte skicka påminnelser ännu – det finns ingen påminnelsefunktion på plats, så jag skapar ingen låtsad påminnelse. Jag lägger till det när det aktiveras.",
       "switchContextPersonal": "personligt utrymme",
@@ -14718,6 +14718,34 @@
       "findWorkInCompanyContext": "Att söka jobb är din egen handling — i företagsutrymmet kör jag den inte. Byt till ditt personliga utrymme och fråga igen.",
       "findWorkInCompanyWhy": "En person söker jobb, inte ett företag — jag svarar från ditt personliga utrymme.",
       "personalOnlyInCompany": "Det är en personlig åtgärd — i ett företagsutrymme utför jag den inte. Byt till ditt personliga utrymme och fortsätt där.",
+      "needsOrganization": "Det görs för en organisation, och inget av dina utrymmen kan göra det ännu.",
+      "readFailed": "Jag kunde inte läsa det just nu — felet ligger hos oss. Inget har ändrats. Försök igen om en stund.",
+      "taskStatusAsk": "Vilken status ska uppgiften få: påbörjad, klar eller blockerad?",
+      "stageStatusAsk": "Vilken status ska etappen få: påbörjad, klar eller blockerad?",
+      "chipStatusStarted": "Påbörjad",
+      "chipStatusDone": "Klar",
+      "chipStatusBlocked": "Blockerad",
+      "professionAsk": "Vilket yrke eller hantverk menar du?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Ditt CV finns i ditt personliga utrymme, inte i organisationen.",
+          "journal": "Din egen arbetsdagbok finns i ditt personliga utrymme.",
+          "profile": "Din profil finns i ditt personliga utrymme.",
+          "calendar": "Din egen kalender finns i ditt personliga utrymme."
+        },
+        "open": {
+          "cv": "Byt och öppna mitt CV",
+          "journal": "Byt och öppna min dagbok",
+          "profile": "Byt och öppna min profil",
+          "calendar": "Byt och öppna min kalender"
+        },
+        "askWhoseCv": "Ditt eget CV eller en kandidats?",
+        "organizationHistory": "Organisationens underlag är dess arbetshistorik.",
+        "openOrganizationHistory": "Öppna organisationens historik",
+        "organization": "Det görs i organisationens utrymme: {name}.",
+        "switchTo": "Byt till {name} och fortsätt",
+        "whichOrganization": "Det görs i en organisations utrymme. Vilket?"
+      },
       "newJobsIntro": "Nya annonser som passar dina önskemål: {count}.",
       "newJobsAll": "Alla möjligheter",
       "newJobsNone": "Inga nya annonser som passar dina önskemål har kommit de senaste dagarna. Alla möjligheter hittar du på sidan för möjligheter.",
@@ -15977,7 +16005,7 @@
       "lasting": "Din erfarenhet och dina möjligheter finns kvar inom räckhåll — när du byter jobb, projekt eller land."
     },
     "v3": {
-      "lead": "För arbetstagare, arbetsgivare och tjänsteleverantörer i alla yrken och branscher. Registrering och grundläggande publicering av ett behov är gratis.",
+      "lead": "Registrering och grundläggande publicering av ett behov är gratis.",
       "or": "eller beskriv det med egna ord",
       "needFree": "Du kan skicka en förfrågan utan att registrera dig. Det är kostnadsfritt att skicka den; villkor och pris för tjänsterna avtalas separat.",
       "market": {
@@ -18919,7 +18947,8 @@
       "heading": "Inbjudningar från organisationer",
       "explainer": "Ledningsinbjudningar riktade till dig. När du accepterar visas organisationen i din arbetsyteväljare.",
       "accept": "Acceptera",
-      "decline": "Avböj"
+      "decline": "Avböj",
+      "invitedBy": "Inbjuden av {name}"
     },
     "members": {
       "heading": "Organisationens medlemmar",
@@ -19380,7 +19409,11 @@
         "open": "Öppna arbetsytan {name}",
         "opening": "Öppnar …",
         "error": "Arbetsytan kunde inte öppnas."
-      }
+      },
+      "structure": "Tidigare arbete utfördes genom {names}.",
+      "structureLater": ", senare ",
+      "structureForClient": "Tidigare arbete genom {names} för beställaren {client}.",
+      "structureAsSubcontractor": "Underleverantör: {names} → beställare {client}."
     },
     "projects": {
       "title": "Projekt på plattformen",
@@ -19411,7 +19444,8 @@
       "title": "Beställare",
       "unnamed": "Beställande organisation",
       "records": "{count, plural, one {# post} other {# poster}}"
-    }
+    },
+    "descriptionNotInSource": "Ingen arbetsbeskrivning i källan"
   },
   "workPlan": {
     "title": "Planerat arbete",
@@ -19645,6 +19679,14 @@
     "noDemand": "Det finns inget öppet behov att erbjuda mot just nu.",
     "demandLabel": "Behov",
     "demandPlaceholder": "Välj ett behov",
+    "need": {
+      "people": "Personer",
+      "start": "Början",
+      "duration": "Varaktighet",
+      "language": "Språk",
+      "skills": "Färdigheter",
+      "tools": "Verktyg"
+    },
     "alreadyOffered": "redan erbjudet",
     "noteLabel": "Meddelande till företaget (valfritt)",
     "notePlaceholder": "Till exempel: arbetslag på 3, kan börja om två veckor",

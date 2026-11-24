@@ -91,6 +91,28 @@ describe("deploy brake", () => {
   it("judges by the most recent end, whatever the list order", () => {
     expect(judgeDeployBrake([done(60), done(1, 2)], now).refuse).toBe(true);
   });
+
+  describe("inside a deploy-vps run (the post-deploy checks of ONE deploy queue)", () => {
+    const own = (minAgo: number | null) => ({
+      id: 7,
+      deployEndedAt: minAgo === null ? null : new Date(now.getTime() - minAgo * 60_000).toISOString(),
+    });
+    const self = { id: 7, status: "in_progress", updated_at: now.toISOString() };
+    it("its own run is not another deploy, and the quiet period counts from its own deploy job", () => {
+      expect(judgeDeployBrake([self, done(60)], now, THRESHOLDS, own(THRESHOLDS.deployQuietMinutes + 1)).refuse).toBe(false);
+      expect(judgeDeployBrake([self, done(60)], now, THRESHOLDS, own(2)).refuse).toBe(true);
+    });
+    it.each(["queued", "waiting", "requested", "pending"])("a run %s in the deploy group cannot start before it, so it does not refuse", (status) => {
+      expect(judgeDeployBrake([{ id: 9, status, updated_at: now.toISOString() }, self], now, THRESHOLDS, own(10)).refuse).toBe(false);
+    });
+    it("another run in progress is outside the queue and still refuses; an unreadable own deploy end refuses", () => {
+      expect(judgeDeployBrake([{ id: 9, status: "in_progress", updated_at: now.toISOString() }, self], now, THRESHOLDS, own(10)).refuse).toBe(true);
+      expect(judgeDeployBrake([self], now, THRESHOLDS, own(null)).refuse).toBe(true);
+    });
+    it("without the own run nothing changes: the same lists refuse as before", () => {
+      expect(judgeDeployBrake([self, done(60)], now).refuse).toBe(true);
+    });
+  });
 });
 
 const report = (...statuses: [string, string?][]) => ({

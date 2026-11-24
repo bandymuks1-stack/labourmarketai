@@ -19,6 +19,11 @@
 //             within 5 min of the last one ending (the blue/green switch runs
 //             two servers on one origin: run 39978076973 got Cloudflare 522s
 //             and 45 s timeouts during deploys). NOT bypassable.
+//             Inside a deploy-vps.yml run (the post-deploy checks, called with
+//             WALK_BRAKE_OWN_DEPLOY_RUN = that run's id): its own run is not
+//             "another deploy", runs waiting in the `deploy-vps` group cannot
+//             start before it ends, and the quiet period counts from its own
+//             `deploy` job's end.
 //   errors    refuse when the last 2 walks that reached production both failed
 //             in their FIRST step or with infrastructure / 5xx errors, and the
 //             latest of them ended < 60 min ago (circuit breaker: after the
@@ -122,7 +127,18 @@ const DEPLOY_ACTIVE = new Set(["in_progress", "queued", "waiting", "requested", 
  * `deployQuietMinutes` of the latest one ending.
  * @returns {{ refuse: boolean, reason: string }}
  */
-export function judgeDeployBrake(runs, now = new Date(), t = THRESHOLDS) {
+export function judgeDeployBrake(runs, now = new Date(), t = THRESHOLDS, own = null) {
+  if (own) {
+    // Called from the checks of deploy-vps.yml run `own.id`. That run holds the `deploy-vps`
+    // concurrency group, so a run WAITING in it cannot start before this one ends; another run
+    // IN PROGRESS would be outside the queue and still refuses.
+    if (!Number.isFinite(Date.parse(own.deployEndedAt ?? ""))) {
+      return { refuse: true, reason: `the end of this run's own deploy job (run ${own.id}) is unreadable` };
+    }
+    runs = runs
+      .filter((r) => r.id !== own.id && (r.status === "completed" || r.status === "in_progress"))
+      .concat([{ id: own.id, status: "completed", updated_at: own.deployEndedAt }]);
+  }
   const active = runs.filter((r) => DEPLOY_ACTIVE.has(r.status));
   // A finished run whose deploy job was skipped shipped nothing (docs only, or Quality Gates failed).
   runs = runs.filter((r) => !r.deploySkipped);
@@ -389,7 +405,21 @@ async function cmdDeploy() {
       r.deploySkipped = false;
     }
   }
-  const verdict = judgeDeployBrake(runs);
+  // Inside a deploy-vps.yml run: that run and the end of its own `deploy` job.
+  let own = null;
+  const ownId = Number(process.env.WALK_BRAKE_OWN_DEPLOY_RUN ?? 0);
+  if (ownId) {
+    let deployEndedAt = null;
+    try {
+      const jobs = ghJson(`repos/${REPO}/actions/runs/${ownId}/jobs?per_page=100`).jobs ?? [];
+      const job = jobs.find((j) => j.name === "deploy" && j.status === "completed" && j.conclusion === "success");
+      deployEndedAt = job?.completed_at ?? null;
+    } catch {
+      deployEndedAt = null;
+    }
+    own = { id: ownId, deployEndedAt };
+  }
+  const verdict = judgeDeployBrake(runs, new Date(), THRESHOLDS, own);
   if (verdict.refuse) refuse(verdict.reason);
   say(`deploy brake: clear (${verdict.reason})`);
 }

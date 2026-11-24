@@ -101,7 +101,7 @@ function InvitationRow({
           <button
             type="submit"
             disabled={isPending}
-            className="self-start rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+            className="inline-flex min-h-11 items-center self-start rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50 sm:min-h-9"
             data-testid={`worker-invitation-accept-${inv.kind}-${inv.orgId}`}
           >
             {isPending ? labels.accepting : labels.accept}

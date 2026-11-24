@@ -12654,7 +12654,7 @@
       },
       "verify": {
         "title": "Patvirtinkite el. paštą, kad matytumėte jam skirtus pakvietimus",
-        "body": "Pakvietimai, adresuoti el. pašto adresui, rodomi tik tam, kas gali atidaryti tą pašto dėžutę. Visa kita jūsų paskyroje veikia kaip veikė; tai reikalinga tik šiems pakvietimams matyti ar priimti.",
+        "body": "Pakvietimai, adresuoti el. pašto adresui, rodomi tik tam, kas gali atidaryti tą pašto dėžutę.",
         "send": "Atsiųskite man vienkartinę nuorodą",
         "sending": "Siunčiama…",
         "sent": "Išsiuntėme vienkartinę nuorodą adresu {email}. Atidarykite ją šiame įrenginyje, kad užbaigtumėte.",
@@ -14462,7 +14462,7 @@
       "navCalendar": "Kalendorius",
       "navProfile": "Profilis",
       "clarifyWorkLog": "Kurią dieną ir kiek laiko dirbote? Parašykite, pvz.: „Šiandien nuo 8 iki 17, 30 min pertrauka, montavau langus“.",
-      "calendarHint": "Jūsų planą rasite skirtuke „Kalendorius“. Čia galiu padėti įrašyti darbo laiką arba peržiūrėti pasiūlymus.",
+      "calendarHint": "Jūsų planą rasite skirtuke „Kalendorius“.",
       "messagesHint": "Štai jūsų žinutės — atsidaro žemiau esančia nuoroda.",
       "reminderBlocked": "Kol kas negaliu siųsti priminimų — tokio mechanizmo dar nėra, todėl nesukursiu netikro priminimo. Kai bus įjungtas, pridėsiu.",
       "switchContextPersonal": "asmeninė erdvė",
@@ -14718,6 +14718,34 @@
       "findWorkInCompanyContext": "Darbo paieška yra jūsų asmeninis veiksmas — įmonės erdvėje jos nevykdau. Persijunkite į asmeninę erdvę ir paklauskite dar kartą.",
       "findWorkInCompanyWhy": "Darbo ieško žmogus, ne įmonė — atsakau iš jūsų asmeninės erdvės.",
       "personalOnlyInCompany": "Tai jūsų asmeninis veiksmas — įmonės erdvėje jo nevykdau. Persijunkite į asmeninę erdvę ir tęskite ten.",
+      "needsOrganization": "Tai atliekama organizacijai, o nė viena jūsų erdvė to dar negali.",
+      "readFailed": "Dabar to nuskaityti nepavyko — klaida mūsų pusėje. Niekas nepakeista. Pabandykite po akimirkos.",
+      "taskStatusAsk": "Kokią būseną nustatyti užduočiai: pradėta, atlikta ar užblokuota?",
+      "stageStatusAsk": "Kokią būseną nustatyti etapui: pradėtas, atliktas ar užblokuotas?",
+      "chipStatusStarted": "Pradėta",
+      "chipStatusDone": "Atlikta",
+      "chipStatusBlocked": "Užblokuota",
+      "professionAsk": "Kurią profesiją ar amatą turite omenyje?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Jūsų CV yra asmeninėje erdvėje, ne organizacijos.",
+          "journal": "Jūsų darbo žurnalas yra asmeninėje erdvėje.",
+          "profile": "Jūsų profilis yra asmeninėje erdvėje.",
+          "calendar": "Jūsų kalendorius yra asmeninėje erdvėje."
+        },
+        "open": {
+          "cv": "Persijungti ir atidaryti mano CV",
+          "journal": "Persijungti ir atidaryti mano žurnalą",
+          "profile": "Persijungti ir atidaryti mano profilį",
+          "calendar": "Persijungti ir atidaryti mano kalendorių"
+        },
+        "askWhoseCv": "Jūsų CV ar kandidato?",
+        "organizationHistory": "Organizacijos įrašas yra jos darbų istorija.",
+        "openOrganizationHistory": "Atidaryti organizacijos istoriją",
+        "organization": "Tai atliekama organizacijos erdvėje: {name}.",
+        "switchTo": "Persijungti į {name} ir tęsti",
+        "whichOrganization": "Tai atliekama organizacijos erdvėje. Kurioje?"
+      },
       "newJobsIntro": "Naujų skelbimų pagal jūsų nuostatas: {count}.",
       "newJobsAll": "Visos galimybės",
       "newJobsNone": "Per paskutines dienas naujų skelbimų pagal jūsų nuostatas neatsirado. Visas galimybes rasite galimybių puslapyje.",
@@ -15977,7 +16005,7 @@
       "lasting": "Jūsų patirtis ir galimybės išlieka pasiekiamos nuolat — keičiant darbą, projektą ar šalį."
     },
     "v3": {
-      "lead": "Darbuotojams, darbdaviams ir paslaugų teikėjams – visų profesijų ir sektorių. Registracija ir pagrindinis poreikio skelbimas nemokami.",
+      "lead": "Registracija ir pagrindinis poreikio skelbimas nemokami.",
       "or": "arba aprašykite savo žodžiais",
       "needFree": "Užklausą galite pateikti be registracijos. Pateikimas nemokamas; paslaugų sąlygos ir kaina derinamos atskirai.",
       "market": {
@@ -18919,7 +18947,8 @@
       "heading": "Pakvietimai į organizacijas",
       "explainer": "Jums adresuoti valdymo pakvietimai. Priėmus organizacija atsiras erdvių perjungiklyje.",
       "accept": "Priimti",
-      "decline": "Atmesti"
+      "decline": "Atmesti",
+      "invitedBy": "Kvietė: {name}"
     },
     "members": {
       "heading": "Organizacijos nariai",
@@ -19380,7 +19409,11 @@
         "open": "Atverti {name} darbo erdvę",
         "opening": "Atveriama…",
         "error": "Darbo erdvės atverti nepavyko."
-      }
+      },
+      "structure": "Ankstesnis darbas atliktas per {names}.",
+      "structureLater": ", vėliau ",
+      "structureForClient": "Ankstesnis darbas atliktas per {names} užsakovui {client}.",
+      "structureAsSubcontractor": "Subrangovas: {names} → užsakovas {client}."
     },
     "projects": {
       "title": "Projektai platformoje",
@@ -19411,7 +19444,8 @@
       "title": "Užsakovai",
       "unnamed": "Užsakovo organizacija",
       "records": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
-    }
+    },
+    "descriptionNotInSource": "Darbo aprašymo šaltinyje nėra"
   },
   "workPlan": {
     "title": "Suplanuotas darbas",
@@ -19645,6 +19679,14 @@
     "noDemand": "Šiuo metu nėra atviros paklausos, kuriai galima siūlyti.",
     "demandLabel": "Paklausa",
     "demandPlaceholder": "Pasirinkite paklausą",
+    "need": {
+      "people": "Žmonių",
+      "start": "Pradžia",
+      "duration": "Trukmė",
+      "language": "Kalba",
+      "skills": "Įgūdžiai",
+      "tools": "Įrankiai"
+    },
     "alreadyOffered": "jau pasiūlyta",
     "noteLabel": "Pastaba įmonei (nebūtina)",
     "notePlaceholder": "Pavyzdžiui: 3 žmonių brigada, galime pradėti po dviejų savaičių",
