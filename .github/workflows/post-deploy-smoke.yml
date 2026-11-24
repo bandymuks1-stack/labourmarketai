@@ -177,7 +177,7 @@ jobs:
     needs: smoke
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 30
     environment: production-qa
     # Its own queue. It does not take the walk's lock (`prod-qa-walk`): GitHub keeps one
     # waiting run per group, so sharing it could push a waiting walk out. It only reads,
@@ -187,6 +187,7 @@ jobs:
       cancel-in-progress: false
     outputs:
       window: ${{ steps.after.outputs.window }}
+      brake: ${{ steps.brake.outputs.brake }}
     permissions:
       contents: read
       actions: read # the deploy brake reads deploy-vps.yml runs
@@ -220,22 +221,33 @@ jobs:
       - name: Install Playwright chromium
         run: pnpm -F web exec playwright install --with-deps chromium
 
-      # The walk's own brakes, right before anything signs in. The deploy brake wants
-      # five quiet minutes after a deploy; it is asked again for up to eight minutes.
-      - name: "Brake: no production deploy running or just finished"
+      # The walk's own brakes, right before anything signs in, unchanged: the deploy brake
+      # wants five quiet minutes after a deploy, the health brake three healthy samples
+      # in a row. Right after a deploy the first health sample can still be slow, so
+      # both are asked again together, every 30 s for about ten minutes (14 tries). A brake that
+      # still refuses means the journeys did NOT run: the job records `brake=refused`
+      # and goes red, and the report job never reads that as a regression.
+      - name: "Brakes: no deploy running or just finished, production healthy"
+        id: brake
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          set -euo pipefail
-          for i in $(seq 1 16); do
-            if node .github/scripts/walk-brakes.mjs deploy; then exit 0; fi
-            sleep 30
+          set -uo pipefail
+          for i in $(seq 1 14); do
+            if node .github/scripts/walk-brakes.mjs deploy && node .github/scripts/walk-brakes.mjs health; then
+              echo "brake=clear" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            [ "$i" -lt 14 ] && sleep 30
           done
-          echo "::error::a production deploy was running or had just finished for eight minutes: the signed-in smoke did not start"
-          exit 1
+          echo "brake=refused" >> "$GITHUB_OUTPUT"
 
-      - name: "Brake: production health"
-        run: node .github/scripts/walk-brakes.mjs health
+      - name: "Brake refused: the signed-in smoke did NOT run"
+        if: steps.brake.outputs.brake != 'clear'
+        run: |
+          echo "**The walk brakes refused for ten minutes: the signed-in smoke did NOT run on build \`${{ needs.smoke.outputs.build }}\`. Not a regression; dispatch this workflow again.**" >> "$GITHUB_STEP_SUMMARY"
+          echo "::error::the walk brakes refused for ten minutes: the signed-in smoke did not run"
+          exit 1
 
       # Sessions for two existing synthetic accounts only. No provisioning step, and
       # PROD_QA_MINT_EXISTING_ONLY makes the mint look the account up first and refuse
@@ -327,6 +339,7 @@ jobs:
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SMOKE_WINDOW: ${{ needs.smoke.outputs.window }}
           SIGNED_IN_WINDOW: ${{ needs.signed-in.outputs.window }}
+          SIGNED_IN_BRAKE: ${{ needs.signed-in.outputs.brake }}
         id: report
         run: bash .github/scripts/post-deploy-regression-issue.sh
 

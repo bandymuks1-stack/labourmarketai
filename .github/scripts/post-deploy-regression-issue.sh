@@ -14,13 +14,19 @@
 #
 #   - production moved to another build during the run (SMOKE_WINDOW or
 #     SIGNED_IN_WINDOW = changed): the run proves nothing about either build,
-#     so the issue is left exactly as it is.
+#     so the issue is left exactly as it is;
+#   - the walk brakes refused (SIGNED_IN_BRAKE = refused): the signed-in
+#     journeys did NOT run. That is not a failure. With a green public half
+#     the issue is left exactly as it is (no regression claimed, nothing
+#     closed); with a red public half the issue names the public failure and
+#     says the signed-in half did not run.
 #
 # The baseline is the BUILD a green run verified, kept as that run's
 # `verified-build` artifact. A run's own head SHA is the newest main commit
 # when it started (workflow_run), not what it tested (Codex review on #3271).
 #
 # Inputs (env): SMOKE, SIGNED_IN (job results), SMOKE_WINDOW, SIGNED_IN_WINDOW,
+# SIGNED_IN_BRAKE (clear | refused),
 # BUILD, DEPLOY_SHA, RUN_URL, GH_TOKEN. Test hooks: REGRESSION_ISSUE_DRY_RUN=1
 # prints the issue body instead of calling GitHub, and LAST_GREEN_SHA stands in
 # for the artifact lookup (lib/guards/post-deploy-regression-issue.test.ts).
@@ -36,6 +42,16 @@ if [ "${SMOKE_WINDOW:-}" = "changed" ] || [ "${SIGNED_IN_WINDOW:-}" = "changed" 
   echo "WINDOW CHANGED: production moved to another build during the smoke; the regression issue is left unchanged."
   say "green=false"
   exit 0
+fi
+
+# A refused brake is NOT RUN, never a failure and never a pass.
+if [ "${SIGNED_IN_BRAKE:-}" = "refused" ]; then
+  SIGNED_IN="not run (the walk brakes refused)"
+  if [ "${SMOKE:-}" = "success" ]; then
+    echo "NOT RUN: the walk brakes refused, so the signed-in smoke did not run; the regression issue is left unchanged."
+    say "green=false"
+    exit 0
+  fi
 fi
 
 green=false

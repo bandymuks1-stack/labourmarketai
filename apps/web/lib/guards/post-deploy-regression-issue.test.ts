@@ -51,6 +51,62 @@ describe("the report job", () => {
   });
 });
 
+describe("a refused walk brake is NOT RUN, never a failure (run 45374185126, issue #3760)", () => {
+  const signedIn = wf.slice(wf.indexOf("\n  signed-in:"), wf.indexOf("\n  report:"));
+
+  it("the brakes keep their thresholds, are asked again for a bounded time, and record the outcome", () => {
+    expect(signedIn).toMatch(/id: brake\n/);
+    expect(signedIn).toMatch(/for i in \$\(seq 1 14\); do\n\s+if node \.github\/scripts\/walk-brakes\.mjs deploy && node \.github\/scripts\/walk-brakes\.mjs health; then/);
+    expect(signedIn).toMatch(/echo "brake=clear" >> "\$GITHUB_OUTPUT"/);
+    expect(signedIn).toMatch(/echo "brake=refused" >> "\$GITHUB_OUTPUT"/);
+    expect(signedIn).toMatch(/brake: \$\{\{ steps\.brake\.outputs\.brake \}\}/);
+    expect(signedIn).not.toMatch(/HEALTH_URL|healthDbMs|deployQuietMinutes/);
+    expect(report).toContain("SIGNED_IN_BRAKE: ${{ needs.signed-in.outputs.brake }}");
+  });
+
+  it("a refused brake makes the job red and the journeys never start, so it is never silently green", () => {
+    expect(signedIn).toMatch(/if: steps\.brake\.outputs\.brake != 'clear'\n\s+run: \|\n[\s\S]*?did NOT run[\s\S]*?exit 1\n/);
+    const refusedAt = signedIn.indexOf("Brake refused");
+    expect(refusedAt).toBeGreaterThan(-1);
+    expect(refusedAt).toBeLessThan(signedIn.indexOf("Mint two synthetic sessions"));
+  });
+
+  function run(env: Record<string, string>): string {
+    const dir = mkdtempSync(join(tmpdir(), "regression-brake-"));
+    try {
+      execFileSync("git", ["-C", dir, "init", "-q"]);
+      return execFileSync("bash", [SCRIPT], {
+        cwd: dir,
+        encoding: "utf8",
+        env: { ...process.env, REGRESSION_ISSUE_DRY_RUN: "1", LAST_GREEN_SHA: "", DEPLOY_SHA: "e630dd20aaaa", RUN_URL: "x", GITHUB_OUTPUT: join(dir, "out"), ...env },
+      }) + readFileSync(join(dir, "out"), "utf8");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("refused with a green public half: no issue, nothing closed, not green", () => {
+    const out = run({ SMOKE: "success", SIGNED_IN: "failure", SIGNED_IN_BRAKE: "refused" });
+    expect(out).toContain("NOT RUN");
+    expect(out).toContain("green=false");
+    expect(out).not.toContain("Pull requests merged");
+    expect(out).not.toContain("GREEN ");
+  });
+
+  it("refused with a red public half: the issue names the public failure and says signed-in did not run", () => {
+    const out = run({ SMOKE: "failure", SIGNED_IN: "failure", SIGNED_IN_BRAKE: "refused" });
+    expect(out).toContain("public `failure` · signed-in `not run (the walk brakes refused)`");
+    expect(out).toContain("Pull requests merged");
+  });
+
+  it("a real signed-in failure after a clear brake still opens the issue", () => {
+    const out = run({ SMOKE: "success", SIGNED_IN: "failure", SIGNED_IN_BRAKE: "clear" });
+    expect(out).toContain("public `success` · signed-in `failure`");
+    expect(out).toContain("Pull requests merged");
+    expect(out).toContain("green=false");
+  });
+});
+
 describe("the issue body lists the pull requests merged since the last green smoke", () => {
   function git(dir: string, ...args: string[]): string {
     return execFileSync("git", ["-C", dir, ...args], { encoding: "utf8" }).trim();
