@@ -39,7 +39,7 @@ let serviceId = "";
 
 test("M-1. the seller lists a handmade shelf and publishes it", async ({ browser }) => {
   const { page, close } = await as(browser, "worker");
-  await page.goto("/lt/dashboard/listings");
+  await page.goto("/lt/dashboard/listings?tab=mine");
   await expect(page.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
   await page.getByTestId("listing-add").click();
   await page.getByTestId("listing-form-domain").selectOption("goods");
@@ -189,7 +189,7 @@ test("M-6. the provider accepts; both sides can open the conversation", async ({
 // plus earlier runs' services and a check that this run left nothing public.
 
 async function closeListing(page: Page, id: string): Promise<void> {
-  await page.goto("/lt/dashboard/listings");
+  await page.goto("/lt/dashboard/listings?tab=mine");
   // Scoped to <main>: the page streams in through a hidden `<div id="S:n">`
   // that a never-painting headless tab keeps outside <main> beside the
   // rendered copy, and an unscoped testid fails strict mode.
@@ -210,7 +210,7 @@ async function closeListing(page: Page, id: string): Promise<void> {
  * many it closed.
  */
 async function closeEarlierListings(page: Page): Promise<number> {
-  await page.goto("/lt/dashboard/listings");
+  await page.goto("/lt/dashboard/listings?tab=mine");
   const main = page.getByRole("main");
   await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
   const open = main
@@ -266,7 +266,7 @@ async function pauseEarlierServices(page: Page): Promise<number> {
 /** The run's own check: nothing titled with this run's id is still public. */
 async function runLeftNothing(page: Page): Promise<string> {
   const mine = new RegExp(`QA-SYNTHETIC ${RUN} `);
-  await page.goto("/lt/dashboard/listings");
+  await page.goto("/lt/dashboard/listings?tab=mine");
   let main = page.getByRole("main");
   await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
   const listings = await main
