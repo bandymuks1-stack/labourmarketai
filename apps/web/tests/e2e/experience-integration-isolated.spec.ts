@@ -17,6 +17,7 @@ import {
   signIn,
   signUp,
   sql,
+  sqlExec,
   stackMailLink,
   userId,
 } from "./isolated-web-a-helpers";
@@ -729,6 +730,13 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
 // ── EX-5 ────────────────────────────────────────────────────────────────────
 
 test("EX-5. screenshots at 375 and 1440: O's CV, W2's CV, company A's history and one place's detail", async ({ browser }) => {
+  // P0 2026-11-24 (Living CV run 45401396990): a long project title widened the
+  // company history's single-column grid past a 375 px screen. One synthetic
+  // project with a long unbroken title and city keeps that case in the
+  // no-sideways-scrolling check below; nothing above counts projects.
+  sqlExec(`insert into public.projects (organization_id, title, city)
+           values (${lit(s.orgA)}, ${lit(`QA-SYNTHETIC-${"a-very-long-unbroken-project-title-".repeat(4)}${RUN}`)},
+                   ${lit(`QA-SYNTHETIC-${"long-city-name-".repeat(6)}`)})`);
   mkdirSync(OUT, { recursive: true });
   const place = encodeURIComponent(`l:QA-SYNTHETIC history r1 ${RUN}`);
   const shots: { who: string; key: string; path: string; themes: readonly ("light" | "dark")[] }[] = [
