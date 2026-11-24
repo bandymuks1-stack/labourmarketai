@@ -136,3 +136,7 @@ play-service-account*.json
 google-play-*.json
 /apps/mobile/credentials/
 /apps/mobile/credentials.json
+
+# Graphify local knowledge graph (AGENTS.md § Project knowledge graph)
+graphify-out/
+.graphify-venv/
