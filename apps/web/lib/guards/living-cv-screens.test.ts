@@ -133,6 +133,24 @@ describe("the workflow publishes only ciphertext", () => {
     expect(result.slice(0, result.indexOf("\n      - "))).not.toMatch(/lcv|\.png|\.enc/);
   });
 
+  it("runs only as a one-shot pair, never as a plan pair that re-runs after a deploy", () => {
+    const tick = read("../../.github/workflows/launch-readiness-walks.yml");
+    const plan = tick.slice(tick.indexOf('PLAN="'), tick.indexOf('"', tick.indexOf('PLAN="') + 6));
+    expect(plan).not.toMatch(/living-cv-screens/);
+    expect(tick).toMatch(/ONE-SHOT pairs/);
+    expect(tick).toMatch(/settled by ONE run after ONCE_START that reached production/);
+    // The plan cap never blocks the one-shot pair, and the pair is not counted as a plan walk.
+    expect(tick.indexOf("One-shot pairs first")).toBeLessThan(tick.indexOf("today's cap reached"));
+  });
+
+  it("the account is created only by the owner's provisioning workflow, never by a walk", () => {
+    const prov = read("../../.github/workflows/prod-qa-fresh-provision.yml");
+    expect(prov).toMatch(/OWNER-DISPATCH ONLY/);
+    expect(prov).toMatch(/- livingcv\n/);
+    expect(prov).toMatch(/targets="qa\.livingcv\+read1@labourmarket\.ai"/);
+    expect(workflow).toMatch(/mint_existing "qa\.livingcv\+read1@labourmarket\.ai" livingcv/);
+  });
+
   it("only a public key is committed", () => {
     expect(key).toMatch(/^-----BEGIN PUBLIC KEY-----\n[A-Za-z0-9+/=\n]+-----END PUBLIC KEY-----\n?$/);
     expect(key).not.toMatch(/PRIVATE/);
