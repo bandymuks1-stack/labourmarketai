@@ -676,7 +676,9 @@ jobs:
             const listed = new Set(m.screens.filter((s) => s.privacy === "PASS" && s.file).map((s) => s.file));
             const pngs = fs.readdirSync(dir).filter((f) => f.endsWith(".png"));
             const stray = pngs.filter((f) => !listed.has(f));
-            if (m.screens.length !== 12 || stray.length > 0) { console.error(`screens=${m.screens.length} stray=${stray.length}`); process.exit(1); }
+            // 6 organization screens, or 12 with the worker's own CV (disabled by default).
+            const ok = (m.expected === 6 || m.expected === 12) && m.screens.length === m.expected;
+            if (!ok || stray.length > 0) { console.error(`screens=${m.screens.length} expected=${m.expected} stray=${stray.length}`); process.exit(1); }
             const pass = m.screens.filter((s) => s.status === "PASS").length;
             console.log(`images=${pngs.length} pass=${pass} fail=${m.screens.length - pass}`);
           ' "$LCV_DIR" >> "$GITHUB_STEP_SUMMARY"

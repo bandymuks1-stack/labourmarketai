@@ -70,8 +70,9 @@ const STATE = resolve(__dirname, `.storage-state.prod-qa.${SLOT}.json`);
 /**
  * The WORKER whose own Living CV (`/cv`) is photographed: a minted synthetic session slot, chosen by
  * the owner (repository variable PROD_QA_LCV_WORKER_SLOT; the owner is deciding whose CV). A real
- * person's /cv would need that person's own session, which a walk never mints. Unset: the two
- * worker screens are recorded FAIL "no worker account chosen", and the organization screens run.
+ * person's /cv would need that person's own session, which a walk never mints. DISABLED BY DEFAULT
+ * (owner 2026-11-24: the owner's own /cv is opened by the owner, never walked): unset, the walk
+ * takes the organization screens only, six in all.
  */
 const WORKER_SLOT = /^[a-z0-9-]{1,24}$/.test(process.env.PROD_QA_LCV_WORKER_SLOT ?? "") ? process.env.PROD_QA_LCV_WORKER_SLOT! : "";
 const WORKER_STATE = WORKER_SLOT ? resolve(__dirname, `.storage-state.prod-qa.${WORKER_SLOT}.json`) : "";
@@ -379,9 +380,11 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
   for (const vp of VIEWPORTS) {
     const fit = "fit" in vp;
     // The worker's own Living CV, through the worker's own session.
-    if (!WORKER_STATE || !existsSync(WORKER_STATE)) {
+    if (!WORKER_SLOT) {
+      // Disabled by default: no worker screens at all, and nothing recorded for them.
+    } else if (!existsSync(WORKER_STATE)) {
       for (const screen of [SCREENS[0], SCREENS[1]]) {
-        results.push({ screen, viewport: vp.key, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: ["not generated: no worker account chosen (owner decision pending)"] });
+        results.push({ screen, viewport: vp.key, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: ["not generated: the chosen worker session was not minted"] });
       }
     } else {
       const wctx = await context(browser, vp.options, WORKER_STATE);
@@ -423,7 +426,9 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
 
   // 3. The manifest: every screen with PASS or FAIL and its reason. It names no person and no
   //    organization, and it is encrypted together with the images.
-  writeFileSync(join(OUT, "manifest.json"), JSON.stringify({ screens: results }, null, 2), { mode: 0o600 });
+  // `expected`: 6 organization screens, or 12 with the worker's own CV.
+  const expected = VIEWPORTS.length * (WORKER_SLOT ? 4 : 2);
+  writeFileSync(join(OUT, "manifest.json"), JSON.stringify({ expected, screens: results }, null, 2), { mode: 0o600 });
   const failed = results.filter((r) => r.status === "FAIL");
   if (failed.length > 0) {
     throw new Error(`living-cv-screens: ${failed.length} of ${results.length} screens FAIL: ${failed.map((r) => `${r.screen}-${r.viewport}`).join(", ")} (reasons in the encrypted manifest)`);
