@@ -30,6 +30,7 @@ export async function BusinessHistoryOverview({
   organizationName,
   identity,
   clients = [],
+  performedAsSubcontractor = false,
   locale,
 }: {
   readonly business: BusinessHistory | null;
@@ -40,6 +41,8 @@ export async function BusinessHistoryOverview({
   /** The clients this organization's OWN records name (`client` parties,
    *  decision 0033: its direct counterparty only). */
   readonly clients?: readonly { readonly name: string | null }[];
+  /** Its own records name it as `subcontractor` (never inferred from a client party). */
+  readonly performedAsSubcontractor?: boolean;
   readonly locale: string;
 }) {
   const t = await getTranslations("companyWorkHistory.business");
@@ -83,10 +86,14 @@ export async function BusinessHistoryOverview({
   const structure =
     entityNames.length > 0
       ? [
-          // The relation is read from the records' own client party, never
-          // assumed: one named direct client → "subcontractor → client".
+          // Read from the records, never assumed: one named direct client →
+          // "for client"; "subcontractor" only when the records name this
+          // organization as subcontractor (a client party alone does not).
           clients.length === 1 && clients[0]!.name
-            ? t("structureForClient", { names: entityNames.join(t("structureLater")), client: clients[0]!.name })
+            ? t(performedAsSubcontractor ? "structureAsSubcontractor" : "structureForClient", {
+                names: entityNames.join(t("structureLater")),
+                client: clients[0]!.name,
+              })
             : t("structure", { names: entityNames.join(t("structureLater")) }),
           ...asserted.map((x) => t(`relation.${x}`)),
         ].join(" ")

@@ -19383,7 +19383,8 @@
       },
       "structure": "Tidigare arbete utfördes genom {names}.",
       "structureLater": ", senare ",
-      "structureForClient": "Underleverantör: {names} → beställare {client}."
+      "structureForClient": "Tidigare arbete genom {names} för beställaren {client}.",
+      "structureAsSubcontractor": "Underleverantör: {names} → beställare {client}."
     },
     "projects": {
       "title": "Projekt på plattformen",

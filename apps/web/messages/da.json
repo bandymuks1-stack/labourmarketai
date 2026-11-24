@@ -7223,7 +7223,8 @@
       },
       "structure": "Tidligere arbejde blev udført gennem {names}.",
       "structureLater": ", senere ",
-      "structureForClient": "Underleverandør: {names} → ordregiver {client}."
+      "structureForClient": "Tidligere arbejde gennem {names} for ordregiveren {client}.",
+      "structureAsSubcontractor": "Underleverandør: {names} → ordregiver {client}."
     },
     "descriptionNotInSource": "Ingen arbejdsbeskrivelse i kilden"
   },

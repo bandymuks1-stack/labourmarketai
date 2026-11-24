@@ -19383,7 +19383,8 @@
       },
       "structure": "Ankstesnis darbas atliktas per {names}.",
       "structureLater": ", vėliau ",
-      "structureForClient": "Subrangovas: {names} → užsakovas {client}."
+      "structureForClient": "Ankstesnis darbas atliktas per {names} užsakovui {client}.",
+      "structureAsSubcontractor": "Subrangovas: {names} → užsakovas {client}."
     },
     "projects": {
       "title": "Projektai platformoje",

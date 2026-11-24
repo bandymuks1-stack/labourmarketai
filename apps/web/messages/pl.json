@@ -19383,7 +19383,8 @@
       },
       "structure": "Wcześniejsza praca była wykonywana w ramach {names}.",
       "structureLater": ", później ",
-      "structureForClient": "Podwykonawca: {names} → zleceniodawca {client}."
+      "structureForClient": "Wcześniejsza praca w ramach {names} dla zleceniodawcy {client}.",
+      "structureAsSubcontractor": "Podwykonawca: {names} → zleceniodawca {client}."
     },
     "projects": {
       "title": "Projekty na platformie",

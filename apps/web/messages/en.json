@@ -19383,7 +19383,8 @@
       },
       "structure": "Earlier work was done under {names}.",
       "structureLater": ", later ",
-      "structureForClient": "Subcontractor: {names} → client {client}."
+      "structureForClient": "Earlier work under {names}, for client {client}.",
+      "structureAsSubcontractor": "Subcontractor: {names} → client {client}."
     },
     "projects": {
       "title": "Projects on the platform",

@@ -19383,7 +19383,8 @@
       },
       "structure": "Eerder werk werd uitgevoerd onder {names}.",
       "structureLater": ", daarna ",
-      "structureForClient": "Onderaannemer: {names} → opdrachtgever {client}."
+      "structureForClient": "Eerder werk onder {names} voor opdrachtgever {client}.",
+      "structureAsSubcontractor": "Onderaannemer: {names} → opdrachtgever {client}."
     },
     "projects": {
       "title": "Projecten op het platform",

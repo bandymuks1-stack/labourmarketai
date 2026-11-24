@@ -19,6 +19,7 @@ const SRC = (p: string) => readFileSync(join(ROOT, "apps/web", p), "utf8");
 const OVERVIEW = SRC("components/app/organization/business-history-overview.tsx");
 const HISTORY = SRC("components/app/organization/company-work-history.tsx");
 const PROJECT_HISTORY = SRC("components/app/project-historical-work.tsx");
+const READ = SRC("lib/organization-evidence/company-work-history-read.ts");
 const LOCALES = ["en", "lt", "pl", "de", "ru", "lv", "et", "sv", "no", "da", "nl"] as const;
 
 function statement(over: Partial<HistoryPeriodStatement> & Pick<HistoryPeriodStatement, "id">): HistoryPeriodStatement {
@@ -96,6 +97,7 @@ describe("2. no importer English in the UI", () => {
       expect(m.business?.structure, l).toMatch(/\{names\}/);
       expect(typeof m.business?.structureLater, l).toBe("string");
       expect(m.business?.structureForClient, l).toMatch(/\{names\}[\s\S]*\{client\}/);
+      expect(m.business?.structureAsSubcontractor, l).toMatch(/\{names\}[\s\S]*\{client\}/);
       expect(m.business?.title, `${l}: business block present`).toBeTruthy();
       if (l !== "en") expect(m.descriptionNotInSource, l).not.toBe("No work description in the source");
     }
@@ -216,9 +218,15 @@ describe("5. one short statement of the structure, never a legal line per card",
     expect(buildBusinessHistory([], [VIVAT_B, same]).periods).toHaveLength(2);
   });
 
-  it("the subcontractor → client line comes from the records' own client party, only when there is one", () => {
-    expect(OVERVIEW).toMatch(/clients\.length === 1 && clients\[0\]!\.name\s*\?\s*t\("structureForClient"/);
+  it("the client line comes from the records' own client party; 'subcontractor' only from a subcontractor party (R3 P2)", () => {
+    expect(OVERVIEW).toMatch(
+      /clients\.length === 1 && clients\[0\]!\.name\s*\?\s*t\(performedAsSubcontractor \? "structureAsSubcontractor" : "structureForClient"/,
+    );
     expect(HISTORY).toMatch(/clients=\{load\.clients\}/);
+    expect(HISTORY).toMatch(/performedAsSubcontractor=\{load\.performedAsSubcontractor\}/);
+    expect(READ).toMatch(/p\.role === "subcontractor" && p\.organizationId === org\.organizationId/);
+    const en = JSON.parse(SRC("messages/en.json")).companyWorkHistory.business;
+    expect(en.structureForClient).not.toMatch(/subcontract/i);
   });
 
   it("the overview prints the relation once at most, and never per card or per header row", () => {

@@ -7223,7 +7223,8 @@
       },
       "structure": "Iepriekšējais darbs tika veikts ar {names}.",
       "structureLater": ", vēlāk ",
-      "structureForClient": "Apakšuzņēmējs: {names} → pasūtītājs {client}."
+      "structureForClient": "Iepriekšējais darbs, ko veica {names} pasūtītājam {client}.",
+      "structureAsSubcontractor": "Apakšuzņēmējs: {names} → pasūtītājs {client}."
     },
     "descriptionNotInSource": "Avotā nav darba apraksta"
   },

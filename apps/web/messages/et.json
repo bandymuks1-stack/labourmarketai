@@ -7223,7 +7223,8 @@
       },
       "structure": "Varasem töö tehti juriidilise isiku {names} all.",
       "structureLater": ", hiljem ",
-      "structureForClient": "Alltöövõtja: {names} → tellija {client}."
+      "structureForClient": "Varasem töö {names} kaudu tellijale {client}.",
+      "structureAsSubcontractor": "Alltöövõtja: {names} → tellija {client}."
     },
     "descriptionNotInSource": "Allikas puudub töö kirjeldus"
   },

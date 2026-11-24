@@ -19383,7 +19383,8 @@
       },
       "structure": "Ранее работа выполнялась через {names}.",
       "structureLater": ", позже ",
-      "structureForClient": "Субподрядчик: {names} → заказчик {client}."
+      "structureForClient": "Ранее работа выполнялась через {names} для заказчика {client}.",
+      "structureAsSubcontractor": "Субподрядчик: {names} → заказчик {client}."
     },
     "projects": {
       "title": "Проекты на платформе",
