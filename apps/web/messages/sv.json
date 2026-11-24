@@ -18939,7 +18939,8 @@
       "heading": "Inbjudningar från organisationer",
       "explainer": "Ledningsinbjudningar riktade till dig. När du accepterar visas organisationen i din arbetsyteväljare.",
       "accept": "Acceptera",
-      "decline": "Avböj"
+      "decline": "Avböj",
+      "invitedBy": "Inbjuden av {name}"
     },
     "members": {
       "heading": "Organisationens medlemmar",

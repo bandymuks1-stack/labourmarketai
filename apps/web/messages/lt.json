@@ -18939,7 +18939,8 @@
       "heading": "Pakvietimai į organizacijas",
       "explainer": "Jums adresuoti valdymo pakvietimai. Priėmus organizacija atsiras erdvių perjungiklyje.",
       "accept": "Priimti",
-      "decline": "Atmesti"
+      "decline": "Atmesti",
+      "invitedBy": "Kvietė: {name}"
     },
     "members": {
       "heading": "Organizacijos nariai",

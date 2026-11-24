@@ -7013,7 +7013,8 @@
       "heading": "Organizāciju uzaicinājumi",
       "explainer": "Jums adresētie pārvaldības uzaicinājumi. Pēc pieņemšanas organizācija parādīsies darbvietu pārslēgā.",
       "accept": "Pieņemt",
-      "decline": "Noraidīt"
+      "decline": "Noraidīt",
+      "invitedBy": "Uzaicināja: {name}"
     },
     "members": {
       "heading": "Organizācijas dalībnieki",

@@ -18939,7 +18939,8 @@
       "heading": "Einladungen von Organisationen",
       "explainer": "An Sie gerichtete Einladungen in die Leitung. Nach der Annahme erscheint die Organisation in Ihrer Bereichsauswahl.",
       "accept": "Annehmen",
-      "decline": "Ablehnen"
+      "decline": "Ablehnen",
+      "invitedBy": "Eingeladen von {name}"
     },
     "members": {
       "heading": "Mitglieder der Organisation",
