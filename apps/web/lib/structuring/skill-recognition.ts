@@ -242,6 +242,73 @@ export function isWarehousePlaceOnlyContext(
   return otherTrade && !WAREHOUSE_WORK_RE.test(foldedText);
 }
 
+/**
+ * SHORT TERMS ARE WHOLE WORDS (owner P0 2026-11-24, historical person card).
+ * The matcher looks for a term ANYWHERE in the text, which is right for
+ * stems ("suvirin…", "plytel…") and wrong for two- and three-letter
+ * abbreviations: the welding synonym "tig" sits inside Dutch "bevestiging"
+ * (fastening), "vochtig" (damp), "voorzichtig" (careful), "regelmatige",
+ * "handmatige" — production stored 70+ "welding" signals from Dutch
+ * construction timesheets that way. A SYNONYM of this length (an
+ * abbreviation: "tig", "mig") matches only as a whole word. Short EXACT stems
+ * ("daz…" for dažiau) are deliberate prefixes and keep matching inside words.
+ */
+const WHOLE_WORD_MAX_LEN = 3;
+
+/**
+ * A KITCHEN NAMED ON CONSTRUCTION WORK IS THE ROOM, NOT COOKING (owner P0
+ * 2026-11-24, decision 0023: fix the wrong label, never disable inference).
+ * "Dirbau virtuvėje" stays cooking — the owner's mandatory phrase lists pin it
+ * for hospitality. But production showed "Maisto gaminimas" on almost every
+ * place card of a Dutch construction worker: "keuken" ×53 and its compounds
+ * (keukenkasten, keukenvloer, keukenmontage…) are the room being tiled, fitted
+ * or plastered. A cooking reading whose ONLY evidence is a kitchen place word
+ * is dropped when another, non-hospitality trade explains the text, or when the
+ * kitchen word is fused with a building element ("keukenvloer"). Cooking said
+ * as an act or a role ("kookte", "als kok", "gaminau maistą", "повар") always
+ * stays.
+ */
+const KITCHEN_PLACE_TERMS: ReadonlySet<string> = new Set(
+  [
+    "keuken",
+    "kitchen",
+    "кухн",
+    "virtuv",
+    "w kuchni",
+    "in der kuche",
+    "in der küche",
+    "i køkkenet",
+    "på kjøkkenet",
+    "i köket",
+    "keittiössä",
+  ].map((t) => foldText(t).trim()),
+);
+const HOSPITALITY_SLUGS: ReadonlySet<string> = new Set([
+  "cooking",
+  "kitchen-help",
+  "dishwashing",
+  "waiting-tables",
+  "bartending",
+  "baking",
+  "food-preparation",
+  "catering",
+  "cleaning-services",
+]);
+/** A kitchen stem fused with a building element: the object of construction. */
+const KITCHEN_BUILDING_COMPOUND_RE =
+  /(keuken|kitchen|kuchn|virtuv)(kast|vloer|plafond|muur|wand|paneel|deur|montage|stopcontact|apparatuur|meubilair|blad|tegel|raam|unit|cabinet|floor|wall|ceiling|wiring|install|fit)/;
+
+export function isKitchenPlaceOnlyCooking(
+  foldedText: string,
+  cookingTerms: Iterable<string>,
+  firmSlugs: Iterable<string>,
+): boolean {
+  const terms = [...cookingTerms];
+  if (terms.length === 0 || !terms.every((t) => KITCHEN_PLACE_TERMS.has(t))) return false;
+  const otherTrade = [...firmSlugs].some((s) => !HOSPITALITY_SLUGS.has(s));
+  return otherTrade || KITCHEN_BUILDING_COMPOUND_RE.test(foldedText);
+}
+
 export function recognizeSkills(
   text: string,
   limit: number = RECOGNITION_LIMIT,
@@ -254,11 +321,16 @@ export function recognizeSkills(
   // best tier per slug
   const best = new Map<
     string,
-    { via: SkillMatchVia; len: number; matchedText: string }
+    { via: SkillMatchVia; len: number; matchedText: string; term?: string }
   >();
+  // Every exact/synonym term that matched, per slug — the kitchen guard below
+  // asks whether ANY of them is more than a place.
+  const matchedTerms = new Map<string, Set<string>>();
 
   for (const t of TERMS) {
     if (!folded.includes(t.term)) continue;
+    if (t.via === "synonym" && t.len <= WHOLE_WORD_MAX_LEN && !foldedTokens.includes(t.term)) continue;
+    (matchedTerms.get(t.slug) ?? matchedTerms.set(t.slug, new Set()).get(t.slug)!).add(t.term);
     const prior = best.get(t.slug);
     const better =
       !prior ||
@@ -266,7 +338,7 @@ export function recognizeSkills(
       (VIA_RANK[t.via] === VIA_RANK[prior.via] && t.len > prior.len);
     if (better) {
       const word = originalWordFor(originalTokens, foldedTokens, t.term);
-      best.set(t.slug, { via: t.via, len: t.len, matchedText: word ?? t.term });
+      best.set(t.slug, { via: t.via, len: t.len, matchedText: word ?? t.term, term: t.term });
     }
   }
 
@@ -295,6 +367,16 @@ export function recognizeSkills(
           break;
         }
       }
+    }
+  }
+
+  // Kitchen-place guard (see isKitchenPlaceOnlyCooking).
+  if (best.has("cooking")) {
+    const firmOthers = [...best.entries()]
+      .filter(([slug, b]) => slug !== "cooking" && b.via !== "fuzzy")
+      .map(([slug]) => slug);
+    if (isKitchenPlaceOnlyCooking(folded, matchedTerms.get("cooking") ?? [], firmOthers)) {
+      best.delete("cooking");
     }
   }
 

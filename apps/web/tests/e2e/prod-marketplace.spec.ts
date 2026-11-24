@@ -95,6 +95,11 @@ test("M-3. the buyer finds the shelf among goods and asks the seller in a thread
   await page.goto("/lt/dashboard/listings");
   await page.getByTestId("market-group-goods").click().catch(() => undefined);
   const card = page.getByTestId("market-browse-row").filter({ hasText: GOODS }).first();
+  // The list folds after its first rows (decision 0034): open the fold when the row is below it.
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  if (!(await card.isVisible().catch(() => false))) {
+    await page.getByTestId("market-browse-more").locator("summary").click().catch(() => undefined);
+  }
   await expect(card).toBeVisible({ timeout: 30_000 });
   await card.getByTestId(`listing-enquire-${listingId}`).click();
   await page.waitForURL(/\/dashboard\/communication\//, { timeout: 30_000 });
@@ -133,6 +138,11 @@ test("M-5. the buyer reaches the service from the market and requests it", async
   await page.goto("/lt/dashboard/listings");
   await page.getByTestId("market-group-services").click().catch(() => undefined);
   const card = page.getByTestId("market-browse-row").filter({ hasText: SERVICE }).first();
+  // The list folds after its first rows (decision 0034): open the fold when the row is below it.
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  if (!(await card.isVisible().catch(() => false))) {
+    await page.getByTestId("market-browse-more").locator("summary").click().catch(() => undefined);
+  }
   await expect(card).toBeVisible({ timeout: 30_000 });
   await card.getByRole("link").last().click();
   await page.waitForURL(/\/dashboard\/service-requests/, { timeout: 30_000 });

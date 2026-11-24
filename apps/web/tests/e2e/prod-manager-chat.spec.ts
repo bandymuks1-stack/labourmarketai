@@ -131,3 +131,19 @@ test("C-5. a brand-new session still has the manager's questions", async ({ brow
   await expect(block).toContainText("Kokia projektų būklė?", { timeout: 20_000 });
   await close();
 });
+
+/**
+ * C-6. A REQUEST FOR THE PERSON'S OWN SPACE (decision 0034 rule 3, owner P0
+ * 2026-11-24). Acting for the organization, "mano cv" was answered with the
+ * organization's generic menu ("Galiu padėti su …"). It must say the CV is in
+ * the personal space and offer ONE switch-and-open action. Read-only: the
+ * chip is checked, never clicked, so the QA account's workspace is unchanged.
+ */
+test("C-6. 'mano cv' and 'mano kalendorius' in the organization point to the personal space", async ({ browser }) => {
+  const { page, close } = await open(browser);
+  await ask(page, "mano cv", /Jūsų CV yra asmeninėje erdvėje/, /Galiu padėti su/);
+  await expect(page.locator('[data-testid="chat-chip-xs:cv"], [data-testid="chat-chip-link:/cv"]').last()).toBeVisible({ timeout: 20_000 });
+  await ask(page, "mano kalendorius", /Jūsų kalendorius yra asmeninėje erdvėje/, /Galiu padėti su/);
+  await expect(page.locator('[data-testid="chat-chip-xs:calendar"], [data-testid="chat-chip-link:/dashboard/planning"]').last()).toBeVisible({ timeout: 20_000 });
+  await close();
+});

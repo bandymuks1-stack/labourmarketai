@@ -22,7 +22,9 @@
  *
  * `split` is true when any record sits outside an `own` period: only then
  * does the header need to separate the figures. An organization whose every
- * record is its own keeps the one-total header.
+ * record is its own keeps the one-total header, and so does one with no
+ * period statement at all: its records are its own history (owner P0
+ * 2026-11-24, superseding the 2026-10-30 "no periods → split" reading).
  *
  * Pure: no IO, no i18n. Every figure is the composer's own (no re-count).
  */
@@ -80,16 +82,24 @@ export function periodOwnership(
 }
 
 export function businessHistoryHeader(business: BusinessHistory, identity: BusinessHistoryIdentity): BusinessHistoryHeader {
-  const rows: HeaderPeriodRow[] = business.periods.map(({ statement, totals }) => ({
+  const rows: HeaderPeriodRow[] = business.periods.map(({ statement, statementIds, totals }) => ({
     statementId: statement.id,
     label: statement.periodLabel,
     legalEntityLabel: statement.legalEntityLabel,
-    ownership: periodOwnership(statement, identity),
+    // Own by id only when EVERY folded statement is (R2 P3-a): a mixed group
+    // reads by its label and relation, never as own by one id.
+    ownership: (statementIds ?? [statement.id]).every((id) => identity.ownStatementIds.includes(id))
+      ? "own"
+      : periodOwnership(statement, identity),
     legalEntityRelation: statement.legalEntityRelation,
     continuity: statement.continuity,
     totals,
   }));
+  // Owner P0 2026-11-24: an organization with NO period statement holds its
+  // own history - its records are simply its work, not "not placed". Only
+  // once a period is stated do records outside an own period split the header.
   const outsideOwn =
-    business.notPlaced.records > 0 || rows.some((r) => r.ownership !== "own" && r.totals.records > 0);
+    (business.periods.length > 0 && business.notPlaced.records > 0) ||
+    rows.some((r) => r.ownership !== "own" && r.totals.records > 0);
   return { split: outsideOwn, rows, notPlaced: business.notPlaced };
 }
