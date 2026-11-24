@@ -316,13 +316,16 @@ function ExperienceSummary({
 }) {
   const exp = living.experience;
   if (!exp) return null;
-  const journal = exp.confirmedHours + exp.pendingHours;
-  const share = journal > 0 ? Math.round((exp.confirmedHours / journal) * 100) : null;
-  const rows: { key: string; level: "confirmed" | "recorded" | "declared"; label: string; value: number }[] = [
-    { key: "confirmed", level: "confirmed" as const, label: t(`${LIVING}.confirmedLabel`), value: exp.confirmedHours },
-    { key: "pending", level: "declared" as const, label: t(`${LIVING}.pendingLabel`), value: exp.pendingHours },
-    { key: "recorded", level: "recorded" as const, label: t(`${LIVING}.recordedLabel`), value: exp.recordedHours },
-  ].filter((r) => r.value > 0);
+  const journal =
+    exp.confirmedHours !== null && exp.pendingHours !== null ? exp.confirmedHours + exp.pendingHours : 0;
+  const share = journal > 0 ? Math.round((exp.confirmedHours! / journal) * 100) : null;
+  const all: { key: string; level: "confirmed" | "recorded" | "declared"; label: string; value: number | null }[] = [
+    { key: "confirmed", level: "confirmed", label: t(`${LIVING}.confirmedLabel`), value: exp.confirmedHours },
+    { key: "pending", level: "declared", label: t(`${LIVING}.pendingLabel`), value: exp.pendingHours },
+    { key: "recorded", level: "recorded", label: t(`${LIVING}.recordedLabel`), value: exp.recordedHours },
+  ];
+  // An unread source shows no row at all, never "0 h".
+  const rows = all.filter((r): r is typeof r & { value: number } => r.value !== null && r.value > 0);
   return (
     <Panel title={t(`${LIVING}.experienceTitle`)} testId="org-living-summary">
       <div className="flex min-w-0 items-center gap-4">
@@ -597,21 +600,25 @@ function OrganizationLivingCv({
           {exp ? (
             <Card>
               <FigurePair testId="org-living-experience-pair">
-                <Figure
-                  label={t(`${LIVING}.confirmedLabel`)}
-                  value={hours(exp.confirmedHours)}
-                  sub={exp.pendingHours > 0 ? t(`${LIVING}.pending`, { hours: hours(exp.pendingHours) }) : null}
-                  source={t(`${LIVING}.confirmedSource`)}
-                  level="confirmed"
-                  testId="org-living-confirmed"
-                />
-                <Figure
-                  label={t(`${LIVING}.recordedLabel`)}
-                  value={hours(exp.recordedHours)}
-                  source={t(`${LIVING}.recordedSource`)}
-                  level="recorded"
-                  testId="org-living-recorded"
-                />
+                {exp.confirmedHours !== null ? (
+                  <Figure
+                    label={t(`${LIVING}.confirmedLabel`)}
+                    value={hours(exp.confirmedHours)}
+                    sub={exp.pendingHours ? t(`${LIVING}.pending`, { hours: hours(exp.pendingHours) }) : null}
+                    source={t(`${LIVING}.confirmedSource`)}
+                    level="confirmed"
+                    testId="org-living-confirmed"
+                  />
+                ) : null}
+                {exp.recordedHours !== null ? (
+                  <Figure
+                    label={t(`${LIVING}.recordedLabel`)}
+                    value={hours(exp.recordedHours)}
+                    source={t(`${LIVING}.recordedSource`)}
+                    level="recorded"
+                    testId="org-living-recorded"
+                  />
+                ) : null}
               </FigurePair>
             </Card>
           ) : null}

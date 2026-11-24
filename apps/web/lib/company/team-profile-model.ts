@@ -269,13 +269,14 @@ export interface OrganizationLivingRecord {
   /** Team skills, confirmed first; null = unread. */
   readonly skills: readonly { readonly slug: string; readonly confirmed: boolean }[] | null;
   readonly rosterSize: number | null;
+  /** Each figure is null when its source could not be read: UNKNOWN, never 0. */
   readonly experience: {
     /** Journal hours the organization approved: the only confirmed hours. */
-    readonly confirmedHours: number;
+    readonly confirmedHours: number | null;
     /** Journal hours still waiting for approval. */
-    readonly pendingHours: number;
+    readonly pendingHours: number | null;
     /** The organization's own records, one total (recorded, not confirmed by anyone else). */
-    readonly recordedHours: number;
+    readonly recordedHours: number | null;
   } | null;
   readonly projects: {
     readonly running: readonly { readonly id: string; readonly title: string; readonly city: string | null }[];
@@ -328,11 +329,14 @@ export function buildOrganizationLivingRecord(input: OrganizationLivingInput): O
   if (rosterSize !== null) figures.push({ key: "team", value: rosterSize });
   const people = history && history.peopleCount > 0 ? history.peopleCount : (journal?.people ?? 0);
 
-  const confirmedHours = journal ? round1(journal.confirmedHours) : 0;
-  const pendingHours = journal ? round1(Math.max(0, journal.hours - journal.confirmedHours)) : 0;
-  const recordedHours = history ? round1(history.hours) : 0;
+  // A source that could not be read stays null (UNKNOWN), never a measured 0.
+  const confirmedHours = journal ? round1(journal.confirmedHours) : null;
+  const pendingHours = journal ? round1(Math.max(0, journal.hours - journal.confirmedHours)) : null;
+  const recordedHours = history ? round1(history.hours) : null;
   const experience =
-    confirmedHours + pendingHours + recordedHours > 0 ? { confirmedHours, pendingHours, recordedHours } : null;
+    (confirmedHours ?? 0) + (pendingHours ?? 0) + (recordedHours ?? 0) > 0
+      ? { confirmedHours, pendingHours, recordedHours }
+      : null;
 
   const declared = new Set(input.capabilities);
   const capabilities = CAPABILITY_ORDER.filter((slug) => declared.has(slug));

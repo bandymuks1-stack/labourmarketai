@@ -111,6 +111,31 @@ describe("organization Living CV — model", () => {
     expect(r.places).toBe(22);
   });
 
+  it("an unread source stays unknown: no 0 h figure, no row, no ring for it", () => {
+    const noJournal = buildOrganizationLivingRecord({ ...FULL, journal: null });
+    expect(noJournal.experience).toEqual({ confirmedHours: null, pendingHours: null, recordedHours: 18250.5 });
+    const noHistory = buildOrganizationLivingRecord({ ...FULL, history: null });
+    expect(noHistory.experience?.recordedHours).toBeNull();
+    const exp = renderToStaticMarkup(
+      createElement(CompanyTeamProfile, {
+        view: buildOrganizationLivingCv(IDENTITY, { ...FULL, journal: null }, "en"),
+        t: translator("en"),
+        member: { locale: "en", tab: "experience", tabHref },
+      }),
+    );
+    expect(exp).not.toContain('data-testid="org-living-confirmed"');
+    expect(exp).not.toMatch(/>0 h</);
+    const overview = renderToStaticMarkup(
+      createElement(CompanyTeamProfile, {
+        view: buildOrganizationLivingCv(IDENTITY, { ...FULL, journal: null }, "en"),
+        t: translator("en"),
+        member: { locale: "en", tab: "overview", tabHref },
+      }),
+    );
+    expect(overview).not.toContain('data-testid="org-living-ring"');
+    expect(overview).not.toContain('data-row="confirmed"');
+  });
+
   it("no source, no figure: an empty organization shows no number at all", () => {
     const r = buildOrganizationLivingRecord({
       capabilities: [],
@@ -337,6 +362,16 @@ describe("organization Living CV — wiring", () => {
     // 0025: the own-records figure is the business history's ONE total; day and
     // period sums are never added here (overlapping periods would count twice).
     expect(loader).toContain("load.business.totals.hours");
+    // A skill reads confirmed only when its confirmation STANDS (never the
+    // sticky stored flag, never a self-confirmation).
+    expect(loader).toContain("readCrossPartyStandingStates(");
+    expect(loader).toContain("withCrossPartyStandingConfirmation(");
+    // Team size counts CURRENT relationships, never every historical roster row.
+    expect(loader).not.toContain("ownPeople");
+    expect(loader).toMatch(/CURRENT_TEAM_KINDS = \[[^\]]*"employee"[^\]]*\]/);
+    expect(loader).not.toMatch(/CURRENT_TEAM_KINDS = \[[^\]]*"(former_employee|student|graduate|candidate|programme_participant)"/);
+    // The Projects block asks the one reader for every project, not its 12-item preview.
+    expect(loader).toMatch(/loadCompanyWorkHistory\(locale, organizationId, \{ projectLimit: PROJECTS_READ \}\)/);
     expect(loader).not.toMatch(/dayHours|periodHours/);
   });
 

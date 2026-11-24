@@ -11,6 +11,8 @@ import { readOrganizationCapabilities } from "@/lib/organizations/capability-rea
 import { loadCompanyWorkHistory } from "@/lib/organization-evidence/company-work-history-read";
 import { readEvidenceMedia } from "@/lib/organization-evidence/evidence-media-read";
 import { signEvidenceMediaUrls } from "@/lib/organization-evidence/evidence-media-serve";
+import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
+import { withCrossPartyStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 
 /**
  * THE ORGANIZATION'S LIVING CV, READ FOR ITS OWN MEMBERS (owner P0 2026-11-24).
@@ -35,6 +37,11 @@ import { signEvidenceMediaUrls } from "@/lib/organization-evidence/evidence-medi
 
 const ID_CHUNK = 100;
 const GALLERY_READ_OBJECTS = 60;
+/** The whole Projects block (the history page keeps its own preview). */
+const PROJECTS_READ = 200;
+/** Roster relationships that are a CURRENT team; former employees, students,
+ *  graduates, candidates and other historical rows are not team capacity. */
+const CURRENT_TEAM_KINDS = ["employee", "agency_worker", "subcontractor", "contractor", "trainee", "apprentice"] as const;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const untyped = (c: unknown): any => c;
@@ -44,19 +51,44 @@ async function readRosterSkills(
   workerIds: readonly string[],
 ): Promise<{ slug: string; confirmed: boolean }[] | null> {
   if (workerIds.length === 0) return [];
-  const out: { slug: string; confirmed: boolean }[] = [];
+  const rows: { worker_id: string; skill_id: string | null; verified: boolean | null; source: string | null; slug: string }[] = [];
   for (let i = 0; i < workerIds.length; i += ID_CHUNK) {
     const res = await untyped(supabase)
       .from("worker_skills")
-      .select("worker_id, verified, skills(slug)")
+      .select("worker_id, skill_id, verified, source, skills(slug)")
       .in("worker_id", workerIds.slice(i, i + ID_CHUNK));
     if (res.error) return null;
-    for (const r of (res.data ?? []) as { verified: boolean | null; skills: { slug: string | null } | null }[]) {
+    for (const r of (res.data ?? []) as {
+      worker_id: string;
+      skill_id: string | null;
+      verified: boolean | null;
+      source: string | null;
+      skills: { slug: string | null } | null;
+    }[]) {
       const slug = r.skills?.slug;
-      if (slug) out.push({ slug, confirmed: r.verified === true });
+      if (slug) rows.push({ worker_id: r.worker_id, skill_id: r.skill_id, verified: r.verified, source: r.source, slug });
     }
   }
-  return out;
+  // The stored flag is sticky after the confirming work is rejected,
+  // corrected or deleted, and a self-confirmation is not a confirmation:
+  // a skill reads confirmed only when its confirmation STANDS (the same
+  // cross-party door every employer-facing read uses). Unknown is never
+  // shown as confirmed.
+  const standing = await readCrossPartyStandingStates(supabase, rows.map((r) => r.worker_id));
+  return withCrossPartyStandingConfirmation(rows, standing).map((r) => ({ slug: r.slug, confirmed: r.verified }));
+}
+
+/** People on the organization's own roster in a current working relationship. Null: unread. */
+async function readCurrentTeamSize(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+): Promise<number | null> {
+  const res = await untyped(supabase)
+    .from("organization_people")
+    .select("id", { count: "exact", head: true })
+    .eq("organization_id", organizationId)
+    .in("relationship_kind", [...CURRENT_TEAM_KINDS]);
+  return res.error || typeof res.count !== "number" ? null : res.count;
 }
 
 export async function loadOrganizationLivingCv(
@@ -64,7 +96,7 @@ export async function loadOrganizationLivingCv(
   organizationId: string,
   country: string | null,
 ): Promise<CompanyTeamProfileView | null> {
-  const load = await loadCompanyWorkHistory(locale, organizationId);
+  const load = await loadCompanyWorkHistory(locale, organizationId, { projectLimit: PROJECTS_READ });
   if (load.kind !== "ready") return null;
 
   const supabase = await createClient();
@@ -79,11 +111,12 @@ export async function loadOrganizationLivingCv(
     .filter((id): id is string => !!id)
     .slice(0, GALLERY_READ_OBJECTS);
 
-  const [capabilities, settings, skills, media] = await Promise.all([
+  const [capabilities, settings, skills, media, teamSize] = await Promise.all([
     readOrganizationCapabilities(load.organizationId),
     getBusinessPublicSettings(load.organizationId),
     readRosterSkills(supabase, Object.values(load.linkedWorkers)),
     readEvidenceMedia(caller, { workObjectIds: objectIds }),
+    readCurrentTeamSize(supabase, load.organizationId),
   ]);
 
   const photos =
@@ -106,7 +139,7 @@ export async function loadOrganizationLivingCv(
     {
       capabilities,
       teamSkills: skills,
-      rosterSize: Object.keys(load.ownPeople).length,
+      rosterSize: teamSize,
       // ONE total, every hour once (decision 0025): the business history's
       // totals. Unreadable → null (unknown), never a partial sum shown as whole.
       history: load.business
