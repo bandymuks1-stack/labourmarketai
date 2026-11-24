@@ -885,7 +885,9 @@ export default async function VerifiedCvPage({
   // outside the dashboard chrome, which is what supplies <main> elsewhere.
   return (
     <main className="cv-doc min-h-screen bg-ink-900 px-4 py-6 text-text-primary sm:px-6 sm:py-8 print:p-0">
-      <div className={`mx-auto flex max-w-3xl flex-col ${pageGap}`}>
+      {/* Wide on screen (the reference's 1440 layout); the printed document
+          keeps its reading width. */}
+      <div className={`mx-auto flex max-w-3xl flex-col lg:max-w-5xl print:max-w-3xl ${pageGap}`}>
         {/* Screen-only toolbar — never printed. */}
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <Link

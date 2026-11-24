@@ -20,6 +20,10 @@ import { PersonPortrait } from "@/components/app/identity/person-portrait";
  * shown twice"): skills and work history. Each skill and each job is listed
  * ONCE, by the page's own sections (pinned by lib/guards/cv-each-item-once.test.ts).
  *
+ * The card and header are an always-dark collectible surface (the reference),
+ * so their ink is fixed rather than theme tokens: on the light theme the
+ * tokens would draw dark text on the dark card.
+ *
  * No helper text (decision 0032). Pure and i18n-agnostic: the page passes
  * resolved strings.
  */
@@ -68,7 +72,7 @@ export function PremiumLivingCv({
   return (
     <article className="flex flex-col gap-6 print:hidden" data-testid="premium-living-cv">
       <section
-        className="relative isolate grid gap-6 overflow-hidden rounded-[28px] bg-[#0b1020] p-4 shadow-[inset_0_0_0_1px_rgb(var(--c-text-primary)/0.10)] sm:p-6 md:grid-cols-[minmax(0,15rem)_1fr] md:gap-8"
+        className="relative isolate grid gap-6 overflow-hidden rounded-[28px] bg-[#0b1020] p-4 shadow-[inset_0_0_0_1px_rgb(255_255_255/0.08)] sm:p-6 md:grid-cols-[minmax(0,15rem)_1fr] md:gap-8"
         data-testid="premium-cv-identity"
       >
         <div
@@ -111,59 +115,65 @@ export function PremiumLivingCv({
           </div>
         </div>
 
-        {/* THE HEADER — name, professions, languages, actions. */}
-        <div className="flex min-w-0 flex-col gap-4">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-            <div className="min-w-0">
-              <h1
-                className="break-words font-display text-[clamp(1.8rem,5vw,2.75rem)] font-semibold leading-tight tracking-tight text-text-primary"
-                data-testid="premium-cv-name"
-              >
-                {name}
-              </h1>
-              <p className="mt-1 text-text-secondary" data-testid="premium-cv-professions">
-                {eyebrow}
-              </p>
-              {languages.length > 0 ? (
-                <div className="mt-3 flex flex-wrap gap-2" data-testid="premium-cv-languages">
-                  {languages.map((l) => (
-                    <span
-                      key={l}
-                      className="inline-flex min-h-8 items-center rounded-full border border-[rgb(var(--c-text-primary)/0.18)] px-3 text-meta font-medium text-text-primary"
-                    >
-                      {l}
-                    </span>
-                  ))}
-                </div>
-              ) : null}
-            </div>
-            {actions ? (
-              <div className="flex flex-wrap gap-2" data-testid="premium-cv-actions">
-                {actions}
-              </div>
-            ) : null}
+        {/* THE HEADER — name, professions, languages, actions, facts.
+            Phone order (the reference): card, fact tiles, actions. On a
+            phone the card already names the person, so the heading is kept
+            for screen readers only; from md up it is the visible title. */}
+        <div className="flex min-w-0 flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-6">
+          <div className="min-w-0 max-md:sr-only lg:col-start-1 lg:row-start-1">
+            <h1
+              className="break-words font-display text-[clamp(1.8rem,5vw,2.75rem)] font-semibold leading-tight tracking-tight text-[#f4f1e8]"
+              data-testid="premium-cv-name"
+            >
+              {name}
+            </h1>
+            <p className="mt-1 text-[#c9cdd6]" data-testid="premium-cv-professions">
+              {eyebrow}
+            </p>
           </div>
 
-          {summary ? <p className="max-w-[60ch] leading-relaxed text-text-secondary">{summary}</p> : null}
+          {languages.length > 0 ? (
+            <div className="flex flex-wrap gap-2 lg:col-start-1" data-testid="premium-cv-languages">
+              {languages.map((l) => (
+                <span
+                  key={l}
+                  className="inline-flex min-h-8 items-center rounded-full border border-[rgb(255_255_255/0.18)] px-3 text-meta font-medium text-[#f4f1e8]"
+                >
+                  {l}
+                </span>
+              ))}
+            </div>
+          ) : null}
+
+          {summary ? <p className="max-w-[60ch] leading-relaxed text-[#c9cdd6] lg:col-start-1">{summary}</p> : null}
 
           {facts.length > 0 ? (
             <dl
-              className="grid grid-cols-3 gap-2 border-t border-[rgb(var(--c-text-primary)/0.10)] pt-4 sm:gap-4"
+              className="grid grid-cols-3 gap-2 border-t border-[rgb(255_255_255/0.10)] pt-4 sm:gap-4 lg:col-span-2"
               data-testid="premium-cv-facts"
             >
               {facts.map((f) => (
                 <div
                   key={f.label}
-                  className="flex min-w-0 flex-col rounded-xl bg-[rgb(var(--c-text-primary)/0.04)] px-3 py-3"
+                  className="flex min-w-0 flex-col rounded-xl bg-[rgb(255_255_255/0.05)] px-3 py-3"
                   data-testid={f.testid}
                 >
-                  <dd className="order-1 truncate font-display text-[clamp(1.15rem,4vw,1.6rem)] font-semibold leading-none tabular-nums text-text-primary">
+                  <dd className="order-1 truncate font-display text-[clamp(1.15rem,4vw,1.6rem)] font-semibold leading-none tabular-nums text-[#f4f1e8]">
                     {f.value}
                   </dd>
-                  <dt className="order-2 mt-1.5 text-meta text-text-muted">{f.label}</dt>
+                  <dt className="order-2 mt-1.5 text-meta text-[#9aa3b5]">{f.label}</dt>
                 </div>
               ))}
             </dl>
+          ) : null}
+
+          {actions ? (
+            <div
+              className="flex flex-wrap gap-2 max-md:[&>*]:w-full lg:col-start-2 lg:row-start-1 lg:justify-end"
+              data-testid="premium-cv-actions"
+            >
+              {actions}
+            </div>
           ) : null}
         </div>
       </section>
