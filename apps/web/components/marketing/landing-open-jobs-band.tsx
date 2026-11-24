@@ -75,7 +75,7 @@ export async function LandingOpenJobsBand({
             <li
               key={vacancy.id}
               data-testid="landing-open-job"
-              className="min-w-0 [overflow-wrap:anywhere] [&>a]:rounded-2xl [&>a]:border-ink-600 [&>a]:bg-ink-800/50 [&_span.rounded-full]:border-ink-500 hover:[&>a]:border-brand-blue/50"
+              className="min-w-0 [overflow-wrap:anywhere] [&>a]:rounded-2xl [&>a]:border-ink-600 [&>a]:bg-ink-800/50 [&_.rounded-full]:border-ink-500 hover:[&>a]:border-brand-blue/50"
             >
               <PublicVacancyCard
                 vacancy={vacancy}
