@@ -9,7 +9,7 @@ import { proposalLimitOf, type ProposalLimit } from "@/lib/booking/proposal-limi
 import { resolveCountryCode } from "@/lib/location/country-model";
 import { notifyBooking } from "@/lib/booking/booking-notify";
 import {
-  emitOfferAnsweredNotification,
+  emitCandidateOfferAnsweredNotification,
   emitOfferReceivedNotification,
 } from "@/lib/notifications/event-emitters";
 import {
@@ -407,20 +407,29 @@ export async function respondCandidateOfferAction(
   const note = validateOfferNote(String(formData.get("note") ?? ""));
   if (!isBridgeUuid(offerId)) return { status: "invalid" };
   if (decision !== "accepted" && decision !== "declined") return { status: "invalid" };
+  // The agency's placement term the employer was shown and ticked, if the
+  // agency states one (migration 20261114235900). v2 refuses an accept that
+  // does not name the agency's CURRENT term, and records the one accepted.
+  const termRaw = String(formData.get("acceptedTermId") ?? "").trim();
+  const acceptedTermId = isBridgeUuid(termRaw) ? termRaw : null;
+  if (decision === "accepted" && termRaw.length > 0 && formData.get("termsAccepted") !== "yes") {
+    return { status: "error", reason: "placement_term_not_accepted" };
+  }
   const supabase = await createClient();
-  // Who proposed the candidate — read BEFORE the answer, under the client's
-  // own RLS (owns_company(client_company_id)), so the agency can hear it.
-  const [{ data: auth }, { data: offerRow }] = await Promise.all([
-    supabase.auth.getUser(),
-    rpc(supabase).from("agency_candidate_offers").select("created_by").eq("id", offerId).maybeSingle(),
-  ]);
-  const { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
+  // Who answers. The proposer is resolved AFTER the answer by the notification
+  // module (the client cannot read the offer's `created_by` since 20261118100000).
+  const { data: auth } = await supabase.auth.getUser();
+  const { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v2", {
     p_offer_id: offerId,
     p_decision: decision,
     p_note: note,
+    p_accepted_term_id: decision === "accepted" ? acceptedTermId : null,
   });
+  // v2 is the only decision path (R2 P2-1: v1 is revoked from signed-in callers
+  // in 20261118100000 so the term and live-partnership rules cannot be skipped).
   if (error) {
     const m = (error.message ?? "").toLowerCase();
+    if (m.includes("placement_term_not_accepted")) return { status: "error", reason: "placement_term_not_accepted" };
     if (m.includes("offer_not_open") || m.includes("offer_not_found")) return { status: "not-found" };
     const limit = proposalLimitOf(error.code, error.message);
     if (limit) return { status: "proposal-limit", limit };
@@ -439,13 +448,7 @@ export async function respondCandidateOfferAction(
   }
   emitFirstRealAction("company", "offer_" + decision, "agency_candidate_offer");
   if (auth.user) {
-    await emitOfferAnsweredNotification({
-      kind: "candidate",
-      offerId,
-      recipientProfileId: (offerRow as { created_by?: string | null } | null)?.created_by ?? null,
-      actorProfileId: auth.user.id,
-      decision,
-    });
+    await emitCandidateOfferAnsweredNotification({ offerId, actorProfileId: auth.user.id, decision });
   }
   revalidatePath("/[locale]/dashboard/company/scouting", "page");
   revalidatePath("/[locale]/dashboard/company", "page");

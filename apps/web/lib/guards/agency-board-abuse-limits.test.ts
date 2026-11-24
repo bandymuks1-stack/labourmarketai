@@ -61,6 +61,23 @@ describe("every board and offer path passes the limits", () => {
     expect(mark.indexOf('agencyBoardBurstLimited("offer", user.id)')).toBeLessThan(mark.indexOf('"mark_agency_can_offer"'));
   });
 
+  it("a lead's forward of a partner candidate is under the same limits (it makes a client offer)", () => {
+    const a = read("lib/agency/partnerships-actions.ts");
+    const fwd = a.slice(a.indexOf("export async function forwardPartnerCandidateAction"));
+    expect(fwd.indexOf("await forwardWithinOfferLimits(id)")).toBeGreaterThan(-1);
+    expect(fwd.indexOf("await forwardWithinOfferLimits(id)")).toBeLessThan(fwd.indexOf('"forward_partner_candidate_v1"'));
+    const lim = a.slice(a.indexOf("async function forwardWithinOfferLimits"));
+    expect(lim).toContain('agencyBoardBurstLimited("offer", user.id)');
+    expect(lim).toContain('.eq("agency_company_id", partnership.lead_company_id)');
+    expect(lim).toContain('.eq("request_share_id", share.client_share_id)');
+    expect(lim).not.toContain("created_by");
+    expect(read("lib/agency/partnerships-model.ts")).toContain('"rate_limited"');
+    for (const l of ["en", "lt", "ru", "nl", "de", "pl", "sv", "da", "et", "lv", "no"]) {
+      const e = JSON.parse(read(`messages/${l}.json`)).agencyPartnerships.errors;
+      expect(typeof e.rate_limited, l).toBe("string");
+    }
+  });
+
   it("a refused offer says so in every locale that carries the agency section", () => {
     expect(read("components/app/agency-bridge-section.tsx")).toContain("labels.offerLimitLabel");
     for (const l of ["en", "lt", "ru", "nl", "de", "pl", "sv"]) {

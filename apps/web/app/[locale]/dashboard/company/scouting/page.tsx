@@ -59,6 +59,11 @@ import { isShortlistedForContact } from "@/lib/communication/communication-eligi
 import { RequestCommunicationButton } from "@/components/app/request-communication-button";
 import { ProposeBookingButton } from "@/components/app/propose-booking-button";
 import { OfferDecisionButtons } from "@/components/app/offer-decision-buttons";
+import {
+  formatPlacementFee,
+  readPlacementTermsForOffers,
+  type PlacementTerm,
+} from "@/lib/agency/placement-terms";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import type { CompanyCandidateLabel } from "@/lib/scouting/candidate-readiness";
@@ -293,7 +298,7 @@ export default async function CompanyScoutingPage({
           )
         : [];
   // Stage 2 — needs the scouting result (or the stage-1 offers).
-  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts, demandHistory] =
+  const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts, offerTerms, demandHistory] =
     await Promise.all([
       selected && result?.kind === "ok"
         ? createSupabaseServerClient().then((client) => readLastAutoMatchReceipt(client, selected))
@@ -329,10 +334,19 @@ export default async function CompanyScoutingPage({
               handRaisers.map((h) => h.workerId),
             )
           : null,
+      // The offering agency's placement term on each still-open offer: the
+      // employer sees it before deciding, and accepts it only by accepting
+      // the candidate (migration 20261114235900; absent -> no term shown).
+      readPlacementTermsForOffers(
+        offeredCandidates.filter((oc) => oc.offerStatus === "offered").map((oc) => oc.offerId),
+      ),
       // The need's history (4.30): its creation, the owner's proposals and their
       // answers with actor and time, and how it ended. Owner only.
       result?.kind === "ok" && !actsForClient ? loadDemandHistory(result.demand.id) : null,
     ]);
+  const termByOffer = offerTerms.kind === "ok" ? offerTerms.byOffer : new Map<string, PlacementTerm>();
+  // A partner agency's candidate carries the LEAD agency's term (20261118100000): name whose it is.
+  const termAgencyByOffer = offerTerms.kind === "ok" ? offerTerms.agencyNameByOffer : new Map<string, string>();
   const applicantIdentity = new Map<string, ApplicantIdentity>();
   for (const [id, who] of appliedIdentities) if (who) applicantIdentity.set(id, who);
   // Stage 3 — projects load only when a team offer is accepted and waiting for
@@ -351,6 +365,20 @@ export default async function CompanyScoutingPage({
     agencyPartnership: tDemandReadback("syntheticTitle.agencyPartnership"),
   };
   const tOffered = await getTranslations("scoutingAgencyOffers");
+  // Each open offer's placement term as the employer reads it: the agency's
+  // amount in the reader's money format, and its condition in its own words.
+  const offerTermView = new Map(
+    [...termByOffer].map(([offerId, term]) => [
+      offerId,
+      {
+        id: term.id,
+        feeLine: tOffered("placementTerm.feeLine", { fee: formatPlacementFee(term, locale) }),
+        conditionText: term.conditionText,
+        conditionLanguage: term.conditionLanguage,
+        termsUrl: term.termsUrl,
+      },
+    ]),
+  );
 
   // Shareable filter links: preserve the selected demand, toggle one facet.
   const filterHref = (next: Partial<ScoutFilters>): string => {
@@ -1201,6 +1229,17 @@ export default async function CompanyScoutingPage({
                       closed: tOffered("decision.closed"), error: tOffered("decision.error"),
                       limitOpen: tOffered("decision.limitOpen"), limitDaily: tOffered("decision.limitDaily"),
                       limitUnknown: tOffered("decision.limitUnknown"), openBookings: tOffered("decision.openBookings"),
+                    }}
+                    placementTerm={offerTermView.get(oc.offerId) ?? null}
+                    termLabels={{
+                      title: tOffered("placementTerm.title", { agency: termAgencyByOffer.get(oc.offerId) ?? oc.agencyName ?? "" }),
+                      conditionLabel: tOffered("placementTerm.conditionLabel"),
+                      termsLink: tOffered("placementTerm.termsLink"),
+                      termsPending: tOffered("placementTerm.termsPending"),
+                      onlyOnPlacement: tOffered("placementTerm.onlyOnPlacement"),
+                      accept: tOffered("placementTerm.accept"),
+                      mustAccept: tOffered("placementTerm.mustAccept"),
+                      changed: tOffered("placementTerm.changed"),
                     }}
                   />
                 ) : null}

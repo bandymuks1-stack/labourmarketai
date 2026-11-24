@@ -42,7 +42,7 @@ describe("scouting page — the reads after the need is chosen run in stages", (
 
   it("stage 2 batches every read that needs the scouting result", () => {
     const s2 = stage(
-      "const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts, demandHistory] =",
+      "const [autoMatchReceipt, teamOffers, appliedIdentities, offerBookingStatus, pipelineFacts, offerTerms, demandHistory] =",
     );
     for (const read of [
       "readLastAutoMatchReceipt(",
@@ -50,6 +50,8 @@ describe("scouting page — the reads after the need is chosen run in stages", (
       "getApplicantIdentity(",
       "readOfferBookingStatuses(",
       "loadDemandPipelineFacts(",
+      // the offering agency's placement term on each open offer (20261114235900)
+      "readPlacementTermsForOffers(",
       "loadDemandHistory(",
     ]) {
       expect(s2, read).toContain(read);

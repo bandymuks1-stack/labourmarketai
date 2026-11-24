@@ -2273,3 +2273,35 @@ export async function emitOfferAnsweredNotification(
   const { eventType, entityType } = OFFER_ANSWERED[facts.kind];
   return deliverOfferEvent(eventType, entityType, facts, { decision: facts.decision });
 }
+
+/**
+ * The client answered an agency's candidate offer; the agency person who
+ * proposed it hears which answer. Since 20261118100000 signed-in callers
+ * cannot read `agency_candidate_offers.created_by` (the client sees only its
+ * own agency, owner principle 2026-11-19), so the proposer is resolved HERE,
+ * from the offer row itself, by the service role this module already holds.
+ * It is read only for the person who RECORDED the decision (`decided_by` =
+ * the actor, `decided_at` set), so it answers nothing for anyone else; the id
+ * never leaves the server. Unresolved: nothing is sent and the miss is named.
+ */
+export async function emitCandidateOfferAnsweredNotification(facts: {
+  readonly offerId: string;
+  readonly actorProfileId: string;
+  readonly decision: "accepted" | "declined";
+}): Promise<NotificationEmitResult> {
+  let recipientProfileId: string | null = null;
+  try {
+    const admin = createAdminClient();
+    const { data } = await asAnyClient(admin)
+      .from("agency_candidate_offers")
+      .select("created_by")
+      .eq("id", facts.offerId)
+      .eq("decided_by", facts.actorProfileId)
+      .not("decided_at", "is", null)
+      .maybeSingle();
+    recipientProfileId = (data as { created_by?: string | null } | null)?.created_by ?? null;
+  } catch {
+    recipientProfileId = null;
+  }
+  return emitOfferAnsweredNotification({ kind: "candidate", ...facts, recipientProfileId });
+}

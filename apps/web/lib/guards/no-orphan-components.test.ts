@@ -62,7 +62,6 @@ const KNOWN_ORPHANS: readonly string[] = [
   "components/marketing/starting-contexts-band.tsx",
   "components/marketing/trust-band.tsx",
   "components/marketing/two-sides-section.tsx",
-  "components/ui/Choice.tsx",
   "components/ui/EmptyState.tsx",
   "components/ui/GroupedList.tsx",
   "components/ui/ListRow.tsx",

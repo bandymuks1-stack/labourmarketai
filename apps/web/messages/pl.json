@@ -13159,6 +13159,17 @@
       "declined": "pracownik odmówił",
       "withdrawn": "propozycja wycofana",
       "expired": "propozycja wygasła"
+    },
+    "placementTerm": {
+      "title": "Opłata za zatrudnienie {agency}",
+      "feeLine": "Opłata za zatrudnienie – {fee} za każdego skutecznie zatrudnionego pracownika.",
+      "conditionLabel": "Warunek:",
+      "termsLink": "Pełne warunki agencji",
+      "termsPending": "Agencja nie opublikowała jeszcze pełnych warunków.",
+      "onlyOnPlacement": "Należna tylko, jeśli ten pracownik zostanie faktycznie u Państwa zatrudniony – nie za wyświetlenie, kontakt ani tę ofertę.",
+      "accept": "Akceptuję opłatę za zatrudnienie i warunek tej agencji dla tego kandydata.",
+      "mustAccept": "Aby przyjąć tego kandydata, najpierw zaakceptuj opłatę agencji za zatrudnienie.",
+      "changed": "Opłata agencji za zatrudnienie się zmieniła. Odśwież stronę, aby ją zobaczyć przed decyzją."
     }
   },
   "cvSections": {
@@ -20773,5 +20784,171 @@
       "fullList": "Pełna lista"
     },
     "more": "Więcej"
+  },
+  "agencySuggestion": {
+    "eyebrow": "Agencja rekrutacyjna",
+    "title": "{agency} – czy chcą Państwo dołączyć do jej listy kandydatów?",
+    "body": "Jeśli Państwo dołączą, {agency} zobaczy Państwa profil i będzie mogła proponować Państwa do odpowiedniej pracy.",
+    "leave": "Mogą Państwo opuścić listę w dowolnym momencie w swoim profilu.",
+    "consent": "Zgadzam się być na liście kandydatów {agency}.",
+    "join": "Dołącz do listy",
+    "joining": "Dołączanie…",
+    "notNow": "Nie teraz",
+    "joined": "Są Państwo na liście kandydatów {agency}. Mogą ją Państwo opuścić w swoim profilu.",
+    "errors": {
+      "consentRequired": "Proszę najpierw zaznaczyć pole, jeśli chcą Państwo dołączyć.",
+      "consentTextChanged": "Tekst się zmienił. Odśwież stronę i przeczytaj go ponownie.",
+      "representedElsewhere": "Reprezentuje Państwa już inna agencja, więc ta lista nie jest proponowana.",
+      "alreadyKnown": "Już odpowiedzieli Państwo tej agencji.",
+      "notAvailable": "To jest teraz niedostępne.",
+      "noWorkerProfile": "Najpierw dokończ zakładanie profilu.",
+      "auth": "Zaloguj się ponownie.",
+      "error": "Nie udało się. Spróbuj ponownie."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Państwa opłata za zatrudnienie",
+    "intro": "To, co pracodawcy widzą przy Państwa kandydatach. Pracodawca akceptuje ją tylko przyjmując jednego z Państwa kandydatów, a dotyczy ona tylko faktycznie zatrudnionej osoby – nigdy wyświetlenia, kontaktu ani aplikacji.",
+    "current": "Teraz widoczne dla pracodawców",
+    "none": "Nie podali Państwo opłaty za zatrudnienie. Pracodawcy jej nie widzą.",
+    "amount": "Kwota",
+    "currency": "Waluta",
+    "condition": "Kiedy opłata obowiązuje",
+    "conditionHint": "Państwa własne słowa, pokazane pracodawcy tak, jak zostały napisane.",
+    "termsUrl": "Link do pełnych warunków (opcjonalnie)",
+    "termsUrlHint": "Jeśli zostawisz puste, pracodawcy dowiedzą się, że pełne warunki nie zostały opublikowane.",
+    "save": "Zapisz",
+    "saving": "Zapisywanie…",
+    "retire": "Przestań pokazywać opłatę",
+    "saved": "Zapisano. Pracodawcy widzą teraz tę opłatę przy Państwa kandydatach.",
+    "retired": "Pracodawcy nie widzą już opłaty.",
+    "unavailable": "Opłaty za zatrudnienie nie są jeszcze dostępne.",
+    "feeLine": "Opłata za zatrudnienie – {fee} za każdego skutecznie zatrudnionego pracownika.",
+    "errors": {
+      "invalid": "Sprawdź kwotę, trzyliterową walutę i link (https://).",
+      "notAgency": "Tylko agencja może podać opłatę za zatrudnienie.",
+      "notFound": "Nie mogą Państwo zmienić opłaty tej organizacji.",
+      "auth": "Zaloguj się ponownie.",
+      "error": "Nie zapisano. Spróbuj ponownie."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Agencje partnerskie",
+    "intro": "Proszę przekazać potrzebę klienta innej agencji. Gdy jej kandydat zostanie zatrudniony, otrzyma ona uzgodnioną część Państwa opłaty za zatrudnienie.",
+    "unavailable": "Agencje partnerskie nie są jeszcze dostępne.",
+    "empty": "Nie ma jeszcze agencji partnerskich.",
+    "working": "Zapisywanie…",
+    "side": {
+      "lead": "Prowadzą Państwo",
+      "partner": "Są Państwo partnerem",
+      "invited": "Zaproszenie do Państwa"
+    },
+    "status": {
+      "pending": "Zaproszona",
+      "active": "Aktywna",
+      "declined": "Odrzucona",
+      "ended": "Zakończona"
+    },
+    "shareLine": "Udział partnera w opłacie: {percent} %",
+    "acceptConsequence": "Po akceptacji {agency} może przekazywać Państwu potrzeby swoich klientów. Gdy Państwa kandydat zostanie zatrudniony, otrzymają Państwo {percent} % opłaty {agency} za zatrudnienie.",
+    "accept": "Akceptuj",
+    "accepted": "Zaakceptowano.",
+    "decline": "Odrzuć",
+    "declined": "Odrzucono.",
+    "end": "Zakończ partnerstwo",
+    "withdrawInvite": "Wycofaj zaproszenie",
+    "ended": "Zakończono. Przekazane przez nie potrzeby zostały odebrane, a otwarte oferty wycofane.",
+    "invite": {
+      "email": "E-mail agencji partnerskiej",
+      "share": "Udział partnera, %",
+      "submit": "Zaproś",
+      "sent": "Zaproszenie utworzone. Agencja zobaczy je po zalogowaniu się tym adresem e-mail."
+    },
+    "pass": {
+      "title": "Przekaż potrzebę klienta",
+      "none": "Żaden klient nie udostępnił jeszcze Państwu potrzeby.",
+      "need": "Potrzeba klienta",
+      "choose": "Proszę wybrać potrzebę",
+      "submit": "Przekaż: {agency}",
+      "done": "Przekazano.",
+      "takeBack": "Odbierz"
+    },
+    "passedToMe": {
+      "title": "Potrzeby przekazane Państwu",
+      "from": "Od {agency} · Państwa udział {percent} %",
+      "noRoster": "Na Państwa liście nie ma aktywnego pracownika do zaproponowania.",
+      "worker": "Państwa kandydat",
+      "choose": "Proszę wybrać pracownika",
+      "offer": "Zaproponuj agencji wiodącej",
+      "offered": "Zaproponowano. Agencja wiodąca sprawdzi kandydata, zanim zobaczy go jej klient.",
+      "note": "Uwaga dla agencji wiodącej (opcjonalnie)",
+      "withdraw": "Wycofaj",
+      "returnedWhy": "Zwrócono: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Zaproponowany",
+      "withdrawn": "Wycofany",
+      "accepted": "Przyjęty",
+      "declined": "Odrzucony"
+    },
+    "commissions": {
+      "title": "Prowizje",
+      "intro": "Należne dopiero po zatrudnieniu pracownika. Nic nie jest tu pobierane.",
+      "empty": "Nie zaakceptowano jeszcze opłaty za zatrudnienie.",
+      "need": "Potrzeba klienta",
+      "role": {
+        "direct": "Państwa kandydat",
+        "lead": "Kandydat {agency}",
+        "partner": "Państwa kandydat przez {agency}"
+      },
+      "amount": "{amount} ({percent} % z {fee})",
+      "status": {
+        "pending": "Oczekuje na zatrudnienie",
+        "placed": "Należna",
+        "not_placed": "Nie zatrudniono"
+      },
+      "due": "Należne: {total}"
+    },
+    "errors": {
+      "not_owner": "Może to zrobić tylko właściciel agencji.",
+      "not_agency": "Ta firma nie jest agencją.",
+      "invalid_email": "Proszę podać poprawny adres e-mail.",
+      "invalid_share": "Proszę podać udział większy niż 0 i mniejszy niż 100 %.",
+      "already_invited": "Dla tego adresu jest już otwarte zaproszenie.",
+      "invitation_not_found": "To zaproszenie nie jest już otwarte.",
+      "same_agency": "Agencja nie może być własnym partnerem.",
+      "already_partners": "Te agencje są już partnerami.",
+      "partnership_not_found": "Nie znaleziono partnerstwa.",
+      "partnership_not_open": "To partnerstwo jest już zakończone.",
+      "partnership_not_active": "To partnerstwo nie jest aktywne.",
+      "share_not_active": "Ta potrzeba nie jest już udostępniana.",
+      "partner_share_not_found": "Ta potrzeba została już odebrana.",
+      "worker_not_on_roster": "Tego pracownika nie ma na Państwa aktywnej liście.",
+      "invalid_note": "Notatka jest za długa.",
+      "needs_migration": "Agencje partnerskie nie są jeszcze dostępne.",
+      "error": "Nie udało się. Proszę spróbować ponownie.",
+      "proposal_not_open": "Ten kandydat nie oczekuje już na sprawdzenie.",
+      "already_offered": "Ten pracownik jest już zaproponowany do tej potrzeby.",
+      "rate_limited": "Zbyt wiele ofert. Proszę spróbować później."
+    },
+    "proposalStatus": {
+      "proposed": "Oczekuje na sprawdzenie przez agencję wiodącą",
+      "forwarded": "Przekazano klientowi",
+      "returned": "Zwrócono",
+      "withdrawn": "Wycofano"
+    },
+    "review": {
+      "title": "Kandydaci partnerów do sprawdzenia",
+      "candidate": "{worker} · od {agency}",
+      "partnerNote": "Uwaga partnera, niewidoczna dla Państwa klienta: {note}",
+      "forward": "Przekaż Państwa klientowi",
+      "forwardConsequence": "Państwa klient zobaczy tego kandydata jako Państwa, z Państwa uwagą poniżej. Wobec klienta to Państwo odpowiadają za tego kandydata.",
+      "yourNote": "Państwa uwaga dla klienta (opcjonalnie)",
+      "confirm": "Przekaż",
+      "forwarded": "Przekazano.",
+      "return": "Zwróć partnerowi",
+      "reason": "Powód widoczny dla partnera (opcjonalnie)",
+      "returned": "Zwrócono."
+    }
   }
 }

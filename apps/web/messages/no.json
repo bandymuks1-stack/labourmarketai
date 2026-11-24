@@ -6876,6 +6876,17 @@
       "limitDaily": "[EN] You have sent 30 booking proposals in the last 24 hours — the daily limit. Accept this candidate later; nothing was sent and the agency's offer stays open.",
       "limitUnknown": "[EN] The booking proposal limit is reached (10 waiting for an answer, 30 per day). Withdraw proposals you no longer need or try later; the agency's offer stays open.",
       "openBookings": "[EN] Open bookings"
+    },
+    "placementTerm": {
+      "title": "[EN] {agency}'s placement fee",
+      "feeLine": "[EN] Placement fee – {fee} per successfully placed worker.",
+      "conditionLabel": "[EN] Condition:",
+      "termsLink": "[EN] The agency's full terms",
+      "termsPending": "[EN] The agency has not published its full terms yet.",
+      "onlyOnPlacement": "[EN] Due only if this worker is actually placed with you — not for viewing, contacting or this offer.",
+      "accept": "[EN] I accept this agency's placement fee and condition for this candidate.",
+      "mustAccept": "[EN] To accept this candidate, first accept the agency's placement fee.",
+      "changed": "[EN] The agency's placement fee has changed. Reload the page to see it before deciding."
     }
   },
   "roleDashboards": {
@@ -8137,6 +8148,172 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "agencySuggestion": {
+    "eyebrow": "Rekrutteringsbyrå",
+    "title": "{agency} – vil du stå på kandidatlisten?",
+    "body": "Hvis du blir med, ser {agency} profilen din og kan foreslå deg for passende arbeid.",
+    "leave": "Du kan forlate listen når som helst på profilen din.",
+    "consent": "Jeg samtykker til å stå på kandidatlisten til {agency}.",
+    "join": "Bli med på listen",
+    "joining": "Blir med…",
+    "notNow": "Ikke nå",
+    "joined": "Du står på kandidatlisten til {agency}. Du kan forlate den på profilen din.",
+    "errors": {
+      "consentRequired": "Kryss først av i boksen hvis du vil bli med.",
+      "consentTextChanged": "Teksten er endret. Last inn siden på nytt og les den igjen.",
+      "representedElsewhere": "Et annet byrå representerer deg allerede, så denne listen tilbys ikke.",
+      "alreadyKnown": "Du har allerede svart dette byrået.",
+      "notAvailable": "Dette er ikke tilgjengelig nå.",
+      "noWorkerProfile": "Gjør først ferdig profilen din.",
+      "auth": "Logg inn igjen.",
+      "error": "Det gikk ikke. Prøv igjen."
+    }
+  },
+  "agencyPlacementTerm": {
+    "title": "Din formidlingsavgift",
+    "intro": "Det arbeidsgivere ser ved kandidatene dine. En arbeidsgiver godtar den bare når de tar imot en av kandidatene dine, og den gjelder bare en person som faktisk blir ansatt – aldri en visning, kontakt eller søknad.",
+    "current": "Vises for arbeidsgivere nå",
+    "none": "Du har ikke oppgitt noen formidlingsavgift. Arbeidsgivere ser ingen.",
+    "amount": "Beløp",
+    "currency": "Valuta",
+    "condition": "Når avgiften gjelder",
+    "conditionHint": "Dine egne ord, vist til arbeidsgiveren slik de er skrevet.",
+    "termsUrl": "Lenke til de fullstendige vilkårene (valgfritt)",
+    "termsUrlHint": "Hvis feltet står tomt, får arbeidsgivere beskjed om at de fullstendige vilkårene ikke er publisert.",
+    "save": "Lagre",
+    "saving": "Lagrer…",
+    "retire": "Slutt å vise en avgift",
+    "saved": "Lagret. Arbeidsgivere ser nå avgiften ved kandidatene dine.",
+    "retired": "Arbeidsgivere ser ikke lenger noen avgift.",
+    "unavailable": "Formidlingsavgifter er ikke tilgjengelige ennå.",
+    "feeLine": "Formidlingsavgift – {fee} per vellykket ansatt arbeidstaker.",
+    "errors": {
+      "invalid": "Sjekk beløpet, valutaen med tre bokstaver og lenken (https://).",
+      "notAgency": "Bare et byrå kan oppgi en formidlingsavgift.",
+      "notFound": "Du kan ikke endre avgiften til denne organisasjonen.",
+      "auth": "Logg inn igjen.",
+      "error": "Det ble ikke lagret. Prøv igjen."
+    }
+  },
+  "agencyPartnerships": {
+    "title": "Partnerbyråer",
+    "intro": "Send en kundes behov videre til et annet byrå. Når kandidaten deres formidles, får byrået den avtalte andelen av formidlingsavgiften din.",
+    "unavailable": "Partnerbyråer er ikke tilgjengelige ennå.",
+    "empty": "Ingen partnerbyråer ennå.",
+    "working": "Lagrer…",
+    "side": {
+      "lead": "Du leder",
+      "partner": "Du er partner",
+      "invited": "Invitasjon til deg"
+    },
+    "status": {
+      "pending": "Invitert",
+      "active": "Aktiv",
+      "declined": "Avslått",
+      "ended": "Avsluttet"
+    },
+    "shareLine": "Partnerens andel av avgiften: {percent} %",
+    "acceptConsequence": "Hvis du godtar, kan {agency} sende kundenes behov til deg. Når kandidaten din formidles, får du {percent} % av formidlingsavgiften til {agency}.",
+    "accept": "Godta",
+    "accepted": "Godtatt.",
+    "decline": "Avslå",
+    "declined": "Avslått.",
+    "end": "Avslutt partnerskapet",
+    "withdrawInvite": "Trekk tilbake invitasjonen",
+    "ended": "Avsluttet. Behov sendt via det er tatt tilbake, og åpne tilbud er trukket tilbake.",
+    "invite": {
+      "email": "Partnerbyråets e-post",
+      "share": "Partnerens andel, %",
+      "submit": "Inviter",
+      "sent": "Invitasjon opprettet. Byrået ser den når det er logget inn med denne e-posten."
+    },
+    "pass": {
+      "title": "Send en kundes behov videre",
+      "none": "Ingen kunde har delt et behov med deg ennå.",
+      "need": "Kundens behov",
+      "choose": "Velg et behov",
+      "submit": "Send til {agency}",
+      "done": "Sendt.",
+      "takeBack": "Ta tilbake"
+    },
+    "passedToMe": {
+      "title": "Behov sendt til deg",
+      "from": "Fra {agency} · din andel {percent} %",
+      "noRoster": "Listen din har ingen aktiv arbeidstaker å tilby.",
+      "worker": "Din kandidat",
+      "choose": "Velg en arbeidstaker",
+      "offer": "Foreslå for det ledende byrået",
+      "offered": "Foreslått. Det ledende byrået går gjennom kandidaten før kunden deres ser den.",
+      "note": "Merknad til det ledende byrået (valgfritt)",
+      "withdraw": "Trekk tilbake",
+      "returnedWhy": "Returnert: {reason}"
+    },
+    "offerStatus": {
+      "offered": "Tilbudt",
+      "withdrawn": "Trukket tilbake",
+      "accepted": "Godtatt",
+      "declined": "Avslått"
+    },
+    "commissions": {
+      "title": "Provisjoner",
+      "intro": "Forfaller først når arbeidstakeren er formidlet. Ingenting belastes her.",
+      "empty": "Ingen formidlingsavgift godtatt ennå.",
+      "need": "Kundens behov",
+      "role": {
+        "direct": "Din kandidat",
+        "lead": "Kandidat fra {agency}",
+        "partner": "Din kandidat via {agency}"
+      },
+      "amount": "{amount} ({percent} % av {fee})",
+      "status": {
+        "pending": "Venter på formidling",
+        "placed": "Forfalt",
+        "not_placed": "Ikke formidlet"
+      },
+      "due": "Forfaller: {total}"
+    },
+    "errors": {
+      "not_owner": "Bare byråets eier kan gjøre dette.",
+      "not_agency": "Dette selskapet er ikke et byrå.",
+      "invalid_email": "Skriv inn en gyldig e-postadresse.",
+      "invalid_share": "Skriv inn en andel over 0 og under 100 %.",
+      "already_invited": "Denne adressen har allerede en åpen invitasjon.",
+      "invitation_not_found": "Invitasjonen er ikke lenger åpen.",
+      "same_agency": "Et byrå kan ikke være sin egen partner.",
+      "already_partners": "Byråene er allerede partnere.",
+      "partnership_not_found": "Partnerskapet ble ikke funnet.",
+      "partnership_not_open": "Partnerskapet er allerede avsluttet.",
+      "partnership_not_active": "Partnerskapet er ikke aktivt.",
+      "share_not_active": "Behovet deles ikke lenger.",
+      "partner_share_not_found": "Behovet er allerede tatt tilbake.",
+      "worker_not_on_roster": "Arbeidstakeren er ikke på den aktive listen din.",
+      "invalid_note": "Notatet er for langt.",
+      "needs_migration": "Partnerbyråer er ikke tilgjengelige ennå.",
+      "error": "Det gikk ikke. Prøv igjen.",
+      "proposal_not_open": "Kandidaten venter ikke lenger på gjennomgang.",
+      "already_offered": "Denne personen er allerede tilbudt til dette behovet.",
+      "rate_limited": "For mange tilbud akkurat nå. Prøv igjen senere."
+    },
+    "proposalStatus": {
+      "proposed": "Venter på det ledende byråets gjennomgang",
+      "forwarded": "Videresendt til kunden",
+      "returned": "Returnert",
+      "withdrawn": "Trukket tilbake"
+    },
+    "review": {
+      "title": "Partneres kandidater til gjennomgang",
+      "candidate": "{worker} · fra {agency}",
+      "partnerNote": "Partnerens merknad, vises ikke for kunden din: {note}",
+      "forward": "Videresend til kunden din",
+      "forwardConsequence": "Kunden din ser kandidaten som din, med merknaden din nedenfor. Du står ansvarlig overfor kunden din for denne kandidaten.",
+      "yourNote": "Merknaden din til kunden (valgfritt)",
+      "confirm": "Videresend",
+      "forwarded": "Videresendt.",
+      "return": "Returner til partneren",
+      "reason": "Årsak, vises for partneren (valgfritt)",
+      "returned": "Returnert."
     }
   }
 }

@@ -91,6 +91,12 @@ describe("staffing-agency mode is a typed view on the company room", () => {
         "@/lib/agency/bridge-read",
         // the agency's delegated demand + placement lifecycle (owner 2026-09-28)
         "@/lib/agency/delegation-read",
+        // the agency's own placement term (20261114235900) — canonical
+        // companies table, no legacy `agencies` row
+        "@/lib/agency/placement-terms",
+        // agency-to-agency partnerships and commissions (20261118100000, register
+        // 4.30) — canonical companies + agency_candidate_offers, no legacy row
+        "@/lib/agency/partnerships",
       ]).toContain(imp);
     }
     // The components the company room mounts stay clean too.
