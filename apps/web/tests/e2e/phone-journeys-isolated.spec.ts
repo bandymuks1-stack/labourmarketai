@@ -1883,7 +1883,7 @@ test.describe("organisation doors on a phone", () => {
     });
     expect(row.count, "the doors render").toBeGreaterThan(5);
     expect(row.tops, "all doors sit in one row").toBe(1);
-    expect(row.height, "the row is one rail card high").toBeLessThanOrEqual(160);
+    expect(row.height, "the row is one strip pill high").toBeLessThanOrEqual(60);
     expect(row.scrolls, "the row scrolls sideways inside itself").toBe(true);
     expect(row.peek, "the next door shows at the edge").toBe(true);
     expect(row.minHeight, "doors keep the 44 px floor").toBeGreaterThanOrEqual(43.5);
