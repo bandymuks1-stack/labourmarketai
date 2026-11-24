@@ -83,8 +83,14 @@ describe("business history header — the earlier entity's work is never the hol
     expect(businessHistoryHeader(b, HOLDER).split).toBe(false);
   });
 
-  it("an organization with no periods but records: not placed → split (never silently the holder's own)", () => {
+  it("an organization with no period statement: its records are its own history, one total (owner P0 2026-11-24)", () => {
     const b = buildBusinessHistory([rec("x", "2026-03-01", 4, "c")], []);
+    expect(businessHistoryHeader(b, HOLDER).split).toBe(false);
+  });
+
+  it("once a period is stated, records outside every own period still split the header", () => {
+    const b = buildBusinessHistory([rec("x", "2019-03-01", 4, "c")], [OWN]);
+    expect(b.notPlaced.records).toBe(1);
     expect(businessHistoryHeader(b, HOLDER).split).toBe(true);
   });
 });

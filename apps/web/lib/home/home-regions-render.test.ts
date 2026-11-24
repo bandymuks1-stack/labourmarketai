@@ -427,7 +427,8 @@ describe("evidence first — a new worker's ONE gold action is the first work en
       // ONE gold action, and it leads to the journal.
       expect(w.match(/bg-gradient-cta/g), loc).toHaveLength(1);
       expect(w, loc).toMatch(/<a href="\/dashboard\/journal"[^>]*data-testid="today-next-cta"/);
-      expect(w, loc).toContain(lookup(loc, "auth.dashboard.workCard.why.evidenceFirst") as string);
+      // No explanatory line under the action (decisions 0032 and 0034).
+      expect(w, loc).not.toContain(lookup(loc, "auth.dashboard.workCard.why.evidenceFirst") as string);
       // Nothing hidden: the profile step is a plain text link, not a button.
       expect(w, loc).toMatch(/<a href="\/dashboard\/profile#profile-edit"[^>]*data-testid="today-next-secondary"[^>]*data-dim="work"/);
       const secondary = w.match(/<a [^>]*data-testid="today-next-secondary"[^>]*>/)?.[0] ?? "";

@@ -37,6 +37,7 @@ import {
 } from "./business-history";
 import {
   buildCompanyWorkHistory,
+  placeKeyOf,
   type CompanyWorkHistory,
   type PlaceObjectFacts,
 } from "./company-work-history";
@@ -92,6 +93,10 @@ export type CompanyWorkHistoryLoad =
       /** The clients this organization's own records name, most records first. `name`
        *  is null when the caller cannot read that organization (never guessed). */
       readonly clients: readonly { readonly organizationId: string; readonly name: string | null; readonly records: number }[];
+      /** The organization's own records name IT as `subcontractor`: only then
+       *  may the page call it a subcontractor (a `client` party alone proves
+       *  only whom the work was for). */
+      readonly performedAsSubcontractor: boolean;
       /** A read of the work stored in partners' books failed: the surface says so,
        *  and an absent aggregate then means UNKNOWN, never "none" (SEP-7). */
       readonly partnerWorkUnreadable: boolean;
@@ -111,6 +116,10 @@ export async function loadCompanyWorkHistory(
   /** An organization the caller names (`?org=`), checked against the caller's
    *  OWN memberships by `resolveEvidenceOrganization`; absent → the active one. */
   requestedOrganizationId: string | null = null,
+  /** How many projects the summary lists (its counts always cover all). The
+   *  history page keeps the default preview; the organization's Living CV
+   *  asks for its whole Projects block. */
+  options: { readonly projectLimit?: number } = {},
 ): Promise<CompanyWorkHistoryLoad> {
   const supabase = await createClient();
   const {
@@ -187,6 +196,7 @@ export async function loadCompanyWorkHistory(
           status: r.status,
           createdAt: r.created_at,
         })),
+        options.projectLimit,
       )
     : null;
 
@@ -281,6 +291,9 @@ export async function loadCompanyWorkHistory(
     attributedCount: attributed.length,
     forClient,
     clients,
+    performedAsSubcontractor: recs.records.some((r) =>
+      r.parties.some((p) => p.role === "subcontractor" && p.organizationId === org.organizationId),
+    ),
     partnerWorkUnreadable: performedHere === null || doneForHere === null,
     truncated: recs.truncated,
   };
@@ -433,6 +446,7 @@ async function readBusinessHistory(
     periodStart: string | null;
     periodEnd: string | null;
     hours: number | null;
+    contextLabel: string | null;
     withdrawn: boolean;
     superseded: boolean;
   }[],
@@ -492,6 +506,9 @@ async function readBusinessHistory(
         periodEnd: r.periodEnd,
         hours: r.hours,
         sourceLabel: labelOf.get(r.id) ?? null,
+        // The place exactly as the place list groups it: one meaning of
+        // "place" on the whole page (owner P0 2026-11-24).
+        placeKey: placeKeyOf(r),
       })),
     statements,
   );

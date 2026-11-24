@@ -180,7 +180,41 @@
       "actionPhone": "Zadzwoń",
       "actionWebsite": "Otwórz stronę firmy",
       "heroContact": "Jak się skontaktować",
-      "provenance": "Firma sama wypełniła tę stronę."
+      "provenance": "Firma sama wypełniła tę stronę.",
+      "living": {
+        "eyebrow": "Żywe CV",
+        "figures": {
+          "years": "{count, plural, one {rok działalności} few {lata działalności} many {lat działalności} other {lat działalności}}",
+          "hours": "przepracowanych godzin",
+          "people": "{count, plural, one {osoba pracowała} few {osoby pracowały} many {osób pracowało} other {osób pracowało}}",
+          "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
+          "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}",
+          "team": "{count, plural, one {członek zespołu} few {członków zespołu} many {członków zespołu} other {członków zespołu}}"
+        },
+        "doTitle": "Kompetencje",
+        "team": "{count, plural, one {W zespole # osoba} few {W zespole # osoby} many {W zespole # osób} other {W zespole # osób}}",
+        "experienceTitle": "Przepracowane godziny",
+        "confirmedLabel": "Potwierdzone",
+        "confirmedSource": "Zapisane przez pracownika, zatwierdzone przez organizację",
+        "recordedLabel": "Własne zapisy",
+        "recordedSource": "Zapisy organizacji, niepotwierdzone przez drugą stronę",
+        "pending": "{hours} czeka na zatwierdzenie",
+        "hours": "{hours} godz.",
+        "running": "W toku",
+        "completed": "Zakończone",
+        "clients": "Prace wykonane dla: {names}",
+        "tabs": {
+          "overview": "Przegląd",
+          "projects": "Projekty",
+          "experience": "Doświadczenie",
+          "gallery": "Galeria",
+          "team": "Zespół"
+        },
+        "pendingLabel": "Czeka na zatwierdzenie",
+        "ringLabel": "Potwierdzono {share}% godzin z dziennika",
+        "open": "Otwórz Żywe CV",
+        "clientsMore": "Prace wykonane dla: {names} i {count} więcej"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1186,7 @@
     "calendar": "Kalendarz",
     "addEntry": "Dodaj wpis",
     "details": "Dane osobowe",
+    "background": "Języki i wykształcenie",
     "improve": "Co poprawić",
     "capabilities": "Umiejętności i historia pracy",
     "fullRecordsInCv": "Wszystkie dowody z pracy",
@@ -12654,7 +12689,7 @@
       },
       "verify": {
         "title": "Proszę potwierdzić e-mail, aby zobaczyć zaproszenia wysłane na ten adres",
-        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę. Wszystko inne na koncie działa jak dotąd; potwierdzenie jest potrzebne tylko do zobaczenia lub przyjęcia tych zaproszeń.",
+        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę.",
         "send": "Wyślij mi jednorazowy link",
         "sending": "Wysyłanie…",
         "sent": "Wysłaliśmy jednorazowy link na {email}. Proszę go otworzyć na tym urządzeniu, aby dokończyć.",
@@ -14462,7 +14497,7 @@
       "navCalendar": "Kalendarz",
       "navProfile": "Profil",
       "clarifyWorkLog": "Którego dnia i jak długo Państwo pracowali? Na przykład: „Dziś od 8 do 17, 30 minut przerwy, montaż okien”.",
-      "calendarHint": "Swój plan znajdą Państwo w zakładce „Kalendarz”. Tutaj mogę pomóc zapisać czas pracy lub przejrzeć oferty.",
+      "calendarHint": "Swój plan znajdą Państwo w zakładce „Kalendarz”.",
       "messagesHint": "Oto Państwa wiadomości — poniższy link je otwiera.",
       "reminderBlocked": "Nie mogę jeszcze wysyłać przypomnień — nie ma mechanizmu przypomnień, więc nie stworzę fałszywego. Dodam tę funkcję, gdy zostanie włączona.",
       "switchContextPersonal": "przestrzeń osobista",
@@ -14718,6 +14753,34 @@
       "findWorkInCompanyContext": "Szukanie pracy to Państwa własne działanie — w przestrzeni firmy go nie uruchamiam. Proszę przełączyć się na przestrzeń osobistą i zapytać ponownie.",
       "findWorkInCompanyWhy": "Pracy szuka człowiek, nie firma — odpowiadam z Państwa przestrzeni osobistej.",
       "personalOnlyInCompany": "To działanie osobiste — w przestrzeni firmy go nie wykonuję. Proszę przełączyć się na przestrzeń osobistą i kontynuować tam.",
+      "needsOrganization": "To wykonuje się dla organizacji, a żadna z przestrzeni nie może tego jeszcze zrobić.",
+      "readFailed": "Nie udało się tego teraz odczytać — błąd po naszej stronie. Nic nie zmieniono. Proszę spróbować za chwilę.",
+      "taskStatusAsk": "Jaki stan ustawić dla zadania: rozpoczęte, wykonane czy zablokowane?",
+      "stageStatusAsk": "Jaki stan ustawić dla etapu: rozpoczęty, wykonany czy zablokowany?",
+      "chipStatusStarted": "Rozpoczęte",
+      "chipStatusDone": "Wykonane",
+      "chipStatusBlocked": "Zablokowane",
+      "professionAsk": "O jaki zawód lub fach chodzi?",
+      "crossSpace": {
+        "personal": {
+          "cv": "CV znajduje się w przestrzeni osobistej, nie w organizacji.",
+          "journal": "Własny dziennik pracy znajduje się w przestrzeni osobistej.",
+          "profile": "Profil znajduje się w przestrzeni osobistej.",
+          "calendar": "Własny kalendarz znajduje się w przestrzeni osobistej."
+        },
+        "open": {
+          "cv": "Przełącz i otwórz moje CV",
+          "journal": "Przełącz i otwórz mój dziennik",
+          "profile": "Przełącz i otwórz mój profil",
+          "calendar": "Przełącz i otwórz mój kalendarz"
+        },
+        "askWhoseCv": "Chodzi o własne CV czy o CV kandydata?",
+        "organizationHistory": "Zapisem organizacji jest jej historia prac.",
+        "openOrganizationHistory": "Otwórz historię organizacji",
+        "organization": "To wykonuje się w przestrzeni organizacji: {name}.",
+        "switchTo": "Przełącz na {name} i kontynuuj",
+        "whichOrganization": "To wykonuje się w przestrzeni organizacji. W której?"
+      },
       "newJobsIntro": "Nowe oferty zgodne z Państwa preferencjami: {count}.",
       "newJobsAll": "Wszystkie możliwości",
       "newJobsNone": "W ostatnich dniach nie pojawiły się nowe oferty zgodne z Państwa preferencjami. Wszystkie możliwości znajdą Państwo na stronie możliwości.",
@@ -15977,7 +16040,7 @@
       "lasting": "Państwa doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     },
     "v3": {
-      "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
+      "lead": "Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
       "market": {
@@ -18919,7 +18982,8 @@
       "heading": "Zaproszenia od organizacji",
       "explainer": "Skierowane do Państwa zaproszenia do zarządu. Po przyjęciu organizacja pojawi się w przełączniku przestrzeni.",
       "accept": "Przyjmij",
-      "decline": "Odrzuć"
+      "decline": "Odrzuć",
+      "invitedBy": "Zaproszenie od {name}"
     },
     "members": {
       "heading": "Członkowie organizacji",
@@ -19380,7 +19444,11 @@
         "open": "Otwórz przestrzeń {name}",
         "opening": "Otwieranie…",
         "error": "Nie udało się otworzyć przestrzeni roboczej."
-      }
+      },
+      "structure": "Wcześniejsza praca była wykonywana w ramach {names}.",
+      "structureLater": ", później ",
+      "structureForClient": "Wcześniejsza praca w ramach {names} dla zleceniodawcy {client}.",
+      "structureAsSubcontractor": "Podwykonawca: {names} → zleceniodawca {client}."
     },
     "projects": {
       "title": "Projekty na platformie",
@@ -19411,7 +19479,8 @@
       "title": "Klienci",
       "unnamed": "Organizacja klienta",
       "records": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
-    }
+    },
+    "descriptionNotInSource": "Brak opisu pracy w źródle"
   },
   "workPlan": {
     "title": "Zaplanowana praca",
@@ -19645,6 +19714,14 @@
     "noDemand": "Obecnie nie ma otwartego zapotrzebowania, do którego można złożyć ofertę.",
     "demandLabel": "Zapotrzebowanie",
     "demandPlaceholder": "Wybierz zapotrzebowanie",
+    "need": {
+      "people": "Osoby",
+      "start": "Początek",
+      "duration": "Czas trwania",
+      "language": "Język",
+      "skills": "Umiejętności",
+      "tools": "Narzędzia"
+    },
     "alreadyOffered": "już zaproponowano",
     "noteLabel": "Wiadomość do firmy (opcjonalnie)",
     "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",

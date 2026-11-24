@@ -4,6 +4,7 @@ import { History } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Link } from "@/lib/i18n/navigation";
 import { peopleInRecords } from "@/lib/organization-evidence/company-work-history";
+import { isImportPlaceholderText, workDescription } from "@/lib/organization-evidence/import-placeholder-text";
 import { nf, span } from "@/components/app/organization/company-work-history";
 import { EvidenceState, type EvidenceStanding } from "@/components/app/work-world/primitives";
 import { createClient } from "@/lib/supabase/server";
@@ -41,6 +42,7 @@ export async function ProjectHistoricalWork({
   const tRecords = await getTranslations("evidenceImport.records");
   const tState = await getTranslations("evidenceImport.evidenceState");
   const tDisclose = await getTranslations("companyPerson");
+  const tHistory = await getTranslations("companyWorkHistory");
 
   const read = await readEvidenceForProject({ supabase, userId: user.id, locale }, projectId);
   if (read.kind === "unprovisioned") return null;
@@ -185,7 +187,11 @@ export async function ProjectHistoricalWork({
                 {rec.contextLabel ? (
                   <p className="text-meta text-text-muted">{rec.contextLabel}</p>
                 ) : null}
-                {rec.text ? <p className="text-sm text-text-secondary">{rec.text}</p> : null}
+                {workDescription(rec.text) ? (
+                  <p className="text-sm text-text-secondary">{rec.text}</p>
+                ) : isImportPlaceholderText(rec.text) ? (
+                  <p className="text-meta text-text-muted">{tHistory("descriptionNotInSource")}</p>
+                ) : null}
                 <p className="font-mono text-meta uppercase tracking-label text-text-muted">
                   {tRecords("notIndependentlyVerified")}
                 </p>

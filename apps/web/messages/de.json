@@ -180,7 +180,41 @@
       "actionPhone": "Anrufen",
       "actionWebsite": "Website des Unternehmens öffnen",
       "heroContact": "So erreichen Sie es",
-      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt."
+      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt.",
+      "living": {
+        "eyebrow": "Lebendiger Lebenslauf",
+        "figures": {
+          "years": "{count, plural, one {Jahr aktiv} other {Jahre aktiv}}",
+          "hours": "geleistete Stunden",
+          "people": "{count, plural, one {Person hat hier gearbeitet} other {Personen haben hier gearbeitet}}",
+          "projects": "{count, plural, one {Projekt} other {Projekte}}",
+          "places": "{count, plural, one {Baustelle} other {Baustellen}}",
+          "team": "{count, plural, one {Teammitglied} other {Teammitglieder}}"
+        },
+        "doTitle": "Kompetenzen",
+        "team": "{count, plural, one {# Person im Team} other {# Personen im Team}}",
+        "experienceTitle": "Geleistete Stunden",
+        "confirmedLabel": "Bestätigt",
+        "confirmedSource": "Vom Mitarbeiter erfasst, von der Organisation freigegeben",
+        "recordedLabel": "Eigene Aufzeichnungen",
+        "recordedSource": "Aufzeichnungen der Organisation, von keiner anderen Seite bestätigt",
+        "pending": "{hours} warten auf Freigabe",
+        "hours": "{hours} Std.",
+        "running": "Laufend",
+        "completed": "Abgeschlossen",
+        "clients": "Arbeiten ausgeführt für: {names}",
+        "tabs": {
+          "overview": "Übersicht",
+          "projects": "Projekte",
+          "experience": "Erfahrung",
+          "gallery": "Galerie",
+          "team": "Mitarbeitende"
+        },
+        "pendingLabel": "Wartet auf Freigabe",
+        "ringLabel": "{share}% der Journalstunden bestätigt",
+        "open": "Lebendigen Lebenslauf öffnen",
+        "clientsMore": "Arbeiten ausgeführt für: {names} und {count} weitere"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1186,7 @@
     "calendar": "Kalender",
     "addEntry": "Eintrag hinzufügen",
     "details": "Persönliche Daten",
+    "background": "Sprachen & Ausbildung",
     "improve": "Verbesserungspunkte",
     "capabilities": "Fähigkeiten & Arbeitshistorie",
     "fullRecordsInCv": "Alle Arbeitseinträge",
@@ -12654,7 +12689,7 @@
       },
       "verify": {
         "title": "Bestätigen Sie Ihre E-Mail, um daran gerichtete Einladungen zu sehen",
-        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann. Alles andere in Ihrem Konto funktioniert wie bisher; das ist nur nötig, um diese Einladungen zu sehen oder anzunehmen.",
+        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann.",
         "send": "Einmal-Link senden",
         "sending": "Wird gesendet…",
         "sent": "Wir haben einen Einmal-Link an {email} gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
@@ -14462,7 +14497,7 @@
       "navCalendar": "Kalender",
       "navProfile": "Profil",
       "clarifyWorkLog": "An welchem Tag und wie lange haben Sie gearbeitet? Zum Beispiel: „Heute von 8 bis 17, 30 Min Pause, Fenster montiert“.",
-      "calendarHint": "Ihren Plan finden Sie im Tab „Kalender“. Hier kann ich beim Erfassen der Arbeitszeit helfen oder Angebote zeigen.",
+      "calendarHint": "Ihren Plan finden Sie im Tab „Kalender“.",
       "messagesHint": "Hier sind Ihre Nachrichten — der Link unten öffnet sie.",
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "switchContextPersonal": "persönlicher Bereich",
@@ -14718,6 +14753,34 @@
       "findWorkInCompanyContext": "Die Jobsuche ist Ihre eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechseln Sie in Ihren persönlichen Bereich und fragen Sie noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus Ihrem persönlichen Bereich.",
       "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechseln Sie in Ihren persönlichen Bereich und machen Sie dort weiter.",
+      "needsOrganization": "Das geschieht für eine Organisation, und keiner Ihrer Bereiche kann das bisher.",
+      "readFailed": "Das konnte ich gerade nicht lesen — der Fehler liegt bei uns. Nichts wurde geändert. Versuchen Sie es gleich noch einmal.",
+      "taskStatusAsk": "Welchen Status soll die Aufgabe haben: begonnen, erledigt oder blockiert?",
+      "stageStatusAsk": "Welchen Status soll die Etappe haben: begonnen, erledigt oder blockiert?",
+      "chipStatusStarted": "Begonnen",
+      "chipStatusDone": "Erledigt",
+      "chipStatusBlocked": "Blockiert",
+      "professionAsk": "Welchen Beruf oder welches Handwerk meinen Sie?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Ihr Lebenslauf liegt in Ihrem persönlichen Bereich, nicht in der Organisation.",
+          "journal": "Ihr eigenes Arbeitstagebuch liegt in Ihrem persönlichen Bereich.",
+          "profile": "Ihr Profil liegt in Ihrem persönlichen Bereich.",
+          "calendar": "Ihr eigener Kalender liegt in Ihrem persönlichen Bereich."
+        },
+        "open": {
+          "cv": "Wechseln und meinen Lebenslauf öffnen",
+          "journal": "Wechseln und mein Tagebuch öffnen",
+          "profile": "Wechseln und mein Profil öffnen",
+          "calendar": "Wechseln und meinen Kalender öffnen"
+        },
+        "askWhoseCv": "Ihr eigener Lebenslauf oder der eines Kandidaten?",
+        "organizationHistory": "Die Aufzeichnung der Organisation ist ihre Arbeitshistorie.",
+        "openOrganizationHistory": "Historie der Organisation öffnen",
+        "organization": "Das geschieht im Bereich der Organisation: {name}.",
+        "switchTo": "Zu {name} wechseln und fortfahren",
+        "whichOrganization": "Das geschieht im Bereich einer Organisation. In welchem?"
+      },
       "newJobsIntro": "Neue Stellen nach Ihren Vorgaben: {count}.",
       "newJobsAll": "Alle Möglichkeiten",
       "newJobsNone": "In den letzten Tagen sind keine neuen Stellen zu Ihren Vorgaben erschienen. Alle Möglichkeiten finden Sie auf der Seite der Möglichkeiten.",
@@ -15977,7 +16040,7 @@
       "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
     },
     "v3": {
-      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
+      "lead": "Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
       "market": {
@@ -18919,7 +18982,8 @@
       "heading": "Einladungen von Organisationen",
       "explainer": "An Sie gerichtete Einladungen in die Leitung. Nach der Annahme erscheint die Organisation in Ihrer Bereichsauswahl.",
       "accept": "Annehmen",
-      "decline": "Ablehnen"
+      "decline": "Ablehnen",
+      "invitedBy": "Eingeladen von {name}"
     },
     "members": {
       "heading": "Mitglieder der Organisation",
@@ -19380,7 +19444,11 @@
         "open": "Arbeitsbereich {name} öffnen",
         "opening": "Wird geöffnet…",
         "error": "Der Arbeitsbereich konnte nicht geöffnet werden."
-      }
+      },
+      "structure": "Frühere Arbeit wurde unter {names} erbracht.",
+      "structureLater": ", später ",
+      "structureForClient": "Frühere Arbeit unter {names} für den Auftraggeber {client}.",
+      "structureAsSubcontractor": "Subunternehmer: {names} → Auftraggeber {client}."
     },
     "projects": {
       "title": "Projekte auf der Plattform",
@@ -19411,7 +19479,8 @@
       "title": "Auftraggeber",
       "unnamed": "Auftraggebende Organisation",
       "records": "{count, plural, one {# Eintrag} other {# Einträge}}"
-    }
+    },
+    "descriptionNotInSource": "Keine Arbeitsbeschreibung in der Quelle"
   },
   "workPlan": {
     "title": "Geplante Arbeit",
@@ -19645,6 +19714,14 @@
     "noDemand": "Derzeit gibt es keinen offenen Bedarf, für den sich ein Angebot lohnt.",
     "demandLabel": "Bedarf",
     "demandPlaceholder": "Bedarf wählen",
+    "need": {
+      "people": "Personen",
+      "start": "Beginn",
+      "duration": "Dauer",
+      "language": "Sprache",
+      "skills": "Fähigkeiten",
+      "tools": "Werkzeuge"
+    },
     "alreadyOffered": "bereits angeboten",
     "noteLabel": "Hinweis an das Unternehmen (optional)",
     "notePlaceholder": "Zum Beispiel: Trupp von 3, Start in zwei Wochen möglich",

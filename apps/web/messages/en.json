@@ -180,7 +180,41 @@
       "actionPhone": "Call",
       "actionWebsite": "Open the company's website",
       "heroContact": "How to get in touch",
-      "provenance": "The company filled in this page itself."
+      "provenance": "The company filled in this page itself.",
+      "living": {
+        "eyebrow": "Living CV",
+        "figures": {
+          "years": "{count, plural, one {year active} other {years active}}",
+          "hours": "hours worked",
+          "people": "{count, plural, one {person worked here} other {people worked here}}",
+          "projects": "{count, plural, one {project} other {projects}}",
+          "places": "{count, plural, one {work site} other {work sites}}",
+          "team": "{count, plural, one {team member} other {team members}}"
+        },
+        "doTitle": "Competencies",
+        "team": "{count, plural, one {# person on the team} other {# people on the team}}",
+        "experienceTitle": "Hours worked",
+        "confirmedLabel": "Confirmed",
+        "confirmedSource": "Recorded by the worker, approved by the organization",
+        "recordedLabel": "Own records",
+        "recordedSource": "The organization's records, not confirmed by another party",
+        "pending": "{hours} waiting for approval",
+        "hours": "{hours} h",
+        "running": "Ongoing",
+        "completed": "Completed",
+        "clients": "Work done for: {names}",
+        "tabs": {
+          "overview": "Overview",
+          "projects": "Projects",
+          "experience": "Experience",
+          "gallery": "Gallery",
+          "team": "Team"
+        },
+        "pendingLabel": "Waiting for approval",
+        "ringLabel": "{share}% of journal hours confirmed",
+        "open": "Open the Living CV",
+        "clientsMore": "Work done for: {names} and {count} more"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1186,7 @@
     "calendar": "Calendar",
     "addEntry": "Add entry",
     "details": "Personal details",
+    "background": "Languages & education",
     "improve": "What to improve",
     "capabilities": "Skills & work history",
     "fullRecordsInCv": "All work records",
@@ -12654,7 +12689,7 @@
       },
       "verify": {
         "title": "Verify your email to see invitations sent to it",
-        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox. Everything else in your account works as it is; this is only needed to see or accept these invitations.",
+        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox.",
         "send": "Send me a one-time link",
         "sending": "Sending…",
         "sent": "We sent a one-time link to {email}. Open it on this device to finish.",
@@ -14462,7 +14497,7 @@
       "navCalendar": "Calendar",
       "navProfile": "Profile",
       "clarifyWorkLog": "Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
-      "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "calendarHint": "You'll find your plan in the “Calendar” tab.",
       "messagesHint": "Here are your messages — the link below opens them.",
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "switchContextPersonal": "personal space",
@@ -14718,6 +14753,34 @@
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
       "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
+      "needsOrganization": "That is done for an organization, and none of your spaces can do it yet.",
+      "readFailed": "I could not read that just now — the fault is on our side. Nothing was changed. Try again in a moment.",
+      "taskStatusAsk": "Which state should the task have: started, done or blocked?",
+      "stageStatusAsk": "Which state should the stage have: started, done or blocked?",
+      "chipStatusStarted": "Started",
+      "chipStatusDone": "Done",
+      "chipStatusBlocked": "Blocked",
+      "professionAsk": "Which profession or trade do you mean?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Your CV is in your personal space, not in the organization.",
+          "journal": "Your own work journal is in your personal space.",
+          "profile": "Your profile is in your personal space.",
+          "calendar": "Your own calendar is in your personal space."
+        },
+        "open": {
+          "cv": "Switch and open my CV",
+          "journal": "Switch and open my journal",
+          "profile": "Switch and open my profile",
+          "calendar": "Switch and open my calendar"
+        },
+        "askWhoseCv": "Your own CV, or a candidate's?",
+        "organizationHistory": "The organization's record is its work history.",
+        "openOrganizationHistory": "Open the organization's history",
+        "organization": "This is done in the organization space: {name}.",
+        "switchTo": "Switch to {name} and continue",
+        "whichOrganization": "This is done in an organization space. Which one?"
+      },
       "newJobsIntro": "New postings that fit your preferences: {count}.",
       "newJobsAll": "All opportunities",
       "newJobsNone": "No new postings fitting your preferences appeared in the last few days. You will find every opportunity on the opportunities page.",
@@ -15977,7 +16040,7 @@
       "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
     },
     "v3": {
-      "lead": "For workers, employers and service providers in every profession and sector. Registration and basic request posting are free.",
+      "lead": "Registration and basic request posting are free.",
       "or": "or describe it in your own words",
       "needFree": "You can submit an enquiry without registering. Submission is free; service terms and price are agreed separately.",
       "market": {
@@ -18919,7 +18982,8 @@
       "heading": "Organization invitations",
       "explainer": "Governance invitations addressed to you. Accepting makes the organization appear in your workspace switcher.",
       "accept": "Accept",
-      "decline": "Decline"
+      "decline": "Decline",
+      "invitedBy": "Invited by {name}"
     },
     "members": {
       "heading": "Organization members",
@@ -19380,7 +19444,11 @@
         "open": "Open {name} workspace",
         "opening": "Opening…",
         "error": "The workspace could not be opened."
-      }
+      },
+      "structure": "Earlier work was done under {names}.",
+      "structureLater": ", later ",
+      "structureForClient": "Earlier work under {names}, for client {client}.",
+      "structureAsSubcontractor": "Subcontractor: {names} → client {client}."
     },
     "projects": {
       "title": "Projects on the platform",
@@ -19411,7 +19479,8 @@
       "title": "Clients",
       "unnamed": "Client organization",
       "records": "{count, plural, one {# record} other {# records}}"
-    }
+    },
+    "descriptionNotInSource": "No work description in the source"
   },
   "workPlan": {
     "title": "Planned work",
@@ -19645,6 +19714,14 @@
     "noDemand": "There is no open demand to offer against right now.",
     "demandLabel": "Demand",
     "demandPlaceholder": "Choose a demand",
+    "need": {
+      "people": "People",
+      "start": "Start",
+      "duration": "Duration",
+      "language": "Language",
+      "skills": "Skills",
+      "tools": "Tools"
+    },
     "alreadyOffered": "already offered",
     "noteLabel": "Note to the company (optional)",
     "notePlaceholder": "For example: crew of 3, can start in two weeks",

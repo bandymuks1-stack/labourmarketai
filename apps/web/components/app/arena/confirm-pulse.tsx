@@ -157,17 +157,14 @@ export async function OrganizationApprovalsCard() {
         </>
       ) : (
         <>
-          {view.state === "waiting" ? <p className="text-sm leading-relaxed text-text-secondary">{t("what")}</p> : null}
           {/* Stays mounted when the last entry is approved, so its receipt survives. */}
           <QuickConfirmQueue
             entries={entries}
             todays={[]}
             exceptions={{}}
-            empty={
-              <p className="text-sm leading-relaxed text-text-secondary" data-testid="organization-approvals-empty">
-                {reason.noEmployees ? t("noEmployees") : reason.reviewOff ? t("emptyTitle") : `${t("emptyTitle")} ${t("emptyNext")}`}
-              </p>
-            }
+            // Nothing waits: the title already says "0" (decisions 0032 and
+            // 0034 — no sentence that repeats or explains it).
+            empty={false}
           />
           {waiting > entries.length ? (
             <Link href={"/dashboard/inbox/quick" as "/dashboard"} className={lineLink} data-testid="organization-approvals-all">

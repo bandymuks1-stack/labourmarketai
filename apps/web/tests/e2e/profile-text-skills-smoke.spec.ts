@@ -62,7 +62,7 @@ mkdirSync(SCREENSHOT_DIR, { recursive: true });
  * TEXT flow, so it steps back to the composer the way a person would.
  */
 async function openComposer(page: Page): Promise<void> {
-  await page.goto("/lt/dashboard/profile#profile-edit", { waitUntil: "networkidle" });
+  await page.goto("/lt/dashboard/profile?tab=edit#profile-edit", { waitUntil: "networkidle" });
   await expect(page.locator("main #profile-edit")).toHaveJSProperty("open", true);
   const back = page.getByTestId("profile-text-flow-manual-back");
   if (await back.isVisible()) await back.click();

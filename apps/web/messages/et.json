@@ -3986,7 +3986,7 @@
       "navCalendar": "[EN] Calendar",
       "navProfile": "[EN] Profile",
       "clarifyWorkLog": "[EN] Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
-      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
@@ -4092,6 +4092,34 @@
       "findWorkInCompanyContext": "Tööotsing on sinu enda tegevus — ettevõtte ruumis ma seda ei käivita. Lülitu oma isiklikku ruumi ja küsi uuesti.",
       "findWorkInCompanyWhy": "Tööd otsib inimene, mitte ettevõte — vastan sinu isiklikust ruumist.",
       "personalOnlyInCompany": "See on isiklik tegevus — ettevõtte ruumis ma seda ei tee. Lülitu isiklikku ruumi ja jätka seal.",
+      "needsOrganization": "Seda tehakse organisatsiooni jaoks ja ükski teie ruum ei saa seda veel teha.",
+      "readFailed": "Ma ei saanud seda praegu lugeda — viga on meie poolel. Midagi ei muudetud. Proovige hetke pärast uuesti.",
+      "taskStatusAsk": "Millise oleku ülesanne saab: alustatud, tehtud või blokeeritud?",
+      "stageStatusAsk": "Millise oleku etapp saab: alustatud, tehtud või blokeeritud?",
+      "chipStatusStarted": "Alustatud",
+      "chipStatusDone": "Tehtud",
+      "chipStatusBlocked": "Blokeeritud",
+      "professionAsk": "Millist ametit või oskust mõtlete?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Teie CV on isiklikus ruumis, mitte organisatsioonis.",
+          "journal": "Teie enda tööpäevik on isiklikus ruumis.",
+          "profile": "Teie profiil on isiklikus ruumis.",
+          "calendar": "Teie enda kalender on isiklikus ruumis."
+        },
+        "open": {
+          "cv": "Lülita ümber ja ava minu CV",
+          "journal": "Lülita ümber ja ava minu päevik",
+          "profile": "Lülita ümber ja ava minu profiil",
+          "calendar": "Lülita ümber ja ava minu kalender"
+        },
+        "askWhoseCv": "Teie enda CV või kandidaadi oma?",
+        "organizationHistory": "Organisatsiooni kirje on tema tööajalugu.",
+        "openOrganizationHistory": "Ava organisatsiooni ajalugu",
+        "organization": "Seda tehakse organisatsiooni ruumis: {name}.",
+        "switchTo": "Lülita ümber: {name} ja jätka",
+        "whichOrganization": "Seda tehakse organisatsiooni ruumis. Millises?"
+      },
       "newJobsIntro": "Uusi sinu eelistustele sobivaid kuulutusi: {count}.",
       "newJobsAll": "Kõik võimalused",
       "newJobsNone": "Viimastel päevadel pole sinu eelistustele sobivaid uusi kuulutusi ilmunud. Kõik võimalused leiad võimaluste lehelt.",
@@ -4820,7 +4848,7 @@
       "lasting": "Sinu kogemus ja võimalused jäävad alati kättesaadavaks — kui vahetad tööd, projekti või riiki."
     },
     "v3": {
-      "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine ja põhivajaduse avaldamine on tasuta.",
+      "lead": "Registreerimine ja põhivajaduse avaldamine on tasuta.",
       "or": "või kirjeldage oma sõnadega",
       "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
       "market": {
@@ -6993,7 +7021,8 @@
       "heading": "Organisatsioonide kutsed",
       "explainer": "Sulle suunatud juhtimiskutsed. Vastuvõtmisel ilmub organisatsioon sinu tööruumide valijasse.",
       "accept": "Võta vastu",
-      "decline": "Lükka tagasi"
+      "decline": "Lükka tagasi",
+      "invitedBy": "Kutsuja: {name}"
     },
     "members": {
       "heading": "Organisatsiooni liikmed",
@@ -7088,7 +7117,8 @@
       "places": "Kohad",
       "people": "Inimesed",
       "hours": "Salvestatud tunnid",
-      "period": "Periood"
+      "period": "Periood",
+      "dayHours": "Tunnid üksikutel päevadel"
     },
     "place": "Koht",
     "noPlaceName": "Kohta pole märgitud",
@@ -7125,7 +7155,8 @@
       "progress": "{attributed} / {total} omistatud: {name}",
       "done": "Omistatud kirjeid: {count}; juba omistatud: {skipped}.",
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
-      "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
+      "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}",
+      "personPeriod": "{hours} h perioodi kogusumma (üksikutele päevadele ei liideta)"
     },
     "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid.",
     "projects": {
@@ -7157,7 +7188,74 @@
       "title": "Tellijad",
       "unnamed": "Tellija organisatsioon",
       "records": "{count, plural, one {# kirje} other {# kirjet}}"
-    }
+    },
+    "periodShort": "{hours} h perioodi kogusumma",
+    "business": {
+      "unavailable": "Ettevõtte ajalugu ei õnnestunud praegu lugeda. Midagi pole kadunud — proovi hiljem uuesti.",
+      "eyebrow": "Ettevõtte ajalugu",
+      "title": "{name}: üks järjepidev ajalugu",
+      "subtitle": "Iga allpool olev arv loeb organisatsiooni enda salvestatud tööd ühe korra. Perioodid näitavad, mida on varasemate juriidiliste isikute kohta märgitud ja millel see märge põhineb.",
+      "titleHeld": "{name}: hoitavad töökirjed perioodide kaupa",
+      "subtitleHeld": "Varasema juriidilise isiku all tehtud töö kuulub sellele juriidilisele isikule ja inimestele, kes selle tegid. {name} hoiab neid kirjeid dokumenteeritud järjepidevusena; neid ei näidata kui ettevõtte {name} enda tööd.",
+      "headerOwn": "Ettevõtte {name} enda periood",
+      "headerEarlier": "Varasem juriidiline isik: {name}",
+      "headerUnstated": "Periood „{label}” — juriidiline isik märkimata",
+      "headerNotPlaced": "Kirjed, mis ei kuulu ühtegi märgitud perioodi",
+      "continuityNotSuccession": "Järjepidevus dokumenteeritud; õigusjärglust ei väideta.",
+      "totalsHeld": "Kõik ettevõtte {name} hoitavad kirjed kõigi perioodide lõikes, igaüks arvestatud üks kord — kõik ei ole ettevõtte {name} enda töö.",
+      "figures": "{records} kirjet · {hours} h · {people} inimest · {places} kohta",
+      "totals": {
+        "records": "Kirjed",
+        "hours": "Tunnid",
+        "people": "Inimesed",
+        "places": "Kohad",
+        "projects": "Projektid",
+        "span": "Ajavahemik"
+      },
+      "spanUnknown": "kuupäevi pole salvestatud",
+      "periodsTitle": "Ettevõtte perioodid",
+      "noPeriods": "Selle ettevõtte kohta pole veel ühtegi perioodi märgitud. Kui töö algas varasema juriidilise isiku all, saab selle salvestada märgitud perioodina — kirjed ise jäävad muutmata.",
+      "bounds": "{from} – {to}",
+      "notDocumented": "dokumenteerimata",
+      "boundsNotDocumented": "Kuupäevad dokumenteerimata",
+      "legalEntity": "Juriidiline isik tollal: {name}",
+      "relation": {
+        "not_asserted": "Ei ole märgitud sama juriidilise isikuna — üks järjepidev ettevõtte ajalugu.",
+        "same_entity": "Märgitud sama juriidilise isikuna.",
+        "renamed": "Märgitud sama juriidilise isikuna varasema nime all.",
+        "successor": "Märgitud õiguslikuks eelkäijaks.",
+        "sold_and_continued_by_new_entity": "Varasem juriidiline isik müüdi; tegevus jätkus uue juriidilise isiku kaudu.",
+        "other": "Muu dokumenteeritud seos juriidiliste isikute vahel."
+      },
+      "basis": {
+        "owner_statement": "Omaniku kinnitus",
+        "registry_extract": "Registriväljavõte",
+        "contract": "Leping",
+        "other_document": "Dokument"
+      },
+      "periodNoRecords": "Sellesse perioodi pole veel ühtegi kirjet paigutatud.",
+      "placedBy": "Paigutatud allika sildi {labels} järgi: {byLabel} kirjet; dokumenteeritud kuupäevade järgi: {byDate}.",
+      "notPlaced": "Märgitud perioodi paigutamata (allikal puudub perioodi silt): {figures} · {span}.",
+      "yearsTitle": "Töö aastate kaupa",
+      "undated": "{count, plural, one {# kirjel} other {# kirjel}} puudub kuupäev ja {count, plural, one {see on} other {need on}} arvestatud ainult kogusummades.",
+      "doorsLabel": "Ava samad kirjed",
+      "doors": {
+        "people": "Inimesed",
+        "projects": "Projektid",
+        "places": "Kohad"
+      },
+      "workspace": {
+        "note": "Avasid ettevõtte {name} ajaloo väljaspool selle tööruumi. Inimesed ja projektid avanevad aktiivses tööruumis.",
+        "open": "Ava tööruum {name}",
+        "opening": "Avamine…",
+        "error": "Tööruumi ei õnnestunud avada."
+      },
+      "structure": "Varasem töö tehti juriidilise isiku {names} all.",
+      "structureLater": ", hiljem ",
+      "structureForClient": "Varasem töö {names} kaudu tellijale {client}.",
+      "structureAsSubcontractor": "Alltöövõtja: {names} → tellija {client}."
+    },
+    "descriptionNotInSource": "Allikas puudub töö kirjeldus"
   },
   "workLifecycle": {
     "pending": "Veel mitte",

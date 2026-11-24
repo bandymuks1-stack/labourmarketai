@@ -15,6 +15,21 @@ import { describe, expect, it } from "vitest";
  */
 const SRC = readFileSync(join(__dirname, "../../components/app/organization/company-work-history.tsx"), "utf8");
 
+const PERSON = readFileSync(join(__dirname, "../../components/app/organization/person-history-summary.tsx"), "utf8");
+
+describe("the historical person card fits a 375 px screen (coordinator 2026-11-24)", () => {
+  it("every grid names an unprefixed column template", () => {
+    const grids = [...PERSON.matchAll(/className="([^"]*\bgrid\b[^"]*)"/g)].map((m) => m[1]!);
+    expect(grids.length).toBeGreaterThan(0);
+    for (const cls of grids) expect(cls.split(/\s+/).some((t) => /^grid-cols-/.test(t)), cls).toBe(true);
+  });
+  it("place items and their cards may shrink; descriptions wrap", () => {
+    expect(PERSON).toContain('<li key={p.key} className="min-w-0">');
+    expect(PERSON).toContain('className="flex min-w-0 flex-col gap-2"');
+    expect(PERSON).toMatch(/<li key=\{w\.text\} className="break-words /);
+  });
+});
+
 describe("company history fits a 375 px screen", () => {
   it("every grid names an unprefixed column template", () => {
     const grids = [...SRC.matchAll(/className="([^"]*\bgrid\b[^"]*)"/g)].map((m) => m[1]!);

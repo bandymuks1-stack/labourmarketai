@@ -199,7 +199,7 @@ for (const w of WIDTHS) {
       await clickUntilVisible(vis.getByTestId("discoverability-open"), vis.getByTestId("discoverability-grant"));
       await vis.getByTestId("discoverability-grant").click();
       await expect(vis.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
-      await wk.page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+      await wk.page.goto(`${BASE}/en/dashboard/profile?tab=details#work-card-editor-section`);
       const editor = wk.page.getByRole("main").getByTestId("work-card-editor");
       await clickUntilVisible(wk.page.getByRole("main").getByTestId("work-card-editor-toggle"), editor);
       await editor.locator('select[name="availability_status"]').selectOption("available");

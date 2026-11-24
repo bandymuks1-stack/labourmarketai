@@ -24,6 +24,17 @@ import {
 } from "@/components/app/company-next-actions";
 import { CompanyReadinessSummary } from "@/components/app/company-readiness-summary";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
+import {
+  CompanyTeamProfile,
+  OrganizationLivingEntry,
+  type CompanyTeamTranslate,
+} from "@/components/app/company-team-profile";
+import {
+  ORGANIZATION_LIVING_TABS,
+  organizationLivingTab,
+  type OrganizationLivingTab,
+} from "@/lib/company/team-profile-model";
+import { loadOrganizationLivingCv } from "@/lib/company/organization-living-cv";
 import { BusinessPublicProfilePanel } from "@/components/app/business-public-profile-panel";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { HelpRequestPanel } from "@/components/app/help-request-panel";
@@ -68,7 +79,7 @@ export default async function CompanySettingsPage({
   params: Promise<{ locale: string }>;
   /** A started action that sent the person here to declare a capability
    *  first (`need`), and the action itself to return to (`next`). */
-  searchParams?: Promise<{ need?: string; next?: string }>;
+  searchParams?: Promise<{ need?: string; next?: string; cv?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
@@ -153,6 +164,28 @@ export default async function CompanySettingsPage({
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
     governedActiveOrganizationId(orgContext);
+  // THE ORGANIZATION'S LIVING CV (owner P0 2026-11-24): the business
+  // profile's own view in its member form, from the organization's records.
+  // It is its own block at its own address (`?cv=<tab>`, decision 0034);
+  // Settings carries only the way in. Null when this person may not read
+  // the history: the page is then plain Settings.
+  const cvTab = organizationLivingTab(sp.cv);
+  const tRoot = (await getTranslations()) as unknown as CompanyTeamTranslate;
+  const livingCv =
+    cvTab && capabilityOrgId
+      ? await loadOrganizationLivingCv(locale, capabilityOrgId, companyRow.country)
+      : null;
+  if (cvTab && livingCv) {
+    const tabHref = Object.fromEntries(
+      ORGANIZATION_LIVING_TABS.map((k) => [k, `/${locale}/dashboard/company/settings?cv=${k}`]),
+    ) as Record<OrganizationLivingTab, string>;
+    return (
+      <div className="flex min-w-0 flex-col gap-4" data-testid="company-settings-living-cv">
+        <PageBack href="/dashboard/company/settings">{t("title")}</PageBack>
+        <CompanyTeamProfile view={livingCv} t={tRoot} member={{ locale, tab: cvTab, tabHref }} />
+      </div>
+    );
+  }
   const [declaredCapabilities, orgMembers] = await Promise.all([
     capabilityOrgId ? readOrganizationCapabilities(capabilityOrgId) : [],
     getOrgMembersData("company", companyRow.id),
@@ -186,6 +219,14 @@ export default async function CompanySettingsPage({
           ) : null}
         </div>
       </header>
+
+      {capabilityOrgId ? (
+        <OrganizationLivingEntry
+          name={companyRow.legalName ?? companyRow.displayName ?? t("title")}
+          href={`/${locale}/dashboard/company/settings?cv=overview`}
+          t={tRoot}
+        />
+      ) : null}
 
       {/* Honest data-driven status (name, verification status, what to fix). */}
       <CompanyNextActions company={companyRow} />

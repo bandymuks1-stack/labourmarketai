@@ -180,7 +180,41 @@
       "actionPhone": "Bellen",
       "actionWebsite": "Website van het bedrijf openen",
       "heroContact": "Hoe u contact opneemt",
-      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld.",
+      "living": {
+        "eyebrow": "Levend cv",
+        "figures": {
+          "years": "{count, plural, one {jaar actief} other {jaar actief}}",
+          "hours": "gewerkte uren",
+          "people": "{count, plural, one {persoon werkte hier} other {personen werkten hier}}",
+          "projects": "{count, plural, one {project} other {projecten}}",
+          "places": "{count, plural, one {werklocatie} other {werklocaties}}",
+          "team": "{count, plural, one {teamlid} other {teamleden}}"
+        },
+        "doTitle": "Competenties",
+        "team": "{count, plural, one {# persoon in het team} other {# personen in het team}}",
+        "experienceTitle": "Gewerkte uren",
+        "confirmedLabel": "Bevestigd",
+        "confirmedSource": "Vastgelegd door de werknemer, goedgekeurd door de organisatie",
+        "recordedLabel": "Eigen registraties",
+        "recordedSource": "Registraties van de organisatie, niet bevestigd door een andere partij",
+        "pending": "{hours} wachten op goedkeuring",
+        "hours": "{hours} u",
+        "running": "Lopend",
+        "completed": "Afgerond",
+        "clients": "Werk uitgevoerd voor: {names}",
+        "tabs": {
+          "overview": "Overzicht",
+          "projects": "Projecten",
+          "experience": "Ervaring",
+          "gallery": "Galerij",
+          "team": "Medewerkers"
+        },
+        "pendingLabel": "Wacht op goedkeuring",
+        "ringLabel": "{share}% van de journaaluren bevestigd",
+        "open": "Levend cv openen",
+        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1186,7 @@
     "calendar": "Kalender",
     "addEntry": "Invoer toevoegen",
     "details": "Persoonsgegevens",
+    "background": "Talen & opleiding",
     "improve": "Wat te verbeteren",
     "capabilities": "Vaardigheden & werkgeschiedenis",
     "fullRecordsInCv": "Alle werkregistraties",
@@ -12654,7 +12689,7 @@
       },
       "verify": {
         "title": "Bevestig uw e-mail om uitnodigingen te zien die ernaar zijn gestuurd",
-        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen. Al het andere in uw account werkt zoals het werkte; dit is alleen nodig om deze uitnodigingen te zien of te accepteren.",
+        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen.",
         "send": "Stuur me een eenmalige link",
         "sending": "Bezig met verzenden…",
         "sent": "We hebben een eenmalige link naar {email} gestuurd. Open hem op dit apparaat om af te ronden.",
@@ -14462,7 +14497,7 @@
       "navCalendar": "Agenda",
       "navProfile": "Profiel",
       "clarifyWorkLog": "Op welke dag en hoe lang heeft u gewerkt? Bijvoorbeeld: “Vandaag van 8 tot 17, 30 min pauze, ramen gemonteerd”.",
-      "calendarHint": "Uw plan vindt u in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
+      "calendarHint": "Uw plan vindt u in het tabblad “Agenda”.",
       "messagesHint": "Hier zijn uw berichten — de link hieronder opent ze.",
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
       "switchContextPersonal": "persoonlijke ruimte",
@@ -14718,6 +14753,34 @@
       "findWorkInCompanyContext": "Werk zoeken is uw eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit uw persoonlijke ruimte.",
       "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en ga daar verder.",
+      "needsOrganization": "Dat gebeurt voor een organisatie, en geen van uw ruimtes kan dat nog.",
+      "readFailed": "Dat kon ik nu niet lezen — de fout ligt bij ons. Er is niets gewijzigd. Probeer het zo opnieuw.",
+      "taskStatusAsk": "Welke status moet de taak krijgen: gestart, klaar of geblokkeerd?",
+      "stageStatusAsk": "Welke status moet de fase krijgen: gestart, klaar of geblokkeerd?",
+      "chipStatusStarted": "Gestart",
+      "chipStatusDone": "Klaar",
+      "chipStatusBlocked": "Geblokkeerd",
+      "professionAsk": "Welk beroep of vak bedoelt u?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Uw cv staat in uw persoonlijke ruimte, niet in de organisatie.",
+          "journal": "Uw eigen werkdagboek staat in uw persoonlijke ruimte.",
+          "profile": "Uw profiel staat in uw persoonlijke ruimte.",
+          "calendar": "Uw eigen agenda staat in uw persoonlijke ruimte."
+        },
+        "open": {
+          "cv": "Overschakelen en mijn cv openen",
+          "journal": "Overschakelen en mijn dagboek openen",
+          "profile": "Overschakelen en mijn profiel openen",
+          "calendar": "Overschakelen en mijn agenda openen"
+        },
+        "askWhoseCv": "Uw eigen cv of dat van een kandidaat?",
+        "organizationHistory": "Het overzicht van de organisatie is haar werkgeschiedenis.",
+        "openOrganizationHistory": "Geschiedenis van de organisatie openen",
+        "organization": "Dit gebeurt in de ruimte van de organisatie: {name}.",
+        "switchTo": "Overschakelen naar {name} en doorgaan",
+        "whichOrganization": "Dit gebeurt in de ruimte van een organisatie. Welke?"
+      },
       "newJobsIntro": "Nieuwe vacatures die bij uw voorkeuren passen: {count}.",
       "newJobsAll": "Alle mogelijkheden",
       "newJobsNone": "De afgelopen dagen zijn er geen nieuwe vacatures verschenen die bij uw voorkeuren passen. Alle mogelijkheden vindt u op de pagina met mogelijkheden.",
@@ -15977,7 +16040,7 @@
       "lasting": "Uw ervaring en kansen blijven bereikbaar — als u van baan, project of land wisselt."
     },
     "v3": {
-      "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en de basisplaatsing van een behoefte zijn gratis.",
+      "lead": "Registreren en de basisplaatsing van een behoefte zijn gratis.",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
       "market": {
@@ -18919,7 +18982,8 @@
       "heading": "Uitnodigingen van organisaties",
       "explainer": "Bestuursuitnodigingen die aan u zijn gericht. Na acceptatie verschijnt de organisatie in uw werkruimtekiezer.",
       "accept": "Accepteren",
-      "decline": "Afwijzen"
+      "decline": "Afwijzen",
+      "invitedBy": "Uitgenodigd door {name}"
     },
     "members": {
       "heading": "Leden van de organisatie",
@@ -19380,7 +19444,11 @@
         "open": "Werkomgeving {name} openen",
         "opening": "Bezig met openen…",
         "error": "De werkomgeving kon niet worden geopend."
-      }
+      },
+      "structure": "Eerder werk werd uitgevoerd onder {names}.",
+      "structureLater": ", daarna ",
+      "structureForClient": "Eerder werk onder {names} voor opdrachtgever {client}.",
+      "structureAsSubcontractor": "Onderaannemer: {names} → opdrachtgever {client}."
     },
     "projects": {
       "title": "Projecten op het platform",
@@ -19411,7 +19479,8 @@
       "title": "Opdrachtgevers",
       "unnamed": "Opdrachtgevende organisatie",
       "records": "{count, plural, one {# registratie} other {# registraties}}"
-    }
+    },
+    "descriptionNotInSource": "Geen werkbeschrijving in de bron"
   },
   "workPlan": {
     "title": "Gepland werk",
@@ -19645,6 +19714,14 @@
     "noDemand": "Er is nu geen openstaande vraag om een aanbod op te doen.",
     "demandLabel": "Vraag",
     "demandPlaceholder": "Kies een vraag",
+    "need": {
+      "people": "Mensen",
+      "start": "Aanvang",
+      "duration": "Duur",
+      "language": "Taal",
+      "skills": "Vaardigheden",
+      "tools": "Gereedschap"
+    },
     "alreadyOffered": "al aangeboden",
     "noteLabel": "Bericht aan het bedrijf (optioneel)",
     "notePlaceholder": "Bijvoorbeeld: ploeg van 3, kan over twee weken starten",

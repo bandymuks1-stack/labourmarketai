@@ -137,10 +137,14 @@ describe("(a) recipient scope", () => {
 
   it("(a6) the write paths resolve the recipient from the offer's own rows, never from input", () => {
     const team = read("lib", "company", "team-offer.ts");
-    // Both team directions: the gated counterpart RPC, keyed on the OFFER id.
-    expect(team).toContain('rpc("team_offer_counterpart_v1", { p_offer_id: offerId })');
-    expect(team).toContain("recipientProfileId: await teamOfferCounterpart(ctx.supabase, parsed.offerId),");
-    expect(team).toContain("recipientProfileId: await teamOfferCounterpart(ctx.supabase, input.offerId),");
+    // Both team directions: the gated counterpart RPC, keyed on the OFFER id,
+    // with the caller id the action verified and the event (decision 0033:
+    // service_role only, resolved server-side, never returned to the client).
+    const emitters = read("lib", "notifications", "event-emitters.ts");
+    expect(emitters).toContain('.rpc("team_offer_counterpart_v1", { p_offer_id: offerId, p_caller: callerId, p_event: event })');
+    expect(team).toContain('recipientProfileId: await teamOfferCounterpart(parsed.offerId, ctx.userId, "offered"),');
+    expect(team).toContain("recipientProfileId: await teamOfferCounterpart(input.offerId, ctx.userId, data),");
+    expect(team).not.toMatch(/createAdminClient/);
     expect(team).not.toMatch(/recipientProfileId: input\./);
 
     const bridge = read("lib", "agency", "bridge-actions.ts");
