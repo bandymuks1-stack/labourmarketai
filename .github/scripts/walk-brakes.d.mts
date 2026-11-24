@@ -26,6 +26,8 @@ export declare function judgeDeployBrake(
   runs: readonly { id: number; status: string; updated_at: string | null; deploySkipped?: boolean }[],
   now?: Date,
   t?: typeof THRESHOLDS,
+  /** Inside a deploy-vps.yml run: that run's id and the end of its own `deploy` job. */
+  own?: { id: number; deployEndedAt: string | null } | null,
 ): { refuse: boolean; reason: string };
 
 export declare function judgeWalkRun(input: {
