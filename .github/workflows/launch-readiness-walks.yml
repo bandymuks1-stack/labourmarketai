@@ -96,7 +96,7 @@ jobs:
           # read grant: set ONCE="living-cv-screens:desktop" and ONCE_START just after the grant is
           # applied, in one reviewed change; the push to this file starts the tick. Empty: nothing.
           ONCE: "living-cv-screens:desktop"
-          ONCE_START: "2026-11-24T12:17:00Z"
+          ONCE_START: "2026-11-24T12:57:00Z"
           # 2026-11-23 00:45 UTC: GitHub's schedule fired no tick after 22:35 UTC again; a push to
           # this file (the push trigger) starts the chain, which then hands over by itself.
         run: |
