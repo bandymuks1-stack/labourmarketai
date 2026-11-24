@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { signupIsolatedRunsFor } from "./signup-isolated-trigger";
 
 /**
  * AN ORGANIZATION'S ACCESS TO A LEARNER'S JOURNAL FOLLOWS THE LINK
@@ -199,6 +200,6 @@ describe("the local-stack proof travels with the policy", () => {
   });
 
   it("the isolated job runs when the migration changes", () => {
-    expect(read(".github/workflows/signup-isolated.yml")).toContain(`supabase/migrations/${NAME}.sql`);
+    expect(signupIsolatedRunsFor(read(".github/workflows/signup-isolated.yml"), `supabase/migrations/${NAME}.sql`)).toBe(true);
   });
 });
