@@ -400,7 +400,16 @@ export function recognizeSkills(
   // magazynowej").
   // Only a FIRM other trade explains the work — a low-confidence fuzzy hit
   // ("pakket" ≈ "parket") never takes a warehouse worker's skill away.
-  const firm = [...best.entries()].filter(([, b]) => b.via !== "fuzzy").map(([slug]) => slug);
+  // A cooking reading resting only on a kitchen PLACE word is itself a place,
+  // not a trade, so it never removes warehouse work ("Stored kitchen supplies
+  // in the warehouse"); the kitchen guard below then judges it (Codex P2 on
+  // #3798: no circular suppression).
+  const cookingTerms = [...(matchedTerms.get("cooking") ?? [])];
+  const placeOnlyCooking =
+    best.has("cooking") && cookingTerms.length > 0 && cookingTerms.every((t) => KITCHEN_PLACE_TERMS.has(t));
+  const firm = [...best.entries()]
+    .filter(([slug, b]) => b.via !== "fuzzy" && !(slug === "cooking" && placeOnlyCooking))
+    .map(([slug]) => slug);
   if (best.has("warehouse-operations") && isWarehousePlaceOnlyContext(folded, firm)) {
     best.delete("warehouse-operations");
   }

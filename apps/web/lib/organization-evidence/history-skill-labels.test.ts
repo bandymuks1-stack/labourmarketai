@@ -165,3 +165,17 @@ describe("Codex P2 on #3774: German 'kochte' on its own is still cooking", () =>
     expect(recognizeSkills("Aangekochte materialen gebracht").map((r) => r.slug)).not.toContain("cooking");
   });
 });
+
+describe("Codex P2 on #3798: a kitchen place word never removes warehouse work", () => {
+  it("Stored kitchen supplies in the warehouse → warehouse work, not cooking", () => {
+    const slugs = recognizeSkills("Stored kitchen supplies in the warehouse").map((r) => r.slug);
+    expect(slugs).toContain("warehouse-operations");
+    expect(slugs).not.toContain("cooking");
+  });
+  it("Keukenkasten in het magazijn is not left with no reading", () => {
+    expect(recognizeSkills("Keukenkasten in het magazijn").map((r) => r.slug)).toContain("warehouse-operations");
+  });
+  it("a real trade in a warehouse still makes the warehouse the place", () => {
+    expect(recognizeSkills("Malowałem ściany w hali magazynowej").map((r) => r.slug)).not.toContain("warehouse-operations");
+  });
+});
