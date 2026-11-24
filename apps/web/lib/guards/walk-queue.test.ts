@@ -62,6 +62,13 @@ describe("a refused walk does not hold the queue", () => {
     expect(TICK).toMatch(/if refused_recently "\$spec" "\$device"; then log .*; continue; fi/);
   });
 
+  it("the 30 min are counted from the refused run's completion, not its creation (Codex P2 on #3813)", () => {
+    // With the brake's waits a refused run can take longer than 30 min to end.
+    expect(TICK).toContain("--json displayTitle,createdAt,updatedAt,conclusion,databaseId");
+    expect(TICK).toContain("\\t\\(.createdAt)\\t\\(.updatedAt)\\\"");
+    expect(TICK).toContain("'$1 == t && $5 >= c {print $3}'");
+  });
+
   it("a pair that has not run comes before the re-run of a failed one; the held pair is the last resort", () => {
     expect(TICK).toContain("RAN_KIND=failed");
     expect(TICK).toContain('if [ "$RAN_KIND" = never ]; then next="$pair"; break; fi');
