@@ -38,6 +38,7 @@ on:
   push:
     branches: [main]
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -48,6 +49,8 @@ concurrency:
 
 jobs:
   e2e-smoke:
+    # Not on a DRAFT pull request (runner load, 2026-11-24): it runs when the PR is marked ready.
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 25
     env:

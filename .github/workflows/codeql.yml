@@ -24,6 +24,7 @@ on:
   # scanner that quietly does nothing is worse than one that is absent, because
   # the checks list still looks complete. Run on every PR regardless of base.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
   schedule:
     # Weekly, so newly published queries reach existing code that has not
     # changed. A push-only trigger never re-examines dormant code.
@@ -41,6 +42,8 @@ concurrency:
 jobs:
   analyze:
     name: Analyze (javascript-typescript)
+    # Not on a DRAFT pull request (runner load, 2026-11-24): it runs when the PR is marked ready.
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 30
     permissions:

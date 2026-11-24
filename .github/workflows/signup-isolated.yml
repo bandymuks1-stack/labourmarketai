@@ -34,6 +34,7 @@ on:
   # required check. A per-file path list let a PR that changed shared
   # components, navigation, auth, data or an API skip every journey.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -48,6 +49,7 @@ jobs:
     timeout-minutes: 5
     outputs:
       run: ${{ steps.filter.outputs.run }}
+      draft: ${{ steps.filter.outputs.draft }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -57,11 +59,20 @@ jobs:
         id: filter
         env:
           EVENT: ${{ github.event_name }}
+          DRAFT: ${{ github.event.pull_request.draft }}
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           set -euo pipefail
           if [ "$EVENT" != "pull_request" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          # A DRAFT pull request does not walk (runner load, 2026-11-24: 88 % of the open PRs were
+          # drafts and their walks starved the production deploy). Marking it ready for review
+          # starts a fresh run (`ready_for_review`), and `core-journeys` stays red until then.
+          if [ "$DRAFT" = "true" ]; then
+            echo "run=false" >> "$GITHUB_OUTPUT"; echo "draft=true" >> "$GITHUB_OUTPUT"
+            echo "Draft pull request: the core journeys run when it is marked ready for review." >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           base="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
           git diff --name-only "$base" "$HEAD_SHA" > "$RUNNER_TEMP/changed.txt"
           # Markdown alone never runs the journeys; everything else under these roots does.
@@ -436,10 +447,13 @@ jobs:
         env:
           CHANGES: ${{ needs.changes.result }}
           RUN: ${{ needs.changes.outputs.run }}
+          DRAFT: ${{ needs.changes.outputs.draft }}
           WALK: ${{ needs.signup-isolated.result }}
         run: |
           set -euo pipefail
           if [ "$CHANGES" != "success" ]; then echo "::error::the change filter did not finish ($CHANGES)"; exit 1; fi
+          # Never green on a draft: nothing was walked. Marking the PR ready runs the journeys.
+          if [ "$DRAFT" = "true" ]; then echo "::error::DRAFT: the core journeys did not run; they run when this PR is marked ready for review"; exit 1; fi
           if [ "$RUN" != "true" ]; then echo "No web app, database or package change: the core journeys are not needed."; exit 0; fi
           if [ "$WALK" != "success" ]; then echo "::error::core journeys: $WALK"; exit 1; fi
           echo "core journeys passed on both shards"
