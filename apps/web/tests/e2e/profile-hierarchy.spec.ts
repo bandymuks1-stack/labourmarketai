@@ -123,9 +123,14 @@ test.describe("the profile is one block per screen (decision 0034)", () => {
       // SCOPED TO `main`: React's streaming SSR briefly keeps a second,
       // buffered copy of the subtree outside it (`<div id="S:1">`).
       await expect(page.locator(`main #${id}`)).toBeVisible({ timeout: 30_000 });
-      await expectInViewport(page, `main #${id}`, `#${id} is scrolled into view, not left below the fold`, {
-        maxTop: 200,
-      });
+      // A section near the end of a short tab cannot scroll to the top; it
+      // must still be in view. The long details tab keeps the 200px bound.
+      await expectInViewport(
+        page,
+        `main #${id}`,
+        `#${id} is scrolled into view, not left below the fold`,
+        TAB_OF[id] === "details" ? { maxTop: 200 } : {},
+      );
     }
   });
 
