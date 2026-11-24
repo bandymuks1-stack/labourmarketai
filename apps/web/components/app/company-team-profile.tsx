@@ -459,18 +459,20 @@ function LivingTabs({
   readonly t: CompanyTeamTranslate;
 }) {
   return (
-    <nav aria-label={t(`${LIVING}.eyebrow`)} className="-mx-1 overflow-x-auto" data-testid="org-living-tabs">
-      <ul className="flex min-w-max gap-1 border-b border-ink-600 px-1">
+    // A segmented control that fits a 375 px screen: three to a row on a
+    // phone, one row from `sm`; it never scrolls sideways (decision 0034).
+    <nav aria-label={t(`${LIVING}.eyebrow`)} data-testid="org-living-tabs">
+      <ul className="grid grid-cols-3 gap-1 rounded-card border border-ink-600 bg-ink-800/40 p-1 sm:flex sm:w-max sm:max-w-full sm:flex-wrap">
         {available.map((key) => (
-          <li key={key}>
+          <li key={key} className="min-w-0">
             <a
               href={tabHref[key]}
               aria-current={key === tab ? "page" : undefined}
               data-tab={key}
               className={
                 key === tab
-                  ? "-mb-px inline-flex min-h-11 items-center border-b-2 border-brand-blue px-3 text-support font-semibold text-text-primary"
-                  : "-mb-px inline-flex min-h-11 items-center border-b-2 border-transparent px-3 text-support text-text-secondary hover:text-text-primary"
+                  ? "flex min-h-11 items-center justify-center rounded-[0.6rem] bg-brand-blue/15 px-3 text-center text-support font-semibold text-text-primary [overflow-wrap:anywhere]"
+                  : "flex min-h-11 items-center justify-center rounded-[0.6rem] px-3 text-center text-support text-text-secondary [overflow-wrap:anywhere] hover:text-text-primary"
               }
             >
               {t(`${LIVING}.tabs.${key}`)}

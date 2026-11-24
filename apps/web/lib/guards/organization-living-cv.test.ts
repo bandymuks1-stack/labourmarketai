@@ -283,12 +283,15 @@ describe("organization Living CV — rendered", () => {
     const src = read("components/app/company-team-profile.tsx");
     const member = src.slice(src.indexOf("const LIVING ="), src.indexOf("export function CompanyTeamProfile"));
     for (const grid of member.match(/className="grid [^"]*"/g) ?? []) {
-      expect(grid, grid).toMatch(/grid-cols-(1|2)( |")/);
+      // One or two columns; three only for the compact tab control.
+      expect(grid, grid).toMatch(/grid-cols-(1|2)( |")|^className="grid grid-cols-3 gap-1 rounded-card/);
     }
     expect(member).not.toMatch(/\bw-\[\d+px\]|min-w-\[\d+px\]/);
     expect((member.match(/min-w-0/g) ?? []).length).toBeGreaterThanOrEqual(14);
-    // The tab row scrolls inside itself, never the page.
-    expect(member).toContain('className="-mx-1 overflow-x-auto"');
+    // The tabs are a segmented control that fits 375 px: no sideways strip
+    // anywhere in the member form (decision 0034, the one-rail rule).
+    expect(member).not.toMatch(/overflow-x-(auto|scroll)|min-w-max|snap-x/);
+    expect(member).toContain('className="grid grid-cols-3 gap-1 rounded-card');
   });
 });
 
