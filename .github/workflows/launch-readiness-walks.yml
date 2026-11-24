@@ -83,9 +83,13 @@ jobs:
           # chain at 375 on the build with it. The other two passes follow on later ticks/days.
           # 2026-11-23: N4 (#3733, goal rail on the signed-in homes) must pass mobile-surfaces on phone
           # before N5/N7 merge; it joins the same consecutive-pass rule.
-          RERUN: "profile-cv-history:phone-375 mobile-surfaces:phone"
-          RERUN_START: "2026-11-23T20:45:00Z"
-          RERUN_PASSES: "3"
+          # Both earlier RERUN pairs met 3 consecutive passes on 2be7abf0 (P-15: 45274742131,
+          # 45277375181, 45312056043; N4 mobile-surfaces: 45315748950, 45317825514, 45319400714).
+          # Owner order 2026-11-24: refresh the core journeys whose newest production run is older
+          # than today's fixes. These are not intermittent, so one pass each (6 = one day's cap).
+          RERUN: "chat-continuity:phone notifications-inapp:phone need-intake:desktop marketplace-goods-services:desktop role-routes:desktop orders-bookings:desktop"
+          RERUN_START: "2026-11-24T09:30:00Z"
+          RERUN_PASSES: "1"
           # ONE-SHOT pairs (coordinator order 2026-11-23): run exactly once after ONCE_START and are
           # settled by that one run whatever its outcome; never re-run after a deploy, never counted as
           # a plan pair. For prod-living-cv-screens, which reads real organizations under a time-boxed
