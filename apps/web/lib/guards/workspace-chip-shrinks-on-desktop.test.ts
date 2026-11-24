@@ -37,6 +37,10 @@ describe("the workspace chip shrinks with its header slot on a desktop", () => {
   it("the chip, its button and its static badge may shrink and truncate", () => {
     expect(CHIP).toMatch(/className="relative flex min-w-0 flex-1 sm:flex-initial" data-testid="workspace-chip"/);
     expect(CHIP.match(/min-w-0 flex-1 sm:max-w-56 sm:flex-initial/g)?.length).toBe(2);
-    expect(CHIP.match(/sm:truncate/g)?.length).toBeGreaterThanOrEqual(2);
+    // The name truncates on one line from `lg` (the desktop this guard is
+    // about); below it, it may take two lines — at 768 px one line cut
+    // "Persönlicher Ber…" in de/nl/pl/ru (owner P0 2026-11-23).
+    expect(CHIP.match(/max-lg:line-clamp-2 max-lg:break-words max-lg:leading-tight lg:truncate/g)?.length).toBe(2);
+    expect(CHIP).not.toMatch(/sm:truncate/);
   });
 });

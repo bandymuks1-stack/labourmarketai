@@ -4,18 +4,18 @@
   "profile-cv-history|phone": {
    "spec": "profile-cv-history",
    "device": "phone",
-   "run": 44634343495,
+   "run": 45182744562,
    "result": "success",
-   "build": "7e517e32",
-   "at": "2026-11-19T23:26:23Z"
+   "build": "386f11a0",
+   "at": "2026-11-23T13:31:17Z"
   },
   "profile-cv-history|phone-375": {
    "spec": "profile-cv-history",
    "device": "phone-375",
-   "run": 45051053618,
-   "result": "failure",
-   "build": "ed4ecf85",
-   "at": "2026-11-22T17:54:43Z"
+   "run": 45200120679,
+   "result": "success",
+   "build": "dd63c977",
+   "at": "2026-11-23T15:11:40Z"
   },
   "company-chain|phone": {
    "spec": "company-chain",
@@ -28,10 +28,10 @@
   "company-chain|phone-375": {
    "spec": "company-chain",
    "device": "phone-375",
-   "run": 44859841951,
-   "result": "failure",
-   "build": "d447a639",
-   "at": "2026-11-21T03:14:41Z"
+   "run": 45140908370,
+   "result": "success",
+   "build": "f0424833",
+   "at": "2026-11-23T08:49:11Z"
   },
   "agency-chain|phone": {
    "spec": "agency-chain",
@@ -52,10 +52,10 @@
   "learning-practice|phone": {
    "spec": "learning-practice",
    "device": "phone",
-   "run": 43895965767,
+   "run": 45141893755,
    "result": "success",
-   "build": "bdfff68f",
-   "at": "2026-11-16T15:29:44Z"
+   "build": "f0424833",
+   "at": "2026-11-23T08:55:08Z"
   },
   "learning-practice|phone-375": {
    "spec": "learning-practice",
@@ -92,10 +92,10 @@
   "agency-chain|desktop": {
    "spec": "agency-chain",
    "device": "desktop",
-   "run": 44644887648,
+   "run": 45238765504,
    "result": "success",
-   "build": "7e517e32",
-   "at": "2026-11-20T00:26:09Z"
+   "build": "47a63f28",
+   "at": "2026-11-23T18:33:45Z"
   },
   "need-intake|phone-375": {
    "spec": "need-intake",
@@ -124,26 +124,26 @@
   "company-chain|desktop": {
    "spec": "company-chain",
    "device": "desktop",
-   "run": 44858511879,
+   "run": 45234809504,
    "result": "success",
-   "build": "d447a639",
-   "at": "2026-11-21T03:02:55Z"
+   "build": "47a63f28",
+   "at": "2026-11-23T18:13:57Z"
   },
   "profile-cv-history|desktop": {
    "spec": "profile-cv-history",
    "device": "desktop",
-   "run": 44632628432,
+   "run": 45176894603,
    "result": "success",
-   "build": "7e517e32",
-   "at": "2026-11-19T23:02:56Z"
+   "build": "386f11a0",
+   "at": "2026-11-23T13:17:20Z"
   },
   "learning-practice|desktop": {
    "spec": "learning-practice",
    "device": "desktop",
-   "run": 44860184317,
-   "result": "success",
-   "build": "d447a639",
-   "at": "2026-11-21T03:19:16Z"
+   "run": 45240106971,
+   "result": "failure",
+   "build": "47a63f28",
+   "at": "2026-11-23T18:39:23Z"
   },
   "company-governance|desktop": {
    "spec": "company-governance",
@@ -156,10 +156,10 @@
   "mobile-surfaces|phone": {
    "spec": "mobile-surfaces",
    "device": "phone",
-   "run": 44977749659,
-   "result": "failure",
-   "build": "eed72052",
-   "at": "2026-11-22T02:59:47Z"
+   "run": 45247712949,
+   "result": "success",
+   "build": "47a63f28",
+   "at": "2026-11-23T19:35:56Z"
   },
   "public-org-locales|phone": {
    "spec": "public-org-locales",
@@ -252,10 +252,10 @@
   "buyer-workspace|desktop": {
    "spec": "buyer-workspace",
    "device": "desktop",
-   "run": 45003241107,
-   "result": "failure",
-   "build": "9f587dd6",
-   "at": "2026-11-22T08:32:19Z"
+   "run": 45094390854,
+   "result": "success",
+   "build": "ee29a3b7",
+   "at": "2026-11-23T01:27:48Z"
   },
   "marketplace|desktop": {
    "spec": "marketplace",
@@ -380,34 +380,34 @@
   "journal-confirm|phone": {
    "spec": "journal-confirm",
    "device": "phone",
-   "run": 44903366199,
+   "run": 45246507952,
    "result": "success",
-   "build": "eed72052",
-   "at": "2026-11-21T12:25:04Z"
+   "build": "47a63f28",
+   "at": "2026-11-23T19:17:38Z"
   },
   "journal-confirm|desktop": {
    "spec": "journal-confirm",
    "device": "desktop",
-   "run": 44902949287,
+   "run": 45187370581,
    "result": "success",
-   "build": "eed72052",
-   "at": "2026-11-21T12:18:55Z"
+   "build": "386f11a0",
+   "at": "2026-11-23T13:51:38Z"
   },
   "jobs-search|phone": {
    "spec": "jobs-search",
    "device": "phone",
-   "run": 44902549477,
+   "run": 45243339264,
    "result": "success",
-   "build": "eed72052",
-   "at": "2026-11-21T12:13:25Z"
+   "build": "47a63f28",
+   "at": "2026-11-23T19:10:28Z"
   },
   "jobs-search|desktop": {
    "spec": "jobs-search",
    "device": "desktop",
-   "run": 44902071507,
+   "run": 45242367415,
    "result": "success",
-   "build": "eed72052",
-   "at": "2026-11-21T12:08:27Z"
+   "build": "47a63f28",
+   "at": "2026-11-23T18:52:19Z"
   },
   "invited-worker|phone": {
    "spec": "invited-worker",
@@ -420,10 +420,10 @@
   "fresh-activation|desktop": {
    "spec": "fresh-activation",
    "device": "desktop",
-   "run": 44901160408,
-   "result": "success",
-   "build": "eed72052",
-   "at": "2026-11-21T11:59:09Z"
+   "run": 45241051644,
+   "result": "failure",
+   "build": "47a63f28",
+   "at": "2026-11-23T18:47:17Z"
   },
   "role-routes|phone": {
    "spec": "role-routes",

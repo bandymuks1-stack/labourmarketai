@@ -25,6 +25,8 @@ import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
  *  (read by the one header), so this config stays framework-agnostic. */
 export type NavIconKey =
   | "home"
+  // The assistant's mark: "My space" leads to the conversation (N3).
+  | "assistant"
   | "store"
   | "map"
   | "idCard"
@@ -54,7 +56,9 @@ type TabMeta = {
 const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
   overview: {
     tabLabelKey: "auth.dashboard.tabs.overview",
-    iconKey: "home",
+    // The conversation home IS the assistant: it wears the assistant's mark
+    // (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC OD-2 (a), N3).
+    iconKey: "assistant",
   },
   // Žemėlapis — the map is its own PRIMARY product surface (map-first
   // correction). The tab goes directly to the real map at /dashboard/market-map
