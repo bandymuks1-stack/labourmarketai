@@ -8886,8 +8886,8 @@
         "organization": "w zapisach organizacji",
         "experienceTotal": "doświadczenia zawodowego łącznie",
         "languages": "języki",
-        "years": "lata",
-        "projects": "projekty"
+        "projects": "projekty",
+        "span": "pierwszy i ostatni wpis"
       },
       "capEyebrow": "Umiejętności",
       "capEyebrowHours": "{hours} godz. zapisanej pracy",

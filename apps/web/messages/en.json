@@ -8886,8 +8886,8 @@
         "organization": "in organisation records",
         "experienceTotal": "professional experience in total",
         "languages": "languages",
-        "years": "years",
-        "projects": "projects"
+        "projects": "projects",
+        "span": "first and latest record"
       },
       "capEyebrow": "Capabilities",
       "capEyebrowHours": "{hours} h of recorded work",

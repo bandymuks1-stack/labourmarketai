@@ -1825,8 +1825,8 @@
         "organization": "in organisation records",
         "experienceTotal": "erialast kogemust kokku",
         "languages": "keelt",
-        "years": "aastat",
-        "projects": "projekti"
+        "projects": "projekti",
+        "span": "esimene ja viimane kirje"
       },
       "capEyebrow": "Capabilities",
       "capEyebrowHours": "{hours} h of recorded work",

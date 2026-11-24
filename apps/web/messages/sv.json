@@ -8886,8 +8886,8 @@
         "organization": "i organisationers registreringar",
         "experienceTotal": "yrkeserfarenhet totalt",
         "languages": "språk",
-        "years": "år",
-        "projects": "projekt"
+        "projects": "projekt",
+        "span": "första och senaste registrering"
       },
       "capEyebrow": "Förmågor",
       "capEyebrowHours": "{hours} h registrerat arbete",

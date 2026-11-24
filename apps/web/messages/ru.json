@@ -8885,8 +8885,8 @@
         "organization": "в записях организаций",
         "experienceTotal": "профессионального опыта всего",
         "languages": "языки",
-        "years": "лет",
-        "projects": "проекты"
+        "projects": "проекты",
+        "span": "первая и последняя запись"
       },
       "capEyebrow": "Навыки",
       "capEyebrowHours": "{hours} ч записанной работы",

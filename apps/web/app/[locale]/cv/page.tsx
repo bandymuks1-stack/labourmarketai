@@ -647,17 +647,17 @@ export default async function VerifiedCvPage({
   // known is not drawn: UNKNOWN is never 0, and nothing is estimated.
   const experience = cv.professionalExperience;
   if (experience) {
-    const from = experience.from;
-    const to = experience.to;
-    if (from) {
-      // Whole calendar years between the first and the latest recorded day.
-      const a = new Date(`${from.slice(0, 10)}T00:00:00Z`);
-      const b = new Date(`${(to ?? from).slice(0, 10)}T00:00:00Z`);
-      let years = b.getUTCFullYear() - a.getUTCFullYear();
-      if (b.getUTCMonth() < a.getUTCMonth() || (b.getUTCMonth() === a.getUTCMonth() && b.getUTCDate() < a.getUTCDate())) years -= 1;
-      if (Number.isFinite(years) && years >= 1)
-        premiumFacts.push({ value: String(years), label: tPremium("facts.years"), testid: "premium-cv-fact-years" });
-    }
+    // The SPAN of the records, never "years of experience": `from`/`to` are
+    // the first and latest recorded days, and the work between them may have
+    // gaps (Codex P1 on #3782) — so the strip states the span as it is.
+    const fromYear = experience.from?.slice(0, 4) ?? null;
+    const toYear = (experience.to ?? experience.from)?.slice(0, 4) ?? null;
+    if (fromYear && toYear && /^\d{4}$/.test(fromYear) && /^\d{4}$/.test(toYear))
+      premiumFacts.push({
+        value: fromYear === toYear ? fromYear : `${fromYear}–${toYear}`,
+        label: tPremium("facts.span"),
+        testid: "premium-cv-fact-span",
+      });
     if (experience.projects.length > 0)
       premiumFacts.push({ value: String(experience.projects.length), label: tPremium("facts.projects"), testid: "premium-cv-fact-projects" });
     // The total keeps its qualifier: it holds every provenance (journal,

@@ -1825,8 +1825,8 @@
         "organization": "in organisation records",
         "experienceTotal": "profesionālā pieredze kopā",
         "languages": "valodas",
-        "years": "gadi",
-        "projects": "projekti"
+        "projects": "projekti",
+        "span": "pirmais un pēdējais ieraksts"
       },
       "capEyebrow": "Capabilities",
       "capEyebrowHours": "{hours} h of recorded work",

@@ -1825,8 +1825,8 @@
         "organization": "in organisation records",
         "experienceTotal": "faglig erfaring i alt",
         "languages": "sprog",
-        "years": "år",
-        "projects": "projekter"
+        "projects": "projekter",
+        "span": "første og seneste registrering"
       },
       "capEyebrow": "Capabilities",
       "capEyebrowHours": "{hours} h of recorded work",

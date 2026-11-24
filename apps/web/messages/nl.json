@@ -8885,8 +8885,8 @@
         "organization": "in registraties van organisaties",
         "experienceTotal": "beroepservaring in totaal",
         "languages": "talen",
-        "years": "jaar",
-        "projects": "projecten"
+        "projects": "projecten",
+        "span": "eerste en laatste registratie"
       },
       "capEyebrow": "Vaardigheden",
       "capEyebrowHours": "{hours} u vastgelegd werk",

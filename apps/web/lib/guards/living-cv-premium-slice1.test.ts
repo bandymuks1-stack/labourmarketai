@@ -72,7 +72,9 @@ describe("2 · the fact strip: years, projects, hours from the ONE experience re
     expect(page).toMatch(/const experience = cv\.professionalExperience;/);
     expect(page).toMatch(/experience\.projects\.length > 0/);
     expect(page).toMatch(/experience\.hours !== null && experience\.hours\.total > 0/);
-    expect(page).toMatch(/years >= 1/);
+    // The span of the records, never a count of years (gaps are not experience).
+    expect(page).toContain('label: tPremium("facts.span")');
+    expect(page).not.toContain('tPremium("facts.years")');
   });
 
   it("a fact that is not known is not drawn — UNKNOWN is never 0", () => {

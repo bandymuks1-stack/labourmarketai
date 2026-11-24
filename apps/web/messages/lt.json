@@ -8886,8 +8886,8 @@
         "organization": "organizacijų įrašuose",
         "experienceTotal": "profesinės patirties iš viso",
         "languages": "kalbos",
-        "years": "metai",
-        "projects": "projektai"
+        "projects": "projektai",
+        "span": "pirmas ir paskutinis įrašas"
       },
       "capEyebrow": "Gebėjimai",
       "capEyebrowHours": "{hours} val. užfiksuoto darbo",
