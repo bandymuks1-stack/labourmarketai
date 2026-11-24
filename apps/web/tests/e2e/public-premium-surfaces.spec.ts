@@ -79,13 +79,16 @@ test.describe("lifecycle graph accessibility", () => {
     await page.emulateMedia({ reducedMotion: "reduce" });
   });
 
-  test("reduced motion: no auto-play — the whole record is present immediately", async ({ page }) => {
+  test("reduced motion: no auto-play — the record is present immediately and holds one stage", async ({ page }) => {
     await page.goto("/en/for-workers", { waitUntil: "load" });
     const record = page.getByTestId("work-lifecycle-workers-record");
     await expect(record).toBeVisible({ timeout: 30_000 });
-    // Every row is filled at once; nothing is left to a timer.
-    await expect(record.locator('li[data-state="filled"]')).toHaveCount(7);
+    // Nothing is recorded on a public page, so the record is the chosen stage
+    // only (owner order 2026-11-24, decisions 0032 / 0034); the rail names
+    // all seven. Nothing is left to a timer.
+    await expect(record.locator("li")).toHaveCount(1);
     await expect(record.locator('li[data-state="pending"]')).toHaveCount(0);
+    await expect(page.getByTestId("work-lifecycle-workers-stages").locator("li")).toHaveCount(7);
   });
 
   test("keyboard: stages are buttons, Enter selects, selection is exposed (aria-pressed) and focus is visible", async ({ page }) => {
@@ -96,9 +99,10 @@ test.describe("lifecycle graph accessibility", () => {
     await work.focus();
     await page.keyboard.press("Enter");
     await expect(work).toHaveAttribute("aria-pressed", "true");
-    // Selecting WORK re-shapes the record: later stages become dashed "not yet".
+    // Selecting WORK puts that stage, and only it, in the record.
     const record = page.getByTestId("work-lifecycle-workers-record");
-    await expect(record.locator('li[data-state="pending"]')).toHaveCount(3);
+    await expect(record.locator("li")).toHaveCount(1);
+    await expect(record.locator("li")).toContainText(/work/i);
     // Focus is visibly indicated (ring/outline), not left to the UA default alone.
     const ring = await work.evaluate((el) => {
       const s = getComputedStyle(el);
@@ -107,12 +111,16 @@ test.describe("lifecycle graph accessibility", () => {
     expect(ring, "visible focus indicator").toBe(true);
   });
 
-  test("state is never colour alone: pending rows carry words and a dashed shape", async ({ page }) => {
+  test("state is never colour alone: the chosen stage is exposed as pressed and named in the record", async ({ page }) => {
     await page.goto("/en/for-workers", { waitUntil: "load" });
-    await page.getByTestId("work-lifecycle-workers-stage-project").click();
-    const pending = page.getByTestId("work-lifecycle-workers-record").locator('li[data-state="pending"]').first();
-    await expect(pending).toContainText(/not yet/i);
-    await expect(pending.locator(".border-dashed")).toHaveCount(1);
+    const project = page.getByTestId("work-lifecycle-workers-stage-project");
+    await project.click();
+    await expect(project).toHaveAttribute("aria-pressed", "true");
+    const row = page.getByTestId("work-lifecycle-workers-record").locator("li");
+    await expect(row).toHaveCount(1);
+    await expect(row).toContainText(/project/i);
+    // No "not yet" rows on a public page.
+    await expect(page.getByTestId("work-lifecycle-workers-record")).not.toContainText(/not yet/i);
   });
 
   test("the stages are an ordered list with a name, in lifecycle order", async ({ page }) => {
