@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Link } from "@/lib/i18n/navigation";
 
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 
@@ -322,10 +323,24 @@ export function BuyerRequestsSection({
             className="rounded-md border border-dashed border-ink-500 p-3"
             data-testid="buyer-requests-empty"
           >
-            <p className="text-xs font-semibold text-text-primary">
-              {labels.emptyStateHeading}
-            </p>
-            <p className="text-xs text-text-secondary">{labels.emptyStateBody}</p>
+            {view === "list" ? (
+              // The form is its own block now (decision 0034): the empty
+              // list opens it instead of pointing "below".
+              <Link
+                href={"/dashboard/buyer?tab=new" as "/dashboard"}
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue hover:underline"
+                data-testid="buyer-requests-empty-new"
+              >
+                {labels.emptyStateHeading} →
+              </Link>
+            ) : (
+              <>
+                <p className="text-xs font-semibold text-text-primary">
+                  {labels.emptyStateHeading}
+                </p>
+                <p className="text-xs text-text-secondary">{labels.emptyStateBody}</p>
+              </>
+            )}
           </div>
         ) : (
           <ul className="flex flex-col gap-2">
