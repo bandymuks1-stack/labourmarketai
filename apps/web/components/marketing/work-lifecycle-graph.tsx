@@ -14,7 +14,6 @@ import {
   UserRound,
   Users,
   FileText,
-  LogIn,
   type LucideIcon,
 } from "lucide-react";
 
@@ -333,17 +332,11 @@ export function WorkLifecycleGraph({
                           audience={current.href === "/company-need" ? "companies" : undefined}
                           className="inline-flex min-h-11 shrink-0 items-center justify-center rounded-full border border-brand-blue px-4 text-sm font-semibold text-text-primary transition-colors hover:bg-brand-blue/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
                         >
-                          {openLabel} →
+                          {/* The button says what it does (owner 2026-11-24):
+                              a signed-out visitor is taken to sign-up, so it
+                              reads "Sign up"; no second note under it. */}
+                          {!signedIn && current.guestHref && accountLabel ? accountLabel : openLabel} →
                         </TrackedCta>
-                        {!signedIn && current.guestHref && accountLabel ? (
-                          <span
-                            className="inline-flex items-center gap-1 font-mono text-meta uppercase tracking-label text-text-muted"
-                            data-testid="lifecycle-account-note"
-                          >
-                            <LogIn aria-hidden className="h-3.5 w-3.5" />
-                            {accountLabel}
-                          </span>
-                        ) : null}
                       </div>
                     </div>
                   ) : null}

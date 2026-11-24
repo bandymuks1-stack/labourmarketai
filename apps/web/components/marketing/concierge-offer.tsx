@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { TrackedCta } from "@/components/app/tracked-cta";
 import { getBillingConfigFor } from "@/lib/billing/config";
@@ -61,44 +62,46 @@ export async function ConciergeOfferSection() {
 
   return (
     <section
-      className="mx-auto max-w-container px-6 pt-12 sm:px-12"
+      className="mx-auto max-w-container px-6 pt-10 sm:px-12"
       data-testid="concierge-offer-section"
     >
-      <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
-        {t("title")}
-      </h2>
-      {/* Not a LabourMarket.ai plan: said in words, directly under the title. */}
-      <p className="mt-2 max-w-3xl text-sm leading-relaxed text-text-secondary" data-testid="concierge-offer-separate">
-        {t("separate")}
-      </p>
-      <ol className="mt-6 grid gap-6 md:grid-cols-2">
-        {steps.map((step, i) => (
-          <li key={step.title} className="card-border p-6">
-            <p className="font-mono text-meta uppercase tracking-label text-brand-blue">
-              {i + 1}
-            </p>
-            <h3 className="mt-2 font-display text-base font-semibold text-text-primary">
-              {step.title}
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-              {step.body}
-            </p>
-          </li>
-        ))}
-      </ol>
-      <p className="mt-6 max-w-3xl text-xs leading-relaxed text-text-muted">
-        {t("note")}
-      </p>
-      <div className="mt-6">
-        <TrackedCta
-          href="/company-need"
-          ctaId="concierge_card_need"
-          audience="companies"
-          className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-text-on-brand hover:opacity-90"
-        >
-          {t("ctaLabel")}
-        </TrackedCta>
-      </div>
+      {/* The service is named and marked as NOT a platform plan on the page;
+          how it runs, its fee note and its action open on a tap (owner
+          2026-11-24, decisions 0032 / 0034). Nothing is removed. */}
+      <details className="group rounded-2xl border border-ink-600 bg-surface-1/60" data-testid="concierge-offer-fold">
+        <summary className="grid min-h-11 cursor-pointer list-none grid-cols-[minmax(0,1fr)_auto] items-center gap-x-4 rounded-2xl p-5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue [&::-webkit-details-marker]:hidden">
+          <h2 className="font-display text-xl font-bold tracking-tightest text-text-primary">{t("title")}</h2>
+          <ChevronDown
+            aria-hidden
+            className="row-span-2 size-5 shrink-0 text-text-secondary transition-transform group-open:rotate-180 motion-reduce:transition-none"
+          />
+          <span className="mt-1 block max-w-3xl text-sm leading-relaxed text-text-secondary" data-testid="concierge-offer-separate">
+            {t("separate")}
+          </span>
+        </summary>
+        <div className="px-5 pb-5">
+          <ol className="grid gap-4 md:grid-cols-2">
+            {steps.map((step, i) => (
+              <li key={step.title} className="card-border p-5">
+                <p className="font-mono text-meta uppercase tracking-label text-brand-blue">{i + 1}</p>
+                <h3 className="mt-2 font-display text-base font-semibold text-text-primary">{step.title}</h3>
+                <p className="mt-2 text-sm leading-relaxed text-text-secondary">{step.body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-5 max-w-3xl text-xs leading-relaxed text-text-muted">{t("note")}</p>
+          <div className="mt-5">
+            <TrackedCta
+              href="/company-need"
+              ctaId="concierge_card_need"
+              audience="companies"
+              className="inline-flex min-h-11 items-center justify-center rounded-full bg-brand-blue px-5 py-2.5 text-sm font-semibold text-text-on-brand hover:opacity-90"
+            >
+              {t("ctaLabel")}
+            </TrackedCta>
+          </div>
+        </div>
+      </details>
     </section>
   );
 }

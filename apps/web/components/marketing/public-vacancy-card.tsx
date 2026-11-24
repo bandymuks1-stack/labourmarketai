@@ -217,7 +217,7 @@ export function PublicVacancyCard({
   return (
     <Link
       href={`/jobs/${vacancy.id}`}
-      className="block rounded-lg border p-4 transition-colors hover:bg-surface-2/60 focus-visible:outline focus-visible:outline-2"
+      className="block rounded-2xl border border-ink-600 bg-ink-800/50 p-4 transition-colors hover:border-brand-blue/50 hover:bg-surface-2/60 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue"
     >
       <div className="flex items-start justify-between gap-3">
         <h2
@@ -227,7 +227,7 @@ export function PublicVacancyCard({
           {heading}
         </h2>
         {savedLabel && (
-          <span className="shrink-0 rounded-full border px-2 py-0.5 text-xs text-text-muted">
+          <span className="shrink-0 rounded-full border border-ink-500 px-2 py-0.5 text-xs text-text-muted">
             {savedLabel}
           </span>
         )}
@@ -283,7 +283,7 @@ export function PublicVacancyCard({
           {chips.map((c) => (
             <li
               key={c}
-              className="rounded-full border px-2 py-0.5 text-xs text-text-muted"
+              className="rounded-full border border-ink-500 px-2 py-0.5 text-xs text-text-muted"
             >
               {c}
             </li>

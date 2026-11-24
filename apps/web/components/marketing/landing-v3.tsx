@@ -169,7 +169,7 @@ export async function LandingHow() {
               <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue [&::-webkit-details-marker]:hidden">
                 <span
                   aria-hidden
-                  className="flex size-7 shrink-0 items-center justify-center rounded-full border border-ink-500 font-mono text-xs text-text-secondary"
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full border border-brand-blue/50 font-mono text-xs text-brand-blue"
                 >
                   {index + 1}
                 </span>
