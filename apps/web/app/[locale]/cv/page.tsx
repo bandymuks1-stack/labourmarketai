@@ -39,6 +39,7 @@ import { FORMER_NAME_RELATIONS, periodFor } from "@/lib/journal/professional-exp
 import { experienceStopsOf, type ExperienceStop } from "@/lib/cv-export/experience-stops";
 import { PremiumLivingCv, type PremiumCvFact } from "@/components/app/cv/premium-living-cv";
 import { CvBlockTabs, CvTabPanel, CV_BLOCKS, parseCvBlock, type CvBlock } from "@/components/app/cv/cv-block-tabs";
+import { CvHashToBlock } from "@/components/app/cv/cv-hash-to-block";
 import { readAthleteProfileFacts } from "@/lib/cv/athlete-profile-read";
 import { playerInitials } from "@/lib/identity/player-identity";
 import { countryDisplayName } from "@/lib/location/country-model";
@@ -1029,6 +1030,7 @@ export default async function VerifiedCvPage({
           />
         ) : null}
 
+        {template !== "eu" ? <CvHashToBlock active={activeBlock} /> : null}
         {template !== "eu" ? (
           <CvBlockTabs
             active={activeBlock}

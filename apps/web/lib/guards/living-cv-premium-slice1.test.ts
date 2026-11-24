@@ -111,3 +111,17 @@ describe("3 · one screen per block (decision 0034)", () => {
     expect(text).toBe("Darbuotojas Nr. 1 Plytelių klojėjas Darbuotojas Nr. 1 Plytelių klojėjas 3 projects");
   });
 });
+
+describe("4 · links into a section still land on it", () => {
+  it("the product's own section links name the block", () => {
+    expect(read("components/app/worker-player-card.tsx")).toContain('"/cv?tab=experience#cv-work-history"');
+    expect(read("lib/player-card/work-context.ts")).toContain('"/cv?tab=experience#cv-work-history"');
+  });
+
+  it("an older anchor-only link opens the block that holds its section", () => {
+    const handler = read("components/app/cv/cv-hash-to-block.tsx");
+    expect(handler).toMatch(/closest<HTMLElement>\("\[data-cv-block\]"\)/);
+    expect(handler).toMatch(/searchParams\.set\("tab", block\)/);
+    expect(page).toMatch(/<CvHashToBlock active=\{activeBlock\} \/>/);
+  });
+});
