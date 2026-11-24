@@ -39,10 +39,9 @@ describe("owner 2026-11-24 — public pages", () => {
     }
   });
 
-  it("a public advert card has a named border colour (no bright default border in the dark theme)", () => {
-    const card = read("components/marketing/public-vacancy-card.tsx");
-    expect(card).not.toMatch(/\bborder (p-4|px-2)/);
-    expect(card).toContain("border border-ink-600");
+  it("on the landing an advert card takes the page's border colour (no bright default border in the dark theme)", () => {
+    const band = read("components/marketing/landing-open-jobs-band.tsx");
+    expect(band).toContain("[&>a]:border-ink-600");
   });
 });
 
