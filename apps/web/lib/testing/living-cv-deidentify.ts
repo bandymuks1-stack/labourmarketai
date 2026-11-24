@@ -189,23 +189,6 @@ export function rewrite(body: string, p: Pseudonyms): string {
 }
 
 const MASK = "[…]";
-
-/**
- * Street addresses inside free text (run 45401396990 let "…laan" and "…straat35" through in the
- * history card descriptions). A street word, by its suffix or by a street abbreviation next to a
- * name, is masked together with the house number written after it or glued to it. Dutch, German,
- * Lithuanian and Polish forms; over-masking is accepted.
- */
-const HOUSE_NO = String.raw`(?:\s*\d+[a-z]?(?:\s*[-/]\s*\d+[a-z]?)?)?`;
-const STREET_SUFFIX = String.raw`(?:straat|str\.|laan|weg|gracht|plein|kade|dreef|singel|steeg|hof|strasse|straße|gatvė|gatve|takas|aikštė|skveras)`;
-const ADDRESS_PATTERNS: readonly RegExp[] = [
-  // "Van Eedenlaan 12", "Keizersgracht35", "Vredenburgstraat 7a", "Kade 3", "Gedimino gatvė 9".
-  new RegExp(String.raw`(?<![\p{L}\p{N}])[\p{L}'’-]*${STREET_SUFFIX}${HOUSE_NO}(?![\p{L}\p{N}])`, "giu"),
-  // "ul. Marszałkowska 102/4", "ulica Długa 5", "al. Jerozolimskie 1".
-  new RegExp(String.raw`(?<![\p{L}\p{N}])(?:ul\.|ulica|al\.|aleja|os\.|pl\.)\s*[\p{L}'’.-]+(?:\s+[\p{L}'’.-]+)?${HOUSE_NO}(?![\p{L}\p{N}])`, "giu"),
-  // "Vilniaus g. 12", "Laisvės al. 5", "Konstitucijos pr. 7".
-  new RegExp(String.raw`(?<![\p{L}\p{N}])[\p{L}'’-]+\s+(?:g\.|al\.|pr\.|skg\.|pl\.)${HOUSE_NO}(?![\p{L}\p{N}])`, "giu"),
-];
 const PERSONAL_CODE = /(?<!\d)[3-6]\d{10}(?!\d)/g;
 const CAPITALISED = /(?<![\p{L}\p{N}])\p{Lu}[\p{L}'’-]{2,}(?![\p{L}\p{N}])/gu;
 
@@ -218,7 +201,6 @@ export function maskFreeText(text: string, p: Pseudonyms, allow: ReadonlySet<str
   const re = rosterPattern(p, true);
   if (re) out = out.replace(re, (m) => (p.emitted.has(m) || p.kept.has(m.toLocaleLowerCase("lt")) ? m : MASK));
   out = redactContactData(out).text.replace(/\[\[\d+\]\]/g, MASK);
-  for (const re of ADDRESS_PATTERNS) out = out.replace(re, MASK);
   out = out.replace(PERSONAL_CODE, MASK);
   out = out.replace(CAPITALISED, (w) => {
     if (p.emitted.has(w)) return w;

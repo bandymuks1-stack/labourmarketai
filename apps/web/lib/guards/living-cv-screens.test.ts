@@ -74,12 +74,6 @@ describe("the walk is read-only and prints no names", () => {
     const lib = read("lib/testing/living-cv-deidentify.ts");
     expect(lib).toMatch(/redactContactData\(out\)/);
     expect(lib).toMatch(/LT_NAME_ENDINGS/);
-    // Street addresses with their house numbers (run 45401396990), applied inside maskFreeText.
-    for (const suffix of ["straat", "laan", "weg", "gracht", "plein", "kade", "dreef", "singel", "gatvė", "ulica"]) {
-      expect(lib, suffix).toContain(suffix);
-    }
-    const mask = lib.slice(lib.indexOf("export function maskFreeText"));
-    expect(mask).toMatch(/for \(const re of ADDRESS_PATTERNS\) out = out\.replace\(re, MASK\)/);
     expect(lib).toMatch(/\[3-6\]\\d\{10\}/);
   });
 
