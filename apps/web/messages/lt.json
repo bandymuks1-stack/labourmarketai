@@ -186,14 +186,13 @@
         "figures": {
           "years": "{count, plural, one {metai} few {metai} other {metų}}",
           "hours": "dirbtų valandų",
-          "people": "{count, plural, one {žmogus} few {žmonės} other {žmonių}}",
+          "people": "{count, plural, one {žmogus dirbo} few {žmonės dirbo} other {žmonių dirbo}}",
           "projects": "{count, plural, one {projektas} few {projektai} other {projektų}}",
-          "places": "{count, plural, one {objektas} few {objektai} other {objektų}}"
+          "places": "{count, plural, one {objektas} few {objektai} other {objektų}}",
+          "team": "{count, plural, one {komandos narys} few {komandos nariai} other {komandos narių}}"
         },
-        "doEyebrow": "Specializacija",
-        "doTitle": "Ką darome",
+        "doTitle": "Kompetencijos",
         "team": "{count, plural, one {Komandoje # žmogus} few {Komandoje # žmonės} other {Komandoje # žmonių}}",
-        "experienceEyebrow": "Patirtis",
         "experienceTitle": "Dirbtos valandos",
         "confirmedLabel": "Patvirtinta",
         "confirmedSource": "Įrašė darbuotojas, patvirtino organizacija",
@@ -202,13 +201,19 @@
         "pending": "{hours} laukia patvirtinimo",
         "periods": "Dar {hours} laikotarpių suvestinėse",
         "hours": "{hours} val.",
-        "projectsEyebrow": "Projektai",
-        "projectsTitle": "Projektai",
         "running": "Vykdomi",
         "completed": "Užbaigti",
-        "galleryEyebrow": "Galerija",
-        "galleryTitle": "Atlikti darbai",
-        "clients": "Darbai atlikti užsakovui: {names}"
+        "clients": "Darbai atlikti užsakovui: {names}",
+        "tabs": {
+          "overview": "Apžvalga",
+          "projects": "Projektai",
+          "experience": "Patirtis",
+          "gallery": "Galerija",
+          "team": "Komanda"
+        },
+        "pendingLabel": "Laukia patvirtinimo",
+        "ringLabel": "Patvirtinta {share}% žurnalo valandų",
+        "open": "Atverti Gyvą CV"
       }
     }
   },

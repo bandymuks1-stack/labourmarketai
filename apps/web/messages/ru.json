@@ -186,14 +186,13 @@
         "figures": {
           "years": "{count, plural, one {год} few {года} many {лет} other {лет}}",
           "hours": "отработанных часов",
-          "people": "{count, plural, one {человек} few {человека} many {человек} other {человек}}",
+          "people": "{count, plural, one {человек работал} few {человека работали} many {человек работали} other {человек работали}}",
           "projects": "{count, plural, one {проект} few {проекта} many {проектов} other {проектов}}",
-          "places": "{count, plural, one {объект} few {объекта} many {объектов} other {объектов}}"
+          "places": "{count, plural, one {объект} few {объекта} many {объектов} other {объектов}}",
+          "team": "{count, plural, one {сотрудник в команде} few {сотрудника в команде} many {сотрудников в команде} other {сотрудников в команде}}"
         },
-        "doEyebrow": "Специализация",
-        "doTitle": "Чем мы занимаемся",
+        "doTitle": "Компетенции",
         "team": "{count, plural, one {В команде # человек} few {В команде # человека} many {В команде # человек} other {В команде # человек}}",
-        "experienceEyebrow": "Опыт",
         "experienceTitle": "Отработанные часы",
         "confirmedLabel": "Подтверждено",
         "confirmedSource": "Записал работник, утвердила организация",
@@ -202,13 +201,19 @@
         "pending": "{hours} ждут утверждения",
         "periods": "Ещё {hours} в итогах за периоды",
         "hours": "{hours} ч",
-        "projectsEyebrow": "Проекты",
-        "projectsTitle": "Проекты",
         "running": "Текущие",
         "completed": "Завершённые",
-        "galleryEyebrow": "Галерея",
-        "galleryTitle": "Выполненные работы",
-        "clients": "Работы выполнены для: {names}"
+        "clients": "Работы выполнены для: {names}",
+        "tabs": {
+          "overview": "Обзор",
+          "projects": "Проекты",
+          "experience": "Опыт",
+          "gallery": "Галерея",
+          "team": "Команда"
+        },
+        "pendingLabel": "Ждут утверждения",
+        "ringLabel": "Подтверждено {share}% часов журнала",
+        "open": "Открыть Живое резюме"
       }
     }
   },

@@ -186,14 +186,13 @@
         "figures": {
           "years": "{count, plural, one {år} other {år}}",
           "hours": "arbetade timmar",
-          "people": "{count, plural, one {person} other {personer}}",
+          "people": "{count, plural, one {person har arbetat här} other {personer har arbetat här}}",
           "projects": "{count, plural, one {projekt} other {projekt}}",
-          "places": "{count, plural, one {arbetsplats} other {arbetsplatser}}"
+          "places": "{count, plural, one {arbetsplats} other {arbetsplatser}}",
+          "team": "{count, plural, one {teammedlem} other {teammedlemmar}}"
         },
-        "doEyebrow": "Specialisering",
-        "doTitle": "Vad vi gör",
+        "doTitle": "Kompetenser",
         "team": "{count, plural, one {# person i teamet} other {# personer i teamet}}",
-        "experienceEyebrow": "Erfarenhet",
         "experienceTitle": "Arbetade timmar",
         "confirmedLabel": "Bekräftat",
         "confirmedSource": "Registrerat av arbetstagaren, godkänt av organisationen",
@@ -202,13 +201,19 @@
         "pending": "{hours} väntar på godkännande",
         "periods": "Ytterligare {hours} i periodsummor",
         "hours": "{hours} tim",
-        "projectsEyebrow": "Projekt",
-        "projectsTitle": "Projekt",
         "running": "Pågående",
         "completed": "Avslutade",
-        "galleryEyebrow": "Galleri",
-        "galleryTitle": "Utfört arbete",
-        "clients": "Arbete utfört åt: {names}"
+        "clients": "Arbete utfört åt: {names}",
+        "tabs": {
+          "overview": "Översikt",
+          "projects": "Projekt",
+          "experience": "Erfarenhet",
+          "gallery": "Galleri",
+          "team": "Personal"
+        },
+        "pendingLabel": "Väntar på godkännande",
+        "ringLabel": "{share} % av journaltimmarna bekräftade",
+        "open": "Öppna Levande CV"
       }
     }
   },

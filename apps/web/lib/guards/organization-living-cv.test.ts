@@ -5,13 +5,21 @@ import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import { CompanyTeamProfile, type CompanyTeamTranslate } from "@/components/app/company-team-profile";
+import {
+  CompanyTeamProfile,
+  OrganizationLivingEntry,
+  organizationMonogram,
+  type CompanyTeamTranslate,
+} from "@/components/app/company-team-profile";
 import {
   buildCompanyTeamProfile,
   buildOrganizationLivingCv,
   buildOrganizationLivingRecord,
   ORGANIZATION_GALLERY_LIMIT,
+  ORGANIZATION_LIVING_TABS,
+  organizationLivingTab,
   type OrganizationLivingInput,
+  type OrganizationLivingTab,
 } from "@/lib/company/team-profile-model";
 import { activeLocales } from "@/lib/i18n/config";
 
@@ -76,12 +84,16 @@ const FULL: OrganizationLivingInput = {
 };
 
 const IDENTITY = { name: "UAB Alfa", tagline: "Fasadai ir stogai", description: null, country: "LT" };
-const render = (locale: string, input: OrganizationLivingInput = FULL) =>
+const tabHref = Object.fromEntries(ORGANIZATION_LIVING_TABS.map((k) => [k, `/x?cv=${k}`])) as Record<
+  OrganizationLivingTab,
+  string
+>;
+const render = (locale: string, tab: OrganizationLivingTab = "overview", input: OrganizationLivingInput = FULL) =>
   renderToStaticMarkup(
     createElement(CompanyTeamProfile, {
       view: buildOrganizationLivingCv(IDENTITY, input, locale),
       t: translator(locale),
-      locale,
+      member: { locale, tab, tabHref },
     }),
   );
 
@@ -96,7 +108,9 @@ describe("organization Living CV — model", () => {
       recordedPeriodHours: 3200,
     });
     expect(r.span).toEqual({ from: 2019, to: 2026 });
-    expect(r.figures.map((f) => f.key)).toEqual(["years", "hours", "people", "projects", "places"]);
+    expect(r.figures.map((f) => f.key)).toEqual(["years", "hours", "projects", "team"]);
+    expect(r.peopleWorked).toBe(37);
+    expect(r.places).toBe(22);
   });
 
   it("no source, no figure: an empty organization shows no number at all", () => {
@@ -151,47 +165,99 @@ describe("organization Living CV — model", () => {
 });
 
 describe("organization Living CV — rendered", () => {
-  it("1: a section with its own h2 inside the signed-in page, no h1 and no public ways in", () => {
+  it("1: the identity card, the header and the fact strip — a section with its own h2, no public ways in", () => {
     const html = render("lt");
     expect(html).toMatch(/^<section[^>]*data-testid="org-living-cv"/);
+    expect(html).toContain('data-testid="org-living-card"');
+    expect(html).toContain('data-testid="org-living-figures"');
     expect(html).toContain("<h2");
     expect(html).not.toContain("<h1");
     expect(html).not.toContain("<main");
     expect(html).not.toContain('data-testid="company-team-contact"');
     expect(html).not.toContain("mailto:");
     expect(html).toContain("2019–2026");
+    expect(organizationMonogram("UAB Nonstop Group")).toBe("NG");
+    expect(organizationMonogram("Labour market ai Sp. z o.o.")).toBe("LM");
   });
 
-  it("6: confirmed and recorded hours are two figures with their own evidence marks", () => {
-    const html = render("en");
-    expect(html).toContain('data-testid="org-living-confirmed"');
-    expect(html).toContain('data-testid="org-living-recorded"');
+  it("0034: one block at a time, each tab its own address; a block without data has no tab", () => {
+    for (const tab of ORGANIZATION_LIVING_TABS) {
+      const html = render("en", tab);
+      expect(html, tab).toContain(`data-testid="org-living-tab-${tab}"`);
+      for (const other of ORGANIZATION_LIVING_TABS.filter((o) => o !== tab)) {
+        expect(html, `${tab} hides ${other}`).not.toContain(`data-testid="org-living-tab-${other}"`);
+      }
+      expect(html).toMatch(new RegExp(`aria-current="page"[^>]*data-tab="${tab}"|data-tab="${tab}"[^>]*aria-current="page"`));
+    }
+    const bare = render("en", "gallery", { ...FULL, gallery: [], projects: null });
+    expect(bare).toContain('data-testid="org-living-tab-overview"');
+    expect(bare).not.toContain('data-tab="gallery"');
+    expect(bare).not.toContain('data-tab="projects"');
+    expect(organizationLivingTab("gallery")).toBe("gallery");
+    expect(organizationLivingTab("x")).toBeNull();
+    expect(organizationLivingTab(["gallery"])).toBeNull();
+  });
+
+  it("0034: the Overview holds only the card, the header, the fact strip and the panels", () => {
+    const overview = render("en", "overview");
+    for (const part of ["org-living-card", "org-living-figures", "org-living-work", "org-living-summary"]) {
+      expect(overview, part).toContain(`data-testid="${part}"`);
+    }
+    for (const block of ["org-living-gallery", "org-living-experience-pair", "org-living-team-figures", "org-living-clients"]) {
+      expect(overview, block).not.toContain(`data-testid="${block}"`);
+    }
+    expect(overview).not.toContain("Gyvenamasis namas");
+    for (const tab of ORGANIZATION_LIVING_TABS.filter((k) => k !== "overview")) {
+      const html = render("en", tab);
+      expect(html, tab).not.toContain('data-testid="org-living-card"');
+      expect(html, tab).not.toContain('data-testid="org-living-figures"');
+    }
+  });
+
+  it("6: confirmed and recorded hours are two figures with their own evidence marks; the ring reads the journal only", () => {
+    const html = render("en", "experience");
     expect(html).toMatch(/org-living-confirmed[\s\S]*data-level="confirmed"/);
     expect(html).toMatch(/org-living-recorded[\s\S]*data-level="recorded"/);
     expect(html).toContain("96 h");
     expect(html).toContain("18,250.5 h");
     expect(html).toContain("24 h waiting for approval");
+    // 96 of 120 journal hours: 80 %. The organization's own records are never in the ring.
+    expect(render("en", "overview")).toContain("80% of journal hours confirmed");
   });
 
-  it("2 + 5: capabilities, skills with their confirmation, team size and a work-only gallery", () => {
+  it("2: capabilities, skills with their confirmation and the team size; the Team block", () => {
     const html = render("lt");
     expect(html).toContain('data-testid="org-living-capabilities"');
     expect(html).toContain('data-confirmed="true"');
     expect(html).toContain("Komandoje 41 žmogus");
-    expect(html).toContain("https://example.test/1.jpg");
-    expect(html).not.toContain("https://example.test/2.jpg");
+    const team = render("lt", "team");
+    expect(team).toContain('data-testid="org-living-team-figures"');
+    expect(team).toContain("37");
+    expect(team).not.toMatch(/Jonas|Petras|@/);
   });
 
-  it("0032: no helper noise — no public provenance line, footer or explanation paragraph", () => {
+  it("3 + 5: projects ongoing and completed; a work-only gallery", () => {
+    const projects = render("lt", "projects");
+    expect(projects).toContain("Gyvenamasis namas");
+    expect(projects).toContain("Biurų pastatas");
+    const photos = render("lt", "gallery");
+    expect(photos).toContain("https://example.test/1.jpg");
+    expect(photos).not.toContain("https://example.test/2.jpg");
+  });
+
+  it("0032: no helper noise — no public provenance line, footer, rating or score", () => {
     const lt = catalog("lt") as { businessProfile: { poweredBy: string; team: Record<string, string> } };
-    const html = render("lt");
-    for (const noise of [lt.businessProfile.poweredBy, lt.businessProfile.team.provenance, lt.businessProfile.team.contactNote]) {
-      expect(html).not.toContain(noise);
+    for (const tab of ORGANIZATION_LIVING_TABS) {
+      const html = render("lt", tab);
+      for (const noise of [lt.businessProfile.poweredBy, lt.businessProfile.team.provenance, lt.businessProfile.team.contactNote]) {
+        expect(html).not.toContain(noise);
+      }
+      expect(html.toLowerCase()).not.toContain("demo");
+      expect(html).not.toMatch(/★|rating|score/i);
     }
-    expect(html.toLowerCase()).not.toContain("demo");
   });
 
-  it("every active locale renders every region from its own catalogue, never English fallbacks", () => {
+  it("every active locale renders every block from its own catalogue, never English fallbacks", () => {
     const enLiving = (catalog("en") as { businessProfile: { team: { living: Record<string, unknown> } } })
       .businessProfile.team.living;
     const keys = (o: Record<string, unknown>, p = ""): string[] =>
@@ -203,20 +269,28 @@ describe("organization Living CV — rendered", () => {
         .businessProfile.team.living;
       expect(living, `${locale} has the living catalogue`).toBeDefined();
       expect(keys(living!).sort(), locale).toEqual(keys(enLiving).sort());
-      const html = render(locale);
-      expect(html, locale).not.toContain("businessProfile.");
-      if (locale !== "en") expect(html, locale).not.toContain("hours worked");
+      for (const tab of ORGANIZATION_LIVING_TABS) {
+        const html = render(locale, tab);
+        expect(html, `${locale} ${tab}`).not.toContain("businessProfile.");
+        if (locale !== "en") expect(html, `${locale} ${tab}`).not.toContain("hours worked");
+      }
+      const entry = renderToStaticMarkup(
+        createElement(OrganizationLivingEntry, { name: "UAB Alfa", href: "/x?cv=overview", t: translator(locale) }),
+      );
+      expect(entry, locale).not.toContain("businessProfile.");
     }
   });
 
   it("phone widths: every grid starts at one or two columns and its items may shrink", () => {
     const src = read("components/app/company-team-profile.tsx");
-    const living = src.slice(src.indexOf("function LivingFigures"), src.indexOf("export function CompanyTeamProfile"));
-    for (const grid of living.match(/className="grid [^"]*"/g) ?? []) {
+    const member = src.slice(src.indexOf("const LIVING ="), src.indexOf("export function CompanyTeamProfile"));
+    for (const grid of member.match(/className="grid [^"]*"/g) ?? []) {
       expect(grid, grid).toMatch(/grid-cols-(1|2)( |")/);
     }
-    expect(living).not.toMatch(/\bw-\[\d+px\]|min-w-\[\d+px\]/);
-    expect((living.match(/min-w-0/g) ?? []).length).toBeGreaterThanOrEqual(6);
+    expect(member).not.toMatch(/\bw-\[\d+px\]|min-w-\[\d+px\]/);
+    expect((member.match(/min-w-0/g) ?? []).length).toBeGreaterThanOrEqual(14);
+    // The tab row scrolls inside itself, never the page.
+    expect(member).toContain('className="-mx-1 overflow-x-auto"');
   });
 });
 
@@ -249,9 +323,13 @@ describe("organization Living CV — wiring", () => {
     expect(loader).not.toMatch(/service[_-]?role|createAdminClient/i);
   });
 
-  it("the organization's own settings page renders it (no second page, no second component)", () => {
+  it("the organization's own settings page carries the way in and the Living CV at its own address", () => {
     const page = read("app/[locale]/dashboard/company/settings/page.tsx");
     expect(page).toContain("loadOrganizationLivingCv(");
     expect(page).toContain("<CompanyTeamProfile");
+    expect(page).toContain("<OrganizationLivingEntry");
+    expect(page).toContain("organizationLivingTab(sp.cv)");
+    // The history is read only when the Living CV is opened, never on every Settings visit.
+    expect(page).toMatch(/cvTab && capabilityOrgId\s*\?\s*await loadOrganizationLivingCv/);
   });
 });

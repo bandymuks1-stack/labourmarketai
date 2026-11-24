@@ -186,14 +186,13 @@
         "figures": {
           "years": "{count, plural, one {jaar} other {jaar}}",
           "hours": "gewerkte uren",
-          "people": "{count, plural, one {persoon} other {personen}}",
+          "people": "{count, plural, one {persoon werkte hier} other {personen werkten hier}}",
           "projects": "{count, plural, one {project} other {projecten}}",
-          "places": "{count, plural, one {werklocatie} other {werklocaties}}"
+          "places": "{count, plural, one {werklocatie} other {werklocaties}}",
+          "team": "{count, plural, one {teamlid} other {teamleden}}"
         },
-        "doEyebrow": "Specialisatie",
-        "doTitle": "Wat we doen",
+        "doTitle": "Competenties",
         "team": "{count, plural, one {# persoon in het team} other {# personen in het team}}",
-        "experienceEyebrow": "Ervaring",
         "experienceTitle": "Gewerkte uren",
         "confirmedLabel": "Bevestigd",
         "confirmedSource": "Vastgelegd door de werknemer, goedgekeurd door de organisatie",
@@ -202,13 +201,19 @@
         "pending": "{hours} wachten op goedkeuring",
         "periods": "Nog {hours} in periodetotalen",
         "hours": "{hours} u",
-        "projectsEyebrow": "Projecten",
-        "projectsTitle": "Projecten",
         "running": "Lopend",
         "completed": "Afgerond",
-        "galleryEyebrow": "Galerij",
-        "galleryTitle": "Uitgevoerd werk",
-        "clients": "Werk uitgevoerd voor: {names}"
+        "clients": "Werk uitgevoerd voor: {names}",
+        "tabs": {
+          "overview": "Overzicht",
+          "projects": "Projecten",
+          "experience": "Ervaring",
+          "gallery": "Galerij",
+          "team": "Medewerkers"
+        },
+        "pendingLabel": "Wacht op goedkeuring",
+        "ringLabel": "{share}% van de journaaluren bevestigd",
+        "open": "Levend cv openen"
       }
     }
   },

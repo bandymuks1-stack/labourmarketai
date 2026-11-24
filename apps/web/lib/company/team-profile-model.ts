@@ -252,11 +252,15 @@ export interface OrganizationLivingInput {
   readonly clients: readonly (string | null)[];
 }
 
-export type OrganizationFigureKey = "years" | "hours" | "people" | "projects" | "places";
+export type OrganizationFigureKey = "years" | "hours" | "projects" | "team";
 
 export interface OrganizationLivingRecord {
-  /** Headline figures, only those with a real source, in this order. */
+  /** The fact strip: only figures with a real source, in this order. */
   readonly figures: readonly { readonly key: OrganizationFigureKey; readonly value: number }[];
+  /** People who worked in the organization's records (Team block); null = none recorded. */
+  readonly peopleWorked: number | null;
+  /** Work sites its records name (Experience block); null = none. */
+  readonly places: number | null;
   /** First and last year of recorded work; null when no dated work exists. */
   readonly span: { readonly from: number; readonly to: number } | null;
   /** Declared capability slugs, in the catalogue's order. */
@@ -317,11 +321,11 @@ export function buildOrganizationLivingRecord(input: OrganizationLivingInput): O
   // Hours: the organization's own day records. The journal is a separate
   // ledger and the period aggregates a separate kind: neither is added here.
   if (history && history.dayHours > 0) figures.push({ key: "hours", value: Math.round(history.dayHours) });
-  const people = history && history.peopleCount > 0 ? history.peopleCount : (journal?.people ?? 0);
-  if (people > 0) figures.push({ key: "people", value: people });
   const projectTotal = projects ? projects.running + projects.completed : 0;
   if (projectTotal > 0) figures.push({ key: "projects", value: projectTotal });
-  if (history && history.placesCount > 0) figures.push({ key: "places", value: history.placesCount });
+  const rosterSize = input.rosterSize && input.rosterSize > 0 ? input.rosterSize : null;
+  if (rosterSize !== null) figures.push({ key: "team", value: rosterSize });
+  const people = history && history.peopleCount > 0 ? history.peopleCount : (journal?.people ?? 0);
 
   const confirmedHours = journal ? round1(journal.confirmedHours) : 0;
   const pendingHours = journal ? round1(Math.max(0, journal.hours - journal.confirmedHours)) : 0;
@@ -354,10 +358,12 @@ export function buildOrganizationLivingRecord(input: OrganizationLivingInput): O
 
   return {
     figures,
+    peopleWorked: people > 0 ? people : null,
+    places: history && history.placesCount > 0 ? history.placesCount : null,
     span,
     capabilities,
     skills,
-    rosterSize: input.rosterSize && input.rosterSize > 0 ? input.rosterSize : null,
+    rosterSize,
     experience,
     projects:
       projects && projectTotal > 0
@@ -400,4 +406,15 @@ export function buildOrganizationLivingCv(
     later: { coverImageUrl: null, finishedWork: [], rosterByRole: [], proofFigures: [], openRoles: [] },
     living: buildOrganizationLivingRecord(input),
   };
+}
+
+/** The Living CV's blocks, each behind its own tab and address (decision 0034). */
+export const ORGANIZATION_LIVING_TABS = ["overview", "projects", "experience", "gallery", "team"] as const;
+export type OrganizationLivingTab = (typeof ORGANIZATION_LIVING_TABS)[number];
+
+/** A requested block, or null when the address names none. */
+export function organizationLivingTab(raw: string | string[] | undefined): OrganizationLivingTab | null {
+  return typeof raw === "string" && (ORGANIZATION_LIVING_TABS as readonly string[]).includes(raw)
+    ? (raw as OrganizationLivingTab)
+    : null;
 }

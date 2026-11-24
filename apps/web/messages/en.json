@@ -186,14 +186,13 @@
         "figures": {
           "years": "{count, plural, one {year} other {years}}",
           "hours": "hours worked",
-          "people": "{count, plural, one {person} other {people}}",
+          "people": "{count, plural, one {person worked here} other {people worked here}}",
           "projects": "{count, plural, one {project} other {projects}}",
-          "places": "{count, plural, one {work site} other {work sites}}"
+          "places": "{count, plural, one {work site} other {work sites}}",
+          "team": "{count, plural, one {team member} other {team members}}"
         },
-        "doEyebrow": "Specialization",
-        "doTitle": "What we do",
+        "doTitle": "Competencies",
         "team": "{count, plural, one {# person on the team} other {# people on the team}}",
-        "experienceEyebrow": "Experience",
         "experienceTitle": "Hours worked",
         "confirmedLabel": "Confirmed",
         "confirmedSource": "Recorded by the worker, approved by the organization",
@@ -202,13 +201,19 @@
         "pending": "{hours} waiting for approval",
         "periods": "{hours} more in period totals",
         "hours": "{hours} h",
-        "projectsEyebrow": "Projects",
-        "projectsTitle": "Projects",
         "running": "Ongoing",
         "completed": "Completed",
-        "galleryEyebrow": "Gallery",
-        "galleryTitle": "Work done",
-        "clients": "Work done for: {names}"
+        "clients": "Work done for: {names}",
+        "tabs": {
+          "overview": "Overview",
+          "projects": "Projects",
+          "experience": "Experience",
+          "gallery": "Gallery",
+          "team": "Team"
+        },
+        "pendingLabel": "Waiting for approval",
+        "ringLabel": "{share}% of journal hours confirmed",
+        "open": "Open the Living CV"
       }
     }
   },

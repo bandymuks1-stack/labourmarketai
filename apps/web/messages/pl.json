@@ -186,14 +186,13 @@
         "figures": {
           "years": "{count, plural, one {rok} few {lata} many {lat} other {lat}}",
           "hours": "przepracowanych godzin",
-          "people": "{count, plural, one {osoba} few {osoby} many {osób} other {osób}}",
+          "people": "{count, plural, one {osoba pracowała} few {osoby pracowały} many {osób pracowało} other {osób pracowało}}",
           "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
-          "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}"
+          "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}",
+          "team": "{count, plural, one {członek zespołu} few {członków zespołu} many {członków zespołu} other {członków zespołu}}"
         },
-        "doEyebrow": "Specjalizacja",
-        "doTitle": "Czym się zajmujemy",
+        "doTitle": "Kompetencje",
         "team": "{count, plural, one {W zespole # osoba} few {W zespole # osoby} many {W zespole # osób} other {W zespole # osób}}",
-        "experienceEyebrow": "Doświadczenie",
         "experienceTitle": "Przepracowane godziny",
         "confirmedLabel": "Potwierdzone",
         "confirmedSource": "Zapisane przez pracownika, zatwierdzone przez organizację",
@@ -202,13 +201,19 @@
         "pending": "{hours} czeka na zatwierdzenie",
         "periods": "Jeszcze {hours} w sumach okresowych",
         "hours": "{hours} godz.",
-        "projectsEyebrow": "Projekty",
-        "projectsTitle": "Projekty",
         "running": "W toku",
         "completed": "Zakończone",
-        "galleryEyebrow": "Galeria",
-        "galleryTitle": "Wykonane prace",
-        "clients": "Prace wykonane dla: {names}"
+        "clients": "Prace wykonane dla: {names}",
+        "tabs": {
+          "overview": "Przegląd",
+          "projects": "Projekty",
+          "experience": "Doświadczenie",
+          "gallery": "Galeria",
+          "team": "Zespół"
+        },
+        "pendingLabel": "Czeka na zatwierdzenie",
+        "ringLabel": "Potwierdzono {share}% godzin z dziennika",
+        "open": "Otwórz Żywe CV"
       }
     }
   },
