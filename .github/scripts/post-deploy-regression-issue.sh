@@ -6,15 +6,20 @@
 # and the workflow's earlier runs. It never touches production data and never
 # rolls anything back; a code rollback is a human decision.
 #
-#   - smoke red: open the issue, or add a comment to the one already open,
+#   - smoke red (FAIL): open the issue with the `deploy-freeze` label, or add
+#     a comment to the one already open (and make sure it carries the label),
 #     naming the deploy SHA, the build production served, the run, and the
-#     pull requests merged since the last green smoke;
+#     pull requests merged since the last green smoke. While an open issue
+#     carries `deploy-freeze`, deploy-vps.yml refuses normal deploys;
 #   - smoke green: if that issue is open, say which deploy is green and
-#     close it.
+#     close it, which lifts the freeze.
 #
 #   - production moved to another build during the run (SMOKE_WINDOW or
 #     SIGNED_IN_WINDOW = changed): the run proves nothing about either build,
 #     so the issue is left exactly as it is;
+#   - the public half was BLOCKED (SMOKE_STATE = blocked: production never
+#     settled on the deploy's build): nothing ran, the issue is left exactly
+#     as it is;
 #   - the walk brakes refused (SIGNED_IN_BRAKE = refused): the signed-in
 #     journeys did NOT run. That is not a failure. With a green public half
 #     the issue is left exactly as it is (no regression claimed, nothing
@@ -26,17 +31,27 @@
 # when it started (workflow_run), not what it tested (Codex review on #3271).
 #
 # Inputs (env): SMOKE, SIGNED_IN (job results), SMOKE_WINDOW, SIGNED_IN_WINDOW,
-# SIGNED_IN_BRAKE (clear | refused),
+# SMOKE_STATE (ran | blocked), SIGNED_IN_BRAKE (clear | refused),
 # BUILD, DEPLOY_SHA, RUN_URL, GH_TOKEN. Test hooks: REGRESSION_ISSUE_DRY_RUN=1
 # prints the issue body instead of calling GitHub, and LAST_GREEN_SHA stands in
 # for the artifact lookup (lib/guards/post-deploy-regression-issue.test.ts).
 set -euo pipefail
 
 TITLE="Post-deploy smoke is failing on production"
-WORKFLOW_FILE="post-deploy-smoke.yml"
+FREEZE_LABEL="deploy-freeze"
+# The checks run inside deploy-vps.yml (the one deploy queue); a manual re-check
+# runs post-deploy-smoke.yml on its own. A green run of either keeps the build.
+WORKFLOW_FILES="deploy-vps.yml post-deploy-smoke.yml"
 short() { printf '%s' "${1:0:8}"; }
 
 say() { if [ -n "${GITHUB_OUTPUT:-}" ]; then echo "$1" >> "$GITHUB_OUTPUT"; fi; }
+note() { echo "$1"; if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then echo "$1" >> "$GITHUB_STEP_SUMMARY"; fi; }
+
+if [ "${SMOKE_STATE:-}" = "blocked" ]; then
+  note "BLOCKED / NOT RUN: production never settled on the deploy's build, so no check ran; the regression issue is left unchanged."
+  say "green=false"
+  exit 0
+fi
 
 if [ "${SMOKE_WINDOW:-}" = "changed" ] || [ "${SIGNED_IN_WINDOW:-}" = "changed" ]; then
   echo "WINDOW CHANGED: production moved to another build during the smoke; the regression issue is left unchanged."
@@ -48,7 +63,7 @@ fi
 if [ "${SIGNED_IN_BRAKE:-}" = "refused" ]; then
   SIGNED_IN="not run (the walk brakes refused)"
   if [ "${SMOKE:-}" = "success" ]; then
-    echo "NOT RUN: the walk brakes refused, so the signed-in smoke did not run; the regression issue is left unchanged."
+    note "NOT RUN: the walk brakes refused, so the signed-in smoke did not run; the regression issue is left unchanged."
     say "green=false"
     exit 0
   fi
@@ -69,10 +84,15 @@ tested_sha() {
 # The run in progress is not "success" yet, so it is never its own baseline.
 last_green_sha() {
   if [ -n "${LAST_GREEN_SHA+x}" ]; then printf '%s' "$LAST_GREEN_SHA"; return; fi
-  local ids id dir b full
-  ids="$(gh run list --workflow "$WORKFLOW_FILE" --status success --limit 30 \
-    --json databaseId,event \
-    --jq '.[] | select(.event == "workflow_run" or .event == "workflow_dispatch") | .databaseId' || true)"
+  local ids id dir b full wf
+  ids=""
+  for wf in $WORKFLOW_FILES; do
+    ids="$ids $(gh run list --workflow "$wf" --status success --limit 30 \
+      --json databaseId,event,createdAt \
+      --jq '.[] | select(.event == "workflow_run" or .event == "workflow_dispatch") | "\(.createdAt) \(.databaseId)"' || true)"
+  done
+  # Newest first across both workflows.
+  ids="$(printf '%s\n' $ids | paste -d' ' - - | sort -r | awk '{print $2}')"
   for id in $ids; do
     dir="$(mktemp -d)"
     if gh run download "$id" -n verified-build -D "$dir" >/dev/null 2>&1 && [ -s "$dir/verified-build.txt" ]; then
@@ -139,10 +159,13 @@ if [ "$green" = true ]; then
   exit 0
 fi
 
-body="$(body_for_failure)"
+body="$(body_for_failure)
+**Deploy freeze:** while this issue is open with the \`${FREEZE_LABEL}\` label, deploy-vps.yml refuses normal deploys. Closing it lifts the freeze; the next deploy and its checks must pass. An owner-only emergency deploy (\`emergency=true\` with a reason) still runs the checks and is logged here."
+gh label create "$FREEZE_LABEL" --color B60205 --description "A post-deploy check failed: normal deploys are refused until this issue is closed" >/dev/null 2>&1 || true
 if [ -n "$open" ]; then
   gh issue comment "$open" --body "$body"
-  echo "updated #${open}"
+  gh issue edit "$open" --add-label "$FREEZE_LABEL"
+  echo "updated #${open} (${FREEZE_LABEL})"
 else
-  gh issue create --title "$TITLE" --body "$body"
+  gh issue create --title "$TITLE" --label "$FREEZE_LABEL" --body "$body"
 fi

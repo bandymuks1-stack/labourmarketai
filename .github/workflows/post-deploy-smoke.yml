@@ -38,16 +38,31 @@ name: Post-deploy smoke (public critical path, read-only)
 # PROD_QA_WALK_DAILY_BUDGET (that counts prod-qa-walk runs) and it keeps the
 # walk's health and deploy brakes.
 #
-# QUEUEING, NOT CANCELLING: runs share one concurrency group with
-# cancel-in-progress false, so a smoke that has started always finishes and
-# records its build. GitHub keeps one waiting run per group; if three deploys
-# land while one smoke runs, the newest waits and the middle one is dropped —
-# the newest is the build production serves by then, so nothing is lost.
+# ONE DEPLOY QUEUE (owner P0 2026-11-24). After every deploy this workflow is
+# CALLED by deploy-vps.yml (`workflow_call`, input `deploy_sha`) as jobs of the
+# deploy run itself, inside its `deploy-vps` concurrency group: the next deploy
+# cannot start until this deploy's checks have finished, so a check never meets
+# another deploy. It is no longer triggered on its own after a deploy.
+#
+# Three results, never mixed up:
+#   PASS     the check ran on the deploy's build and passed;
+#   FAIL     the check ran on the deploy's build and failed: the `report` job
+#            opens the regression issue with the `deploy-freeze` label, and
+#            deploy-vps.yml refuses normal deploys while it is open;
+#   BLOCKED  the check did NOT run (production never settled on the deploy's
+#            build, or a walk brake refused for the whole bounded wait). The
+#            job is red with "did NOT run" and no issue is opened or closed.
+#
+# A manual dispatch (workflow_dispatch) re-checks whatever production serves,
+# in its own group, outside the deploy queue.
 
 on:
-  workflow_run:
-    workflows: ["Deploy to VPS"]
-    types: [completed]
+  workflow_call:
+    inputs:
+      deploy_sha:
+        description: "The full sha deploy-vps.yml has just shipped"
+        type: string
+        required: true
   workflow_dispatch:
   pull_request:
     paths:
@@ -56,8 +71,11 @@ on:
 permissions:
   contents: read
 
+# Called from deploy-vps.yml: a group of its own run (the caller already holds
+# `deploy-vps`; reusing that name here would deadlock). Otherwise one queue for
+# manual re-checks, one per pull request.
 concurrency:
-  group: post-deploy-smoke-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
+  group: post-deploy-smoke-${{ inputs.deploy_sha && format('in-deploy-{0}', github.run_id) || (github.event_name == 'pull_request' && github.ref || 'production') }}
   cancel-in-progress: false
 
 jobs:
@@ -71,27 +89,41 @@ jobs:
       # `changed` when production moved to another build during the run: the run
       # proves nothing about either build, and `report` leaves the issue alone.
       window: ${{ steps.record.outputs.window }}
+      # `ran`, or `blocked` when production never settled on the deploy's build: NOT RUN.
+      state: ${{ steps.build.outputs.state }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # The blue/green switch has just ended: give the old server its drain time,
-      # then require three healthy answers in a row from ONE build.
+      # then require three healthy answers in a row from ONE build — inside the
+      # deploy queue, from THIS deploy's build. Bounded (about 5 minutes); if it
+      # never settles the check is BLOCKED (did not run), not failed.
       - name: Production is settled on one build
         id: build
+        env:
+          EXPECT: ${{ inputs.deploy_sha }}
         run: |
           set -euo pipefail
-          [ "${{ github.event_name }}" = "workflow_run" ] && sleep 60
+          [ -n "$EXPECT" ] && sleep 60
+          want="${EXPECT:0:8}"
           last=""; same=0
-          for i in $(seq 1 12); do
+          for i in $(seq 1 30); do
             body=$(curl -sS --max-time 20 https://labourmarket.ai/api/health || true)
             b=$(printf '%s' "$body" | jq -r 'if .ok == true then .build else empty end' 2>/dev/null || true)
+            if [ -n "$want" ] && [ "$b" != "$want" ]; then b=""; fi
             if [ -n "$b" ] && [ "$b" = "$last" ]; then same=$((same+1)); else same=0; fi
             last="$b"
             [ "$same" -ge 2 ] && break
             sleep 10
           done
-          [ "$same" -ge 2 ] || { echo "::error::production did not give three healthy answers from one build"; exit 1; }
+          if [ "$same" -lt 2 ]; then
+            echo "state=blocked" >> "$GITHUB_OUTPUT"
+            echo "**BLOCKED: production did not give three healthy answers from ${want:+the deploy's build \`$want\`}${want:-one build}. The smoke did NOT run.**" >> "$GITHUB_STEP_SUMMARY"
+            echo "::error::BLOCKED: production did not settle on ${want:-one build}; the smoke did not run"
+            exit 1
+          fi
+          echo "state=ran" >> "$GITHUB_OUTPUT"
           echo "build=$last" >> "$GITHUB_OUTPUT"
           echo "### Post-deploy smoke — production build \`$last\` ($(date -u +%Y-%m-%dT%H:%MZ))" >> "$GITHUB_STEP_SUMMARY"
 
@@ -183,7 +215,7 @@ jobs:
     # waiting run per group, so sharing it could push a waiting walk out. It only reads,
     # and its sign-out is `scope=local`, so a walk running beside it is not disturbed.
     concurrency:
-      group: post-deploy-smoke-signed-in
+      group: post-deploy-smoke-signed-in-${{ inputs.deploy_sha && github.run_id || 'manual' }}
       cancel-in-progress: false
     outputs:
       window: ${{ steps.after.outputs.window }}
@@ -223,18 +255,23 @@ jobs:
 
       # The walk's own brakes, right before anything signs in, unchanged: the deploy brake
       # wants five quiet minutes after a deploy, the health brake three healthy samples
-      # in a row. Right after a deploy the first health sample can still be slow, so
-      # both are asked again together, every 30 s for about ten minutes (14 tries). A brake that
-      # still refuses means the journeys did NOT run: the job records `brake=refused`
-      # and goes red, and the report job never reads that as a regression.
+      # in a row. Inside the deploy queue the deploy brake counts this run's OWN deploy
+      # job (WALK_BRAKE_OWN_DEPLOY_RUN), and production must still serve the build the
+      # public half checked. Right after a deploy the first health sample can still be
+      # slow, so all three are asked again together, every 30 s for about ten minutes
+      # (14 tries). Still refused means the journeys did NOT run: the job records
+      # `brake=refused` and goes red, and the report job never reads that as a regression.
       - name: "Brakes: no deploy running or just finished, production healthy"
         id: brake
         env:
           GH_TOKEN: ${{ github.token }}
+          WALK_BRAKE_OWN_DEPLOY_RUN: ${{ inputs.deploy_sha && github.run_id || '' }}
+          BUILD: ${{ needs.smoke.outputs.build }}
         run: |
           set -uo pipefail
           for i in $(seq 1 14); do
-            if node .github/scripts/walk-brakes.mjs deploy && node .github/scripts/walk-brakes.mjs health; then
+            now=$(curl -sS --max-time 20 https://labourmarket.ai/api/health | jq -r 'if .ok == true then .build else empty end' 2>/dev/null || true)
+            if [ "$now" = "$BUILD" ] && node .github/scripts/walk-brakes.mjs deploy && node .github/scripts/walk-brakes.mjs health; then
               echo "brake=clear" >> "$GITHUB_OUTPUT"
               exit 0
             fi
@@ -335,9 +372,10 @@ jobs:
           SMOKE: ${{ needs.smoke.result }}
           SIGNED_IN: ${{ needs.signed-in.result }}
           BUILD: ${{ needs.smoke.outputs.build }}
-          DEPLOY_SHA: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.head_sha || github.sha }}
+          DEPLOY_SHA: ${{ inputs.deploy_sha || github.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           SMOKE_WINDOW: ${{ needs.smoke.outputs.window }}
+          SMOKE_STATE: ${{ needs.smoke.outputs.state }}
           SIGNED_IN_WINDOW: ${{ needs.signed-in.outputs.window }}
           SIGNED_IN_BRAKE: ${{ needs.signed-in.outputs.brake }}
         id: report

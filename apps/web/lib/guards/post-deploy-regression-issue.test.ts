@@ -30,8 +30,8 @@ describe("the report job", () => {
     expect(report).toMatch(/GH_TOKEN: \$\{\{ github\.token \}\}/);
   });
 
-  it("names the deploy SHA of the deploy run it follows", () => {
-    expect(report).toMatch(/DEPLOY_SHA: \$\{\{ github\.event_name == 'workflow_run' && github\.event\.workflow_run\.head_sha \|\| github\.sha \}\}/);
+  it("names the deploy SHA the deploy run passed in", () => {
+    expect(report).toContain("DEPLOY_SHA: ${{ inputs.deploy_sha || github.sha }}");
   });
 
   it("a run whose build changed underneath it reports a window, and the green build is kept", () => {
@@ -47,6 +47,9 @@ describe("the report job", () => {
     expect(script).not.toMatch(/\bgit (revert|reset|push|checkout)\b|\bgh (workflow run|run rerun|pr merge)\b/);
     expect(script).toContain('TITLE="Post-deploy smoke is failing on production"');
     expect(script).toMatch(/gh issue comment "\$open"/);
+    expect(script).toMatch(/gh issue create --title "\$TITLE" --label "\$FREEZE_LABEL"/);
+    expect(script).toMatch(/gh issue edit "\$open" --add-label "\$FREEZE_LABEL"/);
+    expect(script).toContain('FREEZE_LABEL="deploy-freeze"');
     expect(script).toMatch(/gh issue close "\$open"/);
   });
 });
@@ -56,7 +59,8 @@ describe("a refused walk brake is NOT RUN, never a failure (run 45374185126, iss
 
   it("the brakes keep their thresholds, are asked again for a bounded time, and record the outcome", () => {
     expect(signedIn).toMatch(/id: brake\n/);
-    expect(signedIn).toMatch(/for i in \$\(seq 1 14\); do\n\s+if node \.github\/scripts\/walk-brakes\.mjs deploy && node \.github\/scripts\/walk-brakes\.mjs health; then/);
+    expect(signedIn).toMatch(/for i in \$\(seq 1 14\); do\n[^\n]*\n\s+if \[ "\$now" = "\$BUILD" \] && node \.github\/scripts\/walk-brakes\.mjs deploy && node \.github\/scripts\/walk-brakes\.mjs health; then/);
+    expect(signedIn).toContain("WALK_BRAKE_OWN_DEPLOY_RUN: ${{ inputs.deploy_sha && github.run_id || '' }}");
     expect(signedIn).toMatch(/echo "brake=clear" >> "\$GITHUB_OUTPUT"/);
     expect(signedIn).toMatch(/echo "brake=refused" >> "\$GITHUB_OUTPUT"/);
     expect(signedIn).toMatch(/brake: \$\{\{ steps\.brake\.outputs\.brake \}\}/);
