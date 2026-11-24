@@ -156,3 +156,12 @@ describe("Codex P2 on #3774: only a real trade, after the other guards, takes co
     expect(recognizeSkills("Gipsplaten gemonteerd in de keuken").map((r) => r.slug)).not.toContain("cooking");
   });
 });
+
+describe("Codex P2 on #3774: German 'kochte' on its own is still cooking", () => {
+  it.each(["Kochte täglich frische Gerichte", "Er kochte gestern Suppe"])("%s → cooking", (text) => {
+    expect(recognizeSkills(text).map((r) => r.slug)).toContain("cooking");
+  });
+  it("inside Dutch 'aangekochte' it is not", () => {
+    expect(recognizeSkills("Aangekochte materialen gebracht").map((r) => r.slug)).not.toContain("cooking");
+  });
+});

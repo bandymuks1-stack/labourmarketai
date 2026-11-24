@@ -256,6 +256,15 @@ export function isWarehousePlaceOnlyContext(
 const WHOLE_WORD_MAX_LEN = 3;
 
 /**
+ * Single words that are a different word inside another language's
+ * compound: DE "kochte" (cooked) sits inside NL "aangekochte" / "gekochte"
+ * (bought). Matched only as a whole word, so the German verb keeps working
+ * on its own ("Kochte täglich frische Gerichte") and the Dutch purchase never
+ * reads as cooking (Codex P2 on #3774).
+ */
+const WHOLE_WORD_TERMS: ReadonlySet<string> = new Set(["kochte"].map((t) => foldText(t).trim()));
+
+/**
  * A KITCHEN NAMED ON CONSTRUCTION WORK IS THE ROOM, NOT COOKING (owner P0
  * 2026-11-24, decision 0023: fix the wrong label, never disable inference).
  * "Dirbau virtuvėje" stays cooking — the owner's mandatory phrase lists pin it
@@ -329,7 +338,11 @@ export function recognizeSkills(
 
   for (const t of TERMS) {
     if (!folded.includes(t.term)) continue;
-    if (t.via === "synonym" && t.len <= WHOLE_WORD_MAX_LEN && !foldedTokens.includes(t.term)) continue;
+    if (
+      ((t.via === "synonym" && t.len <= WHOLE_WORD_MAX_LEN) || WHOLE_WORD_TERMS.has(t.term)) &&
+      !foldedTokens.includes(t.term)
+    )
+      continue;
     (matchedTerms.get(t.slug) ?? matchedTerms.set(t.slug, new Set()).get(t.slug)!).add(t.term);
     const prior = best.get(t.slug);
     const better =
