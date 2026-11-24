@@ -247,7 +247,24 @@ jobs:
           f="labourmarket-web-standalone-${SHA}.tgz"
           echo "${SHA256}  ${f}" | sha256sum -c -
           # The receiver reads the tarball from stdin and prints only names, sizes, http codes and the outcome.
-          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "lmdeploy@${HOST}" "deploy ${SHA} ${SHA256}" < "$f" | tee deploy.log
+          # CONNECTION RETRY (run 45406594897: "ssh: connect to host … port 22: Connection timed out"):
+          # up to 3 tries, 60 s then 120 s apart, ONLY while the receiver has not started — it prints
+          # `previous=` first, so an empty log with ssh exit 255 means nothing ran on the VPS. Once the
+          # receiver has started, its own result stands (it rolls back by itself); nothing is re-sent.
+          for try in 1 2 3; do
+            code=0
+            # ConnectTimeout bounds only the connection; a started deploy session is never cut short.
+            ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=30 \
+              "lmdeploy@${HOST}" "deploy ${SHA} ${SHA256}" < "$f" > deploy.log 2> ssh.err || code=$?
+            cat deploy.log; cat ssh.err >&2
+            if [ "$code" -eq 255 ] && ! grep -q '^previous=' deploy.log; then
+              echo "try ${try}/3: no SSH connection to the VPS (exit 255, the receiver did not start)"
+              if [ "$try" -lt 3 ]; then sleep $((try * 60)); continue; fi
+              echo "::error::VPS NETWORK: three SSH connections to the VPS on port 22 failed over about 4 minutes (connection refused or timed out before the receiver started). Nothing was deployed and production keeps its build. Check the VPS is up and that port 22 accepts GitHub Actions runners (provider firewall / panel), then re-run this deploy."
+              exit 1
+            fi
+            break
+          done
           grep -q '^DEPLOY_OK ' deploy.log || { echo "::error::receiver did not report DEPLOY_OK (see log; it rolls back by itself)"; exit 1; }
           rm -f ~/.ssh/deploy_key
       - name: Public verification through Cloudflare
