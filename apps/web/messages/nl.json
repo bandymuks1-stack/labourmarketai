@@ -19380,7 +19380,9 @@
         "open": "Werkomgeving {name} openen",
         "opening": "Bezig met openen…",
         "error": "De werkomgeving kon niet worden geopend."
-      }
+      },
+      "structure": "Eerder werk werd uitgevoerd onder {names}.",
+      "structureLater": ", daarna "
     },
     "projects": {
       "title": "Projecten op het platform",
@@ -19411,7 +19413,8 @@
       "title": "Opdrachtgevers",
       "unnamed": "Opdrachtgevende organisatie",
       "records": "{count, plural, one {# registratie} other {# registraties}}"
-    }
+    },
+    "descriptionNotInSource": "Geen werkbeschrijving in de bron"
   },
   "workPlan": {
     "title": "Gepland werk",

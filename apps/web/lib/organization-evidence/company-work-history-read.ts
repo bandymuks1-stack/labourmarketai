@@ -37,6 +37,7 @@ import {
 } from "./business-history";
 import {
   buildCompanyWorkHistory,
+  placeKeyOf,
   type CompanyWorkHistory,
   type PlaceObjectFacts,
 } from "./company-work-history";
@@ -433,6 +434,7 @@ async function readBusinessHistory(
     periodStart: string | null;
     periodEnd: string | null;
     hours: number | null;
+    contextLabel: string | null;
     withdrawn: boolean;
     superseded: boolean;
   }[],
@@ -492,6 +494,9 @@ async function readBusinessHistory(
         periodEnd: r.periodEnd,
         hours: r.hours,
         sourceLabel: labelOf.get(r.id) ?? null,
+        // The place exactly as the place list groups it: one meaning of
+        // "place" on the whole page (owner P0 2026-11-24).
+        placeKey: placeKeyOf(r),
       })),
     statements,
   );

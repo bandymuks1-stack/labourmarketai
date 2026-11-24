@@ -19380,7 +19380,9 @@
         "open": "Open {name} workspace",
         "opening": "Opening…",
         "error": "The workspace could not be opened."
-      }
+      },
+      "structure": "Earlier work was done under {names}.",
+      "structureLater": ", later "
     },
     "projects": {
       "title": "Projects on the platform",
@@ -19411,7 +19413,8 @@
       "title": "Clients",
       "unnamed": "Client organization",
       "records": "{count, plural, one {# record} other {# records}}"
-    }
+    },
+    "descriptionNotInSource": "No work description in the source"
   },
   "workPlan": {
     "title": "Planned work",
