@@ -157,6 +157,10 @@ export function CompanySetupForm({
   // country); everything optional waits in one closed group. Editing an
   // existing company keeps every field open.
   const collapseOptional = existing === null || firstSetup;
+  // The page shows the existing company's status card only for a company
+  // that is set up (`company && !firstSetup`); everywhere else the form is
+  // where the person reads what creating a company means.
+  const showCreateFrame = existing === null || firstSetup;
   // E-3: after a save, the result and its next door come into view; the door
   // is then the one primary action and Save steps back to secondary.
   const resultRef = useRef<HTMLParagraphElement>(null);
@@ -311,15 +315,17 @@ export function CompanySetupForm({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {labels.title}
         </h2>
-        {existing === null ? <p className="text-sm text-text-secondary">{labels.subtitle}</p> : null}
+        {showCreateFrame ? <p className="text-sm text-text-secondary">{labels.subtitle}</p> : null}
       </header>
 
       {/* Honest verification notice — full company use requires human
           verification that does not happen automatically. On the CREATE form
-          only: an existing company's card above already states its status
-          and what it means (company-start-verification-explainer), so the
-          edit form said it a second time (decision 0032, 2026-11-24). */}
-      {existing === null ? (
+          and on the FIRST setup of the shell row sign-up makes (no status card
+          is shown then): only an existing company's card above already
+          states its status and what it means
+          (company-start-verification-explainer), so only its edit form said
+          it a second time (decision 0032, 2026-11-24; R2 review on #3786). */}
+      {showCreateFrame ? (
         <p
           className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
           data-testid="company-setup-verification-notice"
