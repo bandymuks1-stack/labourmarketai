@@ -171,7 +171,7 @@ describe("historical person signals: identical before and after claim", () => {
       },
     ],
   };
-  const sigs = { data: [{ record_id: "r1", skill_slug: "tiling" }] };
+  const sigs = { data: [{ record_id: "r1", skill_slug: "tiling", term: "plytelės" }] };
   const client = fake({
     organization_people: people,
     organization_evidence_records: recs,

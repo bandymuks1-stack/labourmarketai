@@ -51,7 +51,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           WINDOW_START: "2026-11-19T20:00:00Z"
-          WINDOW_END: "2026-11-30T00:00:00Z"  # owner order 2026-11-23: verify every fix in production after deploy; 6/day from 11-24
+          WINDOW_END: "2026-11-30T00:00:00Z"  # owner order 2026-11-23: verify every fix in production after deploy; 48/day 11-24..11-26 (owner 2026-11-24), then 6
           # Owner decision 2026-11-19: at most 6 plan walks per UTC day (Supabase Free log quota).
           # Owner decision 2026-11-21: the project is on Supabase Pro; up to 24 per UTC day until
           # 2026-11-23, while production stays stable (every prod-qa-walk brake still applies).
@@ -87,16 +87,17 @@ jobs:
           # 45277375181, 45312056043; N4 mobile-surfaces: 45315748950, 45317825514, 45319400714).
           # Owner order 2026-11-24: refresh the core journeys whose newest production run is older
           # than today's fixes. These are not intermittent, so one pass each (6 = one day's cap).
-          RERUN: "chat-continuity:phone notifications-inapp:phone need-intake:desktop marketplace-goods-services:desktop role-routes:desktop orders-bookings:desktop"
-          RERUN_START: "2026-11-24T09:30:00Z"
+          # Owner order 2026-11-24: verify EVERY core journey on the current build; 48/day through 11-26, then 6.
+          RERUN: "company-governance:desktop profile-cv-history:desktop profile-cv-history:phone profile-cv-history:phone-375 company-chain:desktop company-chain:phone company-chain:phone-375 need-intake:desktop need-intake:phone need-intake:phone-375 agency-chain:desktop agency-chain:phone agency-chain:phone-375 learning-practice:desktop learning-practice:phone learning-practice:phone-375 role-routes:desktop role-routes:phone fresh-activation:desktop jobs-search:desktop jobs-search:phone journal-confirm:desktop journal-confirm:phone chat-continuity:phone worker-records-exports:desktop notifications-inapp:phone org-roster:desktop org-roster:phone brigade-formation:desktop project-execution:desktop project-context:desktop calendar-planning:desktop rota-repeat:desktop marketplace-goods-services:desktop marketplace-goods-services:phone orders-bookings:desktop orders-bookings:phone marketplace:desktop buyer-workspace:desktop chat-confirm-once:desktop manager-chat:desktop mcp-chain:desktop mcp-agents:desktop ai-off-honesty:desktop documents-approvals:desktop search-support-privacy:desktop company-talent-history:desktop worker-identity-split:desktop staff-review-notice:desktop public-org-locales:phone mobile-surfaces:phone"
+          RERUN_START: "2026-11-24T13:30:00Z"
           RERUN_PASSES: "1"
           # ONE-SHOT pairs (coordinator order 2026-11-23): run exactly once after ONCE_START and are
           # settled by that one run whatever its outcome; never re-run after a deploy, never counted as
           # a plan pair. For prod-living-cv-screens, which reads real organizations under a time-boxed
           # read grant: set ONCE="living-cv-screens:desktop" and ONCE_START just after the grant is
           # applied, in one reviewed change; the push to this file starts the tick. Empty: nothing.
-          ONCE: ""
-          ONCE_START: ""
+          ONCE: "living-cv-screens:desktop"
+          ONCE_START: "2026-11-24T12:57:00Z"
           # 2026-11-23 00:45 UTC: GitHub's schedule fired no tick after 22:35 UTC again; a push to
           # this file (the push trigger) starts the chain, which then hands over by itself.
         run: |
@@ -149,9 +150,11 @@ jobs:
             # consecutive passes (owner 2026-11-23: an intermittent failure is fixed only after 3).
             for id in $ids; do
               c=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
-              # A walk job that failed BEFORE its Provision step (a brake re-checked inside the walk job,
-              # e.g. production health) never reached production: it is not a run of the pair.
-              if [ "$c" = failure ]; then
+              # A walk job that ended BEFORE its Provision step (a brake re-checked inside the walk job,
+              # e.g. production health) never reached production: it is not a run of the pair. Since a
+              # brake refusal is NOT RUN (the walk job then succeeds and the run is cancelled), a
+              # success counts only when Provision started too.
+              if [ "$c" = failure ] || [ "$c" = success ]; then
                 reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
                   --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
                 [ "${reached:-0}" -gt 0 ] || continue
@@ -183,7 +186,7 @@ jobs:
             case "$started" in "$today"*) ran_today=$((ran_today + 1)) ;; esac
           done <<< "$done_titles"
           # The owner set 24 per day until 2026-11-23; after that the earlier owner setting (6) applies.
-          [[ "$today" > "2026-11-23" ]] && DAILY_CAP=6
+          if [[ "$today" > "2026-11-26" ]]; then DAILY_CAP=6; elif [[ "$today" > "2026-11-23" ]]; then DAILY_CAP=48; fi
           # The cap limits PLAN walks only; a one-shot pair below is not a plan walk.
           capped=0
           [ "$ran_today" -ge "$DAILY_CAP" ] && capped=1
