@@ -4,6 +4,12 @@ after-person-card-1440: 0 px
 after-person-card-390: 0 px
 after-two-statements-org-1440: 0 px
 after-two-statements-org-390: 0 px
+after2-no-period-org-1440: 0 px
+after2-no-period-org-390: 0 px
+after2-person-card-1440: 0 px
+after2-person-card-390: 0 px
+after2-two-statements-org-1440: 0 px
+after2-two-statements-org-390: 0 px
 before-no-period-org-1440: 0 px
 before-no-period-org-390: 0 px
 before-person-card-1440: 0 px

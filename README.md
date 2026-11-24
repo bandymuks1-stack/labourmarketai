@@ -8,3 +8,5 @@ scrollWidth minus viewport (0 = no sideways scrolling).
 - `no-period-org`: an organization with no period statement.
 - `two-statements-org`: two statements about the same earlier entity plus its own period; its records name one client.
 - `person-card`: one historical person's card in the no-period organization.
+
+- `after2-*`: head 8f8f66886 (client line neutral; "subcontractor" only from a subcontractor party).
