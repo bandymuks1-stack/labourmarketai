@@ -710,7 +710,11 @@ jobs:
           node -e '
             const fs = require("fs"), path = require("path"), dir = process.argv[1];
             const m = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
-            const listed = new Set(m.screens.filter((s) => s.privacy === "PASS" && s.file).map((s) => s.file));
+            // A screen is published when its privacy gate passed; showcase-screens (synthetic accounts,
+            // no privacy check) states NOT_CHECKED, accepted for that spec ONLY.
+            const spec = process.argv[2];
+            const allowed = (s) => s.privacy === "PASS" || (spec === "showcase-screens" && s.privacy === "NOT_CHECKED");
+            const listed = new Set(m.screens.filter((s) => allowed(s) && s.file).map((s) => s.file));
             const pngs = fs.readdirSync(dir).filter((f) => f.endsWith(".png"));
             const stray = pngs.filter((f) => !listed.has(f));
             // living-cv-screens: 12 (no `expected` field); showcase-screens: 30 (15 synthetic-account
@@ -719,7 +723,7 @@ jobs:
             if (m.screens.length !== want || stray.length > 0) { console.error(`screens=${m.screens.length} want=${want} stray=${stray.length}`); process.exit(1); }
             const pass = m.screens.filter((s) => s.status === "PASS").length;
             console.log(`images=${pngs.length} pass=${pass} fail=${m.screens.length - pass}`);
-          ' "$LCV_DIR" >> "$GITHUB_STEP_SUMMARY"
+          ' "$LCV_DIR" "${{ needs.debounce.outputs.spec }}" >> "$GITHUB_STEP_SUMMARY"
           (cd "$LCV_DIR" && zip -q -X "$LCV_TMP/lcv.zip" manifest.json $(find . -maxdepth 1 -type f -name '*.png' -printf '%f\n'))
           openssl rand -hex 32 > "$LCV_TMP/lcv.key"
           openssl enc -aes-256-cbc -pbkdf2 -salt -in "$LCV_TMP/lcv.zip" -out "$LCV_OUT/lcv.zip.enc" -pass "file:$LCV_TMP/lcv.key"

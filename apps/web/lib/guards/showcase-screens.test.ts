@@ -33,6 +33,11 @@ describe("showcase screens", () => {
     expect(spec).not.toMatch(/console\.|hasText|getByText|innerText|textContent/);
   });
 
+  it("states that no privacy check ran (R2 P2): never claims privacy PASS", () => {
+    expect(spec).not.toMatch(/privacy: "PASS"/);
+    expect(spec).toMatch(/privacy: "NOT_CHECKED"/);
+  });
+
   it("is published only through the encrypted step, with the buyer minted only when it exists", () => {
     expect(workflow).toMatch(/showcase-screens\) SPEC=tests\/e2e\/prod-showcase-screens\.spec\.ts/);
     expect(workflow).toMatch(/spec == 'living-cv-screens' \|\| needs\.debounce\.outputs\.spec == 'showcase-screens'/);

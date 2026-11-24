@@ -112,7 +112,8 @@ interface Result {
   readonly screen: string;
   readonly viewport: string;
   readonly file: string | null;
-  readonly privacy: "PASS";
+  /** No privacy check runs on these synthetic-account screens (no rewrite, no DOM scan): said so. */
+  readonly privacy: "NOT_CHECKED";
   readonly layout: "n/a";
   readonly status: "PASS" | "FAIL";
   readonly reasons: readonly string[];
@@ -148,9 +149,9 @@ test("SHOW. production showcase screens on the synthetic accounts, 1440 and 390 
           const png = stripPngMetadata(await page.screenshot({ fullPage: shot.full, animations: "disabled", caret: "hide" }));
           writeFileSync(join(OUT, file), png, { mode: 0o600 });
           if (shot.kind === "nav") await page.keyboard.press("Escape").catch(() => undefined);
-          results.push({ screen: shot.id, viewport: vp.key, file, privacy: "PASS", layout: "n/a", status: "PASS", reasons: [] });
+          results.push({ screen: shot.id, viewport: vp.key, file, privacy: "NOT_CHECKED", layout: "n/a", status: "PASS", reasons: [] });
         } catch (e) {
-          results.push({ screen: shot.id, viewport: vp.key, file: null, privacy: "PASS", layout: "n/a", status: "FAIL", reasons: [`not generated: ${causeOf(e)}`] });
+          results.push({ screen: shot.id, viewport: vp.key, file: null, privacy: "NOT_CHECKED", layout: "n/a", status: "FAIL", reasons: [`not generated: ${causeOf(e)}`] });
         }
       }
     } finally {

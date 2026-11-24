@@ -126,7 +126,9 @@ describe("the workflow publishes only ciphertext", () => {
     expect(enc).toMatch(/trap destroy EXIT/);
     expect(enc).toMatch(/shred -u/);
     expect(enc).toMatch(/no manifest/);
-    expect(enc).toMatch(/s\.privacy === "PASS" && s\.file/);
+    // Only a passed privacy gate publishes; NOT_CHECKED is accepted for showcase-screens alone.
+    expect(enc).toMatch(/const allowed = \(s\) => s\.privacy === "PASS" \|\| \(spec === "showcase-screens" && s\.privacy === "NOT_CHECKED"\)/);
+    expect(enc).toMatch(/m\.screens\.filter\(\(s\) => allowed\(s\) && s\.file\)/);
     expect(enc).toMatch(/const want = m\.expected === 30 \? 30 : 12;/);
     expect(enc).toMatch(/m\.screens\.length !== want \|\| stray\.length > 0/);
     expect(enc).toMatch(/zip -q -X "\$LCV_TMP\/lcv\.zip" manifest\.json/);
