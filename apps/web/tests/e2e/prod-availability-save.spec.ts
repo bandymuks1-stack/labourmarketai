@@ -251,7 +251,7 @@ test("the work card saves through a translated page and a plain one, and what wa
     const title = `${TAG} vertimas ${f.name}`;
     const { ctx, page, crashes } = await open(browser, true);
     try {
-      await page.goto(`/lt/dashboard/profile?tab=details#${f.hash}`);
+      await page.goto(`/lt/dashboard/profile?tab=background#${f.hash}`);
       await page.waitForLoadState("load");
       const box = inMain(page).getByTestId(f.box);
       await expect(box).toBeVisible({ timeout: 60_000 });

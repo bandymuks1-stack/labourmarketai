@@ -157,7 +157,7 @@ const ROLES = new Set<Role>(["worker", "company", "agency", "customer"]);
  * `HashTabRedirect`, and the tab's own `DetailsHashOpener` still opens and
  * scrolls to the section.
  */
-const PROFILE_TABS = ["overview", "edit", "details", "skills", "about"] as const;
+const PROFILE_TABS = ["overview", "edit", "details", "background", "skills", "about"] as const;
 type ProfileTab = (typeof PROFILE_TABS)[number];
 const PROFILE_TAB_BY_ANCHOR: Readonly<Record<string, ProfileTab>> = {
   "profile-edit": "edit",
@@ -166,9 +166,10 @@ const PROFILE_TAB_BY_ANCHOR: Readonly<Record<string, ProfileTab>> = {
   "profile-public-summary": "details",
   "cv-availability": "details",
   "work-card-editor-section": "details",
-  "cv-languages": "details",
-  "cv-education": "details",
-  "cv-achievements": "details",
+  "cv-background": "background",
+  "cv-languages": "background",
+  "cv-education": "background",
+  "cv-achievements": "background",
   capabilities: "skills",
   "candidate-skills": "skills",
   "profile-about": "about",
@@ -1122,16 +1123,14 @@ export default async function ProfilePage({
 
       <nav aria-label={t("pageTitle")} data-testid="profile-tabs" className="flex flex-wrap gap-2">
         {PROFILE_TABS.map((id) => {
-          const label =
-            id === "overview"
-              ? tQuick("identity")
-              : id === "edit"
-                ? t("editDisclosure")
-                : id === "details"
-                  ? tQuick("details")
-                  : id === "skills"
-                    ? tQuick("capabilities")
-                    : t("aboutDisclosure");
+          const label = {
+            overview: tQuick("identity"),
+            edit: t("editDisclosure"),
+            details: tQuick("details"),
+            background: tQuick("background"),
+            skills: tQuick("capabilities"),
+            about: t("aboutDisclosure"),
+          }[id];
           const active = id === tab;
           return (
             <Link
@@ -1644,6 +1643,28 @@ export default async function ProfilePage({
         </div>
       ) : null}
 
+        </div>
+      </details>
+        </>
+      ) : null}
+      {/* LANGUAGES, EDUCATION, CERTIFICATES, LINKS — their own block
+          (decision 0034): the work card above is one screen's job; these
+          four editors are another. Same editors, same anchors, same reads. */}
+      {tab === "background" ? (
+        <>
+      <DetailsHashOpener targetId="cv-background" />
+      <details
+        id="cv-background"
+        open
+        className="group scroll-mt-4 rounded-md border border-border-subtle bg-surface-1/40"
+      >
+        <summary className="flex min-h-11 cursor-pointer list-none flex-wrap items-center justify-between gap-2 px-4 text-sm font-medium text-text-secondary hover:text-text-primary">
+          <span className="inline-flex items-center gap-2">
+            <span aria-hidden className="transition-transform group-open:rotate-90">›</span>
+            {tQuick("background")}
+          </span>
+        </summary>
+        <div className="flex flex-col gap-6 px-4 pb-4">
       {/* Self-stated languages (P2-PR3) — worker_languages (draft PR #720),
           right next to the preferences card on the same identity surface.
           Renders its honest not-enabled state until the owner applies the

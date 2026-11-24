@@ -6,7 +6,7 @@ import { tabForHash } from "@/components/app/hash-tab-redirect";
 
 /**
  * Decision 0034 — the profile is one functional block per screen, each with
- * its own address (`?tab=`): overview, edit, details, skills, about. Nothing
+ * its own address (`?tab=`): overview, edit, details, background, skills, about. Nothing
  * was removed: every mount still renders on its tab, and every anchor written
  * before the split still reaches its section.
  */
@@ -32,7 +32,7 @@ function blocks(id: string): string {
 
 describe("profile — one block per screen", () => {
   it("five tabs, each linked by its own address in one tab row", () => {
-    expect(PAGE).toContain('const PROFILE_TABS = ["overview", "edit", "details", "skills", "about"] as const;');
+    expect(PAGE).toContain('const PROFILE_TABS = ["overview", "edit", "details", "background", "skills", "about"] as const;');
     expect(PAGE).toContain('data-testid="profile-tabs"');
     expect(PAGE).toContain("`/dashboard/profile?tab=${id}`");
     expect(PAGE).toContain('aria-current={active ? "page" : undefined}');
@@ -45,7 +45,8 @@ describe("profile — one block per screen", () => {
   const cases: ReadonlyArray<[string, readonly string[]]> = [
     ["overview", ["<RosterLinkOffers", 'id="organization-history"', "<LearningCompassSection", "<LearnerCohortJoinSection", "<ProfileHubOverview", "<OrganizationsLeadership", 'data-testid="profile-role-ledgers"']],
     ["edit", ['id="profile-edit"', "<ProfileTextFirstFlow"]],
-    ["details", ['id="cv-details"', "<WorkerLanguagesSection", "<WorkerEducationSection", "<WorkerAchievementsSection", "<ExternalProfilesSection"]],
+    ["details", ['id="cv-details"', "<WorkerPublicSummaryEditor", "<ProfileAvatar", 'id="cv-availability"', "<WorkCardEditor"]],
+    ["background", ['id="cv-background"', "<WorkerLanguagesSection", "<WorkerEducationSection", "<WorkerAchievementsSection", "<ExternalProfilesSection"]],
     ["skills", ['id="capabilities"', "<CapabilityProfileSection", "<SkillClarifySection"]],
     ["about", ['id="profile-about"', "<TrustBlock"]],
   ];
@@ -57,7 +58,7 @@ describe("profile — one block per screen", () => {
   }
 
   it("a block's own disclosure stands open on its tab", () => {
-    for (const id of ["profile-edit", "cv-details", "profile-about"]) {
+    for (const id of ["profile-edit", "cv-details", "cv-background", "profile-about"]) {
       expect(PAGE).toContain(`        id="${id}"\n        open\n`);
     }
     expect(PAGE).toContain('<details id="capabilities" open className=');
@@ -80,9 +81,10 @@ describe("anchors written before the split reach their tab", () => {
       ["profile-public-summary", "details"],
       ["cv-availability", "details"],
       ["work-card-editor-section", "details"],
-      ["cv-languages", "details"],
-      ["cv-education", "details"],
-      ["cv-achievements", "details"],
+      ["cv-background", "background"],
+      ["cv-languages", "background"],
+      ["cv-education", "background"],
+      ["cv-achievements", "background"],
       ["capabilities", "skills"],
       ["candidate-skills", "skills"],
       ["profile-about", "about"],

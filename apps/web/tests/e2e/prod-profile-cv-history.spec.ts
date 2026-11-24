@@ -11,6 +11,7 @@ function profileTabOf(hash: string): string {
   if (hash === "profile-edit") return "edit";
   if (hash === "capabilities" || hash === "candidate-skills") return "skills";
   if (hash === "profile-about") return "about";
+  if (hash === "cv-languages" || hash === "cv-education" || hash === "cv-achievements") return "background";
   return "details";
 }
 

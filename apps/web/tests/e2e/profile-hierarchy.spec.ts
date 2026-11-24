@@ -60,7 +60,7 @@ const TAB_OF: Record<string, string> = {
   "cv-details": "details",
   "profile-identity": "details",
   "cv-availability": "details",
-  "cv-languages": "details",
+  "cv-languages": "background",
   capabilities: "skills",
   "candidate-skills": "skills",
   "profile-about": "about",
@@ -89,6 +89,7 @@ test.describe("the profile is one block per screen (decision 0034)", () => {
     for (const [tab, id] of [
       ["edit", "profile-edit"],
       ["details", "cv-details"],
+      ["background", "cv-background"],
       ["skills", "capabilities"],
       ["about", "profile-about"],
     ] as const) {
@@ -105,11 +106,11 @@ test.describe("the profile is one block per screen (decision 0034)", () => {
     await page.setViewportSize({ width: 1280, height: 900 });
     await page.goto(`${ROUTE}?tab=details`, { waitUntil: "domcontentloaded" });
     const disclosure = page.locator("main #cv-details");
-    for (const id of ["#cv-availability", "#cv-languages"]) {
-      await expect(disclosure.locator(id), `${id} survived`).toHaveCount(1);
-    }
+    await expect(disclosure.locator("#cv-availability"), "#cv-availability survived").toHaveCount(1);
     const text = await disclosure.innerText();
     expect(text.trim().length, "the block carries real content").toBeGreaterThan(200);
+    await page.goto(`${ROUTE}?tab=background`, { waitUntil: "domcontentloaded" });
+    await expect(page.locator("main #cv-background #cv-languages"), "#cv-languages survived").toHaveCount(1);
   });
 
   test("an anchor written before the split lands on its tab, open and in view", async ({ page }) => {
@@ -129,7 +130,7 @@ test.describe("the profile is one block per screen (decision 0034)", () => {
         page,
         `main #${id}`,
         `#${id} is scrolled into view, not left below the fold`,
-        TAB_OF[id] === "details" ? { maxTop: 200 } : {},
+        TAB_OF[id] === "details" || TAB_OF[id] === "background" ? { maxTop: 200 } : {},
       );
     }
   });
@@ -140,7 +141,7 @@ test.describe("the profile is one block per screen (decision 0034)", () => {
       () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
     );
     expect(overflow, "no horizontal page scroll at 375 px").toBeLessThanOrEqual(0);
-    for (const tab of ["overview", "edit", "details", "skills", "about"]) {
+    for (const tab of ["overview", "edit", "details", "background", "skills", "about"]) {
       const box = await page.locator(`main [data-testid='profile-tab-${tab}']`).boundingBox();
       expect(box, `${tab} tab rendered`).not.toBeNull();
       expect(box!.height, `${tab} tab is a 44px tap target`).toBeGreaterThanOrEqual(44);

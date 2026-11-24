@@ -1121,7 +1121,7 @@ test("ST-1. a student signs up, keeps one worker record with no company, and the
   // beside <main> and the row resolved twice (lib/auth/context.tsx).
   const profileErrors: string[] = [];
   page.on("pageerror", (e) => profileErrors.push(String(e.message).slice(0, 300)));
-  await page.goto(`${BASE}/en/dashboard/profile?tab=details#cv-education`);
+  await page.goto(`${BASE}/en/dashboard/profile?tab=background#cv-education`);
   await page.reload();
   await expect(page.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("worker-education-row").filter({ hasText: school })).toBeVisible({ timeout: 30_000 });
@@ -1340,7 +1340,7 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
   // details; the page's own hash opener unfolds it for #cv-education (as ST-1
   // and prod P-9 reach it). A real load, never a click on the fold: a click can
   // race the opener and close it again, leaving the row counted but hidden.
-  await page.goto(`${BASE}/en/dashboard/profile?tab=details#cv-education`);
+  await page.goto(`${BASE}/en/dashboard/profile?tab=background#cv-education`);
   await page.reload();
   const main = page.getByRole("main");
   await expect(main.locator("#cv-education").first()).toBeVisible({ timeout: 30_000 });
