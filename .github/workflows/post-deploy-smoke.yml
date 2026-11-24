@@ -89,8 +89,9 @@ jobs:
       # `changed` when production moved to another build during the run: the run
       # proves nothing about either build, and `report` leaves the issue alone.
       window: ${{ steps.record.outputs.window }}
-      # `ran`, or `blocked` when production never settled on the deploy's build: NOT RUN.
-      state: ${{ steps.build.outputs.state }}
+      # `ran`, or `blocked` (NOT RUN) when production never settled on the deploy's build
+      # or the runner setup failed (pnpm, Node, install, browser): not a production regression.
+      state: ${{ (steps.setup_pnpm.outcome == 'failure' || steps.setup_node.outcome == 'failure' || steps.install.outcome == 'failure' || steps.playwright.outcome == 'failure') && 'blocked' || steps.build.outputs.state }}
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -153,20 +154,24 @@ jobs:
           fi
 
       - name: Set up pnpm
+        id: setup_pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: 10.33.2
 
       - name: Set up Node
+        id: setup_node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 20
           cache: pnpm
 
       - name: Install dependencies
+        id: install
         run: pnpm install --frozen-lockfile --filter=!mobile
 
       - name: Install Playwright chromium
+        id: playwright
         run: pnpm -F web exec playwright install --with-deps chromium
 
       - name: First visitor and sign-up path, lt and en, 360 and 1440 px
@@ -221,6 +226,10 @@ jobs:
     outputs:
       window: ${{ steps.after.outputs.window }}
       brake: ${{ steps.brake.outputs.brake }}
+      # The journeys step itself: `failure` is a regression; `skipped` means they never ran
+      # (runner setup, brakes or the session mint failed): NOT RUN; `success` with a red job
+      # means a clean-up after them failed: not a regression, and not a pass either.
+      journeys: ${{ steps.journeys.outcome }}
     permissions:
       contents: read
       actions: read # the deploy brake reads deploy-vps.yml runs
@@ -238,20 +247,24 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Set up pnpm
+        id: setup_pnpm
         uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
         with:
           version: 10.33.2
 
       - name: Set up Node
+        id: setup_node
         uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
           node-version: 22
           cache: pnpm
 
       - name: Install dependencies
+        id: install
         run: pnpm install --frozen-lockfile --filter=!mobile
 
       - name: Install Playwright chromium
+        id: playwright
         run: pnpm -F web exec playwright install --with-deps chromium
 
       # The walk's own brakes, right before anything signs in, unchanged: the deploy brake
@@ -306,6 +319,7 @@ jobs:
       # The Playwright output stays in a file that is never uploaded: this repository is
       # public. Only test titles (written in the spec) and pass / fail reach the summary.
       - name: Worker, employer and messaging surfaces open
+        id: journeys
         run: |
           set -uo pipefail
           cd apps/web
@@ -379,6 +393,7 @@ jobs:
           SMOKE_STATE: ${{ needs.smoke.outputs.state }}
           SIGNED_IN_WINDOW: ${{ needs.signed-in.outputs.window }}
           SIGNED_IN_BRAKE: ${{ needs.signed-in.outputs.brake }}
+          SIGNED_IN_JOURNEYS: ${{ needs.signed-in.outputs.journeys }}
         id: report
         run: bash .github/scripts/post-deploy-regression-issue.sh
 

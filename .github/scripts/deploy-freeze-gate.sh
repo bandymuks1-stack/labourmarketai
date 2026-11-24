@@ -2,14 +2,19 @@
 # DEPLOY FREEZE GATE (owner P0 2026-11-24). The first job of deploy-vps.yml,
 # before anything is built or shipped.
 #
-#   - An open issue with the `deploy-freeze` label (opened by
+#   - An open issue with the `deploy-freeze` label, or with the regression
+#     issue's exact title (its label removed by hand still freezes; opened by
 #     post-deploy-regression-issue.sh when a post-deploy check genuinely
 #     FAILED) refuses the deploy: BLOCKED, red, with the issue link. Closing
 #     the issue lifts the freeze.
 #   - Emergency security fix: a manual dispatch with emergency=true goes
-#     through the freeze only when the actor is the repository owner AND a
-#     reason is given. It is logged on the freeze issue, and the deploy's
+#     through the freeze only when the actor is the repository owner's ACCOUNT
+#     and a reason is given. It is logged on the freeze issue, and the deploy's
 #     checks still run in the same run.
+#     HONEST LIMIT: agent sessions act through that same account, so this check
+#     cannot tell an agent from the owner. That agents never dispatch an
+#     emergency is a binding policy (AGENTS.md / CLAUDE.md "Deploy freeze
+#     emergency"), not something this script can enforce.
 #   - An emergency request that fails either condition is refused, frozen or
 #     not: the flag is never silently ignored.
 #
@@ -20,12 +25,13 @@
 set -euo pipefail
 
 LABEL="deploy-freeze"
+TITLE="Post-deploy smoke is failing on production"
 note() { echo "$1"; if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then echo "$1" >> "$GITHUB_STEP_SUMMARY"; fi; }
 
 emergency=false
 if [ "${EMERGENCY:-false}" = "true" ]; then
   if [ -z "${ACTOR:-}" ] || [ "${ACTOR}" != "${OWNER:-}" ]; then
-    note "::error::REFUSED: an emergency deploy may be started only by the repository owner (${OWNER:-unknown}); actor: ${ACTOR:-unknown}."
+    note "::error::REFUSED: an emergency deploy may be started only from the repository owner's account (${OWNER:-unknown}); actor: ${ACTOR:-unknown}."
     exit 1
   fi
   if [ -z "$(printf '%s' "${REASON:-}" | tr -d '[:space:]')" ]; then
@@ -39,6 +45,11 @@ if [ -n "${DEPLOY_FREEZE_OPEN+x}" ]; then
   open="$DEPLOY_FREEZE_OPEN"
 else
   open="$(gh issue list --state open --label "$LABEL" --limit 1 --json number,url --jq '.[0] | select(. != null) | "\(.number) \(.url)"')"
+  # The report job finds the issue by its title: an open one whose label was removed still freezes.
+  if [ -z "$open" ]; then
+    open="$(gh issue list --state open --search "in:title \"${TITLE}\"" --json number,url,title \
+      --jq "[.[] | select(.title == \"${TITLE}\")][0] | select(. != null) | \"\(.number) \(.url)\"")"
+  fi
 fi
 
 if [ -z "$open" ]; then
@@ -48,14 +59,14 @@ fi
 
 num="${open%% *}"; url="${open#* }"
 if [ "$emergency" != true ]; then
-  note "::error::BLOCKED: deploy freeze #${num} is open (${url}). A post-deploy check failed; normal deploys start again when that issue is closed. Owner emergency: dispatch with emergency=true and a reason."
+  note "::error::BLOCKED: deploy freeze #${num} is open (${url}). A post-deploy check failed; normal deploys start again when that issue is closed. To ship the fix: the owner closes that issue once the fix is merged, or the owner in person dispatches emergency=true with a reason (never an agent: AGENTS.md, Deploy freeze emergency)."
   exit 1
 fi
 
-msg="Emergency deploy through the freeze by ${ACTOR}: ${REASON}. Run: ${RUN_URL}. The post-deploy checks run in that same run."
+msg="Emergency deploy through the freeze, dispatched from the ${ACTOR} account: ${REASON}. Run: ${RUN_URL}. The post-deploy checks run in that same run."
 if [ "${DEPLOY_FREEZE_DRY_RUN:-0}" = "1" ]; then
   echo "LOG #${num}: ${msg}"
 else
   gh issue comment "$num" --body "$msg"
 fi
-note "EMERGENCY: deploy freeze #${num} bypassed by the owner (${url}); the checks still run."
+note "EMERGENCY: deploy freeze #${num} bypassed from the owner's account (${url}); the checks still run."

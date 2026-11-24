@@ -18,8 +18,12 @@
 #     SIGNED_IN_WINDOW = changed): the run proves nothing about either build,
 #     so the issue is left exactly as it is;
 #   - the public half was BLOCKED (SMOKE_STATE = blocked: production never
-#     settled on the deploy's build): nothing ran, the issue is left exactly
-#     as it is;
+#     settled on the deploy's build, or the runner setup failed): nothing
+#     ran, the issue is left exactly as it is;
+#   - the signed-in journeys never ran (SIGNED_IN_JOURNEYS = skipped or
+#     empty: runner setup or the session mint failed) or passed with a red
+#     clean-up after them (SIGNED_IN_JOURNEYS = success): not a regression
+#     and not a pass, so the issue is left exactly as it is;
 #   - the walk brakes refused (SIGNED_IN_BRAKE = refused): the signed-in
 #     journeys did NOT run. That is not a failure. With a green public half
 #     the issue is left exactly as it is (no regression claimed, nothing
@@ -32,6 +36,7 @@
 #
 # Inputs (env): SMOKE, SIGNED_IN (job results), SMOKE_WINDOW, SIGNED_IN_WINDOW,
 # SMOKE_STATE (ran | blocked), SIGNED_IN_BRAKE (clear | refused),
+# SIGNED_IN_JOURNEYS (success | failure | skipped | empty),
 # BUILD, DEPLOY_SHA, RUN_URL, GH_TOKEN. Test hooks: REGRESSION_ISSUE_DRY_RUN=1
 # prints the issue body instead of calling GitHub, and LAST_GREEN_SHA stands in
 # for the artifact lookup (lib/guards/post-deploy-regression-issue.test.ts).
@@ -48,7 +53,7 @@ say() { if [ -n "${GITHUB_OUTPUT:-}" ]; then echo "$1" >> "$GITHUB_OUTPUT"; fi; 
 note() { echo "$1"; if [ -n "${GITHUB_STEP_SUMMARY:-}" ]; then echo "$1" >> "$GITHUB_STEP_SUMMARY"; fi; }
 
 if [ "${SMOKE_STATE:-}" = "blocked" ]; then
-  note "BLOCKED / NOT RUN: production never settled on the deploy's build, so no check ran; the regression issue is left unchanged."
+  note "BLOCKED / NOT RUN: the public check did not run (production never settled on the deploy's build, or the runner setup failed); the regression issue is left unchanged."
   say "green=false"
   exit 0
 fi
@@ -67,6 +72,17 @@ if [ "${SIGNED_IN_BRAKE:-}" = "refused" ]; then
     say "green=false"
     exit 0
   fi
+fi
+
+# The public half passed and the signed-in job is red, but its journeys did not fail.
+if [ "${SMOKE:-}" = "success" ] && [ "${SIGNED_IN:-}" != "success" ] && [ "${SIGNED_IN_JOURNEYS-unset}" != "unset" ] && [ "${SIGNED_IN_JOURNEYS:-}" != "failure" ]; then
+  if [ "${SIGNED_IN_JOURNEYS:-}" = "success" ]; then
+    note "INCOMPLETE: the signed-in journeys passed, but a clean-up step after them failed; not a regression, not a pass. The regression issue is left unchanged."
+  else
+    note "NOT RUN: the signed-in journeys never started (runner setup or the session mint failed); the regression issue is left unchanged."
+  fi
+  say "green=false"
+  exit 0
 fi
 
 green=false
@@ -160,7 +176,7 @@ if [ "$green" = true ]; then
 fi
 
 body="$(body_for_failure)
-**Deploy freeze:** while this issue is open with the \`${FREEZE_LABEL}\` label, deploy-vps.yml refuses normal deploys. Closing it lifts the freeze; the next deploy and its checks must pass. An owner-only emergency deploy (\`emergency=true\` with a reason) still runs the checks and is logged here."
+**Deploy freeze:** while this issue is open, deploy-vps.yml refuses every normal deploy, so the next deploy cannot lift it by itself. To ship the fix: merge it, then the owner closes this issue (the next deploy and its checks must then pass), or the owner in person dispatches an emergency deploy (\`emergency=true\` with a reason), which still runs the checks and is logged here. Agents never close this issue, remove its label or dispatch an emergency (AGENTS.md, Deploy freeze emergency). Re-running the smoke by hand re-checks the same build, so it only clears a flake."
 gh label create "$FREEZE_LABEL" --color B60205 --description "A post-deploy check failed: normal deploys are refused until this issue is closed" >/dev/null 2>&1 || true
 if [ -n "$open" ]; then
   gh issue comment "$open" --body "$body"

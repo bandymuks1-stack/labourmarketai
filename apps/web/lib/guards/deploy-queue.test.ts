@@ -131,10 +131,10 @@ describe("the freeze is checked before anything is built or shipped", () => {
     }
   });
 
-  it("an owner emergency with a reason passes the freeze and is logged on the freeze issue", () => {
+  it("an emergency from the owner's account with a reason passes the freeze and is logged on the freeze issue", () => {
     const r = gate({ DEPLOY_FREEZE_OPEN: FROZEN, EMERGENCY: "true", ACTOR: "the-owner", REASON: "security fix" });
     expect(r.code).toBe(0);
-    expect(r.out).toContain("LOG #3760: Emergency deploy through the freeze by the-owner: security fix.");
+    expect(r.out).toContain("LOG #3760: Emergency deploy through the freeze, dispatched from the the-owner account: security fix.");
     expect(r.out).toContain("the checks still run");
   });
 });
@@ -169,7 +169,7 @@ describe("BLOCKED is never PASS or FAIL; a real FAIL freezes", () => {
   });
 
   it("a check that ran and failed writes the regression body (the issue carries deploy-freeze)", () => {
-    const out = report({ SMOKE: "success", SMOKE_STATE: "ran", SIGNED_IN: "failure", SIGNED_IN_BRAKE: "clear" });
+    const out = report({ SMOKE: "success", SMOKE_STATE: "ran", SIGNED_IN: "failure", SIGNED_IN_BRAKE: "clear", SIGNED_IN_JOURNEYS: "failure" });
     expect(out).toContain("Pull requests merged");
     expect(readFileSync(REPORT, "utf8")).toMatch(/gh issue create --title "\$TITLE" --label "\$FREEZE_LABEL"/);
   });
@@ -228,4 +228,79 @@ describe("every shell step of the queue parses (a quote inside ${var:+…} broke
       }
     });
   }
+});
+
+describe("a runner or clean-up failure is not a regression (R3 on #3762)", () => {
+  function report(env: Record<string, string>): string {
+    const dir = mkdtempSync(join(tmpdir(), "deploy-queue-infra-"));
+    try {
+      execFileSync("git", ["-C", dir, "init", "-q"]);
+      const out = execFileSync("bash", [REPORT], {
+        cwd: dir,
+        encoding: "utf8",
+        env: { ...process.env, REGRESSION_ISSUE_DRY_RUN: "1", LAST_GREEN_SHA: "", DEPLOY_SHA: "e630dd20aaaa", RUN_URL: "x", GITHUB_OUTPUT: join(dir, "out"), GITHUB_STEP_SUMMARY: join(dir, "summary"), SMOKE: "success", SMOKE_STATE: "ran", SIGNED_IN: "failure", SIGNED_IN_BRAKE: "clear", ...env },
+      });
+      return out + readFileSync(join(dir, "out"), "utf8");
+    } finally {
+      rmSync(dir, { recursive: true, force: true });
+    }
+  }
+
+  it("the public half's runner setup failing is BLOCKED, not FAIL", () => {
+    expect(smoke).toContain(
+      "state: ${{ (steps.setup_pnpm.outcome == 'failure' || steps.setup_node.outcome == 'failure' || steps.install.outcome == 'failure' || steps.playwright.outcome == 'failure') && 'blocked' || steps.build.outputs.state }}",
+    );
+  });
+
+  it("the signed-in journeys never started (setup or mint failed): NOT RUN, no issue", () => {
+    expect(smoke).toContain("journeys: ${{ steps.journeys.outcome }}");
+    expect(smoke).toContain("SIGNED_IN_JOURNEYS: ${{ needs.signed-in.outputs.journeys }}");
+    for (const j of ["skipped", ""]) {
+      const out = report({ SIGNED_IN_JOURNEYS: j });
+      expect(out).toContain("NOT RUN");
+      expect(out).toContain("green=false");
+      expect(out).not.toContain("Pull requests merged");
+    }
+  });
+
+  it("the journeys passed but a clean-up after them failed: INCOMPLETE, no issue, not green", () => {
+    const out = report({ SIGNED_IN_JOURNEYS: "success" });
+    expect(out).toContain("INCOMPLETE");
+    expect(out).toContain("green=false");
+    expect(out).not.toContain("Pull requests merged");
+  });
+
+  it("the journeys themselves failed: FAIL, the issue is written", () => {
+    expect(report({ SIGNED_IN_JOURNEYS: "failure" })).toContain("Pull requests merged");
+  });
+});
+
+describe("the emergency path is described honestly (R3 blocker on #3762)", () => {
+  const POLICY = "## Deploy freeze emergency — the owner only, in person (binding, owner P0 2026-11-24)";
+
+  it("AGENTS.md and CLAUDE.md bind agents never to dispatch an emergency or lift a freeze", () => {
+    for (const f of ["AGENTS.md", "CLAUDE.md"]) {
+      const doc = readFileSync(join(REPO, f), "utf8");
+      expect(doc, f).toContain(POLICY);
+      expect(doc, f).toMatch(/agents never dispatch `deploy-vps\.yml` with `emergency=true`/);
+      expect(doc, f).toMatch(/never remove the `deploy-freeze` label or close a freeze issue/);
+    }
+  });
+
+  it("the workflow, the gate and the issue never claim the account check is an owner-identity check", () => {
+    const gateSrc = readFileSync(GATE, "utf8");
+    const reportSrc = readFileSync(REPORT, "utf8");
+    expect(deploy).not.toMatch(/Owner only: deploy through/);
+    expect(deploy).toMatch(/cannot tell an agent from the\s+#?\s*owner/);
+    expect(gateSrc).toMatch(/HONEST LIMIT: agent sessions act through that same account/);
+    expect(gateSrc).not.toMatch(/by the owner \(/);
+    expect(reportSrc).toContain("Agents never close this issue, remove its label or dispatch an emergency");
+    expect(reportSrc).not.toMatch(/owner-only emergency/i);
+  });
+
+  it("the gate also finds the open regression issue by its exact title (a removed label does not unfreeze)", () => {
+    const gateSrc = readFileSync(GATE, "utf8");
+    expect(gateSrc).toContain('TITLE="Post-deploy smoke is failing on production"');
+    expect(gateSrc).toMatch(/--search "in:title/);
+  });
 });
