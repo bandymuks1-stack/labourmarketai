@@ -106,6 +106,22 @@ async function db<T>(path: string): Promise<T> {
   return (await r.json()) as T;
 }
 
+/** A write to the THROWAWAY local database (the file refuses any other target). */
+async function dbWrite<T>(path: string, method: "POST" | "PATCH", body: unknown): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    method,
+    headers: {
+      apikey: SB_SERVICE,
+      Authorization: `Bearer ${SB_SERVICE}`,
+      "content-type": "application/json",
+      prefer: "return=representation",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`local db ${method} ${path.split("?")[0]} → ${r.status}`);
+  return (await r.json()) as T;
+}
+
 async function userId(address: string): Promise<string> {
   const r = await fetch(`${SB_URL}/auth/v1/admin/users?per_page=200`, {
     headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` },
@@ -476,6 +492,56 @@ test("I-8. the institution runs a programme, opens a cohort and places the learn
   await page.reload();
   await expect(page.getByTestId(`cohort-${cohortId}`), "the cohort shows its learner").toContainText(LEARNER_NAME, { timeout: 30_000 });
   await close();
+});
+
+// Regression for production run 45240106971 (L-5): the compass read a learner's
+// cohorts with a limit and no order, so with more than 20 live cohorts it kept an
+// arbitrary 20 and dropped the one just joined. Here the learner gets 21 OLDER
+// live cohorts on top of I-8's; a fresh table returns rows in insertion order, so
+// an unordered read keeps I-8's cohort and the OLDEST seeded ones. Only a
+// newest-first read shows I-8's cohort and leaves the oldest seeded one out.
+test("I-8b. with more than 20 live cohorts the compass shows the newest, not an arbitrary 20", async ({ browser }) => {
+  const programs = await db<Array<{ id: string }>>(
+    `education_programs?organization_id=eq.${s.orgId}&name=eq.${encodeURIComponent(PROGRAM)}&select=id`,
+  );
+  const programId = programs[0]?.id ?? "";
+  expect(programId, "I-8's programme exists").not.toBe("");
+  const seeded = await dbWrite<Array<{ id: string }>>(
+    "education_cohorts",
+    "POST",
+    Array.from({ length: 21 }, (_, i) => ({
+      program_id: programId,
+      organization_id: s.orgId,
+      name: `Synthetic Older Cohort ${RUN} ${String(i + 1).padStart(2, "0")}`,
+    })),
+  );
+  expect(seeded).toHaveLength(21);
+  await dbWrite(
+    "education_cohort_members",
+    "POST",
+    seeded.map((c, i) => ({
+      cohort_id: c.id,
+      profile_id: s.learnerId,
+      status: "active",
+      // Oldest first: 2025-01-01, 2025-01-02, … (all before I-8's membership).
+      added_at: new Date(Date.UTC(2025, 0, 1 + i)).toISOString(),
+    })),
+  );
+  try {
+    const { page, close } = await as(browser, LEARNER);
+    await page.goto(`${BASE}/en/dashboard/profile`);
+    const compass = page.getByTestId("learning-compass");
+    await expect(compass).toBeVisible({ timeout: 30_000 });
+    await expect(compass, "the cohort joined last (I-8) is on the compass").toContainText(COHORT, { timeout: 30_000 });
+    await expect(compass.getByTestId(`compass-cohort-${seeded[0]!.id}`), "the oldest membership is the one left out").toHaveCount(0);
+    await expect(compass.getByTestId(`compass-cohort-${seeded[20]!.id}`), "the newest seeded one is shown").toHaveCount(1);
+    await close();
+  } finally {
+    // Back to the world the later steps expect: the seeded groups are archived.
+    await dbWrite(`education_cohorts?id=in.(${seeded.map((c) => c.id).join(",")})`, "PATCH", {
+      archived_at: new Date().toISOString(),
+    });
+  }
 });
 
 test("I-9. a separate employer signs up and invites the same person as an intern; they accept", async ({ browser }) => {
