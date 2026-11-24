@@ -199,7 +199,6 @@
         "recordedLabel": "Savi įrašai",
         "recordedSource": "Organizacijos įrašai, kitos šalies nepatvirtinti",
         "pending": "{hours} laukia patvirtinimo",
-        "periods": "Dar {hours} laikotarpių suvestinėse",
         "hours": "{hours} val.",
         "running": "Vykdomi",
         "completed": "Užbaigti",

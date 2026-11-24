@@ -606,7 +606,6 @@ function OrganizationLivingCv({
                 <Figure
                   label={t(`${LIVING}.recordedLabel`)}
                   value={hours(exp.recordedHours)}
-                  sub={exp.recordedPeriodHours > 0 ? t(`${LIVING}.periods`, { hours: hours(exp.recordedPeriodHours) }) : null}
                   source={t(`${LIVING}.recordedSource`)}
                   level="recorded"
                   testId="org-living-recorded"

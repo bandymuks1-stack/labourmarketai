@@ -199,7 +199,6 @@
         "recordedLabel": "Eigen registraties",
         "recordedSource": "Registraties van de organisatie, niet bevestigd door een andere partij",
         "pending": "{hours} wachten op goedkeuring",
-        "periods": "Nog {hours} in periodetotalen",
         "hours": "{hours} u",
         "running": "Lopend",
         "completed": "Afgerond",

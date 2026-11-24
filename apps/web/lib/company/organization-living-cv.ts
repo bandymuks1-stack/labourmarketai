@@ -107,14 +107,17 @@ export async function loadOrganizationLivingCv(
       capabilities,
       teamSkills: skills,
       rosterSize: Object.keys(load.ownPeople).length,
-      history: {
-        dayHours: load.history.dayHours,
-        periodHours: load.history.periodHours,
-        peopleCount: load.history.peopleCount,
-        placesCount: load.history.places.filter((p) => p.kind !== "none").length,
-        firstDate: load.history.firstDate,
-        lastDate: load.history.lastDate,
-      },
+      // ONE total, every hour once (decision 0025): the business history's
+      // totals. Unreadable → null (unknown), never a partial sum shown as whole.
+      history: load.business
+        ? {
+            hours: load.business.totals.hours,
+            peopleCount: load.business.totals.people,
+            placesCount: load.business.totals.places,
+            firstDate: load.business.totals.from,
+            lastDate: load.business.totals.to,
+          }
+        : null,
       journal: load.journal,
       projects: load.projects,
       gallery: photos.map((m) => ({

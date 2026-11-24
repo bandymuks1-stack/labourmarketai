@@ -199,7 +199,6 @@
         "recordedLabel": "Egna registreringar",
         "recordedSource": "Organisationens registreringar, inte bekräftade av någon annan part",
         "pending": "{hours} väntar på godkännande",
-        "periods": "Ytterligare {hours} i periodsummor",
         "hours": "{hours} tim",
         "running": "Pågående",
         "completed": "Avslutade",

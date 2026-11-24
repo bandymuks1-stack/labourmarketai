@@ -199,7 +199,6 @@
         "recordedLabel": "Eigene Aufzeichnungen",
         "recordedSource": "Aufzeichnungen der Organisation, von keiner anderen Seite bestätigt",
         "pending": "{hours} warten auf Freigabe",
-        "periods": "Weitere {hours} in Zeitraumsummen",
         "hours": "{hours} Std.",
         "running": "Laufend",
         "completed": "Abgeschlossen",

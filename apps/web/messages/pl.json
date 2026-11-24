@@ -199,7 +199,6 @@
         "recordedLabel": "Własne zapisy",
         "recordedSource": "Zapisy organizacji, niepotwierdzone przez drugą stronę",
         "pending": "{hours} czeka na zatwierdzenie",
-        "periods": "Jeszcze {hours} w sumach okresowych",
         "hours": "{hours} godz.",
         "running": "W toku",
         "completed": "Zakończone",

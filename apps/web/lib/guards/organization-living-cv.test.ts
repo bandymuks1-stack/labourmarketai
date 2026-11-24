@@ -58,8 +58,7 @@ const FULL: OrganizationLivingInput = {
   ],
   rosterSize: 41,
   history: {
-    dayHours: 18250.5,
-    periodHours: 3200,
+    hours: 18250.5,
     peopleCount: 37,
     placesCount: 22,
     firstDate: "2019-03-04",
@@ -98,14 +97,13 @@ const render = (locale: string, tab: OrganizationLivingTab = "overview", input: 
   );
 
 describe("organization Living CV — model", () => {
-  it("4: every hour once — figures read the day records only; periods and journal stay apart", () => {
+  it("4: every hour once — the own-records figure is the one business total; the journal stays apart", () => {
     const r = buildOrganizationLivingRecord(FULL);
     expect(r.figures.find((f) => f.key === "hours")?.value).toBe(18251);
     expect(r.experience).toEqual({
       confirmedHours: 96,
       pendingHours: 24,
       recordedHours: 18250.5,
-      recordedPeriodHours: 3200,
     });
     expect(r.span).toEqual({ from: 2019, to: 2026 });
     expect(r.figures.map((f) => f.key)).toEqual(["years", "hours", "projects", "team"]);
@@ -118,7 +116,7 @@ describe("organization Living CV — model", () => {
       capabilities: [],
       teamSkills: null,
       rosterSize: 0,
-      history: { dayHours: 0, periodHours: 0, peopleCount: 0, placesCount: 0, firstDate: null, lastDate: null },
+      history: { hours: 0, peopleCount: 0, placesCount: 0, firstDate: null, lastDate: null },
       journal: null,
       projects: null,
       gallery: [],
@@ -321,6 +319,10 @@ describe("organization Living CV — wiring", () => {
     expect(loader).toContain('from "@/lib/organization-evidence/company-work-history-read"');
     expect(loader).not.toMatch(/listEvidenceRecords|listAllEvidenceRecords|\.insert\(|\.update\(|\.upsert\(|\.delete\(/);
     expect(loader).not.toMatch(/service[_-]?role|createAdminClient/i);
+    // 0025: the own-records figure is the business history's ONE total; day and
+    // period sums are never added here (overlapping periods would count twice).
+    expect(loader).toContain("load.business.totals.hours");
+    expect(loader).not.toMatch(/dayHours|periodHours/);
   });
 
   it("the organization's own settings page carries the way in and the Living CV at its own address", () => {

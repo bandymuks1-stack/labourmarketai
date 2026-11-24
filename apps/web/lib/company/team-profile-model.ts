@@ -198,8 +198,8 @@ export function buildCompanyTeamProfile(
  * 2026-11-24). It reads only the organization's own canonical records, through
  * readers that already exist, and keeps every source apart:
  *
- *   history    the organization's own records (`loadCompanyWorkHistory`):
- *              day hours and period hours are two figures, never one sum;
+ *   history    the organization's own records as ONE total (the business
+ *              history's totals from `loadCompanyWorkHistory`: every hour once);
  *   journal    work its people recorded under its engagements: a separate
  *              ledger, never added to the records; hours the organization
  *              approved are the only CONFIRMED hours;
@@ -218,9 +218,10 @@ export interface OrganizationLivingInput {
   readonly teamSkills: readonly { readonly slug: string; readonly confirmed: boolean }[] | null;
   /** Roster people on this organization's own books. Null: unread. */
   readonly rosterSize: number | null;
+  /** The organization's own records as ONE total (the business history's
+   *  totals: every hour once). Null when unreadable — never zero. */
   readonly history: {
-    readonly dayHours: number;
-    readonly periodHours: number;
+    readonly hours: number;
     readonly peopleCount: number;
     readonly placesCount: number;
     readonly firstDate: string | null;
@@ -273,10 +274,8 @@ export interface OrganizationLivingRecord {
     readonly confirmedHours: number;
     /** Journal hours still waiting for approval. */
     readonly pendingHours: number;
-    /** The organization's own day records (recorded, not confirmed by anyone else). */
+    /** The organization's own records, one total (recorded, not confirmed by anyone else). */
     readonly recordedHours: number;
-    /** Period aggregates from its own records, never added to day hours. */
-    readonly recordedPeriodHours: number;
   } | null;
   readonly projects: {
     readonly running: readonly { readonly id: string; readonly title: string; readonly city: string | null }[];
@@ -318,9 +317,9 @@ export function buildOrganizationLivingRecord(input: OrganizationLivingInput): O
 
   const figures: { key: OrganizationFigureKey; value: number }[] = [];
   if (span) figures.push({ key: "years", value: span.to - span.from + 1 });
-  // Hours: the organization's own day records. The journal is a separate
-  // ledger and the period aggregates a separate kind: neither is added here.
-  if (history && history.dayHours > 0) figures.push({ key: "hours", value: Math.round(history.dayHours) });
+  // Hours: the organization's own records, one total. The journal is a
+  // separate ledger and is never added here.
+  if (history && history.hours > 0) figures.push({ key: "hours", value: Math.round(history.hours) });
   const projectTotal = projects ? projects.running + projects.completed : 0;
   if (projectTotal > 0) figures.push({ key: "projects", value: projectTotal });
   const rosterSize = input.rosterSize && input.rosterSize > 0 ? input.rosterSize : null;
@@ -329,12 +328,9 @@ export function buildOrganizationLivingRecord(input: OrganizationLivingInput): O
 
   const confirmedHours = journal ? round1(journal.confirmedHours) : 0;
   const pendingHours = journal ? round1(Math.max(0, journal.hours - journal.confirmedHours)) : 0;
-  const recordedHours = history ? round1(history.dayHours) : 0;
-  const recordedPeriodHours = history ? round1(history.periodHours) : 0;
+  const recordedHours = history ? round1(history.hours) : 0;
   const experience =
-    confirmedHours + pendingHours + recordedHours + recordedPeriodHours > 0
-      ? { confirmedHours, pendingHours, recordedHours, recordedPeriodHours }
-      : null;
+    confirmedHours + pendingHours + recordedHours > 0 ? { confirmedHours, pendingHours, recordedHours } : null;
 
   const declared = new Set(input.capabilities);
   const capabilities = CAPABILITY_ORDER.filter((slug) => declared.has(slug));

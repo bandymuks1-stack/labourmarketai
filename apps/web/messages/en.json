@@ -199,7 +199,6 @@
         "recordedLabel": "Own records",
         "recordedSource": "The organization's records, not confirmed by another party",
         "pending": "{hours} waiting for approval",
-        "periods": "{hours} more in period totals",
         "hours": "{hours} h",
         "running": "Ongoing",
         "completed": "Completed",
