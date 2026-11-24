@@ -189,7 +189,7 @@ export default async function InvitePage({
           <p className="text-sm text-text-secondary">{t("invalidBody")}</p>
           <Link
             href="/auth/signup"
-            className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+            className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
             data-testid="invite-selfstart"
           >
             {t("selfStart")}
@@ -241,7 +241,7 @@ export default async function InvitePage({
         {closed ? (
           <Link
             href="/auth/signup"
-            className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+            className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
             data-testid="invite-closed-selfstart"
           >
             {t("selfStart")}
@@ -280,9 +280,6 @@ export default async function InvitePage({
                 {t("signIn")}
               </Link>
             </div>
-            <p className="text-meta text-text-muted" data-testid="invite-owns-identity">
-              {t("youOwnYourIdentity")}
-            </p>
           </>
         )}
         {/* A closed invitation never shows a validity date next to the
@@ -380,7 +377,7 @@ export default async function InvitePage({
         <p className="text-sm text-text-secondary">{t("invalidBody")}</p>
         <Link
           href="/dashboard"
-          className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+          className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
         >
           {t("toDashboard")}
         </Link>
@@ -594,7 +591,7 @@ export default async function InvitePage({
           </p>
           <Link
             href="/dashboard"
-            className="w-fit rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
+            className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/50 px-4 py-2 text-sm text-brand-blue hover:border-brand-blue"
             data-testid="invite-closed-dashboard"
           >
             {t("toDashboard")}

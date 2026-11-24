@@ -9,6 +9,15 @@ import {
 } from "@/lib/navigation/nav-card-icons";
 import { professionCards } from "@/lib/navigation/profession-sectors";
 import { WORK_CATEGORIES, type WorkLabel } from "@/lib/taxonomy/work-categories";
+import type { NavCardIconKey } from "@/lib/navigation/nav-card-icons";
+
+/** A signed-in goal's function card, already labelled (N4). */
+export type OwnGoalFunction = {
+  readonly id: string;
+  readonly href: string;
+  readonly label: string;
+  readonly iconKey: NavCardIconKey;
+};
 
 /** Goals that carry a profession catalogue. */
 const CATALOGUE_GOALS = new Set(["work"]);
@@ -22,14 +31,20 @@ const CATALOGUE_GOALS = new Set(["work"]);
  */
 export async function GoalNavigation({
   headingLevel = "h2",
-  phoneLayout = "rail",
-  phoneMore,
   lead,
+  ownFunctions,
 }: {
   headingLevel?: "h1" | "h2";
-  phoneLayout?: "rail" | "grid";
-  phoneMore?: { readonly ids: readonly string[]; readonly label: string };
   lead?: string;
+  /**
+   * SIGNED IN (CAROUSEL_NAVIGATION_SPEC N4, owner P0 2026-11-23): the same
+   * six goals, each opening the functions THIS person may use
+   * (`components/navigation/signed-in-goal-navigation.tsx` builds the map
+   * from `lib/navigation/signed-in-goals.ts`). Same navigator, same cards,
+   * same `#goal=` state as the public home. Kept as plain data so the public
+   * landing's import graph never reaches the signed-in modules.
+   */
+  ownFunctions?: ReadonlyMap<string, readonly OwnGoalFunction[]>;
 }) {
   const [t, tNav, tProf, locale] = await Promise.all([
     getTranslations("siteNav"),
@@ -47,10 +62,9 @@ export async function GoalNavigation({
     <GoalNavigator
       locale={locale}
       headingLevel={headingLevel}
-      phoneLayout={phoneLayout}
-      phoneMore={phoneMore}
       lead={lead}
-      goals={PUBLIC_INTENTS.map((intent) => ({
+      goals={withOwnFunctions(
+        PUBLIC_INTENTS.map((intent) => ({
         id: intent.id,
         href: goalHref(intent.id),
         label: t(`intents.${intent.id}.short`),
@@ -74,7 +88,9 @@ export async function GoalNavigation({
           guestNote: link.account && link.guestHref ? t("signUp") : undefined,
           iconKey: FUNCTION_ICONS[link.id as keyof typeof FUNCTION_ICONS],
         })),
-      }))}
+      })),
+        ownFunctions,
+      )}
       professions={cards.map((card) => ({
         id: card.slug,
         href: card.href,
@@ -101,4 +117,14 @@ export async function GoalNavigation({
       }}
     />
   );
+}
+
+/** The public goals with their functions swapped for this person's own, when
+ *  the signed-in home hands them in; the public home passes nothing. */
+function withOwnFunctions<G extends { readonly id: string; readonly functions: readonly unknown[] }>(
+  goals: readonly G[],
+  own: ReadonlyMap<string, readonly OwnGoalFunction[]> | undefined,
+): readonly G[] {
+  if (!own) return goals;
+  return goals.map((goal) => ({ ...goal, functions: own.get(goal.id) ?? goal.functions }));
 }

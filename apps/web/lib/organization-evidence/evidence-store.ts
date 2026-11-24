@@ -196,7 +196,11 @@ export interface EvidenceStore {
   /** The parties already recorded on these records. */
   readParties(recordIds: readonly string[]): Promise<StoreResult<readonly StoreRow[]>>;
   /** The record ids that name this organization as a party (its attributed work). */
-  readRecordIdsNamingOrganization(partyOrganizationId: string): Promise<StoreResult<readonly string[]>>;
+  /** `roles`: only party rows in these roles (absent = every role). */
+  readRecordIdsNamingOrganization(
+    partyOrganizationId: string,
+    roles?: readonly string[],
+  ): Promise<StoreResult<readonly string[]>>;
   insertParties(rows: readonly StoreRow[]): Promise<StoreResult<readonly { readonly id: string }[]>>;
 }
 
@@ -548,14 +552,16 @@ export function supabaseEvidenceStore(caller: DomainCaller): EvidenceStore {
       );
     },
 
-    async readRecordIdsNamingOrganization(partyOrganizationId) {
+    async readRecordIdsNamingOrganization(partyOrganizationId, roles) {
       const res = await readEveryPage(
-        () =>
-          db()
+        () => {
+          let q = db()
             .from("organization_evidence_parties")
             .select("id, record_id")
-            .eq("party_organization_id", partyOrganizationId)
-            .order("id", { ascending: true }),
+            .eq("party_organization_id", partyOrganizationId);
+          if (roles) q = q.in("party_role", roles as string[]);
+          return q.order("id", { ascending: true });
+        },
         ORGANIZATION_READ_CEILING,
       );
       if (res.error) return { data: null, error: res.error };

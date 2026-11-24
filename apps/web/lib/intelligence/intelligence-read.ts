@@ -461,6 +461,8 @@ export async function getCompanyDemandIntelligence(): Promise<CompanyDemandIntel
   const { data, error } = await asAny(supabase)
     .from("customer_requests")
     .select("role_or_work_type, country, location, team_size, created_at")
+    // A privacy request to the platform is never a labour need (P0 2026-11-22).
+    .is("payload->>privacy_request_type", null)
     // W14 P0-3 + W8 Stage B: the org predicate. Without one an admin viewer
     // cross-aggregated every tenant on a company surface. The id comes from
     // `requireEmployerCompany()` — the server's own resolution of the active

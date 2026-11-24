@@ -47,7 +47,6 @@ export type ServiceOfferingsLabels = {
   formCountryPlaceholder: string;
   formRemoteLabel: string;
   formRateLabel: string;
-  formRatePlaceholder: string;
   formRateHint: string;
   save: string;
   saving: string;
@@ -113,7 +112,7 @@ export function ServiceOfferingsSection({
   const [error, setError] = useState<string | null>(null);
 
   const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
+    "min-h-11 w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
 
   function openCreate() {
     setError(null);
@@ -233,7 +232,7 @@ export function ServiceOfferingsSection({
                 type="button"
                 onClick={openCreate}
                 data-testid="service-offering-add"
-                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
+                className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
                 {labels.addButton}
@@ -242,7 +241,7 @@ export function ServiceOfferingsSection({
                 type="button"
                 onClick={openCreatePartnership}
                 data-testid="service-offering-add-partnership"
-                className="inline-flex w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
                 {labels.addPartnership}
@@ -305,7 +304,6 @@ export function ServiceOfferingsSection({
                   value={draft.rateText}
                   data-testid="service-offering-rate"
                   onChange={(e) => setDraft({ ...draft, rateText: e.target.value })}
-                  placeholder={labels.formRatePlaceholder}
                   maxLength={120}
                 />
                 <span className="text-meta text-text-muted">{labels.formRateHint}</span>
@@ -330,14 +328,14 @@ export function ServiceOfferingsSection({
                   onClick={submit}
                   disabled={pending}
                   data-testid="service-offering-save"
-                  className="rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:border-brand-blue disabled:opacity-60"
+                  className="min-h-11 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:border-brand-blue disabled:opacity-60"
                 >
                   {pending ? labels.saving : labels.save}
                 </button>
                 <button
                   type="button"
                   onClick={close}
-                  className="rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary"
+                  className="min-h-11 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary"
                 >
                   {labels.cancel}
                 </button>

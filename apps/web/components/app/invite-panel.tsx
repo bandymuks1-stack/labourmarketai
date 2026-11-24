@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+
+import { PageTitle } from "@/components/app/premium/page-title";
 import { Check, Copy, Share2 } from "lucide-react";
 
 import { NATIVE_LOCALE_NAMES } from "@/components/marketing/locale-switcher";
@@ -51,6 +53,7 @@ export function InvitePanel({
   defaultProjectId,
   defaultRelationshipSlug,
   defaultOpen = false,
+  pageTitle,
 }: {
   locale: string;
   /**
@@ -79,6 +82,13 @@ export function InvitePanel({
    * the panel on their own; this only adds the case with no preset.
    */
   defaultOpen?: boolean;
+  /**
+   * The page's own title when the panel IS the page (`/dashboard/network?
+   * invite=1`, the invite action view): rendered as the page's h1 in place of
+   * the panel's h2, so the screen is named after the action the person chose
+   * ("Kviesti studentus") and says it once.
+   */
+  pageTitle?: string;
 }) {
   const t = useTranslations("network.invite");
   // The ONE localized relationship vocabulary — the same words the CV prints.
@@ -290,6 +300,15 @@ export function InvitePanel({
     }
   }
 
+  /**
+   * The missing step, then back (owner 2026-11-22): the organisation's
+   * capability card, with a link under it back to THIS invite (same type,
+   * organisation and relationship). It used to open the company home and
+   * leave the person there.
+   */
+  const capabilityFixHref = `/${locale}/dashboard/company/settings?need=training_provider&next=${encodeURIComponent(
+    `/dashboard/network?invite=1&type=${type}${organizationId ? `&org=${organizationId}` : ""}&relationship=${relationshipSlug}`,
+  )}#company-capabilities`;
   const capacityBlockedNotice = (
     <span
       className="text-meta text-state-danger"
@@ -297,7 +316,7 @@ export function InvitePanel({
     >
       {t("capacityNeedsCapability")}{" "}
       <a
-        href={`/${locale}/dashboard/company`}
+        href={capabilityFixHref}
         className="underline hover:text-text-primary"
         data-testid="invite-capacity-blocked-cta"
       >
@@ -316,7 +335,9 @@ export function InvitePanel({
             already the word the owner named for this action ("Pakviesti"), so
             the compact state needs no new string in any locale, and the
             reader sees the same word whether it is open or shut. */}
-        {open ? (
+        {pageTitle ? (
+          <PageTitle data-testid="invite-page-title">{pageTitle}</PageTitle>
+        ) : open ? (
           <h2 className="font-display text-lg font-bold text-text-primary">
             {t("title")}
           </h2>
@@ -567,7 +588,7 @@ export function InvitePanel({
           type="submit"
           disabled={sending || (mode === "email" && emails.trim().length === 0)}
           data-testid="invite-submit"
-          className="inline-flex min-h-10 items-center justify-center rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="inline-flex min-h-11 items-center justify-center rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {sending ? t("sending") : mode === "link" ? t("createLink") : t("send")}
         </button>

@@ -36,14 +36,9 @@ import { formatUtcDate } from "@/lib/time/display";
 import { EuFormatCv } from "@/components/app/cv/eu-format-cv";
 import { CvOrganizationHistory } from "@/components/app/cv/cv-organization-history";
 import { organizationHistoryLines } from "@/components/app/cv/organization-history-lines";
-import { FORMER_NAME_RELATIONS, formerNamesOf, periodFor } from "@/lib/journal/professional-experience";
+import { FORMER_NAME_RELATIONS, periodFor } from "@/lib/journal/professional-experience";
 import { experienceStopsOf, type ExperienceStop } from "@/lib/cv-export/experience-stops";
-import {
-  PremiumLivingCv,
-  type PremiumCvCapability,
-  type PremiumCvExperience,
-  type PremiumCvFact,
-} from "@/components/app/cv/premium-living-cv";
+import { PremiumLivingCv, type PremiumCvFact } from "@/components/app/cv/premium-living-cv";
 import { ownEngagementHeading } from "@/lib/cv-export/own-engagement-heading";
 import { endedUnnamedOrganizationContexts } from "@/lib/journal/engagement-label";
 import { statedDateLabel } from "@/lib/cv/period-dates";
@@ -644,17 +639,6 @@ export default async function VerifiedCvPage({
       org: orgNameOfPeriod.get(p.id) ?? "—",
     });
   };
-  const formerNamesByOrgName = new Map<string, string[]>();
-  for (const r of cv.professionalExperience?.roles ?? []) {
-    if (!r.organizationName) continue;
-    const names = formerNamesOf(r.businessPeriods);
-    if (names.length > 0 && !formerNamesByOrgName.has(r.organizationName)) formerNamesByOrgName.set(r.organizationName, names);
-  }
-  const withFormerNames = (orgName: string | null): string | null => {
-    if (!orgName) return null;
-    const names = formerNamesByOrgName.get(orgName);
-    return names && names.length > 0 ? `${orgName} (${tOrgHist("formerly", { names: names.join(", ") })})` : orgName;
-  };
   if (
     experienceTotal !== null &&
     experienceTotal.total > 0 &&
@@ -669,28 +653,10 @@ export default async function VerifiedCvPage({
     premiumFacts.push({ value: premiumHours(cv.organizationRecordedHours.totalHours), label: tPremium("facts.organization") });
   if (cv.languages.length > 0)
     premiumFacts.push({ value: cv.languages.map((l) => l.lang.toUpperCase()).join(" · "), label: tPremium("facts.languages") });
-  const tierLevel = { confirmed: "confirmed", evidence: "recorded", declared: "declared" } as const;
-  const premiumCapsAll: PremiumCvCapability[] = (["confirmed", "evidence", "declared"] as const).flatMap((tier) =>
-    cv.tiers[tier].map((slug): PremiumCvCapability => {
-      const practice = cv.skillPractice?.[slug] ?? null;
-      const hours = practice && practice.attributedHours > 0 ? practice.attributedHours : null;
-      const confirmedHours = practice?.confirmedHours ?? 0;
-      const evidenceText =
-        hours !== null && confirmedHours > 0
-          ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(confirmedHours)), recorded: fmtNum.format(roundHours(hours)) })
-          : hours !== null
-            ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(hours)) })
-            : practice && practice.sharedHours > 0
-              ? tPremium("evidence.involved", { hours: fmtNum.format(roundHours(practice.sharedHours)) })
-              : tier === "declared"
-                ? tPremium("evidence.declared")
-                : tPremium("evidence.shown");
-      return { key: `${tier}:${slug}`, label: skillLabel(slug), level: tierLevel[tier], hours, confirmedHours, evidenceText };
-    }),
-  );
-  const levelRank = { confirmed: 0, recorded: 1, declared: 2 } as const;
-  premiumCapsAll.sort((a, b) => levelRank[a.level] - levelRank[b.level] || (b.hours ?? 0) - (a.hours ?? 0));
-  const PREMIUM_CAPS_SHOWN = 8;
+  // SKILLS ARE LISTED ONCE (owner P0 2026-11-23): by the `cv-skills` section
+  // below, through the ONE presentation (`presentSkills` above — claims folded
+  // into the skill they already are, potential capabilities beside them). The
+  // hero no longer carries a second list read straight from the raw tiers.
   const monthYear = (iso: string | null) =>
     iso ? (formatUtcDate(iso, locale, { month: "short", year: "numeric" }) ?? null) : null;
   // THE ENTRIES THE ENGAGEMENT LIST CANNOT SHOW (decision 0025, 2026-10-20):
@@ -714,25 +680,31 @@ export default async function VerifiedCvPage({
     ]
       .filter((x): x is string => !!x)
       .join(" · ") || null;
-  const stopEntry = (s: ExperienceStop): PremiumCvExperience & { sortKey: string } => ({
+  // ONE LINE OF THE "ORGANIZATIONS AND LEADERSHIP" LIST (decision 0025).
+  type OrganizationRoleLine = {
+    readonly key: string;
+    readonly kind: ExperienceStop["kind"];
+    readonly period: string;
+    readonly title: string;
+    readonly subtitle: string | null;
+    readonly detail: string | null;
+    readonly source: string;
+    readonly level: "recorded" | "declared";
+  };
+  const stopEntry = (s: ExperienceStop): OrganizationRoleLine => ({
     key: s.key,
+    kind: s.kind,
     period: stopPeriod(s),
     title: s.name ?? tPremium("untitled"),
     subtitle: stopSubtitle(s),
     detail: s.hours !== null ? tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(s.hours)) }) : null,
     source: tPremium("source.organization"),
     level: "recorded",
-    current: s.current,
-    sortKey: s.current ? "9999-12-31" : (s.to ?? s.from ?? "0000"),
   });
-  // The premium layout's own leadership block lists CURRENT governing
-  // memberships only, so the premium list adds the earlier legal entities AND
-  // every leadership stop that block cannot show (an ended or engagement-only
-  // manager / owner role); the classic / print layout lists every stop.
-  // One entry PER uncovered role, with that role's own dates and provenance:
-  // an engagement role is the person's own entry (declared), a governing
-  // membership is the organization's record. A current membership is the
-  // leadership block's and is not repeated here.
+  // The leadership block lists CURRENT governing memberships only, so the
+  // career journey adds the earlier legal entities AND every leadership stop
+  // that block cannot show (an ended or engagement-only manager / owner role).
+  // A current membership is the leadership block's and is not repeated there.
   const earlierEntityStops = stops.filter((s) => s.kind === "earlier_legal_entity");
   const uncoveredRoles = stops
     .filter((s) => s.kind === "organization")
@@ -741,82 +713,38 @@ export default async function VerifiedCvPage({
         .filter((r) => !(r.source === "membership" && r.current))
         .map((r, i) => ({ stop: s, role: r, key: `${s.key}:${r.relationship}:${i}` })),
     );
+  // The organizations-and-roles SECTION is the document's list (it prints;
+  // the leadership block does not), so it carries every role. One entry PER
+  // role, with that role's own dates and provenance — never an aggregate stop
+  // that would date an ended 2020–2022 manager role and a current ownership
+  // both "2020 – now": an engagement role is the person's own entry
+  // (declared), a governing membership is the organization's record.
+  const everyRole = stops
+    .filter((s) => s.kind === "organization")
+    .flatMap((s) => s.roles.map((r, i) => ({ stop: s, role: r, key: `${s.key}:${r.relationship}:${i}` })));
   const rolePeriod = (r: ExperienceStop["roles"][number]): string => {
     const from = monthYear(r.startedAt);
     const to = r.current ? tPremium("present") : monthYear(r.endedAt);
     return from || to ? `${from ?? "…"} – ${to ?? "…"}` : tLead("notDocumented");
   };
-  const roleEntry = ({ stop, role, key }: (typeof uncoveredRoles)[number]): PremiumCvExperience & { sortKey: string } => ({
+  const roleEntry = ({ stop, role, key }: (typeof everyRole)[number]): OrganizationRoleLine => ({
     key,
+    kind: stop.kind,
     period: rolePeriod(role),
     title: stop.name ?? tPremium("untitled"),
     subtitle: roleLabel(role.relationship),
     detail: null,
     source: role.source === "membership" ? tPremium("source.organization") : tPremium("source.own"),
     level: role.source === "membership" ? "recorded" : "declared",
-    current: role.current,
-    sortKey: role.current ? "9999-12-31" : (role.endedAt ?? role.startedAt ?? "0000"),
   });
-  const premiumExperience: (PremiumCvExperience & { sortKey: string })[] = [
+  // EVERY JOB IS LISTED ONCE (owner P0 2026-11-23): the person's engagements
+  // by the work-history sections, the organizations' records by their own
+  // section, leadership and earlier legal entities here — never a second,
+  // merged list of the same rows in the hero above them.
+  const organizationRoleLines: OrganizationRoleLine[] = [
     ...earlierEntityStops.map(stopEntry),
-    ...uncoveredRoles.map(roleEntry),
-    ...cv.workHistory.map((e, i): PremiumCvExperience & { sortKey: string } => {
-      const heading = ownEngagementHeading({
-        orgName: orgSlotOf(e),
-        title: e.title,
-        relationshipLabel: tRel.has(e.relationship) ? tRel(e.relationship) : e.relationship,
-        practice: e.kind === "practice",
-      });
-      const from = e.orgName ? monthYear(e.startedAt) : statedDateLabel(e.startedAt, "start", locale, "month");
-      const to = !e.endedAt
-        ? tPremium("present")
-        : e.orgName
-          ? monthYear(e.endedAt)
-          : statedDateLabel(e.endedAt, "end", locale, "month");
-      const rec = e.recorded && e.recorded.entries > 0 ? e.recorded : null;
-      return {
-        key: `own:${e.id ?? i}`,
-        period: from ? `${from} – ${to}` : e.endedAt ? to : null,
-        ...heading,
-        detail: rec
-          ? rec.confirmedHours > 0
-            ? tPremium("evidence.both", { confirmed: fmtNum.format(roundHours(rec.confirmedHours)), recorded: fmtNum.format(roundHours(rec.hours)) })
-            : tPremium("evidence.recorded", { hours: fmtNum.format(roundHours(rec.hours)) })
-          : null,
-        source: tPremium("source.own"),
-        level: rec && rec.confirmedHours > 0 ? "confirmed" : rec ? "recorded" : "declared",
-        current: !e.endedAt,
-        sortKey: e.endedAt ?? "9999-12-31",
-      };
-    }),
-    ...(cv.organizationHistory ?? []).map((h): PremiumCvExperience & { sortKey: string } => {
-      const title = h.project ?? h.place ?? h.organizationName ?? tPremium("untitled");
-      const from = monthYear(h.from);
-      const to = monthYear(h.to);
-      const detailParts = [
-        h.dayHours !== null ? tPremium("orgDayHours", { hours: fmtNum.format(roundHours(h.dayHours)), count: h.dayRecords }) : null,
-        h.periodHours !== null ? tPremium("orgPeriodHours", { hours: fmtNum.format(roundHours(h.periodHours)) }) : null,
-      ].filter((x): x is string => !!x);
-      const periodBand = h.sourceLabel ? periodLabelOf(h.sourceLabel) : null;
-      return {
-        key: `org:${h.key}`,
-        period: from && to && from !== to ? `${from} – ${to}` : (from ?? to),
-        title,
-        subtitle:
-          [
-            h.organizationName && h.organizationName !== title ? withFormerNames(h.organizationName) : null,
-            periodBand,
-          ]
-            .filter((x): x is string => !!x)
-            .join(" · ") || null,
-        detail: detailParts.length > 0 ? detailParts.join(" · ") : null,
-        source: tPremium("source.organization"),
-        level: h.proof.includes("INDEPENDENTLY_VERIFIED") || h.proof.includes("EMPLOYER_CONFIRMED") ? "confirmed" : "recorded",
-        current: false,
-        sortKey: h.to ?? h.from ?? "0000",
-      };
-    }),
-  ].sort((a, b) => Number(b.current) - Number(a.current) || b.sortKey.localeCompare(a.sortKey));
+    ...everyRole.map(roleEntry),
+  ];
 
   // THE CAREER JOURNEY (Future Experience B, owner 2026-10-14): the SAME
   // rows the Living CV above lists, drawn as a route — engagements and
@@ -1071,27 +999,14 @@ export default async function VerifiedCvPage({
         {/* Player-card style header — identity + honest counters. */}
         {template !== "eu" ? (
           <PremiumLivingCv
-            formatHours={premiumHours}
             name={cv.personName.trim() && cv.personName.trim() !== "—" ? cv.personName : t("nameNotProvided")}
             eyebrow={professionNames.length > 0 ? professionNames.join(" · ") : tPremium("eyebrowFallback")}
             /* The summary renders ONCE, in its own section below (which also
                prints); the hero carries name + professions only. */
             summary={null}
             facts={premiumFacts}
-            capabilities={premiumCapsAll.slice(0, PREMIUM_CAPS_SHOWN)}
-            hiddenCapabilities={Math.max(premiumCapsAll.length - PREMIUM_CAPS_SHOWN, 0)}
-            moreLabel={tPremium("more", { count: Math.max(premiumCapsAll.length - PREMIUM_CAPS_SHOWN, 0) })}
-            capabilitiesHead={{
-              eyebrow:
-                cv.recordedHoursTotal !== null && cv.recordedHoursTotal > 0
-                  ? tPremium("capEyebrowHours", { hours: fmtNum.format(roundHours(cv.recordedHoursTotal)) })
-                  : tPremium("capEyebrow"),
-              title: tPremium("capTitle"),
-            }}
-            experience={premiumExperience}
-            experienceHead={{ eyebrow: tPremium("expEyebrow"), title: tPremium("expTitle") }}
-            emptyCapabilities={tPremium("emptyCapabilities")}
-            emptyExperience={tPremium("emptyExperience")}
+            /* Skills and work history are NOT listed in the hero: each is
+               listed once, by the sections below (owner P0 2026-11-23). */
             leadership={<OrganizationsLeadership locale={locale} variant="cv" />}
           />
         ) : null}
@@ -1108,7 +1023,16 @@ export default async function VerifiedCvPage({
           </div>
         ) : null}
 
-        <header className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"}`}>
+        {/* On screen the name and professions live in the hero above (this
+            header keeps them for PRINT); with no tailored basis and no
+            figures, the screen was left an empty bordered box reading only
+            "Mano CV" (design audit 2026-11-22). It is then print-only. */}
+        <header
+          className={`rounded-xl border-2 border-ink-500 ${compact ? "p-4" : "p-6"} ${
+            template !== "eu" && !tailoredOk && !summaryHasFigures ? "hidden print:block" : ""
+          }`}
+          data-testid="cv-document-header"
+        >
           <p className="font-mono text-meta uppercase tracking-widest text-text-muted">
             {t("pageTitle")}
           </p>
@@ -1304,10 +1228,10 @@ export default async function VerifiedCvPage({
 
         {/* ORGANIZATIONS AND LEADERSHIP (decision 0025, 2026-10-20): earlier
             legal entities and leadership held without an employment
-            engagement — their own entries, from the one reading. The premium
-            layout shows leadership in its own block; here every stop is
-            listed. Omitted when there is none. */}
-        {stops.length > 0 ? (
+            engagement — their own entries, from the one reading: one line
+            per earlier entity and one per role, each dated by its own role
+            and naming its provenance. Omitted when there is none. */}
+        {organizationRoleLines.length > 0 ? (
           <section
             id="cv-organizations-roles"
             className="flex flex-col gap-3 scroll-mt-20"
@@ -1315,12 +1239,13 @@ export default async function VerifiedCvPage({
           >
             <h2 className={sectionTitle}>{tLead("eyebrow")}</h2>
             <ul className="flex flex-col gap-2">
-              {stops.map((s) => (
-                <li key={s.key} className={bodyText} data-testid="cv-organization-role" data-kind={s.kind}>
-                  <span className="font-semibold text-text-primary">{s.name ?? "—"}</span>
-                  {stopSubtitle(s) ? <span className="text-text-secondary"> · {stopSubtitle(s)}</span> : null}
-                  <span className="text-text-muted"> · {stopPeriod(s)}</span>
-                  {s.hours !== null ? <span className="text-text-muted"> · {premiumHours(s.hours)}</span> : null}
+              {organizationRoleLines.map((l) => (
+                <li key={l.key} className={bodyText} data-testid="cv-organization-role" data-kind={l.kind} data-level={l.level}>
+                  <span className="font-semibold text-text-primary">{l.title}</span>
+                  {l.subtitle ? <span className="text-text-secondary"> · {l.subtitle}</span> : null}
+                  <span className="text-text-muted"> · {l.period}</span>
+                  {l.detail ? <span className="text-text-muted"> · {l.detail}</span> : null}
+                  <span className="text-text-muted"> · {l.source}</span>
                 </li>
               ))}
             </ul>

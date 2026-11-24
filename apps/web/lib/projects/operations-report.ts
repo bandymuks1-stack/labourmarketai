@@ -41,6 +41,15 @@ export function csvSafeCell(value: string): string {
   return csvCell(guarded);
 }
 
+/**
+ * A cell of an export that mixes free text with amounts: text a person typed
+ * is guarded like csvSafeCell, a plain signed number ("-12.50") stays a
+ * number (a spreadsheet reads it as a value, never as a formula).
+ */
+export function csvExportCell(value: string): string {
+  return /^-\d+(?:\.\d+)?$/.test(value) ? csvCell(value) : csvSafeCell(value);
+}
+
 function csvRow(cells: string[]): string {
   return cells.map(csvCell).join(",");
 }

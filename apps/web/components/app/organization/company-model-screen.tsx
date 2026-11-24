@@ -1,7 +1,9 @@
+import { Suspense } from "react";
 import { getTranslations } from "next-intl/server";
 
 import { OrganizationApprovalsCard } from "@/components/app/arena/confirm-pulse";
 import { AreaSwitcher } from "@/components/app/area-switcher";
+import { SignedInGoalNavigation } from "@/components/navigation/signed-in-goal-navigation";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { Link } from "@/lib/i18n/navigation";
 import { learnerInviteHref, ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
@@ -51,7 +53,13 @@ export async function CompanyModelScreen({
     <section
       aria-label={t("title")}
       data-testid="company-model"
-      className="mx-auto flex w-full max-w-2xl flex-col gap-3 px-4 pb-2 pt-4"
+      // The conversation thread already gives this its column and its 16px
+      // inset. A narrower max-w-2xl column with its own px-4 left the company
+      // home 32px in from each edge on phones (owner phone report 2026-11-20)
+      // and, from 640px up, out of line with the assistant below it (48px at
+      // 768, 48px at 1024; design audit 2026-11-22). It now shares the
+      // thread's column at every width.
+      className="flex w-full flex-col gap-3 pb-2 pt-4 max-sm:pt-2"
     >
       <h2 className="font-display text-card-title font-semibold text-text-primary">
         {t("title")}
@@ -71,6 +79,14 @@ export async function CompanyModelScreen({
       ) : (
         <NeedDoorLink surface="company_model" testId="company-model-primary" className={primaryClassName} />
       )}
+      {/* THE SIX GOALS (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC N4):
+          the public home's navigator, each goal opening what this
+          organization may use. After the approvals and the one primary
+          action, which stay on the first screen (owner P0 2026-11-07); the
+          area switcher below stays until N6 retires it. */}
+      <Suspense fallback={<div data-testid="signed-in-goals-pending" className="min-h-[13rem]" aria-hidden />}>
+        <SignedInGoalNavigation />
+      </Suspense>
       {/* Every door of the company, by priority (the everyday six first),
           as the light 3D area switcher — one source: ORGANIZATION_WORK_AREAS.
           The carousel replaces the six-tile grid + "More" disclosure: the
