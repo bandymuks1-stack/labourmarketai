@@ -19671,6 +19671,14 @@
     "noDemand": "Šiuo metu nėra atviros paklausos, kuriai galima siūlyti.",
     "demandLabel": "Paklausa",
     "demandPlaceholder": "Pasirinkite paklausą",
+    "need": {
+      "people": "Žmonių",
+      "start": "Pradžia",
+      "duration": "Trukmė",
+      "language": "Kalba",
+      "skills": "Įgūdžiai",
+      "tools": "Įrankiai"
+    },
     "alreadyOffered": "jau pasiūlyta",
     "noteLabel": "Pastaba įmonei (nebūtina)",
     "notePlaceholder": "Pavyzdžiui: 3 žmonių brigada, galime pradėti po dviejų savaičių",

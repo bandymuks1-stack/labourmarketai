@@ -1818,6 +1818,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
       // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261120190000_former_employer_chain_fixes_v1.sql",
+      // 2026-11-22: owner decision (open agency board, no client identity). RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261122170000_open_need_board_no_client_identity_v1.sql",
       // 2026-11-22: owner order, privacy requests never shared with an agency. RED draft, the marker is the
       // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
       "20261122180000_share_refuses_privacy_requests_v1.sql",
