@@ -1386,7 +1386,8 @@ test("E-3. the student becomes a worker: studies end, work is recorded, and noth
   if (links) expect(links.map((l) => l.relationship_slug), "the student period is kept").toContain("student");
 
   // One history on the Living CV: the study, the student period at the institution, and the work.
-  await page.goto(`${BASE}/en/cv`);
+  // The history sits in the CV's Experience block (decision 0034).
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   await expect(page.getByTestId("cv-education-row").filter({ hasText: EDU.studiesAt }), "the study on the CV").toHaveCount(1, { timeout: 30_000 });
   const periods = page
     .locator('[data-testid="cv-practice-history"], [data-testid="cv-organizations-roles"], [data-testid="cv-work-history"]')
