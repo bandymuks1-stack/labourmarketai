@@ -1120,7 +1120,7 @@ export default async function ProfilePage({
         </div>
       </header>
 
-      <nav aria-label={t("pageTitle")} data-testid="profile-tabs" className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+      <nav aria-label={t("pageTitle")} data-testid="profile-tabs" className="flex flex-wrap gap-2">
         {PROFILE_TABS.map((id) => {
           const label =
             id === "overview"
