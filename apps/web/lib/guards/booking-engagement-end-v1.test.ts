@@ -1824,7 +1824,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-23: owner P0 #3679, three bypassed v1 doors revoked. RED draft, the marker is the
       // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
       "20261123060000_revoke_bypassed_v1_doors_v1.sql",
-]);
+      // 2026-11-24: time-boxed read-only history grant (owner request 2026-11-23; RED draft, needs-human-gate, NOT applied).
+      "20261124053000_history_read_grant_v1.sql",
+    ]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {

@@ -668,12 +668,13 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
     await expect(place.getByRole("heading", { level: 2 })).toContainText(label);
     const chip = place.getByTestId("company-place-person-history-link");
     await expect(chip, `${ref}: one person, a door to A's own card`).toHaveCount(1);
-    await expect(chip).toHaveAttribute("href", new RegExp(`/dashboard/company/people/${personId}$`));
+    // The card keeps the organization the history was opened for (`?org=`, #3754).
+    await expect(chip).toHaveAttribute("href", new RegExp(`/dashboard/company/people/${personId}\\?org=${s.orgA}$`));
     await expect(chip).toHaveAttribute("data-linked", linked);
     await expect(place.getByTestId("company-place-person-other-workspace")).toHaveCount(0);
     await expect(place.getByTestId("company-place-person-other-roster")).toHaveCount(0);
     await chip.click();
-    await o.waitForURL(new RegExp(`/dashboard/company/people/${personId}$`), { timeout: 60_000 });
+    await o.waitForURL(new RegExp(`/dashboard/company/people/${personId}\\?org=${s.orgA}$`), { timeout: 60_000 });
     await expect(o.getByRole("main").getByTestId("company-person"), `${ref}: the card opens`).toHaveAttribute(
       "data-state",
       "ready",
