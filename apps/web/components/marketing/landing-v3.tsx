@@ -152,19 +152,27 @@ export async function LandingHow() {
       <h2 id="landing-how-title" className="font-display text-xl font-semibold text-text-primary">
         {t("title")}
       </h2>
-      <ol className="mt-3 grid gap-x-6 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
+      <ol className="mt-2 grid gap-x-6 gap-y-1 sm:grid-cols-2 lg:grid-cols-4 lg:items-start">
         {(["s1", "s2", "s3", "s4"] as const).map((step, index) => (
-          <li key={step} className="flex min-w-0 gap-3">
-            <span
-              aria-hidden
-              className="flex size-7 shrink-0 items-center justify-center rounded-full border border-ink-500 font-mono text-xs text-text-secondary"
-            >
-              {index + 1}
-            </span>
-            <span className="min-w-0">
-              <span className="block text-sm font-semibold text-text-primary">{t(`${step}.title`)}</span>
-              <span className="mt-0.5 block text-sm leading-relaxed text-text-secondary">{t(`${step}.body`)}</span>
-            </span>
+          <li key={step} className="min-w-0">
+            {/* The step is its title (decisions 0032 and 0034); its
+                explanation opens on a tap and stays in the document. */}
+            <details className="group" data-testid={`landing-how-${step}`}>
+              <summary className="flex min-h-11 cursor-pointer list-none items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue [&::-webkit-details-marker]:hidden">
+                <span
+                  aria-hidden
+                  className="flex size-7 shrink-0 items-center justify-center rounded-full border border-ink-500 font-mono text-xs text-text-secondary"
+                >
+                  {index + 1}
+                </span>
+                <span className="min-w-0 flex-1 text-sm font-semibold text-text-primary">{t(`${step}.title`)}</span>
+                <ChevronDown
+                  aria-hidden
+                  className="size-4 shrink-0 text-text-muted transition-transform group-open:rotate-180 motion-reduce:transition-none"
+                />
+              </summary>
+              <p className="pb-2 pl-10 text-sm leading-relaxed text-text-secondary">{t(`${step}.body`)}</p>
+            </details>
           </li>
         ))}
       </ol>

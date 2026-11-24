@@ -367,6 +367,13 @@ describe("the first screen carries no helper text", () => {
     expect(read("components/navigation/goal-navigation.tsx")).not.toContain("nav.swipe");
   });
 
+  it("a 'how it works' step is its title; its explanation opens on a tap and stays in the document", () => {
+    const how = read("components/marketing/landing-v3.tsx");
+    expect(how).toMatch(/<details className="group" data-testid=\{`landing-how-\$\{step\}`\}>/);
+    expect(how).toContain("{t(`${step}.title`)}");
+    expect(how).toContain("{t(`${step}.body`)}");
+  });
+
   it("no divider between the goals and the sentence field; the field's label is for assistive tech", () => {
     const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
     expect(focus).not.toContain('data-testid="landing-or"');
