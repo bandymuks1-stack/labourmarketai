@@ -180,7 +180,41 @@
       "actionPhone": "Ring",
       "actionWebsite": "Öppna företagets webbplats",
       "heroContact": "Så kommer du i kontakt",
-      "provenance": "Företaget har själv fyllt i den här sidan."
+      "provenance": "Företaget har själv fyllt i den här sidan.",
+      "living": {
+        "eyebrow": "Levande CV",
+        "figures": {
+          "years": "{count, plural, one {år i verksamhet} other {år i verksamhet}}",
+          "hours": "arbetade timmar",
+          "people": "{count, plural, one {person har arbetat här} other {personer har arbetat här}}",
+          "projects": "{count, plural, one {projekt} other {projekt}}",
+          "places": "{count, plural, one {arbetsplats} other {arbetsplatser}}",
+          "team": "{count, plural, one {teammedlem} other {teammedlemmar}}"
+        },
+        "doTitle": "Kompetenser",
+        "team": "{count, plural, one {# person i teamet} other {# personer i teamet}}",
+        "experienceTitle": "Arbetade timmar",
+        "confirmedLabel": "Bekräftat",
+        "confirmedSource": "Registrerat av arbetstagaren, godkänt av organisationen",
+        "recordedLabel": "Egna registreringar",
+        "recordedSource": "Organisationens registreringar, inte bekräftade av någon annan part",
+        "pending": "{hours} väntar på godkännande",
+        "hours": "{hours} tim",
+        "running": "Pågående",
+        "completed": "Avslutade",
+        "clients": "Arbete utfört åt: {names}",
+        "tabs": {
+          "overview": "Översikt",
+          "projects": "Projekt",
+          "experience": "Erfarenhet",
+          "gallery": "Galleri",
+          "team": "Personal"
+        },
+        "pendingLabel": "Väntar på godkännande",
+        "ringLabel": "{share} % av journaltimmarna bekräftade",
+        "open": "Öppna Levande CV",
+        "clientsMore": "Arbete utfört åt: {names} och {count} till"
+      }
     }
   },
   "marketplaceListings": {

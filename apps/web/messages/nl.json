@@ -180,7 +180,41 @@
       "actionPhone": "Bellen",
       "actionWebsite": "Website van het bedrijf openen",
       "heroContact": "Hoe u contact opneemt",
-      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld.",
+      "living": {
+        "eyebrow": "Levend cv",
+        "figures": {
+          "years": "{count, plural, one {jaar actief} other {jaar actief}}",
+          "hours": "gewerkte uren",
+          "people": "{count, plural, one {persoon werkte hier} other {personen werkten hier}}",
+          "projects": "{count, plural, one {project} other {projecten}}",
+          "places": "{count, plural, one {werklocatie} other {werklocaties}}",
+          "team": "{count, plural, one {teamlid} other {teamleden}}"
+        },
+        "doTitle": "Competenties",
+        "team": "{count, plural, one {# persoon in het team} other {# personen in het team}}",
+        "experienceTitle": "Gewerkte uren",
+        "confirmedLabel": "Bevestigd",
+        "confirmedSource": "Vastgelegd door de werknemer, goedgekeurd door de organisatie",
+        "recordedLabel": "Eigen registraties",
+        "recordedSource": "Registraties van de organisatie, niet bevestigd door een andere partij",
+        "pending": "{hours} wachten op goedkeuring",
+        "hours": "{hours} u",
+        "running": "Lopend",
+        "completed": "Afgerond",
+        "clients": "Werk uitgevoerd voor: {names}",
+        "tabs": {
+          "overview": "Overzicht",
+          "projects": "Projecten",
+          "experience": "Ervaring",
+          "gallery": "Galerij",
+          "team": "Medewerkers"
+        },
+        "pendingLabel": "Wacht op goedkeuring",
+        "ringLabel": "{share}% van de journaaluren bevestigd",
+        "open": "Levend cv openen",
+        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}"
+      }
     }
   },
   "marketplaceListings": {

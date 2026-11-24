@@ -180,7 +180,41 @@
       "actionPhone": "Позвонить",
       "actionWebsite": "Открыть сайт компании",
       "heroContact": "Как связаться",
-      "provenance": "Эту страницу заполнила сама компания."
+      "provenance": "Эту страницу заполнила сама компания.",
+      "living": {
+        "eyebrow": "Живое резюме",
+        "figures": {
+          "years": "{count, plural, one {год работы} few {года работы} many {лет работы} other {лет работы}}",
+          "hours": "отработанных часов",
+          "people": "{count, plural, one {человек работал} few {человека работали} many {человек работали} other {человек работали}}",
+          "projects": "{count, plural, one {проект} few {проекта} many {проектов} other {проектов}}",
+          "places": "{count, plural, one {объект} few {объекта} many {объектов} other {объектов}}",
+          "team": "{count, plural, one {сотрудник в команде} few {сотрудника в команде} many {сотрудников в команде} other {сотрудников в команде}}"
+        },
+        "doTitle": "Компетенции",
+        "team": "{count, plural, one {В команде # человек} few {В команде # человека} many {В команде # человек} other {В команде # человек}}",
+        "experienceTitle": "Отработанные часы",
+        "confirmedLabel": "Подтверждено",
+        "confirmedSource": "Записал работник, утвердила организация",
+        "recordedLabel": "Собственные записи",
+        "recordedSource": "Записи организации, не подтверждённые другой стороной",
+        "pending": "{hours} ждут утверждения",
+        "hours": "{hours} ч",
+        "running": "Текущие",
+        "completed": "Завершённые",
+        "clients": "Работы выполнены для: {names}",
+        "tabs": {
+          "overview": "Обзор",
+          "projects": "Проекты",
+          "experience": "Опыт",
+          "gallery": "Галерея",
+          "team": "Команда"
+        },
+        "pendingLabel": "Ждут утверждения",
+        "ringLabel": "Подтверждено {share}% часов журнала",
+        "open": "Открыть Живое резюме",
+        "clientsMore": "Работы выполнены для: {names} и ещё {count}"
+      }
     }
   },
   "marketplaceListings": {
