@@ -10,7 +10,6 @@ import {
   submitDemandRequest as _submitDemandRequest,
   getOwnLastDemandPrefill as _getOwnLastDemandPrefill,
   getOwnDemandPrefillById as _getOwnDemandPrefillById,
-  findOwnJustSubmittedDemand as _findOwnJustSubmittedDemand,
   type DemandIntent,
   type DemandFields,
   type DemandPrefill,
@@ -23,15 +22,6 @@ export async function submitDemandRequestAction(
   opts: { readonly expectedOrganizationId?: string | null } = {},
 ): Promise<DemandRequestResult> {
   return _submitDemandRequest(intent, fields, opts);
-}
-
-/** The submit's answer was lost: was this exact need saved since `sentAtIso`? Own rows, id only. */
-export async function findOwnJustSubmittedDemandAction(
-  intent: DemandIntent,
-  sent: { readonly role?: string; readonly description?: string },
-  sentAtIso: string,
-): Promise<string | null> {
-  return _findOwnJustSubmittedDemand(intent, sent, sentAtIso);
 }
 
 /** Duplicate-and-edit: fetch the owner's own last request as prefill values. */

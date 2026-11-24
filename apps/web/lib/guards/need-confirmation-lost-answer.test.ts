@@ -14,15 +14,44 @@ const read = (p: string) => readFileSync(join(WEB, p), "utf8");
 const FORM = read("components/app/demand-request-button.tsx");
 const CORE = read("lib/demand/demand-request.ts");
 const SPEC = read("tests/e2e/need-confirmation-isolated.spec.ts");
+const ROUTE = read("app/api/demand/just-saved/route.ts");
 const WORKFLOW = readFileSync(join(WEB, "..", "..", ".github/workflows/signup-isolated.yml"), "utf8");
 
 describe("a saved need is confirmed even when the answer is lost", () => {
-  it("the form checks for the saved need before showing the error", () => {
+  it("'was it saved?' is a plain request to the route, never a server action", () => {
+    // The lost answer came through the router's one action queue; a follow-up
+    // action can be stranded behind it (CI run 45365699921: no request in 30 s).
+    const ask = FORM.indexOf("const askSaved = (): Promise<string | null> =>");
+    expect(ask, "one helper asks").toBeGreaterThan(-1);
+    expect(FORM.slice(ask, ask + 300)).toMatch(/fetch\("\/api\/demand\/just-saved"/);
+    expect(FORM).not.toMatch(/findOwnJustSubmittedDemandAction/);
+  });
+
+  it("a lost answer asks before it says 'could not send'", () => {
     const lost = FORM.indexOf('if (!res || typeof res !== "object" || typeof res.ok !== "boolean")');
     expect(lost, "the lost-answer branch exists").toBeGreaterThan(-1);
-    const branch = FORM.slice(lost, lost + 600);
-    expect(branch).toMatch(/findOwnJustSubmittedDemandAction\(intent, \{ role, description \}, sentAt\)/);
-    expect(branch).toMatch(/setState\(savedId \? "done" : "error"\)/);
+    const branch = FORM.slice(lost, lost + 300);
+    expect(branch).toMatch(/const savedId = await askSaved\(\);/);
+    expect(branch).toMatch(/if \(savedId\) await confirmSaved\(savedId\);\s*else setState\("error"\);/);
+  });
+
+  it("an answer that never comes: the watchdog only ever confirms a saved need, never fails early", () => {
+    const dog = FORM.indexOf("for (const wait of [10_000, 8_000, 8_000, 8_000])");
+    expect(dog, "the watchdog exists").toBeGreaterThan(-1);
+    const body = FORM.slice(dog, dog + 400);
+    expect(body).toMatch(/const id = await askSaved\(\);/);
+    expect(body).toMatch(/await confirmSaved\(id\);/);
+    expect(body).not.toMatch(/setState\("error"\)/);
+    // One outcome per send: the answer and the watchdog both check `settled`.
+    expect(FORM.match(/if \(settled\) return;/g)?.length ?? 0).toBeGreaterThanOrEqual(4);
+  });
+
+  it("the route only reads, through the one lookup, and answers an id or null", () => {
+    expect(ROUTE).toMatch(/export async function POST\(/);
+    expect(ROUTE).toMatch(/findOwnJustSubmittedDemand\(/);
+    expect(ROUTE).toMatch(/NextResponse\.json\(\{ id \}/);
+    expect(ROUTE).not.toMatch(/\.(insert|update|upsert|delete|rpc)\(/);
+    expect(ROUTE).not.toMatch(/"use server"/);
   });
 
   it("the lookup reads own open needs only, matched exactly, and returns an id only", () => {

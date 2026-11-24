@@ -20,14 +20,15 @@ import { watchNeedSubmit } from "./need-submit-trail";
  * Two answers are then broken on purpose: the need is SAVED but the answer is
  * lost (a 502 in its place) — the page must still confirm it, not invite a
  * duplicate; and the request never reaches the server — the page must say it
- * failed and nothing may be stored.
+ * failed and nothing may be stored. And the answer may never come back at
+ * all: the page must find the saved need by itself within the same 30 s.
  */
 test.skip(!isolatedStack(), "isolated stack only (SIGNUP_ISOLATED=1 against a local Supabase)");
 test.setTimeout(300_000);
 
 const RUN = Date.now().toString(36);
 
-type Answer = "normal" | "lost-after-save" | "never-sent";
+type Answer = "normal" | "lost-after-save" | "never-arrives" | "never-sent";
 
 async function describeNeed(page: Page, role: string, answer: Answer = "normal"): Promise<void> {
   // The company setup screen, reached the way the walk reaches it.
@@ -56,11 +57,23 @@ async function describeNeed(page: Page, role: string, answer: Answer = "normal")
   if (await size.isVisible().catch(() => false)) await size.fill("2");
   await chooseDemandCountryIfEmpty(page);
   await main.getByTestId("demand-next").click();
+  // The held answer of "never-arrives", let go (as an error) once the page has confirmed.
+  let release: (() => Promise<void>) | null = null;
   if (answer !== "normal") {
     // Only the FIRST request that carries this need's role (the submit); every other request passes.
     await page.route("**/dashboard/company/needs", async (route) => {
       const req = route.request();
       if (req.method() !== "POST" || !(req.postData() ?? "").includes(role)) return route.continue();
+      if (answer === "never-arrives") {
+        await route.fetch(); // the server saves it… and the answer does not come back
+        await new Promise<void>((done) => {
+          release = async () => {
+            await route.fulfill({ status: 504, contentType: "text/html", body: "<html>gateway timeout</html>" }).catch(() => undefined);
+            done();
+          };
+        });
+        return;
+      }
       if (answer === "lost-after-save") await route.fetch(); // the server saves it…
       await route.fulfill({ status: 502, contentType: "text/html", body: "<html>bad gateway</html>" }); // …the answer is lost
     }, { times: 1 }); // the submit only: the page's own follow-up question goes through
@@ -84,6 +97,13 @@ async function describeNeed(page: Page, role: string, answer: Answer = "normal")
   trail.stop();
   await expect(main.getByTestId("demand-open-need-limit"), "a company with no open need was refused").toHaveCount(0);
   await expect(main.getByTestId("demand-done"), "the saved need is confirmed").toBeVisible();
+  if (release) {
+    // The late answer (an error) arrives after the confirmation: it changes nothing.
+    await (release as () => Promise<void>)();
+    await page.waitForTimeout(1_000);
+    await expect(main.getByTestId("demand-done"), "a late error answer does not undo the confirmation").toBeVisible();
+    await expect(main.getByTestId("demand-error")).toHaveCount(0);
+  }
   if (answer !== "normal") await page.unroute("**/dashboard/company/needs");
 }
 
@@ -115,6 +135,8 @@ test("a saved need is confirmed: new company, setup door, slow network, then aga
     // The production failure: saved, but the answer never reached the page.
     { name: "answer-lost", answer: "lost-after-save", stored: 1 },
     // A real failure stays a failure (no confirmation without a saved need).
+    // Saved, and the answer never comes back in time: the page asks by itself.
+    { name: "never-arrives", answer: "never-arrives", stored: 1 },
     { name: "never-sent", answer: "never-sent", stored: 0 },
   ];
   for (const round of rounds) {
