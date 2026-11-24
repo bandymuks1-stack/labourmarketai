@@ -107,6 +107,44 @@ describe("rendered-text layer", () => {
     expect(maskFreeText("Jonas dirbo", q, ALLOW)).toBe("[…] dirbo");
   });
 
+  it("masks street addresses with their house numbers (run 45401396990)", () => {
+    const q = buildPseudonyms(PEOPLE, COMPANIES, KEEP);
+    // Synthetic addresses only.
+    const cases = [
+      "darbai: van eedenlaan 12, objektas",
+      "plytelės keizersgracht35 vonioje",
+      "Vredenburgstraat 7a",
+      "prie kade 3",
+      "gedimino gatvė 9-14",
+      "Vilniaus g. 12",
+      "Laisvės al. 5",
+      "ul. Marszałkowska 102/4",
+      "ulica Długa 5",
+      "Hauptstraße 3",
+      "Oude Dreef 4",
+      // Coordinator's three shapes from run 45401396990 (synthetic names):
+      "plytelės placenameweg118 vonioje", // (1) compound street, number glued
+      "darbai jan steenlaan, virtuvė", // (2) two-word street in lower case
+      "van testerstraat35 2 uur", // (3) inside Dutch description text
+      "Testdijk 4",
+      "Kerkpad 12b",
+      "testo g. 12", // Lithuanian
+      "ul. Testowa 5", // Polish
+    ];
+    for (const c of cases) {
+      const out = maskFreeText(c, q, ALLOW);
+      expect(out, c).toContain("[…]");
+      expect(out, c).not.toMatch(/laan|gracht|straat|kade|gatvė|g\. 12|al\. 5|Marszałkowska|Długa|straße|Dreef|weg|dijk|pad|Testowa|placename|steen|tester|118|35|12|\b5\b|\b4\b|\b9\b|\b3\b|7a/i);
+      // The word before a two-word street is masked too.
+      if (c.includes("jan steenlaan")) expect(out).not.toMatch(/\bjan\b/);
+    }
+  });
+
+  it("does not mask ordinary work text without an address", () => {
+    const q = buildPseudonyms(PEOPLE, COMPANIES, KEEP);
+    expect(maskFreeText("plytelių klojimas, 8 h, darbo istorija", q, ALLOW)).toBe("plytelių klojimas, 8 h, darbo istorija");
+  });
+
   it("leaves the network pseudonyms alone", () => {
     const q = buildPseudonyms(PEOPLE, COMPANIES, KEEP);
     const replaced = rewrite("Linas", q);
