@@ -296,9 +296,15 @@ jobs:
     permissions:
       actions: read
       contents: read
+    outputs:
+      brake: ${{ (steps.brake_a.outcome == 'success' && steps.brake_e.outcome == 'success' && steps.brake_b.outcome == 'success' && steps.brake_c.outcome == 'success') && 'clear' || 'refused' }}
     # AUTOMATIC BRAKES (owner order 2026-10-23, after one brigade walk made ~8,100 Supabase requests in
     # 6.5 min — run 39795574869). A walk starts only when ALL of these hold; each refusal prints `::error::`
-    # with its reason, before any install, session mint or production request. Thresholds live in ONE place,
+    # with its reason, before any install, session mint or production request.
+    # A REFUSAL IS NOT RUN, NEVER A FAILED WALK (owner P0 2026-11-24, run 45404386749): each brake step
+    # records its outcome instead of failing the job, the walk is not started, and the `not-run` job
+    # ends the run as CANCELLED with "BLOCKED / NOT RUN" in its summary. No journey ran, so nothing may
+    # read it as a failure (the status ledger skips cancelled runs; the schedulers dispatch the pair again). Thresholds live in ONE place,
     # `.github/scripts/walk-brakes.mjs` THRESHOLDS (unit-tested in apps/web/lib/guards/walk-brakes.test.ts):
     #   (a) health   3 x GET https://labourmarket.ai/api/health, 5 s apart: EVERY sample must be HTTP 200
     #                with ok=true, checks.db.ms <= 1500, checks.auth.ms <= 1500 and vacancyFreshness
@@ -334,20 +340,28 @@ jobs:
           sparse-checkout: .github/scripts
 
       - name: "Brake (a): production health (the override does not lift it)"
+        id: brake_a
+        continue-on-error: true
         run: node .github/scripts/walk-brakes.mjs health
 
       - name: "Brake (e): no production deploy running or just finished (the override does not lift it)"
+        id: brake_e
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: node .github/scripts/walk-brakes.mjs deploy
 
       - name: "Brake (b): the last walks did not fail for infrastructure"
+        id: brake_b
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           OVERRIDE: ${{ inputs.budget_override }}
         run: node .github/scripts/walk-brakes.mjs errors
 
       - name: "Brake (c): Supabase edge 5xx / 429 (optional, needs SUPABASE_ACCESS_TOKEN)"
+        id: brake_c
+        continue-on-error: true
         env:
           OVERRIDE: ${{ inputs.budget_override }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -355,6 +369,8 @@ jobs:
         run: node .github/scripts/walk-brakes.mjs supabase
 
       - name: Count production walks in the last 24 h
+        # Only when every brake is clear: after a refusal no walk starts, so there is nothing to count.
+        if: steps.brake_a.outcome == 'success' && steps.brake_e.outcome == 'success' && steps.brake_b.outcome == 'success' && steps.brake_c.outcome == 'success'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -386,6 +402,8 @@ jobs:
 
   walk:
     needs: [debounce, budget]
+    # A brake refusal in the budget job: no walk (the `not-run` job records it).
+    if: needs.budget.outputs.brake == 'clear'
     # One walk at a time against the shared synthetic cast (unchanged).
     concurrency:
       group: prod-qa-walk
@@ -396,6 +414,8 @@ jobs:
     permissions:
       contents: read
       actions: read # the gap brake reads the previous walk's end time
+    outputs:
+      brake: ${{ (steps.brake_d.outcome == 'success' && steps.brake_we.outcome == 'success' && steps.brake_wa.outcome == 'success') && 'clear' || 'refused' }}
     # NO service-role key at job level (owner decision 2026-11-14, R2 P3-1 on #3303): a job-level
     # value reaches every step — `pnpm install` and its install scripts, the browser walk and every
     # Playwright spec — although no spec reads it. It is set on exactly the steps whose script uses
@@ -416,6 +436,8 @@ jobs:
       # waits first; the deploy and health checks run last, right before the
       # session mint. None is lifted by budget_override.
       - name: "Brake (d): minimum gap after the previous walk (waits)"
+        id: brake_d
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: node .github/scripts/walk-brakes.mjs gap
@@ -429,15 +451,22 @@ jobs:
       - run: pnpm -C apps/web exec playwright install --with-deps chromium
 
       - name: "Brake (e): no production deploy running or just finished"
+        id: brake_we
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: node .github/scripts/walk-brakes.mjs deploy
 
       - name: "Brake (a): production health, right before the walk"
+        id: brake_wa
+        continue-on-error: true
         run: node .github/scripts/walk-brakes.mjs health
 
+      # Nothing touches production unless all three brakes above were clear. The two steps
+      # below run only after this one succeeded; every later step is an always() clean-up.
       - name: Provision + mint the synthetic cast (allowlist only)
         id: mint
+        if: steps.brake_d.outcome == 'success' && steps.brake_we.outcome == 'success' && steps.brake_wa.outcome == 'success'
         shell: bash
         env:
           PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -491,7 +520,7 @@ jobs:
       # address already exists (an owner-provisioned one belongs to another walk and must never be deleted here).
       - name: "Sign-up walk: no account with the synthetic address exists (else stop)"
         id: signup_precheck
-        if: needs.debounce.outputs.spec == 'signup-form'
+        if: steps.mint.outcome == 'success' && needs.debounce.outputs.spec == 'signup-form'
         shell: bash
         env:
           PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -502,6 +531,7 @@ jobs:
 
       - name: Walk
         id: walk
+        if: steps.mint.outcome == 'success'
         shell: bash
         env:
           # The addressed invitee of staff-review-notice: the second synthetic
@@ -874,3 +904,30 @@ jobs:
           retention-days: 1
           if-no-files-found: warn
           path: sr1-readings.jsonl
+
+  # BLOCKED / NOT RUN (owner P0 2026-11-24). A brake refused in the budget job or
+  # right before the walk: no journey ran. The run is CANCELLED, never failed and
+  # never passed — the status ledger skips cancelled runs, the error brake and the
+  # daily count only see walks that reached production, and the schedulers
+  # dispatch the pair again once production is stable. The one job with
+  # `actions: write`, and it only cancels this run.
+  not-run:
+    needs: [debounce, budget, walk]
+    if: always() && (needs.budget.outputs.brake == 'refused' || needs.walk.outputs.brake == 'refused')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: write # cancel this run
+    steps:
+      - name: "BLOCKED / NOT RUN: a brake refused, no journey ran"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          WHERE: ${{ needs.budget.outputs.brake == 'refused' && 'before the walk was queued (budget job)' || 'right before the session mint (walk job)' }}
+        run: |
+          echo "**BLOCKED / NOT RUN: a walk brake refused ${WHERE}. No journey ran; this is not a failed walk. The reason is in that job's brake step.**" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::BLOCKED / NOT RUN: a walk brake refused ${WHERE}; the run is cancelled, not failed"
+          gh run cancel "$GITHUB_RUN_ID"
+          sleep 300
+          echo "::error::the run could not be cancelled: it stays red, but no journey ran"
+          exit 1
