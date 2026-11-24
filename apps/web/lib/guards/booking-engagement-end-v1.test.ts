@@ -1814,6 +1814,9 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
       // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261120190000_former_employer_chain_fixes_v1.sql",
+      // 2026-11-22: owner request, erasure within one month of receipt. Owner-approved 2026-11-24,
+      // APPLIED ledger 20261124052729.
+      "20261122190500_privacy_deletion_within_one_month_v1.sql",
       // 2026-11-23: owner P0 #3679, three bypassed v1 doors revoked. RED draft, the marker is the
       // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
       "20261123060000_revoke_bypassed_v1_doors_v1.sql",
