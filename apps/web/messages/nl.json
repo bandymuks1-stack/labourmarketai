@@ -12654,7 +12654,7 @@
       },
       "verify": {
         "title": "Bevestig uw e-mail om uitnodigingen te zien die ernaar zijn gestuurd",
-        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen. Al het andere in uw account werkt zoals het werkte; dit is alleen nodig om deze uitnodigingen te zien of te accepteren.",
+        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen.",
         "send": "Stuur me een eenmalige link",
         "sending": "Bezig met verzenden…",
         "sent": "We hebben een eenmalige link naar {email} gestuurd. Open hem op dit apparaat om af te ronden.",

@@ -12654,7 +12654,7 @@
       },
       "verify": {
         "title": "Verify your email to see invitations sent to it",
-        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox. Everything else in your account works as it is; this is only needed to see or accept these invitations.",
+        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox.",
         "send": "Send me a one-time link",
         "sending": "Sending…",
         "sent": "We sent a one-time link to {email}. Open it on this device to finish.",

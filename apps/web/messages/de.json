@@ -12654,7 +12654,7 @@
       },
       "verify": {
         "title": "Bestätigen Sie Ihre E-Mail, um daran gerichtete Einladungen zu sehen",
-        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann. Alles andere in Ihrem Konto funktioniert wie bisher; das ist nur nötig, um diese Einladungen zu sehen oder anzunehmen.",
+        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann.",
         "send": "Einmal-Link senden",
         "sending": "Wird gesendet…",
         "sent": "Wir haben einen Einmal-Link an {email} gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
