@@ -194,7 +194,10 @@ export function buildBusinessHistory(
   // own source labels and bounds for placing, the group holds the figures.
   const groupKeys: string[] = [];
   const groupOf = periods.map((p) => {
-    const key = norm(p.legalEntityLabel ?? p.periodLabel);
+    // A statement that says "same entity" never folds with one that does not
+    // (R2 P3-a): a folded period is never part own, part earlier.
+    const sameEntity = p.legalEntityRelation === "same_entity" || p.legalEntityRelation === "renamed";
+    const key = `${sameEntity ? "s" : "x"}:${norm(p.legalEntityLabel ?? p.periodLabel)}`;
     let g = groupKeys.indexOf(key);
     if (g < 0) g = groupKeys.push(key) - 1;
     return g;

@@ -86,7 +86,9 @@ export function businessHistoryHeader(business: BusinessHistory, identity: Busin
     statementId: statement.id,
     label: statement.periodLabel,
     legalEntityLabel: statement.legalEntityLabel,
-    ownership: (statementIds ?? [statement.id]).some((id) => identity.ownStatementIds.includes(id))
+    // Own by id only when EVERY folded statement is (R2 P3-a): a mixed group
+    // reads by its label and relation, never as own by one id.
+    ownership: (statementIds ?? [statement.id]).every((id) => identity.ownStatementIds.includes(id))
       ? "own"
       : periodOwnership(statement, identity),
     legalEntityRelation: statement.legalEntityRelation,

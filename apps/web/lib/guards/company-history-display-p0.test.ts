@@ -204,6 +204,17 @@ describe("5. one short statement of the structure, never a legal line per card",
     expect(b.periods[1]!.totals.records).toBe(1);
   });
 
+  it("a folded period is never own by one id while another folded statement is earlier (R2 P3-a)", () => {
+    const own = statement({ id: "o1", legalEntityLabel: "Vivat Rex", periodStart: "2026-01-01", periodEnd: "2026-12-31" });
+    const b = buildBusinessHistory([rec({ id: "r", activityDate: "2024-05-01" })], [VIVAT_B, own]);
+    expect(b.periods).toHaveLength(1);
+    const h = businessHistoryHeader(b, { legalName: "Holder UAB", displayName: "Holder", ownStatementIds: ["o1"] });
+    expect(h.rows[0]!.ownership).toBe("earlier");
+    expect(h.split).toBe(true);
+    const same = statement({ id: "s1", legalEntityLabel: "Vivat Rex", legalEntityRelation: "same_entity" });
+    expect(buildBusinessHistory([], [VIVAT_B, same]).periods).toHaveLength(2);
+  });
+
   it("the overview prints the relation once at most, and never per card or per header row", () => {
     expect(OVERVIEW).not.toMatch(/continuityNotSuccession/);
     expect((OVERVIEW.match(/t\(`relation\./g) ?? []).length).toBe(1);
