@@ -12664,7 +12664,7 @@
       },
       "verify": {
         "title": "Proszę potwierdzić e-mail, aby zobaczyć zaproszenia wysłane na ten adres",
-        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę. Wszystko inne na koncie działa jak dotąd; potwierdzenie jest potrzebne tylko do zobaczenia lub przyjęcia tych zaproszeń.",
+        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę.",
         "send": "Wyślij mi jednorazowy link",
         "sending": "Wysyłanie…",
         "sent": "Wysłaliśmy jednorazowy link na {email}. Proszę go otworzyć na tym urządzeniu, aby dokończyć.",
@@ -14728,6 +14728,11 @@
       "findWorkInCompanyContext": "Szukanie pracy to Państwa własne działanie — w przestrzeni firmy go nie uruchamiam. Proszę przełączyć się na przestrzeń osobistą i zapytać ponownie.",
       "findWorkInCompanyWhy": "Pracy szuka człowiek, nie firma — odpowiadam z Państwa przestrzeni osobistej.",
       "personalOnlyInCompany": "To działanie osobiste — w przestrzeni firmy go nie wykonuję. Proszę przełączyć się na przestrzeń osobistą i kontynuować tam.",
+      "needsOrganization": "To wykonuje się dla organizacji, a żadna z przestrzeni nie może tego jeszcze zrobić.",
+      "readFailed": "Nie udało się tego teraz odczytać — błąd po naszej stronie. Nic nie zmieniono. Proszę spróbować za chwilę.",
+      "taskStatusAsk": "Jaki stan ustawić dla zadania: rozpoczęte, wykonane czy zablokowane?",
+      "stageStatusAsk": "Jaki stan ustawić dla etapu: rozpoczęty, wykonany czy zablokowany?",
+      "professionAsk": "O jaki zawód lub fach chodzi?",
       "crossSpace": {
         "personal": {
           "cv": "CV znajduje się w przestrzeni osobistej, nie w organizacji.",
@@ -16007,7 +16012,7 @@
       "lasting": "Państwa doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     },
     "v3": {
-      "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
+      "lead": "Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
       "market": {
@@ -18949,7 +18954,8 @@
       "heading": "Zaproszenia od organizacji",
       "explainer": "Skierowane do Państwa zaproszenia do zarządu. Po przyjęciu organizacja pojawi się w przełączniku przestrzeni.",
       "accept": "Przyjmij",
-      "decline": "Odrzuć"
+      "decline": "Odrzuć",
+      "invitedBy": "Zaproszenie od {name}"
     },
     "members": {
       "heading": "Członkowie organizacji",
@@ -19680,6 +19686,14 @@
     "noDemand": "Obecnie nie ma otwartego zapotrzebowania, do którego można złożyć ofertę.",
     "demandLabel": "Zapotrzebowanie",
     "demandPlaceholder": "Wybierz zapotrzebowanie",
+    "need": {
+      "people": "Osoby",
+      "start": "Początek",
+      "duration": "Czas trwania",
+      "language": "Język",
+      "skills": "Umiejętności",
+      "tools": "Narzędzia"
+    },
     "alreadyOffered": "już zaproponowano",
     "noteLabel": "Wiadomość do firmy (opcjonalnie)",
     "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",

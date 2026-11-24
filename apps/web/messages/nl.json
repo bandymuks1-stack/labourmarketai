@@ -12664,7 +12664,7 @@
       },
       "verify": {
         "title": "Bevestig uw e-mail om uitnodigingen te zien die ernaar zijn gestuurd",
-        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen. Al het andere in uw account werkt zoals het werkte; dit is alleen nodig om deze uitnodigingen te zien of te accepteren.",
+        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen.",
         "send": "Stuur me een eenmalige link",
         "sending": "Bezig met verzenden…",
         "sent": "We hebben een eenmalige link naar {email} gestuurd. Open hem op dit apparaat om af te ronden.",
@@ -14728,6 +14728,11 @@
       "findWorkInCompanyContext": "Werk zoeken is uw eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit uw persoonlijke ruimte.",
       "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en ga daar verder.",
+      "needsOrganization": "Dat gebeurt voor een organisatie, en geen van uw ruimtes kan dat nog.",
+      "readFailed": "Dat kon ik nu niet lezen — de fout ligt bij ons. Er is niets gewijzigd. Probeer het zo opnieuw.",
+      "taskStatusAsk": "Welke status moet de taak krijgen: gestart, klaar of geblokkeerd?",
+      "stageStatusAsk": "Welke status moet de fase krijgen: gestart, klaar of geblokkeerd?",
+      "professionAsk": "Welk beroep of vak bedoelt u?",
       "crossSpace": {
         "personal": {
           "cv": "Uw cv staat in uw persoonlijke ruimte, niet in de organisatie.",
@@ -16007,7 +16012,7 @@
       "lasting": "Uw ervaring en kansen blijven bereikbaar — als u van baan, project of land wisselt."
     },
     "v3": {
-      "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en de basisplaatsing van een behoefte zijn gratis.",
+      "lead": "Registreren en de basisplaatsing van een behoefte zijn gratis.",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
       "market": {
@@ -18949,7 +18954,8 @@
       "heading": "Uitnodigingen van organisaties",
       "explainer": "Bestuursuitnodigingen die aan u zijn gericht. Na acceptatie verschijnt de organisatie in uw werkruimtekiezer.",
       "accept": "Accepteren",
-      "decline": "Afwijzen"
+      "decline": "Afwijzen",
+      "invitedBy": "Uitgenodigd door {name}"
     },
     "members": {
       "heading": "Leden van de organisatie",
@@ -19680,6 +19686,14 @@
     "noDemand": "Er is nu geen openstaande vraag om een aanbod op te doen.",
     "demandLabel": "Vraag",
     "demandPlaceholder": "Kies een vraag",
+    "need": {
+      "people": "Mensen",
+      "start": "Aanvang",
+      "duration": "Duur",
+      "language": "Taal",
+      "skills": "Vaardigheden",
+      "tools": "Gereedschap"
+    },
     "alreadyOffered": "al aangeboden",
     "noteLabel": "Bericht aan het bedrijf (optioneel)",
     "notePlaceholder": "Bijvoorbeeld: ploeg van 3, kan over twee weken starten",

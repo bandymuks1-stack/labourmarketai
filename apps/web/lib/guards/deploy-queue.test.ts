@@ -298,9 +298,12 @@ describe("the emergency path is described honestly (R3 blocker on #3762)", () =>
     expect(reportSrc).not.toMatch(/owner-only emergency/i);
   });
 
-  it("the gate also finds the open regression issue by its exact title (a removed label does not unfreeze)", () => {
+  it("only the deploy-freeze LABEL freezes: a same-titled issue without it (e.g. #3793) never does", () => {
     const gateSrc = readFileSync(GATE, "utf8");
-    expect(gateSrc).toContain('TITLE="Post-deploy smoke is failing on production"');
-    expect(gateSrc).toMatch(/--search "in:title/);
+    expect(gateSrc).toMatch(/gh issue list --state open --label "\$LABEL"/);
+    expect(gateSrc).not.toMatch(/--search "in:title/);
+    expect(gateSrc).not.toContain("TITLE=");
+    // the report job is the one place that sets the label, and only on a real failure
+    expect(readFileSync(REPORT, "utf8")).toMatch(/gh issue create --title "\$TITLE" --label "\$FREEZE_LABEL"/);
   });
 });

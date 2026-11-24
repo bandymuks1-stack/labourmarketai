@@ -69,8 +69,8 @@ export type RailCard = {
  * A native horizontal scroller with scroll-snap, so a swipe is the browser's
  * own and the scroll position is never reset by a selection. On a phone the
  * cards are compact (icon on top, a name of up to four lines), about three
- * show, the right edge fades while there is more, and a dot indicator with
- * the word "swipe" sits under the rail. On a wide screen the cards share the
+ * show, the right edge fades while there is more, and a dot indicator sits
+ * under the rail (no word: decision 0032). On a wide screen the cards share the
  * row and carry their one-line description; arrow buttons appear only when
  * the content actually overflows, and never on touch widths.
  *
@@ -88,7 +88,6 @@ export function CardRail({
   size = "regular",
   activeId,
   onSelect,
-  swipeHint,
   prevLabel,
   nextLabel,
   testId,
@@ -100,7 +99,6 @@ export function CardRail({
   size?: "compact" | "regular";
   activeId?: string | null;
   onSelect?: (card: RailCard) => void;
-  swipeHint: string;
   prevLabel: string;
   nextLabel: string;
   /** The rail's test id. Its parts are addressed inside it by
@@ -303,7 +301,7 @@ export function CardRail({
         <p
           aria-hidden
           data-rail-part="hint"
-          className="flex items-center gap-2 text-xs text-text-muted md:hidden"
+          className="flex items-center md:hidden"
         >
           <span className="flex items-center gap-1">
             {Array.from({ length: edge.pages }, (_, i) => (
@@ -316,7 +314,6 @@ export function CardRail({
               />
             ))}
           </span>
-          {swipeHint}
         </p>
       )}
     </div>

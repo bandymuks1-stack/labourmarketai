@@ -25,6 +25,10 @@ test("N-6. the landing's worker-search door opens the one need form, which keeps
   const ctx = await browser.newContext({ viewport: { width: 1280, height: 900 } }); // no session
   const page = await ctx.newPage();
   await page.goto(`${BASE}/en`);
+  // The request block is closed until asked for (owner order 2026-11-24,
+  // decisions 0032 / 0034): a visitor opens it, then picks the door.
+  const block = page.getByTestId("landing-need-path");
+  if (!(await block.evaluate((el) => (el as HTMLDetailsElement).open))) await block.locator("summary").click();
   await page.getByTestId("request-door-worker-search-open").first().click();
   await page.waitForURL(/\/en\/company-need\?from=request_worker_search/, { timeout: 30_000 });
   const form = page.getByTestId("company-need-form");

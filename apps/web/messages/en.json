@@ -12664,7 +12664,7 @@
       },
       "verify": {
         "title": "Verify your email to see invitations sent to it",
-        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox. Everything else in your account works as it is; this is only needed to see or accept these invitations.",
+        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox.",
         "send": "Send me a one-time link",
         "sending": "Sending…",
         "sent": "We sent a one-time link to {email}. Open it on this device to finish.",
@@ -14728,6 +14728,11 @@
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
       "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
+      "needsOrganization": "That is done for an organization, and none of your spaces can do it yet.",
+      "readFailed": "I could not read that just now — the fault is on our side. Nothing was changed. Try again in a moment.",
+      "taskStatusAsk": "Which state should the task have: started, done or blocked?",
+      "stageStatusAsk": "Which state should the stage have: started, done or blocked?",
+      "professionAsk": "Which profession or trade do you mean?",
       "crossSpace": {
         "personal": {
           "cv": "Your CV is in your personal space, not in the organization.",
@@ -16007,7 +16012,7 @@
       "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
     },
     "v3": {
-      "lead": "For workers, employers and service providers in every profession and sector. Registration and basic request posting are free.",
+      "lead": "Registration and basic request posting are free.",
       "or": "or describe it in your own words",
       "needFree": "You can submit an enquiry without registering. Submission is free; service terms and price are agreed separately.",
       "market": {
@@ -18949,7 +18954,8 @@
       "heading": "Organization invitations",
       "explainer": "Governance invitations addressed to you. Accepting makes the organization appear in your workspace switcher.",
       "accept": "Accept",
-      "decline": "Decline"
+      "decline": "Decline",
+      "invitedBy": "Invited by {name}"
     },
     "members": {
       "heading": "Organization members",
@@ -19680,6 +19686,14 @@
     "noDemand": "There is no open demand to offer against right now.",
     "demandLabel": "Demand",
     "demandPlaceholder": "Choose a demand",
+    "need": {
+      "people": "People",
+      "start": "Start",
+      "duration": "Duration",
+      "language": "Language",
+      "skills": "Skills",
+      "tools": "Tools"
+    },
     "alreadyOffered": "already offered",
     "noteLabel": "Note to the company (optional)",
     "notePlaceholder": "For example: crew of 3, can start in two weeks",

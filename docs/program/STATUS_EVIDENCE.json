@@ -148,10 +148,10 @@
   "company-governance|desktop": {
    "spec": "company-governance",
    "device": "desktop",
-   "run": 44856477733,
-   "result": "success",
-   "build": "d447a639",
-   "at": "2026-11-21T02:37:24Z"
+   "run": 45406000625,
+   "result": "failure",
+   "build": "24be4a06",
+   "at": "2026-11-24T13:41:51Z"
   },
   "mobile-surfaces|phone": {
    "spec": "mobile-surfaces",
@@ -440,6 +440,14 @@
    "result": "success",
    "build": "eed72052",
    "at": "2026-11-21T11:37:54Z"
+  },
+  "living-cv-screens|desktop": {
+   "spec": "living-cv-screens",
+   "device": "desktop",
+   "run": 45401396990,
+   "result": "failure",
+   "build": "c5f9e3b1",
+   "at": "2026-11-24T13:26:54Z"
   }
  }
 }

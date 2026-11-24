@@ -683,7 +683,8 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
   test.skip(slot === null, "no synthetic identity holds the customer role (owner decision: provision one)");
 
   const { ctx, page } = await as(browser, slot!);
-  await page.goto("/lt/dashboard/buyer");
+  // The new-request form is its own block (decision 0034, `?tab=new`).
+  await page.goto("/lt/dashboard/buyer?tab=new");
   const form = page.getByTestId("buyer-requests-form");
   await expect(form, "the customer setup is complete enough to file requests").toBeVisible({ timeout: 30_000 });
   await page.getByTestId("buyer-requests-field-title").fill(`${NOTE} užsakymas`);

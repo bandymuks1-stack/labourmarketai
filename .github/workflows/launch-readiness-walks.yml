@@ -14,7 +14,9 @@ name: launch-readiness-walks
 #   1. dispatches the next pair of the plan that has no completed workflow_dispatch run since
 #      WINDOW_START, through prod-qa-walk.yml, WITHOUT budget_override;
 #   2. waits for that run;
-#   3. hands over to a fresh tick.
+#   3. if a brake refused it (BLOCKED / NOT RUN), waits up to 30 min for the deploy brake to clear
+#      and dispatches the same pair once more;
+#   4. hands over to a fresh tick.
 #
 # At most DAILY_CAP plan walks per UTC day (owner decision 2026-11-19).
 # Every brake of prod-qa-walk.yml still applies unchanged: health, deploy, errors, the 180 s gap and
@@ -44,8 +46,13 @@ concurrency:
 jobs:
   tick:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # A refused walk, a bounded wait of up to 30 min and one more walk fit with room to spare.
+    timeout-minutes: 150
     steps:
+      # Only the brake script, to wait on the same deploy brake prod-qa-walk.yml uses.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
       - name: Dispatch the next pair, wait for it, hand over
         env:
           GH_TOKEN: ${{ github.token }}
@@ -222,53 +229,72 @@ jobs:
 
           spec=${next%%:*}; device=${next##*:}
           prod_sha=$(gh run list -R "$REPO" -w deploy-vps.yml --branch main --status success --limit 1 --json headSha --jq '.[0].headSha // ""')
-          before=$(gh run list -R "$REPO" -w prod-qa-walk.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0')
-          gh workflow run prod-qa-walk.yml -R "$REPO" --ref main -f spec="$spec" -f device="$device"
-          log "dispatched: $spec $device (last successful deploy ${prod_sha:0:8}; no override)"
-          id=""
-          for _ in $(seq 1 30); do
-            sleep 10
-            id=$(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --limit 10 --json databaseId,displayTitle \
-              --jq "[.[] | select(.databaseId > $before and .displayTitle == \"prod-qa-walk $spec $device\") | .databaseId] | min // empty")
-            [ -n "$id" ] && break
-          done
-          if [ -z "$id" ]; then log "the dispatched run did not appear; the next scheduled tick continues"; exit 0; fi
-          until [ "$(gh run view "$id" -R "$REPO" --json status --jq .status)" = completed ]; do sleep 60; done
-          conclusion=$(gh run view "$id" -R "$REPO" --json conclusion --jq .conclusion)
-          walk=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
-          log "$spec $device run $id: $conclusion, walk job: ${walk:-none} (deploy ${prod_sha:0:8})"
-          # Hand over only if the walk reached production (its Provision step started); a brake inside the
-          # walk job leaves the retry to the hourly tick, as a brake before it does.
-          reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
-            --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
-          [ "${reached:-0}" -gt 0 ] || walk="refused"
+
+          # Dispatch the pair and wait for its run; sets $id, $conclusion, $walk ("refused" when the
+          # walk never reached production) and $notrun (1 when prod-qa-walk's `not-run` job recorded
+          # a brake refusal: BLOCKED / NOT RUN, the run cancelled, never a failure).
+          dispatch_and_wait() {
+            local before
+            before=$(gh run list -R "$REPO" -w prod-qa-walk.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0')
+            gh workflow run prod-qa-walk.yml -R "$REPO" --ref main -f spec="$spec" -f device="$device"
+            log "dispatched: $spec $device (last successful deploy ${prod_sha:0:8}; no override)"
+            id=""
+            for _ in $(seq 1 30); do
+              sleep 10
+              id=$(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --limit 10 --json databaseId,displayTitle \
+                --jq "[.[] | select(.databaseId > $before and .displayTitle == \"prod-qa-walk $spec $device\") | .databaseId] | min // empty")
+              [ -n "$id" ] && break
+            done
+            [ -n "$id" ] || return 1
+            until [ "$(gh run view "$id" -R "$REPO" --json status --jq .status)" = completed ]; do sleep 60; done
+            conclusion=$(gh run view "$id" -R "$REPO" --json conclusion --jq .conclusion)
+            walk=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
+            log "$spec $device run $id: $conclusion, walk job: ${walk:-none} (deploy ${prod_sha:0:8})"
+            reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+            [ "${reached:-0}" -gt 0 ] || walk="refused"
+            notrun=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "not-run" and .conclusion != "skipped")] | length')
+          }
+
+          handover() {
+            gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
+            log "handed over to a fresh tick"
+          }
+
+          if ! dispatch_and_wait; then log "the dispatched run did not appear; the next scheduled tick continues"; exit 0; fi
+
+          # A BRAKE REFUSAL (owner P0 2026-11-24): the walk did not run. Today's merges keep the deploy
+          # brake busy and GitHub's hourly cron is unreliable, so the tick does not leave the retry to
+          # it: it waits, bounded, for production to be quiet by the SAME deploy brake prod-qa-walk
+          # uses (node walk-brakes.mjs deploy: no deploy running or queued, 5 min after the last one),
+          # re-dispatches the pair once, then hands over to a fresh tick as after a normal run. Every
+          # brake still applies to that run. At most 12 refused runs of one pair per UTC day.
+          # A run refused by the 24 h budget (the budget job failed, no `not-run` job) is not retried.
+          if [ "$walk" = refused ] && [ "${notrun:-0}" -gt 0 ]; then
+            refused_today=0
+            for rid in $(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --created ">=$(date -u +%F)" \
+                --limit 100 --json databaseId,displayTitle --jq ".[] | select(.displayTitle == \"prod-qa-walk $spec $device\") | .databaseId"); do
+              r=$(gh api "repos/$REPO/actions/runs/$rid/jobs?filter=all&per_page=100" \
+                --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+              [ "${r:-0}" -gt 0 ] || refused_today=$((refused_today + 1))
+            done
+            if [ "$refused_today" -ge 12 ]; then
+              log "a brake refused this pair $refused_today times today; stopped, the schedule retries"; exit 0
+            fi
+            log "a brake refused the walk (BLOCKED / NOT RUN, $refused_today today): waiting for a quiet production"
+            quiet=0
+            for _ in $(seq 1 30); do
+              if GITHUB_REPOSITORY="$REPO" node .github/scripts/walk-brakes.mjs deploy >/dev/null 2>&1; then quiet=1; break; fi
+              sleep 60
+            done
+            log "deploy brake $([ "$quiet" = 1 ] && echo clear || echo 'still busy after 30 min'): re-dispatching once"
+            if ! dispatch_and_wait; then log "the re-dispatched run did not appear; the next scheduled tick continues"; exit 0; fi
+            handover
+            exit 0
+          fi
+
           case "$walk" in
-            success|failure)
-              gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
-              log "handed over to a fresh tick" ;;
-            *)
-              # A brake refused it before the walk. GitHub's hourly schedule proved unreliable (no
-              # scheduled tick from 08:12 to 16:00 UTC on 2026-11-22). Self-retry ONLY for the transient
-              # deploy brake (5-minute quiet period), and at most 3 refused runs of this pair per UTC
-              # day; every other refusal (health, errors, budget) is left to the schedule as before.
-              brake=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
-                --jq '[.jobs[].steps[]? | select(.conclusion == "failure") | .name][0] // ""')
-              refused_today=0
-              for rid in $(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --created ">=$(date -u +%F)" \
-                  --limit 100 --json databaseId,displayTitle --jq ".[] | select(.displayTitle == \"prod-qa-walk $spec $device\") | .databaseId"); do
-                r=$(gh api "repos/$REPO/actions/runs/$rid/jobs?filter=all&per_page=100" \
-                  --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
-                [ "${r:-0}" -gt 0 ] || refused_today=$((refused_today + 1))
-              done
-              case "$brake" in
-                "Brake (e)"*)
-                  if [ "$refused_today" -lt 3 ]; then
-                    sleep 420
-                    gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
-                    log "deploy brake refused the walk ($refused_today today); handed over after 7 minutes"
-                  else
-                    log "deploy brake refused this pair $refused_today times today; stopped, the schedule retries"
-                  fi ;;
-                *) log "brake '${brake:-unknown}' refused the walk; not retried here, the schedule retries" ;;
-              esac ;;
+            success|failure) handover ;;
+            *) log "the run was refused before the walk (${conclusion:-unknown}, no brake record: the 24 h budget or a setup failure); the schedule retries" ;;
           esac

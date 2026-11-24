@@ -12664,7 +12664,7 @@
       },
       "verify": {
         "title": "Verifiera din e-post för att se inbjudningar som skickats till den",
-        "body": "Inbjudningar som är adresserade till en e-postadress visas bara för den som kan öppna den brevlådan. Allt annat i ditt konto fungerar som vanligt; detta behövs bara för att se eller acceptera de här inbjudningarna.",
+        "body": "Inbjudningar som är adresserade till en e-postadress visas bara för den som kan öppna den brevlådan.",
         "send": "Skicka mig en engångslänk",
         "sending": "Skickar…",
         "sent": "Vi har skickat en engångslänk till {email}. Öppna den på den här enheten för att slutföra.",
@@ -14728,6 +14728,11 @@
       "findWorkInCompanyContext": "Att söka jobb är din egen handling — i företagsutrymmet kör jag den inte. Byt till ditt personliga utrymme och fråga igen.",
       "findWorkInCompanyWhy": "En person söker jobb, inte ett företag — jag svarar från ditt personliga utrymme.",
       "personalOnlyInCompany": "Det är en personlig åtgärd — i ett företagsutrymme utför jag den inte. Byt till ditt personliga utrymme och fortsätt där.",
+      "needsOrganization": "Det görs för en organisation, och inget av dina utrymmen kan göra det ännu.",
+      "readFailed": "Jag kunde inte läsa det just nu — felet ligger hos oss. Inget har ändrats. Försök igen om en stund.",
+      "taskStatusAsk": "Vilken status ska uppgiften få: påbörjad, klar eller blockerad?",
+      "stageStatusAsk": "Vilken status ska etappen få: påbörjad, klar eller blockerad?",
+      "professionAsk": "Vilket yrke eller hantverk menar du?",
       "crossSpace": {
         "personal": {
           "cv": "Ditt CV finns i ditt personliga utrymme, inte i organisationen.",
@@ -16007,7 +16012,7 @@
       "lasting": "Din erfarenhet och dina möjligheter finns kvar inom räckhåll — när du byter jobb, projekt eller land."
     },
     "v3": {
-      "lead": "För arbetstagare, arbetsgivare och tjänsteleverantörer i alla yrken och branscher. Registrering och grundläggande publicering av ett behov är gratis.",
+      "lead": "Registrering och grundläggande publicering av ett behov är gratis.",
       "or": "eller beskriv det med egna ord",
       "needFree": "Du kan skicka en förfrågan utan att registrera dig. Det är kostnadsfritt att skicka den; villkor och pris för tjänsterna avtalas separat.",
       "market": {
@@ -18949,7 +18954,8 @@
       "heading": "Inbjudningar från organisationer",
       "explainer": "Ledningsinbjudningar riktade till dig. När du accepterar visas organisationen i din arbetsyteväljare.",
       "accept": "Acceptera",
-      "decline": "Avböj"
+      "decline": "Avböj",
+      "invitedBy": "Inbjuden av {name}"
     },
     "members": {
       "heading": "Organisationens medlemmar",
@@ -19680,6 +19686,14 @@
     "noDemand": "Det finns inget öppet behov att erbjuda mot just nu.",
     "demandLabel": "Behov",
     "demandPlaceholder": "Välj ett behov",
+    "need": {
+      "people": "Personer",
+      "start": "Början",
+      "duration": "Varaktighet",
+      "language": "Språk",
+      "skills": "Färdigheter",
+      "tools": "Verktyg"
+    },
     "alreadyOffered": "redan erbjudet",
     "noteLabel": "Meddelande till företaget (valfritt)",
     "notePlaceholder": "Till exempel: arbetslag på 3, kan börja om två veckor",
