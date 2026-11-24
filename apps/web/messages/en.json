@@ -14722,6 +14722,9 @@
       "readFailed": "I could not read that just now — the fault is on our side. Nothing was changed. Try again in a moment.",
       "taskStatusAsk": "Which state should the task have: started, done or blocked?",
       "stageStatusAsk": "Which state should the stage have: started, done or blocked?",
+      "chipStatusStarted": "Started",
+      "chipStatusDone": "Done",
+      "chipStatusBlocked": "Blocked",
       "professionAsk": "Which profession or trade do you mean?",
       "crossSpace": {
         "personal": {

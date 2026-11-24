@@ -14722,6 +14722,9 @@
       "readFailed": "Jag kunde inte läsa det just nu — felet ligger hos oss. Inget har ändrats. Försök igen om en stund.",
       "taskStatusAsk": "Vilken status ska uppgiften få: påbörjad, klar eller blockerad?",
       "stageStatusAsk": "Vilken status ska etappen få: påbörjad, klar eller blockerad?",
+      "chipStatusStarted": "Påbörjad",
+      "chipStatusDone": "Klar",
+      "chipStatusBlocked": "Blockerad",
       "professionAsk": "Vilket yrke eller hantverk menar du?",
       "crossSpace": {
         "personal": {

@@ -14722,6 +14722,9 @@
       "readFailed": "Das konnte ich gerade nicht lesen — der Fehler liegt bei uns. Nichts wurde geändert. Versuchen Sie es gleich noch einmal.",
       "taskStatusAsk": "Welchen Status soll die Aufgabe haben: begonnen, erledigt oder blockiert?",
       "stageStatusAsk": "Welchen Status soll die Etappe haben: begonnen, erledigt oder blockiert?",
+      "chipStatusStarted": "Begonnen",
+      "chipStatusDone": "Erledigt",
+      "chipStatusBlocked": "Blockiert",
       "professionAsk": "Welchen Beruf oder welches Handwerk meinen Sie?",
       "crossSpace": {
         "personal": {

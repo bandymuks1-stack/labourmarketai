@@ -4096,6 +4096,9 @@
       "readFailed": "Pašlaik to neizdevās nolasīt — kļūda ir mūsu pusē. Nekas netika mainīts. Mēģiniet pēc brīža.",
       "taskStatusAsk": "Kādu statusu piešķirt uzdevumam: sākts, izpildīts vai bloķēts?",
       "stageStatusAsk": "Kādu statusu piešķirt posmam: sākts, izpildīts vai bloķēts?",
+      "chipStatusStarted": "Sākts",
+      "chipStatusDone": "Izpildīts",
+      "chipStatusBlocked": "Bloķēts",
       "professionAsk": "Kuru profesiju vai amatu jūs domājat?",
       "crossSpace": {
         "personal": {
