@@ -2,6 +2,8 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { storedSignalStillSupported } from "./competency-signals";
+
 /**
  * COMPETENCY SIGNALS → THE SUBJECT (2026-09-20).
  *
@@ -54,6 +56,30 @@ function db(c: SupabaseClient): any {
   return c;
 }
 
+/**
+ * The records' own words, for the stored-signal re-check
+ * (`storedSignalStillSupported`). Same RLS session as the signals; a failed or
+ * hidden read is simply an empty map — the re-check then falls back to the
+ * stored term, and the signal read itself never fails because of it.
+ */
+export async function readRecordTextsForRecheck(
+  supabase: SupabaseClient,
+  recordIds: readonly string[],
+): Promise<ReadonlyMap<string, string>> {
+  const out = new Map<string, string>();
+  for (let i = 0; i < recordIds.length; i += RECORD_ID_CHUNK) {
+    const res = await db(supabase)
+      .from("organization_evidence_records")
+      .select("id, original_text")
+      .in("id", recordIds.slice(i, i + RECORD_ID_CHUNK));
+    if (res.error) return out;
+    for (const r of (res.data ?? []) as { id: string; original_text: string | null }[]) {
+      if (r.original_text) out.set(r.id, r.original_text);
+    }
+  }
+  return out;
+}
+
 export async function readSubjectCompetencySignals(
   supabase: SupabaseClient,
   recordIds: readonly string[],
@@ -82,6 +108,7 @@ export async function readSubjectCompetencySignals(
     rows.push(...got);
   }
 
+  const textById = await readRecordTextsForRecheck(supabase, [...new Set(rows.map((r) => r.record_id))]);
   const bySlug = new Map<
     string,
     { terms: Set<string>; records: Set<string>; confidence: number }
@@ -89,6 +116,10 @@ export async function readSubjectCompetencySignals(
   for (const r of rows) {
     const slug = (r.skill_slug ?? "").trim();
     if (!slug) continue;
+    // A stored reading the current recognizer no longer makes is not shown
+    // (fixed wrong labels, e.g. "tig" in "bevestiging" → welding). Kept, not
+    // deleted.
+    if (!storedSignalStillSupported(slug, r.term, textById.get(r.record_id))) continue;
     const entry = bySlug.get(slug) ?? { terms: new Set<string>(), records: new Set<string>(), confidence: 0 };
     const term = (r.term ?? "").trim();
     if (term) entry.terms.add(term);
