@@ -1058,6 +1058,7 @@ export default async function VerifiedCvPage({
             blocks={cvBlocks}
             hrefFor={blockHref}
             labelFor={(b) => t(`blocks.${b}`)}
+            ariaLabel={tPremium("eyebrowFallback")}
           />
         ) : null}
 

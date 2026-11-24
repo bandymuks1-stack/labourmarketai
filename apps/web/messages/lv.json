@@ -285,6 +285,14 @@
       "moreSection": {
         "title": "Detalizēts pārskats",
         "hint": "Statuss, pieprasījumi un papildu kartītes"
+      },
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Reģistrēt darbu",
+            "desc": "Entries build your profile and CV"
+          }
+        }
       }
     },
     "errors": {
@@ -1800,7 +1808,50 @@
     "generatedAt": "Izveidots",
     "verifyNote": "Apstiprinājumus var pārbaudīt platformā.",
     "notWorker": "CV eksports ir pieejams darbinieka profilam — to veido no darba žurnāla un apstiprinātām prasmēm.",
-    "claimFromJournal": "[EN] from work journal"
+    "claimFromJournal": "[EN] from work journal",
+    "blocks": {
+      "overview": "Pārskats",
+      "experience": "Pieredze",
+      "projects": "Projekti",
+      "photos": "Foto",
+      "documents": "Dokumenti",
+      "reviews": "Atsauksmes"
+    },
+    "premium": {
+      "eyebrowFallback": "Dzīvais CV",
+      "facts": {
+        "recorded": "recorded in your work journal",
+        "confirmed": "ar vadītāja ierakstu",
+        "organization": "in organisation records",
+        "experienceTotal": "profesionālā pieredze kopā",
+        "languages": "valodas",
+        "years": "gadi",
+        "projects": "projekti"
+      },
+      "capEyebrow": "Capabilities",
+      "capEyebrowHours": "{hours} h of recorded work",
+      "capTitle": "What you *can do*",
+      "expEyebrow": "Experience",
+      "expTitle": "Where you have *worked*",
+      "evidence": {
+        "both": "{confirmed} h with a manager's record · {recorded} h recorded",
+        "recorded": "{hours} h recorded",
+        "shown": "Shown by your records",
+        "declared": "You say so; nothing shows it yet",
+        "involved": "Involved in {hours} h, not attributed to it alone"
+      },
+      "source": {
+        "own": "Your record",
+        "organization": "Organisation records"
+      },
+      "orgDayHours": "{hours} h on {count, plural, one {# record} other {# records}}",
+      "orgPeriodHours": "{hours} h stated as a period total",
+      "present": "now",
+      "more": "+ {count} more in the full register below",
+      "emptyCapabilities": "No skills on record yet. Skills you add — and the work that shows them — appear here.",
+      "emptyExperience": "No work history yet. Your journal and the records of organisations you worked for build this.",
+      "untitled": "Work without a name in the source"
+    }
   },
   "todayScreen": {
     "eyebrow": "[EN] Today",

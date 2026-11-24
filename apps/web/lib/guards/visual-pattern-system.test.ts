@@ -79,7 +79,8 @@ describe("EmptyState is the shared empty treatment in the marketplace loop", () 
 });
 
 describe("44px touch targets on decision controls", () => {
-  it("page quick-nav chips", () => {
+  it("CV block tabs (the quick-nav chips they replaced, decision 0034)", () => {
+    expect(read("components/app/cv/cv-block-tabs.tsx")).toMatch(/min-h-11/);
   });
   it("booking accept/decline buttons", () => {
     const src = read("components/app/booking-respond-buttons.tsx");

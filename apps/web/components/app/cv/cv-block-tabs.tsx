@@ -29,32 +29,34 @@ export function CvBlockTabs({
   blocks,
   hrefFor,
   labelFor,
+  ariaLabel,
 }: {
   readonly active: CvBlock;
   /** Only the blocks that have content — an empty block has no tab. */
   readonly blocks: readonly CvBlock[];
   readonly hrefFor: (block: CvBlock) => string;
   readonly labelFor: (block: CvBlock) => string;
+  /** Names the block navigation for assistive technology. */
+  readonly ariaLabel: string;
 }) {
   return (
-    <nav
-      className="-mx-4 overflow-x-auto px-4 print:hidden sm:mx-0 sm:px-0"
-      data-testid="cv-block-tabs"
-    >
-      <ul className="flex min-w-max gap-1 border-b border-[rgb(var(--c-text-primary)/0.12)]">
+    // The same segmented control as the organization Living CV (#3775): three
+    // to a row on a phone, one row from `sm`; it never scrolls sideways.
+    <nav aria-label={ariaLabel} className="print:hidden" data-testid="cv-block-tabs">
+      <ul className="grid grid-cols-3 gap-1 rounded-card border border-ink-600 bg-ink-800/40 p-1 sm:flex sm:w-max sm:max-w-full sm:flex-wrap">
         {blocks.map((b) => {
           const isActive = b === active;
           return (
-            <li key={b}>
+            <li key={b} className="min-w-0">
               <a
                 href={hrefFor(b)}
                 aria-current={isActive ? "page" : undefined}
                 data-testid={`cv-tab-${b}`}
                 className={cn(
-                  "inline-flex min-h-11 items-center border-b-2 px-3 text-sm font-medium transition-colors",
+                  "flex min-h-11 items-center justify-center rounded-[0.6rem] px-3 text-center text-support [overflow-wrap:anywhere]",
                   isActive
-                    ? "border-[#D4AF37] text-text-primary"
-                    : "border-transparent text-text-muted hover:text-text-primary",
+                    ? "bg-brand-blue/15 font-semibold text-text-primary"
+                    : "text-text-secondary hover:text-text-primary",
                 )}
               >
                 {labelFor(b)}
