@@ -25,7 +25,7 @@ describe("privacy requests stay off commercial surfaces", () => {
 
   it("the agency share picker lists labour needs only", () => {
     const src = read("lib/agency/clients.ts");
-    const fn = src.slice(src.indexOf("export async function listAgencyDemands"));
+    const fn = src.slice(src.indexOf("async function readAgencyDemands"));
     expect(fn).toContain('const base = "id, title, status, created_at, kind, payload";');
     expect(fn).toContain("isLabourDemandRow({ kind: r.kind as string | null, payload: r.payload })");
   });

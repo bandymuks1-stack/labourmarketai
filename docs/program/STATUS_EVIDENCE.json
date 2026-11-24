@@ -12,10 +12,10 @@
   "profile-cv-history|phone-375": {
    "spec": "profile-cv-history",
    "device": "phone-375",
-   "run": 45200120679,
+   "run": 45312056043,
    "result": "success",
-   "build": "dd63c977",
-   "at": "2026-11-23T15:11:40Z"
+   "build": "2be7abf0",
+   "at": "2026-11-24T02:39:58Z"
   },
   "company-chain|phone": {
    "spec": "company-chain",
@@ -140,10 +140,10 @@
   "learning-practice|desktop": {
    "spec": "learning-practice",
    "device": "desktop",
-   "run": 45240106971,
+   "run": 45314244234,
    "result": "failure",
-   "build": "47a63f28",
-   "at": "2026-11-23T18:39:23Z"
+   "build": "2be7abf0",
+   "at": "2026-11-24T02:45:46Z"
   },
   "company-governance|desktop": {
    "spec": "company-governance",
@@ -156,10 +156,10 @@
   "mobile-surfaces|phone": {
    "spec": "mobile-surfaces",
    "device": "phone",
-   "run": 45247712949,
+   "run": 45319400714,
    "result": "success",
-   "build": "47a63f28",
-   "at": "2026-11-23T19:35:56Z"
+   "build": "2be7abf0",
+   "at": "2026-11-24T03:34:38Z"
   },
   "public-org-locales|phone": {
    "spec": "public-org-locales",
@@ -420,10 +420,10 @@
   "fresh-activation|desktop": {
    "spec": "fresh-activation",
    "device": "desktop",
-   "run": 45241051644,
-   "result": "failure",
-   "build": "47a63f28",
-   "at": "2026-11-23T18:47:17Z"
+   "run": 45314924447,
+   "result": "success",
+   "build": "2be7abf0",
+   "at": "2026-11-24T02:52:23Z"
   },
   "role-routes|phone": {
    "spec": "role-routes",

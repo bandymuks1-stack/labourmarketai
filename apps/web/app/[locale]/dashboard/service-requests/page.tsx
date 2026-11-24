@@ -1,3 +1,4 @@
+import { OrganizationDoorsServer } from "@/components/app/organization/organization-doors-server";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -80,6 +81,7 @@ export default async function ServiceRequestsPage({
   const category = normalizeDiscoveryCategory(sp.category);
 
   const t = await getTranslations("marketplace");
+  const tDoors = await getTranslations("organizationDoors");
   // The caller's OWN offerings are read alongside the loop (RLS-scoped, own
   // rows only) so the provider inbox's empty state can tell the truth: no
   // active service → no request can arrive; N active → nobody asked yet.
@@ -165,6 +167,10 @@ export default async function ServiceRequestsPage({
 
   return (
     <div className="flex flex-col gap-4" data-testid="service-requests-page">
+      {/* The marketplace is one of the organization's doors: the strip stays
+          in view here too (carousel spec N7a). Nothing renders outside an
+          organization context. */}
+      <OrganizationDoorsServer ariaLabel={tDoors("label")} />
       <TelemetryView
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
         metadata={{ surface: "service_requests" }}
