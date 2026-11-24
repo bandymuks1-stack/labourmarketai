@@ -5084,7 +5084,15 @@
         "event_invitation_accepted": "Ktoś przyjął Państwa zaproszenie",
         "event_weekly_digest_profile_completion": "Aby pokazać pasujące oferty, proszę potwierdzić, jaką pracę Państwo wykonują",
         "event_weekly_digest_journal": "Podsumowanie Państwa dziennika pracy z tego tygodnia jest gotowe",
-        "event_history_link_offered": "Organizacja zaproponowała powiązanie zarejestrowanej historii Państwa pracy z Państwa kontem"
+        "event_history_link_offered": "Organizacja zaproponowała powiązanie zarejestrowanej historii Państwa pracy z Państwa kontem",
+        "event_team_offer_received": "Zespół zgłosił się do Państwa zapotrzebowania",
+        "event_team_offer_answered": "Odpowiedziano na ofertę Państwa zespołu",
+        "event_team_offer_answered_accepted": "Oferta Państwa zespołu została przyjęta",
+        "event_team_offer_answered_declined": "Oferta Państwa zespołu została odrzucona",
+        "event_candidate_offer_received": "Agencja zaproponowała kandydata do Państwa zapotrzebowania",
+        "event_candidate_offer_answered": "Odpowiedziano na zaproponowanego przez Państwa kandydata",
+        "event_candidate_offer_answered_accepted": "Zaproponowany przez Państwa kandydat został przyjęty",
+        "event_candidate_offer_answered_declined": "Zaproponowany przez Państwa kandydat został odrzucony"
       },
       "label": "Moje powiadomienia",
       "emptyTitle": "Nic nie wymaga teraz Państwa uwagi.",

@@ -5084,7 +5084,15 @@
         "event_invitation_accepted": "Kažkas priėmė jūsų kvietimą",
         "event_weekly_digest_profile_completion": "Norint pamatyti jums tinkamus darbus, patvirtinkite, kokį darbą dirbate",
         "event_weekly_digest_journal": "Paruošta jūsų savaitės darbo žurnalo apžvalga",
-        "event_history_link_offered": "Organizacija pasiūlė susieti jūsų užfiksuotą darbo istoriją su jūsų paskyra"
+        "event_history_link_offered": "Organizacija pasiūlė susieti jūsų užfiksuotą darbo istoriją su jūsų paskyra",
+        "event_team_offer_received": "Komanda pasiūlė save jūsų poreikiui",
+        "event_team_offer_answered": "Į jūsų komandos pasiūlymą atsakyta",
+        "event_team_offer_answered_accepted": "Jūsų komandos pasiūlymas priimtas",
+        "event_team_offer_answered_declined": "Jūsų komandos pasiūlymas atmestas",
+        "event_candidate_offer_received": "Agentūra pasiūlė kandidatą jūsų poreikiui",
+        "event_candidate_offer_answered": "Į jūsų pasiūlytą kandidatą atsakyta",
+        "event_candidate_offer_answered_accepted": "Jūsų pasiūlytas kandidatas priimtas",
+        "event_candidate_offer_answered_declined": "Jūsų pasiūlytas kandidatas atmestas"
       },
       "label": "Mano pranešimai",
       "emptyTitle": "Šiuo metu nieko nereikia daryti.",

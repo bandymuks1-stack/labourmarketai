@@ -220,6 +220,50 @@ PR/repository identity without this evidence.
 
 If identity does not match → **STOP** for this repository.
 
+**An existing worktree may be reused (owner decision 2026-11-24).** A clean
+existing worktree or clone whose `git remote` names `bandymuks1-stack/labourmarketai`
+and whose checked-out branch is the PR's head branch may be used for that PR,
+even when its directory differs from the default path for new worktrees. The
+directory name or location is never a reason to stop, and never a reason to
+create another copy. Stop only for a real risk: a remote that does not match,
+uncommitted changes whose content is not yours, or a branch that is not the PR's.
+
+### Project knowledge graph (Graphify) — query before you read
+
+The owner approved Graphify (Apache-2.0, `graphifyy`, pinned **0.9.118**) on
+2026-11-24 as a local development aid, so that every agent works from the same
+checkable map of the code. It runs locally, uses no paid cloud, and changes no
+product or production setting.
+
+```bash
+python3 -m venv .graphify-venv && .graphify-venv/bin/pip install "graphifyy[sql,mcp]==0.9.118"
+.graphify-venv/bin/graphify update .                  # AST only, no LLM; 1–3 min on this repo
+.graphify-venv/bin/graphify explain "professional-experience.ts"   # a module and its importers, with file:line
+.graphify-venv/bin/graphify path "A" "B" --undirected # how two things connect
+.graphify-venv/bin/graphify query "<question>"        # keyword BFS: broad, check the hits
+```
+
+Rules:
+- **Facts versus inferences.** An edge tagged `EXTRACTED` was read from the
+  source at the cited file:line, and counts as a fact *about that checkout*. An
+  edge tagged `INFERRED`, a community label or a `query` answer is an inference:
+  confirm it in the code before you rely on it.
+- **The graph describes one commit, not production.** It is built from the
+  checkout you ran it on. Rebuild after `git pull`, because a graph older than
+  your `HEAD` is stale and is never the current state. Production state (what is
+  deployed, applied or walked) comes only from `/api/health`, the migration
+  ledger and production walks.
+- **Known gap.** Supabase table names used as strings (`.from("table")`) are
+  not edges, so the graph does not link app code to database tables. Use
+  `git grep` for those.
+- **Not memory.** `graphify-out/` (gitignored) is a per-checkout cache.
+  Decisions and history stay in `docs/DECISIONS/`, `docs/program/FUNCTION_REGISTER.md`,
+  `docs/program/COORDINATION_REGISTER.md` and git (decision 0024: no second
+  memory). `graphify save-result` and `reflect` output is not a record.
+- **No hooks in the repository.** Do not commit `graphify install` /
+  `hook install` output or a PreToolUse guard: agents without Graphify would be
+  blocked. Install it per user or per session only.
+
 ### Repository mission
 
 Build an AI-native European labour/work platform connecting workers, employers,
