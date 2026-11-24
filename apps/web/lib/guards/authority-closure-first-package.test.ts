@@ -248,6 +248,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261123060000_",
       // 2026-11-24 owner request: time-boxed read-only history grant (RED draft, NOT applied).
       "20261124053000_",
+      // 2026-11-22 owner decision: a demoted owner loses owner rights at once (SECURITY DEFINER bodies + four
+      // narrowed company/agency policies; RED draft, needs-human-gate, NOT applied).
+      "20261122140000_",
       // 2026-11-21 owner P0 security directive: sign-up role allow-list, admin grant guard, manager grant needs an
       // accepted governance membership; journal lineage guard and manager-labelled metrics. SECURITY DEFINER bodies,
       // a trigger and one policy; RED draft, needs-human-gate, NOT applied.
