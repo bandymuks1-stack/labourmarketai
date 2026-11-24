@@ -14462,7 +14462,7 @@
       "navCalendar": "Calendar",
       "navProfile": "Profile",
       "clarifyWorkLog": "Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
-      "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "calendarHint": "You'll find your plan in the “Calendar” tab.",
       "messagesHint": "Here are your messages — the link below opens them.",
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "switchContextPersonal": "personal space",
