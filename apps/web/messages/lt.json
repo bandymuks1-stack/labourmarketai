@@ -14722,6 +14722,9 @@
       "readFailed": "Dabar to nuskaityti nepavyko — klaida mūsų pusėje. Niekas nepakeista. Pabandykite po akimirkos.",
       "taskStatusAsk": "Kokią būseną nustatyti užduočiai: pradėta, atlikta ar užblokuota?",
       "stageStatusAsk": "Kokią būseną nustatyti etapui: pradėtas, atliktas ar užblokuotas?",
+      "chipStatusStarted": "Pradėta",
+      "chipStatusDone": "Atlikta",
+      "chipStatusBlocked": "Užblokuota",
       "professionAsk": "Kurią profesiją ar amatą turite omenyje?",
       "crossSpace": {
         "personal": {

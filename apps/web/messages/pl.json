@@ -14722,6 +14722,9 @@
       "readFailed": "Nie udało się tego teraz odczytać — błąd po naszej stronie. Nic nie zmieniono. Proszę spróbować za chwilę.",
       "taskStatusAsk": "Jaki stan ustawić dla zadania: rozpoczęte, wykonane czy zablokowane?",
       "stageStatusAsk": "Jaki stan ustawić dla etapu: rozpoczęty, wykonany czy zablokowany?",
+      "chipStatusStarted": "Rozpoczęte",
+      "chipStatusDone": "Wykonane",
+      "chipStatusBlocked": "Zablokowane",
       "professionAsk": "O jaki zawód lub fach chodzi?",
       "crossSpace": {
         "personal": {
