@@ -215,6 +215,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261110140000_",
       // 2026-11-10 partner registration Slice 1: company takeover invitation, two-operator decision, link (RED draft #3211, needs-human-gate, NOT applied).
       "20261110190000_",
+      // 20261111230000 (offer_notification_types_v1: B2B offer notification types, strict CHECK superset, no grant; draft #3227, NOT applied).
+      "20261111230000_",
       // 20261112213100 (team_offer_counterpart_v1: gated SECURITY DEFINER recipient of a team offer; RED draft, needs-human-gate, NOT applied).
       "20261112213100_",
       // 2026-11-13 owner P0 invitation delivery reliability: codes-only send diagnostics, retry /
