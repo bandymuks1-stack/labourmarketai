@@ -26,6 +26,7 @@ import { RecognisedByBlock } from "@/components/app/recognised-by-block";
 import { CapabilityProfileSection } from "@/components/app/capability-profile-section";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { HashTabRedirect } from "@/components/app/hash-tab-redirect";
+import { IntakeDraftOpensEditor } from "@/components/app/intake-draft-opens-editor";
 import { SkillClarifySection } from "@/components/app/skill-clarify-section";
 import { listProfileSkillClaims } from "@/lib/profile/profile-skill-claims";
 import { type CvSkill } from "@/components/app/cv-preview";
@@ -1150,6 +1151,9 @@ export default async function ProfilePage({
         })}
       </nav>
       <HashTabRedirect tabByAnchor={PROFILE_TAB_BY_ANCHOR} current={tab} />
+      {tab === "overview" && savedProfileText.trim().length === 0 ? (
+        <IntakeDraftOpensEditor viewerEmail={user.email ?? null} />
+      ) : null}
 
       {/* NO QUICK-NAV STRIP HERE ANY MORE (worker mobile IA 2026-09-13 §4:
           PageQuickNav "REMOVE (worker)"; owner P0/P1 §17). The strip existed

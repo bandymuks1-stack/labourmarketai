@@ -69,6 +69,17 @@ describe("profile — one block per screen", () => {
   });
 });
 
+describe("a worker's pre-sign-up intake reaches the composer's block", () => {
+  it("the overview hands a waiting intake draft to ?tab=edit, only without own profile text", () => {
+    expect(PAGE).toContain('{tab === "overview" && savedProfileText.trim().length === 0 ? (');
+    expect(PAGE).toContain("<IntakeDraftOpensEditor viewerEmail={user.email ?? null} />");
+    const c = readFileSync(join(WEB, "components/app/intake-draft-opens-editor.tsx"), "utf8");
+    expect(c).toContain("if (!readWorkerIntakeDraftFor(viewerEmail)) return;");
+    expect(c).toContain("router.replace(`${pathname}?tab=edit#profile-edit`);");
+    expect(c).not.toContain("clearWorkerIntakeDraft");
+  });
+});
+
 describe("anchors written before the split reach their tab", () => {
   const map = { "profile-edit": "edit", "cv-availability": "details", capabilities: "skills" };
 
