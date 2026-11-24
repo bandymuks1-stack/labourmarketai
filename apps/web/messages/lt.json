@@ -209,7 +209,6 @@
     "formLabelLabel": "Vieta",
     "formLabelPlaceholder": "Miestas ar regionas",
     "formPriceLabel": "Kaina",
-    "formPricePlaceholder": "pvz. 450 €/mėn arba pagal susitarimą",
     "priceHint": "Kaina neprivaloma ir aprašomoji. Mokėjimai čia nevykdomi.",
     "save": "Išsaugoti",
     "saving": "Saugoma…",
@@ -2976,8 +2975,7 @@
           "label": "Kiek darbuotojų reikia"
         },
         "salary": {
-          "label": "Atlyginimas (€)",
-          "placeholder": "Pvz., 2200"
+          "label": "Atlyginimas (€)"
         },
         "countries": {
           "label": "Pageidaujamos šalys (ISO kodai)",
@@ -4394,7 +4392,7 @@
           },
           "education": {
             "title": "Atstovauju mokymo įstaigai",
-            "desc": "Kvieskite besimokančiuosius, matykite jų dalyvavimą ir junkite juos prie praktikų ir darbų."
+            "desc": "Kvieskite besimokančiuosius, vykdykite programas ir sekite jų praktiką bei rezultatus."
           }
         },
         "heading": "Pradedate kaip asmuo ar įmonė?",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Valandų vienam darbuotojui",
               "totalHours": "Iš viso valandų (nebūtina, pakeičia)",
               "rate": "Valandinis / dienos tarifas",
-              "ratePlaceholder": "pvz., 20",
               "country": "Šalis / vieta",
               "materials": "Medžiagos",
               "equipment": "Įranga / įrankiai",
@@ -7176,7 +7173,6 @@
       "countryPlaceholder": "pvz. LT",
       "remoteLabel": "Gali būti atliekama nuotoliniu būdu",
       "rateLabel": "Įkainis (nebūtina)",
-      "ratePlaceholder": "pvz. apie 25 EUR/val., derinama",
       "rateHint": "Tik laisvas tekstas — pavyzdžiui, orientacinis valandinis įkainis."
     },
     "save": "Išsaugoti",
@@ -15982,7 +15978,6 @@
     },
     "v3": {
       "lead": "Darbuotojams, darbdaviams ir paslaugų teikėjams – visų profesijų ir sektorių. Registracija ir pagrindinis poreikio skelbimas nemokami.",
-      "moreChoices": "Daugiau pasirinkimų",
       "or": "arba aprašykite savo žodžiais",
       "needFree": "Užklausą galite pateikti be registracijos. Pateikimas nemokamas; paslaugų sąlygos ir kaina derinamos atskirai.",
       "market": {
@@ -19403,6 +19398,19 @@
       "period": "Įrašyta",
       "basis": "Iš {entries} žurnalo įrašų, kuriuos žmonės įrašė šioje organizacijoje. Skaičiuojama atskirai nuo aukščiau esančios importuotos istorijos ir niekada su ja nesumuojama.",
       "unavailable": "Šiuo metu nepavyko perskaityti šioje organizacijoje žurnale įrašyto darbo."
+    },
+    "forClient": {
+      "title": "Subrangovų atlikti darbai",
+      "confirmed": "Patvirtinti įrašai",
+      "unconfirmed": "Nepatvirtinti įrašai",
+      "periodHours": "{hours} val. nurodyta kaip laikotarpio suma, nepridėta prie atskirų dienų.",
+      "basis": "Iš {count, plural, one {# įrašo} few {# įrašų} other {# įrašų}} jūsų subrangovų apskaitoje. Skaičiuojama atskirai nuo jūsų pačių darbų.",
+      "unreadable": "Partnerių apskaitoje užfiksuotų darbų šiuo metu nepavyko perskaityti. Tai nereiškia, kad jų nėra."
+    },
+    "clients": {
+      "title": "Užsakovai",
+      "unnamed": "Užsakovo organizacija",
+      "records": "{count, plural, one {# įrašas} few {# įrašai} other {# įrašų}}"
     }
   },
   "workPlan": {
@@ -19647,7 +19655,8 @@
       "heading": "Jūsų pasiūlymai",
       "none": "Pasiūlymų dar nėra.",
       "withdraw": "Atšaukti",
-      "message": "Rašyti užsakovui"
+      "message": "Rašyti užsakovui",
+      "orgNext": "Užsakovas iš esmės sutiko (tai nėra sutartis). Pradėti darbus pagal įmonės pasiūlymą per platformą dar negalima: detales ir dirbsiančius žmones suderinkite pokalbyje."
     },
     "status": {
       "offered": "Laukiama atsakymo",
@@ -19748,7 +19757,7 @@
       "message": "Rašyti komandai",
       "messageCompany": "Rašyti įmonei",
       "kindOrganization": "Įmonės pasiūlymas",
-      "orgNext": "Sutarta iš esmės (ne sutartis). Detales ir dirbsiančius žmones suderinkite pokalbyje."
+      "orgNext": "Iš esmės sutarta (tai nėra sutartis). Pradėti darbus pagal įmonės pasiūlymą per platformą dar negalima: detales ir dirbsiančius žmones suderinkite pokalbyje."
     },
     "orgHeading": "Pasiūlyti savo įmonę atviram poreikiui",
     "orgIntro": "Pasiūlykite pačią įmonę — savo žmones, paslaugą ar kaip subrangovą — vienam atviram poreikiui. Brigados kurti nereikia.",
@@ -19770,7 +19779,6 @@
       },
       "capacity": "Žmonių",
       "rate": "Įkainis",
-      "ratePlaceholder": "pvz. 32 €/val. arba fiksuota kaina",
       "period": "Laikotarpis",
       "start": "Pradžia",
       "end": "Pabaiga",

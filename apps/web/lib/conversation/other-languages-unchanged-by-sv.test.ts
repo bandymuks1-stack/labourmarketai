@@ -278,9 +278,49 @@ const WORD_NUMBER_HEADCOUNT: readonly Intended[] = [
   { sentence: "Нужны 12 монтажников строительных лесов в Роттердаме с 5 октября.", reader: "route", now: ["need-workers", 14] },
   { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "route", now: ["need-workers", 4] },
   { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "turn", now: "new-goal" },
+  // "ludzi" counts people in the need form's digit reader too, and the value
+  // reader counts "30 рабочих" as the headcount it is.
+  { sentence: "Mamy budowę w Umeå, potrzeba 3 ludzi", reader: "headcount", now: { total: 3, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Mamy budowę w Umeå, potrzeba 3 ludzi", reader: "need", now: [null, null, 3, null, null] },
+  { sentence: "Мы кадровое агентство, можем предложить 30 рабочих", reader: "value", now: [null, null, 30, null, null, null, null, null] },
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...WORD_NUMBER_HEADCOUNT];
+/**
+ * (i) MARKETS, POLISH TRADES AND THE DAY BEFORE YESTERDAY, IN EVERY LANGUAGE
+ * (entity-recognition audit 2026-11-22, entity-recognition-7-locales.test.ts).
+ *
+ * A market named in German, Dutch or Polish ("in Schweden", "in Zweden", "w
+ * Szwecji") resolved no country: the needles held only the LT/EN/RU names.
+ * The Polish need verbs had no Polish trade to bind to, so "Potrzebuję 4
+ * murarzy" was `unknown` and "Szukamy spawacza, 40 godzin tygodniowo" (we are
+ * hiring a welder) was read as a work log. "Eergisteren" / "позавчера" now
+ * count as a day for the day + duration rule, as "užvakar" already did.
+ */
+const ENTITIES_IN_EVERY_LANGUAGE: readonly Intended[] = [
+  { sentence: "Arbeit in Schweden", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Werk in Zweden", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Praca w Szwecji", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Potrzebuję 4 murarzy w Malmö", reader: "route", now: ["need-workers", 6] },
+  { sentence: "Potrzebuję 4 murarzy w Malmö", reader: "turn", now: "new-goal" },
+  { sentence: "Szukamy spawacza, 40 godzin tygodniowo", reader: "route", now: ["need-workers", 6] },
+  { sentence: "Szukamy spawacza, 40 godzin tygodniowo", reader: "turn", now: "new-goal" },
+  { sentence: "Eergisteren 8 uur gewerkt.", reader: "route", now: ["log-work", 7] },
+  { sentence: "Позавчера работал 8 часов.", reader: "route", now: ["log-work", 7] },
+];
+
+/**
+ * (j) A WRITTEN NUMBER IS A DURATION IN EVERY LANGUAGE (DUPLICATION_AUDIT AI-9).
+ *
+ * The journal's duration reader knew only Lithuanian number words, so "два
+ * дня" carried no time while "2 дня" carried two days. It now reads written
+ * numbers through the shared lexicon (`word-numbers.ts`) and the same digit
+ * readers.
+ */
+const WRITTEN_NUMBER_DURATIONS: readonly Intended[] = [
+  { sentence: "свободен два дня", reader: "journalTime", now: { value: 2, unitSlug: "days" } },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...WORD_NUMBER_HEADCOUNT, ...ENTITIES_IN_EVERY_LANGUAGE, ...WRITTEN_NUMBER_DURATIONS];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).

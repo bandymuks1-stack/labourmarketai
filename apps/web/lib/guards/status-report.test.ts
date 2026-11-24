@@ -395,6 +395,15 @@ describe("Report synchronisation — one latest confirmed state, never overwritt
     expect(r2.ledger.walks["agency-chain|phone-375"]).toMatchObject({ run: 3, result: "failure" });
   });
 
+  it("reads the tablet and wide-desktop screens, and never lets a dark-scheme run stand in for the light one", () => {
+    expect(parseWalkTitle("prod-qa-walk ux-metrics tablet-768")).toEqual({ spec: "ux-metrics", device: "tablet-768" });
+    expect(parseWalkTitle("prod-qa-walk ux-metrics desktop-1440 dark")).toEqual({ spec: "ux-metrics", device: "desktop-1440" });
+    const ledger = { schema: 1, walks: { "ux-metrics|phone": { spec: "ux-metrics", device: "phone", run: 2, result: "success", build: "d", at: "2026-11-15T17:55:58Z" } } };
+    const r = mergeWalkLedger(ledger, [walk(3, "prod-qa-walk ux-metrics phone dark", "failure", "2026-11-16T08:00:00Z")]);
+    expect(r.ledger.walks["ux-metrics|phone"]).toMatchObject({ run: 2, result: "success" });
+    expect(r.unknownDevice).toEqual([]);
+  });
+
   it("does not guess a screen, skips unfinished or cancelled runs, and flags the same run with a different result", () => {
     const r = mergeWalkLedger({ schema: 1, walks: {} }, [
       walk(1, "prod-qa-walk agency-chain", "success", "2026-11-15T10:00:00Z"),

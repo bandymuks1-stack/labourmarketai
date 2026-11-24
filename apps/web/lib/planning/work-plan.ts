@@ -174,7 +174,9 @@ export async function readWorkPlanItems(
   return { state: { status: "ok", count: items.length }, items };
 }
 
-export type PlannableWorker = { readonly workerId: string; readonly name: string };
+/** `name` is null when the person has no name on record; the page words it
+ *  ("Person without a name"), never an id fragment (design audit 2026-11-22). */
+export type PlannableWorker = { readonly workerId: string; readonly name: string | null };
 
 /** Relationships `work_plan_worker_in_scope_v1` accepts as an engagement
  *  (migration 20261007140000) — the picker offers exactly those people. */
@@ -233,9 +235,12 @@ export async function listPlannableWorkers(
         name:
           r.workers?.profiles?.full_name?.trim() ||
           r.workers?.display_name?.trim() ||
-          r.worker_id.slice(0, 8),
+          null,
       });
     }
   }
-  return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
+  // Named people first, alphabetically; people without a name after them.
+  return [...out.values()].sort((a, b) =>
+    a.name === null ? (b.name === null ? 0 : 1) : b.name === null ? -1 : a.name.localeCompare(b.name),
+  );
 }

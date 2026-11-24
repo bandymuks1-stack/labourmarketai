@@ -142,6 +142,25 @@ export function AboutLifecycle({ label, steps, note }: { label: string; steps: r
   );
 }
 
+/** A section body folded behind one label on the about page (coordinator
+ *  decision 2026-11-22: fold long marketing copy; nothing deleted). Without a
+ *  label the body renders as before. */
+function AboutFold({ label, children }: { label?: string; children: React.ReactNode }) {
+  if (!label) return <>{children}</>;
+  return (
+    <details className="group" data-testid="about-fold">
+      <summary className="inline-flex min-h-11 cursor-pointer list-none items-center gap-1.5 text-sm font-medium text-brand-blue [&::-webkit-details-marker]:hidden">
+        {label}
+        <span aria-hidden className="transition-transform group-open:rotate-180 motion-reduce:transition-none">
+          ▾
+        </span>
+      </summary>
+      <div className="mt-4 flex flex-col gap-5">{children}</div>
+    </details>
+  );
+}
+
+
 /** A labelled audience block: a lead, a flow of steps and a short list. */
 export function AboutAudience({
   id,
@@ -152,7 +171,10 @@ export function AboutAudience({
   pointsLabel,
   points,
   tone,
+  moreLabel,
 }: {
+  /** Folds the section body behind this label (the heading and lead stay in view). */
+  moreLabel?: string;
   id: string;
   heading: string;
   lead: string;
@@ -169,6 +191,7 @@ export function AboutAudience({
         {heading}
       </h2>
       <p className="max-w-prose text-base leading-relaxed text-text-secondary">{lead}</p>
+      <AboutFold label={moreLabel}>
       {flow.length > 0 ? (
         <ol className="flex flex-wrap items-center gap-x-1 gap-y-2">
           {flow.map((step, i) => (
@@ -205,6 +228,7 @@ export function AboutAudience({
           ))}
         </ul>
       </div>
+      </AboutFold>
     </section>
   );
 }
@@ -220,7 +244,10 @@ export function AboutEvidenceGraph({
   projectionsLabel,
   projections,
   note,
+  moreLabel,
 }: {
+  /** Folds the section body behind this label (the heading and lead stay in view). */
+  moreLabel?: string;
   heading: string;
   lead: string;
   chainLabel: string;
@@ -237,6 +264,7 @@ export function AboutEvidenceGraph({
         </h2>
         <p className="max-w-prose text-base leading-relaxed text-text-secondary">{lead}</p>
       </div>
+      <AboutFold label={moreLabel}>
       <div className="grid gap-6 rounded-md border border-border-subtle bg-surface-1/60 p-5 sm:p-8 lg:grid-cols-[1.1fr_auto_1fr] lg:items-center">
         <div className="flex flex-col gap-3">
           <p className="font-mono text-meta uppercase tracking-label text-text-muted">{chainLabel}</p>
@@ -285,6 +313,7 @@ export function AboutEvidenceGraph({
       <p className="max-w-prose rounded-md border border-brand-blue/30 bg-brand-blue/5 px-3 py-2 text-sm leading-relaxed text-text-secondary">
         {note}
       </p>
+      </AboutFold>
     </section>
   );
 }
@@ -351,7 +380,10 @@ export function AboutBeforeAfter({
   platformPoints,
   schematicNote,
   conclusion,
+  moreLabel,
 }: {
+  /** Folds the section body behind this label (the heading and lead stay in view). */
+  moreLabel?: string;
   heading: string;
   lead: string;
   stages: readonly string[];
@@ -372,6 +404,7 @@ export function AboutBeforeAfter({
         </h2>
         <p className="max-w-prose text-base leading-relaxed text-text-secondary">{lead}</p>
       </div>
+      <AboutFold label={moreLabel}>
       <div className="grid gap-4 md:grid-cols-2">
         <ValuePanel label={boardLabel} heights={boardHeights} stages={stages} points={boardPoints} tone="amber" />
         <ValuePanel label={platformLabel} heights={platformHeights} stages={stages} points={platformPoints} tone="success" strong />
@@ -380,6 +413,7 @@ export function AboutBeforeAfter({
       <p className="max-w-prose font-display text-lg font-semibold leading-snug tracking-tightest text-text-primary">
         {conclusion}
       </p>
+      </AboutFold>
     </section>
   );
 }
@@ -392,7 +426,10 @@ export function AboutTrustTiers({
   tiers,
   noLabel,
   no,
+  moreLabel,
 }: {
+  /** Folds the section body behind this label (the heading and lead stay in view). */
+  moreLabel?: string;
   heading: string;
   lead: string;
   tiers: readonly { term: string; meaning: string; example: string }[];
@@ -412,6 +449,7 @@ export function AboutTrustTiers({
         </h2>
         <p className="max-w-prose text-base leading-relaxed text-text-secondary">{lead}</p>
       </div>
+      <AboutFold label={moreLabel}>
       <dl className="grid gap-4 md:grid-cols-3">
         {tiers.map((tier, i) => (
           <div key={tier.term} className={`flex flex-col gap-2 rounded-md border-2 p-4 ${look[i]?.box ?? look[0].box}`}>
@@ -436,6 +474,7 @@ export function AboutTrustTiers({
           ))}
         </ul>
       </div>
+      </AboutFold>
     </section>
   );
 }
@@ -470,7 +509,10 @@ export function AboutPrivacySplit({
   publicNotLabel,
   publicNot,
   control,
+  moreLabel,
 }: {
+  /** Folds the section body behind this label (the heading and lead stay in view). */
+  moreLabel?: string;
   heading: string;
   lead: string;
   privateLabel: string;
@@ -487,6 +529,7 @@ export function AboutPrivacySplit({
         </h2>
         <p className="max-w-prose text-base leading-relaxed text-text-secondary">{lead}</p>
       </div>
+      <AboutFold label={moreLabel}>
       <div className="grid gap-4 md:grid-cols-2">
         <div className="flex flex-col gap-3 rounded-md border border-brand-cyan/40 bg-brand-cyan/5 p-5">
           <p className="flex items-center gap-2 font-display text-lg font-bold tracking-tightest text-text-primary">
@@ -515,6 +558,7 @@ export function AboutPrivacySplit({
         </div>
       </div>
       <p className="max-w-prose text-sm leading-relaxed text-text-secondary">{control}</p>
+      </AboutFold>
     </section>
   );
 }

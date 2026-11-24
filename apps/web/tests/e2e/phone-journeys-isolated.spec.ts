@@ -9,6 +9,7 @@ import {
   PASSWORD,
   publishNeed,
   SB_ANON,
+  SB_SERVICE,
   SB_URL,
   setUpCompany,
   signIn,
@@ -619,6 +620,35 @@ for (const phone of PHONES) {
       expect(await own.json(), "another company's own session reads no row of this engagement").toEqual([]);
       const heardHere = [...(heard.get(od.page) ?? [])].filter((n) => n.startsWith("pageerror"));
       expect(heardHere, "no page error for the outsider").toEqual([]);
+    });
+    test(`M-6c (${phone.name}). the experience records opened by their address stay open on the phone`, async ({ browser }) => {
+      // Twin of production profile-cv-history P-15, which failed at 375 × 667 on build 386f11a0:
+      // the result was rendered but hidden. A `?result=` address opens the phone's sheet by itself;
+      // the person asked to SEE it, so it must still be on screen once the page has settled.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const main = page.getByRole("main");
+      const shown = main
+        .getByTestId("experiences-result")
+        .or(main.getByTestId("experiences-result-unavailable").first())
+        .or(main.getByTestId("experiences-result-error"))
+        .first();
+      const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+      // Three loads in a row, each one the way production P-15 met it: as soon as
+      // the document is there, a "collapsed" chevron is tapped once. Before the
+      // fix the sheet opened one effect after mount, and that tap could toggle
+      // it back shut, leaving the result rendered inside a closed sheet.
+      for (const pass of [1, 2, 3]) {
+        await page.goto(`${BASE}/en/dashboard?result=experiences`, { waitUntil: "domcontentloaded" });
+        await toggle.waitFor({ state: "visible", timeout: 60_000 });
+        if ((await toggle.getAttribute("aria-expanded")) === "false") await toggle.click();
+        await expect(shown, `load ${pass}: the experience records are on screen`).toBeVisible({ timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+        await page.waitForTimeout(3_000);
+        const state = await toggle.getAttribute("aria-expanded");
+        await expect(shown, `load ${pass}: still on screen once the page settled (sheet aria-expanded=${state})`).toBeVisible();
+        await expect(main.getByTestId("experiences-result-error"), `load ${pass}: the records loaded`).toHaveCount(0);
+      }
+      await done();
     });
     test(`M-7 (${phone.name}). the worker's work journal fits the phone`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
@@ -1819,6 +1849,92 @@ test.describe("popups on a short phone screen", () => {
       return el.getBoundingClientRect().bottom;
     });
     expect(bottom).toBeLessThanOrEqual(320);
+  });
+});
+
+// ── THE ORGANISATION DOORS ARE ONE ROW ON A PHONE (2026-11-22) ──────────────
+// Coordinator decision on the owner's orders of 2026-11-21/22: horizontal
+// card rows with the next card peeking. Wrapped, 8–9 doors took three or four
+// rows (150–200 px) above every organisation page (UX gap SH-6).
+test.describe("organisation doors on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("doors-agency");
+
+  test("one row that scrolls sideways, the next door peeking, every door reachable", async ({ browser }) => {
+    await newOrganisation(browser, OWNER, "agency", `Synthetic Doors Owner ${RUN}`, `Synthetic Doors Staffing ${RUN}`);
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company`);
+    const nav = page.getByTestId("organization-doors");
+    await expect(nav).toBeVisible({ timeout: 60_000 });
+    const row = await nav.evaluate((el) => {
+      const doors = [...el.querySelectorAll<HTMLElement>('[data-testid^="organization-door-"]')];
+      const r = el.getBoundingClientRect();
+      return {
+        count: doors.length,
+        tops: new Set(doors.map((d) => Math.round(d.getBoundingClientRect().top))).size,
+        height: r.height,
+        scrolls: el.scrollWidth > el.clientWidth,
+        peek: doors.some((d) => { const b = d.getBoundingClientRect(); return b.left < r.right - 8 && b.right > r.right + 2; }),
+        minHeight: Math.min(...doors.map((d) => d.getBoundingClientRect().height)),
+      };
+    });
+    expect(row.count, "the doors render").toBeGreaterThan(5);
+    expect(row.tops, "all doors sit in one row").toBe(1);
+    expect(row.height, "the row is one door high").toBeLessThanOrEqual(60);
+    expect(row.scrolls, "the row scrolls sideways inside itself").toBe(true);
+    expect(row.peek, "the next door shows at the edge").toBe(true);
+    expect(row.minHeight, "doors keep the 44 px floor").toBeGreaterThanOrEqual(43.5);
+    await fitsTheScreen(page, "the organisation doors row");
+    const last = nav.locator('[data-testid^="organization-door-"]').last();
+    const href = await last.getAttribute("href");
+    await last.scrollIntoViewIfNeeded();
+    await last.tap();
+    await page.waitForURL((u) => !!href && u.pathname === href, { timeout: 30_000 });
+    await done();
+  });
+});
+
+// ── THE PEOPLE PAGE'S READINESS TABLE FOLDS AND FITS (2026-11-22) ────────────
+// Coordinator decision 2026-11-22, item 3: the readiness table repeated the
+// people listed just above (a second 600 px list at 390 px) and its third
+// column was cut. It now folds behind its title and fits the phone when open.
+test.describe("the people page's readiness signals on a phone", () => {
+  test.describe.configure({ mode: "serial" });
+  const phone = PHONES.find((p) => p.viewport.width === 390) ?? PHONES[0]!;
+  const OWNER = email("readiness-company");
+
+  test("folded behind its title; opened, no column runs past the card", async ({ browser }) => {
+    const org = await newOrganisation(browser, OWNER, "hire", `Synthetic Readiness Owner ${RUN}`, `Synthetic Readiness Co ${RUN}`);
+    // Three synthetic people on the roster (local stack only): the table shows when the roster has people.
+    for (let i = 1; i <= 3; i += 1) {
+      const res = await fetch(`${SB_URL}/auth/v1/admin/users`, {
+        method: "POST",
+        headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email(`readiness-person${i}`), password: PASSWORD, email_confirm: true }),
+      });
+      expect(res.ok, "the synthetic person is created on the local stack").toBe(true);
+    }
+    const company = sql<{ id: string }>(`select legacy_company_id as id from public.organizations where id = ${lit(org.orgId)}`)[0]!.id;
+    sqlExec(
+      `insert into public.company_workers (company_id, worker_id, status)
+       select ${lit(company)}, w.id, 'active' from public.workers w join auth.users u on u.id = w.profile_id
+       where u.email like ${lit(`phone.readiness-person%.${RUN}@local.test`)}`,
+    );
+    const { page, done } = await signedInOnPhone(browser, phone, OWNER);
+    await page.goto(`${BASE}/en/dashboard/company/people`);
+    const card = page.getByTestId("worker-readiness-summary");
+    await expect(card).toBeVisible({ timeout: 60_000 });
+    await expect(card.getByTestId("worker-readiness-row").first()).toBeHidden();
+    await card.getByTestId("worker-readiness-fold").locator(":scope > summary").tap();
+    await expect(card.getByTestId("worker-readiness-row").first()).toBeVisible();
+    const fit = await card.evaluate((el) => {
+      const table = el.querySelector("table")!;
+      return { table: table.getBoundingClientRect().right, card: el.getBoundingClientRect().right };
+    });
+    expect(fit.table, "the table ends inside the card on a 390 px phone").toBeLessThanOrEqual(fit.card + 1);
+    await fitsTheScreen(page, "the people page with the readiness signals open");
+    await done();
   });
 });
 
