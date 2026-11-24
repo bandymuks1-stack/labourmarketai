@@ -68,7 +68,6 @@ export async function GoalNavigation({
         id: intent.id,
         href: goalHref(intent.id),
         label: t(`intents.${intent.id}.short`),
-        description: t(`intents.${intent.id}.description`),
         title: t(`intents.${intent.id}.title`),
         iconKey: GOAL_ICONS[intent.id],
         hasCatalogue: CATALOGUE_GOALS.has(intent.id),
@@ -102,7 +101,6 @@ export async function GoalNavigation({
       sectors={usedSectors.map((key) => ({ key, label: sectorLabel.get(key) ?? key }))}
       labels={{
         heading: t("nav.heading"),
-        swipe: t("nav.swipe"),
         previous: tNav("previous"),
         next: tNav("next"),
         close: t("nav.close"),

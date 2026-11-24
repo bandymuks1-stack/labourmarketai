@@ -16,12 +16,11 @@ import { Link } from "@/lib/i18n/navigation";
  *   LandingHow          ONE compact explanation with links to the detail.
  */
 
-/** Folds the request block on a narrow screen, before first paint. It is sent
- *  open: on a wide screen the three services are visible with no tap, and
- *  with no script it simply stays open. `lg` (1024px) is where the block
- *  moves beside the sentence field. */
+/** The request block is closed until the visitor asks for it (decisions 0032
+ *  and 0034): the first screen shows its title only. A link to `#request`
+ *  opens it before first paint. */
 const NEED_FOLD_SCRIPT =
-  '(function(){try{var d=document.getElementById("request");if(d&&window.matchMedia("(max-width: 1023px)").matches&&location.hash.indexOf("#request")!==0)d.removeAttribute("open")}catch(e){}})()';
+  '(function(){try{var d=document.getElementById("request");if(d&&location.hash.indexOf("#request")===0)d.setAttribute("open","")}catch(e){}})()';
 
 export async function LandingNeedPath({ locale }: { locale: string }) {
   const [t, tV3] = await Promise.all([
@@ -33,7 +32,6 @@ export async function LandingNeedPath({ locale }: { locale: string }) {
       <details
         id="request"
         data-testid="landing-need-path"
-        open
         suppressHydrationWarning
         className="group min-w-0 scroll-mt-24 rounded-2xl border border-ink-600 bg-ink-900/60"
       >
@@ -44,19 +42,7 @@ export async function LandingNeedPath({ locale }: { locale: string }) {
           <h2 id="request-doors-title" className="col-start-1 font-display text-lg font-semibold text-text-primary">
             {t("title")}
           </h2>
-          <span
-            className="col-start-1 mt-1 block text-sm leading-relaxed text-text-secondary"
-            data-testid="request-doors-promise"
-          >
-            {t("promise")}
-          </span>
-          <span
-            className="col-start-1 mt-1 block text-xs leading-relaxed text-text-muted"
-            data-testid="request-doors-free"
-          >
-            {tV3("needFree")}
-          </span>
-          <span className="col-start-2 row-span-3 row-start-1 inline-flex size-11 shrink-0 items-center justify-center self-center rounded-full border border-ink-500 text-text-secondary">
+          <span className="col-start-2 row-start-1 inline-flex size-11 shrink-0 items-center justify-center self-center rounded-full border border-ink-500 text-text-secondary">
             <ChevronDown
               aria-hidden
               className="size-5 transition-transform group-open:rotate-180 motion-reduce:transition-none"
@@ -64,6 +50,14 @@ export async function LandingNeedPath({ locale }: { locale: string }) {
           </span>
         </summary>
         <div className="px-4 pb-4 sm:px-5 sm:pb-5">
+          {/* What happens to a request, and what it costs: said once, where
+              the visitor is about to send one. */}
+          <p className="text-sm leading-relaxed text-text-secondary" data-testid="request-doors-promise">
+            {t("promise")}
+          </p>
+          <p className="mb-3 mt-1 text-xs leading-relaxed text-text-muted" data-testid="request-doors-free">
+            {tV3("needFree")}
+          </p>
           <LandingRequestDoors locale={locale} embedded />
         </div>
       </details>
