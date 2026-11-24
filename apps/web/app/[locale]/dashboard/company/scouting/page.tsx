@@ -704,15 +704,14 @@ export default async function CompanyScoutingPage({
               </Link>
             ) : null}
           </div>
-          {/* PHONE: one row that scrolls sideways inside itself, so a long
-              facet list never pushes the candidates below the fold and the
-              page itself never scrolls sideways. From sm up the chips wrap. */}
-          <div className="-m-1 flex gap-2 overflow-x-auto p-1 sm:m-0 sm:flex-wrap sm:overflow-visible sm:p-0">
+          {/* The chips wrap at every width, and a long label wraps inside its
+              chip (max-w-full), so no filter is ever cut off on a phone. */}
+          <div className="flex flex-wrap gap-2">
             <Link
               href={filterHref({ availableNow: !result.filters.availableNow })}
               data-testid="scout-filter-available"
               aria-current={result.filters.availableNow ? "true" : undefined}
-              className={`${chipLinkClassName(result.filters.availableNow)} shrink-0 whitespace-nowrap`}
+              className={`${chipLinkClassName(result.filters.availableNow)} max-w-full`}
             >
               {result.filters.availableNow ? (
                 <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
@@ -727,7 +726,7 @@ export default async function CompanyScoutingPage({
                 })}
                 data-testid={`scout-filter-country-${cc}`}
                 aria-current={result.filters.country === cc ? "true" : undefined}
-                className={`${chipLinkClassName(result.filters.country === cc)} shrink-0 whitespace-nowrap`}
+                className={`${chipLinkClassName(result.filters.country === cc)} max-w-full`}
               >
                 {result.filters.country === cc ? (
                   <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
@@ -743,7 +742,7 @@ export default async function CompanyScoutingPage({
                 })}
                 data-testid={`scout-filter-skill-${s}`}
                 aria-current={result.filters.skill === s ? "true" : undefined}
-                className={`${chipLinkClassName(result.filters.skill === s)} shrink-0 whitespace-nowrap`}
+                className={`${chipLinkClassName(result.filters.skill === s)} max-w-full`}
               >
                 {result.filters.skill === s ? (
                   <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />

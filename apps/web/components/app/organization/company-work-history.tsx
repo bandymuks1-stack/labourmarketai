@@ -580,7 +580,7 @@ export async function CompanyPlaceHistory({
                     that cannot open. */}
                 {load.ownPeople[pp.id] && cardsOpen ? (
                   <Link
-                    href={`/dashboard/company/people/${pp.id}` as "/dashboard"}
+                    href={`/dashboard/company/people/${pp.id}${organizationId ? `?org=${encodeURIComponent(organizationId)}` : ""}` as "/dashboard"}
                     data-testid="company-place-person-history-link"
                     data-linked={load.linkedWorkers[pp.id] ? "confirmed" : "no"}
                   >
