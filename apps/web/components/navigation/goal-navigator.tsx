@@ -25,7 +25,6 @@ export type NavigatorProfession = RailCard & { readonly sector: string };
 
 export type NavigatorLabels = {
   readonly heading: string;
-  readonly swipe: string;
   readonly previous: string;
   readonly next: string;
   readonly close: string;
@@ -310,7 +309,6 @@ export function GoalNavigator({
         cards={goals}
         activeId={activeId}
         onSelect={select}
-        swipeHint={labels.swipe}
         prevLabel={labels.previous}
         nextLabel={labels.next}
       />
@@ -368,7 +366,6 @@ export function GoalNavigator({
                 label={labels.functions}
                 testId="function-rail-early"
                 cards={goal.functions}
-                swipeHint={labels.swipe}
                 prevLabel={labels.previous}
                 nextLabel={labels.next}
               />
@@ -415,7 +412,6 @@ export function GoalNavigator({
               label={labels.functions}
               testId="function-rail"
               cards={active.functions}
-              swipeHint={labels.swipe}
               prevLabel={labels.previous}
               nextLabel={labels.next}
             />
@@ -475,7 +471,6 @@ export function GoalNavigator({
                   label={labels.professions}
                   testId="profession-rail"
                   cards={shown}
-                  swipeHint={labels.swipe}
                   prevLabel={labels.previous}
                   nextLabel={labels.next}
                 />
