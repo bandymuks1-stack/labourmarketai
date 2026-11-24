@@ -5,7 +5,8 @@ import { describe, expect, it } from "vitest";
 /**
  * ONE PAGE PATTERN (owner order 2026-10-25, phase 3 of the one navigation
  * system): every signed-in area shares the header, the page title and the
- * back link — and no navigation strip scrolls sideways.
+ * back link — and no navigation strip scrolls sideways, except the one rail,
+ * CardRail (the organisation doors since spec N7).
  *
  * Measured before this change on a local production build at 390px: the
  * organization doors on /dashboard/projects, /company and /company/people
@@ -34,23 +35,23 @@ describe("navigation strips wrap instead of scrolling sideways", () => {
 });
 
 /**
- * THE ORGANISATION DOORS ARE ONE ROW ON A PHONE (coordinator decision of
- * 2026-11-22 on the owner's orders of 2026-11-21/22: horizontal card rows with
- * the next card peeking on phones). Wrapped, 8–9 doors took three or four rows
- * (150–200 px) above every organisation page. This replaces, for this strip
- * only, the 2026-10-25 rule above; from `sm` the doors still wrap.
+ * THE ORGANISATION DOORS ARE ON THE ONE RAIL (spec N7, Option A of
+ * docs/design/CAROUSEL_NAVIGATION_SPEC.md §8.2). The coordinator decision of
+ * 2026-11-22 made them one row with the next door peeking on phones; that row
+ * was a second, unsnapped sideways strip. They are now drawn by CardRail, the
+ * one rail, so the doors build no scroller of their own.
  */
-describe("organisation doors: one sideways row on a phone, wrapped from sm", () => {
+describe("organisation doors: drawn on the one rail", () => {
   const src = read("components/app/organization/organization-doors.tsx");
-  it("scrolls sideways below sm and wraps from sm (no snap: the one rail is CardRail)", () => {
-    expect(src).toMatch(/max-sm:overflow-x-auto/);
-    expect(src).toMatch(/max-sm:flex-nowrap/);
+  it("renders CardRail and builds no strip of its own", () => {
+    expect(src).toMatch(/<CardRail\b/);
+    expect(src).toMatch(/testId="organization-doors"/);
+    expect(src).not.toMatch(/overflow-x-(auto|scroll)/);
     expect(src).not.toMatch(/snap-x/);
-    expect(src).toMatch(/sm:flex-wrap/);
   });
-  it("keeps 44 px door targets and brings the current door into view", () => {
-    expect(src).toMatch(/min-h-11 shrink-0/);
-    expect(src).toMatch(/aria-current="page"/);
+  it("brings the current door into view inside the rail's track", () => {
+    expect(src).toMatch(/\[data-rail-part="track"\]/);
+    expect(src).toMatch(/\[aria-current="true"\]/);
   });
 });
 

@@ -99,8 +99,24 @@ export const AREA_ICONS = {
   projects: "folder",
 } as const satisfies Record<string, string>;
 
+/** The organization's doors (`lib/company/organization-doors.ts`), drawn on
+ *  the one rail (spec N7). Keyed by door id. */
+export const ORGANIZATION_DOOR_ICONS = {
+  now: "activity",
+  people: "users",
+  work: "folder",
+  needs: "userSearch",
+  market: "store",
+  calendar: "calendarDays",
+  partners: "handshake",
+  education: "graduationCap",
+  history: "history",
+  settings: "settings",
+} as const satisfies Record<string, string>;
+
 export type NavCardIconKey =
   | (typeof AREA_ICONS)[keyof typeof AREA_ICONS]
+  | (typeof ORGANIZATION_DOOR_ICONS)[keyof typeof ORGANIZATION_DOOR_ICONS]
   | (typeof FUNCTION_ICONS)[keyof typeof FUNCTION_ICONS]
   | (typeof PROFESSION_ICONS)[keyof typeof PROFESSION_ICONS]
   | (typeof GOAL_ICONS)[keyof typeof GOAL_ICONS];

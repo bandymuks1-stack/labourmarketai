@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { ORGANIZATION_DOOR_ROUTES } from "@/lib/company/organization-doors";
+import { ORGANIZATION_DOOR_ROUTES, organizationDoorLabelKey } from "@/lib/company/organization-doors";
 import { ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
 
 /**
@@ -44,10 +46,39 @@ describe("the two organization door lists agree", () => {
     }
   });
 
+  // ONE LABEL KEY PER ROUTE (spec N7, M1): a destination is never named two
+  // ways on one screen, in the doors and in the header's "More".
+  for (const [areaId, doorId] of Object.entries(SAME_DOOR)) {
+    it(`${doorId} (door) is named by the ${areaId} area's own key`, () => {
+      const areaKey = ORGANIZATION_WORK_AREAS.find((a) => a.id === areaId)?.labelKey;
+      expect(organizationDoorLabelKey(doorId)).toBe(areaKey);
+    });
+  }
+
+  it("a door with no area keeps its own key", () => {
+    for (const id of ["now", "education", "settings"] as const) {
+      expect(organizationDoorLabelKey(id)).toBe(`organizationDoors.${id}`);
+    }
+  });
+
   it("no two shared doors share a route, and the calendar is the one calendar", () => {
     const routes = Object.values(SAME_DOOR).map((d) => ORGANIZATION_DOOR_ROUTES[d]);
     expect(new Set(routes).size).toBe(routes.length);
     expect(ORGANIZATION_DOOR_ROUTES.calendar).toBe("/dashboard/planning");
     expect(area.get("capacity")).toBe("/dashboard/company/planning");
+  });
+});
+
+describe("the doors are one row, the same size as the goal strip (N7 on N5)", () => {
+  it("OrganizationDoors draws CardRail in the strip size, never full cards", () => {
+    const src = readFileSync(join(__dirname, "../../components/app/organization/organization-doors.tsx"), "utf8");
+    expect(src).toMatch(/<CardRail[\s\S]*?size="strip"/);
+    expect(src).not.toMatch(/size="(regular|compact)"/);
+  });
+
+  it("the current door is scrolled into view by its position in the track (offsetLeft is 0 inside its list item)", () => {
+    const src = readFileSync(join(__dirname, "../../components/app/organization/organization-doors.tsx"), "utf8");
+    expect(src).not.toMatch(/current\.offsetLeft/);
+    expect(src).toMatch(/current\.getBoundingClientRect\(\)\.left - track\.getBoundingClientRect\(\)\.left/);
   });
 });
