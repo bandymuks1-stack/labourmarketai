@@ -50,7 +50,7 @@ describe("1 · the identity card and header", () => {
 
   it("the page's own actions sit in the header; Download CV is the existing print action", () => {
     expect(render({ actions: createElement("button", null, "Download") })).toContain('data-testid="premium-cv-actions"');
-    expect(page).toMatch(/actions=\{<PrintButton label=\{t\("print"\)\}/);
+    expect(page).toMatch(/actions=\{[\s\S]{0,900}<PrintButton label=\{t\("print"\)\}/);
   });
 
   it("no invented rating, attribute score, percentage or stars on the hero", () => {
@@ -136,5 +136,12 @@ describe("Codex on #3782: honest totals and in-page anchors", () => {
     const hash = read("components/app/cv/cv-hash-to-block.tsx");
     expect(hash).toContain('window.addEventListener("hashchange", open)');
     expect(hash).toContain('window.removeEventListener("hashchange", open)');
+  });
+});
+
+describe("the journal is one tap from the CV's Overview (journal-reach R-1)", () => {
+  it("the own CV's header carries Record work, linking the journal", () => {
+    expect(page).toMatch(/href="\/dashboard\/journal"[\s\S]{0,400}data-testid="cv-record-work"/);
+    expect(page).toContain('tMyZone("recordWork.title")');
   });
 });

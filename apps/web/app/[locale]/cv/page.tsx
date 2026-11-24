@@ -124,6 +124,7 @@ export default async function VerifiedCvPage({
   const tRel = await getTranslations("relationshipTypes");
   const tTier = await getTranslations("evidenceTier");
   const tPremium = await getTranslations("cvExport.premium");
+  const tMyZone = await getTranslations("auth.dashboard.myZone.actions");
   const tJourney = await getTranslations("careerJourney");
   const tIntel = await getTranslations("journal.intelligence");
   const tJournal = await getTranslations("journal");
@@ -1029,7 +1030,21 @@ export default async function VerifiedCvPage({
             countryCode={identityFacts.countryCode}
             countryName={identityFacts.countryCode ? countryDisplayName(identityFacts.countryCode, locale) : null}
             languages={cv.languages.map((l) => l.lang.toUpperCase())}
-            actions={<PrintButton label={t("print")} tone="primary" className="min-h-11" />}
+            /* Own CV: recording work is the person's next step, so the
+               journal is one tap from the Overview (every worker surface
+               shows the way to the journal, journal-reach R-1). */
+            actions={
+              <>
+                <Link
+                  href="/dashboard/journal"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-[rgb(255_255_255/0.22)] px-4 text-sm font-medium text-[#f4f1e8] transition-colors hover:border-[rgb(255_255_255/0.45)]"
+                  data-testid="cv-record-work"
+                >
+                  {tMyZone("recordWork.title")}
+                </Link>
+                <PrintButton label={t("print")} tone="primary" className="min-h-11" />
+              </>
+            }
             /* Skills and work history are NOT listed in the hero: each is
                listed once, by the sections below (owner P0 2026-11-23). */
             leadership={<OrganizationsLeadership locale={locale} variant="cv" />}
