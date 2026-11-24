@@ -7,6 +7,7 @@ import { SignedInGoalNavigation } from "@/components/navigation/signed-in-goal-n
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { Link } from "@/lib/i18n/navigation";
 import { learnerInviteHref, ORGANIZATION_WORK_AREAS } from "@/lib/navigation/work-areas";
+import { COMPANY_OFFER_INTAKE_HREF } from "@/lib/company/company-home-field-model";
 
 /**
  * THE COMPANY CONTEXT'S CENTRE (owner order 2026-10-01): the company home is
@@ -38,9 +39,12 @@ import { learnerInviteHref, ORGANIZATION_WORK_AREAS } from "@/lib/navigation/wor
  */
 export async function CompanyModelScreen({
   learnerInviteOrganizationId = null,
+  agency = false,
 }: {
   /** The active organization's id when it holds the education capability. */
   learnerInviteOrganizationId?: string | null;
+  /** The active organization acts as a staffing agency: it OFFERS people (SEP-4). */
+  agency?: boolean;
 } = {}) {
   const [t, tAll, tNav] = await Promise.all([
     getTranslations("companyModel"),
@@ -75,6 +79,18 @@ export async function CompanyModelScreen({
           className={primaryClassName}
         >
           {tAll("roleDashboards.company.learners.invite")}
+        </Link>
+      ) : agency ? (
+        // A STAFFING AGENCY OFFERS PEOPLE (SEP-4, owner P0 2026-11-24): its one
+        // primary is the offer intake, the same address and label as the
+        // partners page's "Offer workers" door, never the employer's need.
+        <Link
+          href={COMPANY_OFFER_INTAKE_HREF as "/dashboard/company/needs"}
+          data-testid="company-model-primary"
+          data-primary="agency-offer"
+          className={primaryClassName}
+        >
+          {tAll("roleDashboards.company.agencyMode.actions.offer.label")}
         </Link>
       ) : (
         <NeedDoorLink surface="company_model" testId="company-model-primary" className={primaryClassName} />
