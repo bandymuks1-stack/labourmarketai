@@ -311,17 +311,22 @@ export function CompanySetupForm({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {labels.title}
         </h2>
-        <p className="text-sm text-text-secondary">{labels.subtitle}</p>
+        {existing === null ? <p className="text-sm text-text-secondary">{labels.subtitle}</p> : null}
       </header>
 
       {/* Honest verification notice — full company use requires human
-          verification that does not happen automatically. */}
-      <p
-        className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
-        data-testid="company-setup-verification-notice"
-      >
-        {labels.verificationNotice}
-      </p>
+          verification that does not happen automatically. On the CREATE form
+          only: an existing company's card above already states its status
+          and what it means (company-start-verification-explainer), so the
+          edit form said it a second time (decision 0032, 2026-11-24). */}
+      {existing === null ? (
+        <p
+          className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="company-setup-verification-notice"
+        >
+          {labels.verificationNotice}
+        </p>
+      ) : null}
 
       {legalLocked ? (
         <p
