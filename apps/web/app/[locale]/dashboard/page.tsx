@@ -390,14 +390,14 @@ export default async function DashboardHomePage({
         other: tChat("workspaceRelationshipMember"),
       })
     : null;
+  // The first screen NAMES the context and lists nothing (owner order
+  // 2026-11-24, decision 0034): "Here I can help with …" was helper text.
   const workspaceContextLine = !workspaceLabel
     ? null
-    : identity === "company" && workspace.organizationName && phraseKeys.length > 0
-      ? tChat("workspaceIntro", { company: workspaceLabel, list: capabilityList })
-      : tChat("workspaceActingAs", {
-          workspace: workspaceLabel,
-          relationship: relationshipLabel ?? tChat("workspaceRelationshipMember"),
-        });
+    : tChat("workspaceActingAs", {
+        workspace: workspaceLabel,
+        relationship: relationshipLabel ?? tChat("workspaceRelationshipMember"),
+      });
   // THE CONVERSATION'S IDENTITY IS THE ACTIVE WORKSPACE. A switch re-renders
   // this page with new props, but React keeps a client component's state
   // across `router.refresh` — the thread, the opening brief, the pins, the
