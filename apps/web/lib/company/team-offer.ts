@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import {
   emitOfferAnsweredNotification,
   emitOfferReceivedNotification,
+  resolveTeamOfferCounterpart,
 } from "@/lib/notifications/event-emitters";
 
 import type { MatchNeed } from "@/lib/market/match-v1";
@@ -74,18 +75,13 @@ async function authed(): Promise<{ supabase: SupabaseClient; userId: string } | 
 }
 
 /**
- * The OTHER party of a team offer, as the recipient of its notification: for
- * the team that offered, the owner of the need; for the company answering,
- * the person who made the offer. Neither side can read the other under its
- * own RLS, so it comes from the gated SECURITY DEFINER
- * `team_offer_counterpart_v1`, which answers only a party to the offer. That
- * function is a separate owner-gated migration: until it exists this is null
- * and the notification names an unresolved recipient instead of guessing.
+ * The OTHER party of a team offer, as the recipient of its notification. It
+ * is resolved server-side by `resolveTeamOfferCounterpart` (the notification
+ * module, with the caller id this action verified and the event); the id
+ * addresses one notification row and is never returned to the client
+ * (decision 0033).
  */
-async function teamOfferCounterpart(supabase: SupabaseClient, offerId: string): Promise<string | null> {
-  const { data, error } = await asAny(supabase).rpc("team_offer_counterpart_v1", { p_offer_id: offerId });
-  return !error && typeof data === "string" ? data : null;
-}
+const teamOfferCounterpart = resolveTeamOfferCounterpart;
 
 async function readRows<T>(
   rpc: string,
@@ -110,8 +106,13 @@ async function readRows<T>(
   }
 }
 
-/** Open demand the manager of `teamId` may offer against (worker-board whitelist). */
-export function listOfferableDemand(teamId: string): Promise<ReadResult<OfferableDemand>> {
+/** Open demand the manager of `teamId` may offer against (worker-board whitelist).
+ *  v2 (20261122170000) = the same rows with duration, language, skills and
+ *  tools, and no client column. Until it is applied, v1 answers; the model
+ *  never reads v1's company_name, so the client is not shown either way. */
+export async function listOfferableDemand(teamId: string): Promise<ReadResult<OfferableDemand>> {
+  const v2 = await readRows("list_open_needs_for_offer_v2", { p_team_org_id: teamId }, parseOfferableDemand);
+  if (v2.status !== "needs_migration") return v2;
   return readRows("list_open_demand_for_team_offer_v1", { p_team_org_id: teamId }, parseOfferableDemand);
 }
 
@@ -221,7 +222,7 @@ export async function offerTeamToDemand(input: {
       kind: "team",
       offerId: parsed.offerId,
       requestId: input.requestId,
-      recipientProfileId: await teamOfferCounterpart(ctx.supabase, parsed.offerId),
+      recipientProfileId: await teamOfferCounterpart(parsed.offerId, ctx.userId, "offered"),
       actorProfileId: ctx.userId,
     });
   }
@@ -267,7 +268,7 @@ export async function respondToTeamOffer(input: {
       await emitOfferAnsweredNotification({
         kind: "team",
         offerId: input.offerId,
-        recipientProfileId: await teamOfferCounterpart(ctx.supabase, input.offerId),
+        recipientProfileId: await teamOfferCounterpart(input.offerId, ctx.userId, data),
         actorProfileId: ctx.userId,
         decision: data,
       });
