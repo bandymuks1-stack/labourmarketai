@@ -4092,6 +4092,26 @@
       "findWorkInCompanyContext": "Å søke jobb er din egen handling — i bedriftsområdet kjører jeg det ikke. Bytt til ditt personlige område og spør igjen.",
       "findWorkInCompanyWhy": "En person søker jobb, ikke en bedrift — jeg svarer fra ditt personlige område.",
       "personalOnlyInCompany": "Det er en personlig handling — i en virksomhetsplass utfører jeg den ikke. Bytt til ditt personlige rom og fortsett der.",
+      "crossSpace": {
+        "personal": {
+          "cv": "CV-en din ligger i ditt personlige område, ikke i organisasjonen.",
+          "journal": "Din egen arbeidsdagbok ligger i ditt personlige område.",
+          "profile": "Profilen din ligger i ditt personlige område.",
+          "calendar": "Din egen kalender ligger i ditt personlige område."
+        },
+        "open": {
+          "cv": "Bytt og åpne CV-en min",
+          "journal": "Bytt og åpne dagboken min",
+          "profile": "Bytt og åpne profilen min",
+          "calendar": "Bytt og åpne kalenderen min"
+        },
+        "askWhoseCv": "Din egen CV eller en kandidats?",
+        "organizationHistory": "Organisasjonens oppføring er dens arbeidshistorikk.",
+        "openOrganizationHistory": "Åpne organisasjonens historikk",
+        "organization": "Dette gjøres i organisasjonens område: {name}.",
+        "switchTo": "Bytt til {name} og fortsett",
+        "whichOrganization": "Dette gjøres i en organisasjons område. Hvilket?"
+      },
       "newJobsIntro": "Nye utlysninger som passer dine ønsker: {count}.",
       "newJobsAll": "Alle muligheter",
       "newJobsNone": "Det har ikke kommet nye utlysninger som passer dine ønsker de siste dagene. Alle muligheter finner du på siden for muligheter.",
@@ -7088,7 +7108,8 @@
       "places": "Steder",
       "people": "Personer",
       "hours": "Registrerte timer",
-      "period": "Periode"
+      "period": "Periode",
+      "dayHours": "Timer på enkeltdager"
     },
     "place": "Sted",
     "noPlaceName": "Ingen sted oppgitt",
@@ -7125,7 +7146,8 @@
       "progress": "{attributed} av {total} tilskrevet {name}",
       "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
-      "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
+      "person": "{hours} t, {count, plural, one {# post} other {# poster}}",
+      "personPeriod": "{hours} t periodesum (legges ikke til enkeltdager)"
     },
     "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem.",
     "projects": {
@@ -7157,7 +7179,74 @@
       "title": "Oppdragsgivere",
       "unnamed": "Oppdragsgivers organisasjon",
       "records": "{count, plural, one {# post} other {# poster}}"
-    }
+    },
+    "periodShort": "{hours} t periodesum",
+    "business": {
+      "unavailable": "Virksomhetshistorikken kunne ikke leses akkurat nå. Ingenting har gått tapt – prøv igjen senere.",
+      "eyebrow": "Virksomhetshistorikk",
+      "title": "{name}: én sammenhengende historikk",
+      "subtitle": "Hvert tall nedenfor teller organisasjonens eget registrerte arbeid én gang. Periodene viser hva som er oppgitt om tidligere juridiske enheter, og hva opplysningen bygger på.",
+      "titleHeld": "{name}: arbeidsposter organisasjonen har, per periode",
+      "subtitleHeld": "Arbeid utført under en tidligere juridisk enhet tilhører den enheten og personene som utførte det. {name} har disse postene som dokumentert kontinuitet; de vises ikke som {name}s eget arbeid.",
+      "headerOwn": "{name}s egen periode",
+      "headerEarlier": "Tidligere juridisk enhet: {name}",
+      "headerUnstated": "Perioden «{label}» – juridisk enhet ikke oppgitt",
+      "headerNotPlaced": "Poster som ingen oppgitt periode omfatter",
+      "continuityNotSuccession": "Kontinuitet dokumentert; rettslig suksesjon hevdes ikke.",
+      "totalsHeld": "Alle poster {name} har, på tvers av alle perioder, hver telt én gang – ikke alt er {name}s eget arbeid.",
+      "figures": "{records} poster · {hours} t · {people} personer · {places} steder",
+      "totals": {
+        "records": "Poster",
+        "hours": "Timer",
+        "people": "Personer",
+        "places": "Steder",
+        "projects": "Prosjekter",
+        "span": "Tidsrom"
+      },
+      "spanUnknown": "datoer ikke registrert",
+      "periodsTitle": "Virksomhetens perioder",
+      "noPeriods": "Ingen periode for denne virksomheten er oppgitt ennå. Hvis arbeidet startet under en tidligere juridisk enhet, kan det registreres som en oppgitt periode – selve postene forblir som de er.",
+      "bounds": "{from} – {to}",
+      "notDocumented": "ikke dokumentert",
+      "boundsNotDocumented": "Datoer ikke dokumentert",
+      "legalEntity": "Juridisk enhet på det tidspunktet: {name}",
+      "relation": {
+        "not_asserted": "Ikke oppgitt som samme juridiske enhet – én sammenhengende virksomhetshistorikk.",
+        "same_entity": "Oppgitt som samme juridiske enhet.",
+        "renamed": "Oppgitt som samme juridiske enhet under et tidligere navn.",
+        "successor": "Oppgitt som rettslig forgjenger.",
+        "sold_and_continued_by_new_entity": "Den tidligere enheten ble solgt; virksomheten fortsatte gjennom en ny enhet.",
+        "other": "En annen dokumentert relasjon mellom enhetene."
+      },
+      "basis": {
+        "owner_statement": "Eierens erklæring",
+        "registry_extract": "Registerutskrift",
+        "contract": "Avtale",
+        "other_document": "Dokument"
+      },
+      "periodNoRecords": "Ingen poster er plassert i denne perioden ennå.",
+      "placedBy": "Plassert etter kildeetiketten {labels}: {byLabel} poster; etter dokumenterte datoer: {byDate}.",
+      "notPlaced": "Ikke plassert i en oppgitt periode (kilden har ingen periodeetikett): {figures} · {span}.",
+      "yearsTitle": "Arbeid per år",
+      "undated": "{count, plural, one {# post mangler} other {# poster mangler}} dato og {count, plural, one {telles} other {telles}} bare med i totalene.",
+      "doorsLabel": "Åpne de samme postene",
+      "doors": {
+        "people": "Personer",
+        "projects": "Prosjekter",
+        "places": "Steder"
+      },
+      "workspace": {
+        "note": "Du åpnet historikken for {name} utenfor arbeidsområdet. Personer og prosjekter åpnes i det aktive arbeidsområdet.",
+        "open": "Åpne arbeidsområdet {name}",
+        "opening": "Åpner …",
+        "error": "Arbeidsområdet kunne ikke åpnes."
+      },
+      "structure": "Tidligere arbeid ble utført gjennom {names}.",
+      "structureLater": ", senere ",
+      "structureForClient": "Tidligere arbeid gjennom {names} for oppdragsgiveren {client}.",
+      "structureAsSubcontractor": "Underleverandør: {names} → oppdragsgiver {client}."
+    },
+    "descriptionNotInSource": "Ingen arbeidsbeskrivelse i kilden"
   },
   "workLifecycle": {
     "pending": "Ikke ennå",

@@ -1,3 +1,4 @@
+import { spanHoldsAnyDay } from "@/lib/organization-evidence/hours-counted-once";
 import type {
   WorkIntelligence,
   WorkIntelligenceOrganizationPeriodRecord,
@@ -65,11 +66,10 @@ export function organizationAllTime(wi: WorkIntelligence | null): OrganizationAl
 
   const overlapping: WorkIntelligenceOrganizationPeriodRecord[] = [];
   for (const p of periods) {
-    const overlaps = dayRecords.some(
-      (d) =>
-        d.organizationId === p.organizationId &&
-        d.workDate >= p.periodStart &&
-        d.workDate <= p.periodEnd,
+    const overlaps = spanHoldsAnyDay(
+      p.periodStart,
+      p.periodEnd,
+      dayRecords.filter((d) => d.organizationId === p.organizationId).map((d) => d.workDate),
     );
     if (overlaps) {
       overlapping.push(p);

@@ -181,7 +181,9 @@ export const PL_PACK: LanguagePack = {
       exact: ["malowałem", "malarz", "pomalowałem ściany", "malowanie ścian"],
     },
     tiling: {
-      exact: ["płytki", "kładłem płytki", "glazurnik", "kafelki"],
+      // "układanie płytek" / "płytek" (genitive) — the noun phrase a
+      // timesheet uses; "płytki" alone missed it (2026-11-24).
+      exact: ["płytki", "kładłem płytki", "glazurnik", "kafelki", "układanie płytek", "płytek"],
     },
     plastering: {
       exact: ["tynkowałem", "tynkarz", "tynki", "kładłem tynk"],
