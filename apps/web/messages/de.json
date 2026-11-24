@@ -14718,6 +14718,11 @@
       "findWorkInCompanyContext": "Die Jobsuche ist Ihre eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechseln Sie in Ihren persönlichen Bereich und fragen Sie noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus Ihrem persönlichen Bereich.",
       "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechseln Sie in Ihren persönlichen Bereich und machen Sie dort weiter.",
+      "needsOrganization": "Das geschieht für eine Organisation, und keiner Ihrer Bereiche kann das bisher.",
+      "readFailed": "Das konnte ich gerade nicht lesen — der Fehler liegt bei uns. Nichts wurde geändert. Versuchen Sie es gleich noch einmal.",
+      "taskStatusAsk": "Welchen Status soll die Aufgabe haben: begonnen, erledigt oder blockiert?",
+      "stageStatusAsk": "Welchen Status soll die Etappe haben: begonnen, erledigt oder blockiert?",
+      "professionAsk": "Welchen Beruf oder welches Handwerk meinen Sie?",
       "crossSpace": {
         "personal": {
           "cv": "Ihr Lebenslauf liegt in Ihrem persönlichen Bereich, nicht in der Organisation.",

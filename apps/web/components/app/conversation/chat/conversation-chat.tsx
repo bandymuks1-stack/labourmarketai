@@ -1550,6 +1550,28 @@ export function ConversationChat({
     [assistant, clarifyDoor],
   );
 
+  /**
+   * NEVER THE GENERIC MENU (owner order 2026-11-24, decision 0034 rule 3).
+   * An organization action asked where no workspace can do it is said as
+   * such, with the ONE door that makes it possible; a personal read asked in
+   * an organization offers the switch. The greeting's starter row is not an
+   * answer to a request.
+   */
+  const answerNeedsOrganization = useCallback(
+    () =>
+      assistant(t("needsOrganization"), [
+        { id: "link:/dashboard/start/company", label: labels.chipCreateOrganization },
+      ]),
+    [assistant, labels.chipCreateOrganization, t],
+  );
+  const answerPersonalOnly = useCallback(() => {
+    const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+    assistant(
+      t("personalOnlyInCompany"),
+      personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+    );
+  }, [assistant, auth?.workspaces, t]);
+
   const openForm = useCallback(
     (
       // A registered action id, or a spec BUILT for this turn (the agency
@@ -1700,10 +1722,10 @@ export function ConversationChat({
         })
         .catch(() => {
           setTyping(false);
-          assistant(fallbackText, starterChips);
+          assistant(t("readFailed"));
         });
     },
-    [assistant, pushMessage, locale, searchChips, starterChips, fallbackText, tAi],
+    [assistant, pushMessage, locale, searchChips, tAi, t],
   );
 
   /**
@@ -1750,9 +1772,9 @@ export function ConversationChat({
       })
       .catch(() => {
         setTyping(false);
-        assistant(fallbackText, starterChips);
+        assistant(t("readFailed"));
       });
-  }, [assistant, searchChips, starterChips, fallbackText]);
+  }, [assistant, searchChips, t]);
 
   /**
    * "Ieškau darbo" starts a DIALOGUE, not a verdict (owner audit P0.5). The
@@ -1867,10 +1889,10 @@ export function ConversationChat({
         })
         .catch(() => {
           setTyping(false);
-          if (!opts?.quiet) assistant(fallbackText, starterChips);
+          if (!opts?.quiet) assistant(t("readFailed"));
         });
     },
-    [pushMessage, assistant, starterChips, profileChips, fallbackText, tSummary],
+    [pushMessage, assistant, starterChips, profileChips, tSummary, t],
   );
   startProfileSummaryRef.current = startProfileSummary;
 
@@ -1983,9 +2005,9 @@ export function ConversationChat({
       })
       .catch(() => {
         setTyping(false);
-        assistant(fallbackText, starterChips);
+        assistant(t("readFailed"));
       });
-  }, [assistant, starterChips, fallbackText, labels.chipPrefs, labels.chipJobs]);
+  }, [assistant, starterChips, labels.chipPrefs, labels.chipJobs, t]);
 
   /**
    * THE PLAYER CARD OPENS IN THE PANEL (W3 row 1).
@@ -4169,10 +4191,10 @@ export function ConversationChat({
       } else if (canActAsEmployer && workspaceChips.length > 0) {
         withTyping(() => assistant(labels.agencySwitchHint, workspaceChips));
       } else {
-        withTyping(() => assistant(fallbackText, starterChips));
+        withTyping(() => answerNeedsOrganization());
       }
     },
-    [identity, canActAsEmployer, workspaceChips, startAgencyBridge, withTyping, assistant, labels.agencySwitchHint, fallbackText, starterChips],
+    [identity, canActAsEmployer, workspaceChips, startAgencyBridge, withTyping, assistant, labels.agencySwitchHint, answerNeedsOrganization],
   );
 
   /** "Noriu pakviesti klientą" / "pakviesk darbuotoją": the ONE missing fact
@@ -4188,7 +4210,7 @@ export function ConversationChat({
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
-          assistant(fallbackText, starterChips);
+          answerNeedsOrganization();
         }
         return;
       }
@@ -4213,7 +4235,7 @@ export function ConversationChat({
         },
       );
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, labels.projectCreatedNext, fallbackText, starterChips, openForm],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, labels.projectCreatedNext, openForm, answerNeedsOrganization],
   );
 
   /** PROGRESS (§11): a stage moved to a real status — the SAME token-confirmed
@@ -4347,7 +4369,7 @@ export function ConversationChat({
     (sentence: string, picked?: { workerProfileId: string; fromProjectId: string }) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       setTyping(true);
@@ -4392,7 +4414,7 @@ export function ConversationChat({
           assistant(labels.projectsUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, t, runMoveWhatIf],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, t, runMoveWhatIf, answerNeedsOrganization],
   );
 
   /** "Kokius kandidatus pasiūlė agentūra?" — the offers on the company's OWN
@@ -4438,7 +4460,7 @@ export function ConversationChat({
   const startClientBridge = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-      else assistant(fallbackText, starterChips);
+      else answerNeedsOrganization();
       return;
     }
     setTyping(true);
@@ -4480,12 +4502,12 @@ export function ConversationChat({
           { id: "link:/dashboard/company/partners", label: labels.chipCompanyHub },
         ]);
       });
-  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, answerNeedsOrganization]);
 
   const startClientOffers = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-      else assistant(fallbackText, starterChips);
+      else answerNeedsOrganization();
       return;
     }
     if (agencyWorkspace) {
@@ -4539,7 +4561,7 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.agencyUnavailable, [{ id: "candidates", label: labels.chipCandidates }]);
       });
-  }, [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips]);
+  }, [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, answerNeedsOrganization]);
 
   /** "Turiu naują A1 iki 2027-03" — a document RECORDED by sentence (owner
    *  contract §12/§14). The form is built from the canonical catalogues per
@@ -4738,7 +4760,7 @@ export function ConversationChat({
     (sentence: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       setTyping(true);
@@ -4776,7 +4798,7 @@ export function ConversationChat({
           assistant(labels.projectsUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.taskCreateIntro, labels.taskCreatedNext, labels.chipTasks, labels.projectsUnavailable, fallbackText, starterChips, openForm],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.taskCreateIntro, labels.taskCreatedNext, labels.chipTasks, labels.projectsUnavailable, openForm, answerNeedsOrganization],
   );
 
   /** CAPACITY (§11): "kas laisvas šią savaitę?" — the company's roster against
@@ -4799,7 +4821,7 @@ export function ConversationChat({
     (sentence: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       setTyping(true);
@@ -4849,7 +4871,7 @@ export function ConversationChat({
           assistant(labels.confirmUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, answerNeedsOrganization],
   );
 
   /** The confirmation writes over the ONE dispatcher (confirm = important tier,
@@ -5029,12 +5051,12 @@ export function ConversationChat({
     (sentence: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       runProjectReadiness(null, sentence);
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, fallbackText, starterChips, runProjectReadiness],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, runProjectReadiness, answerNeedsOrganization],
   );
 
   /** §14 WORK PERFORMED → RESULT: a task moved to a real status — the SAME
@@ -5097,7 +5119,7 @@ export function ConversationChat({
       // nothing: it used to be recorded as done.
       const status: WorkTaskStatus | null = readStatedProgress(sentence, "task");
       if (status === null) {
-        assistant(fallbackText, starterChips);
+        askToClarify(t("taskStatusAsk"));
         return;
       }
       setTyping(true);
@@ -5128,7 +5150,7 @@ export function ConversationChat({
           assistant(labels.taskUnavailable);
         });
     },
-    [identity, assistant, labels, runTaskStatus, fallbackText, starterChips],
+    [identity, assistant, labels, runTaskStatus, t, askToClarify],
   );
 
   /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
@@ -5139,7 +5161,7 @@ export function ConversationChat({
   const startProjectRisk = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-      else assistant(fallbackText, starterChips);
+      else answerNeedsOrganization();
       return;
     }
     setTyping(true);
@@ -5184,12 +5206,12 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.riskUnavailable, [{ id: "projects", label: labels.chipProjects }]);
       });
-  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, answerNeedsOrganization]);
 
   const startWhoAvailable = useCallback((sentence = "") => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-      else assistant(fallbackText, starterChips);
+      else answerNeedsOrganization();
       return;
     }
     setTyping(true);
@@ -5253,7 +5275,7 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.capacityUnavailable, [{ id: "projects", label: labels.chipProjects }]);
       });
-  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, answerNeedsOrganization]);
 
   /** "Etapas pamatai baigtas" — the status the sentence names, resolved
    *  against the company's REAL stages: one match runs it, several ask with
@@ -5262,7 +5284,7 @@ export function ConversationChat({
     (sentence: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       const lower = sentence.toLowerCase();
@@ -5270,7 +5292,7 @@ export function ConversationChat({
       // Fundament" is a question; a stage is not marked done by one.
       const status: StageStatus | null = readStatedProgress(sentence, "stage");
       if (status === null) {
-        assistant(fallbackText, [{ id: "projects", label: labels.chipProjects }]);
+        askToClarify(t("stageStatusAsk"));
         return;
       }
       setTyping(true);
@@ -5299,7 +5321,7 @@ export function ConversationChat({
           assistant(labels.projectsUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, runStageStatus],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, runStageStatus, answerNeedsOrganization, askToClarify, t],
   );
 
   const startAgencyInvite = useCallback(
@@ -5309,7 +5331,7 @@ export function ConversationChat({
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
-          assistant(fallbackText, starterChips);
+          answerNeedsOrganization();
         }
         return;
       }
@@ -5348,7 +5370,7 @@ export function ConversationChat({
         },
       );
     },
-    [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips, roleContextNow, openForm, agencyFollowup],
+    [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, roleContextNow, openForm, agencyFollowup, answerNeedsOrganization],
   );
 
   /**
@@ -5378,7 +5400,7 @@ export function ConversationChat({
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
-          assistant(fallbackText, starterChips);
+          answerNeedsOrganization();
         }
         return;
       }
@@ -5402,7 +5424,7 @@ export function ConversationChat({
           ),
       );
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, roleContextNow, openForm, educationFollowup],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, roleContextNow, openForm, educationFollowup, answerNeedsOrganization],
   );
 
   const runEducationProgrammes = useCallback(
@@ -5411,7 +5433,7 @@ export function ConversationChat({
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
-          assistant(fallbackText, starterChips);
+          answerNeedsOrganization();
         }
         return;
       }
@@ -5563,7 +5585,7 @@ export function ConversationChat({
           ]);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, openForm, educationFollowup, educationChips, roleContextNow],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, openForm, educationFollowup, educationChips, roleContextNow, answerNeedsOrganization],
   );
   const runEducationProgrammesRef = useRef(runEducationProgrammes);
   runEducationProgrammesRef.current = runEducationProgrammes;
@@ -7100,7 +7122,7 @@ export function ConversationChat({
           }
           const stated = readProfessionStatement(text);
           if (!stated) {
-            assistant(fallbackText, starterChips);
+            askToClarify(t("professionAsk"));
             return;
           }
           const inCatalogue = Boolean(stated.professionSlug && tProfessions.has(stated.professionSlug));
@@ -7244,7 +7266,7 @@ export function ConversationChat({
         },
         savedOpportunities: () => {
           if (identity === "company") {
-            assistant(fallbackText, starterChips);
+            answerPersonalOnly();
             return;
           }
           setTyping(true);
@@ -7758,7 +7780,7 @@ export function ConversationChat({
               { id: "link:/dashboard/company", label: labels.chipCompanyHub },
             ]);
           } else {
-            assistant(fallbackText, starterChips);
+            answerNeedsOrganization();
           }
         },
         // "Sukurk įmonės profilį" — START an organization. Routes to the ONE
@@ -8238,7 +8260,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [presentCrossSpace, noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, workspaceChips, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [presentCrossSpace, noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, workspaceChips, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization, answerNeedsOrganization, answerPersonalOnly],
   );
 
   /**
