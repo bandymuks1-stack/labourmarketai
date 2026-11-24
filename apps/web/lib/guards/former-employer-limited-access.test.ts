@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { signupIsolatedRunsFor } from "./signup-isolated-trigger";
 
 /**
  * A FORMER EMPLOYER KEEPS LIMITED ACCESS (owner decision 2026-11-17;
@@ -334,8 +335,8 @@ describe("the local-stack proof travels with the SQL", () => {
   it("the isolated job runs the walk, and runs when the migration changes", () => {
     const wf = read(".github/workflows/signup-isolated.yml");
     expect(wf).toContain("tests/e2e/former-employer-access-isolated.spec.ts");
-    expect(wf).toContain(`supabase/migrations/${NAME}.sql`);
-    expect(wf).toContain(`supabase/migrations/${FIX}.sql`);
+    expect(signupIsolatedRunsFor(wf, `supabase/migrations/${NAME}.sql`)).toBe(true);
+    expect(signupIsolatedRunsFor(wf, `supabase/migrations/${FIX}.sql`)).toBe(true);
   });
 });
 
