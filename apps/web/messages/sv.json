@@ -180,7 +180,36 @@
       "actionPhone": "Ring",
       "actionWebsite": "Öppna företagets webbplats",
       "heroContact": "Så kommer du i kontakt",
-      "provenance": "Företaget har själv fyllt i den här sidan."
+      "provenance": "Företaget har själv fyllt i den här sidan.",
+      "living": {
+        "eyebrow": "Levande CV",
+        "figures": {
+          "years": "{count, plural, one {år} other {år}}",
+          "hours": "arbetade timmar",
+          "people": "{count, plural, one {person} other {personer}}",
+          "projects": "{count, plural, one {projekt} other {projekt}}",
+          "places": "{count, plural, one {arbetsplats} other {arbetsplatser}}"
+        },
+        "doEyebrow": "Specialisering",
+        "doTitle": "Vad vi gör",
+        "team": "{count, plural, one {# person i teamet} other {# personer i teamet}}",
+        "experienceEyebrow": "Erfarenhet",
+        "experienceTitle": "Arbetade timmar",
+        "confirmedLabel": "Bekräftat",
+        "confirmedSource": "Registrerat av arbetstagaren, godkänt av organisationen",
+        "recordedLabel": "Egna registreringar",
+        "recordedSource": "Organisationens registreringar, inte bekräftade av någon annan part",
+        "pending": "{hours} väntar på godkännande",
+        "periods": "Ytterligare {hours} i periodsummor",
+        "hours": "{hours} tim",
+        "projectsEyebrow": "Projekt",
+        "projectsTitle": "Projekt",
+        "running": "Pågående",
+        "completed": "Avslutade",
+        "galleryEyebrow": "Galleri",
+        "galleryTitle": "Utfört arbete",
+        "clients": "Arbete utfört åt: {names}"
+      }
     }
   },
   "marketplaceListings": {

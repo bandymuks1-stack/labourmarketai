@@ -567,3 +567,41 @@ test.afterAll(async ({ browser }) => {
     await ctx.close();
   }
 });
+
+// ── THE ORGANIZATION'S LIVING CV (owner P0 2026-11-24) ─────────────────────
+// The business profile's member form on the organization's own Settings page:
+// the owner sees it at desktop and both phone widths with no sideways scroll;
+// an employee of the organization sees none of it.
+
+test("L-1 (P0 2026-11-24). Alfa's owner sees the organization's Living CV at 1440, 390 and 375 px", async ({ browser }) => {
+  for (const width of [1440, 390, 375]) {
+    const ctx = await browser.newContext({
+      storageState: state("owner"),
+      locale: "lt-LT",
+      viewport: { width, height: width > 800 ? 900 : 844 },
+      ...(width < 800 ? { isMobile: true, hasTouch: true } : {}),
+    });
+    const page = await ctx.newPage();
+    try {
+      await useWorkspace(page, ALFA);
+      await page.goto("/lt/dashboard/company/settings");
+      await rendered(page, `settings ${width}`);
+      const cv = inMain(page).getByTestId("org-living-cv");
+      await expect(cv, `${width}: the Living CV renders`).toBeVisible({ timeout: 30_000 });
+      await expect(cv.getByRole("heading", { level: 2 }).first()).toContainText(/Alfa/i);
+      await fitsPhone(page, `Living CV at ${width} px`);
+    } finally {
+      await ctx.close();
+    }
+  }
+});
+
+test("L-2 (P0 2026-11-24). an employee of Alfa sees no organization Living CV", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker");
+  try {
+    await page.goto("/lt/dashboard/company/settings");
+    await expect(page.getByTestId("org-living-cv")).toHaveCount(0);
+  } finally {
+    await ctx.close();
+  }
+});

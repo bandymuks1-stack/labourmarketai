@@ -180,7 +180,36 @@
       "actionPhone": "Bellen",
       "actionWebsite": "Website van het bedrijf openen",
       "heroContact": "Hoe u contact opneemt",
-      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld.",
+      "living": {
+        "eyebrow": "Levend cv",
+        "figures": {
+          "years": "{count, plural, one {jaar} other {jaar}}",
+          "hours": "gewerkte uren",
+          "people": "{count, plural, one {persoon} other {personen}}",
+          "projects": "{count, plural, one {project} other {projecten}}",
+          "places": "{count, plural, one {werklocatie} other {werklocaties}}"
+        },
+        "doEyebrow": "Specialisatie",
+        "doTitle": "Wat we doen",
+        "team": "{count, plural, one {# persoon in het team} other {# personen in het team}}",
+        "experienceEyebrow": "Ervaring",
+        "experienceTitle": "Gewerkte uren",
+        "confirmedLabel": "Bevestigd",
+        "confirmedSource": "Vastgelegd door de werknemer, goedgekeurd door de organisatie",
+        "recordedLabel": "Eigen registraties",
+        "recordedSource": "Registraties van de organisatie, niet bevestigd door een andere partij",
+        "pending": "{hours} wachten op goedkeuring",
+        "periods": "Nog {hours} in periodetotalen",
+        "hours": "{hours} u",
+        "projectsEyebrow": "Projecten",
+        "projectsTitle": "Projecten",
+        "running": "Lopend",
+        "completed": "Afgerond",
+        "galleryEyebrow": "Galerij",
+        "galleryTitle": "Uitgevoerd werk",
+        "clients": "Werk uitgevoerd voor: {names}"
+      }
     }
   },
   "marketplaceListings": {

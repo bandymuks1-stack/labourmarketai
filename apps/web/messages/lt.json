@@ -180,7 +180,36 @@
       "actionPhone": "Skambinti",
       "actionWebsite": "Atidaryti įmonės svetainę",
       "heroContact": "Kaip susisiekti",
-      "provenance": "Šį puslapį užpildė pati įmonė."
+      "provenance": "Šį puslapį užpildė pati įmonė.",
+      "living": {
+        "eyebrow": "Gyvas CV",
+        "figures": {
+          "years": "{count, plural, one {metai} few {metai} other {metų}}",
+          "hours": "dirbtų valandų",
+          "people": "{count, plural, one {žmogus} few {žmonės} other {žmonių}}",
+          "projects": "{count, plural, one {projektas} few {projektai} other {projektų}}",
+          "places": "{count, plural, one {objektas} few {objektai} other {objektų}}"
+        },
+        "doEyebrow": "Specializacija",
+        "doTitle": "Ką darome",
+        "team": "{count, plural, one {Komandoje # žmogus} few {Komandoje # žmonės} other {Komandoje # žmonių}}",
+        "experienceEyebrow": "Patirtis",
+        "experienceTitle": "Dirbtos valandos",
+        "confirmedLabel": "Patvirtinta",
+        "confirmedSource": "Įrašė darbuotojas, patvirtino organizacija",
+        "recordedLabel": "Savi įrašai",
+        "recordedSource": "Organizacijos įrašai, kitos šalies nepatvirtinti",
+        "pending": "{hours} laukia patvirtinimo",
+        "periods": "Dar {hours} laikotarpių suvestinėse",
+        "hours": "{hours} val.",
+        "projectsEyebrow": "Projektai",
+        "projectsTitle": "Projektai",
+        "running": "Vykdomi",
+        "completed": "Užbaigti",
+        "galleryEyebrow": "Galerija",
+        "galleryTitle": "Atlikti darbai",
+        "clients": "Darbai atlikti užsakovui: {names}"
+      }
     }
   },
   "marketplaceListings": {

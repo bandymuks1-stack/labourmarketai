@@ -180,7 +180,36 @@
       "actionPhone": "Call",
       "actionWebsite": "Open the company's website",
       "heroContact": "How to get in touch",
-      "provenance": "The company filled in this page itself."
+      "provenance": "The company filled in this page itself.",
+      "living": {
+        "eyebrow": "Living CV",
+        "figures": {
+          "years": "{count, plural, one {year} other {years}}",
+          "hours": "hours worked",
+          "people": "{count, plural, one {person} other {people}}",
+          "projects": "{count, plural, one {project} other {projects}}",
+          "places": "{count, plural, one {work site} other {work sites}}"
+        },
+        "doEyebrow": "Specialization",
+        "doTitle": "What we do",
+        "team": "{count, plural, one {# person on the team} other {# people on the team}}",
+        "experienceEyebrow": "Experience",
+        "experienceTitle": "Hours worked",
+        "confirmedLabel": "Confirmed",
+        "confirmedSource": "Recorded by the worker, approved by the organization",
+        "recordedLabel": "Own records",
+        "recordedSource": "The organization's records, not confirmed by another party",
+        "pending": "{hours} waiting for approval",
+        "periods": "{hours} more in period totals",
+        "hours": "{hours} h",
+        "projectsEyebrow": "Projects",
+        "projectsTitle": "Projects",
+        "running": "Ongoing",
+        "completed": "Completed",
+        "galleryEyebrow": "Gallery",
+        "galleryTitle": "Work done",
+        "clients": "Work done for: {names}"
+      }
     }
   },
   "marketplaceListings": {

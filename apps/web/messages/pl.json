@@ -180,7 +180,36 @@
       "actionPhone": "Zadzwoń",
       "actionWebsite": "Otwórz stronę firmy",
       "heroContact": "Jak się skontaktować",
-      "provenance": "Firma sama wypełniła tę stronę."
+      "provenance": "Firma sama wypełniła tę stronę.",
+      "living": {
+        "eyebrow": "Żywe CV",
+        "figures": {
+          "years": "{count, plural, one {rok} few {lata} many {lat} other {lat}}",
+          "hours": "przepracowanych godzin",
+          "people": "{count, plural, one {osoba} few {osoby} many {osób} other {osób}}",
+          "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
+          "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}"
+        },
+        "doEyebrow": "Specjalizacja",
+        "doTitle": "Czym się zajmujemy",
+        "team": "{count, plural, one {W zespole # osoba} few {W zespole # osoby} many {W zespole # osób} other {W zespole # osób}}",
+        "experienceEyebrow": "Doświadczenie",
+        "experienceTitle": "Przepracowane godziny",
+        "confirmedLabel": "Potwierdzone",
+        "confirmedSource": "Zapisane przez pracownika, zatwierdzone przez organizację",
+        "recordedLabel": "Własne zapisy",
+        "recordedSource": "Zapisy organizacji, niepotwierdzone przez drugą stronę",
+        "pending": "{hours} czeka na zatwierdzenie",
+        "periods": "Jeszcze {hours} w sumach okresowych",
+        "hours": "{hours} godz.",
+        "projectsEyebrow": "Projekty",
+        "projectsTitle": "Projekty",
+        "running": "W toku",
+        "completed": "Zakończone",
+        "galleryEyebrow": "Galeria",
+        "galleryTitle": "Wykonane prace",
+        "clients": "Prace wykonane dla: {names}"
+      }
     }
   },
   "marketplaceListings": {

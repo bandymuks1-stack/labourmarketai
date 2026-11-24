@@ -24,6 +24,8 @@ import {
 } from "@/components/app/company-next-actions";
 import { CompanyReadinessSummary } from "@/components/app/company-readiness-summary";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
+import { CompanyTeamProfile, type CompanyTeamTranslate } from "@/components/app/company-team-profile";
+import { loadOrganizationLivingCv } from "@/lib/company/organization-living-cv";
 import { BusinessPublicProfilePanel } from "@/components/app/business-public-profile-panel";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { HelpRequestPanel } from "@/components/app/help-request-panel";
@@ -153,9 +155,14 @@ export default async function CompanySettingsPage({
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
     governedActiveOrganizationId(orgContext);
-  const [declaredCapabilities, orgMembers] = await Promise.all([
+  // THE ORGANIZATION'S LIVING CV (owner P0 2026-11-24): the business
+  // profile's own view in its member form, from the organization's records.
+  // Null when this person may not read the history: nothing is shown then.
+  const [declaredCapabilities, orgMembers, livingCv, tRoot] = await Promise.all([
     capabilityOrgId ? readOrganizationCapabilities(capabilityOrgId) : [],
     getOrgMembersData("company", companyRow.id),
+    capabilityOrgId ? loadOrganizationLivingCv(locale, capabilityOrgId, companyRow.country) : null,
+    getTranslations(),
   ]);
   const businessPublicSettings = orgMembers
     ? await getBusinessPublicSettings(orgMembers.orgId)
@@ -186,6 +193,10 @@ export default async function CompanySettingsPage({
           ) : null}
         </div>
       </header>
+
+      {livingCv ? (
+        <CompanyTeamProfile view={livingCv} t={tRoot as unknown as CompanyTeamTranslate} locale={locale} />
+      ) : null}
 
       {/* Honest data-driven status (name, verification status, what to fix). */}
       <CompanyNextActions company={companyRow} />

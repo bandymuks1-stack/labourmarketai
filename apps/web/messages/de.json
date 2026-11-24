@@ -180,7 +180,36 @@
       "actionPhone": "Anrufen",
       "actionWebsite": "Website des Unternehmens öffnen",
       "heroContact": "So erreichen Sie es",
-      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt."
+      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt.",
+      "living": {
+        "eyebrow": "Lebendiger Lebenslauf",
+        "figures": {
+          "years": "{count, plural, one {Jahr} other {Jahre}}",
+          "hours": "geleistete Stunden",
+          "people": "{count, plural, one {Person} other {Personen}}",
+          "projects": "{count, plural, one {Projekt} other {Projekte}}",
+          "places": "{count, plural, one {Baustelle} other {Baustellen}}"
+        },
+        "doEyebrow": "Spezialisierung",
+        "doTitle": "Was wir tun",
+        "team": "{count, plural, one {# Person im Team} other {# Personen im Team}}",
+        "experienceEyebrow": "Erfahrung",
+        "experienceTitle": "Geleistete Stunden",
+        "confirmedLabel": "Bestätigt",
+        "confirmedSource": "Vom Mitarbeiter erfasst, von der Organisation freigegeben",
+        "recordedLabel": "Eigene Aufzeichnungen",
+        "recordedSource": "Aufzeichnungen der Organisation, von keiner anderen Seite bestätigt",
+        "pending": "{hours} warten auf Freigabe",
+        "periods": "Weitere {hours} in Zeitraumsummen",
+        "hours": "{hours} Std.",
+        "projectsEyebrow": "Projekte",
+        "projectsTitle": "Projekte",
+        "running": "Laufend",
+        "completed": "Abgeschlossen",
+        "galleryEyebrow": "Galerie",
+        "galleryTitle": "Ausgeführte Arbeiten",
+        "clients": "Arbeiten ausgeführt für: {names}"
+      }
     }
   },
   "marketplaceListings": {
