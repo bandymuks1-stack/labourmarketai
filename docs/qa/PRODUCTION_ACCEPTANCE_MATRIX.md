@@ -338,6 +338,22 @@ The daily budget is 24 walks in a rolling 24 h. At 10:30 UTC about 14 have reach
 | Free paths and payments | LOCAL / BLOCKED | `free-paths-isolated` 4/4: needs posted free at 1440 and 390 px; `/pricing` shows both plans, the paid plan cannot be bought, and no Stripe request is made. `billing-isolated` 5/5: Stripe TEST state. `free-paths-isolated` passed again in CI run 45116196998 (#3670, head 2bb90eb). Stripe hosted Checkout and the Customer Portal are BLOCKED, because there is no Stripe TEST key. Source: Lane D. |
 | Admin and privacy | PASS | company-governance desktop · 44856477733 · 96<br>documents-approvals desktop · 44974276075 · 94<br>search-support-privacy desktop · 44974866504 · 94<br>worker-records-exports desktop · 44904394732 · 94 |
 
+## Flaky tests (policy, owner order 2026-11-23)
+
+**N = 3.** An intermittent failure counts as fixed only after **3 consecutive passes** of the same test, on the same workflow, after the fix merged. Each pass is a completed run whose id is listed in the row. Fewer than 3 keeps the row OPEN.
+
+**Nothing is quarantined, skipped or retried to get green.** The local stack runs Playwright with `retries: 0`, so a flake shows as a red run, and that is the signal.
+
+| Test | Workflow | Measured | Status | Consecutive passes since the fix |
+|---|---|---|---|---|
+| `journal-template-isolated.spec.ts`, T-1..T-3 ("T-3: the entry is stored" waits 60 s) | Signup Isolated | failed on attempt 1, passed on attempt 2 of the same run: 44618409649, 44470490897, 44317988112 | OPEN | 0 (no fix yet) |
+| `teams-projects-isolated.spec.ts`, T-3 (a company owner creates a team and invites two people) | Signup Isolated | 44486061824: attempt 1 failed, attempt 2 passed | OPEN | 0 (no fix yet) |
+| `audit-trail-isolated-web-a.spec.ts`, U-1 (closing and reopening a need writes one audit row each) | Signup Isolated | 44405544350: attempt 1 failed, attempt 2 passed | OPEN | 0 (no fix yet) |
+| `journal-reach-isolated.spec.ts`, R-3 (the detailed form stays open after a refused save) | Signup Isolated | 45286810300 (#3744, `4677c5ed`, shard 2): attempt 1 failed, attempt 2 passed | OPEN | 0 (no fix yet) |
+| `journal-reach-isolated.spec.ts`, R-1 (390) | Signup Isolated | mixed results across branches on 2026-11-22, with no same-commit re-run | SUSPECTED | — |
+
+Source: CI history 2026-11-13 → 2026-11-23, read-only (Lane S). A test is FLAKY only when it failed and then passed on the same commit.
+
 ## To dispatch before claiming the deployed build
 
 1. `invited-worker:phone`, after the owner creates the account.

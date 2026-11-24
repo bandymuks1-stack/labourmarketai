@@ -5084,7 +5084,15 @@
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
         "event_weekly_digest_journal": "Your week’s work journal summary is ready",
-        "event_history_link_offered": "An organization offered to connect your recorded work history to your account"
+        "event_history_link_offered": "An organization offered to connect your recorded work history to your account",
+        "event_team_offer_received": "A team offered itself for your need",
+        "event_team_offer_answered": "Your team's offer was answered",
+        "event_team_offer_answered_accepted": "Your team's offer was accepted",
+        "event_team_offer_answered_declined": "Your team's offer was declined",
+        "event_candidate_offer_received": "An agency proposed a candidate for your need",
+        "event_candidate_offer_answered": "Your candidate proposal was answered",
+        "event_candidate_offer_answered_accepted": "Your candidate proposal was accepted",
+        "event_candidate_offer_answered_declined": "Your candidate proposal was declined"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -5822,9 +5830,9 @@
       "confirmedTitle": "Deletion confirmed",
       "confirmedBody": "The system will delete the account within the next few minutes and send a confirmation to your account email. If anything needs review, we will tell you.",
       "inReview": "Automatic deletion is paused for review: the account holds data that may have to be kept by law or that concerns other people. You will receive the decision and its reasons by email within one month. Meanwhile your profile is not shown in search.",
-      "confirmLabelWaiting": "I understand that the account and its data are deleted irreversibly 30 days after confirmation, unless I cancel before then.",
-      "confirmStepBodyWaiting": "Your account deletion request is filed. Confirm it — the account is kept for 30 days, and you can cancel on this page during that time. After that the system deletes the account automatically and emails you a confirmation.",
-      "confirmedBodyWaiting": "The account will be deleted in 30 days. Until then you can cancel on this page. Once it is deleted, we will send a confirmation to your account email.",
+      "confirmLabelWaiting": "I understand that the account and its data are deleted irreversibly up to 30 days after confirmation, and no later than one month after my request, unless I cancel before then.",
+      "confirmStepBodyWaiting": "Your account deletion request is filed. Confirm it — the account is kept for up to 30 days (never beyond one month from your request), and you can cancel on this page during that time. After that the system deletes the account automatically and emails you a confirmation.",
+      "confirmedBodyWaiting": "The account will be deleted within 30 days, and no later than one month after your request. Until then you can cancel on this page. Once it is deleted, we will send a confirmation to your account email.",
       "status": {
         "pending": "Your account deletion request is filed.",
         "pendingConfirmed": "Account deletion is confirmed and scheduled.",
@@ -5832,7 +5840,7 @@
         "inProgress": "Account deletion is already running — it can no longer be cancelled.",
         "done": "The account has been deleted.",
         "submittedAt": "Filed: {date}",
-        "scheduledAt": "The account will be deleted on {date} (after a 30-day waiting period).",
+        "scheduledAt": "The account will be deleted on {date}.",
         "cancelUntil": "Until then you can cancel.",
         "loadError": "Could not load the account deletion status. Refresh the page and try again."
       },

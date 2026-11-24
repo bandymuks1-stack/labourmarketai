@@ -86,6 +86,8 @@ import {
   isNotificationStoreWriteBlocked,
   type NotificationEventInput,
   type JournalReviewDecision,
+  type NotificationEntityType,
+  type NotificationEventMetadata,
   type NotificationEventType,
 } from "./events";
 import {
@@ -2171,4 +2173,103 @@ export async function emitJobAlertNotificationsForCron(): Promise<JobAlertCronRe
   } catch {
     return { kind: "unavailable", reason: "thrown" };
   }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+ * B2B OFFERS (v12, 20261111230000) - a team (brigade) offered itself to a
+ * company need, or an agency proposed a candidate for it. Both directions
+ * were silent: the demand owner found offers only by opening scouting, and
+ * the supplier never learned the answer (Swedish employer audit, N-1/N-2).
+ *
+ * THE RECIPIENT IS A FACT THE WRITE PATH HANDS IN, resolved under the
+ * CALLER's own session from the offer's own rows - never from request input,
+ * never with the admin client. service_role holds no grant on
+ * customer_requests, team_demand_offers or agency_candidate_offers (the
+ * 2026-09-17 demand-interest lesson), and none is added:
+ *   - candidate offer received: the agency reads its offer row's request and
+ *     that request's owner through the share policy it already holds
+ *     (customer_requests_select_agency_share);
+ *   - candidate offer answered: the client reads the offer's `created_by`
+ *     (agency_candidate_offers_select admits the client company);
+ *   - team offer, both directions: the counterpart comes from the gated
+ *     SECURITY DEFINER `team_offer_counterpart_v1`, a separate owner-gated
+ *     migration. Until it exists the recipient is unresolved and nothing is
+ *     sent - named, never guessed.
+ *
+ * ONE recipient, the person the offer is addressed to or came from - never an
+ * organization-wide fan-out. Idempotent: the entity is the OFFER, so a retried
+ * write re-emits the same (type, offer) key and the store's UNIQUE
+ * (recipient, dedupe_key) turns it into a no-op. The row carries no name, no
+ * contact, no CV field: the received event carries only the need's opaque
+ * id (its link target), the answer only `decision`.
+ *
+ * Inert until the v12 constraint is applied: the insert fails its CHECK and
+ * the result says so, the v2..v11 precedent.
+ * ═════════════════════════════════════════════════════════════════════════ */
+export type OfferNotificationKind = "team" | "candidate";
+
+const OFFER_RECEIVED = {
+  team: { eventType: "team_offer_received", entityType: "team_demand_offer" },
+  candidate: { eventType: "candidate_offer_received", entityType: "agency_candidate_offer" },
+} as const;
+const OFFER_ANSWERED = {
+  team: { eventType: "team_offer_answered", entityType: "team_demand_offer_response" },
+  candidate: { eventType: "candidate_offer_answered", entityType: "agency_candidate_offer_response" },
+} as const;
+
+export interface OfferNotificationFacts {
+  readonly kind: OfferNotificationKind;
+  /** The offer row's id - the entity, and so the dedupe key. */
+  readonly offerId: string;
+  /** Resolved by the write path under the caller's session (see above).
+   *  Null = unresolved: nothing is sent and the miss is named. */
+  readonly recipientProfileId: string | null;
+  /** auth.uid() of the person who made the offer or answered it. */
+  readonly actorProfileId: string;
+}
+
+export interface OfferAnsweredFacts extends OfferNotificationFacts {
+  readonly decision: "accepted" | "declined";
+}
+
+async function deliverOfferEvent(
+  eventType: NotificationEventType,
+  entityType: NotificationEntityType,
+  facts: OfferNotificationFacts,
+  metadata?: NotificationEventMetadata,
+): Promise<NotificationEmitResult> {
+  if (!facts.recipientProfileId) return undeliveredResult(eventType, "recipient_unresolved");
+  if (facts.recipientProfileId === facts.actorProfileId) return { delivered: false, reason: "self_action" };
+  try {
+    const admin = createAdminClient();
+    return resultFromOutcome(
+      await deliver(admin, {
+        recipientProfileId: facts.recipientProfileId,
+        eventType,
+        entityType,
+        entityId: facts.offerId,
+        ...(metadata ? { metadata } : {}),
+      }),
+    );
+  } catch (err) {
+    return undeliveredResult(eventType, "threw", err instanceof Error ? err.message.slice(0, 200) : undefined);
+  }
+}
+
+/** A NEW offer reached the demand owner. The only metadata is the need's id,
+ *  so the bell opens scouting on that need; the offer itself is read there,
+ *  under the owner's own RLS. */
+export async function emitOfferReceivedNotification(
+  facts: OfferNotificationFacts & { readonly requestId: string | null },
+): Promise<NotificationEmitResult> {
+  const { eventType, entityType } = OFFER_RECEIVED[facts.kind];
+  return deliverOfferEvent(eventType, entityType, facts, facts.requestId ? { requestId: facts.requestId } : undefined);
+}
+
+/** The company answered; the one who offered hears which answer. */
+export async function emitOfferAnsweredNotification(
+  facts: OfferAnsweredFacts,
+): Promise<NotificationEmitResult> {
+  const { eventType, entityType } = OFFER_ANSWERED[facts.kind];
+  return deliverOfferEvent(eventType, entityType, facts, { decision: facts.decision });
 }

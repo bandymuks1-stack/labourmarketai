@@ -81,7 +81,9 @@ jobs:
           # Owner order 2026-11-23: an intermittent failure is fixed only after 3 consecutive passes.
           # #3738 fixes the P-15 phone-375 race (context panel opens expanded); this re-runs the CV
           # chain at 375 on the build with it. The other two passes follow on later ticks/days.
-          RERUN: "profile-cv-history:phone-375"
+          # 2026-11-23: N4 (#3733, goal rail on the signed-in homes) must pass mobile-surfaces on phone
+          # before N5/N7 merge; it joins the same consecutive-pass rule.
+          RERUN: "profile-cv-history:phone-375 mobile-surfaces:phone"
           RERUN_START: "2026-11-23T20:45:00Z"
           RERUN_PASSES: "3"
           # 2026-11-23 00:45 UTC: GitHub's schedule fired no tick after 22:35 UTC again; a push to
