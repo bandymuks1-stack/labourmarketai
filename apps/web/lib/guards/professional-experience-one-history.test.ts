@@ -58,7 +58,7 @@ describe("1 · one reading, every surface", () => {
     expect(cvPage).toContain('data-testid="cv-professional-experience-total"');
     // The fact strip states the total from the same reading (owner reference 2026-11-24).
     expect(cvPage).toMatch(/experience\.hours !== null && experience\.hours\.total > 0/);
-    expect(cvPage).toContain('tPremium("facts.hours")');
+    expect(cvPage).toContain('tPremium("facts.experienceTotal")');
     expect(cvPage).toMatch(/const experienceTotal = cv\.professionalExperience\?\.hours \?\? null;/);
   });
   it("the profile fact strip states the same total, derived by the same function", () => {

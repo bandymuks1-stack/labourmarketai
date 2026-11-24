@@ -8852,8 +8852,7 @@
         "experienceTotal": "profesinės patirties iš viso",
         "languages": "kalbos",
         "years": "metai",
-        "projects": "projektai",
-        "hours": "dirbtos valandos"
+        "projects": "projektai"
       },
       "capEyebrow": "Gebėjimai",
       "capEyebrowHours": "{hours} val. užfiksuoto darbo",

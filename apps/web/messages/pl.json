@@ -8852,8 +8852,7 @@
         "experienceTotal": "doświadczenia zawodowego łącznie",
         "languages": "języki",
         "years": "lata",
-        "projects": "projekty",
-        "hours": "przepracowane godziny"
+        "projects": "projekty"
       },
       "capEyebrow": "Umiejętności",
       "capEyebrowHours": "{hours} godz. zapisanej pracy",

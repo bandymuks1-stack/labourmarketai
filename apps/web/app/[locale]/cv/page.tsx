@@ -659,8 +659,14 @@ export default async function VerifiedCvPage({
     }
     if (experience.projects.length > 0)
       premiumFacts.push({ value: String(experience.projects.length), label: tPremium("facts.projects"), testid: "premium-cv-fact-projects" });
-    if (experience.hours !== null && experience.hours.total > 0)
-      premiumFacts.push({ value: premiumHours(experience.hours.total), label: tPremium("facts.hours"), testid: "premium-cv-fact-hours" });
+    // The total keeps its qualifier: it holds every provenance (journal,
+    // organization-reported, estimated), so it is "professional experience in
+    // total", never "hours worked"; the manager-confirmed part stands beside it.
+    if (experience.hours !== null && experience.hours.total > 0) {
+      premiumFacts.push({ value: premiumHours(experience.hours.total), label: tPremium("facts.experienceTotal"), testid: "premium-cv-fact-hours" });
+      if (experience.hours.journalConfirmed > 0)
+        premiumFacts.push({ value: premiumHours(experience.hours.journalConfirmed), label: tPremium("facts.confirmed"), testid: "premium-cv-fact-confirmed-hours" });
+    }
   }
   // SKILLS ARE LISTED ONCE (owner P0 2026-11-23): by the `cv-skills` section
   // below, through the ONE presentation (`presentSkills` above — claims folded

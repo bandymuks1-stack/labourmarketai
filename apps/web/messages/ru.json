@@ -8851,8 +8851,7 @@
         "experienceTotal": "профессионального опыта всего",
         "languages": "языки",
         "years": "лет",
-        "projects": "проекты",
-        "hours": "отработано часов"
+        "projects": "проекты"
       },
       "capEyebrow": "Навыки",
       "capEyebrowHours": "{hours} ч записанной работы",

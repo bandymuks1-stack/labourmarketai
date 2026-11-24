@@ -8852,8 +8852,7 @@
         "experienceTotal": "professional experience in total",
         "languages": "languages",
         "years": "years",
-        "projects": "projects",
-        "hours": "hours worked"
+        "projects": "projects"
       },
       "capEyebrow": "Capabilities",
       "capEyebrowHours": "{hours} h of recorded work",

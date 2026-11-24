@@ -125,3 +125,16 @@ describe("4 · links into a section still land on it", () => {
     expect(page).toMatch(/<CvHashToBlock active=\{activeBlock\} \/>/);
   });
 });
+
+describe("Codex on #3782: honest totals and in-page anchors", () => {
+  it("the hours total keeps its evidence qualifier, with the confirmed part beside it", () => {
+    expect(page).toContain('label: tPremium("facts.experienceTotal"), testid: "premium-cv-fact-hours"');
+    expect(page).toContain('label: tPremium("facts.confirmed"), testid: "premium-cv-fact-confirmed-hours"');
+    expect(page).not.toContain('tPremium("facts.hours")');
+  });
+  it("an anchor clicked after load opens the block that holds it", () => {
+    const hash = read("components/app/cv/cv-hash-to-block.tsx");
+    expect(hash).toContain('window.addEventListener("hashchange", open)');
+    expect(hash).toContain('window.removeEventListener("hashchange", open)');
+  });
+});

@@ -8851,8 +8851,7 @@
         "experienceTotal": "beroepservaring in totaal",
         "languages": "talen",
         "years": "jaar",
-        "projects": "projecten",
-        "hours": "gewerkte uren"
+        "projects": "projecten"
       },
       "capEyebrow": "Vaardigheden",
       "capEyebrowHours": "{hours} u vastgelegd werk",

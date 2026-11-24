@@ -12,14 +12,21 @@ import { useEffect } from "react";
  */
 export function CvHashToBlock({ active }: { readonly active: string }) {
   useEffect(() => {
-    const id = decodeURIComponent(window.location.hash.slice(1));
-    if (!id) return;
-    const target = document.getElementById(id);
-    const block = target?.closest<HTMLElement>("[data-cv-block]")?.dataset.cvBlock;
-    if (!block || block === active) return;
-    const url = new URL(window.location.href);
-    url.searchParams.set("tab", block);
-    window.location.replace(url.toString());
+    const open = () => {
+      const id = decodeURIComponent(window.location.hash.slice(1));
+      if (!id) return;
+      const target = document.getElementById(id);
+      const block = target?.closest<HTMLElement>("[data-cv-block]")?.dataset.cvBlock;
+      if (!block || block === active) return;
+      const url = new URL(window.location.href);
+      url.searchParams.set("tab", block);
+      window.location.replace(url.toString());
+    };
+    open();
+    // An in-page anchor clicked after load ("#cv-proof" inside Experience)
+    // changes only the hash: follow it into the block that holds it.
+    window.addEventListener("hashchange", open);
+    return () => window.removeEventListener("hashchange", open);
   }, [active]);
   return null;
 }

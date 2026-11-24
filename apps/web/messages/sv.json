@@ -8852,8 +8852,7 @@
         "experienceTotal": "yrkeserfarenhet totalt",
         "languages": "språk",
         "years": "år",
-        "projects": "projekt",
-        "hours": "arbetade timmar"
+        "projects": "projekt"
       },
       "capEyebrow": "Förmågor",
       "capEyebrowHours": "{hours} h registrerat arbete",
