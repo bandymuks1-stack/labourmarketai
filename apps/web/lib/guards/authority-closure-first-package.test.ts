@@ -236,6 +236,12 @@ describe("the four migrations ship paired, gated and stated", () => {
       // it corrects that context's record; the chain root walk is cycle-safe, no depth cap). Two SECURITY DEFINER
       // bodies; RED draft, needs-human-gate, NOT applied.
       "20261120190000_",
+      // 2026-11-22 owner request: a confirmed account deletion is erased within one month of receipt (GDPR
+      // Art. 12(3)); two SECURITY DEFINER bodies + one helper. Owner-approved, APPLIED ledger 20261124052729.
+      "20261122190500_",
+      // 2026-11-23 owner P0 #3679 (duplication audit SEC-1/2/4): three bypassed v1 doors revoked from
+      // authenticated (REVOKE only; RED draft, needs-human-gate, NOT applied).
+      "20261123060000_",
       // 2026-11-22 owner order: a privacy request is never shared with an agency (one SECURITY DEFINER body;
       // RED draft, needs-human-gate, NOT applied).
       "20261122180000_",

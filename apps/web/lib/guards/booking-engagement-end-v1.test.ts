@@ -1817,7 +1817,13 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-22: owner order, privacy requests never shared with an agency. RED draft, the marker is the
       // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
       "20261122180000_share_refuses_privacy_requests_v1.sql",
-]);
+      // 2026-11-22: owner request, erasure within one month of receipt. Owner-approved 2026-11-24,
+      // APPLIED ledger 20261124052729.
+      "20261122190500_privacy_deletion_within_one_month_v1.sql",
+      // 2026-11-23: owner P0 #3679, three bypassed v1 doors revoked. RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261123060000_revoke_bypassed_v1_doors_v1.sql",
+    ]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {

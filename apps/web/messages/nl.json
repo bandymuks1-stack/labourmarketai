@@ -209,7 +209,6 @@
     "formLabelLabel": "Locatie",
     "formLabelPlaceholder": "Stad of regio",
     "formPriceLabel": "Prijs",
-    "formPricePlaceholder": "bijv. € 450/maand of in overleg",
     "priceHint": "Prijs is optioneel en beschrijvend. Er wordt hier geen betaling gedaan.",
     "save": "Opslaan",
     "saving": "Opslaan…",
@@ -2976,8 +2975,7 @@
           "label": "Hoeveel werknemers nodig"
         },
         "salary": {
-          "label": "Salaris (€)",
-          "placeholder": "Bijv. 2200"
+          "label": "Salaris (€)"
         },
         "countries": {
           "label": "Voorkeurslanden (ISO-codes)",
@@ -4394,7 +4392,7 @@
           },
           "education": {
             "title": "Ik vertegenwoordig een onderwijsinstelling",
-            "desc": "Nodig lerenden uit, zie hun deelname en verbind ze met stages en banen."
+            "desc": "Nodig lerenden uit, voer programma's uit en volg hun stage en resultaten."
           }
         },
         "heading": "Begint u als persoon of als bedrijf?",
@@ -4643,7 +4641,6 @@
               "hoursPerWorker": "Uren per werknemer",
               "totalHours": "Totaal aantal uren (optionele overschrijving)",
               "rate": "Uur- / dagtarief",
-              "ratePlaceholder": "bijv. 20",
               "country": "Land / locatie",
               "materials": "Materialen",
               "equipment": "Apparatuur / gereedschap",
@@ -5825,9 +5822,9 @@
       "confirmedTitle": "Verwijdering bevestigd",
       "confirmedBody": "Het systeem verwijdert het account binnen enkele minuten en stuurt een bevestiging naar het e-mailadres van uw account. Moet iets worden beoordeeld, dan laten we het u weten.",
       "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. U ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt uw profiel niet getoond in zoekresultaten.",
-      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens 30 dagen na bevestiging onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
-      "confirmStepBodyWaiting": "Uw verzoek om uw account te verwijderen is ingediend. Bevestig het — het account blijft nog 30 dagen bestaan en in die tijd kunt u op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt u een bevestiging per e-mail.",
-      "confirmedBodyWaiting": "Het account wordt over 30 dagen verwijderd. Tot die tijd kunt u op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van uw account.",
+      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens uiterlijk 30 dagen na bevestiging, en uiterlijk een maand na mijn verzoek, onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
+      "confirmStepBodyWaiting": "Uw verzoek om uw account te verwijderen is ingediend. Bevestig het — het account blijft nog ten hoogste 30 dagen bestaan (nooit langer dan een maand na uw verzoek) en in die tijd kunt u op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt u een bevestiging per e-mail.",
+      "confirmedBodyWaiting": "Het account wordt binnen 30 dagen verwijderd, en uiterlijk een maand na uw verzoek. Tot die tijd kunt u op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van uw account.",
       "status": {
         "pending": "Uw verzoek om uw account te verwijderen is ingediend.",
         "pendingConfirmed": "Het verwijderen van uw account is bevestigd en ingepland.",
@@ -5835,7 +5832,7 @@
         "inProgress": "Uw account wordt al verwijderd — dit kan niet meer worden geannuleerd.",
         "done": "Het account is verwijderd.",
         "submittedAt": "Ingediend: {date}",
-        "scheduledAt": "Het account wordt verwijderd op {date} (na een wachttijd van 30 dagen).",
+        "scheduledAt": "Het account wordt verwijderd op {date}.",
         "cancelUntil": "Tot die tijd kunt u annuleren.",
         "loadError": "De status van het verwijderen van uw account kon niet worden geladen. Vernieuw de pagina en probeer het opnieuw."
       },
@@ -7168,7 +7165,6 @@
       "countryPlaceholder": "bijv. LT",
       "remoteLabel": "Kan op afstand worden gedaan",
       "rateLabel": "Tarief (optioneel)",
-      "ratePlaceholder": "bijv. ca. 25 EUR/u, bespreekbaar",
       "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief."
     },
     "save": "Opslaan",
@@ -13088,6 +13084,7 @@
     },
     "goToRoster": "Naar het team",
     "invalidLabel": "Controleer het e-mailadres — de uitnodiging is niet verzonden.",
+    "offerLimitLabel": "Te veel aanbiedingen. Probeer het later opnieuw.",
     "deliveryHeading": "Uitnodigingslink",
     "deliveryCreated": "Niet gemaild — e-mailbezorging is niet ingesteld. Kopieer de link en stuur die zelf naar de klant.",
     "deliverySent": "De uitnodigingsmail is verzonden. U kunt de link nog steeds kopiëren.",
@@ -15973,7 +15970,6 @@
     },
     "v3": {
       "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en de basisplaatsing van een behoefte zijn gratis.",
-      "moreChoices": "Meer opties",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
       "market": {
@@ -19394,6 +19390,19 @@
       "period": "Vastgelegd",
       "basis": "Uit {entries} logboekregels die mensen onder deze organisatie vastlegden. Apart geteld van de geïmporteerde geschiedenis hierboven en daar nooit bij opgeteld.",
       "unavailable": "Het werk dat onder deze organisatie in het logboek is vastgelegd, kon nu niet worden gelezen."
+    },
+    "forClient": {
+      "title": "Werk van uw onderaannemers",
+      "confirmed": "Bevestigde registraties",
+      "unconfirmed": "Niet-bevestigde registraties",
+      "periodHours": "{hours} u opgegeven als periodetotaal, niet opgeteld bij losse dagen.",
+      "basis": "Uit {count, plural, one {# registratie} other {# registraties}} in de eigen administratie van uw onderaannemers. Apart geteld van uw eigen werk.",
+      "unreadable": "Het werk in de administratie van partners kon nu niet worden gelezen. Dat betekent niet dat er geen is."
+    },
+    "clients": {
+      "title": "Opdrachtgevers",
+      "unnamed": "Opdrachtgevende organisatie",
+      "records": "{count, plural, one {# registratie} other {# registraties}}"
     }
   },
   "workPlan": {
@@ -19638,7 +19647,8 @@
       "heading": "Uw aanbiedingen",
       "none": "Nog geen aanbiedingen.",
       "withdraw": "Intrekken",
-      "message": "Bericht aan de opdrachtgever"
+      "message": "Bericht aan de opdrachtgever",
+      "orgNext": "De opdrachtgever ging in principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
     },
     "status": {
       "offered": "Wacht op antwoord",
@@ -19739,7 +19749,7 @@
       "message": "Bericht aan het team",
       "messageCompany": "Bericht aan het bedrijf",
       "kindOrganization": "Bedrijfsaanbod",
-      "orgNext": "In principe akkoord (geen contract). Spreek de details en de mensen die het werk doen af in het gesprek."
+      "orgNext": "In principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
     },
     "orgHeading": "Ons bedrijf aanbieden voor een open behoefte",
     "orgIntro": "Bied uw bedrijf zelf aan — uw mensen, uw dienst of als onderaannemer — voor één open behoefte. Eerst een ploeg aanmaken is niet nodig.",
@@ -19761,7 +19771,6 @@
       },
       "capacity": "Mensen",
       "rate": "Tarief",
-      "ratePlaceholder": "bijv. 32 €/u of vaste prijs",
       "period": "Periode",
       "start": "Begin",
       "end": "Einde",

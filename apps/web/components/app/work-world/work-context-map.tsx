@@ -104,8 +104,10 @@ export function WorkContextMap({
     <section aria-label={title} className="flex flex-col gap-4" data-testid={testId}>
       <h3 className="font-mono text-meta uppercase tracking-label text-text-secondary">{title}</h3>
 
-      {/* Desktop: the spatial map. */}
-      <div className="relative mx-auto hidden aspect-[16/9] w-full max-w-3xl md:block" data-testid={`${testId}-spatial`}>
+      {/* Desktop: the spatial map. The bottom nodes' labels hang below the
+          16:9 box; `mb-14` reserves their room, so at 768 px they no longer
+          print over the line under the map (design audit 2026-11-22). */}
+      <div className="relative mx-auto mb-14 hidden aspect-[16/9] w-full max-w-3xl md:block" data-testid={`${testId}-spatial`}>
         <svg
           aria-hidden
           viewBox="0 0 100 100"

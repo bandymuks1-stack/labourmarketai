@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FoldedRows } from "@/components/app/folded-rows";
 import { TrackedLink } from "@/components/app/tracked-link";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -327,38 +328,6 @@ function RequestRow({
       ) : null}
       </div>
     </li>
-  );
-}
-
-/** Rows a list shows before the rest open in place (responsive pass
- *  2026-11-22): the newest come first, so a new need is always on show. */
-const LIST_VISIBLE = 5;
-
-function FoldedRows({
-  rows,
-  showAll,
-  testId,
-  render,
-}: {
-  rows: readonly CustomerRequestRow[];
-  showAll?: (count: number) => string;
-  testId: string;
-  render: (r: CustomerRequestRow) => React.ReactNode;
-}) {
-  const fold = showAll && rows.length > LIST_VISIBLE;
-  const shown = fold ? rows.slice(0, LIST_VISIBLE) : rows;
-  return (
-    <>
-      <ul className="flex flex-col gap-2">{shown.map(render)}</ul>
-      {fold ? (
-        <details className="group" data-testid={testId}>
-          <summary className="flex min-h-11 cursor-pointer list-none items-center text-xs font-medium text-brand-blue [&::-webkit-details-marker]:hidden">
-            {showAll(rows.length)}
-          </summary>
-          <ul className="mt-2 flex flex-col gap-2">{rows.slice(LIST_VISIBLE).map(render)}</ul>
-        </details>
-      ) : null}
-    </>
   );
 }
 

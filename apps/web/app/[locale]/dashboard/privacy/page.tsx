@@ -124,9 +124,10 @@ export default async function PrivacyPage({
   // applied the read is `unavailable` and the section renders exactly as
   // before — `deletionSectionMode` keeps the old rule for that case.
   const deletionMode = deletionSectionMode(deletionStatus, openDeletion?.status ?? null);
-  // The scheduled date is the RPC's `scheduled_erasure_at` (deletion_confirmed_at + the
-  // owner's 30-day waiting period, computed in the database) — never derived
-  // here, so there is one source of truth.
+  // The scheduled date is the RPC's `scheduled_erasure_at`
+  // (privacy_account_deletion_due_at: the owner's 30-day waiting period after
+  // confirmation, capped at one month from the request, computed in the
+  // database) — never derived here, so there is one source of truth.
   const deletionDate = (value: string | null) =>
     formatUtcDateTime(value, locale, {
       year: "numeric",

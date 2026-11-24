@@ -67,7 +67,7 @@ test("H-1. a company owner's header: no overlapping controls and a readable work
         // person always reads which workspace they are in.
         const name = await page
           .getByTestId("workspace-chip")
-          .locator('span[class*="sm:truncate"]')
+          .locator('span[class*="lg:truncate"]')
           .first()
           .evaluate((e) => Math.round(e.getBoundingClientRect().width));
         if (name < 48) found.push(`/${locale}${path} @${width}: the workspace name is ${name}px wide`);

@@ -6,6 +6,9 @@ import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmat
 import { countConfirmedEntries, type ConfirmableEntryRow } from "@/lib/journal/review-status";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { cache } from "react";
+import { getTranslations } from "next-intl/server";
+import { countDeclaredSkills } from "@/lib/cv-export/skill-presentation";
+import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
@@ -295,28 +298,45 @@ async function declaredSkillsUnionCount(
   profileId: string,
   skillRows: readonly WorkerSkillRow[],
 ): Promise<{ count: number; status: "ok" | "unavailable" }> {
-  const norm = (s: string): string =>
-    s.toLowerCase().replace(/\s+/g, " ").trim();
-  const labels = new Set<string>();
+  // ONE counting rule (audit CV-16): the number is the items the skills list
+  // shows, by `presentSkills`. This used to dedup claim labels against
+  // catalogue SLUGS, so a claim in the person's own language never met the
+  // skill it names and was counted a second time.
+  const labels: string[] = [];
   let status: "ok" | "unavailable" = "ok";
   try {
     const { data: claims, error } = await asAny(supabase)
       .from("profile_skill_claims")
-      .select("normalized_label")
+      .select("label")
       .eq("profile_id", profileId);
     if (error) status = "unavailable";
-    for (const c of (claims ?? []) as { normalized_label: string | null }[]) {
-      if (c.normalized_label) labels.add(norm(c.normalized_label));
+    for (const c of (claims ?? []) as { label: string | null }[]) {
+      if (c.label) labels.push(c.label);
     }
   } catch {
     // Keep whatever we have, but say the total is not known.
     status = "unavailable";
   }
-  for (const r of skillRows) {
-    const label = r.skills?.slug ?? r.skill_id;
-    if (label) labels.add(norm(String(label)));
+  let nameOf = (slug: string): string => slug;
+  try {
+    const tSkill = await getTranslations("skillNames");
+    nameOf = (slug) => (tSkill.has(slug) ? tSkill(slug) : slug);
+  } catch {
+    // No request locale (a job, a test): slugs still count once each.
   }
-  return { count: labels.size, status };
+  const mapped = mapClaimLabelsToCatalogSlugs(labels);
+  const count = countDeclaredSkills({
+    slugs: skillRows
+      .map((r) => r.skills?.slug ?? r.skill_id)
+      .filter((x): x is string => typeof x === "string" && x !== ""),
+    claims: labels.map((label) => ({
+      label,
+      origin: "profile" as const,
+      mappedSlugs: mapped.get(label.trim()) ?? [],
+    })),
+    nameOf,
+  });
+  return { count, status };
 }
 
 /**

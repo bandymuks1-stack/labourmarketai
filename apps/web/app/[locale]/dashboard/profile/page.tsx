@@ -15,6 +15,7 @@ import { ProfileAvatar } from "@/components/app/profile-avatar";
 import { getOwnAvatar } from "@/lib/profile/avatar";
 import {
   deriveSkillEvidence,
+  skillEvidenceOfPresentation,
   type SkillEvidenceInput,
 } from "@/lib/profile/skill-evidence";
 import {
@@ -187,6 +188,7 @@ export default async function ProfilePage({
     tPublicSummary,
     tRoleLedger,
     tJournal,
+    tCapability,
   ] = await Promise.all([
     getTranslations("skills"),
     getTranslations("spaces"),
@@ -225,6 +227,8 @@ export default async function ProfilePage({
     getTranslations("roleLedger"),
     // The ONE "no name" phrase set (`journal.unnamedOrganization.*`, #3356).
     getTranslations("journal"),
+    // the one existing "Saving…" of this page's editors (`capabilityProfile.expSaving`)
+    getTranslations("capabilityProfile"),
   ]);
 
   /**
@@ -846,8 +850,14 @@ export default async function ProfilePage({
    * reads — this is the duplicate-work removal the slice measured.
    */
   const skillEvidenceSummary = workerId
-    ? deriveSkillEvidence(skillEvidenceInputs, savedSkillClaims.length)
+    ? skillPresentation
+      ? skillEvidenceOfPresentation(skillPresentation)
+      : deriveSkillEvidence(skillEvidenceInputs, savedSkillClaims.length)
     : undefined;
+  // ONE declared-skills number for the whole page (audit CV-16): the items
+  // the skills list shows. Without a worker row there are only claims.
+  const declaredSkillCount =
+    skillPresentation?.visible ?? savedSkillClaims.length + savedSkills.length;
 
   const cvSectionCards: CvSectionCard[] | undefined = (() => {
     if (!workerId || recordReadUnavailable) return undefined;
@@ -1252,7 +1262,7 @@ export default async function ProfilePage({
         avatarUrl={avatar.signedUrl}
         workerId={workerId}
         cvProvided={savedProfileText.trim().length > 0}
-        selfDeclaredCount={savedSkillClaims.length + savedSkills.length}
+        selfDeclaredCount={declaredSkillCount}
         hasWorker={workerId !== null}
         // Derived ONCE and shared (it was computed three times per render).
         skillEvidence={skillEvidenceSummary}
@@ -1271,7 +1281,7 @@ export default async function ProfilePage({
           email: profile?.email ?? null,
           avatarUrl: avatar.signedUrl,
           about: savedProfileText,
-          skillsDeclared: savedSkillClaims.length + savedSkills.length,
+          skillsDeclared: declaredSkillCount,
           // Real saved country signal (worker-owned) — lets the ONE minimum
           // contract count "location" honestly instead of always-missing.
           location: worker?.current_location_country ?? null,
@@ -1440,6 +1450,7 @@ export default async function ProfilePage({
         <WorkerPublicSummaryEditor
           initialHeadline={(worker as { headline?: string | null } | null)?.headline ?? ""}
           initialBio={(worker as { bio?: string | null } | null)?.bio ?? ""}
+          draftOwner={user.id}
           labels={{
             title: tPublicSummary("title"),
             audience: tPublicSummary("audience"),
@@ -1448,6 +1459,7 @@ export default async function ProfilePage({
             bio: tPublicSummary("bio"),
             bioPlaceholder: tPublicSummary("bioPlaceholder"),
             save: tPublicSummary("save"),
+            saving: tCapability("expSaving"),
             saved: tPublicSummary("saved"),
             tooLong: tPublicSummary("tooLong"),
             error: tPublicSummary("error"),
