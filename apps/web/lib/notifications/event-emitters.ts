@@ -120,6 +120,38 @@ import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 type AdminClient = ReturnType<typeof createAdminClient>;
 
 /**
+ * The OTHER party of a team offer, as the recipient of its notification: for
+ * the team that offered or withdrew, the owner of the need; for the company
+ * answering, the person who made the offer. Neither side can read the other
+ * under its own RLS, so it comes from the gated SECURITY DEFINER
+ * `team_offer_counterpart_v1` (20261112213100, RED, owner-gated).
+ *
+ * Decision 0033: that identity must never reach the other party. The function
+ * is executable by service_role ONLY, so it is called here with the admin
+ * client, passing the caller id the calling server action verified from the
+ * session (never browser input) and the event being notified. It answers only
+ * when the offer's current state matches the event and the caller is on the
+ * side that caused it. The id addresses one notification row and is never
+ * returned to the browser, MCP or chat. Until the migration is applied, or on
+ * any error, this is null and the notification names an unresolved recipient
+ * instead of guessing.
+ */
+export async function resolveTeamOfferCounterpart(
+  offerId: string,
+  callerId: string,
+  event: "offered" | "withdrawn" | "accepted" | "declined",
+): Promise<string | null> {
+  try {
+    const { data, error } = await (createAdminClient() as unknown as {
+      rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+    }).rpc("team_offer_counterpart_v1", { p_offer_id: offerId, p_caller: callerId, p_event: event });
+    return !error && typeof data === "string" ? data : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * ONE greppable marker for "the domain write happened and the recipient was
  * not told" — the generic sibling of `INTEREST_UNDELIVERED` below, which
  * production proved was needed: without a marker, a permanent delivery
