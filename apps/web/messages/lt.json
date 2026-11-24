@@ -8850,7 +8850,10 @@
         "confirmed": "su vadovo įrašu",
         "organization": "organizacijų įrašuose",
         "experienceTotal": "profesinės patirties iš viso",
-        "languages": "kalbos"
+        "languages": "kalbos",
+        "years": "metai",
+        "projects": "projektai",
+        "hours": "dirbtos valandos"
       },
       "capEyebrow": "Gebėjimai",
       "capEyebrowHours": "{hours} val. užfiksuoto darbo",
@@ -8967,6 +8970,14 @@
         "none": "Kito žingsnio kol kas parodyti negalime. Daugiau įrašyto darbo duos daugiau pagrindo.",
         "unknown": "Dabar nepavyko perskaityti."
       }
+    },
+    "blocks": {
+      "overview": "Apžvalga",
+      "experience": "Patirtis",
+      "projects": "Projektai",
+      "photos": "Nuotraukos",
+      "documents": "Dokumentai",
+      "reviews": "Atsiliepimai"
     }
   },
   "todayScreen": {

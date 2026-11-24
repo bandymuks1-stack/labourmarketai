@@ -240,49 +240,48 @@ describe("PROFESINIS PROFILIS — the page opens on the person, not on seven dec
   });
 });
 
-describe("MANO CV — a document with a way in, and never a dead anchor", () => {
+describe("MANO CV — one screen per block, each block by its own address (decision 0034)", () => {
   const page = read("app/[locale]/cv/page.tsx");
+  const tabs = read("components/app/cv/cv-block-tabs.tsx");
 
-  it("the jump strip is the existing primitive and is never printed", () => {
-    expect(page).toMatch(/from "@\/components\/app\/page-quick-nav"/);
-    expect(page).toMatch(/<PageQuickNav[\s\S]{0,220}className="print:hidden"/);
+  it("the jump strip is replaced by block tabs, never printed", () => {
+    expect(page).not.toMatch(/<PageQuickNav\b/);
+    expect(page).toMatch(/<CvBlockTabs\b/);
+    expect(tabs).toMatch(/data-testid="cv-block-tabs"/);
+    expect(tabs).toMatch(/print:hidden/);
   });
 
-  it("every anchor is built from the SAME predicate that renders its section", () => {
-    const items = page.slice(
-      page.indexOf("const cvQuickNavItems = ["),
-      page.indexOf("const cvQuickNavItems = [") + 1400,
-    );
-    for (const [flag, href] of [
-      ["visibility.workHistory", "#cv-work-history"],
-      ["visibility.practiceHistory", "#cv-practice-history"],
-      ["visibility.education", "#cv-education"],
-      ["visibility.languages", "#cv-languages"],
-      ["visibility.certificates", "#cv-certificates"],
-      ["visibility.projects", "#cv-projects"],
-      ["visibility.achievements", "#cv-achievements"],
-    ] as const) {
-      expect(items, href).toContain(flag);
-      expect(items, href).toContain(href);
-    }
-    // the summary anchor covers EITHER of the two blocks that can render it
-    expect(items).toMatch(/cv\.professionalSummary \|\| factsSentences\.length > 0/);
+  it("each block has its own address, so a link opens it directly", () => {
+    expect(tabs).toMatch(/export function parseCvBlock/);
+    expect(page).toMatch(/const activeBlock = parseCvBlock\(sp\.tab\)/);
+    expect(page).toMatch(/q\.set\("tab", b\)/);
   });
 
-  it("every anchor has a real target on the page", () => {
-    const hrefs = [
-      ...page.slice(page.indexOf("const cvQuickNavItems = [")).matchAll(/href: "#(cv-[a-z-]+)"/g),
-    ].map((m) => m[1]);
-    expect(hrefs.length).toBeGreaterThanOrEqual(8);
-    for (const id of hrefs) {
+  it("a hidden block still prints — the downloaded CV loses no section", () => {
+    expect(tabs).toMatch(/hidden print:contents/);
+  });
+
+  it("every section stays on the page, inside a block (nothing deleted)", () => {
+    for (const id of [
+      "cv-summary-section",
+      "cv-work-history",
+      "cv-practice-history",
+      "cv-skills",
+      "cv-education",
+      "cv-languages",
+      "cv-certificates",
+      "cv-projects",
+      "cv-achievements",
+      "cv-proof",
+    ]) {
       expect(page, id).toMatch(new RegExp(`id="${id}"`));
     }
+    expect((page.match(/<CvTabPanel block=/g) ?? []).length).toBeGreaterThanOrEqual(6);
   });
 
-  it("the CV stays a document — no section was collapsed to make it short", () => {
-    // a CV is read top to bottom; the fix was a way IN, not a fold
-    const body = page.slice(page.indexOf('data-testid="cv-work-history"'));
-    expect(body).not.toMatch(/<details[\s\S]{0,200}data-testid="cv-/);
+  it("a block with nothing in it has no tab, from the SAME predicates that render its sections", () => {
+    expect(page).toMatch(/projects: visibility\.projects \|\| visibility\.achievements/);
+    expect(page).toMatch(/documents: visibility\.education \|\| visibility\.languages \|\| visibility\.certificates/);
   });
 });
 
@@ -322,8 +321,6 @@ describe("the CV summary anchor lands on whichever block renders", () => {
   const page = read("app/[locale]/cv/page.tsx");
 
   it("the facts-only state carries the summary id, and never duplicates it", () => {
-    // the quick-nav offers the anchor when EITHER block renders
-    expect(page).toMatch(/cv\.professionalSummary \|\| factsSentences\.length > 0/);
     // so the facts section takes the id exactly when the summary block is absent
     expect(page).toMatch(/id=\{!cv\.professionalSummary \? "cv-summary-section" : undefined\}/);
     // one unconditional id on the summary block, one conditional on the facts

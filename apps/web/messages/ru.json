@@ -8849,7 +8849,10 @@
         "confirmed": "с записью руководителя",
         "organization": "в записях организаций",
         "experienceTotal": "профессионального опыта всего",
-        "languages": "языки"
+        "languages": "языки",
+        "years": "лет",
+        "projects": "проекты",
+        "hours": "отработано часов"
       },
       "capEyebrow": "Навыки",
       "capEyebrowHours": "{hours} ч записанной работы",
@@ -8967,7 +8970,15 @@
         "unknown": "Сейчас не удалось прочитать."
       }
     },
-    "educationSelfStated": "Образование указано самим работником."
+    "educationSelfStated": "Образование указано самим работником.",
+    "blocks": {
+      "overview": "Обзор",
+      "experience": "Опыт",
+      "projects": "Проекты",
+      "photos": "Фото",
+      "documents": "Документы",
+      "reviews": "Отзывы"
+    }
   },
   "todayScreen": {
     "eyebrow": "Сегодня",

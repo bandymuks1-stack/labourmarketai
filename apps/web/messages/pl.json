@@ -8850,7 +8850,10 @@
         "confirmed": "z wpisem kierownika",
         "organization": "w zapisach organizacji",
         "experienceTotal": "doświadczenia zawodowego łącznie",
-        "languages": "języki"
+        "languages": "języki",
+        "years": "lata",
+        "projects": "projekty",
+        "hours": "przepracowane godziny"
       },
       "capEyebrow": "Umiejętności",
       "capEyebrowHours": "{hours} godz. zapisanej pracy",
@@ -8967,6 +8970,14 @@
         "none": "Nie ma jeszcze następnego kroku do pokazania. Więcej zapisanej pracy da więcej podstaw.",
         "unknown": "Nie udało się teraz odczytać."
       }
+    },
+    "blocks": {
+      "overview": "Przegląd",
+      "experience": "Doświadczenie",
+      "projects": "Projekty",
+      "photos": "Zdjęcia",
+      "documents": "Dokumenty",
+      "reviews": "Opinie"
     }
   },
   "todayScreen": {

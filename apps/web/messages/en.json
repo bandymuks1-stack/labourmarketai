@@ -8850,7 +8850,10 @@
         "confirmed": "with a manager's record",
         "organization": "in organisation records",
         "experienceTotal": "professional experience in total",
-        "languages": "languages"
+        "languages": "languages",
+        "years": "years",
+        "projects": "projects",
+        "hours": "hours worked"
       },
       "capEyebrow": "Capabilities",
       "capEyebrowHours": "{hours} h of recorded work",
@@ -8967,6 +8970,14 @@
         "none": "No next move to show yet. More recorded work gives this more to go on.",
         "unknown": "Could not be read right now."
       }
+    },
+    "blocks": {
+      "overview": "Overview",
+      "experience": "Experience",
+      "projects": "Projects",
+      "photos": "Photos",
+      "documents": "Documents",
+      "reviews": "Reviews"
     }
   },
   "todayScreen": {

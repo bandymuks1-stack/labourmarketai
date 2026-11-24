@@ -8849,7 +8849,10 @@
         "confirmed": "mit Eintrag der Leitung",
         "organization": "in Aufzeichnungen von Organisationen",
         "experienceTotal": "Berufserfahrung insgesamt",
-        "languages": "Sprachen"
+        "languages": "Sprachen",
+        "years": "Jahre",
+        "projects": "Projekte",
+        "hours": "Arbeitsstunden"
       },
       "capEyebrow": "Fähigkeiten",
       "capEyebrowHours": "{hours} Std. erfasste Arbeit",
@@ -8967,7 +8970,15 @@
         "unknown": "Konnte gerade nicht gelesen werden."
       }
     },
-    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft."
+    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft.",
+    "blocks": {
+      "overview": "Übersicht",
+      "experience": "Erfahrung",
+      "projects": "Projekte",
+      "photos": "Fotos",
+      "documents": "Dokumente",
+      "reviews": "Bewertungen"
+    }
   },
   "todayScreen": {
     "eyebrow": "Heute",

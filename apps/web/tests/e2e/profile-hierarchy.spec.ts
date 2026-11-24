@@ -168,7 +168,7 @@ test.describe("the profile leads with what it exists to edit", () => {
    */
   test("summary first: no strip; the editor bars are closed on arrival", async ({ page }) => {
     await open(page, 1280, 900, "summary");
-    await expect(page.locator("[data-testid='page-quick-nav']")).toHaveCount(0);
+    // The quick-nav component itself was removed (decision 0034, block tabs).
     await expect(page.locator("main [data-testid='profile-hub-overview']")).toBeVisible();
     for (const id of ["profile-edit", "cv-details", "capabilities", "profile-about"]) {
       await expect(page.locator(`main #${id}`), `#${id} closed`).toHaveJSProperty("open", false);
