@@ -43,7 +43,7 @@
  * audit); the owner deletes it from the Supabase dashboard when it is no
  * longer wanted.
  */
-import { createClient } from "@supabase/supabase-js";
+import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
 import {
   PROD_QA_AGENCY_EMAIL,
@@ -132,6 +132,12 @@ async function main(): Promise<void> {
   }
 
   if (existing) {
+    // The Living CV screens account must be past onboarding (see markLivingCvOnboarded); an
+    // earlier provision that predates that rule is completed here, and nothing else is touched.
+    if (target.email === PROD_QA_LIVING_CV_EMAIL) {
+      await markLivingCvOnboarded(admin, existing.id);
+      return;
+    }
     console.info(
       `[prod-qa] already provisioned (id=${existing.id.slice(0, 8)}…). ` +
         "Nothing was modified.",
@@ -184,9 +190,33 @@ async function main(): Promise<void> {
     `[prod-qa] PROVISIONED ${target.email} (id=${data.user.id.slice(0, 8)}…), ` +
       "passwordless, app_metadata.qa_synthetic=true.",
   );
+  if (target.email === PROD_QA_LIVING_CV_EMAIL) await markLivingCvOnboarded(admin, data.user.id);
   console.info(
     "[prod-qa] next: mint a session with scripts/prod-qa-mint-session.ts, " +
       "then run tests/e2e/employee-beta-gate.spec.ts.",
+  );
+}
+
+/**
+ * The Living CV screens account is not proving onboarding: the dashboard layout sends any profile
+ * without `onboarded_at` to /onboarding, and the first screens run (45397606197) stopped there. It
+ * is created past onboarding. Only `onboarded_at`, only when it is still empty, only this account.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- the script's untyped admin client
+async function markLivingCvOnboarded(admin: SupabaseClient<any>, userId: string): Promise<void> {
+  const { data, error } = await admin
+    .from("profiles")
+    .update({ onboarded_at: new Date().toISOString() })
+    .eq("id", userId)
+    .is("onboarded_at", null)
+    .select("id");
+  if (error) {
+    fail(`marking the Living CV screens account onboarded failed: ${error.message}`);
+    return;
+  }
+  console.info(
+    `[prod-qa] Living CV screens account (id=${userId.slice(0, 8)}…): ` +
+      ((data ?? []).length > 0 ? "marked onboarded." : "already onboarded; nothing was modified."),
   );
 }
 

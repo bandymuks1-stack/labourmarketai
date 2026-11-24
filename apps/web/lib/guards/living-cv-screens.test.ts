@@ -160,6 +160,31 @@ describe("the workflow publishes only ciphertext", () => {
     expect(workflow).toMatch(/mint_existing "qa\.livingcv\+read1@labourmarket\.ai" livingcv/);
   });
 
+  it("a failure names one fixed cause from the walk's own vocabulary, never the error's text", () => {
+    const atFn = spec.slice(spec.indexOf("async function at<T>"), spec.indexOf("async function context"));
+    expect(atFn).toMatch(/\(\$\{causeOf\(e\)\}\)/);
+    expect(atFn).not.toMatch(/\.message/);
+    const cause = spec.slice(spec.indexOf("function causeOf"), spec.indexOf("async function at<T>"));
+    // Every branch returns a literal from CAUSES; the message is only compared, never returned
+    // except where it equals a fixed literal.
+    expect(cause).toMatch(/return "other";/);
+    expect(spec).toMatch(/"redirected to onboarding"/);
+    expect(spec).toMatch(/redirected: onboarding/);
+    expect(spec).toMatch(/reasons: \[`not generated: \$\{causeOf\(e\)\} \(\$\{step\}\)`\]/);
+  });
+
+  it("the account is provisioned past onboarding, touching only onboarded_at and only when empty", () => {
+    const prov = read("scripts/prod-qa-provision.ts");
+    const fn = prov.slice(prov.indexOf("async function markLivingCvOnboarded"), prov.indexOf("function fail("));
+    expect(fn).toMatch(/\.from\("profiles"\)/);
+    expect(fn).toMatch(/\.update\(\{ onboarded_at: new Date\(\)\.toISOString\(\) \}\)/);
+    expect(fn).toMatch(/\.is\("onboarded_at", null\)/);
+    // Called for this account only: after creating it, and for an earlier provision of it.
+    expect(prov).toMatch(/if \(target\.email === PROD_QA_LIVING_CV_EMAIL\) await markLivingCvOnboarded\(admin, data\.user\.id\)/);
+    expect(prov).toMatch(/if \(target\.email === PROD_QA_LIVING_CV_EMAIL\) \{\n\s+await markLivingCvOnboarded\(admin, existing\.id\)/);
+    expect((prov.match(/markLivingCvOnboarded\(/g) ?? []).length).toBe(3);
+  });
+
   it("only a public key is committed", () => {
     expect(key).toMatch(/^-----BEGIN PUBLIC KEY-----\n[A-Za-z0-9+/=\n]+-----END PUBLIC KEY-----\n?$/);
     expect(key).not.toMatch(/PRIVATE/);
