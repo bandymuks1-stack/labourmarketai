@@ -164,7 +164,7 @@ completion roadmap and #3265 remain the shared queue; no second register is crea
 | #3811 | IN_PROGRESS | retry-attempt review finding on `60c047f0`; corrective commit and regression checks before merge |
 | #3813 | MERGED | `077dd6c3cc7386bfb06298b524cb7ef58c352000`; production queue verification pending |
 | #3815 | MERGED | `880dd76fd50c9de3686dbfad2f4e4fb48dd1b499`; production notification walk pending |
-| #3782 | CODE_COMPLETE | `e3a402bab`; required checks green, source review complete; production visual acceptance pending |
+| #3782 | MERGED | `0b1f712671ab01e85b8fd6eb8420530d51d3152a`; production visual acceptance pending |
 | worker-records-exports | FAIL (saved-search step) | 45522721334: both CSV export checks passed; English saved-search strip failed; final isolation step did not run |
 
 GREEN integration uses the existing required checks. RED gates, deploy-freeze,
