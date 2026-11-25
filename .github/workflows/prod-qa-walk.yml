@@ -296,6 +296,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      deployments: read # production-vps deploy records, including reruns
     outputs:
       brake: ${{ (steps.brake_a.outcome == 'success' && steps.brake_e.outcome == 'success' && steps.brake_b.outcome == 'success' && steps.brake_c.outcome == 'success') && 'clear' || 'refused' }}
     # AUTOMATIC BRAKES (owner order 2026-10-23, after one brigade walk made ~8,100 Supabase requests in
@@ -416,6 +417,7 @@ jobs:
     permissions:
       contents: read
       actions: read # the gap brake reads the previous walk's end time
+      deployments: read # production-vps deploy records, including reruns
     outputs:
       brake: ${{ (steps.brake_d.outcome == 'success' && steps.brake_we.outcome == 'success' && steps.brake_wa.outcome == 'success') && 'clear' || 'refused' }}
     # NO service-role key at job level (owner decision 2026-11-14, R2 P3-1 on #3303): a job-level

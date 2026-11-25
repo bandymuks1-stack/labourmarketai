@@ -7,6 +7,8 @@ import {
   gapRemainingSeconds,
   judgeDeployBrake,
   runShippedFromJobs,
+  readDeployVerdict,
+  readStandaloneDeployVerdict,
   judgeErrorBrake,
   judgeHealth,
   judgeHealthSamples,
@@ -144,6 +146,266 @@ describe("deploy brake", () => {
     it("without the own run nothing changes: the same lists refuse as before", () => {
       expect(judgeDeployBrake([self, done(60)], now).refuse).toBe(true);
     });
+  });
+});
+
+describe("standalone deploy evidence survives capped run history", () => {
+  const repo = "owner/project";
+  const prefix = `repos/${repo}`;
+  const now = new Date("2026-11-25T16:00:00Z");
+  const ago = (minutes: number) => new Date(now.getTime() - minutes * 60_000).toISOString();
+  const active = ["in_progress", "queued", "waiting", "requested", "pending"];
+  const historyPath = `${prefix}/actions/workflows/deploy-vps.yml/runs?per_page=10`;
+  const deploymentsPath = `${prefix}/deployments?environment=production-vps&per_page=50`;
+  type Candidate = { workflow?: string; jobName?: string; endedAgo?: number; createdAgo?: number };
+
+  function setup(specs: Candidate[] = [{}]) {
+    const responses = new Map<string, unknown>();
+    const calls: string[] = [];
+    responses.set(historyPath, { total_count: 0, workflow_runs: [] });
+    for (const status of active) {
+      responses.set(`${prefix}/actions/workflows/deploy-vps.yml/runs?status=${status}&per_page=1`, { total_count: 0, workflow_runs: [] });
+    }
+    const candidates = specs.map((spec, index) => {
+      const deployment = { id: 500 - index, environment: "production-vps", created_at: ago(spec.createdAgo ?? 15 + index) };
+      const run = { id: 1000 + index, path: spec.workflow ?? ".github/workflows/deploy-vps.yml", status: "completed", created_at: ago(500) };
+      const job = {
+        id: 2000 + index, run_id: run.id, name: spec.jobName ?? "deploy", status: "completed", conclusion: "success",
+        completed_at: ago(spec.endedAgo ?? 1),
+      };
+      const status = { state: "success", log_url: `https://github.com/${repo}/actions/runs/${run.id}/job/${job.id}` };
+      const statusPath = `${prefix}/deployments/${deployment.id}/statuses?per_page=1`;
+      const jobPath = `${prefix}/actions/jobs/${job.id}`;
+      const runPath = `${prefix}/actions/runs/${run.id}`;
+      responses.set(statusPath, [status]);
+      responses.set(jobPath, job);
+      responses.set(runPath, run);
+      return { deployment, status, job, run, statusPath, jobPath, runPath };
+    });
+    responses.set(deploymentsPath, candidates.map((c) => c.deployment));
+    const api = (path: string): unknown => {
+      calls.push(path);
+      if (!responses.has(path)) throw new Error("unexpected API read");
+      return responses.get(path);
+    };
+    return { responses, calls, candidates, api };
+  }
+  const verdict = (f: ReturnType<typeof setup>) => readDeployVerdict({ api: f.api, repo, now, ownId: 0 });
+
+  it("ten cancelled pending runs cannot hide the eleventh run's recent ship", () => {
+    const f = setup();
+    const runs = Array.from({ length: 10 }, (_, index) => ({ id: index + 1, status: "completed", conclusion: "cancelled", updated_at: ago(1) }));
+    f.responses.set(historyPath, { total_count: 10000, workflow_runs: runs });
+    for (const run of runs) f.responses.set(`${prefix}/actions/runs/${run.id}/jobs?filter=all&per_page=100`, { total_count: 0, jobs: [] });
+    const result = verdict(f);
+    expect(result.refuse).toBe(true);
+    expect(result.reason).toContain("quiet period 5 min");
+    expect(f.calls).toContain(f.candidates[0].jobPath);
+    expect(f.calls.filter((path) => path.includes("/runs?per_page="))).toEqual([historyPath]);
+  });
+
+  it.each([5, 6, 60])("clears after %i quiet minutes without scanning lifetime run history", (endedAgo) => {
+    const f = setup([{ endedAgo, createdAgo: endedAgo + 10 }]);
+    f.responses.set(historyPath, { total_count: 10000, workflow_runs: [] });
+    expect(verdict(f).refuse).toBe(false);
+    expect(f.calls).toHaveLength(10); // one old guard + five active probes + deployments/status/job/run
+  });
+
+  it.each([[1, true], [10, false]] as const)(
+    "a verified skipped ship uses the older actual ship (%i minutes ago, refuse=%s)", (endedAgo, refuse) => {
+      const f = setup([
+        { createdAgo: 0.5, endedAgo: 0.25 },
+        { createdAgo: 20, endedAgo },
+      ]);
+      for (const [index, conclusion] of [[0, "skipped"], [1, "success"]] as const) {
+        const candidate = f.candidates[index];
+        f.responses.set(candidate.jobPath, {
+          ...candidate.job,
+          steps: [{ name: "Ship + activate on the VPS (forced-command receiver)", conclusion }],
+        });
+      }
+      const result = verdict(f);
+      expect(result.refuse).toBe(refuse);
+      expect(result.reason).toContain(`ended ${endedAgo} min`);
+      expect(f.calls).toContain(f.candidates[1].jobPath);
+    },
+  );
+
+  it("refuses when every deployment is a proven skipped ship and no actual ship is found", () => {
+    const f = setup();
+    const candidate = f.candidates[0];
+    f.responses.set(candidate.jobPath, {
+      ...candidate.job,
+      steps: [{ name: "Ship + activate on the VPS (forced-command receiver)", conclusion: "skipped" }],
+    });
+    const result = verdict(f);
+    expect(result.refuse).toBe(true);
+    expect(result.reason).toContain("no deploy job was found");
+  });
+
+  it.each([{ steps: undefined }, { steps: null }, { steps: [] }, { steps: [{ name: "Ship + activate on the VPS (forced-command receiver)", conclusion: null }] }])(
+    "keeps the quiet period when ship-step evidence is incomplete: %j", ({ steps }) => {
+      const f = setup([
+        { createdAgo: 2, endedAgo: 1 },
+        { createdAgo: 20, endedAgo: 10 },
+      ]);
+      const candidate = f.candidates[0];
+      f.responses.set(candidate.jobPath, { ...candidate.job, steps });
+      expect(verdict(f).refuse).toBe(true);
+      expect(f.calls).not.toContain(f.candidates[1].jobPath);
+    },
+  );
+
+  it("keeps the 50-object cap when all verified deploy jobs skipped shipping", () => {
+    const f = setup(Array.from({ length: 50 }, () => ({ endedAgo: 10 })));
+    for (const candidate of f.candidates) {
+      f.responses.set(candidate.jobPath, {
+        ...candidate.job,
+        steps: [{ name: "Ship + activate on the VPS (forced-command receiver)", conclusion: "skipped" }],
+      });
+    }
+    const result = readStandaloneDeployVerdict(f.api, repo, now);
+    expect(result.refuse).toBe(true);
+    expect(result.reason).toContain("scan limit");
+    expect(f.calls).toHaveLength(156);
+    expect(f.calls.filter((path) => path.includes("/deployments?"))).toEqual([deploymentsPath]);
+  });
+  it("uses the rerun's environment job completion, not the old workflow creation time", () => {
+    const f = setup([{ createdAgo: 2, endedAgo: 1 }]);
+    expect(f.candidates[0].run.created_at).toBe(ago(500));
+    expect(verdict(f).refuse).toBe(true);
+  });
+
+  it("a newer read-only status job cannot hide an older-created deploy that just finished", () => {
+    const f = setup([
+      { workflow: ".github/workflows/vps-status.yml", jobName: "status", createdAgo: 10, endedAgo: 6 },
+      { createdAgo: 20, endedAgo: 1 },
+    ]);
+    expect(verdict(f).refuse).toBe(true);
+    expect(f.calls).toContain(f.candidates[1].jobPath);
+  });
+
+  it.each(active)("finds an old workflow rerun that is %s outside the capped history", (status) => {
+    const f = setup([{ endedAgo: 10 }]);
+    f.responses.set(`${prefix}/actions/workflows/deploy-vps.yml/runs?status=${status}&per_page=1`, {
+      total_count: 1, workflow_runs: [{ id: 1, status, created_at: ago(500) }],
+    });
+    expect(verdict(f)).toEqual({ refuse: true, reason: `a production deploy is ${status}` });
+    expect(f.calls).not.toContain(deploymentsPath);
+  });
+
+  it.each([null, {}, { total_count: 1, workflow_runs: [] }, { total_count: 0, workflow_runs: [{}] }, { total_count: -1, workflow_runs: [] }])(
+    "refuses malformed active-run evidence: %j", (response) => {
+      const f = setup();
+      f.responses.set(`${prefix}/actions/workflows/deploy-vps.yml/runs?status=in_progress&per_page=1`, response);
+      expect(verdict(f).refuse).toBe(true);
+    },
+  );
+
+  it.each(["success", "failure", "cancelled", "skipped", "timed_out"])("keeps the quiet period for a completed deploy job with conclusion %s", (conclusion) => {
+    const f = setup();
+    f.candidates[0].job.conclusion = conclusion;
+    expect(verdict(f).refuse).toBe(true);
+  });
+
+  it.each(["queued", "pending", "in_progress", "unknown"])("refuses a deployment status of %s", (state) => {
+    const f = setup([{ endedAgo: 10 }]);
+    f.candidates[0].status.state = state;
+    expect(verdict(f).refuse).toBe(true);
+  });
+
+  it.each([
+    ".github/workflows/unknown.yml",
+    ".github/workflows/vps-status.yml",
+  ])("does not trust an unmatched workflow/job pair: %s", (workflow) => {
+    const f = setup([{ workflow, endedAgo: 10 }]);
+    expect(verdict(f).refuse).toBe(true); // vps-status must also name its read-only `status` job
+  });
+
+  it.each([
+    "https://github.com/other/project/actions/runs/1000/job/2000",
+    "https://elsewhere.invalid/owner/project/actions/runs/1000/job/2000",
+    "https://github.com/owner/project/actions/runs/1000",
+    "https://github.com/owner/project/actions/runs/1000/job/2000?elsewhere=1",
+    "not a URL",
+  ])("refuses an untrusted or incomplete deployment log URL: %s", (logUrl) => {
+    const f = setup([{ endedAgo: 10 }]);
+    f.candidates[0].status.log_url = logUrl;
+    expect(verdict(f).refuse).toBe(true);
+    expect(f.calls).not.toContain(f.candidates[0].jobPath);
+  });
+
+  it("refuses mismatched run/job identities and invalid job conclusions", () => {
+    for (const patch of [{ id: 9 }, { run_id: 9 }, { conclusion: "unknown" }, { name: "build" }]) {
+      const f = setup([{ endedAgo: 10 }]);
+      f.responses.set(f.candidates[0].jobPath, { ...f.candidates[0].job, ...patch });
+      expect(verdict(f).refuse).toBe(true);
+    }
+    const f = setup([{ endedAgo: 10 }]);
+    f.candidates[0].run.id = 9;
+    expect(verdict(f).refuse).toBe(true);
+  });
+
+  it.each([null, "invalid", ago(-1), ago(16)])("refuses an invalid completion time: %s", (completedAt) => {
+    const f = setup([{ endedAgo: 10 }]);
+    f.responses.set(f.candidates[0].jobPath, { ...f.candidates[0].job, completed_at: completedAt });
+    expect(verdict(f).refuse).toBe(true);
+  });
+
+  it("refuses a job or workflow still running even if an earlier active probe was empty", () => {
+    for (const kind of ["job", "run"] as const) {
+      const f = setup([{ endedAgo: 10 }]);
+      f.candidates[0][kind].status = "in_progress";
+      expect(verdict(f).refuse).toBe(true);
+    }
+  });
+
+  it("refuses missing evidence or API failures at every new read boundary", () => {
+    const baseline = setup([{ endedAgo: 10 }]);
+    verdict(baseline);
+    for (const path of baseline.calls.filter((p) => p !== historyPath)) {
+      const missing = setup([{ endedAgo: 10 }]);
+      missing.responses.delete(path);
+      expect(verdict(missing).refuse, path).toBe(true);
+      const malformed = setup([{ endedAgo: 10 }]);
+      malformed.responses.set(path, null);
+      expect(verdict(malformed).refuse, path).toBe(true);
+    }
+  });
+
+  it("refuses empty, malformed or unordered deployment lists", () => {
+    for (const response of [[], {}, [null]]) {
+      const f = setup();
+      f.responses.set(deploymentsPath, response);
+      expect(verdict(f).refuse).toBe(true);
+    }
+    const f = setup([{ createdAgo: 20 }, { createdAgo: 10 }]);
+    expect(verdict(f).refuse).toBe(true);
+  });
+
+  it("stops after at most 50 deployment objects and refuses an unproven quiet period", () => {
+    const f = setup(Array.from({ length: 50 }, () => ({ workflow: ".github/workflows/vps-status.yml", jobName: "status", endedAgo: 10 })));
+    const result = readStandaloneDeployVerdict(f.api, repo, now);
+    expect(result.refuse).toBe(true);
+    expect(result.reason).toContain("scan limit");
+    expect(f.calls).toHaveLength(156);
+    expect(f.calls.filter((path) => path.includes("/deployments?"))).toEqual([deploymentsPath]);
+  });
+
+  it("does not call the standalone evidence path when the existing brake already refuses", () => {
+    const f = setup();
+    f.responses.set(historyPath, { total_count: 1, workflow_runs: [{ id: 7, status: "in_progress", updated_at: ago(1) }] });
+    expect(verdict(f).refuse).toBe(true);
+    expect(f.calls).toEqual([historyPath]);
+  });
+
+  it("keeps the serialized own-deploy path unchanged, with no deployment or active-status reads", () => {
+    const f = setup();
+    f.responses.set(historyPath, { total_count: 1, workflow_runs: [{ id: 7, status: "in_progress", updated_at: ago(1) }] });
+    const ownJobs = `${prefix}/actions/runs/7/jobs?per_page=100`;
+    f.responses.set(ownJobs, { jobs: [{ name: "deploy", status: "completed", conclusion: "success", completed_at: ago(6) }] });
+    expect(readDeployVerdict({ api: f.api, repo, now, ownId: 7 }).refuse).toBe(false);
+    expect(f.calls).toEqual([historyPath, ownJobs]);
   });
 });
 

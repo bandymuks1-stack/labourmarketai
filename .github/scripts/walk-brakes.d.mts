@@ -67,3 +67,19 @@ export declare function judgeSr1Readings(text: string): { publish: boolean; why:
 
 /** `--wait <minutes>` from the arguments, bounded to 0..30; absent = 0 (judge once). */
 export declare function deployWaitMinutes(argv: readonly string[]): number;
+
+/** Bounded deployment-job evidence for a walk outside the serialized deploy queue. */
+export declare function readStandaloneDeployVerdict(
+  api: (path: string) => unknown,
+  repo: string,
+  now?: Date,
+  t?: typeof THRESHOLDS,
+): { refuse: boolean; reason: string };
+
+/** The complete deploy brake, with injectable reads and clock for offline regression tests. */
+export declare function readDeployVerdict(options?: {
+  api?: (path: string) => unknown;
+  repo?: string;
+  now?: Date;
+  ownId?: number;
+}): { refuse: boolean; reason: string };

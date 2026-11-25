@@ -157,14 +157,18 @@ independent work or launch of other features (owner order 2026-10-28).
 Codex now holds coordination under the owner's current instruction. This supersedes
 older coordinator assignments, without deleting their work or history. The existing
 completion roadmap and #3265 remain the shared queue; no second register is created.
+The immediate priority is the coherent, reliable new-client journey through the
+existing core product. Production Chrome evidence is required for visual acceptance;
+remaining agreed functions stay in the same roadmap for subsequent stages.
 
 | Item | State | Evidence / next step |
 |---|---|---|
-| Baseline | DEPLOYED | `9351c8f25205dd5e3ed859b49df157ac04cc7059`; deployment 45486397706 |
-| #3811 | IN_PROGRESS | retry-attempt review finding on `60c047f0`; corrective commit and regression checks before merge |
+| Verified deployed build | DEPLOYED; partial runtime checks PASS | `880dd76fd50c9de3686dbfad2f4e4fb48dd1b499`; deployment 45618256211; lt/en first-visitor and synthetic signed-in smoke passed; full commercial/visual acceptance pending |
+| #3811 | IN_PROGRESS | retry handling corrected; additional deployment-history boundary fix under independent review before merge |
 | #3813 | MERGED | `077dd6c3cc7386bfb06298b524cb7ef58c352000`; production queue verification pending |
-| #3815 | MERGED | `880dd76fd50c9de3686dbfad2f4e4fb48dd1b499`; production notification walk pending |
+| #3815 | DEPLOYED | `880dd76fd50c9de3686dbfad2f4e4fb48dd1b499`; production notification walk pending |
 | #3782 | MERGED | `0b1f712671ab01e85b8fd6eb8420530d51d3152a`; production visual acceptance pending |
+| #3817 | IN_PROGRESS | brigade history regression and affected production checks; CI request-count regressions must be corrected before merge |
 | worker-records-exports | FAIL (saved-search step) | 45522721334: both CSV export checks passed; English saved-search strip failed; final isolation step did not run |
 
 GREEN integration uses the existing required checks. RED gates, deploy-freeze,
