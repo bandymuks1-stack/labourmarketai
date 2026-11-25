@@ -239,11 +239,11 @@ describe("loadOrganizationLivingCv current-team capability source", () => {
     vi.mocked(buildOrganizationLivingCv).mockClear();
   });
 
-  it("counts current roster rows and reads skills only from unique worker-confirmed current links", async () => {
+  it("counts a confirmed current person once across roles and reads only current confirmed links", async () => {
     await load();
     const data = input();
 
-    expect(data?.rosterSize).toBe(4);
+    expect(data?.rosterSize).toBe(3);
     expect(data?.teamSkills).toEqual([{ slug: "current-skill", confirmed: true }]);
     expect(data?.historyDetail).toEqual({
       business: {
@@ -293,7 +293,7 @@ describe("loadOrganizationLivingCv current-team capability source", () => {
     await load();
     const data = input();
 
-    expect(data?.rosterSize).toBe(4);
+    expect(data?.rosterSize).toBe(3);
     expect(data?.teamSkills).toBeNull();
   });
 });

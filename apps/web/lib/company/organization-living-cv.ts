@@ -106,17 +106,22 @@ async function readCurrentTeam(
   );
   if (!read || read.truncated) return null;
 
-  const workerIds = [...new Set(
-    read.rows
-      .filter((person) =>
-        person.link_state === "linked" &&
-        person.link_method === "worker_confirmed" &&
-        typeof person.linked_worker_id === "string" &&
-        person.linked_worker_id.length > 0,
-      )
-      .map((person) => person.linked_worker_id as string),
-  )];
-  return { size: read.rows.length, workerIds };
+  const workerIds = new Set<string>();
+  const people = new Set<string>();
+  for (const person of read.rows) {
+    const linked = person.link_state === "linked" && person.link_method === "worker_confirmed" &&
+      typeof person.linked_worker_id === "string" && person.linked_worker_id.length > 0;
+    if (linked) {
+      const workerId = person.linked_worker_id!;
+      workerIds.add(workerId);
+      people.add(`worker:${workerId}`);
+    } else {
+      // Without the person's confirmation, two roster identities cannot be
+      // merged by a similar name or an unconfirmed worker link.
+      people.add(`person:${person.id}`);
+    }
+  }
+  return { size: people.size, workerIds: [...workerIds] };
 }
 
 export async function loadOrganizationLivingCv(
