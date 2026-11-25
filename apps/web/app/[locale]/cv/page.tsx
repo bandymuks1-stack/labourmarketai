@@ -1021,9 +1021,9 @@ export default async function VerifiedCvPage({
           <PremiumLivingCv
             name={cv.personName.trim() && cv.personName.trim() !== "—" ? cv.personName : t("nameNotProvided")}
             eyebrow={professionNames.length > 0 ? professionNames.join(" · ") : tPremium("eyebrowFallback")}
-            /* The summary renders ONCE, in its own section below (which also
-               prints); the hero carries name + professions only. */
-            summary={null}
+            /* Overview introduces the person; the Experience block retains
+               the full printable summary without repeating it on screen. */
+            summary={activeBlock === "overview" ? cv.professionalSummary : null}
             facts={premiumFacts}
             portraitUrl={identityFacts.portraitUrl}
             initials={playerInitials(cv.personName)}
@@ -1061,6 +1061,27 @@ export default async function VerifiedCvPage({
             ariaLabel={tPremium("eyebrowFallback")}
           />
         ) : null}
+
+        <CvTabPanel block="overview" active={activeBlock}>
+          {presentation.groups.some((group) => group.items.length > 0) ? (
+            <section className="flex flex-col gap-3 rounded-2xl border border-ink-600 bg-ink-800/40 p-4 print:hidden" data-testid="cv-overview-skills">
+              <header className="flex flex-wrap items-center justify-between gap-2">
+                <h2 className={sectionTitle}>{t("skills")}</h2>
+                <a href={`${blockHref("experience")}#cv-skills`} className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue">
+                  {t("blocks.experience")} →
+                </a>
+              </header>
+              <ul className="flex flex-wrap gap-2">
+                {presentation.groups.flatMap((group) => group.items.map((item) => ({ item, tier: group.tier }))).slice(0, 6).map(({ item, tier }) => (
+                  <li key={item.key} className="flex flex-col gap-1 rounded-xl border border-ink-600 px-3 py-2">
+                    <span className="text-sm font-medium text-text-primary">{item.name}</span>
+                    <span className="text-meta text-text-muted">{tier === "self_stated" ? t("selfStatedTitle") : t(`tiers.${tier}`)}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+        </CvTabPanel>
 
         <CvTabPanel block="experience" active={activeBlock}>
         {/* THE CAREER JOURNEY — screen-only route over the same rows. */}

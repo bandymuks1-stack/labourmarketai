@@ -9,6 +9,7 @@ import {
 } from "@/lib/company/team-profile-model";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { loadCompanyWorkHistory } from "@/lib/organization-evidence/company-work-history-read";
+import { readAllPages } from "@/lib/organization-evidence/evidence-pagination";
 import { readEvidenceMedia } from "@/lib/organization-evidence/evidence-media-read";
 import { signEvidenceMediaUrls } from "@/lib/organization-evidence/evidence-media-serve";
 import { readCrossPartyStandingStates } from "@/lib/evidence/skill-confirmation-standing-read";
@@ -78,17 +79,44 @@ async function readRosterSkills(
   return withCrossPartyStandingConfirmation(rows, standing).map((r) => ({ slug: r.slug, confirmed: r.verified }));
 }
 
-/** People on the organization's own roster in a current working relationship. Null: unread. */
-async function readCurrentTeamSize(
+type CurrentTeam = { size: number; workerIds: string[] };
+
+/**
+ * Read the complete current roster once. The same bounded rows determine both
+ * the team count and whose skills can describe current team capability.
+ * Unknown link state/method never establishes a worker identity.
+ */
+async function readCurrentTeam(
   supabase: Awaited<ReturnType<typeof createClient>>,
   organizationId: string,
-): Promise<number | null> {
-  const res = await untyped(supabase)
-    .from("organization_people")
-    .select("id", { count: "exact", head: true })
-    .eq("organization_id", organizationId)
-    .in("relationship_kind", [...CURRENT_TEAM_KINDS]);
-  return res.error || typeof res.count !== "number" ? null : res.count;
+): Promise<CurrentTeam | null> {
+  const read = await readAllPages<{
+    id: string;
+    linked_worker_id: string | null;
+    link_state: string | null;
+    link_method: string | null;
+  }>((from, to) =>
+    untyped(supabase)
+      .from("organization_people")
+      .select("id, linked_worker_id, link_state, link_method")
+      .eq("organization_id", organizationId)
+      .in("relationship_kind", [...CURRENT_TEAM_KINDS])
+      .order("id", { ascending: true })
+      .range(from, to),
+  );
+  if (!read || read.truncated) return null;
+
+  const workerIds = [...new Set(
+    read.rows
+      .filter((person) =>
+        person.link_state === "linked" &&
+        person.link_method === "worker_confirmed" &&
+        typeof person.linked_worker_id === "string" &&
+        person.linked_worker_id.length > 0,
+      )
+      .map((person) => person.linked_worker_id as string),
+  )];
+  return { size: read.rows.length, workerIds };
 }
 
 export async function loadOrganizationLivingCv(
@@ -111,13 +139,20 @@ export async function loadOrganizationLivingCv(
     .filter((id): id is string => !!id)
     .slice(0, GALLERY_READ_OBJECTS);
 
-  const [capabilities, settings, skills, media, teamSize] = await Promise.all([
+  const currentTeamPromise = readCurrentTeam(supabase, load.organizationId);
+  const [capabilities, settings, media, currentTeam, skills] = await Promise.all([
     readOrganizationCapabilities(load.organizationId),
     getBusinessPublicSettings(load.organizationId),
-    readRosterSkills(supabase, Object.values(load.linkedWorkers)),
     readEvidenceMedia(caller, { workObjectIds: objectIds }),
-    readCurrentTeamSize(supabase, load.organizationId),
+    currentTeamPromise,
+    currentTeamPromise.then((team) =>
+      team ? readRosterSkills(supabase, team.workerIds) : null,
+    ),
   ]);
+  // History remains complete and unchanged above. Its linked people include
+  // former and otherwise historical relationships, so only the current roster
+  // supplies identities for this current-team skill statement.
+  const teamSize = currentTeam?.size ?? null;
 
   const photos =
     media.kind === "ok"
@@ -151,6 +186,14 @@ export async function loadOrganizationLivingCv(
             lastDate: load.business.totals.to,
           }
         : null,
+      historyDetail: {
+        business: load.business,
+        identity: load.identity,
+        organizationId: load.organizationId,
+        organizationName: load.organizationName,
+        clients: load.clients,
+        performedAsSubcontractor: load.performedAsSubcontractor,
+      },
       journal: load.journal,
       projects: load.projects,
       gallery: photos.map((m) => ({

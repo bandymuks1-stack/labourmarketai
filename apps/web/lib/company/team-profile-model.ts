@@ -1,3 +1,5 @@
+import type { BusinessHistory } from "@/lib/organization-evidence/business-history";
+import type { BusinessHistoryIdentity } from "@/lib/organization-evidence/business-history-header";
 import type {
   PublicBusinessListing,
   PublicBusinessProfileView,
@@ -212,7 +214,18 @@ export function buildCompanyTeamProfile(
  * Nothing is estimated. A figure with no source is absent, never zero.
  * ──────────────────────────────────────────────────────────────────────────── */
 
+export type OrganizationLivingHistory = {
+  readonly business: BusinessHistory | null;
+  readonly identity: BusinessHistoryIdentity;
+  readonly organizationId: string;
+  readonly organizationName: string;
+  readonly clients: readonly { readonly name: string | null }[];
+  readonly performedAsSubcontractor: boolean;
+};
+
 export interface OrganizationLivingInput {
+  /** The same authorized history composition used by the history page. */
+  readonly historyDetail?: OrganizationLivingHistory;
   readonly capabilities: readonly string[];
   /** Null: the team skills could not be read (unknown, never "none"). */
   readonly teamSkills: readonly { readonly slug: string; readonly confirmed: boolean }[] | null;
@@ -256,6 +269,7 @@ export interface OrganizationLivingInput {
 export type OrganizationFigureKey = "years" | "hours" | "projects" | "team";
 
 export interface OrganizationLivingRecord {
+  readonly historyDetail: OrganizationLivingHistory | null;
   /** The fact strip: only figures with a real source, in this order. */
   readonly figures: readonly { readonly key: OrganizationFigureKey; readonly value: number }[];
   /** People who worked in the organization's records (Team block); null = none recorded. */
@@ -364,6 +378,7 @@ export function buildOrganizationLivingRecord(input: OrganizationLivingInput): O
 
   return {
     figures,
+    historyDetail: input.historyDetail ?? null,
     peopleWorked: people > 0 ? people : null,
     places: history && history.placesCount > 0 ? history.placesCount : null,
     span,

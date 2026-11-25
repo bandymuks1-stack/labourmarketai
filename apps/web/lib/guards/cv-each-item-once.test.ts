@@ -63,7 +63,7 @@ describe("1 · the hero lists no skills and no experience", () => {
   });
   it("is mounted by the Living CV page only, without a list prop", () => {
     const callers = [...sources("app"), ...sources("components")].filter((f) => read(f).includes("<PremiumLivingCv"));
-    expect(callers.map((f) => relative(root, join(root, f)))).toEqual(["app/[locale]/cv/page.tsx"]);
+    expect(callers.map((f) => relative(root, join(root, f)).replaceAll("\\", "/"))).toEqual(["app/[locale]/cv/page.tsx"]);
     const call = page.slice(page.indexOf("<PremiumLivingCv"), page.indexOf("/>", page.indexOf("leadership={<OrganizationsLeadership")));
     expect(call).not.toMatch(/capabilities=|experience=|hiddenCapabilities=/);
   });

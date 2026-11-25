@@ -21,6 +21,7 @@ import {
   type OrganizationLivingInput,
   type OrganizationLivingTab,
 } from "@/lib/company/team-profile-model";
+import { buildBusinessHistory } from "@/lib/organization-evidence/business-history";
 import { activeLocales } from "@/lib/i18n/config";
 
 /**
@@ -97,6 +98,25 @@ const render = (locale: string, tab: OrganizationLivingTab = "overview", input: 
   );
 
 describe("organization Living CV — model", () => {
+  it("keeps the dated business history when the current team is empty", () => {
+    const business = buildBusinessHistory([2019, 2025].map((year) => ({
+      id: `record-${year}`, personId: `person-${year}`, workObjectId: "site-1", projectId: null,
+      activityDate: `${year}-06-01`, periodStart: null, periodEnd: null, hours: 8, sourceLabel: null,
+    })), []);
+    const historyDetail = {
+      business, identity: { legalName: "Alfa", displayName: "Alfa", ownStatementIds: [] },
+      organizationId: "org-1", organizationName: "Alfa", clients: [], performedAsSubcontractor: false,
+    };
+    const record = buildOrganizationLivingRecord({ ...FULL, rosterSize: 0, teamSkills: [], historyDetail });
+    expect(record.rosterSize).toBeNull();
+    expect(record.skills).toEqual([]);
+    expect(record.historyDetail).toBe(historyDetail);
+    expect(record.historyDetail?.business?.years.map((year) => year.year)).toEqual([2019, 2025]);
+    expect(record.historyDetail?.business?.totals.hours).toBe(16);
+    expect(record.peopleWorked).toBe(37);
+    expect(record.experience?.recordedHours).toBe(FULL.history!.hours);
+  });
+
   it("4: every hour once — the own-records figure is the one business total; the journal stays apart", () => {
     const r = buildOrganizationLivingRecord(FULL);
     expect(r.figures.find((f) => f.key === "hours")?.value).toBe(18251);
@@ -200,6 +220,17 @@ describe("organization Living CV — model", () => {
 });
 
 describe("organization Living CV — rendered", () => {
+  it("renders the canonical history slot without repeating its recorded-hours total", () => {
+    const html = renderToStaticMarkup(createElement(CompanyTeamProfile, {
+      view: buildOrganizationLivingCv(IDENTITY, FULL, "en"), t: translator("en"),
+      member: { locale: "en", tab: "experience", tabHref, history: createElement("section", { "data-testid": "canonical-history" }, "2019–2025") },
+    }));
+    expect(html).toContain('data-testid="canonical-history"');
+    expect(html).toContain('data-testid="org-living-confirmed"');
+    expect(html).not.toContain('data-testid="org-living-recorded"');
+    expect(html).not.toContain('data-testid="org-living-places"');
+  });
+
   it("1: the identity card, the header and the fact strip — a section with its own h2, no public ways in", () => {
     const html = render("lt");
     expect(html).toMatch(/^<section[^>]*data-testid="org-living-cv"/);
