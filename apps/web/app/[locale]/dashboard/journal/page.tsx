@@ -1304,7 +1304,7 @@ export default async function JournalPage({
             : t("cvBridgeEmpty")}
       </span>
       <Link
-        href="/cv"
+        href="/cv?tab=experience"
         className={chipLinkClassName(false)}
         data-testid="journal-cv-bridge-link"
       >

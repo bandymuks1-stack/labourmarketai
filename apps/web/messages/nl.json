@@ -8884,7 +8884,9 @@
         "confirmed": "met registratie van een leidinggevende",
         "organization": "in registraties van organisaties",
         "experienceTotal": "beroepservaring in totaal",
-        "languages": "talen"
+        "languages": "talen",
+        "projects": "projecten",
+        "span": "eerste en laatste registratie"
       },
       "capEyebrow": "Vaardigheden",
       "capEyebrowHours": "{hours} u vastgelegd werk",
@@ -9002,7 +9004,15 @@
         "unknown": "Kon nu niet worden gelezen."
       }
     },
-    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer."
+    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer.",
+    "blocks": {
+      "overview": "Overzicht",
+      "experience": "Ervaring",
+      "projects": "Projecten",
+      "photos": "Foto's",
+      "documents": "Documenten",
+      "reviews": "Beoordelingen"
+    }
   },
   "todayScreen": {
     "eyebrow": "Vandaag",

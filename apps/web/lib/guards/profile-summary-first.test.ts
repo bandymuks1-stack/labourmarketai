@@ -89,10 +89,10 @@ describe("what stands OPEN on arrival — summary, current state, action", () =>
     expect([...order].sort((a, b) => a - b)).toEqual(order);
   });
 
-  it("the profile carries no quick-nav strip (IA 01 §4 'REMOVE (worker)') — /cv keeps its own", () => {
+  it("the profile carries no quick-nav strip (IA 01 §4 'REMOVE (worker)') — /cv has its block tabs (decision 0034)", () => {
     expect(PAGE).not.toMatch(/<PageQuickNav\b/);
     expect(PAGE).not.toMatch(/from "@\/components\/app\/page-quick-nav"/);
-    expect(read("app/[locale]/cv/page.tsx")).toMatch(/<PageQuickNav\b/);
+    expect(read("app/[locale]/cv/page.tsx")).toMatch(/<CvBlockTabs\b/);
   });
 });
 
