@@ -24,13 +24,11 @@ export interface PublicServiceSearchInput {
 
 export type PublicServiceSearchResult =
   | { readonly kind: "ok"; readonly rows: readonly PublicServiceOffering[]; readonly hasMore: boolean; readonly page: number; readonly pageSize: number }
-  | { readonly kind: "needs-migration" }
   | { readonly kind: "unavailable" };
 
 export type PublicServiceDetailResult =
   | { readonly kind: "ok"; readonly offering: PublicServiceOffering }
   | { readonly kind: "not-found" }
-  | { readonly kind: "needs-migration" }
   | { readonly kind: "unavailable" };
 
 export function normalizePublicServiceSearch(input: PublicServiceSearchInput = {}) {

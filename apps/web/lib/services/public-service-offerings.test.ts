@@ -57,8 +57,8 @@ describe("public personal service reader", () => {
   it.each(["42883", "PGRST202", "42P01", "42703", "PGRST204", "PGRST205"])(
     "reports unapplied schema %s rather than an empty market", async (code) => {
       rpc.mockResolvedValue({ data: null, error: { code } });
-      expect(await searchPublicServiceOfferings()).toEqual({ kind: "needs-migration" });
-      expect(await getPublicServiceOffering(ID)).toEqual({ kind: "needs-migration" });
+      expect(await searchPublicServiceOfferings()).toEqual({ kind: "unavailable" });
+      expect(await getPublicServiceOffering(ID)).toEqual({ kind: "unavailable" });
     },
   );
 

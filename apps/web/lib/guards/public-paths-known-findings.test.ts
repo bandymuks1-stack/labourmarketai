@@ -2,8 +2,8 @@
  * Guard: the public-paths e2e (tests/e2e/public-paths-isolated.spec.ts, Lane L)
  * keeps its known-findings list honest. Every entry names a case that exists
  * and says what it observed and who owns it; the case list covers every
- * navigation link and stays at the 33 public paths (32 until 2026-11-19, when
- * the partners goal got the education institution's door, UX gap I-6).
+ * navigation link and stays at the 34 public paths (33 until 2026-11-25, when
+ * the contractors goal gained the public personal-service search).
  */
 import { describe, expect, it } from "vitest";
 
@@ -15,9 +15,9 @@ import {
 } from "../../tests/e2e/public-paths-cases";
 
 describe("public paths: the known-findings list", () => {
-  it("case ids are unique and there are 33", () => {
+  it("case ids are unique and there are 34", () => {
     expect(new Set(PUBLIC_PATH_CASE_IDS).size).toBe(PUBLIC_PATH_CASE_IDS.length);
-    expect(PUBLIC_PATH_CASE_IDS.length).toBe(33);
+    expect(PUBLIC_PATH_CASE_IDS.length).toBe(34);
   });
 
   it("every navigation panel link has a case", () => {

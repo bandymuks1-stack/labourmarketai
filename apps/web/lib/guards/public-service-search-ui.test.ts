@@ -9,6 +9,12 @@ const io = vi.hoisted(() => ({
   detail: vi.fn(),
   ownership: vi.fn(),
   cookie: vi.fn(),
+  push: vi.fn(),
+  navigationPending: false,
+}));
+vi.mock("react", async (importOriginal) => ({
+  ...await importOriginal<typeof import("react")>(),
+  useTransition: () => [io.navigationPending, (action: () => void) => action()] as const,
 }));
 vi.mock("@/lib/services/public-service-offerings", () => ({
   searchPublicServiceOfferings: io.search,
@@ -19,7 +25,10 @@ vi.mock("@/lib/supabase/session-cookie", () => ({ hasSessionCookie: io.cookie })
 vi.mock("@/lib/i18n/navigation", () => ({
   Link: ({ href, children, ...props }: { href: string; children: ReactNode }) => createElement("a", { href, ...props }, children),
 }));
-vi.mock("next/navigation", () => ({ notFound: () => { throw new Error("NEXT_NOT_FOUND"); } }));
+vi.mock("next/navigation", () => ({
+  notFound: () => { throw new Error("NEXT_NOT_FOUND"); },
+  useRouter: () => ({ push: io.push }),
+}));
 vi.mock("next-intl/server", () => ({
   setRequestLocale: vi.fn(),
   getTranslations: async (namespace: string) => (key: string, args?: Record<string, unknown>) =>
@@ -45,6 +54,7 @@ const renderDetail = async () => renderToStaticMarkup(await PublicServicePage({ 
 
 beforeEach(() => {
   vi.clearAllMocks();
+  io.navigationPending = false;
   io.search.mockResolvedValue({ kind: "ok", rows: [offering], page: 1, pageSize: 6, hasMore: false });
   io.detail.mockResolvedValue({ kind: "ok", offering });
   io.cookie.mockResolvedValue(false);
@@ -80,12 +90,27 @@ describe("public service search uses real results and addressable filters", () =
     expect(await renderList()).toContain('<span>ZZ</span>');
   });
 
-  it.each(["needs-migration", "unavailable"])("does not call a %s read an empty market", async (kind) => {
-    io.search.mockResolvedValue({ kind });
+  it("does not call an unavailable read an empty market", async () => {
+    io.search.mockResolvedValue({ kind: "unavailable" });
     const html = await renderList();
     expect(html).toContain('data-testid="public-services-unavailable"');
     expect(html).not.toContain('data-testid="public-services-empty"');
     expect(html).not.toContain("Fixture service");
+  });
+
+  it("keeps native GET navigation and announces an actual pending search", async () => {
+    const idle = await renderList();
+    expect(idle).toContain('method="get"');
+    expect(idle).toContain('action="/lt/services"');
+    expect(idle).not.toContain('aria-busy="true"');
+    expect(idle).not.toContain('data-testid="button-spinner"');
+
+    io.navigationPending = true;
+    const pending = await renderList();
+    expect(pending).toContain('aria-busy="true"');
+    expect(pending).toContain('disabled=""');
+    expect(pending).toContain('data-testid="button-spinner"');
+    expect(pending).toContain('<span role="status" class="sr-only">common.loading</span>');
   });
 
   it("shows a real empty state with no invented offering", async () => {

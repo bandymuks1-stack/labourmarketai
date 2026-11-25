@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { Link } from "@/lib/i18n/navigation";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("notFound");
+  return { title: t("title"), robots: { index: false, follow: false } };
+}
 
 export default async function ServiceNotFound() {
   const t = await getTranslations("publicServices");

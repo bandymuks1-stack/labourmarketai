@@ -4,6 +4,11 @@
 -- No raw-table grant, no organization-owner join, no changes to existing RLS.
 -- Dependency: canonical synthetic marker helper (20261028123000).
 -- Rollback: supabase/rollbacks/20261125133404_public_personal_service_search_v1.down.sql
+-- @plan-cache-proof: scripts/db-proof/plan-cache-probe.sql via supabase/tests/20261125133404_public_personal_service_search_plan_cache.sql; auto + force_generic_plan, 10 calls x 8 terms x 2 query shapes, scratch PG16 100000 invented offers, worst 330.0 ms, final single-index draft (2026-11-25).
+-- Local fixture only, not production or large-scale latency evidence.
+-- Four warmed nested plans chose service_offerings_public_created_idx; the
+-- unproven country index is omitted.
+-- The limit bounds returned rows, not the number of rows filtered by the plan.
 begin;
 
 do $guard$
@@ -39,13 +44,10 @@ $column_guard$;
 comment on column public.service_offerings.public_search_enabled is
   'Owner-selected publication to signed-out visitors. False by default; active alone remains members-only.';
 
--- Partial indexes contain only explicitly public active rows. Expiry remains
+-- The partial index contains only explicitly public active rows. Expiry remains
 -- a runtime predicate; no volatile now() in an index definition.
 create index service_offerings_public_created_idx
   on public.service_offerings (created_at desc, id)
-  where public_search_enabled and status = 'active';
-create index service_offerings_public_country_created_idx
-  on public.service_offerings (location_country, created_at desc, id)
   where public_search_enabled and status = 'active';
 
 -- A fixed projection is the anonymous boundary. All filters, including detail

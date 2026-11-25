@@ -14,11 +14,6 @@ import {
 } from "./public-service-offerings-shared";
 
 const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-const ABSENT = new Set(["42883", "PGRST202", "42P01", "42703", "PGRST204", "PGRST205"]);
-
-function failure(error: { code?: string } | null | undefined) {
-  return { kind: error?.code && ABSENT.has(error.code) ? "needs-migration" : "unavailable" } as const;
-}
 
 /** Copy only the public projection. A malformed response is not an empty market. */
 function offering(raw: unknown): PublicServiceOffering | null {
@@ -55,7 +50,7 @@ export async function searchPublicServiceOfferings(
       p_offset: (filter.page - 1) * PUBLIC_SERVICE_PAGE_SIZE,
       p_offering_id: null,
     });
-    if (error) return failure(error);
+    if (error) return { kind: "unavailable" };
     if (!Array.isArray(data) || data.length > PUBLIC_SERVICE_PAGE_SIZE + 1) return { kind: "unavailable" };
     const rows = data.map(offering);
     if (rows.some((row) => row === null)) return { kind: "unavailable" };
@@ -78,7 +73,7 @@ async function readPublicServiceOffering(id: string): Promise<PublicServiceDetai
     const client = await createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const { data, error } = await (client as any).rpc("get_public_service_offering_v1", { p_id: id });
-    if (error) return failure(error);
+    if (error) return { kind: "unavailable" };
     if (!Array.isArray(data) || data.length > 1) return { kind: "unavailable" };
     if (data.length === 0) return { kind: "not-found" };
     const row = offering(data[0]);

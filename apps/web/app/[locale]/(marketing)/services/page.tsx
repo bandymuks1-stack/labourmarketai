@@ -3,7 +3,8 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { EmptyState } from "@/components/app/empty-state";
-import { Button, buttonLinkClassName } from "@/components/ui/Button";
+import { buttonLinkClassName } from "@/components/ui/Button";
+import { ServiceSearchForm } from "./search-form";
 import { Select } from "@/components/ui/Select";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { PublicServiceOfferingCard } from "@/components/marketing/public-service-offering";
@@ -42,9 +43,10 @@ export default async function PublicServicesPage({
   const query = filter.query ?? "";
   const country = filter.country ?? "";
   const category = filter.category ?? "";
-  const [t, result] = await Promise.all([
+  const [t, result, common] = await Promise.all([
     getTranslations("publicServices"),
     searchPublicServiceOfferings(filter),
+    getTranslations("common"),
   ]);
   const countries = countryOptionsForLocale(locale);
   const filtered = !!(query || country || category);
@@ -63,7 +65,7 @@ export default async function PublicServicesPage({
         <PageTitle>{t("title")}</PageTitle>
         <p className="max-w-prose text-sm text-text-secondary">{t("lead")}</p>
       </header>
-      <form method="get" action={"/" + locale + "/services"} className="grid gap-3 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_auto]" role="search" aria-label={t("search")}>
+      <ServiceSearchForm key={JSON.stringify(filter)} action={"/" + locale + "/services"} label={t("search")} pendingLabel={common("loading")}>
         <label className="flex flex-col gap-1 text-xs text-text-secondary">
           {t("query")}
           <input type="search" name="q" defaultValue={query} maxLength={120} className={fieldClass} />
@@ -80,8 +82,7 @@ export default async function PublicServicesPage({
           {t("category")}
           <input name="category" defaultValue={category} maxLength={80} className={fieldClass} />
         </label>
-        <Button type="submit" className="min-h-11 self-end">{t("search")}</Button>
-      </form>
+      </ServiceSearchForm>
       {filtered && result.kind === "ok" && result.rows.length > 0 ? <Link href="/services" className={buttonLinkClassName("ghost", "sm")}>{t("clear")}</Link> : null}
       {result.kind !== "ok" ? (
         <EmptyState title={t("unavailable")} why={t("unavailableHint")} cta={{ label: t("retry"), href: pageHref(1), variant: "secondary" }} testId="public-services-unavailable" />
