@@ -61,6 +61,8 @@ type HistoryRecord = CompanyWorkHistory["places"][number]["records"][number];
 type HistoryEntry = {
   readonly record: HistoryRecord;
   readonly placeName: string | null;
+  /** Canonical project link resolved by the history reader for this place. */
+  readonly placeProjectId: string | null;
 };
 type WorkContext = {
   readonly sourceKey: string;
@@ -84,7 +86,7 @@ function projectWorkMap(
     place.objectId && place.name ? [[place.objectId, displayExcerpt(place.name, 90)!] as const] : [],
   ));
   const entries: HistoryEntry[] = history.places.flatMap((place) =>
-    place.records.map((record) => ({ record, placeName: place.name })),
+    place.records.map((record) => ({ record, placeName: place.name, placeProjectId: place.scope.projectId })),
   );
   const workGroups = new Map<string, HistoryEntry[]>();
   const contexts = new Map<string, WorkContext>();
@@ -119,9 +121,12 @@ function projectWorkMap(
       if (group) group.push(entry);
       else workGroups.set(key, [entry]);
     }
-    if (record.projectId) {
-      const label = projectTitles.get(record.projectId);
-      if (label) addContext(`project:${record.projectId}`, "project", label, entry);
+    // Prefer the record's explicit project. Only use the place's canonical
+    // project when the record itself has no project link; names never infer it.
+    const projectId = record.projectId ?? entry.placeProjectId;
+    if (projectId) {
+      const label = projectTitles.get(projectId);
+      if (label) addContext(`project:${projectId}`, "project", label, entry);
     }
     if (record.workObjectId) {
       const label = placeNames.get(record.workObjectId);

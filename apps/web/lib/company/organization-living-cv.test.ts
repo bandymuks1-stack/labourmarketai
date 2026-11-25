@@ -28,6 +28,7 @@ const state = vi.hoisted(() => ({
   historyPlaces: [] as {
     name: string | null;
     objectId: string | null;
+    scope: { projectId: string | null };
     records: {
       id: string;
       organizationId: string;
@@ -329,9 +330,9 @@ describe("loadOrganizationLivingCv current-team capability source", () => {
   it("keeps exact record-to-context edges, even for duplicate labels, and projects only bounded safe fields", async () => {
     const longDescription = `Cleaned entrance ${"x".repeat(320)}`;
     state.historyPlaces = [
-      { name: "Site A", objectId: "place-a", records: [workRecord("record-a", "Install tiles", "project-a", "place-a")] },
-      { name: "Site B", objectId: "place-b", records: [workRecord("record-b", "Repair wall", "project-b", "place-b")] },
-      { name: "Site A", objectId: null, records: [workRecord("record-unlinked", longDescription, null, null)] },
+      { name: "Site A", objectId: "place-a", scope: { projectId: "project-b" }, records: [workRecord("record-a", "Install tiles", "project-a", "place-a")] },
+      { name: "Site B", objectId: "place-b", scope: { projectId: "project-b" }, records: [workRecord("record-b", "Repair wall", null, "place-b")] },
+      { name: "Site A", objectId: null, scope: { projectId: null }, records: [workRecord("record-unlinked", longDescription, null, null)] },
     ];
     state.projectRows = [
       { id: "project-a", title: "Same project" },
@@ -362,6 +363,14 @@ describe("loadOrganizationLivingCv current-team capability source", () => {
       { from: "work-2", to: "context-3" },
     ]);
     expect(detail?.workDescriptions[0]?.details[0]?.contexts).toEqual([]);
+    expect(detail?.workDescriptions[1]?.details[0]?.contexts).toEqual([
+      { kind: "project", label: "Same project" },
+      { kind: "place", label: "Site A" },
+    ]);
+    expect(detail?.workDescriptions[2]?.details[0]?.contexts).toEqual([
+      { kind: "project", label: "Same project" },
+      { kind: "place", label: "Site B" },
+    ]);
     const safe = JSON.stringify(detail);
     expect(safe).not.toContain("private-person-id");
     expect(safe).not.toContain("Private Worker Name");
@@ -383,6 +392,7 @@ describe("loadOrganizationLivingCv current-team capability source", () => {
     const workPlaces = Array.from({ length: 7 }, (_, index) => ({
       name: `Place ${index + 1}`,
       objectId: `place-${index + 1}`,
+      scope: { projectId: `project-${index + 1}` },
       records: [workRecord(`record-${index + 1}`, `Work item ${index + 1}`, `project-${index + 1}`, `place-${index + 1}`)],
     }));
     state.historyPlaces = workPlaces;
