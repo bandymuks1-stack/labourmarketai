@@ -32,7 +32,7 @@ import { PersonPortrait } from "@/components/app/identity/person-portrait";
 export function LivingCvIdentityFrame({ children, testId }: { readonly children: ReactNode; readonly testId: string }) {
   return (
     <div
-      className="living-cv-identity-frame mx-auto w-full max-w-[15rem] self-start rounded-[22px] bg-[linear-gradient(160deg,#f5d77a,#b8860b_45%,#f0cf6b_70%,#8a6a12)] p-[2px] shadow-[0_18px_40px_-18px_rgb(212_175_55/0.55)]"
+      className="living-cv-identity-frame text-text-primary mx-auto w-full max-w-[15rem] self-start rounded-[22px] bg-[linear-gradient(160deg,#f5d77a,#b8860b_45%,#f0cf6b_70%,#8a6a12)] p-[2px] shadow-[0_18px_40px_-18px_rgb(212_175_55/0.55)]"
       data-testid={testId}
     >
       {children}
