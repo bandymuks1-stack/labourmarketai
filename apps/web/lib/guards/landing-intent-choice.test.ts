@@ -138,7 +138,7 @@ describe("one rail, one panel", () => {
   });
 
   it("phone goal cards are compact with no description; wide cards carry it", () => {
-    expect(rail).toMatch(/compact \? "w-\[6rem\] sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44"/);
+    expect(rail).toMatch(/compact \? "w-\[6rem\] min-w-min sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44"/);
     // A flex rail on every width (no phone grid since N1).
     expect(rail).not.toMatch(/grid grid-cols-3 sm:flex/);
     expect(rail).toMatch(/compact && "hidden sm:\[display:-webkit-box\]"/);

@@ -68,7 +68,7 @@ export type RailCard = {
  *
  * A native horizontal scroller with scroll-snap, so a swipe is the browser's
  * own and the scroll position is never reset by a selection. On a phone the
- * cards are compact (icon on top, a name of up to four lines), about three
+ * cards are compact (icon on top, a name that wraps at word boundaries), about three
  * show, the right edge fades while there is more, and a dot indicator sits
  * under the rail (no word: decision 0032). On a wide screen the cards share the
  * row and carry their one-line description; arrow buttons appear only when
@@ -202,7 +202,7 @@ export function CardRail({
                 key={card.id}
                 className={cn(
                   "relative shrink-0 snap-start",
-                  compact ? "w-[6rem] sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44",
+                  compact ? "w-[6rem] min-w-min sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44",
                 )}
               >
                 <CardLink
@@ -232,13 +232,13 @@ export function CardRail({
                     <Icon className="size-5" />
                   </span>
                   <span className="flex min-w-0 flex-col gap-0.5">
-                    {/* A compact (phone) card is narrow: four lines let the
-                        longest goal names ("Find services or contractors",
-                        "Jag söker tjänster eller utförare") stay whole. */}
+                    {/* Compact cards grow to fit their longest word. Keep
+                        the full goal name at natural word boundaries instead
+                        of splitting or clipping translated labels. */}
                     <span
                       className={cn(
-                        "hyphens-auto text-sm font-semibold leading-snug text-text-primary [overflow-wrap:anywhere]",
-                        compact ? "line-clamp-4" : "line-clamp-3",
+                        "text-sm font-semibold leading-snug text-text-primary",
+                        compact ? "whitespace-normal break-normal hyphens-none" : "line-clamp-3 hyphens-auto [overflow-wrap:anywhere]",
                       )}
                     >
                       {card.label}
