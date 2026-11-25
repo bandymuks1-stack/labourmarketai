@@ -1818,6 +1818,16 @@
       "reviews": "Atsauksmes"
     },
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Stundu sadalījums",
+        "states": {
+          "actual": "Reģistrētas kā faktiskas",
+          "reported": "Organizācijas norādītas",
+          "estimated": "Aplēstas",
+          "confirmed": "Citas puses apstiprinātas"
+        },
+        "skillBasis": "Darba žurnāla laiks, kas attiecināts uz atsevišķām prasmēm."
+      },
       "eyebrowFallback": "Dzīvais CV",
       "facts": {
         "recorded": "recorded in your work journal",

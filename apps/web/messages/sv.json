@@ -184,8 +184,8 @@
       "living": {
         "eyebrow": "Levande CV",
         "figures": {
-          "years": "{count, plural, one {år i verksamhet} other {år i verksamhet}}",
-          "hours": "arbetade timmar",
+          "years": "period som täcks av poster (år)",
+          "hours": "registrerade timmar",
           "people": "{count, plural, one {person har arbetat här} other {personer har arbetat här}}",
           "projects": "{count, plural, one {projekt} other {projekt}}",
           "places": "{count, plural, one {arbetsplats} other {arbetsplatser}}",
@@ -8879,6 +8879,16 @@
     "durationPendingUnnamed": "en organisation",
     "durationPendingUndated": "datum inte registrerade",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Timmarnas fördelning",
+        "states": {
+          "actual": "Registrerade som faktiska",
+          "reported": "Uppgivna av organisationen",
+          "estimated": "Uppskattade",
+          "confirmed": "Bekräftade av en annan part"
+        },
+        "skillBasis": "Tid från arbetsjournalen som kopplats till enskilda färdigheter."
+      },
       "eyebrowFallback": "Levande CV",
       "facts": {
         "recorded": "registrerat i din arbetsjournal",

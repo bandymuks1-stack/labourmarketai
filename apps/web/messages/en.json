@@ -184,8 +184,8 @@
       "living": {
         "eyebrow": "Living CV",
         "figures": {
-          "years": "{count, plural, one {year active} other {years active}}",
-          "hours": "hours worked",
+          "years": "period covered by records (years)",
+          "hours": "recorded hours",
           "people": "{count, plural, one {person worked here} other {people worked here}}",
           "projects": "{count, plural, one {project} other {projects}}",
           "places": "{count, plural, one {work site} other {work sites}}",
@@ -8879,6 +8879,16 @@
     "durationPendingUnnamed": "an organization",
     "durationPendingUndated": "dates not recorded",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Hours breakdown",
+        "states": {
+          "actual": "Recorded as actual",
+          "reported": "Reported by the organisation",
+          "estimated": "Estimated",
+          "confirmed": "Confirmed by another party"
+        },
+        "skillBasis": "Work-journal time attributed to individual skills."
+      },
       "eyebrowFallback": "Living CV",
       "facts": {
         "recorded": "recorded in your work journal",

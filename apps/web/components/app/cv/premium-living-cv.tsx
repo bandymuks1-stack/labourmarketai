@@ -81,6 +81,12 @@ export function PremiumLivingCv({
   readonly actions?: ReactNode;
 }) {
   const flag = flagOf(countryCode);
+  // Two known facts share the strip evenly; larger sets auto-fit at least
+  // 8rem per tile so values wrap instead of being compressed or hidden.
+  const factGridColumns =
+    facts.length === 2
+      ? "grid-cols-2"
+      : "grid-cols-[repeat(auto-fit,minmax(min(100%,8rem),1fr))]";
   return (
     <article className="flex flex-col gap-6 print:hidden" data-testid="premium-living-cv">
       <section
@@ -159,7 +165,7 @@ export function PremiumLivingCv({
 
           {facts.length > 0 ? (
             <dl
-              className="grid grid-cols-3 gap-2 border-t border-[rgb(255_255_255/0.10)] pt-4 sm:gap-4 lg:col-span-2"
+              className={["grid", factGridColumns, "gap-2 border-t border-[rgb(255_255_255/0.10)] pt-4 sm:gap-4 lg:col-span-2"].join(" ")}
               data-testid="premium-cv-facts"
             >
               {facts.map((f) => (
@@ -168,7 +174,7 @@ export function PremiumLivingCv({
                   className="flex min-w-0 flex-col rounded-xl bg-[rgb(255_255_255/0.05)] px-3 py-3"
                   data-testid={f.testid}
                 >
-                  <dd className="order-1 truncate font-display text-[clamp(1.15rem,4vw,1.6rem)] font-semibold leading-none tabular-nums text-[#f4f1e8]">
+                  <dd className="order-1 min-w-0 whitespace-normal break-words font-display text-[clamp(1.15rem,4vw,1.6rem)] font-semibold leading-none tabular-nums text-[#f4f1e8]">
                     {f.value}
                   </dd>
                   <dt className="order-2 mt-1.5 text-meta text-[#9aa3b5]">{f.label}</dt>

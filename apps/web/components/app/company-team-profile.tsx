@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { LivingCvIdentityFrame } from "@/components/app/cv/premium-living-cv";
+import { OrganizationLivingActivity } from "@/components/app/organization/organization-living-activity";
 import { Globe, Mail, Phone } from "lucide-react";
 
 import {
@@ -569,6 +570,7 @@ function OrganizationLivingCv({
               ) : null}
             </header>
             <FactStrip living={living} t={t} num={num} />
+            <OrganizationLivingActivity historyDetail={living.historyDetail} locale={locale} t={t} />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Competencies living={living} t={t} />
               <ExperienceSummary living={living} t={t} hours={hours} />

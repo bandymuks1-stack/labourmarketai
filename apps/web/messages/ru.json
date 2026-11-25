@@ -184,8 +184,8 @@
       "living": {
         "eyebrow": "Живое резюме",
         "figures": {
-          "years": "{count, plural, one {год работы} few {года работы} many {лет работы} other {лет работы}}",
-          "hours": "отработанных часов",
+          "years": "период, охваченный записями (лет)",
+          "hours": "учтённые часы",
           "people": "{count, plural, one {человек работал} few {человека работали} many {человек работали} other {человек работали}}",
           "projects": "{count, plural, one {проект} few {проекта} many {проектов} other {проектов}}",
           "places": "{count, plural, one {объект} few {объекта} many {объектов} other {объектов}}",
@@ -8878,6 +8878,16 @@
     "durationPendingUnnamed": "организация",
     "durationPendingUndated": "даты не записаны",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Состав часов",
+        "states": {
+          "actual": "Указаны как фактические",
+          "reported": "Заявленные организацией",
+          "estimated": "Оценочные",
+          "confirmed": "Подтверждены другой стороной"
+        },
+        "skillBasis": "Время из рабочего журнала, отнесённое к отдельным навыкам."
+      },
       "eyebrowFallback": "Живое резюме",
       "facts": {
         "recorded": "записано в журнале работ",

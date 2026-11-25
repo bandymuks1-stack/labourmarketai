@@ -801,7 +801,7 @@ Owner rule: a page is not done because CI passed or a sitemap answered 200. Thes
 | 2.36 | Profession-specific journal templates | not proven end to end | Coordinator: add a walk step for a profession template |
 | 3.34 | Project forecast engine + recompute modes | not proven end to end | Coordinator: install the cron (#2738), then walk a project with enough recorded work |
 | 3.35 | Commitment overlap -> warning -> alternatives -> override -> audit | not proven end to end | Owner: RED #2795. Coordinator: walk the flow |
-| 3.36 | Company Living CV | implementation under validation | 2026-11-25: current-team scope and history presentation; production verification pending |
+| 3.36 | Company Living CV | implementation under validation | 2026-11-25: current-team scope, annual history graphic and evidence presentation (#3821); production verification pending |
 | 4.29 | Interest->vacancy hand-off | production facts, no walk or Chrome check | Coordinator: name a production job run or Chrome check for it; the production data stays true |
 | 4.30 | Candidate pipeline -> hire decision -> close need (+ agency commissions, agency-to-agency) | not proven end to end | GREEN executor: decision and history UI. Coordinator: walk |
 | 5.14 | Command finder + voice | production facts, no walk or Chrome check | Coordinator: add a finder step to a walk |

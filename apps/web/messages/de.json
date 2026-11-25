@@ -184,8 +184,8 @@
       "living": {
         "eyebrow": "Lebendiger Lebenslauf",
         "figures": {
-          "years": "{count, plural, one {Jahr aktiv} other {Jahre aktiv}}",
-          "hours": "geleistete Stunden",
+          "years": "durch Einträge abgedeckter Zeitraum (Jahre)",
+          "hours": "erfasste Stunden",
           "people": "{count, plural, one {Person hat hier gearbeitet} other {Personen haben hier gearbeitet}}",
           "projects": "{count, plural, one {Projekt} other {Projekte}}",
           "places": "{count, plural, one {Baustelle} other {Baustellen}}",
@@ -8878,6 +8878,16 @@
     "durationPendingUnnamed": "eine Organisation",
     "durationPendingUndated": "Daten nicht erfasst",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Zusammensetzung der Stunden",
+        "states": {
+          "actual": "Als tatsächlich erfasst",
+          "reported": "Von der Organisation angegeben",
+          "estimated": "Geschätzt",
+          "confirmed": "Von anderer Seite bestätigt"
+        },
+        "skillBasis": "Einzelnen Fähigkeiten zugeordnete Zeit aus dem Arbeitsjournal."
+      },
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {
         "recorded": "im Arbeitsjournal erfasst",

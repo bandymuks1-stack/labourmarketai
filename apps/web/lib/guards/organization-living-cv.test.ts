@@ -11,6 +11,7 @@ import {
   organizationMonogram,
   type CompanyTeamTranslate,
 } from "@/components/app/company-team-profile";
+import { OrganizationLivingActivity } from "@/components/app/organization/organization-living-activity";
 import {
   buildCompanyTeamProfile,
   buildOrganizationLivingCv,
@@ -96,6 +97,93 @@ const render = (locale: string, tab: OrganizationLivingTab = "overview", input: 
       member: { locale, tab, tabHref },
     }),
   );
+
+describe("organization Living CV — annual activity graphic", () => {
+  it("uses one exact hours scale and marks dated gaps, undated records, and held prior-entity history", () => {
+    const business = buildBusinessHistory(
+      [
+        {
+          id: "record-2019",
+          personId: "worker-1",
+          workObjectId: null,
+          projectId: null,
+          activityDate: "2019-05-01",
+          periodStart: null,
+          periodEnd: null,
+          hours: 10,
+          sourceLabel: "former-entity",
+        },
+        {
+          id: "record-2022",
+          personId: "worker-1",
+          workObjectId: null,
+          projectId: null,
+          activityDate: "2022-08-01",
+          periodStart: null,
+          periodEnd: null,
+          hours: 25,
+          sourceLabel: null,
+        },
+        {
+          id: "record-undated",
+          personId: "worker-1",
+          workObjectId: null,
+          projectId: null,
+          activityDate: null,
+          periodStart: null,
+          periodEnd: null,
+          hours: 7,
+          sourceLabel: null,
+        },
+      ],
+      [
+        {
+          id: "period-former",
+          periodLabel: "Former entity",
+          legalEntityLabel: "Former entity",
+          sourceLabels: ["former-entity"],
+          periodStart: null,
+          periodEnd: null,
+          continuity: "continuous_business_history",
+          legalEntityRelation: "successor",
+          basis: "owner_statement",
+          basisReference: null,
+          statement: null,
+          createdAt: "2026-11-25T00:00:00Z",
+        },
+      ],
+    );
+    const html = renderToStaticMarkup(
+      createElement(OrganizationLivingActivity, {
+        historyDetail: {
+          business,
+          identity: { legalName: "Current Co", displayName: "Current Co", ownStatementIds: [] },
+          organizationId: "org-1",
+          organizationName: "Current Co",
+          clients: [],
+          performedAsSubcontractor: false,
+        },
+        locale: "en",
+        t: translator("en"),
+      }),
+    );
+
+    expect(html).toContain('data-testid="org-living-activity"');
+    expect(html).toContain('data-scale-max="25"');
+    expect(html).toContain('data-legal-split="true"');
+    expect(html).toContain('data-year="2019" data-year-hours="10"');
+    expect(html).toContain('data-year="2022" data-year-hours="25"');
+    expect(html).toContain('data-gap-from="2020" data-gap-to="2021"');
+    expect(html).toContain('min-w-0 font-display text-meta tabular-nums text-text-muted [overflow-wrap:anywhere]');
+    expect(html).toContain('style="width:40%"');
+    expect(html).toContain('style="width:100%"');
+    expect(html).toContain("10 h");
+    expect(html).toContain("25 h");
+    expect(html).toContain("No records are placed in this period yet.");
+    expect(html).toContain("1 record has no date and is counted in the totals only.");
+    expect(html).toContain("All records Current Co holds, across every period, each counted once");
+  });
+});
 
 describe("organization Living CV — model", () => {
   it("keeps the dated business history when the current team is empty", () => {

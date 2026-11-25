@@ -184,8 +184,8 @@
       "living": {
         "eyebrow": "Gyvas CV",
         "figures": {
-          "years": "{count, plural, one {veiklos metai} few {veiklos metai} other {veiklos metų}}",
-          "hours": "dirbtų valandų",
+          "years": "įrašų laikotarpio aprėptis (metais)",
+          "hours": "užfiksuotos valandos",
           "people": "{count, plural, one {žmogus dirbo} few {žmonės dirbo} other {žmonių dirbo}}",
           "projects": "{count, plural, one {projektas} few {projektai} other {projektų}}",
           "places": "{count, plural, one {objektas} few {objektai} other {objektų}}",
@@ -8879,6 +8879,16 @@
     "durationPendingUnnamed": "organizacija",
     "durationPendingUndated": "datos neužrašytos",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Valandų sudėtis",
+        "states": {
+          "actual": "Užfiksuotos kaip faktinės",
+          "reported": "Organizacijos nurodytos",
+          "estimated": "Apytikriai apskaičiuotos",
+          "confirmed": "Kitos šalies patvirtintos"
+        },
+        "skillBasis": "Darbo žurnalo laikas, priskirtas atskiriems įgūdžiams."
+      },
       "eyebrowFallback": "Gyvas CV",
       "facts": {
         "recorded": "užfiksuota darbo žurnale",
