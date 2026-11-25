@@ -8886,7 +8886,7 @@
           "actual": "Recorded as actual",
           "reported": "Reported by the organisation",
           "estimated": "Estimated",
-          "confirmed": "Confirmed by another party"
+          "confirmed": "Supported by another party's record"
         },
         "skillBasis": "Work-journal time attributed to individual skills."
       },
