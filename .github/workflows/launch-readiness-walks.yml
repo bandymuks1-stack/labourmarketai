@@ -41,6 +41,7 @@ on:
 permissions:
   actions: write
   contents: read
+  deployments: read # the existing deploy brake reads production-vps records
 
 concurrency:
   group: launch-readiness-walks
