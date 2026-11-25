@@ -214,7 +214,8 @@
         "pendingLabel": "Czeka na zatwierdzenie",
         "ringLabel": "Potwierdzono {share}% godzin z dziennika",
         "open": "Otwórz Żywe CV",
-        "clientsMore": "Prace wykonane dla: {names} i {count} więcej"
+        "clientsMore": "Prace wykonane dla: {names} i {count} więcej",
+        "currentTeamTitle": "Obecny zespół"
       }
     }
   },
@@ -8888,7 +8889,14 @@
           "estimated": "Szacunkowe",
           "confirmed": "Poparte wpisem drugiej strony"
         },
-        "skillBasis": "Czas z dziennika pracy przypisany do poszczególnych umiejętności."
+        "skillBasis": "Czas z dziennika pracy przypisany do poszczególnych umiejętności.",
+        "workTitle": "Prace i umiejętności",
+        "attributedTime": "Przypisane tej umiejętności",
+        "confirmedTime": "Potwierdzone przez przełożonego: {hours}",
+        "activityLabel": "Fragment wpisu",
+        "contextLabel": "Kontekst pracy",
+        "mapTitle": "Mapa umiejętności",
+        "workNodes": "Prace"
       },
       "eyebrowFallback": "Żywe CV",
       "facts": {

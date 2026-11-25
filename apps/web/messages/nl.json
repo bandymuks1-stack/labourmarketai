@@ -214,7 +214,8 @@
         "pendingLabel": "Wacht op goedkeuring",
         "ringLabel": "{share}% van de journaaluren bevestigd",
         "open": "Levend cv openen",
-        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}"
+        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}",
+        "currentTeamTitle": "Huidig team"
       }
     }
   },
@@ -8887,7 +8888,14 @@
           "estimated": "Geschat",
           "confirmed": "Ondersteund door een registratie van een andere partij"
         },
-        "skillBasis": "Tijd uit het werkjournaal die aan afzonderlijke vaardigheden is toegerekend."
+        "skillBasis": "Tijd uit het werkjournaal die aan afzonderlijke vaardigheden is toegerekend.",
+        "workTitle": "Werk en vaardigheden",
+        "attributedTime": "Aan deze vaardigheid toegewezen",
+        "confirmedTime": "Door de leidinggevende bevestigd: {hours}",
+        "activityLabel": "Fragment uit de registratie",
+        "contextLabel": "Werkcontext",
+        "mapTitle": "Vaardighedenkaart",
+        "workNodes": "Werk"
       },
       "eyebrowFallback": "Levend cv",
       "facts": {

@@ -49,10 +49,8 @@
 }
 
 /* ── DARK — BLACK + METALLIC GOLD, the product default ───────────────────── */
-/* CV identity cards retain this palette inside either page theme. */
 :root,
-:root[data-theme="dark"],
-.living-cv-identity-frame {
+:root[data-theme="dark"] {
   /* ink — surfaces. A NEUTRAL black ladder (the old dark theme carried a cool
      blue tint: 6 7 13 / 11 13 23). Gold is a warm accent, and a cool-tinted
      ground turned it green-ish; a neutral ground lets the metal read as metal.

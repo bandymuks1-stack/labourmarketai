@@ -64,7 +64,8 @@ describe("1 · the hero lists no skills and no experience", () => {
   it("is mounted by the Living CV page only, without a list prop", () => {
     const callers = [...sources("app"), ...sources("components")].filter((f) => read(f).includes("<PremiumLivingCv"));
     expect(callers.map((f) => relative(root, join(root, f)).replaceAll("\\", "/"))).toEqual(["app/[locale]/cv/page.tsx"]);
-    const call = page.slice(page.indexOf("<PremiumLivingCv"), page.indexOf("/>", page.indexOf("leadership={<OrganizationsLeadership")));
+    const start = page.indexOf("<PremiumLivingCv");
+    const call = page.slice(start, page.indexOf("\n          />", start));
     expect(call).not.toMatch(/capabilities=|experience=|hiddenCapabilities=/);
   });
 });
@@ -77,6 +78,13 @@ describe("2 · the page lists each skill and each job once", () => {
     // The raw tiers are mapped once more only for the journey diagram's lines.
     expect(count(page, "cv.tiers[tier].map(")).toBe(1);
     expect(page).toMatch(/skills: \(\["confirmed", "evidence", "declared"\] as const\)\.flatMap\(\(tier\) =>\s*cv\.tiers\[tier\]\.map\(/);
+  });
+  it("bounds historical context fallback labels before passing them into the skill map", () => {
+    expect(page).toContain("const CONTEXT_LABEL_CODEPOINT_LIMIT = 90;");
+    expect(page).toContain("Array.from(value.trim())");
+    expect(page).toContain("item.practice?.contextIds?.slice(0, 3)");
+    expect(page).toContain(".map(boundedContextLabel)");
+    expect(page).toMatch(/const contextNames = \[\.\.\.new Set\([\s\S]*?\)\]\s*\.slice\(0, 3\);/);
   });
   it("history: one renderer per section; the journey's stations are the only other read", () => {
     expect(count(page, 'data-testid="cv-history-node"')).toBe(1);

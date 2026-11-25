@@ -1826,7 +1826,14 @@
           "estimated": "Aplēstas",
           "confirmed": "Pamatotas ar citas puses ierakstu"
         },
-        "skillBasis": "Darba žurnāla laiks, kas attiecināts uz atsevišķām prasmēm."
+        "skillBasis": "Darba žurnāla laiks, kas attiecināts uz atsevišķām prasmēm.",
+        "workTitle": "Darbi un prasmes",
+        "attributedTime": "Attiecināts uz šo prasmi",
+        "confirmedTime": "Vadītāja apstiprināts: {hours}",
+        "activityLabel": "Ieraksta fragments",
+        "contextLabel": "Darba konteksts",
+        "mapTitle": "Prasmju karte",
+        "workNodes": "Darbi"
       },
       "eyebrowFallback": "Dzīvais CV",
       "facts": {
@@ -8301,7 +8308,8 @@
   "businessProfile": {
     "team": {
       "living": {
-        "activityTitle": "Darba ieraksti pa periodiem"
+        "activityTitle": "Darba ieraksti pa periodiem",
+        "currentTeamTitle": "Pašreizējā komanda"
       }
     }
   }

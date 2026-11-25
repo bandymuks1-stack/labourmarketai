@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
+import { deriveWorkIntelligence } from "@/lib/journal/work-intelligence";
 import {
   presentSkills,
+  skillPracticeFromIntelligence,
   skillMagnitude,
   skillTimeReading,
   topPresentedSkills,
@@ -26,6 +28,33 @@ const NAMES: Record<string, string> = {
   tiling: "Plytelių klojimas",
 };
 const nameOf = (slug: string) => NAMES[slug] ?? slug;
+
+describe("canonical skill sample projection", () => {
+  it("passes bounded examples through to the same presented skill without creating evidence for a claim", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: "2026-11-25",
+      includeSkillSamples: true,
+      skills: [{ skillId: "s-tiling", slug: "tiling", verified: false, source: "work_journal" }],
+      entries: [{
+        entryId: "entry-a", createdAt: "2026-11-25T12:00:00Z", originalText: "Laid tiles around the doorway.",
+        metrics: [], engagementContextId: "context-a", reviewResult: "submitted", linkedSkillIds: ["s-tiling"],
+      }],
+    });
+    const practice = skillPracticeFromIntelligence(wi);
+    const shown = presentSkills({
+      tiers: { confirmed: [], evidence: ["tiling"], declared: [] },
+      claims: [{ label: "A different self-stated skill", origin: "profile" }], practice, nameOf,
+    }).groups.flatMap((g) => g.items);
+    expect(practice.tiling!.samples).toEqual(wi.skills[0]!.samples);
+    expect(shown.find((s) => s.slug === "tiling")!.practice!.samples).toEqual(wi.skills[0]!.samples);
+    expect(shown.find((s) => s.kind === "claim")!.practice).toBeNull();
+    const unknown = presentSkills({
+      tiers: { confirmed: [], evidence: ["tiling"], declared: [] }, claims: [], practice: null, nameOf,
+    });
+    expect(unknown.groups[0]!.items[0]!.practice).toBeNull();
+    expect(unknown.groups[0]!.items[0]!.magnitude).toBe("unknown");
+  });
+});
 
 describe("skill presentation — duplicates fold without a destructive merge (owner defect D)", () => {
   // NEGATIVE CONTROL: on the pre-change tree the CV page rendered

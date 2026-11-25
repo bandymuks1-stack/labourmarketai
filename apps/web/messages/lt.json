@@ -214,7 +214,8 @@
         "pendingLabel": "Laukia patvirtinimo",
         "ringLabel": "Patvirtinta {share}% žurnalo valandų",
         "open": "Atverti Gyvą CV",
-        "clientsMore": "Darbai atlikti užsakovui: {names} ir dar {count}"
+        "clientsMore": "Darbai atlikti užsakovui: {names} ir dar {count}",
+        "currentTeamTitle": "Dabartinė komanda"
       }
     }
   },
@@ -8888,7 +8889,14 @@
           "estimated": "Apytikriai apskaičiuotos",
           "confirmed": "Kitos šalies įrašu pagrįstos"
         },
-        "skillBasis": "Darbo žurnalo laikas, priskirtas atskiriems įgūdžiams."
+        "skillBasis": "Darbo žurnalo laikas, priskirtas atskiriems įgūdžiams.",
+        "workTitle": "Darbai ir įgūdžiai",
+        "attributedTime": "Šiam įgūdžiui priskirta",
+        "confirmedTime": "Vadovo patvirtinta: {hours}",
+        "activityLabel": "Įrašo ištrauka",
+        "contextLabel": "Darbo kontekstas",
+        "mapTitle": "Kompetencijų žemėlapis",
+        "workNodes": "Darbai"
       },
       "eyebrowFallback": "Gyvas CV",
       "facts": {

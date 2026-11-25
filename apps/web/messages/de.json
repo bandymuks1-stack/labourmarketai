@@ -214,7 +214,8 @@
         "pendingLabel": "Wartet auf Freigabe",
         "ringLabel": "{share}% der Journalstunden bestätigt",
         "open": "Lebendigen Lebenslauf öffnen",
-        "clientsMore": "Arbeiten ausgeführt für: {names} und {count} weitere"
+        "clientsMore": "Arbeiten ausgeführt für: {names} und {count} weitere",
+        "currentTeamTitle": "Aktuelles Team"
       }
     }
   },
@@ -8887,7 +8888,14 @@
           "estimated": "Geschätzt",
           "confirmed": "Durch den Eintrag einer anderen Partei belegt"
         },
-        "skillBasis": "Einzelnen Fähigkeiten zugeordnete Zeit aus dem Arbeitsjournal."
+        "skillBasis": "Einzelnen Fähigkeiten zugeordnete Zeit aus dem Arbeitsjournal.",
+        "workTitle": "Arbeiten und Fähigkeiten",
+        "attributedTime": "Dieser Fähigkeit zugeordnet",
+        "confirmedTime": "Von der Leitung bestätigt: {hours}",
+        "activityLabel": "Auszug aus dem Eintrag",
+        "contextLabel": "Arbeitskontext",
+        "mapTitle": "Kompetenzkarte",
+        "workNodes": "Arbeiten"
       },
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {
