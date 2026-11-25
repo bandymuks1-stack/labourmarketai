@@ -115,12 +115,18 @@ async function pick(page: Page, scope: Locator, testId: string, option: string):
   await page.getByRole("option", { name: option, exact: true }).first().click();
 }
 
-async function livingCv(page: Page): Promise<Locator> {
-  await page.goto("/lt/cv");
+async function livingCv(
+  page: Page,
+  block: "experience" | "documents" | "projects" = "experience",
+): Promise<Locator> {
+  await page.goto(`/lt/cv?tab=${block}`);
   // The Living CV's own <main> (added for runs 40086140120 / 40153545718,
   // which found none). By role, so a hidden streaming copy never counts.
   const main = inMain(page);
   await expect(main.locator("h1").first()).toBeVisible({ timeout: 30_000 });
+  const tab = main.getByTestId(`cv-tab-${block}`);
+  await expect(tab).toBeVisible();
+  await expect(tab).toHaveAttribute("aria-current", "page");
   return main;
 }
 
@@ -585,7 +591,7 @@ test("P-9 (2.7). an education row is added and shows on the Living CV", async ({
   if (!(await row.isVisible())) throw new Error(`education not saved: ${await section.getByTestId("worker-education-error").innerText()}`);
   await expect(section.getByTestId("worker-education-self-stated"), "the profile says education is self-stated").toBeVisible();
 
-  const cv = await livingCv(page);
+  const cv = await livingCv(page, "documents");
   await expect(cv.getByTestId("cv-education-row").filter({ hasText: SCHOOL })).toBeVisible({ timeout: 30_000 });
   await ctx.close();
 });
@@ -627,12 +633,13 @@ test("P-10 (2.8). a declared certificate and an achievement are added and the Li
   await addAchievement(page, CERTIFICATE, "Nurodytas sertifikatas");
   await addAchievement(page, ACHIEVEMENT, "Pasiekimas");
 
-  const cv = await livingCv(page);
+  const cv = await livingCv(page, "documents");
   const cert = cv.getByTestId("cv-declared-certificate-row").filter({ hasText: CERTIFICATE });
   await expect(cert, "a declared certificate sits with the certificates").toBeVisible({ timeout: 30_000 });
   await expect(cert.getByTestId("cv-declared-certificate-label"), "…and says it was listed by the worker").toBeVisible();
+  const projects = await livingCv(page, "projects");
   await expect(
-    cv.locator('[data-testid="cv-achievement-row"][data-standing="declared"]', { hasText: ACHIEVEMENT }),
+    projects.locator('[data-testid="cv-achievement-row"][data-standing="declared"]', { hasText: ACHIEVEMENT }),
     "an achievement the app never confirmed stays declared",
   ).toBeVisible();
   await ctx.close();
