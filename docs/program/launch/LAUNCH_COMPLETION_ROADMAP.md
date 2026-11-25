@@ -1,4 +1,24 @@
-# LAUNCH COMPLETION ROADMAP — LabourMarket.ai (2026-11-12, 20:00 UTC)
+# LAUNCH COMPLETION ROADMAP — LabourMarket.ai
+
+## Current stabilization sequence — 2026-11-25
+
+Coordination: [`COORDINATION_REGISTER.md`](../COORDINATION_REGISTER.md#2c-current-coordination--2026-11-25)
+and #3265. Older dated snapshots below are retained as history, not current proof.
+
+| Priority | Existing work | Acceptance |
+|---|---|---|
+| P0 | #3811 deployment-brake retry fix, #3813 bounded queue wait | required checks green; retries that actually ship keep the quiet period; next eligible pair advances without bypassing a brake |
+| P0 | #3815 notification walk | merged build; one serialized notification walk proves the complete stored-notification path |
+| P0 | #3782 Living CV | deployed build; addressable blocks, old links, complete print output, 375/390 px and desktop checks |
+| P0 | worker-records-exports, brigade-formation, ai-off-honesty | inspect each failing assertion; reuse existing fixes; affected journey passes on the resulting build |
+| P1 | manager-chat phone / phone-375 and remaining unrun core pairs | existing readiness plan, within its daily and rolling caps; record actual build/run and PASS/FAIL/NOT_RUN |
+
+Do not repeat already-proven unaffected journeys. A passed export step is not a
+failed export because a later saved-search assertion failed. A refused budget is
+NOT_RUN. CI, merge, deployment and production acceptance remain distinct states.
+The existing owner gates and #3594 remain unchanged.
+
+## Historical planning snapshot — 2026-11-12, 20:00 UTC
 
 Likusių darbų planas iki pirmojo viešo V2 leidimo ir iki pilno produkto. Būsenos ir įrodymai:
 [`LAUNCH_EXECUTIVE_STATUS.md`](LAUNCH_EXECUTIVE_STATUS.md). Visos 288 funkcijos:

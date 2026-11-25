@@ -81,6 +81,18 @@ describe("a deploy run holds the quiet period only if it shipped (run 4547256013
     expect(runShippedFromJobs([ship("failure")])).toBe(true);
     expect(runShippedFromJobs([ship("cancelled")])).toBe(true);
   });
+  it("keeps the quiet period when any retry shipped, regardless of attempt order", () => {
+    for (const outcome of ["success", "failure", "cancelled"]) {
+      for (const noShip of [ship("skipped"), ship(null), { name: "deploy", conclusion: "skipped", steps: [] }]) {
+        expect(runShippedFromJobs([noShip, ship(outcome)])).toBe(true);
+        expect(runShippedFromJobs([ship(outcome), noShip])).toBe(true);
+      }
+    }
+    expect(runShippedFromJobs([ship("skipped"), ship(null)])).toBe(false);
+  });
+  it("ignores ship-like steps outside the deploy job", () => {
+    expect(runShippedFromJobs([{ ...ship("success"), name: "build" }, ship("skipped")])).toBe(false);
+  });
   it("the brake reads every job and step of each recent run, and an unreadable run still counts as a deploy", () => {
     const src = readFileSync(resolve(__dirname, "../../../../.github/scripts/walk-brakes.mjs"), "utf8");
     expect(src).toContain("r.deploySkipped = !runShippedFromJobs(jobs);");

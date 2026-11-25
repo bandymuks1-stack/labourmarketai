@@ -131,9 +131,10 @@ const DEPLOY_ACTIVE = new Set(["in_progress", "queued", "waiting", "requested", 
  * @param {readonly { name: string, conclusion?: string | null, steps?: readonly { name: string, conclusion?: string | null }[] }[]} jobs
  */
 export function runShippedFromJobs(jobs) {
-  const deploy = (jobs ?? []).find((j) => j.name === "deploy");
-  const ship = (deploy?.steps ?? []).find((st) => /^Ship \+ activate/.test(st.name));
-  return !!ship && ship.conclusion !== "skipped" && ship.conclusion != null;
+  // filter=all includes every attempt; any attempt may have switched production.
+  return (jobs ?? []).some((job) => job.name === "deploy" &&
+    (job.steps ?? []).some((step) => /^Ship \+ activate/.test(step.name) &&
+      step.conclusion !== "skipped" && step.conclusion != null));
 }
 
 /**
@@ -414,7 +415,13 @@ async function cmdDeploy() {
   for (const r of runs) {
     if (r.status !== "completed" || Date.now() - Date.parse(r.updated_at) >= THRESHOLDS.deployQuietMinutes * 60_000) continue;
     try {
-      const jobs = ghJson(`repos/${REPO}/actions/runs/${r.id}/jobs?filter=all&per_page=100`).jobs ?? [];
+      const response = ghJson(`repos/${REPO}/actions/runs/${r.id}/jobs?filter=all&per_page=100`);
+      const jobs = response.jobs;
+      // An incomplete or malformed response cannot prove that no attempt shipped.
+      // Keep the quiet period rather than making additional calls on every poll.
+      if (!Array.isArray(jobs) || !Number.isInteger(response.total_count) || response.total_count !== jobs.length) {
+        throw new Error("incomplete deploy-job list");
+      }
       r.deploySkipped = !runShippedFromJobs(jobs);
     } catch {
       r.deploySkipped = false;
