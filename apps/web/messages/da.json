@@ -1826,7 +1826,14 @@
           "estimated": "Anslåede",
           "confirmed": "Understøttet af en anden parts registrering"
         },
-        "skillBasis": "Tid fra arbejdsjournalen knyttet til de enkelte færdigheder."
+        "skillBasis": "Tid fra arbejdsjournalen knyttet til de enkelte færdigheder.",
+        "workTitle": "Arbejde og færdigheder",
+        "attributedTime": "Tildelt denne færdighed",
+        "confirmedTime": "Bekræftet af lederen: {hours}",
+        "activityLabel": "Uddrag af registreringen",
+        "contextLabel": "Arbejdskontekst",
+        "mapTitle": "Kompetencekort",
+        "workNodes": "Arbejde"
       },
       "eyebrowFallback": "Levende CV",
       "facts": {
@@ -8301,7 +8308,8 @@
   "businessProfile": {
     "team": {
       "living": {
-        "activityTitle": "Arbejdsregistreringer efter periode"
+        "activityTitle": "Arbejdsregistreringer efter periode",
+        "currentTeamTitle": "Nuværende team"
       }
     }
   }

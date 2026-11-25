@@ -117,6 +117,13 @@ describe("organization Living CV — activity coverage", () => {
     performedAsSubcontractor: false,
     recordsRead: 2,
     truncated,
+    workDescriptions: [],
+    workContexts: [],
+    workEdges: [],
+    workDescriptionCount: 0,
+    workContextCount: 0,
+    attributedCount: 0,
+    partnerWorkUnreadable: false,
   });
 
   it("discloses truncated history in the overview and full Experience and makes no gap claim", async () => {
@@ -145,35 +152,37 @@ describe("organization Living CV — activity coverage", () => {
     expect(experienceHtml).toContain("Coverage limited to 2");
   });
 
-  it("shows each bucket's full date interval and does not split hours across its covered years", () => {
-    const business = buildBusinessHistory(
-      [
-        {
-          id: "period-2020-2023", personId: "worker-1", workObjectId: null, projectId: null,
-          activityDate: null, periodStart: "2020-04-01", periodEnd: "2023-10-30", hours: 800, sourceLabel: null,
-        },
-        {
-          id: "day-2024", personId: "worker-1", workObjectId: null, projectId: null,
-          activityDate: "2024-03-10", periodStart: null, periodEnd: null, hours: 200, sourceLabel: null,
-        },
-      ],
-      [],
-    );
+  it("renders only the safe canonical work/context projection in the Overview map", () => {
+    const business = buildBusinessHistory([], []);
+    const detail = {
+      ...historyDetail(business, false),
+      workDescriptions: [{
+        id: "work-0", label: "Tiling", records: 2, contexts: [{ kind: "project" as const, label: "North site" }],
+        details: [{
+          id: "work-0-detail-0", description: "Tiling", when: "2024", contexts: [{ kind: "project" as const, label: "North site" }],
+          fallbackPlace: null, hours: 800, period: true, attributed: false,
+        }],
+      }],
+      workContexts: [{ id: "context-0", kind: "project" as const, label: "North site", records: 2, details: [] }],
+      workEdges: [{ from: "work-0", to: "context-0" }],
+      workDescriptionCount: 1,
+      workContextCount: 1,
+    };
     const html = renderToStaticMarkup(createElement(OrganizationLivingActivity, {
-      historyDetail: historyDetail(business, false), locale: "en", t: translator("en"),
+      historyDetail: detail, locale: "en", t: translator("en"),
     }));
 
-    expect(html).toContain('data-scale-max="800"');
-    expect(html).toContain('data-year="2020" data-year-hours="800" data-period-from="2020" data-period-to="2023"');
-    expect(html).toContain(">2020–2023</span>");
-    expect(html).toContain('data-year="2024" data-year-hours="200" data-period-from="2024" data-period-to="2024"');
-    expect(html).toContain('style="width:25%"');
-    expect(html.match(/data-testid="org-living-activity-year"/g)).toHaveLength(2);
-    expect(html).not.toContain('data-testid="org-living-activity-gap"');
+    expect(html).toContain('data-testid="cv-work-map"');
+    expect(html.match(/data-testid="cv-work-map-node"/g)).toHaveLength(2);
+    expect(html).toContain("Tiling");
+    expect(html).toContain("North site");
+    expect(html).not.toContain("worker-1");
+    expect(html).not.toContain("personId");
+    expect(html).not.toContain('data-testid="org-living-activity-year"');
   });
 });
-describe("organization Living CV — activity-period graphic", () => {
-  it("uses one exact hours scale and marks dated gaps, undated records, and held prior-entity history", () => {
+describe("organization Living CV — work map notices", () => {
+  it("keeps the legal history notice without implying gaps between known periods", () => {
     const business = buildBusinessHistory(
       [
         {
@@ -238,6 +247,13 @@ describe("organization Living CV — activity-period graphic", () => {
           performedAsSubcontractor: false,
           recordsRead: 3,
           truncated: false,
+          workDescriptions: [],
+          workContexts: [],
+          workEdges: [],
+          workDescriptionCount: 0,
+          workContextCount: 0,
+          attributedCount: 0,
+          partnerWorkUnreadable: false,
         },
         locale: "en",
         t: translator("en"),
@@ -245,19 +261,10 @@ describe("organization Living CV — activity-period graphic", () => {
     );
 
     expect(html).toContain('data-testid="org-living-activity"');
-    expect(html).toContain('data-scale-max="25"');
-    expect(html).toContain('data-legal-split="true"');
-    expect(html).toContain('data-year="2019" data-year-hours="10"');
-    expect(html).toContain('data-year="2022" data-year-hours="25"');
-    expect(html).toContain('data-gap-from="2020" data-gap-to="2021"');
-    expect(html).toContain('min-w-0 font-display text-meta tabular-nums text-text-muted [overflow-wrap:anywhere]');
-    expect(html).toContain('style="width:40%"');
-    expect(html).toContain('style="width:100%"');
-    expect(html).toContain("10 h");
-    expect(html).toContain("25 h");
-    expect(html).toContain("No records are placed in this period yet.");
-    expect(html).toContain("1 record has no date and is counted in the totals only.");
+    expect(html).toContain('data-testid="org-living-activity-held"');
     expect(html).toContain("All records Current Co holds, across every period, each counted once");
+    expect(html).not.toContain("No records are placed in this period yet.");
+    expect(html).not.toContain('data-testid="org-living-activity-gap"');
   });
 });
 
@@ -270,6 +277,8 @@ describe("organization Living CV — model", () => {
     const historyDetail = {
       business, identity: { legalName: "Alfa", displayName: "Alfa", ownStatementIds: [] },
       organizationId: "org-1", organizationName: "Alfa", clients: [], performedAsSubcontractor: false, recordsRead: 2, truncated: false,
+      workDescriptions: [], workContexts: [], workEdges: [], attributedCount: 0, partnerWorkUnreadable: false,
+      workDescriptionCount: 0, workContextCount: 0,
     };
     const record = buildOrganizationLivingRecord({ ...FULL, rosterSize: 0, teamSkills: [], historyDetail });
     expect(record.rosterSize).toBeNull();
@@ -405,7 +414,7 @@ describe("organization Living CV — rendered", () => {
     expect(html).not.toContain("<main");
     expect(html).not.toContain('data-testid="company-team-contact"');
     expect(html).not.toContain("mailto:");
-    expect(html).toContain("2019–2026");
+    expect(html).not.toContain("2019–2026");
     expect(organizationMonogram("UAB Nonstop Group")).toBe("NG");
     expect(organizationMonogram("Labour market ai Sp. z o.o.")).toBe("LM");
   });
@@ -428,14 +437,19 @@ describe("organization Living CV — rendered", () => {
     expect(organizationLivingTab(["gallery"])).toBeNull();
   });
 
-  it("0034: the Overview holds only the card, the header, the fact strip and the panels", () => {
+  it("0034: the Overview separates current team, declared capabilities and history", () => {
     const overview = render("en", "overview");
-    for (const part of ["org-living-card", "org-living-figures", "org-living-work", "org-living-summary"]) {
+    for (const part of ["org-living-card", "org-living-figures", "org-living-work", "org-living-capabilities-panel"]) {
       expect(overview, part).toContain(`data-testid="${part}"`);
     }
-    for (const block of ["org-living-gallery", "org-living-experience-pair", "org-living-team-figures", "org-living-clients"]) {
+    for (const figure of ["years", "hours", "team"]) {
+      expect(overview).not.toContain(`data-figure="${figure}"`);
+    }
+    for (const block of ["org-living-gallery", "org-living-experience-pair", "org-living-summary", "org-living-team-figures", "org-living-clients"]) {
       expect(overview, block).not.toContain(`data-testid="${block}"`);
     }
+    expect(overview).not.toContain("18,250.5 h");
+    expect(overview).not.toContain("2019–2026");
     expect(overview).not.toContain("Gyvenamasis namas");
     for (const tab of ORGANIZATION_LIVING_TABS.filter((k) => k !== "overview")) {
       const html = render("en", tab);
@@ -451,8 +465,7 @@ describe("organization Living CV — rendered", () => {
     expect(html).toContain("96 h");
     expect(html).toContain("18,250.5 h");
     expect(html).toContain("24 h waiting for approval");
-    // 96 of 120 journal hours: 80 %. The organization's own records are never in the ring.
-    expect(render("en", "overview")).toContain("80% of journal hours confirmed");
+    expect(render("en", "overview")).not.toContain("org-living-ring");
   });
 
   it("2: capabilities, skills with their confirmation and the team size; the Team block", () => {

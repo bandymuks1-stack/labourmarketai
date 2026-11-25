@@ -214,6 +214,40 @@ export function buildCompanyTeamProfile(
  * Nothing is estimated. A figure with no source is absent, never zero.
  * ──────────────────────────────────────────────────────────────────────────── */
 
+export type OrganizationLivingWorkContext = {
+  readonly kind: "project" | "place";
+  readonly label: string;
+};
+
+/** A deliberately safe, member-visible excerpt; it carries no worker identity or source fields. */
+export type OrganizationLivingWorkRecord = {
+  readonly id: string;
+  readonly description: string | null;
+  readonly when: string | null;
+  readonly contexts: readonly OrganizationLivingWorkContext[];
+  readonly fallbackPlace: string | null;
+  readonly hours: number | null;
+  readonly period: boolean;
+  readonly attributed: boolean;
+};
+
+export type OrganizationLivingWorkDescription = {
+  readonly id: string;
+  readonly label: string;
+  readonly records: number;
+  readonly contexts: readonly OrganizationLivingWorkContext[];
+  readonly details: readonly OrganizationLivingWorkRecord[];
+};
+
+export type OrganizationLivingWorkContextNode = {
+  readonly id: string;
+  readonly kind: "project" | "place";
+  readonly label: string;
+  readonly records: number;
+  readonly details: readonly OrganizationLivingWorkRecord[];
+};
+
+export type OrganizationLivingWorkEdge = { readonly from: string; readonly to: string };
 export type OrganizationLivingHistory = {
   readonly business: BusinessHistory | null;
   readonly identity: BusinessHistoryIdentity;
@@ -224,6 +258,15 @@ export type OrganizationLivingHistory = {
   /** Coverage metadata from the same history read; partial totals must be disclosed. */
   readonly recordsRead: number;
   readonly truncated: boolean;
+  /** Safe projections of canonical descriptions and directly linked contexts. */
+  readonly workDescriptions: readonly OrganizationLivingWorkDescription[];
+  readonly workContexts: readonly OrganizationLivingWorkContextNode[];
+  readonly workEdges: readonly OrganizationLivingWorkEdge[];
+  /** Distinct counts before the small activity map's display limits. */
+  readonly workDescriptionCount: number;
+  readonly workContextCount: number;
+  readonly attributedCount: number;
+  readonly partnerWorkUnreadable: boolean;
 };
 
 export interface OrganizationLivingInput {

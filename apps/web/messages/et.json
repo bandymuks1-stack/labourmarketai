@@ -1826,7 +1826,14 @@
           "estimated": "Hinnangulised",
           "confirmed": "Teise osapoole sissekandega toetatud"
         },
-        "skillBasis": "Tööpäeviku aeg, mis on omistatud üksikutele oskustele."
+        "skillBasis": "Tööpäeviku aeg, mis on omistatud üksikutele oskustele.",
+        "workTitle": "Tööd ja oskused",
+        "attributedTime": "Selle oskusega seotud",
+        "confirmedTime": "Juhi kinnitatud: {hours}",
+        "activityLabel": "Kirje väljavõte",
+        "contextLabel": "Töö kontekst",
+        "mapTitle": "Oskuste kaart",
+        "workNodes": "Tööd"
       },
       "eyebrowFallback": "Elav CV",
       "facts": {
@@ -8301,7 +8308,8 @@
   "businessProfile": {
     "team": {
       "living": {
-        "activityTitle": "Töö sissekanded perioodide kaupa"
+        "activityTitle": "Töö sissekanded perioodide kaupa",
+        "currentTeamTitle": "Praegune meeskond"
       }
     }
   }

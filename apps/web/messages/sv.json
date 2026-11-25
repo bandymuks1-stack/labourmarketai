@@ -214,7 +214,8 @@
         "pendingLabel": "Väntar på godkännande",
         "ringLabel": "{share} % av journaltimmarna bekräftade",
         "open": "Öppna Levande CV",
-        "clientsMore": "Arbete utfört åt: {names} och {count} till"
+        "clientsMore": "Arbete utfört åt: {names} och {count} till",
+        "currentTeamTitle": "Nuvarande team"
       }
     }
   },
@@ -8888,7 +8889,14 @@
           "estimated": "Uppskattade",
           "confirmed": "Styrkta av en annan parts registrering"
         },
-        "skillBasis": "Tid från arbetsjournalen som kopplats till enskilda färdigheter."
+        "skillBasis": "Tid från arbetsjournalen som kopplats till enskilda färdigheter.",
+        "workTitle": "Arbete och färdigheter",
+        "attributedTime": "Tilldelat denna färdighet",
+        "confirmedTime": "Bekräftat av arbetsledaren: {hours}",
+        "activityLabel": "Utdrag ur posten",
+        "contextLabel": "Arbetssammanhang",
+        "mapTitle": "Kompetenskarta",
+        "workNodes": "Arbete"
       },
       "eyebrowFallback": "Levande CV",
       "facts": {

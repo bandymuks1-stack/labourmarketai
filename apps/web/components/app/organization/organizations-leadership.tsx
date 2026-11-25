@@ -41,14 +41,14 @@ export async function OrganizationsLeadership({
   return (
     <section
       id="organizations-leadership"
-      className="flex scroll-mt-20 flex-col gap-4"
+      className={variant === "cv" ? "flex scroll-mt-20 flex-col gap-3 border-t border-ink-600 pt-4" : "flex scroll-mt-20 flex-col gap-4"}
       data-testid="organizations-leadership"
       data-variant={variant}
       data-count={read.organizations.length}
     >
       <header className="flex flex-col gap-1">
-        <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted">{t("eyebrow")}</span>
-        <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-text-primary">{t("title")}</h2>
+        {variant !== "cv" ? <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted">{t("eyebrow")}</span> : null}
+        <h2 className={variant === "cv" ? "font-display text-base font-semibold text-text-primary" : "font-display text-xl font-semibold tracking-[-0.02em] text-text-primary"}>{t("title")}</h2>
         {variant !== "cv" ? <p className="max-w-[60ch] text-sm text-text-secondary">{t("subtitle")}</p> : null}
       </header>
       <ol className="flex flex-col">
@@ -71,13 +71,13 @@ export async function OrganizationsLeadership({
           return (
           <li
             key={o.organizationId}
-            className="flex flex-col gap-2 border-t border-text-primary/10 py-4 first:border-t-0"
+            className={variant === "cv" ? "flex min-w-0 flex-col gap-1 border-t border-ink-600 py-2 first:border-t-0" : "flex flex-col gap-2 border-t border-text-primary/10 py-4 first:border-t-0"}
             data-testid="organizations-leadership-row"
             data-relationship={o.relationship}
             data-former-names={formerNames.join(" | ")}
           >
             <div className="flex flex-wrap items-baseline justify-between gap-2">
-              <p className="font-display text-lg font-semibold text-text-primary">
+              <p className={variant === "cv" ? "min-w-0 break-words text-sm font-semibold leading-relaxed text-text-primary" : "font-display text-lg font-semibold text-text-primary"}>
                 {o.name || <span className="italic text-text-muted">{t("unnamed")}</span>}
                 {formerNames.length > 0 ? (
                   <span className="ml-2 text-meta font-normal text-text-muted" data-testid="organizations-leadership-formerly">
@@ -101,7 +101,7 @@ export async function OrganizationsLeadership({
             )) : null}
             <Link
               href={`/dashboard/company/history?org=${o.organizationId}` as "/dashboard"}
-              className="inline-flex min-h-11 w-fit items-center text-sm font-semibold text-text-primary underline-offset-4 hover:underline"
+              className="inline-flex min-h-11 w-fit items-center text-sm font-medium text-brand-blue underline-offset-4 transition-colors hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue"
               data-testid="organizations-leadership-history-link"
             >
               {t("openHistory")} →

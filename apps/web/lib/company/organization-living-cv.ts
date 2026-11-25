@@ -9,6 +9,13 @@ import {
 } from "@/lib/company/team-profile-model";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { loadCompanyWorkHistory } from "@/lib/organization-evidence/company-work-history-read";
+import {
+  isPeriodRecord,
+  topWorkDescriptions,
+  type CompanyWorkHistory,
+} from "@/lib/organization-evidence/company-work-history";
+import { recordWhen } from "@/lib/organization-evidence/period-provenance";
+import { workDescription } from "@/lib/organization-evidence/import-placeholder-text";
 import { readAllPages } from "@/lib/organization-evidence/evidence-pagination";
 import { readEvidenceMedia } from "@/lib/organization-evidence/evidence-media-read";
 import { signEvidenceMediaUrls } from "@/lib/organization-evidence/evidence-media-serve";
@@ -40,6 +47,175 @@ const ID_CHUNK = 100;
 const GALLERY_READ_OBJECTS = 60;
 /** The whole Projects block (the history page keeps its own preview). */
 const PROJECTS_READ = 200;
+const workKey = (text: string | null): string | null => {
+  const description = (workDescription(text) ?? "").replace(/\s+/g, " ").trim();
+  return description ? description.toLocaleLowerCase() : null;
+};
+const displayExcerpt = (value: string | null, limit: number): string | null => {
+  if (!value) return null;
+  const chars = [...value];
+  return chars.length > limit ? `${chars.slice(0, limit - 1).join("")}…` : value;
+};
+
+type HistoryRecord = CompanyWorkHistory["places"][number]["records"][number];
+type HistoryEntry = {
+  readonly record: HistoryRecord;
+  readonly placeName: string | null;
+  /** Canonical project link resolved by the history reader for this place. */
+  readonly placeProjectId: string | null;
+};
+type WorkContext = {
+  readonly sourceKey: string;
+  readonly kind: "project" | "place";
+  readonly label: string;
+  readonly entries: HistoryEntry[];
+};
+
+/** Convert the existing reader output to a small safe graph projection. Raw
+ *  people, source ids, labels and evidence fields remain inside this server reader. */
+function projectWorkMap(
+  history: CompanyWorkHistory,
+  organizationId: string,
+  locale: string,
+  projectRows: readonly { readonly id: string; readonly title: string | null }[],
+) {
+  const projectTitles = new Map(projectRows.flatMap((project) =>
+    project.title ? [[project.id, displayExcerpt(project.title, 90)!] as const] : [],
+  ));
+  const placeNames = new Map(history.places.flatMap((place) =>
+    place.objectId && place.name ? [[place.objectId, displayExcerpt(place.name, 90)!] as const] : [],
+  ));
+  const entries: HistoryEntry[] = history.places.flatMap((place) =>
+    place.records.map((record) => ({ record, placeName: place.name, placeProjectId: place.scope.projectId })),
+  );
+  const workGroups = new Map<string, HistoryEntry[]>();
+  const contexts = new Map<string, WorkContext>();
+  const contextKeysByRecord = new Map<string, string[]>();
+  const contextKeySetsByRecord = new Map<string, Set<string>>();
+  const contextEntryIds = new Map<string, Set<string>>();
+
+  const addContext = (sourceKey: string, kind: WorkContext["kind"], label: string, entry: HistoryEntry) => {
+    const context = contexts.get(sourceKey) ?? { sourceKey, kind, label, entries: [] };
+    const entryIds = contextEntryIds.get(sourceKey) ?? new Set<string>();
+    if (!entryIds.has(entry.record.id)) {
+      entryIds.add(entry.record.id);
+      context.entries.push(entry);
+      contextEntryIds.set(sourceKey, entryIds);
+    }
+    contexts.set(sourceKey, context);
+    const current = contextKeysByRecord.get(entry.record.id) ?? [];
+    const currentSet = contextKeySetsByRecord.get(entry.record.id) ?? new Set<string>();
+    if (!currentSet.has(sourceKey)) {
+      currentSet.add(sourceKey);
+      current.push(sourceKey);
+      contextKeysByRecord.set(entry.record.id, current);
+      contextKeySetsByRecord.set(entry.record.id, currentSet);
+    }
+  };
+
+  for (const entry of entries) {
+    const { record } = entry;
+    const key = workKey(record.text);
+    if (key) {
+      const group = workGroups.get(key);
+      if (group) group.push(entry);
+      else workGroups.set(key, [entry]);
+    }
+    // Prefer the record's explicit project. Only use the place's canonical
+    // project when the record itself has no project link; names never infer it.
+    const projectId = record.projectId ?? entry.placeProjectId;
+    if (projectId) {
+      const label = projectTitles.get(projectId);
+      if (label) addContext(`project:${projectId}`, "project", label, entry);
+    }
+    if (record.workObjectId) {
+      const label = placeNames.get(record.workObjectId);
+      if (label) addContext(`place:${record.workObjectId}`, "place", label, entry);
+    }
+  }
+
+  const allWork = [...workGroups.entries()].map(([key, group]) => {
+    const description = topWorkDescriptions(group.map((entry) => entry.record), 1)[0];
+    return description ? { key, label: description.text, records: description.records, entries: group } : null;
+  }).filter((item): item is NonNullable<typeof item> => item !== null)
+    .sort((a, b) => b.records - a.records || a.label.localeCompare(b.label));
+  const work = allWork.slice(0, 6);
+
+  const contextsTop = [...contexts.values()]
+    .sort((a, b) => b.entries.length - a.entries.length || a.label.localeCompare(b.label))
+    .slice(0, 4);
+  const workIds = new Map(work.map((item, index) => [item.key, `work-${index}`] as const));
+  const contextIds = new Map(contextsTop.map((item, index) => [item.sourceKey, `context-${index}`] as const));
+
+  const recentDetails = (selected: readonly HistoryEntry[], nodeId: string) =>
+    [...selected]
+      .sort((a, b) => {
+        const aDate = a.record.periodEnd ?? a.record.activityDate ?? a.record.periodStart ?? "";
+        const bDate = b.record.periodEnd ?? b.record.activityDate ?? b.record.periodStart ?? "";
+        return bDate.localeCompare(aDate) || b.record.id.localeCompare(a.record.id);
+      })
+      .slice(0, 2)
+      .map(({ record, placeName }, index) => ({
+        id: `${nodeId}-detail-${index}`,
+        description: displayExcerpt(workDescription(record.text)?.replace(/\s+/g, " ").trim() || null, 240),
+        when: recordWhen(record, locale),
+        contexts: (contextKeysByRecord.get(record.id) ?? []).map((key) => contexts.get(key))
+          .filter((context): context is WorkContext => context !== undefined)
+          .map((context) => ({ kind: context.kind, label: context.label })),
+        fallbackPlace: displayExcerpt(placeName, 90),
+        hours: record.hours,
+        period: isPeriodRecord(record),
+        attributed: record.organizationId !== organizationId,
+      }));
+
+  const workDescriptions = work.map((item) => {
+    const id = workIds.get(item.key)!;
+    const linkedKeys = new Set(item.entries.flatMap((entry) => contextKeysByRecord.get(entry.record.id) ?? []));
+    const linkedContextLabels = [...linkedKeys].map((key) => contexts.get(key))
+      .filter((context): context is WorkContext => context !== undefined)
+      .map((context) => ({ kind: context.kind, label: context.label }));
+    return {
+      id,
+      label: displayExcerpt(item.label, 90) ?? item.label,
+      records: item.records,
+      contexts: linkedContextLabels,
+      details: recentDetails(item.entries, id),
+    };
+  });
+
+  const workContexts = contextsTop.map((context) => {
+    const id = contextIds.get(context.sourceKey)!;
+    return {
+      id,
+      kind: context.kind,
+      label: context.label,
+      records: context.entries.length,
+      details: recentDetails(context.entries, id),
+    };
+  });
+
+  const edgeKeys = new Set<string>();
+  for (const item of work) {
+    const from = workIds.get(item.key)!;
+    for (const entry of item.entries) {
+      for (const sourceKey of contextKeysByRecord.get(entry.record.id) ?? []) {
+        const to = contextIds.get(sourceKey);
+        if (to) edgeKeys.add(`${from}\u0000${to}`);
+      }
+    }
+  }
+  const workEdges = [...edgeKeys].map((edge) => {
+    const [from, to] = edge.split("\u0000");
+    return { from: from!, to: to! };
+  });
+  return {
+    workDescriptions,
+    workContexts,
+    workEdges,
+    workDescriptionCount: allWork.length,
+    workContextCount: contexts.size,
+  };
+}
 /** Roster relationships that are a CURRENT team; former employees, students,
  *  graduates, candidates and other historical rows are not team capacity. */
 const CURRENT_TEAM_KINDS = ["employee", "agency_worker", "subcontractor", "contractor", "trainee", "apprentice"] as const;
@@ -200,6 +376,9 @@ export async function loadOrganizationLivingCv(
         performedAsSubcontractor: load.performedAsSubcontractor,
         recordsRead: load.history.totalRecords,
         truncated: load.truncated,
+        ...projectWorkMap(load.history, load.organizationId, locale, load.projects?.items ?? []),
+        attributedCount: load.attributedCount,
+        partnerWorkUnreadable: load.partnerWorkUnreadable,
       },
       journal: load.journal,
       projects: load.projects,

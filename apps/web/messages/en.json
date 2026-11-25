@@ -214,7 +214,8 @@
         "pendingLabel": "Waiting for approval",
         "ringLabel": "{share}% of journal hours confirmed",
         "open": "Open the Living CV",
-        "clientsMore": "Work done for: {names} and {count} more"
+        "clientsMore": "Work done for: {names} and {count} more",
+        "currentTeamTitle": "Current team"
       }
     }
   },
@@ -8888,7 +8889,14 @@
           "estimated": "Estimated",
           "confirmed": "Supported by another party's record"
         },
-        "skillBasis": "Work-journal time attributed to individual skills."
+        "skillBasis": "Work-journal time attributed to individual skills.",
+        "workTitle": "Work and skills",
+        "attributedTime": "Attributed to this skill",
+        "confirmedTime": "Manager-confirmed: {hours}",
+        "activityLabel": "Record excerpt",
+        "contextLabel": "Work context",
+        "mapTitle": "Skills map",
+        "workNodes": "Work"
       },
       "eyebrowFallback": "Living CV",
       "facts": {
