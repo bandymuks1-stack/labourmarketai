@@ -182,10 +182,11 @@
       "heroContact": "Hoe u contact opneemt",
       "provenance": "Het bedrijf heeft deze pagina zelf ingevuld.",
       "living": {
+        "activityTitle": "Werkregistraties per periode",
         "eyebrow": "Levend cv",
         "figures": {
-          "years": "{count, plural, one {jaar actief} other {jaar actief}}",
-          "hours": "gewerkte uren",
+          "years": "periode gedekt door registraties (jaren)",
+          "hours": "geregistreerde uren",
           "people": "{count, plural, one {persoon werkte hier} other {personen werkten hier}}",
           "projects": "{count, plural, one {project} other {projecten}}",
           "places": "{count, plural, one {werklocatie} other {werklocaties}}",
@@ -8878,6 +8879,16 @@
     "durationPendingUnnamed": "een organisatie",
     "durationPendingUndated": "data niet vastgelegd",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Verdeling van de uren",
+        "states": {
+          "actual": "Als werkelijk vastgelegd",
+          "reported": "Door de organisatie opgegeven",
+          "estimated": "Geschat",
+          "confirmed": "Ondersteund door een registratie van een andere partij"
+        },
+        "skillBasis": "Tijd uit het werkjournaal die aan afzonderlijke vaardigheden is toegerekend."
+      },
       "eyebrowFallback": "Levend cv",
       "facts": {
         "recorded": "vastgelegd in uw werkjournaal",

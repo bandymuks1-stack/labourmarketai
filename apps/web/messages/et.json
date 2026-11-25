@@ -1818,6 +1818,16 @@
       "reviews": "Soovitused"
     },
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Tundide jaotus",
+        "states": {
+          "actual": "Tegelikena registreeritud",
+          "reported": "Organisatsiooni esitatud",
+          "estimated": "Hinnangulised",
+          "confirmed": "Teise osapoole sissekandega toetatud"
+        },
+        "skillBasis": "Tööpäeviku aeg, mis on omistatud üksikutele oskustele."
+      },
       "eyebrowFallback": "Elav CV",
       "facts": {
         "recorded": "recorded in your work journal",
@@ -8286,6 +8296,13 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Töö sissekanded perioodide kaupa"
+      }
     }
   }
 }

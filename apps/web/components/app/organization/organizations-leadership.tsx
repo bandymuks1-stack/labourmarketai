@@ -49,7 +49,7 @@ export async function OrganizationsLeadership({
       <header className="flex flex-col gap-1">
         <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted">{t("eyebrow")}</span>
         <h2 className="font-display text-xl font-semibold tracking-[-0.02em] text-text-primary">{t("title")}</h2>
-        <p className="max-w-[60ch] text-sm text-text-secondary">{t("subtitle")}</p>
+        {variant !== "cv" ? <p className="max-w-[60ch] text-sm text-text-secondary">{t("subtitle")}</p> : null}
       </header>
       <ol className="flex flex-col">
         {read.organizations.map((o) => {
@@ -87,7 +87,7 @@ export async function OrganizationsLeadership({
               </p>
               <span className="text-meta text-text-muted">{t(`role.${o.relationship}`)}</span>
             </div>
-            {o.periods.map((p) => (
+            {variant !== "cv" ? o.periods.map((p) => (
               <p key={p.id} className="text-sm text-text-secondary" data-testid="organizations-leadership-period" data-relation={p.legalEntityRelation}>
                 {t("period", {
                   label: p.periodLabel,
@@ -98,7 +98,7 @@ export async function OrganizationsLeadership({
                   · {t(`basis.${p.basis}`)} · {tRelation(p.legalEntityRelation as never)}
                 </span>
               </p>
-            ))}
+            )) : null}
             <Link
               href={`/dashboard/company/history?org=${o.organizationId}` as "/dashboard"}
               className="inline-flex min-h-11 w-fit items-center text-sm font-semibold text-text-primary underline-offset-4 hover:underline"
@@ -110,7 +110,7 @@ export async function OrganizationsLeadership({
           );
         })}
       </ol>
-      <p className="text-meta text-text-muted">{t("note")}</p>
+      {variant !== "cv" ? <p className="text-meta text-text-muted">{t("note")}</p> : null}
     </section>
   );
 }

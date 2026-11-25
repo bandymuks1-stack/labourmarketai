@@ -38,6 +38,7 @@ import { organizationHistoryLines } from "@/components/app/cv/organization-histo
 import { FORMER_NAME_RELATIONS, periodFor } from "@/lib/journal/professional-experience";
 import { experienceStopsOf, type ExperienceStop } from "@/lib/cv-export/experience-stops";
 import { PremiumLivingCv, type PremiumCvFact } from "@/components/app/cv/premium-living-cv";
+import { CvSkillOverview, CvEvidenceMix, type CvSkillOverviewRow, type CvEvidenceSlice } from "@/components/app/cv/cv-overview-analytics";
 import { CvBlockTabs, CvTabPanel, CV_BLOCKS, parseCvBlock, type CvBlock } from "@/components/app/cv/cv-block-tabs";
 import { CvHashToBlock } from "@/components/app/cv/cv-hash-to-block";
 import { readAthleteProfileFacts } from "@/lib/cv/athlete-profile-read";
@@ -669,6 +670,51 @@ export default async function VerifiedCvPage({
         premiumFacts.push({ value: premiumHours(experience.hours.journalConfirmed), label: tPremium("facts.confirmed"), testid: "premium-cv-fact-confirmed-hours" });
     }
   }
+  // Overview graphics are projections of the SAME skill presentation and
+  // capacity-adjusted hours ledger. The full evidence register stays below.
+  const overviewSkills: CvSkillOverviewRow[] = presentation.groups
+    .flatMap((group) => group.items)
+    .slice(0, 6)
+    .map((item) => {
+      const time = skillTimeReading(item.practice, cv.skillPractice !== null);
+      const attributed = time.kind === "attributed";
+      const involved = attributed || time.kind === "involvement_only" ? time.involvedHours : 0;
+      const share = attributed && item.practice && Number.isFinite(item.practice.share)
+        && item.practice.share >= 0 && item.practice.share <= 1 ? item.practice.share : null;
+      const details = [
+        item.practice && item.practice.entries > 0 ? t("skillEntries", { count: item.practice.entries }) : null,
+        attributed && involved > 0 ? t("skillInvolvedHoursAlso", { hours: fmtHours(involved) }) : null,
+      ].filter((v): v is string => v !== null);
+      return {
+        key: item.key,
+        name: item.name,
+        tier: item.tier === "self_stated" ? t("selfStatedTitle") : t(`tiers.${item.tier}`),
+        value: attributed
+          ? time.confirmedHours > 0
+            ? t("skillHoursConfirmed", { hours: fmtHours(time.attributedHours), confirmed: fmtHours(time.confirmedHours) })
+            : t("skillHoursOwn", { hours: fmtHours(time.attributedHours) })
+          : time.kind === "involvement_only"
+            ? t("skillInvolvedHours", { hours: fmtHours(involved) })
+            : time.kind === "none" && item.kind === "catalog" && item.magnitude === "none" ? t("skillNoRecords") : null,
+        detail: details.length > 0 ? details.join(" · ") : null,
+        share,
+        shareLabel: share === null ? null : new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 }).format(share),
+      };
+    });
+  const coverageNote = cv.journalCoverage?.truncated
+    ? t("recordedHoursScopeTruncated", { count: cv.journalCoverage.entriesRead }) : null;
+  const evidenceSlices: CvEvidenceSlice[] = experience?.hours !== null && experience?.ledger
+    ? (["actual", "reported", "estimated", "confirmed"] as const).map((key) => ({
+        key,
+        label: tPremium(`analytics.states.${key}`),
+        hours: experience.ledger.byState[key],
+        value: premiumHours(experience.ledger.byState[key]),
+      })) : [];
+  const evidenceScope = [
+    experience?.hours?.organizationUnknown
+      ? tIntel("experience.totalSubJournalOnly") : t("athlete.stats.total.behind"),
+    coverageNote,
+  ].filter((v): v is string => v !== null);
   // SKILLS ARE LISTED ONCE (owner P0 2026-11-23): by the `cv-skills` section
   // below, through the ONE presentation (`presentSkills` above — claims folded
   // into the skill they already are, potential capabilities beside them). The
@@ -1021,9 +1067,9 @@ export default async function VerifiedCvPage({
           <PremiumLivingCv
             name={cv.personName.trim() && cv.personName.trim() !== "—" ? cv.personName : t("nameNotProvided")}
             eyebrow={professionNames.length > 0 ? professionNames.join(" · ") : tPremium("eyebrowFallback")}
-            /* The summary renders ONCE, in its own section below (which also
-               prints); the hero carries name + professions only. */
-            summary={null}
+            /* Overview introduces the person; the Experience block retains
+               the full printable summary without repeating it on screen. */
+            summary={activeBlock === "overview" ? cv.professionalSummary : null}
             facts={premiumFacts}
             portraitUrl={identityFacts.portraitUrl}
             initials={playerInitials(cv.personName)}
@@ -1061,6 +1107,28 @@ export default async function VerifiedCvPage({
             ariaLabel={tPremium("eyebrowFallback")}
           />
         ) : null}
+
+        <CvTabPanel block="overview" active={activeBlock}>
+          {activeBlock === "overview" ? (
+            <div className={`grid min-w-0 gap-4 print:hidden ${overviewSkills.length > 0 && evidenceSlices.some((slice) => slice.hours > 0) ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(0,1fr)]" : "grid-cols-1"}`}>
+              <CvSkillOverview
+                title={t("skills")}
+                basis={overviewSkills.some((row) => row.share !== null)
+                  ? [tPremium("analytics.skillBasis"), coverageNote].filter(Boolean).join(" ") : coverageNote}
+                rows={overviewSkills}
+                action={<a href={`${blockHref("experience")}#cv-skills`} className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue">{t("blocks.experience")} →</a>}
+              />
+              <CvEvidenceMix
+                title={tPremium("analytics.evidenceTitle")}
+                locale={locale}
+                total={experience?.hours !== null ? experience?.ledger.total ?? 0 : 0}
+                slices={evidenceSlices}
+                scope={evidenceScope}
+                action={<a href={blockHref("experience")} className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue">{t("blocks.experience")} →</a>}
+              />
+            </div>
+          ) : null}
+        </CvTabPanel>
 
         <CvTabPanel block="experience" active={activeBlock}>
         {/* THE CAREER JOURNEY — screen-only route over the same rows. */}

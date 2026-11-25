@@ -182,10 +182,11 @@
       "heroContact": "Jak się skontaktować",
       "provenance": "Firma sama wypełniła tę stronę.",
       "living": {
+        "activityTitle": "Wpisy pracy według okresu",
         "eyebrow": "Żywe CV",
         "figures": {
-          "years": "{count, plural, one {rok działalności} few {lata działalności} many {lat działalności} other {lat działalności}}",
-          "hours": "przepracowanych godzin",
+          "years": "okres objęty wpisami (lata)",
+          "hours": "zapisane godziny",
           "people": "{count, plural, one {osoba pracowała} few {osoby pracowały} many {osób pracowało} other {osób pracowało}}",
           "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
           "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}",
@@ -8879,6 +8880,16 @@
     "durationPendingUnnamed": "organizacja",
     "durationPendingUndated": "daty nie zapisane",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Struktura godzin",
+        "states": {
+          "actual": "Zapisane jako rzeczywiste",
+          "reported": "Podane przez organizację",
+          "estimated": "Szacunkowe",
+          "confirmed": "Poparte wpisem drugiej strony"
+        },
+        "skillBasis": "Czas z dziennika pracy przypisany do poszczególnych umiejętności."
+      },
       "eyebrowFallback": "Żywe CV",
       "facts": {
         "recorded": "zapisane w dzienniku pracy",

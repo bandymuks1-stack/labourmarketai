@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { LivingCvIdentityFrame } from "@/components/app/cv/premium-living-cv";
+import { OrganizationLivingActivity } from "@/components/app/organization/organization-living-activity";
 import { Globe, Mail, Phone } from "lucide-react";
 
 import {
@@ -227,28 +229,26 @@ function IdentityCard({
   readonly t: CompanyTeamTranslate;
 }) {
   return (
-    <div
-      data-testid="org-living-card"
-      className="relative mx-auto flex w-full min-w-0 max-w-[18rem] flex-col items-center gap-4 overflow-hidden rounded-[1.75rem] border-2 border-brand-blue/80 bg-gradient-to-b from-ink-700 to-ink-900 px-5 pb-6 pt-7 text-center shadow-2xl lg:mx-0"
-    >
-      <span aria-hidden className="pointer-events-none absolute inset-1.5 rounded-[1.45rem] border border-brand-blue/25" />
+    <LivingCvIdentityFrame testId="org-living-card">
+    <div className="flex min-w-0 flex-col items-center gap-4 rounded-[20px] bg-ink-900 px-4 pb-5 pt-5 text-center">
       <Eyebrow className="text-brand-blue">{t(`${LIVING}.eyebrow`)}</Eyebrow>
       <span
         aria-hidden
-        className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-brand-blue/70 bg-ink-900 font-display text-[2.6rem] font-bold tracking-[-0.04em] text-brand-blue"
+        className="flex h-28 w-28 items-center justify-center rounded-full border border-brand-blue/60 bg-ink-800 font-display text-[2.6rem] font-bold tracking-[-0.04em] text-brand-blue"
       >
         {organizationMonogram(name)}
       </span>
-      <p className="font-display text-xl font-bold uppercase leading-tight tracking-[-0.02em] text-text-primary [overflow-wrap:anywhere]">
+      <p aria-hidden="true" className="font-display text-xl font-semibold leading-tight text-brand-blue [overflow-wrap:anywhere] lg:hidden">
         {name}
       </p>
       {country || span ? (
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-          {country ? <Stamp>{country}</Stamp> : null}
-          {span ? <Stamp>{span}</Stamp> : null}
+          {country ? <Stamp className="text-text-secondary">{country}</Stamp> : null}
+          {span ? <Stamp className="text-text-secondary">{span}</Stamp> : null}
         </div>
       ) : null}
     </div>
+    </LivingCvIdentityFrame>
   );
 }
 
@@ -512,10 +512,12 @@ function OrganizationLivingCv({
   locale,
   tab: requested,
   tabHref,
+  history,
 }: {
   readonly view: CompanyTeamProfileView;
   readonly living: OrganizationLivingRecord;
   readonly t: CompanyTeamTranslate;
+  readonly history?: ReactNode;
   readonly locale: string;
   readonly tab: OrganizationLivingTab;
   readonly tabHref: Readonly<Record<OrganizationLivingTab, string>>;
@@ -537,7 +539,7 @@ function OrganizationLivingCv({
   const has: Record<OrganizationLivingTab, boolean> = {
     overview: true,
     projects: allProjects.length > 0,
-    experience: exp !== null || living.places !== null || living.clients.length > 0,
+    experience: living.historyDetail !== null || exp !== null || living.places !== null || living.clients.length > 0,
     gallery: living.gallery.length > 0,
     team: living.rosterSize !== null || living.peopleWorked !== null || skills.length > 0,
   };
@@ -551,11 +553,11 @@ function OrganizationLivingCv({
   return (
     <section data-testid="org-living-cv" aria-label={hero.name} className="flex w-full min-w-0 flex-col gap-6">
       {tab === "overview" ? (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:items-start" data-testid="org-living-tab-overview">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,15rem)_minmax(0,1fr)] lg:items-start" data-testid="org-living-tab-overview">
           <IdentityCard name={hero.name} country={hero.country} span={spanText(living.span)} t={t} />
           <div className="flex min-w-0 flex-col gap-5">
             <header className="flex min-w-0 flex-col gap-2" data-testid="company-team-hero">
-              <h2 className="font-display text-[clamp(1.9rem,6vw,3.25rem)] font-bold leading-[1] tracking-[-0.035em] text-text-primary [overflow-wrap:anywhere]">
+              <h2 className="font-display text-[clamp(1.9rem,6vw,3.25rem)] font-bold leading-[1] tracking-[-0.035em] text-text-primary [overflow-wrap:anywhere] max-lg:sr-only">
                 {hero.name}
               </h2>
               {hero.tagline ? (
@@ -568,6 +570,7 @@ function OrganizationLivingCv({
               ) : null}
             </header>
             <FactStrip living={living} t={t} num={num} />
+            <OrganizationLivingActivity historyDetail={living.historyDetail} locale={locale} t={t} />
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
               <Competencies living={living} t={t} />
               <ExperienceSummary living={living} t={t} hours={hours} />
@@ -597,7 +600,7 @@ function OrganizationLivingCv({
 
       {tab === "experience" ? (
         <div className="flex min-w-0 flex-col gap-5" data-testid="org-living-tab-experience">
-          {exp ? (
+          {exp && (exp.confirmedHours !== null || (!history && exp.recordedHours !== null)) ? (
             <Card>
               <FigurePair testId="org-living-experience-pair">
                 {exp.confirmedHours !== null ? (
@@ -610,7 +613,7 @@ function OrganizationLivingCv({
                     testId="org-living-confirmed"
                   />
                 ) : null}
-                {exp.recordedHours !== null ? (
+                {!history && exp.recordedHours !== null ? (
                   <Figure
                     label={t(`${LIVING}.recordedLabel`)}
                     value={hours(exp.recordedHours)}
@@ -622,7 +625,8 @@ function OrganizationLivingCv({
               </FigurePair>
             </Card>
           ) : null}
-          {living.places !== null ? (
+          {history}
+          {!history && living.places !== null ? (
             <p className="text-support text-text-secondary" data-testid="org-living-places">
               <span className="font-semibold text-text-primary [font-feature-settings:'tnum']">{num(living.places)}</span>{" "}
               {t(`${LIVING}.figures.places`, { count: living.places })}
@@ -690,6 +694,7 @@ export function CompanyTeamProfile({
     readonly locale: string;
     readonly tab: OrganizationLivingTab;
     readonly tabHref: Readonly<Record<OrganizationLivingTab, string>>;
+    readonly history?: ReactNode;
   };
 }) {
   if (view.living && member) {

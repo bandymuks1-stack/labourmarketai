@@ -3,7 +3,15 @@ import { join } from "node:path";
 import { createTranslator } from "next-intl";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@/lib/i18n/navigation", () => ({ Link: "a" }));
+vi.mock("next-intl/server", () => ({
+  getTranslations: async (namespace: string) => (key: string, values?: Record<string, string | number>) =>
+    namespace === "companyWorkHistory" && key === "truncated"
+      ? `Coverage limited to ${values?.count}`
+      : `${namespace}.${key}`,
+}));
 
 import {
   CompanyTeamProfile,
@@ -11,6 +19,8 @@ import {
   organizationMonogram,
   type CompanyTeamTranslate,
 } from "@/components/app/company-team-profile";
+import { OrganizationLivingActivity } from "@/components/app/organization/organization-living-activity";
+import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 import {
   buildCompanyTeamProfile,
   buildOrganizationLivingCv,
@@ -21,6 +31,7 @@ import {
   type OrganizationLivingInput,
   type OrganizationLivingTab,
 } from "@/lib/company/team-profile-model";
+import { buildBusinessHistory } from "@/lib/organization-evidence/business-history";
 import { activeLocales } from "@/lib/i18n/config";
 
 /**
@@ -96,7 +107,180 @@ const render = (locale: string, tab: OrganizationLivingTab = "overview", input: 
     }),
   );
 
+describe("organization Living CV — activity coverage", () => {
+  const historyDetail = (business: ReturnType<typeof buildBusinessHistory>, truncated: boolean) => ({
+    business,
+    identity: { legalName: "Current Co", displayName: "Current Co", ownStatementIds: [] },
+    organizationId: "org-1",
+    organizationName: "Current Co",
+    clients: [],
+    performedAsSubcontractor: false,
+    recordsRead: 2,
+    truncated,
+  });
+
+  it("discloses truncated history in the overview and full Experience and makes no gap claim", async () => {
+    const business = buildBusinessHistory(
+      [2019, 2022].map((year) => ({
+        id: `record-${year}`, personId: "worker-1", workObjectId: null, projectId: null,
+        activityDate: `${year}-06-01`, periodStart: null, periodEnd: null, hours: 8, sourceLabel: null,
+      })),
+      [],
+    );
+    const detail = historyDetail(business, true);
+    const overviewHtml = renderToStaticMarkup(createElement(OrganizationLivingActivity, {
+      historyDetail: detail, locale: "en", t: translator("en"),
+    }));
+    expect(overviewHtml).toContain('data-testid="org-living-activity-truncated"');
+    expect(overviewHtml).toContain("The 2 read are shown; totals cover only these.");
+    expect(overviewHtml).not.toContain('data-testid="org-living-activity-gap"');
+
+    const canonical = await BusinessHistoryOverview({
+      ...detail,
+      locale: "en",
+      compact: true,
+    });
+    const experienceHtml = renderToStaticMarkup(canonical);
+    expect(experienceHtml).toContain('data-testid="business-history-truncated"');
+    expect(experienceHtml).toContain("Coverage limited to 2");
+  });
+
+  it("shows each bucket's full date interval and does not split hours across its covered years", () => {
+    const business = buildBusinessHistory(
+      [
+        {
+          id: "period-2020-2023", personId: "worker-1", workObjectId: null, projectId: null,
+          activityDate: null, periodStart: "2020-04-01", periodEnd: "2023-10-30", hours: 800, sourceLabel: null,
+        },
+        {
+          id: "day-2024", personId: "worker-1", workObjectId: null, projectId: null,
+          activityDate: "2024-03-10", periodStart: null, periodEnd: null, hours: 200, sourceLabel: null,
+        },
+      ],
+      [],
+    );
+    const html = renderToStaticMarkup(createElement(OrganizationLivingActivity, {
+      historyDetail: historyDetail(business, false), locale: "en", t: translator("en"),
+    }));
+
+    expect(html).toContain('data-scale-max="800"');
+    expect(html).toContain('data-year="2020" data-year-hours="800" data-period-from="2020" data-period-to="2023"');
+    expect(html).toContain(">2020–2023</span>");
+    expect(html).toContain('data-year="2024" data-year-hours="200" data-period-from="2024" data-period-to="2024"');
+    expect(html).toContain('style="width:25%"');
+    expect(html.match(/data-testid="org-living-activity-year"/g)).toHaveLength(2);
+    expect(html).not.toContain('data-testid="org-living-activity-gap"');
+  });
+});
+describe("organization Living CV — activity-period graphic", () => {
+  it("uses one exact hours scale and marks dated gaps, undated records, and held prior-entity history", () => {
+    const business = buildBusinessHistory(
+      [
+        {
+          id: "record-2019",
+          personId: "worker-1",
+          workObjectId: null,
+          projectId: null,
+          activityDate: "2019-05-01",
+          periodStart: null,
+          periodEnd: null,
+          hours: 10,
+          sourceLabel: "former-entity",
+        },
+        {
+          id: "record-2022",
+          personId: "worker-1",
+          workObjectId: null,
+          projectId: null,
+          activityDate: "2022-08-01",
+          periodStart: null,
+          periodEnd: null,
+          hours: 25,
+          sourceLabel: null,
+        },
+        {
+          id: "record-undated",
+          personId: "worker-1",
+          workObjectId: null,
+          projectId: null,
+          activityDate: null,
+          periodStart: null,
+          periodEnd: null,
+          hours: 7,
+          sourceLabel: null,
+        },
+      ],
+      [
+        {
+          id: "period-former",
+          periodLabel: "Former entity",
+          legalEntityLabel: "Former entity",
+          sourceLabels: ["former-entity"],
+          periodStart: null,
+          periodEnd: null,
+          continuity: "continuous_business_history",
+          legalEntityRelation: "successor",
+          basis: "owner_statement",
+          basisReference: null,
+          statement: null,
+          createdAt: "2026-11-25T00:00:00Z",
+        },
+      ],
+    );
+    const html = renderToStaticMarkup(
+      createElement(OrganizationLivingActivity, {
+        historyDetail: {
+          business,
+          identity: { legalName: "Current Co", displayName: "Current Co", ownStatementIds: [] },
+          organizationId: "org-1",
+          organizationName: "Current Co",
+          clients: [],
+          performedAsSubcontractor: false,
+          recordsRead: 3,
+          truncated: false,
+        },
+        locale: "en",
+        t: translator("en"),
+      }),
+    );
+
+    expect(html).toContain('data-testid="org-living-activity"');
+    expect(html).toContain('data-scale-max="25"');
+    expect(html).toContain('data-legal-split="true"');
+    expect(html).toContain('data-year="2019" data-year-hours="10"');
+    expect(html).toContain('data-year="2022" data-year-hours="25"');
+    expect(html).toContain('data-gap-from="2020" data-gap-to="2021"');
+    expect(html).toContain('min-w-0 font-display text-meta tabular-nums text-text-muted [overflow-wrap:anywhere]');
+    expect(html).toContain('style="width:40%"');
+    expect(html).toContain('style="width:100%"');
+    expect(html).toContain("10 h");
+    expect(html).toContain("25 h");
+    expect(html).toContain("No records are placed in this period yet.");
+    expect(html).toContain("1 record has no date and is counted in the totals only.");
+    expect(html).toContain("All records Current Co holds, across every period, each counted once");
+  });
+});
+
 describe("organization Living CV — model", () => {
+  it("keeps the dated business history when the current team is empty", () => {
+    const business = buildBusinessHistory([2019, 2025].map((year) => ({
+      id: `record-${year}`, personId: `person-${year}`, workObjectId: "site-1", projectId: null,
+      activityDate: `${year}-06-01`, periodStart: null, periodEnd: null, hours: 8, sourceLabel: null,
+    })), []);
+    const historyDetail = {
+      business, identity: { legalName: "Alfa", displayName: "Alfa", ownStatementIds: [] },
+      organizationId: "org-1", organizationName: "Alfa", clients: [], performedAsSubcontractor: false, recordsRead: 2, truncated: false,
+    };
+    const record = buildOrganizationLivingRecord({ ...FULL, rosterSize: 0, teamSkills: [], historyDetail });
+    expect(record.rosterSize).toBeNull();
+    expect(record.skills).toEqual([]);
+    expect(record.historyDetail).toBe(historyDetail);
+    expect(record.historyDetail?.business?.years.map((year) => year.year)).toEqual([2019, 2025]);
+    expect(record.historyDetail?.business?.totals.hours).toBe(16);
+    expect(record.peopleWorked).toBe(37);
+    expect(record.experience?.recordedHours).toBe(FULL.history!.hours);
+  });
+
   it("4: every hour once — the own-records figure is the one business total; the journal stays apart", () => {
     const r = buildOrganizationLivingRecord(FULL);
     expect(r.figures.find((f) => f.key === "hours")?.value).toBe(18251);
@@ -200,6 +384,17 @@ describe("organization Living CV — model", () => {
 });
 
 describe("organization Living CV — rendered", () => {
+  it("renders the canonical history slot without repeating its recorded-hours total", () => {
+    const html = renderToStaticMarkup(createElement(CompanyTeamProfile, {
+      view: buildOrganizationLivingCv(IDENTITY, FULL, "en"), t: translator("en"),
+      member: { locale: "en", tab: "experience", tabHref, history: createElement("section", { "data-testid": "canonical-history" }, "2019–2025") },
+    }));
+    expect(html).toContain('data-testid="canonical-history"');
+    expect(html).toContain('data-testid="org-living-confirmed"');
+    expect(html).not.toContain('data-testid="org-living-recorded"');
+    expect(html).not.toContain('data-testid="org-living-places"');
+  });
+
   it("1: the identity card, the header and the fact strip — a section with its own h2, no public ways in", () => {
     const html = render("lt");
     expect(html).toMatch(/^<section[^>]*data-testid="org-living-cv"/);
@@ -362,6 +557,8 @@ describe("organization Living CV — wiring", () => {
     // 0025: the own-records figure is the business history's ONE total; day and
     // period sums are never added here (overlapping periods would count twice).
     expect(loader).toContain("load.business.totals.hours");
+    expect(loader).toContain("recordsRead: load.history.totalRecords");
+    expect(loader).toContain("truncated: load.truncated");
     // A skill reads confirmed only when its confirmation STANDS (never the
     // sticky stored flag, never a self-confirmation).
     expect(loader).toContain("readCrossPartyStandingStates(");

@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
@@ -182,7 +183,23 @@ export default async function CompanySettingsPage({
     return (
       <div className="flex min-w-0 flex-col gap-4" data-testid="company-settings-living-cv">
         <PageBack href="/dashboard/company/settings">{t("title")}</PageBack>
-        <CompanyTeamProfile view={livingCv} t={tRoot} member={{ locale, tab: cvTab, tabHref }} />
+        <CompanyTeamProfile
+          view={livingCv}
+          t={tRoot}
+          member={{
+            locale,
+            tab: cvTab,
+            tabHref,
+            history: cvTab === "experience" && livingCv.living?.historyDetail ? (
+              <BusinessHistoryOverview
+                {...livingCv.living.historyDetail}
+                locale={locale}
+                compact
+                placesHref={`/${locale}/dashboard/company/history?org=${livingCv.living.historyDetail.organizationId}#company-work-history-places`}
+              />
+            ) : undefined,
+          }}
+        />
       </div>
     );
   }

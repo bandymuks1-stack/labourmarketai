@@ -28,6 +28,18 @@ import { PersonPortrait } from "@/components/app/identity/person-portrait";
  * resolved strings.
  */
 
+/** Shared identity frame for people and organizations; the record inside stays distinct. */
+export function LivingCvIdentityFrame({ children, testId }: { readonly children: ReactNode; readonly testId: string }) {
+  return (
+    <div
+      className="living-cv-identity-frame mx-auto w-full max-w-[15rem] self-start rounded-[22px] bg-[linear-gradient(160deg,#f5d77a,#b8860b_45%,#f0cf6b_70%,#8a6a12)] p-[2px] shadow-[0_18px_40px_-18px_rgb(212_175_55/0.55)]"
+      data-testid={testId}
+    >
+      {children}
+    </div>
+  );
+}
+
 export type PremiumCvFact = { readonly value: string; readonly label: string; readonly testid?: string };
 
 /** ISO-3166 alpha-2 → the flag as regional-indicator letters, or null. */
@@ -69,6 +81,12 @@ export function PremiumLivingCv({
   readonly actions?: ReactNode;
 }) {
   const flag = flagOf(countryCode);
+  // Two known facts share the strip evenly; larger sets auto-fit at least
+  // 8rem per tile so values wrap instead of being compressed or hidden.
+  const factGridColumns =
+    facts.length === 2
+      ? "grid-cols-2"
+      : "grid-cols-[repeat(auto-fit,minmax(min(100%,8rem),1fr))]";
   return (
     <article className="flex flex-col gap-6 print:hidden" data-testid="premium-living-cv">
       <section
@@ -81,10 +99,7 @@ export function PremiumLivingCv({
         />
 
         {/* THE COLLECTIBLE CARD — gold frame on a dark surface. */}
-        <div
-          className="mx-auto w-full max-w-[15rem] rounded-[22px] bg-[linear-gradient(160deg,#f5d77a,#b8860b_45%,#f0cf6b_70%,#8a6a12)] p-[2px] shadow-[0_18px_40px_-18px_rgb(212_175_55/0.55)]"
-          data-testid="premium-cv-card"
-        >
+        <LivingCvIdentityFrame testId="premium-cv-card">
           <div className="flex flex-col items-center gap-3 rounded-[20px] bg-[radial-gradient(130%_80%_at_50%_0%,#2a2410,#0c0c0c_70%)] px-4 pb-5 pt-4">
             <PersonPortrait
               name={name}
@@ -94,12 +109,13 @@ export function PremiumLivingCv({
               testids={{ photo: "premium-cv-photo", monogram: "premium-cv-monogram" }}
             />
             <p
-              className="text-center font-display text-lg font-semibold leading-tight text-[#f3d27a]"
+              aria-hidden="true"
+              className="text-center font-display text-lg font-semibold leading-tight text-[#f3d27a] md:hidden"
               data-testid="premium-cv-card-name"
             >
               {name}
             </p>
-            <p className="text-center text-meta uppercase tracking-wider text-[#e9dcb5]" data-testid="premium-cv-card-profession">
+            <p aria-hidden="true" className="text-center text-meta uppercase tracking-wider text-[#e9dcb5] md:hidden" data-testid="premium-cv-card-profession">
               {eyebrow}
             </p>
             {flag ? (
@@ -113,10 +129,10 @@ export function PremiumLivingCv({
               </span>
             ) : null}
           </div>
-        </div>
+        </LivingCvIdentityFrame>
 
         {/* THE HEADER — name, professions, languages, actions, facts.
-            Phone order (the reference): card, fact tiles, actions. On a
+            Phone order: card, actions, then fact tiles. On a
             phone the card already names the person, so the heading is kept
             for screen readers only; from md up it is the visible title. */}
         <div className="flex min-w-0 flex-col gap-4 lg:grid lg:grid-cols-[minmax(0,1fr)_auto] lg:items-start lg:gap-x-6">
@@ -149,7 +165,7 @@ export function PremiumLivingCv({
 
           {facts.length > 0 ? (
             <dl
-              className="grid grid-cols-3 gap-2 border-t border-[rgb(255_255_255/0.10)] pt-4 sm:gap-4 lg:col-span-2"
+              className={["grid", factGridColumns, "gap-2 border-t border-[rgb(255_255_255/0.10)] pt-4 sm:gap-4 lg:col-span-2"].join(" ")}
               data-testid="premium-cv-facts"
             >
               {facts.map((f) => (
@@ -158,7 +174,7 @@ export function PremiumLivingCv({
                   className="flex min-w-0 flex-col rounded-xl bg-[rgb(255_255_255/0.05)] px-3 py-3"
                   data-testid={f.testid}
                 >
-                  <dd className="order-1 truncate font-display text-[clamp(1.15rem,4vw,1.6rem)] font-semibold leading-none tabular-nums text-[#f4f1e8]">
+                  <dd className="order-1 min-w-0 whitespace-normal break-words font-display text-[clamp(1.15rem,4vw,1.6rem)] font-semibold leading-none tabular-nums text-[#f4f1e8]">
                     {f.value}
                   </dd>
                   <dt className="order-2 mt-1.5 text-meta text-[#9aa3b5]">{f.label}</dt>
@@ -169,7 +185,7 @@ export function PremiumLivingCv({
 
           {actions ? (
             <div
-              className="flex flex-wrap gap-2 max-md:[&>*]:w-full lg:col-start-2 lg:row-start-1 lg:justify-end"
+              className="order-first flex flex-wrap gap-2 max-md:[&>*]:w-full md:order-none lg:col-start-2 lg:row-start-1 lg:justify-end"
               data-testid="premium-cv-actions"
             >
               {actions}

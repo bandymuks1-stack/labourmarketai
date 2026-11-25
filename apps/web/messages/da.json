@@ -1818,6 +1818,16 @@
       "reviews": "Anbefalinger"
     },
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Timernes fordeling",
+        "states": {
+          "actual": "Registreret som faktiske",
+          "reported": "Oplyst af organisationen",
+          "estimated": "Anslåede",
+          "confirmed": "Understøttet af en anden parts registrering"
+        },
+        "skillBasis": "Tid fra arbejdsjournalen knyttet til de enkelte færdigheder."
+      },
       "eyebrowFallback": "Levende CV",
       "facts": {
         "recorded": "recorded in your work journal",
@@ -8286,6 +8296,13 @@
       "auth": "Log ind igen.",
       "not_authorized": "Du kan kun administrere dine egne poster.",
       "error": "Noget gik galt. Prøv igen."
+    }
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Arbejdsregistreringer efter periode"
+      }
     }
   }
 }
