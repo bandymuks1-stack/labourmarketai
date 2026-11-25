@@ -1063,7 +1063,7 @@ export default async function VerifiedCvPage({
         ) : null}
 
         <CvTabPanel block="overview" active={activeBlock}>
-          {presentation.groups.some((group) => group.items.length > 0) ? (
+          {activeBlock === "overview" && presentation.groups.some((group) => group.items.length > 0) ? (
             <section className="flex flex-col gap-3 rounded-2xl border border-ink-600 bg-ink-800/40 p-4 print:hidden" data-testid="cv-overview-skills">
               <header className="flex flex-wrap items-center justify-between gap-2">
                 <h2 className={sectionTitle}>{t("skills")}</h2>
