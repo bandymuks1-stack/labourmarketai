@@ -69,7 +69,7 @@ const TAB_OF: Record<string, string> = {
 test.describe("the profile is one block per screen (decision 0034)", () => {
   test("the overview opens first; every other block is one tap away in the tab row", async ({ page }) => {
     await open(page, 1280, 900, "tabs");
-    await expect(page.locator("[data-testid='page-quick-nav']")).toHaveCount(0);
+    // The quick-nav strip is gone with its component (decision 0034, block tabs).
     await expect(page.locator("main [data-testid='profile-hub-overview']")).toBeVisible();
     await expect(page.locator("main [data-testid='profile-tab-overview']")).toHaveAttribute("aria-current", "page");
     // Overview only: the other blocks are on their own addresses.

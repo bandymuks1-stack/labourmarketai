@@ -8885,7 +8885,9 @@
         "confirmed": "med en chefs registrering",
         "organization": "i organisationers registreringar",
         "experienceTotal": "yrkeserfarenhet totalt",
-        "languages": "språk"
+        "languages": "språk",
+        "projects": "projekt",
+        "span": "första och senaste registrering"
       },
       "capEyebrow": "Förmågor",
       "capEyebrowHours": "{hours} h registrerat arbete",
@@ -9002,6 +9004,14 @@
         "none": "Inget nästa steg att visa ännu. Mer registrerat arbete ger mer att gå på.",
         "unknown": "Kunde inte läsas just nu."
       }
+    },
+    "blocks": {
+      "overview": "Översikt",
+      "experience": "Erfarenhet",
+      "projects": "Projekt",
+      "photos": "Foton",
+      "documents": "Dokument",
+      "reviews": "Omdömen"
     }
   },
   "todayScreen": {

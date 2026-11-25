@@ -73,7 +73,7 @@ export function buildWorkContext(card: WorkerPlayerCard): readonly WorkContextNo
     status: unreadable("workHistory") ? "unknown" : card.workHistory.length > 0 ? "done" : "absent",
     count: unreadable("workHistory") ? null : card.workHistory.length,
     names: [],
-    href: "/cv#cv-work-history",
+    href: "/cv?tab=experience#cv-work-history",
   };
 
   // Skills the person's OWN records stand behind (journal-supported). A failed

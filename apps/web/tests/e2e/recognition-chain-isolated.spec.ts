@@ -712,7 +712,8 @@ test("I-12. the employer confirms the intern's practice day", async ({ browser }
 });
 
 async function openCv(page: Page): Promise<Locator> {
-  await page.goto(`${BASE}/en/cv`);
+  // History, practice and skills sit in the CV's Experience block (decision 0034).
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   const main = page.getByRole("main").first();
   await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });
   return main;
@@ -730,7 +731,9 @@ test("I-13. the learner's Living CV shows the practice period and the recognitio
   await expect(main.getByTestId("cv-work-history").getByText(EMPLOYER_ORG), "practice is not listed as employment").toHaveCount(0);
   // The institution's practice, signed off in I-5, stands as confirmed.
   await expect(practice.getByTestId("cv-history-node").filter({ hasText: SCHOOL_ORG })).toHaveAttribute("data-standing", "confirmed");
-  // I-7's recognition is on the CV too, not only in the document centre.
+  // I-7's recognition is on the CV too, not only in the document centre — in its Reviews block.
+  await main.getByTestId("cv-tab-reviews").click();
+  await page.waitForURL(/tab=reviews/, { timeout: 30_000 });
   const recognised = main.getByTestId("recognised-by");
   await expect(recognised, "the recognition is on the CV").toBeVisible({ timeout: 30_000 });
   await expect(recognised).toHaveAttribute("data-evidence-class", "assessor_recognition");
