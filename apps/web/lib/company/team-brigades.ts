@@ -482,6 +482,8 @@ async function readTeamBrigadesData(): Promise<TeamBrigadesData> {
       invitationsApplied: true,
       detailsApplied: true,
       enquiriesApplied: true,
+      // Disbanding the last active brigade must not hide its history.
+      disbanded: await readDisbandedTeams(supabase, user.id),
     };
   }
 
