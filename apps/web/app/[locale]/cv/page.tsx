@@ -1176,6 +1176,9 @@ export default async function VerifiedCvPage({
         </CvTabPanel>
 
         <CvTabPanel block="experience" active={activeBlock}>
+        {/* Keep leadership facts and organization-history doors in Experience.
+            Inactive panels still render children, so only the active block reads them. */}
+        {activeBlock === "experience" ? <OrganizationsLeadership locale={locale} /> : null}
         {/* THE CAREER JOURNEY — screen-only route over the same rows. */}
         {template !== "eu" ? <CareerJourneyMap journey={journey} labels={journeyLabels} /> : null}
 
