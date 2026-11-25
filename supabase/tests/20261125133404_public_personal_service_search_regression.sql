@@ -21,6 +21,20 @@ create function auth.uid() returns uuid language sql stable as $$
  select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid
 $$;
 create function public.is_admin() returns boolean language sql stable as $$ select false $$;
+-- Exact canonical audit columns and admin-only policies from 0001.
+-- This is a disposable fixture, not a new production audit table.
+create table public.audit_logs (
+ id uuid primary key default gen_random_uuid(),
+ actor_id uuid references public.profiles(id) on delete set null,
+ action text, entity text, entity_id uuid, payload jsonb,
+ occurred_at timestamptz not null default now(),
+ created_at timestamptz not null default now(),
+ updated_at timestamptz not null default now()
+);
+alter table public.audit_logs enable row level security;
+create policy audit_logs_select on public.audit_logs for select using(public.is_admin());
+create policy audit_logs_insert on public.audit_logs for insert with check(public.is_admin());
+grant select,insert,update,delete on public.audit_logs to authenticated;
 -- The actual existing owner-scoped CRUD policies and grants.
 \ir ../migrations/20260627121713_service_offerings.sql
 alter table public.service_offerings add column expires_at timestamptz;
@@ -51,7 +65,13 @@ do $test$ begin
  then raise exception 'FAIL existing offer opted in'; end if;
  if has_table_privilege('anon','public.service_offerings','select') or has_table_privilege('anon','auth.users','select')
  then raise exception 'FAIL raw anonymous table grant'; end if;
- raise notice 'PASS old rows default off and no raw-table grant';
+ if exists(select from public.audit_logs where entity='service_offerings')
+ then raise exception 'FAIL fabricated pre-migration history'; end if;
+ if has_function_privilege('anon','public.service_offering_history_v1()','execute')
+ or has_function_privilege('authenticated','public.service_offering_history_v1()','execute')
+ or has_table_privilege('anon','public.audit_logs','select')
+ then raise exception 'FAIL history RPC or public audit read exposed'; end if;
+ raise notice 'PASS old rows default off, no historical backfill, and no raw-table/history grants';
 end $test$;
 -- Invented visible rows omit fixture markers because exclusion itself is tested.
 insert into public.service_offerings
@@ -129,6 +149,123 @@ do $test$ begin
  raise notice 'PASS immediate opt-out';
 end $test$;
 reset role;
+-- A real authenticated owner's successful actions accumulate separate facts.
+-- Free text below is invented, and must never be copied into the audit payload.
+set role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',false);
+insert into public.service_offerings(id,provider_id,title,description,status)
+ values('10000000-0000-4000-8000-000000000801','00000000-0000-4000-8000-000000000001',
+        'private-old-title','private-old-contact@local.invalid','draft');
+update public.service_offerings set status='active' where id='10000000-0000-4000-8000-000000000801';
+update public.service_offerings set public_search_enabled=true where id='10000000-0000-4000-8000-000000000801';
+update public.service_offerings set title='private-new-title',description='private-new-contact@local.invalid'
+ where id='10000000-0000-4000-8000-000000000801';
+update public.service_offerings set status='paused' where id='10000000-0000-4000-8000-000000000801';
+update public.service_offerings set status='active' where id='10000000-0000-4000-8000-000000000801';
+update public.service_offerings set expires_at='2026-12-25 00:00Z' where id='10000000-0000-4000-8000-000000000801';
+update public.service_offerings set status='closed',closed_outcome='completed'
+ where id='10000000-0000-4000-8000-000000000801';
+update public.service_offerings set title=title,updated_at=now()+interval '1 second'
+ where id='10000000-0000-4000-8000-000000000801';
+delete from public.service_offerings where id='10000000-0000-4000-8000-000000000801';
+do $test$ begin
+ if exists(select from public.audit_logs) then raise exception 'FAIL owner can read audit rows'; end if;
+ begin
+  insert into public.audit_logs(action,entity,entity_id) values('forged','service_offerings','10000000-0000-4000-8000-000000000801');
+  raise exception 'FAIL owner can forge history';
+ exception when insufficient_privilege then null; end;
+end $test$;
+reset role;
+do $test$ begin
+ if (select count(*) from public.audit_logs where entity='service_offerings'
+     and entity_id='10000000-0000-4000-8000-000000000801')<>9
+ then raise exception 'FAIL history did not accumulate or no-op created an event'; end if;
+ if exists(select from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000801'
+           and (actor_id is distinct from '00000000-0000-4000-8000-000000000001'::uuid
+                or payload::text like '%private-%'))
+ then raise exception 'FAIL wrong history actor or private text copied'; end if;
+ if not exists(select from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000801'
+               and action='service_offering_created' and payload->'from_state'='null'::jsonb
+               and payload#>>'{to_state,status}'='draft')
+ or not exists(select from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000801'
+               and payload->'changed_fields'='["public_search_enabled"]'::jsonb
+               and payload#>>'{from_state,public_search_enabled}'='false'
+               and payload#>>'{to_state,public_search_enabled}'='true')
+ or not exists(select from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000801'
+               and payload->'changed_fields'='["description","title"]'::jsonb)
+ or not exists(select from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000801'
+               and action='service_offering_deleted' and payload->'to_state'='null'::jsonb
+               and payload#>>'{from_state,status}'='closed'
+               and payload#>>'{from_state,closed_outcome}'='completed')
+ or exists(select from public.service_offerings where id='10000000-0000-4000-8000-000000000801')
+ then raise exception 'FAIL retained lifecycle/publication/edit/delete facts'; end if;
+ raise notice 'PASS atomic owner history accumulates through DELETE, excludes private text, ignores no-ops and remains admin-only';
+end $test$;
+
+-- Existing provider FK cascades must remain compatible with profile erasure:
+-- actor references are nullable, including the delete event made by the cascade.
+insert into auth.users values('00000000-0000-4000-8000-000000000005','erasure@local.test','{}');
+insert into public.profiles values('00000000-0000-4000-8000-000000000005');
+set role authenticated;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000005',false);
+insert into public.service_offerings(id,provider_id,title,status)
+ values('10000000-0000-4000-8000-000000000821','00000000-0000-4000-8000-000000000005','Cascade fixture','draft');
+reset role;
+delete from public.profiles where id='00000000-0000-4000-8000-000000000005';
+do $test$ begin
+ if exists(select from public.service_offerings where id='10000000-0000-4000-8000-000000000821')
+ or (select count(*) from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000821')<>2
+ or exists(select from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000821' and actor_id is not null)
+ then raise exception 'FAIL profile cascade blocked or erased minimal offering history'; end if;
+ raise notice 'PASS profile cascade retains minimal history and severs actor identity';
+end $test$;
+select set_config('request.jwt.claim.sub','00000000-0000-4000-8000-000000000001',false);
+
+-- Fail an actual audit append. Each otherwise-authorized original statement
+-- must roll back too; a separate best-effort append would fail these tests.
+set role authenticated;
+insert into public.service_offerings(id,provider_id,title,status)
+ values('10000000-0000-4000-8000-000000000811','00000000-0000-4000-8000-000000000001','Atomic original','draft');
+reset role;
+alter table public.audit_logs add constraint test_reject_service_history
+ check(entity_id not in ('10000000-0000-4000-8000-000000000811'::uuid,'10000000-0000-4000-8000-000000000812'::uuid)) not valid;
+set role authenticated;
+do $test$ declare failure_constraint text; begin
+ begin
+  update public.service_offerings set public_search_enabled=true where id='10000000-0000-4000-8000-000000000811';
+  raise exception 'FAIL update survived audit failure';
+ exception when check_violation then
+  get stacked diagnostics failure_constraint=constraint_name;
+  if failure_constraint<>'test_reject_service_history' then raise; end if;
+ end;
+ begin
+  insert into public.service_offerings(id,provider_id,title,status)
+   values('10000000-0000-4000-8000-000000000812','00000000-0000-4000-8000-000000000001','Atomic refused','draft');
+  raise exception 'FAIL insert survived audit failure';
+ exception when check_violation then
+  get stacked diagnostics failure_constraint=constraint_name;
+  if failure_constraint<>'test_reject_service_history' then raise; end if;
+ end;
+ begin
+  delete from public.service_offerings where id='10000000-0000-4000-8000-000000000811';
+  raise exception 'FAIL delete survived audit failure';
+ exception when check_violation then
+  get stacked diagnostics failure_constraint=constraint_name;
+  if failure_constraint<>'test_reject_service_history' then raise; end if;
+ end;
+ if not exists(select from public.service_offerings where id='10000000-0000-4000-8000-000000000811'
+               and public_search_enabled=false and status='draft')
+ or exists(select from public.service_offerings where id='10000000-0000-4000-8000-000000000812')
+ then raise exception 'FAIL original row changes were not rolled back'; end if;
+end $test$;
+reset role;
+do $test$ begin
+ if (select count(*) from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000811')<>1
+ or exists(select from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000812')
+ then raise exception 'FAIL failed mutation retained an audit row'; end if;
+ raise notice 'PASS audit failure rolls back authorized INSERT, UPDATE and DELETE atomically';
+end $test$;
+alter table public.audit_logs drop constraint test_reject_service_history;
 insert into public.service_offerings(id,provider_id,title,status,public_search_enabled,created_at)
 select ('20000000-0000-4000-8000-'||lpad(n::text,12,'0'))::uuid,
  '00000000-0000-4000-8000-000000000001','Bounded service '||n,'active',true,'2026-11-26 10:00Z'
@@ -149,6 +286,7 @@ do $test$ declare first_id uuid; capped_id uuid; begin
  raise notice 'PASS limit/offset caps and deterministic nonoverlapping pages';
 end $test$;
 reset role;
+create temporary table saved_service_history as select * from public.audit_logs;
 \ir ../rollbacks/20261125133404_public_personal_service_search_v1.down.sql
 do $test$ begin
  if to_regprocedure('public.get_public_service_offering_v1(uuid)') is not null
@@ -157,7 +295,13 @@ do $test$ begin
  if (select public_search_enabled from public.service_offerings where id='10000000-0000-4000-8000-000000000002') is distinct from true
  or (select public_search_enabled from public.service_offerings where id='10000000-0000-4000-8000-000000000001') is distinct from false
  then raise exception 'FAIL choices lost on rollback'; end if;
- raise notice 'PASS rollback removes readers and retains both owner choices';
+ if to_regprocedure('public.service_offering_history_v1()') is not null
+ or exists(select from pg_catalog.pg_trigger where tgrelid='public.service_offerings'::regclass and tgname='service_offering_history_v1')
+ then raise exception 'FAIL rollback retained history writer'; end if;
+ if exists((select * from public.audit_logs except select * from saved_service_history)
+           union all (select * from saved_service_history except select * from public.audit_logs))
+ then raise exception 'FAIL rollback changed accumulated history'; end if;
+ raise notice 'PASS rollback removes readers and writer, retaining owner choices and accumulated history';
 end $test$;
 \ir ../migrations/20261125133404_public_personal_service_search_v1.sql
 set role anon;
@@ -169,3 +313,20 @@ do $test$ begin
  raise notice 'PASS reapply restores only explicitly retained public choices';
 end $test$;
 reset role;
+
+do $test$ begin
+ if exists((select * from public.audit_logs except select * from saved_service_history)
+           union all (select * from saved_service_history except select * from public.audit_logs))
+ then raise exception 'FAIL reapply fabricated or lost history'; end if;
+end $test$;
+set role authenticated;
+update public.service_offerings set status='paused' where id='10000000-0000-4000-8000-000000000900';
+reset role;
+do $test$ begin
+ if (select count(*) from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000900')<>1
+ or not exists(select from public.audit_logs where entity_id='10000000-0000-4000-8000-000000000900'
+               and action='service_offering_changed'
+               and payload#>>'{from_state,status}'='active' and payload#>>'{to_state,status}'='paused')
+ then raise exception 'FAIL reapply did not resume prospective history'; end if;
+ raise notice 'PASS reapply preserves old history without backfill and resumes prospective appends';
+end $test$;

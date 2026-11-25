@@ -34,8 +34,23 @@ create function auth.uid() returns uuid language sql stable as $$
  select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid
 $$;
 create function public.is_admin() returns boolean language sql stable as $$select false$$;
+-- Exact canonical audit columns and admin-only policies from 0001.
+-- This is a disposable fixture, not a new production audit table.
+create table public.audit_logs (
+ id uuid primary key default gen_random_uuid(),
+ actor_id uuid references public.profiles(id) on delete set null,
+ action text, entity text, entity_id uuid, payload jsonb,
+ occurred_at timestamptz not null default now(),
+ created_at timestamptz not null default now(),
+ updated_at timestamptz not null default now()
+);
+alter table public.audit_logs enable row level security;
+create policy audit_logs_select on public.audit_logs for select using(public.is_admin());
+create policy audit_logs_insert on public.audit_logs for insert with check(public.is_admin());
+grant select,insert,update,delete on public.audit_logs to authenticated;
 \ir ../migrations/20260627121713_service_offerings.sql
 alter table public.service_offerings add column expires_at timestamptz;
+alter table public.service_offerings add column closed_outcome text;
 create function public.is_synthetic_fixture_label_v1(variadic p_values text[])
 returns boolean language sql immutable parallel safe set search_path to 'pg_catalog'
 as $function$
