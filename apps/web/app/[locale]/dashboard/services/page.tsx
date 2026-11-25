@@ -78,6 +78,10 @@ export default async function ServicesPage({
     formCountryLabel: t("form.countryLabel"),
     formCountryPlaceholder: t("form.countryPlaceholder"),
     formRemoteLabel: t("form.remoteLabel"),
+    formPublicLabel: t("form.publicLabel"),
+    formPublicHint: t("form.publicHint"),
+    publicAudience: t("publicAudience"),
+    memberAudience: t("memberAudience"),
     formRateLabel: t("form.rateLabel"),
     formRateHint: t("form.rateHint"),
     save: t("save"),
@@ -101,6 +105,7 @@ export default async function ServicesPage({
         initialRows={rows}
         needsMigration={needsMigration}
         closedSupported={closedSupported}
+        publicSearchSupported={result.kind === "ok" && result.publicSearchSupported === true}
         labels={labels}
       />
       {canOfferOrganization && employerCtx.kind === "ok" ? (
