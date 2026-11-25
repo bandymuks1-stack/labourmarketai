@@ -229,21 +229,21 @@ function IdentityCard({
 }) {
   return (
     <LivingCvIdentityFrame testId="org-living-card">
-    <div className="flex min-w-0 flex-col items-center gap-4 rounded-[20px] bg-[#0b1020] px-4 pb-5 pt-5 text-center">
-      <Eyebrow className="text-[#f3d27a]">{t(`${LIVING}.eyebrow`)}</Eyebrow>
+    <div className="flex min-w-0 flex-col items-center gap-4 rounded-[20px] bg-ink-900 px-4 pb-5 pt-5 text-center">
+      <Eyebrow className="text-brand-blue">{t(`${LIVING}.eyebrow`)}</Eyebrow>
       <span
         aria-hidden
-        className="flex h-28 w-28 items-center justify-center rounded-full border border-[#d4af37]/60 bg-[#141a28] font-display text-[2.6rem] font-bold tracking-[-0.04em] text-[#f3d27a]"
+        className="flex h-28 w-28 items-center justify-center rounded-full border border-brand-blue/60 bg-ink-800 font-display text-[2.6rem] font-bold tracking-[-0.04em] text-brand-blue"
       >
         {organizationMonogram(name)}
       </span>
-      <p aria-hidden="true" className="font-display text-xl font-semibold leading-tight text-[#f3d27a] [overflow-wrap:anywhere] lg:hidden">
+      <p aria-hidden="true" className="font-display text-xl font-semibold leading-tight text-brand-blue [overflow-wrap:anywhere] lg:hidden">
         {name}
       </p>
       {country || span ? (
         <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-          {country ? <Stamp className="text-[#c9cdd6]">{country}</Stamp> : null}
-          {span ? <Stamp className="text-[#c9cdd6]">{span}</Stamp> : null}
+          {country ? <Stamp className="text-text-secondary">{country}</Stamp> : null}
+          {span ? <Stamp className="text-text-secondary">{span}</Stamp> : null}
         </div>
       ) : null}
     </div>
