@@ -198,6 +198,8 @@ export async function loadOrganizationLivingCv(
         organizationName: load.organizationName,
         clients: load.clients,
         performedAsSubcontractor: load.performedAsSubcontractor,
+        recordsRead: load.history.totalRecords,
+        truncated: load.truncated,
       },
       journal: load.journal,
       projects: load.projects,

@@ -8297,5 +8297,12 @@
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
     }
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Arbeidsregistreringer etter periode"
+      }
+    }
   }
 }

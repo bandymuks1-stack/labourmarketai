@@ -221,6 +221,9 @@ export type OrganizationLivingHistory = {
   readonly organizationName: string;
   readonly clients: readonly { readonly name: string | null }[];
   readonly performedAsSubcontractor: boolean;
+  /** Coverage metadata from the same history read; partial totals must be disclosed. */
+  readonly recordsRead: number;
+  readonly truncated: boolean;
 };
 
 export interface OrganizationLivingInput {

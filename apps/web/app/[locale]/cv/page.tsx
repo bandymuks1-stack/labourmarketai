@@ -695,7 +695,7 @@ export default async function VerifiedCvPage({
             : t("skillHoursOwn", { hours: fmtHours(time.attributedHours) })
           : time.kind === "involvement_only"
             ? t("skillInvolvedHours", { hours: fmtHours(involved) })
-            : time.kind === "none" && item.kind === "catalog" ? t("skillNoRecords") : null,
+            : time.kind === "none" && item.kind === "catalog" && item.magnitude === "none" ? t("skillNoRecords") : null,
         detail: details.length > 0 ? details.join(" · ") : null,
         share,
         shareLabel: share === null ? null : new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 }).format(share),

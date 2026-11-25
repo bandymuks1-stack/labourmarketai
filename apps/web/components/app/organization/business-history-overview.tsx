@@ -33,6 +33,8 @@ export async function BusinessHistoryOverview({
   performedAsSubcontractor = false,
   locale,
   compact = false,
+  truncated = false,
+  recordsRead,
   placesHref = "#company-work-history-places",
 }: {
   readonly business: BusinessHistory | null;
@@ -48,14 +50,25 @@ export async function BusinessHistoryOverview({
   readonly locale: string;
   /** Living CV already names the organization and carries the overview. */
   readonly compact?: boolean;
+  /** Coverage metadata from the same canonical history read. */
+  readonly truncated?: boolean;
+  readonly recordsRead?: number;
   readonly placesHref?: string;
 }) {
   const t = await getTranslations("companyWorkHistory.business");
+  const coverage = await getTranslations("companyWorkHistory");
   if (business === null) {
     return (
-      <p className="text-meta text-text-muted" data-testid="business-history-unavailable">
-        {t("unavailable")}
-      </p>
+      <div className="flex flex-col gap-2">
+        <p className="text-meta text-text-muted" data-testid="business-history-unavailable">
+          {t("unavailable")}
+        </p>
+        {truncated ? (
+          <p className="text-meta text-text-muted" data-testid="business-history-truncated">
+            {coverage("truncated", { count: recordsRead ?? 0 })}
+          </p>
+        ) : null}
+      </div>
     );
   }
   const n = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
@@ -185,6 +198,12 @@ export async function BusinessHistoryOverview({
           {header.split ? (structure ?? t("subtitleHeld", { name: organizationName })) : t("subtitle")}
         </p> : null}
       </header>
+
+      {truncated ? (
+        <p className="text-meta leading-relaxed text-text-muted" data-testid="business-history-truncated">
+          {coverage("truncated", { count: recordsRead ?? totals.records })}
+        </p>
+      ) : null}
 
       {/* P0-B: whose work — the periods, each with its own figures, before any total. */}
       {header.split ? periodsBlock : null}

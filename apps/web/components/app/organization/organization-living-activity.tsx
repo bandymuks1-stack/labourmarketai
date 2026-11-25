@@ -6,7 +6,7 @@ const BUSINESS_HISTORY = "companyWorkHistory.business";
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 type TimelineRow =
-  | { readonly kind: "year"; readonly year: BusinessHistory["years"][number] }
+  | { readonly kind: "year"; readonly year: BusinessHistory["years"][number]; readonly fromYear: number; readonly toYear: number }
   | { readonly kind: "gap"; readonly from: number; readonly to: number };
 
 function figures(
@@ -22,7 +22,7 @@ function figures(
   });
 }
 
-/** The same dated business records as the full history, shown as one shared annual-hours scale. */
+/** Start-year buckets retain full record spans and place their whole hours on one shared scale. */
 export function OrganizationLivingActivity({
   historyDetail,
   locale,
@@ -32,23 +32,26 @@ export function OrganizationLivingActivity({
   readonly locale: string;
   readonly t: Translate;
 }) {
-  const business = historyDetail?.business;
-  if (!historyDetail || !business || (business.years.length === 0 && business.undated === 0)) return null;
-
+  if (!historyDetail) return null;
+  const business = historyDetail.business;
+  if ((!business || (business.years.length === 0 && business.undated === 0)) && !historyDetail.truncated) return null;
   const number = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
-  const years = [...business.years].sort((a, b) => a.year - b.year);
+  const years = [...(business?.years ?? [])].sort((a, b) => a.year - b.year);
   const maxHours = Math.max(0, ...years.map((year) => year.hours));
   const rows: TimelineRow[] = [];
+  let coveredThrough: number | null = null;
 
-  years.forEach((year, index) => {
-    const previous = years[index - 1];
-    if (previous && year.year > previous.year + 1) {
-      rows.push({ kind: "gap", from: previous.year + 1, to: year.year - 1 });
+  years.forEach((year) => {
+    const fromYear = year.from ? Number(year.from.slice(0, 4)) : year.year;
+    const toYear = year.to ? Number(year.to.slice(0, 4)) : year.year;
+    if (!historyDetail.truncated && coveredThrough !== null && fromYear > coveredThrough + 1) {
+      rows.push({ kind: "gap", from: coveredThrough + 1, to: fromYear - 1 });
     }
-    rows.push({ kind: "year", year });
+    rows.push({ kind: "year", year, fromYear, toYear });
+    coveredThrough = Math.max(coveredThrough ?? toYear, toYear);
   });
 
-  const split = businessHistoryHeader(business, historyDetail.identity).split;
+  const split = business ? businessHistoryHeader(business, historyDetail.identity).split : false;
 
   return (
     <section
@@ -60,7 +63,7 @@ export function OrganizationLivingActivity({
     >
       <header className="flex min-w-0 flex-col gap-1">
         <h3 id="org-living-activity-title" className="font-display text-base font-semibold text-text-primary">
-          {t(BUSINESS_HISTORY + ".yearsTitle")}
+          {t("businessProfile.team.living.activityTitle")}
         </h3>
         {split ? (
           <p className="text-meta leading-relaxed text-text-muted">
@@ -69,10 +72,16 @@ export function OrganizationLivingActivity({
         ) : null}
       </header>
 
+      {historyDetail.truncated ? (
+        <p className="text-meta leading-relaxed text-text-muted" data-testid="org-living-activity-truncated">
+          {t("companyWorkHistory.truncated", { count: historyDetail.recordsRead })}
+        </p>
+      ) : null}
+
       {years.length > 0 ? (
         <>
           <div
-            className="grid grid-cols-[3.5rem_minmax(0,1fr)] items-end gap-x-3"
+            className="grid grid-cols-[4.75rem_minmax(0,1fr)] items-end gap-x-3"
             aria-label={t(BUSINESS_HISTORY + ".totals.hours")}
           >
             <span className="text-meta text-text-muted">{t(BUSINESS_HISTORY + ".totals.hours")}</span>
@@ -87,7 +96,7 @@ export function OrganizationLivingActivity({
               row.kind === "gap" ? (
                 <li
                   key={"gap-" + row.from}
-                  className="grid grid-cols-[3.5rem_minmax(0,1fr)] gap-x-3 border-t border-dashed border-text-primary/10 py-2"
+                  className="grid grid-cols-[4.75rem_minmax(0,1fr)] gap-x-3 border-t border-dashed border-text-primary/10 py-2"
                   data-testid="org-living-activity-gap"
                   data-gap-from={row.from}
                   data-gap-to={row.to}
@@ -104,13 +113,15 @@ export function OrganizationLivingActivity({
               ) : (
                 <li
                   key={"year-" + row.year.year}
-                  className="grid min-w-0 grid-cols-[3.5rem_minmax(0,1fr)] items-start gap-x-3 border-t border-text-primary/10 py-2.5"
+                  className="grid min-w-0 grid-cols-[4.75rem_minmax(0,1fr)] items-start gap-x-3 border-t border-text-primary/10 py-2.5"
                   data-testid="org-living-activity-year"
                   data-year={row.year.year}
                   data-year-hours={row.year.hours}
+                  data-period-from={row.fromYear}
+                  data-period-to={row.toYear}
                 >
                   <span className="font-display text-sm font-semibold tabular-nums text-text-primary">
-                    {row.year.year}
+                    {row.fromYear === row.toYear ? row.fromYear : `${row.fromYear}–${row.toYear}`}
                   </span>
                   <div className="min-w-0">
                     <div className="h-2 overflow-hidden rounded-full bg-text-primary/10" aria-hidden="true">
@@ -130,9 +141,9 @@ export function OrganizationLivingActivity({
         </>
       ) : null}
 
-      {business.undated > 0 ? (
+      {(business?.undated ?? 0) > 0 ? (
         <p className="text-meta leading-relaxed text-text-muted" data-testid="org-living-activity-undated">
-          {t(BUSINESS_HISTORY + ".undated", { count: business.undated })}
+          {t(BUSINESS_HISTORY + ".undated", { count: business?.undated ?? 0 })}
         </p>
       ) : null}
     </section>

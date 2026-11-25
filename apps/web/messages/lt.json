@@ -182,6 +182,7 @@
       "heroContact": "Kaip susisiekti",
       "provenance": "Šį puslapį užpildė pati įmonė.",
       "living": {
+        "activityTitle": "Veiklos įrašai pagal laikotarpį",
         "eyebrow": "Gyvas CV",
         "figures": {
           "years": "įrašų laikotarpio aprėptis (metais)",

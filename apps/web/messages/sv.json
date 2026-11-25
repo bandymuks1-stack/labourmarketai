@@ -182,6 +182,7 @@
       "heroContact": "Så kommer du i kontakt",
       "provenance": "Företaget har själv fyllt i den här sidan.",
       "living": {
+        "activityTitle": "Arbetsregistreringar per period",
         "eyebrow": "Levande CV",
         "figures": {
           "years": "period som täcks av poster (år)",
