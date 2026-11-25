@@ -4096,6 +4096,9 @@
       "readFailed": "Jeg kunne ikke lese det akkurat nå — feilen ligger hos oss. Ingenting er endret. Prøv igjen om litt.",
       "taskStatusAsk": "Hvilken status skal oppgaven få: startet, ferdig eller blokkert?",
       "stageStatusAsk": "Hvilken status skal etappen få: startet, ferdig eller blokkert?",
+      "chipStatusStarted": "Startet",
+      "chipStatusDone": "Ferdig",
+      "chipStatusBlocked": "Blokkert",
       "professionAsk": "Hvilket yrke eller fag mener du?",
       "crossSpace": {
         "personal": {

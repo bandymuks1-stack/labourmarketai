@@ -133,17 +133,93 @@ test("C-5. a brand-new session still has the manager's questions", async ({ brow
 });
 
 /**
- * C-6. A REQUEST FOR THE PERSON'S OWN SPACE (decision 0034 rule 3, owner P0
- * 2026-11-24). Acting for the organization, "mano cv" was answered with the
- * organization's generic menu ("Galiu padėti su …"). It must say the CV is in
- * the personal space and offer ONE switch-and-open action. Read-only: the
- * chip is checked, never clicked, so the QA account's workspace is unchanged.
+ * THE CHAT'S THREE P0 FIXES IN PRODUCTION (owner order 2026-11-24): #3776
+ * (a request for the other space), #3790 (the first screen names the context
+ * and lists nothing) and #3783 (no generic menu as an answer). The walk runs
+ * on `desktop`, `phone` (390) and `phone-375`: the screen comes from the
+ * dispatch through the walk fixture (this spec never reads it), and every step below
+ * also checks that the screen does not scroll sideways (e).
  */
-test("C-6. 'mano cv' and 'mano kalendorius' in the organization point to the personal space", async ({ browser }) => {
+const MENU = /Galiu padėti su |Čia galiu padėti su /;
+
+/** (e) The page fits its screen: no sideways scroll at 375, 390 or desktop. */
+async function fits(page: Page, where: string): Promise<void> {
+  const { scroll, inner } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, inner: window.innerWidth }));
+  console.info(`[manager-chat] ${where}: scrollWidth=${scroll} innerWidth=${inner}`);
+  expect(scroll, `${where} scrolls sideways (${scroll} > ${inner})`).toBeLessThanOrEqual(inner + 1);
+}
+
+/** The chips of the newest answer (chip rows render only on the newest message). */
+const chips = (page: Page) => page.locator('[data-testid^="chat-chip-"]:visible');
+
+test("C-6. (a) the first screen names the organization and lists no menu", async ({ browser }) => {
   const { page, close } = await open(browser);
-  await ask(page, "mano cv", /Jūsų CV yra asmeninėje erdvėje/, /Galiu padėti su/);
-  await expect(page.locator('[data-testid="chat-chip-xs:cv"], [data-testid="chat-chip-link:/cv"]').last()).toBeVisible({ timeout: 20_000 });
-  await ask(page, "mano kalendorius", /Jūsų kalendorius yra asmeninėje erdvėje/, /Galiu padėti su/);
-  await expect(page.locator('[data-testid="chat-chip-xs:calendar"], [data-testid="chat-chip-link:/dashboard/planning"]').last()).toBeVisible({ timeout: 20_000 });
+  await expect(page.getByText(new RegExp(`Veikiate kaip: ${ALFA}`)).first()).toBeVisible({ timeout: 30_000 });
+  await expect(page.locator("body")).not.toContainText(MENU);
+  await fits(page, "first screen");
   await close();
+});
+
+test("C-7. (b) 'mano cv' and 'mano kalendorius' in the organization: the other-space line and ONE switch action", async ({ browser }) => {
+  const { page, close } = await open(browser);
+  await ask(page, "mano cv", /Jūsų CV yra asmeninėje erdvėje/, MENU);
+  await expect(chips(page)).toHaveCount(1, { timeout: 20_000 });
+  await expect(page.locator('[data-testid="chat-chip-xs:cv"], [data-testid="chat-chip-link:/cv"]').last()).toBeVisible();
+  await fits(page, "mano cv");
+  await ask(page, "mano kalendorius", /Jūsų kalendorius yra asmeninėje erdvėje/, MENU);
+  await expect(chips(page)).toHaveCount(1, { timeout: 20_000 });
+  await expect(page.locator('[data-testid="chat-chip-xs:calendar"], [data-testid="chat-chip-link:/dashboard/planning"]').last()).toBeVisible();
+  await fits(page, "mano kalendorius");
+  await close();
+});
+
+test("C-8. (c) a clear request gets its concrete action, never a menu", async ({ browser }) => {
+  const { page, close } = await open(browser);
+  // Opens the project form: nothing is submitted, the walk only sees it.
+  await ask(page, "Noriu sukurti projektą", /Naujas projektas\./, MENU);
+  await expect(page.locator('[data-testid="inline-action-form-company.create-project"]').last()).toBeVisible({ timeout: 30_000 });
+  await fits(page, "create project");
+  await close();
+  const second = await open(browser);
+  await ask(
+    second.page,
+    "Rodyk kandidatus",
+    /Štai jūsų poreikiai ir žmonės už jų\.|Jūsų įmonė dar neaprašė poreikio/,
+    /Galiu padėti su |Čia galiu padėti su |nepavyko nuskaityti jūsų įmonės poreikių/,
+  );
+  await fits(second.page, "candidates");
+  await second.close();
+});
+
+test("C-9. (d) an unclear request gets exactly one clarifying question", async ({ browser }) => {
+  const { page, close } = await open(browser);
+  await ask(page, "CV", /Jūsų CV ar kandidato\?/, MENU);
+  // The answer is ONE question: one question mark in the newest assistant turn.
+  const answer = (await page.getByTestId("msg-assistant").filter({ hasText: "Jūsų CV ar kandidato?" }).last().innerText()).trim();
+  console.info(`[manager-chat] unclear CV answer: ${answer.replace(/\s+/g, " ")}`);
+  expect(answer.match(/\?/g) ?? [], `one question in: ${answer}`).toHaveLength(1);
+  await expect(chips(page)).toHaveCount(2, { timeout: 20_000 });
+  await fits(page, "unclear CV");
+  await close();
+});
+
+/**
+ * C-10. (b) THE SWITCH ACTION OPENS /cv. Tapping it switches the QA owner to
+ * their personal space (the same server-validated switch as the workspace
+ * chip) and opens the CV page. The walk then switches back to the
+ * organization, so the next walk starts where this one did.
+ */
+test("C-10. (b) the switch action opens the person's CV, then the walk returns to the organization", async ({ browser }) => {
+  const { page, close } = await open(browser);
+  try {
+    await ask(page, "mano cv", /Jūsų CV yra asmeninėje erdvėje/, MENU);
+    await page.locator('[data-testid="chat-chip-xs:cv"], [data-testid="chat-chip-link:/cv"]').last().click();
+    await page.waitForURL(/\/lt\/cv(\?|#|$)/, { timeout: 45_000 });
+    await fits(page, "/cv after the switch");
+  } finally {
+    await close();
+    const back = await open(browser);
+    await expect(back.page.getByTestId("workspace-chip").first()).toContainText(ALFA, { timeout: 30_000 });
+    await back.close();
+  }
 });

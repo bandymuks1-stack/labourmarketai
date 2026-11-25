@@ -4096,6 +4096,9 @@
       "readFailed": "Ma ei saanud seda praegu lugeda — viga on meie poolel. Midagi ei muudetud. Proovige hetke pärast uuesti.",
       "taskStatusAsk": "Millise oleku ülesanne saab: alustatud, tehtud või blokeeritud?",
       "stageStatusAsk": "Millise oleku etapp saab: alustatud, tehtud või blokeeritud?",
+      "chipStatusStarted": "Alustatud",
+      "chipStatusDone": "Tehtud",
+      "chipStatusBlocked": "Blokeeritud",
       "professionAsk": "Millist ametit või oskust mõtlete?",
       "crossSpace": {
         "personal": {

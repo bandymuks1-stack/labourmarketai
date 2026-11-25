@@ -4,6 +4,7 @@ export declare const THRESHOLDS: Readonly<{
   healthSamples: number;
   healthSampleGapMs: number;
   deployQuietMinutes: number;
+  deployWaitPollMs: number;
   errorLookback: number;
   errorCooldownMinutes: number;
   supabaseWindowMinutes: number;
@@ -63,3 +64,6 @@ export declare function judgeSupabaseEdge(
 export declare const SR1_READING_KEYS: readonly string[];
 
 export declare function judgeSr1Readings(text: string): { publish: boolean; why: string };
+
+/** `--wait <minutes>` from the arguments, bounded to 0..30; absent = 0 (judge once). */
+export declare function deployWaitMinutes(argv: readonly string[]): number;

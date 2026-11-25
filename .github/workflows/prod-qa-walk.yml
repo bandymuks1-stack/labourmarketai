@@ -292,7 +292,7 @@ jobs:
     # `none`: the dated digest-check cron fired on another date — no walk (the walk job needs this one).
     if: needs.debounce.outputs.spec != 'none'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 25  # the deploy brake may wait up to 15 min
     permissions:
       actions: read
       contents: read
@@ -349,7 +349,9 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node .github/scripts/walk-brakes.mjs deploy
+        # WAITS for production to be quiet (up to 15 min) instead of refusing at once: frequent
+        # deploys refused walk after walk (owner P0 2026-11-24). The rule itself is unchanged.
+        run: node .github/scripts/walk-brakes.mjs deploy --wait 15
 
       - name: "Brake (b): the last walks did not fail for infrastructure"
         id: brake_b
@@ -409,7 +411,7 @@ jobs:
       group: prod-qa-walk
       cancel-in-progress: false
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40  # the deploy brake may wait up to 10 min
     environment: production-qa
     permissions:
       contents: read
@@ -455,7 +457,8 @@ jobs:
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node .github/scripts/walk-brakes.mjs deploy
+        # A deploy that started during the concurrency wait: wait it out (up to 10 min), never walk into it.
+        run: node .github/scripts/walk-brakes.mjs deploy --wait 10
 
       - name: "Brake (a): production health, right before the walk"
         id: brake_wa

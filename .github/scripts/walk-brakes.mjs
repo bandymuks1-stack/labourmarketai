@@ -65,6 +65,8 @@ export const THRESHOLDS = Object.freeze({
    *  (blue/green switch: two Next servers on one origin; run 39978076973 got
    *  Cloudflare 522s and 45 s timeouts during deploys). */
   deployQuietMinutes: 5,
+  /** How often `deploy --wait` re-reads the deploy runs while it waits. */
+  deployWaitPollMs: 30_000,
   /** The error brake looks at this many latest walks that reached production. */
   errorLookback: 2,
   /** …and trips only while the latest of them ended less than this long ago. */
@@ -407,7 +409,7 @@ async function cmdHealth() {
   say(`health brake: clear (${THRESHOLDS.healthSamples}/${THRESHOLDS.healthSamples} samples within thresholds)`);
 }
 
-async function cmdDeploy() {
+function readDeployVerdict() {
   const runs = (ghJson(`repos/${REPO}/actions/workflows/deploy-vps.yml/runs?per_page=10`).workflow_runs ?? []).map(
     (r) => ({ id: r.id, status: r.status, updated_at: r.updated_at }),
   );
@@ -441,9 +443,35 @@ async function cmdDeploy() {
     }
     own = { id: ownId, deployEndedAt };
   }
-  const verdict = judgeDeployBrake(runs, new Date(), THRESHOLDS, own);
-  if (verdict.refuse) refuse(verdict.reason);
+  return judgeDeployBrake(runs, new Date(), THRESHOLDS, own);
+}
+
+/**
+ * The deploy brake. `deploy` judges once. `deploy --wait <minutes>` WAITS for the
+ * quiet period instead of refusing at once (owner P0 2026-11-24: frequent deploys
+ * refused walk after walk, and a refused walk is lost). The rule is unchanged —
+ * no walk while a deploy runs or within `deployQuietMinutes` of one ending; it
+ * still refuses when production is not quiet within the bound (at most 30 min).
+ */
+async function cmdDeploy() {
+  const waitMin = deployWaitMinutes(process.argv);
+  const until = Date.now() + waitMin * 60_000;
+  let verdict = readDeployVerdict();
+  while (verdict.refuse && Date.now() + THRESHOLDS.deployWaitPollMs <= until) {
+    say(`deploy brake: waiting (${verdict.reason})`);
+    await sleep(THRESHOLDS.deployWaitPollMs);
+    verdict = readDeployVerdict();
+  }
+  if (verdict.refuse) refuse(waitMin > 0 ? `${verdict.reason} (still not quiet after waiting ${waitMin} min)` : verdict.reason);
   say(`deploy brake: clear (${verdict.reason})`);
+}
+
+/** `--wait <minutes>` from the arguments, bounded to 0..30; absent = 0 (judge once). */
+export function deployWaitMinutes(argv) {
+  const at = argv.indexOf("--wait");
+  if (at === -1) return 0;
+  const n = Number(argv[at + 1]);
+  return Number.isFinite(n) ? Math.max(0, Math.min(30, n)) : 0;
 }
 
 async function cmdErrors() {
