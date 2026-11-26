@@ -98,6 +98,8 @@ export interface WorkHistoryEntry {
   readonly endedAt: string | null;
   /** True only when the row says active AND has no end date. */
   readonly current: boolean;
+  /** Canonical provenance. Legacy engagement-only readers omit this field. */
+  readonly source?: ExperienceRelationship["source"];
   readonly countryCode: string | null;
 }
 
@@ -244,6 +246,7 @@ export function workHistoryFromExperience(
     startedAt: nonEmpty(r.startedAt),
     endedAt: nonEmpty(r.endedAt),
     current: r.current && !nonEmpty(r.endedAt),
+    source: r.source,
     countryCode: nonEmpty(r.countryCode),
   }));
   return sortNewestFirst(entries);
@@ -258,9 +261,14 @@ function sortNewestFirst(entries: WorkHistoryEntry[]): WorkHistoryEntry[] {
   });
 }
 
-/** How many of these engagements are running right now. A count of real rows. */
+/** Current membership is a role, not evidence that work is happening now. */
+export function isCurrentWork(entry: WorkHistoryEntry): boolean {
+  return entry.current && entry.source !== "membership";
+}
+
+/** How many recorded engagements are running right now. */
 export function countCurrentEngagements(entries: readonly WorkHistoryEntry[]): number {
-  return entries.filter((e) => e.current).length;
+  return entries.filter(isCurrentWork).length;
 }
 
 function nonEmpty(v: string | null | undefined): string | null {

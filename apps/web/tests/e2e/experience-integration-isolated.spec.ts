@@ -17,6 +17,7 @@ import {
   signIn,
   signUp,
   sql,
+  sqlExec,
   stackMailLink,
   userId,
 } from "./isolated-web-a-helpers";
@@ -397,7 +398,7 @@ function wiOrgRow(exp: Locator, orgId: string): Locator {
 }
 
 async function openCv(page: Page): Promise<Locator> {
-  await page.goto(`${BASE}/en/cv`);
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   const main = page.getByRole("main").first();
   await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });
   return main;
@@ -592,6 +593,8 @@ test("EX-1b. O's profile card names A and B — the same organizations as Work i
   await expect(history, "the card's work history renders").toBeVisible({ timeout: 60_000 });
   await expect(history).toContainText(ORG_A);
   await expect(history, "the manager role in B is on the card too").toContainText(ORG_B);
+  await expect(o.getByRole("main").getByTestId("identity-stage-current-work").filter({ hasText: ORG_B }),
+    "membership-only management is a role, not current work").toHaveCount(0);
 });
 
 // ── EX-2 ────────────────────────────────────────────────────────────────────
@@ -686,12 +689,13 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
     await expect(place.getByRole("heading", { level: 2 })).toContainText(label);
     const chip = place.getByTestId("company-place-person-history-link");
     await expect(chip, `${ref}: one person, a door to A's own card`).toHaveCount(1);
-    await expect(chip).toHaveAttribute("href", new RegExp(`/dashboard/company/people/${personId}$`));
+    // The card keeps the organization the history was opened for (`?org=`, #3754).
+    await expect(chip).toHaveAttribute("href", new RegExp(`/dashboard/company/people/${personId}\\?org=${s.orgA}$`));
     await expect(chip).toHaveAttribute("data-linked", linked);
     await expect(place.getByTestId("company-place-person-other-workspace")).toHaveCount(0);
     await expect(place.getByTestId("company-place-person-other-roster")).toHaveCount(0);
     await chip.click();
-    await o.waitForURL(new RegExp(`/dashboard/company/people/${personId}$`), { timeout: 60_000 });
+    await o.waitForURL(new RegExp(`/dashboard/company/people/${personId}\\?org=${s.orgA}$`), { timeout: 60_000 });
     await expect(o.getByRole("main").getByTestId("company-person"), `${ref}: the card opens`).toHaveAttribute(
       "data-state",
       "ready",
@@ -746,6 +750,13 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
 // ── EX-5 ────────────────────────────────────────────────────────────────────
 
 test("EX-5. screenshots at 375 and 1440: O's CV, W2's CV, company A's history and one place's detail", async ({ browser }) => {
+  // P0 2026-11-24 (Living CV run 45401396990): a long project title widened the
+  // company history's single-column grid past a 375 px screen. One synthetic
+  // project with a long unbroken title and city keeps that case in the
+  // no-sideways-scrolling check below; nothing above counts projects.
+  sqlExec(`insert into public.projects (organization_id, title, city)
+           values (${lit(s.orgA)}, ${lit(`QA-SYNTHETIC-${"a-very-long-unbroken-project-title-".repeat(4)}${RUN}`)},
+                   ${lit(`QA-SYNTHETIC-${"long-city-name-".repeat(6)}`)})`);
   mkdirSync(OUT, { recursive: true });
   const place = encodeURIComponent(`l:QA-SYNTHETIC history r1 ${RUN}`);
   const shots: { who: string; key: string; path: string; themes: readonly ("light" | "dark")[] }[] = [

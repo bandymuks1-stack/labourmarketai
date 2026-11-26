@@ -1,6 +1,7 @@
 import type { EvidenceRecordView } from "./import-core";
 import {
   buildCompanyWorkHistory,
+  isPeriodRecord,
   type CompanyWorkHistory,
   type PlaceObjectFacts,
 } from "./company-work-history";
@@ -39,9 +40,6 @@ export interface PersonHistorySummary {
   readonly byMonth: readonly { readonly month: string; readonly hours: number }[];
 }
 
-const isPeriod = (r: EvidenceRecordView) =>
-  r.activityDate === null && r.periodStart !== null && r.periodEnd !== null;
-
 export function summarizePersonHistory(
   records: readonly EvidenceRecordView[],
   objects: readonly PlaceObjectFacts[] = [],
@@ -58,7 +56,7 @@ export function summarizePersonHistory(
     history: buildCompanyWorkHistory(live, objects),
     liveRecords: live.length,
     statedHours: live.reduce((s, r) => s + (r.hours ?? 0), 0),
-    periodHours: live.filter(isPeriod).reduce((s, r) => s + (r.hours ?? 0), 0),
+    periodHours: live.filter(isPeriodRecord).reduce((s, r) => s + (r.hours ?? 0), 0),
     recordsWithoutHours: live.filter((r) => r.hours === null).length,
     recordsUndated: live.filter((r) => !r.activityDate && !r.periodStart && !r.periodEnd).length,
     recordsWithoutWorkObject: live.filter((r) => !r.workObjectId).length,

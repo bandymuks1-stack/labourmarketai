@@ -266,3 +266,26 @@ describe("6. i18n - every shipped full locale carries the namespace with the sam
     for (const l of LOCALES) expect(JSON.stringify(ns(l)), l).not.toMatch(/\bdemo\b/i);
   });
 });
+
+describe("7. what is not built says so (owner P0 2026-11-23)", () => {
+  // A company offer cannot yet be handed off to a project (it needs a named
+  // crew: #3649, RED, not applied). After the client's yes, BOTH sides are
+  // told plainly that starting the work through the platform is not available
+  // yet — never a control or a sentence that implies it works.
+  const form = readFileSync(join(WEB, "components/app/team-demand-offer-form.tsx"), "utf8");
+  const received = readFileSync(join(WEB, "components/app/team-offers-received.tsx"), "utf8");
+  it("the client's card and the offering company's sent row both carry the note", () => {
+    expect(received).toMatch(/data-testid=\{`team-offer-org-next-\$\{offer\.offerId\}`\}>\s*\{t\("received\.orgNext"\)\}/);
+    expect(form).toMatch(/\{org && o\.status === "accepted" \? \(\s*\/\/[\s\S]*?\{t\("sent\.orgNext"\)\}/);
+  });
+  it("in every full locale the note says it is not available yet", () => {
+    const en = JSON.parse(readFileSync(join(WEB, "messages", "en.json"), "utf8")) as { teamDemandOffer: { received: { orgNext: string }; sent: { orgNext: string } } };
+    expect(en.teamDemandOffer.received.orgNext).toMatch(/is not available yet/);
+    expect(en.teamDemandOffer.sent.orgNext).toMatch(/is not available yet/);
+    for (const l of ["lt", "ru", "nl", "de", "pl", "sv"]) {
+      const ns = (JSON.parse(readFileSync(join(WEB, "messages", `${l}.json`), "utf8")) as { teamDemandOffer: { received: { orgNext: string }; sent: { orgNext?: string } } }).teamDemandOffer;
+      expect(ns.sent.orgNext, l).toBeTruthy();
+      expect(ns.received.orgNext, l).not.toBe(en.teamDemandOffer.received.orgNext);
+    }
+  });
+});

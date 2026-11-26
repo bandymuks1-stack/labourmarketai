@@ -88,6 +88,18 @@ test("D-1..D-4. the journal opens with the day; yesterday's entry keeps its work
   // D-3 Calendar: ten days back through the native picker.
   const tenBack = new Date(Date.parse(`${today}T00:00:00Z`) - 10 * 86_400_000).toISOString().slice(0, 10);
   await page.goto(`${BASE}/en/dashboard/journal`);
+  // The native date input changes the day only through React's onChange: a
+  // fill that lands before the day choice hydrates sets the value and fires
+  // nothing, so the URL never moves. Wait for React to own the input first
+  // (the same check integrated-fixes uses for the journal composer).
+  await page.waitForFunction(
+    () => {
+      const el = document.querySelector('[data-testid="journal-day-choice-input"]');
+      return !!el && Object.keys(el).some((k) => k.startsWith("__reactProps"));
+    },
+    undefined,
+    { timeout: 30_000 },
+  );
   await main.getByTestId("journal-day-choice-input").fill(tenBack);
   await page.waitForURL(new RegExp(`date=${tenBack}`), { timeout: 30_000 });
   await expect(main.getByTestId("journal-day-choice")).toHaveAttribute("data-choice", "other");

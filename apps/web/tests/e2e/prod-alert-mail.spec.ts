@@ -147,7 +147,7 @@ test("A-3. 390 px: the work card says Sweden; the next visit writes the job aler
     // links to it: `#cv-availability`, which DetailsHashOpener opens on
     // arrival. Run 41469193732 went to the bare page and waited on a toggle
     // inside the still-closed disclosure. Tapping the bar is the fallback.
-    await page.goto("/lt/dashboard/profile#cv-availability");
+    await page.goto("/lt/dashboard/profile?tab=details#cv-availability");
     await settle(page);
     const card = inMain(page).getByTestId("profile-work-card-editor");
     if (!(await card.isVisible().catch(() => false))) {

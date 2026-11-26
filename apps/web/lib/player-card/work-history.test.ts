@@ -123,6 +123,18 @@ describe("the profile card's history = the decision-0025 reading", () => {
     expect(led).toMatchObject({ organizationName: "Led Org", startedAt: null, endedAt: null, title: null, current: true });
   });
 
+  it("current membership stays in history without claiming current work", async () => {
+    engagementRows = [{ ...engagement(1, "employee"), status: "active", ended_at: null }];
+    const { card } = await load();
+    if (card.status !== "ok") throw new Error("card read failed");
+    const { isCurrentWork, countCurrentEngagements } = await import("./work-history-model");
+    const membership = card.entries.find(e => e.source === "membership");
+    expect(membership).toMatchObject({ current: true, relationshipSlug: "owner" });
+    expect(isCurrentWork(membership!)).toBe(false);
+    expect(card.entries.filter(isCurrentWork).map(e => e.organizationName)).toEqual(["Org 1"]);
+    expect(countCurrentEngagements(card.entries)).toBe(1);
+  });
+
   it("keeps the engagement's own fields and orders newest first", async () => {
     engagementRows = [engagement(3, "employee"), engagement(9, "freelancer")];
     const { card } = await load();

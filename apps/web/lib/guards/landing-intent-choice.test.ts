@@ -41,7 +41,7 @@ const landing = read("app/[locale]/focus-landing/focus-landing.tsx");
 const choice = read("components/marketing/landing-intent-choice.tsx");
 const navigator = read("components/navigation/goal-navigator.tsx");
 /** CardRail mounts in the navigator: goals, functions, professions. */
-const navigatorRails = 5;
+const navigatorRails = 4;
 const server = read("components/navigation/goal-navigation.tsx");
 const rail = read("components/navigation/card-rail.tsx");
 
@@ -56,9 +56,11 @@ describe("the choice is the first screen", () => {
     expect(landing).not.toMatch(/<h1\b/);
     expect(body.indexOf("<LandingIntentChoice")).toBeLessThan(body.indexOf("<PublicEntry"));
     expect(navigator).toMatch(/\{lead && \(\s*<p\s+data-testid="goal-lead"/);
-    // On a phone the first four goals show whole, two across; the other two
-    // sit under one "more" control — never a carousel.
-    expect(body).toMatch(/phoneMore=\{\{ ids: \["partners", "agencies"\], label: tV3\("moreChoices"\) \}\}/);
+    // All six goals in ONE rail on every width (owner P0 2026-11-23,
+    // CAROUSEL_NAVIGATION_SPEC N1): no "More options" part on a phone, no
+    // phone grid — the rail itself peeks, fades and shows the swipe hint.
+    expect(body).toMatch(/<LandingIntentChoice lead=\{tV3\("lead"\)\} \/>/);
+    expect(landing + choice).not.toMatch(/phoneMore|moreChoices|phoneLayout="grid"/);
   });
 
   it("the sentence entry and the request doors stay", () => {
@@ -73,11 +75,15 @@ describe("the choice is the first screen", () => {
     );
     const need = readFileSync(join(APP_ROOT, "components/marketing/landing-v3.tsx"), "utf8");
     expect(need).toMatch(/<details\s+id="request"\s+data-testid="landing-need-path"/);
-    // Sent open (wide screens show the services without a tap; also the safe
-    // state with no script) and folded on a narrow screen before first paint
-    // — unless the address asks for one of its forms.
-    expect(need).toMatch(/data-testid="landing-need-path"\s+open\s/);
-    expect(need).toMatch(/window\.matchMedia\("\(max-width: 1023px\)"\)\.matches&&location\.hash\.indexOf\("#request"\)!==0\)d\.removeAttribute\("open"\)/);
+    // Closed until the visitor asks for it, on every width (owner order
+    // 2026-11-24, decisions 0032 and 0034: the first screen shows the title
+    // only). Native <details> still opens with no script; a link to
+    // `#request` opens it before first paint.
+    expect(need).not.toMatch(/data-testid="landing-need-path"\s+open\s/);
+    expect(need).toMatch(/location\.hash\.indexOf\("#request"\)===0\)d\.setAttribute\("open",""\)/);
+    // What happens to a request and what it costs stay, inside the block.
+    expect(need).toMatch(/data-testid="request-doors-promise"/);
+    expect(need).toMatch(/data-testid="request-doors-free"/);
     expect(need.match(/<LandingRequestDoors /g)).toHaveLength(1);
     // A goal's action can open one form directly: `/#request=b2b`.
     const form = readFileSync(join(APP_ROOT, "components/marketing/landing-request-doors-form.tsx"), "utf8");
@@ -86,9 +92,7 @@ describe("the choice is the first screen", () => {
   });
 
   it("the home mounts the one navigator; no second goal view or page exists", () => {
-    expect(choice).toMatch(
-      /<GoalNavigation headingLevel="h1" phoneLayout="grid" lead=\{lead\} phoneMore=\{phoneMore\} \/>/,
-    );
+    expect(choice).toMatch(/<GoalNavigation headingLevel="h1" lead=\{lead\} \/>/);
     expect(existsSync(join(APP_ROOT, "components/navigation/goal-rail.tsx"))).toBe(false);
     // A new public screen is an owner decision (constitution A-09): the goal
     // state is a fragment of this page, not a route.
@@ -100,9 +104,7 @@ describe("one rail, one panel", () => {
   it("goals, functions and professions all use the one card rail", () => {
     // Goals, the live panel's functions and professions, and the functions of
     // the early (pre-script) panels.
-    // … plus the phone's "more" part, which shows the remaining goals in the
-    // same cards (Landing V3).
-    expect(navigator.match(/<CardRail\b/g)).toHaveLength(5);
+    expect(navigator.match(/<CardRail\b/g)).toHaveLength(4);
     expect(navigator).toMatch(/testId="goal-rail"/);
     expect(navigator).toMatch(/testId="function-rail"/);
     expect(navigator).toMatch(/testId="profession-rail"/);
@@ -114,7 +116,9 @@ describe("one rail, one panel", () => {
     expect(navigator).toMatch(/\{showProfessions && \(/);
     // (On a phone in the no-swipe layout the profession rail is replaced by
     // the list, so the rail sits in a wrapper that hides it there.)
-    expect(navigator).toMatch(/\{!fullList && \(\s*<div className=\{phoneMore \? "max-sm:hidden" : undefined\}>\s*<CardRail/);
+    // One rail per level on every width: no phone-only wrapper or list swap.
+    expect(navigator).toMatch(/\{!fullList && \(\s*<CardRail\s+label=\{labels\.professions\}/);
+    expect(navigator + rail).not.toMatch(/phoneMore|phoneGrid|phoneHiddenIds|phoneLayout|goal-more-choices/);
   });
 
   it("the switch appears only for a goal with a catalogue; Close is a named button", () => {
@@ -134,9 +138,9 @@ describe("one rail, one panel", () => {
   });
 
   it("phone goal cards are compact with no description; wide cards carry it", () => {
-    expect(rail).toMatch(/phoneGrid \? "w-auto" : "w-\[5\.75rem\]", "sm:w-auto sm:min-w-40 sm:flex-1"/);
-    // The grid is phones only: from `sm` the track is the same flex rail.
-    expect(rail).toMatch(/phoneGrid \? "grid grid-cols-3 sm:flex" : "flex"/);
+    expect(rail).toMatch(/compact \? "w-\[6rem\] min-w-min sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44"/);
+    // A flex rail on every width (no phone grid since N1).
+    expect(rail).not.toMatch(/grid grid-cols-3 sm:flex/);
     expect(rail).toMatch(/compact && "hidden sm:\[display:-webkit-box\]"/);
   });
 
@@ -341,5 +345,39 @@ describe("copy", () => {
         if (loc !== "en") expect(value, `${loc} ${group}.${key} untranslated`).not.toBe(en[group][key]);
       }
     }
+  });
+});
+
+/**
+ * Owner order 2026-11-24 (decisions 0032 and 0034): the public first screen
+ * carries no helper text. A goal card is its title; the rail has no "swipe"
+ * word; there is no "or describe it" divider and no printed field eyebrow.
+ */
+describe("the first screen carries no helper text", () => {
+  const read = (p: string) => readFileSync(join(APP_ROOT, p), "utf8");
+
+  it("a goal card is its title only", () => {
+    expect(read("components/navigation/goal-navigation.tsx")).not.toMatch(/intents\.\$\{intent\.id\}\.description/);
+  });
+
+  it("the rail keeps its dots and prints no swipe word", () => {
+    const rail = read("components/navigation/card-rail.tsx");
+    expect(rail).toContain('data-rail-part="hint"');
+    expect(rail).not.toContain("swipeHint");
+    expect(read("components/navigation/goal-navigation.tsx")).not.toContain("nav.swipe");
+  });
+
+  it("a 'how it works' step is its title; its explanation opens on a tap and stays in the document", () => {
+    const how = read("components/marketing/landing-v3.tsx");
+    expect(how).toMatch(/<details className="group" data-testid=\{`landing-how-\$\{step\}`\}>/);
+    expect(how).toContain("{t(`${step}.title`)}");
+    expect(how).toContain("{t(`${step}.body`)}");
+  });
+
+  it("no divider between the goals and the sentence field; the field's label is for assistive tech", () => {
+    const focus = read("app/[locale]/focus-landing/focus-landing.tsx");
+    expect(focus).not.toContain('data-testid="landing-or"');
+    expect(focus).toContain("quietLabel");
+    expect(read("components/marketing/public-entry.tsx")).toMatch(/quietLabel \? "sr-only"/);
   });
 });

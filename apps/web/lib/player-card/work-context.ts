@@ -1,4 +1,5 @@
 import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
+import { isCurrentWork } from "@/lib/player-card/work-history-model";
 
 /**
  * LIVE WORK GRAPH — LEVEL 2: the authenticated professional's own context
@@ -39,7 +40,7 @@ export function buildWorkContext(card: WorkerPlayerCard): readonly WorkContextNo
   const currentNames = [
     ...new Set(
       card.workHistory
-        .filter((h) => h.current)
+        .filter(isCurrentWork)
         .map((h) => (h.organizationName ?? "").trim())
         .filter((n) => n.length > 0),
     ),
@@ -73,7 +74,7 @@ export function buildWorkContext(card: WorkerPlayerCard): readonly WorkContextNo
     status: unreadable("workHistory") ? "unknown" : card.workHistory.length > 0 ? "done" : "absent",
     count: unreadable("workHistory") ? null : card.workHistory.length,
     names: [],
-    href: "/cv#cv-work-history",
+    href: "/cv?tab=experience#cv-work-history",
   };
 
   // Skills the person's OWN records stand behind (journal-supported). A failed

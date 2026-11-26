@@ -7,7 +7,7 @@ import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
 import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
-import { shownWorkHistory } from "@/lib/player-card/work-history-model";
+import { isCurrentWork, shownWorkHistory } from "@/lib/player-card/work-history-model";
 import { contextHoursById } from "@/lib/player-card/context-hours";
 import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
 import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenance";
@@ -129,7 +129,7 @@ export async function buildPlayerCardLabels(
   const currentWork = [
     ...new Set(
       card.workHistory
-        .filter((h) => h.current)
+        .filter(isCurrentWork)
         .map((h) => (h.organizationName ?? "").trim())
         .filter((n) => n.length > 0),
     ),

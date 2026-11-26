@@ -54,7 +54,7 @@ function me(): Page {
 }
 
 async function openCapabilities(p: Page) {
-  await p.goto(`${BASE}/en/dashboard/profile#capabilities`);
+  await p.goto(`${BASE}/en/dashboard/profile?tab=skills#capabilities`);
   const main = p.getByRole("main");
   await expect(main.locator("#capabilities").first()).toBeVisible({ timeout: 60_000 });
   await clickUntilVisible(main.locator("#capabilities > summary").first(), main.getByTestId("capability-profile-manual-add"), {
@@ -140,7 +140,7 @@ test("CV2-2. the Living CV lists every skill and every job once on the screen", 
   mkdirSync(OUT, { recursive: true });
   for (const width of [375, 390, 768, 1440] as const) {
     await p.setViewportSize({ width, height: 900 });
-    await p.goto(`${BASE}/en/cv`);
+    await p.goto(`${BASE}/en/cv?tab=experience`);
     const cv = p.getByRole("main");
     const skills = cv.getByTestId("cv-skills");
     await expect(skills, "the skills section renders").toBeVisible({ timeout: 60_000 });

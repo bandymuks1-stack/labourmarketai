@@ -518,7 +518,10 @@ export default async function OpportunitiesPage({
     patch: Partial<Record<keyof DiscoveryFilterState, string | null>> & {
       sort?: DiscoverySort;
     },
-  ) => `${boardHref}${buildDiscoveryQuery(filters, sort, patch)}`;
+  ) => `${boardHref}${buildDiscoveryQuery(filters, sort, patch, view)}`;
+  // Clearing filters keeps the person on the board they chose: the whole
+  // market stays the whole market, the default view stays the default view.
+  const resetHref = view === "all" ? `${boardHref}?view=all` : boardHref;
   const chipClass = (isActive: boolean) =>
     `inline-flex min-h-11 items-center rounded-md border px-2.5 text-support transition-colors ${
       isActive
@@ -1165,7 +1168,7 @@ export default async function OpportunitiesPage({
                         {active.length > 0 ? (
                           <div className="flex flex-wrap items-center justify-end gap-2">
                             <Link
-                              href={boardHref}
+                              href={resetHref}
                               data-testid="opportunities-filters-reset"
                               className="inline-flex min-h-11 items-center text-support font-medium text-brand-blue hover:text-brand-champagne"
                             >
@@ -1253,7 +1256,7 @@ export default async function OpportunitiesPage({
                       })}
                     </p>
                     <Link
-                      href={boardHref}
+                      href={resetHref}
                       className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
                       data-testid="opportunities-filtered-empty-reset"
                     >

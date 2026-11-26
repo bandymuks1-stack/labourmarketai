@@ -169,7 +169,7 @@ test.describe("worker self view", () => {
   test("profile: canonical count label + bin legend, no score, desktop", async ({ page }) => {
     // Summary first (2026-09-23): the trust counts live in the closed
     // `#profile-about` bar; the hash opens it the way the reader's tap does.
-    await page.goto("/lt/dashboard/profile#profile-about");
+    await page.goto("/lt/dashboard/profile?tab=about#profile-about");
     const trust = page.getByTestId("trust-block").or(page.locator("text=" + LT_COUNT).first());
     await expect(page.locator(`text=${LT_COUNT}`).first()).toBeVisible({ timeout: 60_000 });
     await expect(page.locator("text=Susieti įgūdžiai")).toHaveCount(0);
@@ -215,7 +215,7 @@ test.describe("worker self view", () => {
 
   test("mobile 375px: profile legend fits without overflow", async ({ page }) => {
     await page.setViewportSize({ width: 375, height: 812 });
-    await page.goto("/lt/dashboard/profile");
+    await page.goto("/lt/dashboard/profile?tab=skills");
     await expect(page.getByTestId("confidence-bin-legend").first()).toBeAttached({
       timeout: 60_000,
     });

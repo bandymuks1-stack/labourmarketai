@@ -49,7 +49,6 @@ import { CompanyInterestAck } from "@/components/app/company-interest-ack";
 import { DemandLifecycleControls } from "@/components/app/demand-lifecycle-controls";
 import { JourneyStrip } from "@/components/app/journey-strip";
 import { buildDemandJourney } from "@/lib/demand/demand-journey-model";
-import { FeatureNote } from "@/components/app/feature-note";
 import { AutoMatchReceiptNote } from "@/components/app/auto-match-receipt-note";
 import { readLastAutoMatchReceipt } from "@/lib/scouting/auto-match";
 import { createClient as createSupabaseServerClient } from "@/lib/supabase/server";
@@ -428,19 +427,6 @@ export default async function CompanyScoutingPage({
   const supplyIsTheAction = result?.kind === "not-structured" && handRaisers.length === 0;
   const guidanceTop = (
     <>
-      {/* Honest matching status (audit P1): what works today vs what an active
-          candidate stream still depends on. No guaranteed/instant/AI claims. */}
-      <section
-        className="flex flex-col gap-1.5 rounded-lg border border-ink-600 bg-ink-800/40 px-4 py-3"
-        data-testid="scouting-status-note"
-      >
-        <p className="text-sm font-semibold text-text-primary">{t("statusNote.title")}</p>
-        <p className="text-xs leading-relaxed text-text-secondary">{t("statusNote.signals")}</p>
-        <p className="text-xs leading-relaxed text-text-secondary">{t("statusNote.stream")}</p>
-        <p className="text-xs leading-relaxed text-text-secondary">{t("statusNote.fill")}</p>
-        <p className="text-xs leading-relaxed text-text-muted">{t("statusNote.disclaimer")}</p>
-      </section>
-
       {/* Privacy frame — contacts hidden, profile-safe only (Step 3A policy). */}
       <section
         className="flex flex-col gap-1.5 rounded-lg border border-brand-blue/25 bg-brand-blue/5 px-4 py-3"
@@ -461,9 +447,6 @@ export default async function CompanyScoutingPage({
   );
   const guidanceBottom = (
     <>
-      {/* Honest visibility: based on readiness/trust/permissions — NOT payment.
-          Paid wider access is inert while billing is disabled; no fake unlock. */}
-      <FeatureNote testId="scouting-visibility-note">{t("visibilityNote")}</FeatureNote>
 
       {/* Trust: how matching works — deterministic, honest, no fake score. */}
       <details className="group rounded-lg border border-ink-600 bg-ink-800/40" data-testid="scouting-how">
@@ -471,6 +454,22 @@ export default async function CompanyScoutingPage({
           {t("how.title")}
         </summary>
         <div className="flex flex-col gap-3 px-4 pb-4 text-xs leading-relaxed text-text-secondary">
+          {/* Honest matching status (audit P1): what works today vs what an
+              active candidate stream still depends on. Behind the "how
+              matching works" disclosure since decision 0034 (one block per
+              screen, 2026-11-24): kept whole, no longer an always-open card
+              above the candidates. */}
+          <div className="flex flex-col gap-1.5" data-testid="scouting-status-note">
+            <p className="font-semibold text-text-primary">{t("statusNote.title")}</p>
+            <p>{t("statusNote.signals")}</p>
+            <p>{t("statusNote.stream")}</p>
+            <p>{t("statusNote.fill")}</p>
+            <p className="text-text-muted">{t("statusNote.disclaimer")}</p>
+          </div>
+          {/* Honest visibility: based on readiness/trust/permissions — NOT
+              payment. Paid wider access is inert while billing is disabled; no
+              fake unlock. In the same disclosure since decision 0034. */}
+          <p data-testid="scouting-visibility-note">{t("visibilityNote")}</p>
           <p>{t("how.intro")}</p>
           <ul className="flex flex-col gap-1.5">
             {(["strong", "possible", "weak", "insufficient_data"] as const).map((k) => (
@@ -676,15 +675,14 @@ export default async function CompanyScoutingPage({
               </Link>
             ) : null}
           </div>
-          {/* PHONE: one row that scrolls sideways inside itself, so a long
-              facet list never pushes the candidates below the fold and the
-              page itself never scrolls sideways. From sm up the chips wrap. */}
-          <div className="-m-1 flex gap-2 overflow-x-auto p-1 sm:m-0 sm:flex-wrap sm:overflow-visible sm:p-0">
+          {/* The chips wrap at every width, and a long label wraps inside its
+              chip (max-w-full), so no filter is ever cut off on a phone. */}
+          <div className="flex flex-wrap gap-2">
             <Link
               href={filterHref({ availableNow: !result.filters.availableNow })}
               data-testid="scout-filter-available"
               aria-current={result.filters.availableNow ? "true" : undefined}
-              className={`${chipLinkClassName(result.filters.availableNow)} shrink-0 whitespace-nowrap`}
+              className={`${chipLinkClassName(result.filters.availableNow)} max-w-full`}
             >
               {result.filters.availableNow ? (
                 <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
@@ -699,7 +697,7 @@ export default async function CompanyScoutingPage({
                 })}
                 data-testid={`scout-filter-country-${cc}`}
                 aria-current={result.filters.country === cc ? "true" : undefined}
-                className={`${chipLinkClassName(result.filters.country === cc)} shrink-0 whitespace-nowrap`}
+                className={`${chipLinkClassName(result.filters.country === cc)} max-w-full`}
               >
                 {result.filters.country === cc ? (
                   <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />
@@ -715,7 +713,7 @@ export default async function CompanyScoutingPage({
                 })}
                 data-testid={`scout-filter-skill-${s}`}
                 aria-current={result.filters.skill === s ? "true" : undefined}
-                className={`${chipLinkClassName(result.filters.skill === s)} shrink-0 whitespace-nowrap`}
+                className={`${chipLinkClassName(result.filters.skill === s)} max-w-full`}
               >
                 {result.filters.skill === s ? (
                   <Check aria-hidden className="h-4 w-4 shrink-0 text-brand-blue" />

@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 
 import { clickUntilVisible } from "./click-until-visible";
 import { inviteCapGate } from "./invite-cap";
+import { archiveSyntheticCohorts, SYNTHETIC_PROGRAM } from "./prod-synthetic-cohorts";
 import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
@@ -19,7 +20,7 @@ import { test, expect, type Browser, type Page } from "./prod-walk";
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const ALFA = "QA-SYNTHETIC Alfa";
-const PROGRAM = "QA-SYNTHETIC praktikos programa";
+const PROGRAM = SYNTHETIC_PROGRAM;
 const COHORT = `QA-SYNTHETIC grupė ${RUN}`;
 // The institution sees the learner by the name IT typed on the invitation
 // (learner privacy), or by the profile name where membership shows it.
@@ -44,6 +45,19 @@ async function workspace(page: Page, orgName: string): Promise<void> {
   await page.getByTestId("workspace-chip-menu").locator('[data-testid^="workspace-option-"]', { hasText: orgName }).first().click();
   await expect(chip).toContainText(orgName, { timeout: 30_000 });
 }
+
+// Independent of earlier walks (owner order 2026-11-23): before the walk, the
+// groups earlier runs left live are archived; after it (Playwright runs
+// afterAll when a test fails too), this run's group as well. Archiving keeps
+// the membership rows as history; it only takes the group off the compass.
+test.beforeAll(async () => {
+  if (!ENABLED) return;
+  await archiveSyntheticCohorts("before");
+});
+test.afterAll(async () => {
+  if (!ENABLED) return;
+  await archiveSyntheticCohorts("after");
+});
 
 let link = "";
 

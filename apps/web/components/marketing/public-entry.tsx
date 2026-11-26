@@ -171,12 +171,16 @@ export function PublicEntry({
   supply,
   examples: exampleSet = "standard",
   requestLabel,
+  quietLabel = false,
 }: {
   readonly supply: EntrySupply | null;
   /** The request block's own title ("Submit a request"), from the server so the
    *  landing's client messages stay `landing.entry` only. Without it the entry
    *  offers no request route. */
   readonly requestLabel?: string;
+  /** The field's label stays for assistive tech and is not printed
+   *  (decision 0032): the placeholder already says what to type. */
+  readonly quietLabel?: boolean;
   /**
    * `short` (the landing since 2026-11-13, owner: less noise on the first
    * screen): two example chips and no "more examples". `standard`: the four
@@ -352,7 +356,7 @@ export function PublicEntry({
         >
           <label
             htmlFor={inputId}
-            className="font-mono text-meta uppercase tracking-label text-text-muted"
+            className={quietLabel ? "sr-only" : "font-mono text-meta uppercase tracking-label text-text-muted"}
           >
             {t("label")}
           </label>
