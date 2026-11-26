@@ -1,4 +1,117 @@
-# Living CV: owner visual reference (2026-11-24)
+# Living CV — final owner standard (2026-11-26)
+
+The two owner-supplied images below are the final information-design references for the
+person and organization Living CV. They supersede conflicting visual direction in the
+historical 2026-11-24 reference retained below. They are a standard for a later implementation
+stage, not a request to implement another dashboard variant now.
+
+- **Organization:** [final organization reference](owner-final-organization-2026-11-26.png).
+- **Person:** [final person reference](owner-final-person-2026-11-26.png).
+
+These are design mock-ups. Their names, figures, scores, badges, reviews and performance
+percentages are illustrative, not production evidence or permission to manufacture data.
+Production screenshots continue to follow the existing private, de-identified evidence rules.
+
+## Existing task and implementation links
+
+This standard belongs to the existing [function register](../../program/FUNCTION_REGISTER.md):
+**2.4 — person Living CV / player card / EU export** and **3.36 — company Living CV**.
+It does not create a new registry, design project, capability, database or source of truth.
+The existing premium-design and player-identity documentation remains applicable where it
+agrees with this current owner decision.
+
+The already implemented professional journey is `CareerJourneyMap`, fed by
+`deriveCareerJourney` and the current CV reader. It draws real professional stops and skill
+lines on a time axis, with a vertical phone layout. Reuse that verified implementation for
+the temporary view where a minimal safe change is possible. Do not rebuild it or roll back
+the whole release. Retain other verified theme, history, privacy and functional fixes.
+The temporary person CV entry opens the existing Experience tab and its professional journey;
+all tabs retain explicit addresses. The organization CV has no equivalent verified person-style
+journey projection to reconnect in a minimal change, so its working current view is retained.
+The two-column text-node experiment is not the final standard; its further design work is
+stopped. If a safe minimal restoration is unavailable for a surface, keep that surface
+working, record its concrete limitation in the existing task and continue core functions.
+
+## Information design
+
+Use the professional premium athlete-card principle: career, teams, periods and results
+translate to actual professional history, organizations, projects, capabilities and work
+results. Use simple, understandable visual hierarchy, coherent themes and responsive screens.
+Charts must show meaningful measurements and development over time. Decorative connections
+between journal paragraphs do not satisfy this standard.
+
+Selecting a skill, project, period or work place must open the factual records behind it.
+Every aggregate must remain traceable to its existing source. The main view should be easy
+to scan; detailed records and evidence remain accessible through the existing interactions.
+
+## Person Living CV
+
+Show, when supported by actual permitted data:
+
+- Professional periods, organizations, work places and geography, and projects participated in.
+- The specific work performed, duration, quantities and measurement units.
+- Time attributable to each skill only when the actual allocation is known.
+- Total professional experience and the experience of individual competencies, separately.
+- Confirmed and unconfirmed experience and its evolution over time.
+- Actual productivity measures only when the evidence and denominator are sufficient.
+- Work evidence, photo reports, documents, qualifications and real reviews.
+
+## Organization Living CV
+
+Show, when supported by actual permitted data:
+
+- The organization's operating history, project periods and geography.
+- Work types, quantities, total work hours, competency-specific hours and actual results.
+- Confirmed and unconfirmed experience, photo reports and other evidence.
+- Current team, historical team composition, worker and brigade competencies.
+- Current capacity, worker/team availability, and ongoing and completed projects.
+
+**Historical experience and current capacity are different facts.** When a worker leaves,
+their participation in prior projects and the organization's recorded historical experience
+remain part of that history under the existing access/privacy rules. Current capacity must
+reflect the changed team composition. Do not attribute the organization's hours to its owner
+or a current employee merely because they hold a role there.
+
+## Dynamic data and integrity
+
+The existing computations and readers must reflect relevant changes: a worker joining or
+leaving; a brigade changing; a project being created or completed; a work entry, work report
+or photo report being added; a result being confirmed; an original record being corrected;
+availability changing; or a student/trainee moving into a worker role.
+
+- One fact has one authoritative source. Reuse existing journals, reports, projects,
+  organization/person history, classifications, confirmations, calendar, computations,
+  graphs, components and APIs. Do not create parallel storage or a new competence system.
+- Do not duplicate hours, skills, projects or professional experience. An entry involving
+  several skills does not give its entire duration to every skill when allocation is unknown.
+- Never invent proficiency levels, productivity, percentages, ratings, periods or confirmations.
+  A pictured chart is not evidence that its example measure exists in the product.
+- Show unavailable measures as unavailable. Do not fabricate the missing inputs or create
+  new architecture to obtain them without an owner decision.
+- Preserve source records, history, media relationships, evidence state, existing privacy and
+  access restrictions, and the already approved outcome-level patent description. No technical
+  patent details or new SQL/security/financial authorization are granted by this standard.
+
+## Current delivery priority
+
+Defer the final premium dashboard implementation. Use the existing work organization and focus
+on the working journeys for people/workers, employers, agencies, brigades, students/trainees and
+education/training institutions: registration/login/roles and profiles; AI conversation creation,
+history, continuation and context under current access rules; journals and reports (including
+existing scheduling and approval); photo reports; calendar and availability; actual Living CV
+and PDF export; public work/worker/service/subcontractor search; publishing; messages and contacts.
+
+Repair specific existing connections so one work fact reaches its report, calendar, project
+and Living CV without being entered again. Verify real actions in the existing isolated
+production Chrome session. Green CI or a merged PR alone does not establish user acceptance.
+Use targeted development checks, mandatory integration checks and existing reliable evidence.
+Do not restart broad audits, invent design variants or create additional coordination systems.
+
+---
+
+## Historical 2026-11-24 reference (retained, superseded where conflicting)
+
+### Owner visual reference (2026-11-24)
 
 The owner provided two reference images for the worker Living CV, on desktop and phone:
 `owner-reference-1.webp` and `owner-reference-2.webp`. They are the target look for `/[locale]/cv`. The

@@ -152,7 +152,8 @@ export default async function VerifiedCvPage({
   const template = parseCvTemplateId(sp.template);
   // ONE SCREEN PER BLOCK (decision 0034): the active block comes from the
   // address, so a link, a notification or the chat opens it directly.
-  const activeBlock = parseCvBlock(sp.tab);
+  // Owner 2026-11-26: the existing professional journey is the temporary entry view.
+  const activeBlock = parseCvBlock(sp.tab ?? "experience");
   const compact = template === "compact";
   const needParam =
     (Array.isArray(sp.need) ? sp.need[0] : sp.need)?.trim() ?? "";
@@ -411,15 +412,15 @@ export default async function VerifiedCvPage({
 
   // Template link helper — plain query links so the registry can grow.
   const templateHref = (id: string) =>
-    `?template=${id}${needParam ? `&need=${encodeURIComponent(needParam)}` : ""}`;
+    `?template=${id}&tab=${activeBlock}${needParam ? `&need=${encodeURIComponent(needParam)}` : ""}`;
 
   // Block link helper (decision 0034): the same query links, plus `tab`.
-  // Overview is the page's own address, so its link carries no `tab`.
+  // Explicit tab addresses keep every block reachable when the entry view changes.
   const blockHref = (b: CvBlock) => {
     const q = new URLSearchParams();
     if (sp.template && !Array.isArray(sp.template)) q.set("template", sp.template);
     if (needParam) q.set("need", needParam);
-    if (b !== "overview") q.set("tab", b);
+    q.set("tab", b);
     const qs = q.toString();
     return qs ? `?${qs}` : "?";
   };
