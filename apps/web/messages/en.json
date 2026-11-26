@@ -7210,7 +7210,9 @@
       "countryPlaceholder": "e.g. LT",
       "remoteLabel": "Can be done remotely",
       "rateLabel": "Rate (optional)",
-      "rateHint": "Free text only — for example an indicative hourly rate."
+      "rateHint": "Free text only — for example an indicative hourly rate.",
+      "publicLabel": "Show this personal service publicly",
+      "publicHint": "When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
     },
     "save": "Save",
     "saving": "Saving...",
@@ -7236,7 +7238,9 @@
     "linkToRequests": "See requests for your services",
     "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead.",
     "removeQuestion": "Delete this service permanently? This cannot be undone. To only hide it from search, pause it instead.",
-    "removeYes": "Yes, delete"
+    "removeYes": "Yes, delete",
+    "publicAudience": "Public search selected",
+    "memberAudience": "Signed-in members selected"
   },
   "communication": {
     "origin": {
@@ -20859,7 +20863,8 @@
       "setUpAgency": "Set up your agency",
       "setUpInstitution": "For training institutions",
       "b2bEnquiry": "Business services enquiry (B2B)",
-      "projectEnquiry": "Individual project enquiry"
+      "projectEnquiry": "Individual project enquiry",
+      "findServices": "Find personal services"
     },
     "assistant": "Ask the assistant",
     "start": {
@@ -20879,5 +20884,36 @@
       "fullList": "Full list"
     },
     "more": "More"
+  },
+  "publicServices": {
+    "title": "Find personal services",
+    "lead": "Services published by individuals.",
+    "search": "Search",
+    "query": "Service or keyword",
+    "country": "Country",
+    "category": "Category",
+    "clear": "Clear filters",
+    "unavailable": "Service search is unavailable",
+    "unavailableHint": "Please try again later.",
+    "retry": "Try again",
+    "emptyFiltered": "No services match these filters",
+    "empty": "No personal services have been published publicly yet",
+    "results": "Services",
+    "remote": "Remote",
+    "pagination": "Search pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page}",
+    "refine": "Narrow your search to see more relevant services.",
+    "back": "All services",
+    "delivery": "Delivery",
+    "rate": "Rate",
+    "personalService": "Personal service",
+    "signInToRequest": "Sign in to request",
+    "manage": "Manage this service",
+    "contactUnavailable": "The request action is unavailable. Please try again later.",
+    "notFound": "Service not found",
+    "notFoundHint": "This service is no longer publicly available.",
+    "allCountries": "All countries"
   }
 }

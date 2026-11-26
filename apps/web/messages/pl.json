@@ -7210,7 +7210,9 @@
       "countryPlaceholder": "np. LT",
       "remoteLabel": "Można wykonać zdalnie",
       "rateLabel": "Stawka (opcjonalnie)",
-      "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa."
+      "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa.",
+      "publicLabel": "Pokazuj tę osobistą usługę publicznie",
+      "publicHint": "Gdy usługa jest aktywna i nie wygasła, jej tytuł, opis, kategoria, kraj, możliwość pracy zdalnej i stawka są widoczne bez logowania. Nie wpisuj prywatnych danych kontaktowych. Odznacz i zapisz, aby wyłączyć widoczność publiczną."
     },
     "save": "Zapisz",
     "saving": "Zapisywanie…",
@@ -7236,7 +7238,9 @@
     "linkToRequests": "Zapytania o Państwa usługi",
     "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Mogą ją Państwo wstrzymać.",
     "removeQuestion": "Usunąć tę usługę na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ją w wyszukiwaniu, proszę ją wstrzymać.",
-    "removeYes": "Tak, usuń"
+    "removeYes": "Tak, usuń",
+    "publicAudience": "Wybrano wyszukiwanie publiczne",
+    "memberAudience": "Wybrano zalogowanych użytkowników"
   },
   "communication": {
     "origin": {
@@ -20859,7 +20863,8 @@
       "setUpAgency": "Rejestracja agencji",
       "setUpInstitution": "Dla instytucji szkoleniowych",
       "b2bEnquiry": "Zapytanie o usługi dla firm (B2B)",
-      "projectEnquiry": "Zapytanie o projekt indywidualny"
+      "projectEnquiry": "Zapytanie o projekt indywidualny",
+      "findServices": "Znajdź usługi osób prywatnych"
     },
     "assistant": "Zapytaj asystenta",
     "start": {
@@ -20879,5 +20884,36 @@
       "fullList": "Pełna lista"
     },
     "more": "Więcej"
+  },
+  "publicServices": {
+    "title": "Znajdź usługi osób prywatnych",
+    "lead": "Usługi opublikowane publicznie przez osoby prywatne.",
+    "search": "Szukaj",
+    "query": "Usługa lub słowo kluczowe",
+    "country": "Kraj",
+    "category": "Kategoria",
+    "clear": "Wyczyść filtry",
+    "unavailable": "Wyszukiwanie usług jest niedostępne",
+    "unavailableHint": "Spróbuj ponownie później.",
+    "retry": "Spróbuj ponownie",
+    "emptyFiltered": "Brak usług pasujących do tych filtrów",
+    "empty": "Nie opublikowano jeszcze publicznie usług osób prywatnych",
+    "results": "Usługi",
+    "remote": "Zdalnie",
+    "pagination": "Strony wyszukiwania",
+    "previous": "Poprzednia",
+    "next": "Następna",
+    "page": "Strona {page}",
+    "refine": "Zawęź wyszukiwanie, aby znaleźć bardziej odpowiednie usługi.",
+    "back": "Wszystkie usługi",
+    "delivery": "Realizacja",
+    "rate": "Stawka",
+    "personalService": "Usługa osoby prywatnej",
+    "signInToRequest": "Zaloguj się i wyślij zapytanie",
+    "manage": "Zarządzaj tą usługą",
+    "contactUnavailable": "Wysłanie zapytania jest niedostępne. Spróbuj później.",
+    "notFound": "Nie znaleziono usługi",
+    "notFoundHint": "Ta usługa nie jest już publicznie dostępna.",
+    "allCountries": "Wszystkie kraje"
   }
 }

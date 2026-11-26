@@ -7210,7 +7210,9 @@
       "countryPlaceholder": "pvz. LT",
       "remoteLabel": "Gali būti atliekama nuotoliniu būdu",
       "rateLabel": "Įkainis (nebūtina)",
-      "rateHint": "Tik laisvas tekstas — pavyzdžiui, orientacinis valandinis įkainis."
+      "rateHint": "Tik laisvas tekstas — pavyzdžiui, orientacinis valandinis įkainis.",
+      "publicLabel": "Rodyti šią asmeninę paslaugą viešai",
+      "publicHint": "Aktyvios ir galiojančios paslaugos pavadinimą, aprašymą, kategoriją, šalį, nuotolinio atlikimo galimybę ir įkainį matys ir neprisijungę lankytojai. Nerašykite privačių kontaktų. Nuimkite žymę ir išsaugokite, kad viešas rodymas būtų išjungtas."
     },
     "save": "Išsaugoti",
     "saving": "Saugoma...",
@@ -7236,7 +7238,9 @@
     "linkToRequests": "Peržiūrėkite užklausas dėl savo paslaugų",
     "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti.",
     "removeQuestion": "Ištrinti paslaugą visam laikui? Atkurti nebus galima. Jei norite tik paslėpti iš paieškos, pristabdykite.",
-    "removeYes": "Taip, ištrinti"
+    "removeYes": "Taip, ištrinti",
+    "publicAudience": "Pasirinkta vieša paieška",
+    "memberAudience": "Pasirinkti prisijungę nariai"
   },
   "communication": {
     "origin": {
@@ -20859,7 +20863,8 @@
       "setUpAgency": "Užregistruoti agentūrą",
       "setUpInstitution": "Mokymo įstaigoms",
       "b2bEnquiry": "Verslo paslaugų užklausa (B2B)",
-      "projectEnquiry": "Individualaus projekto užklausa"
+      "projectEnquiry": "Individualaus projekto užklausa",
+      "findServices": "Ieškoti asmeninių paslaugų"
     },
     "assistant": "Klausti asistento",
     "start": {
@@ -20879,5 +20884,36 @@
       "fullList": "Visas sąrašas"
     },
     "more": "Daugiau"
+  },
+  "publicServices": {
+    "title": "Ieškoti asmeninių paslaugų",
+    "lead": "Asmenų viešai paskelbtos paslaugos.",
+    "search": "Ieškoti",
+    "query": "Paslauga arba raktažodis",
+    "country": "Šalis",
+    "category": "Kategorija",
+    "clear": "Išvalyti filtrus",
+    "unavailable": "Paslaugų paieška nepasiekiama",
+    "unavailableHint": "Bandykite dar kartą vėliau.",
+    "retry": "Bandyti dar kartą",
+    "emptyFiltered": "Pagal šiuos filtrus paslaugų nerasta",
+    "empty": "Viešai paskelbtų asmeninių paslaugų dar nėra",
+    "results": "Paslaugos",
+    "remote": "Nuotoliniu būdu",
+    "pagination": "Paieškos puslapiai",
+    "previous": "Ankstesnis",
+    "next": "Kitas",
+    "page": "Puslapis {page}",
+    "refine": "Patikslinkite paiešką, kad rastumėte tinkamesnių paslaugų.",
+    "back": "Visos paslaugos",
+    "delivery": "Atlikimas",
+    "rate": "Įkainis",
+    "personalService": "Asmeninė paslauga",
+    "signInToRequest": "Prisijungti ir pateikti užklausą",
+    "manage": "Tvarkyti šią paslaugą",
+    "contactUnavailable": "Užklausos pateikti nepavyksta. Bandykite vėliau.",
+    "notFound": "Paslauga nerasta",
+    "notFoundHint": "Ši paslauga nebėra viešai prieinama.",
+    "allCountries": "Visos šalys"
   }
 }

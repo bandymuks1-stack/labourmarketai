@@ -7210,7 +7210,9 @@
       "countryPlaceholder": "bijv. LT",
       "remoteLabel": "Kan op afstand worden gedaan",
       "rateLabel": "Tarief (optioneel)",
-      "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief."
+      "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief.",
+      "publicLabel": "Deze persoonlijke dienst openbaar tonen",
+      "publicHint": "Als de dienst actief en niet verlopen is, zijn titel, beschrijving, categorie, land, uitvoering op afstand en tarief zichtbaar zonder inloggen. Vermeld geen privécontactgegevens. Vink uit en sla op om de openbare weergave uit te schakelen."
     },
     "save": "Opslaan",
     "saving": "Opslaan...",
@@ -7236,7 +7238,9 @@
     "linkToRequests": "Bekijk aanvragen voor uw diensten",
     "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren.",
     "removeQuestion": "Deze dienst definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wilt u hem alleen uit de zoekresultaten halen, pauzeer hem dan.",
-    "removeYes": "Ja, verwijderen"
+    "removeYes": "Ja, verwijderen",
+    "publicAudience": "Openbare zoekweergave gekozen",
+    "memberAudience": "Ingelogde leden gekozen"
   },
   "communication": {
     "origin": {
@@ -20859,7 +20863,8 @@
       "setUpAgency": "Bureau registreren",
       "setUpInstitution": "Voor opleidingsinstellingen",
       "b2bEnquiry": "Aanvraag zakelijke diensten (B2B)",
-      "projectEnquiry": "Aanvraag individueel project"
+      "projectEnquiry": "Aanvraag individueel project",
+      "findServices": "Persoonlijke diensten zoeken"
     },
     "assistant": "Vraag de assistent",
     "start": {
@@ -20879,5 +20884,36 @@
       "fullList": "Volledige lijst"
     },
     "more": "Meer"
+  },
+  "publicServices": {
+    "title": "Persoonlijke diensten zoeken",
+    "lead": "Diensten die door personen openbaar zijn gepubliceerd.",
+    "search": "Zoeken",
+    "query": "Dienst of trefwoord",
+    "country": "Land",
+    "category": "Categorie",
+    "clear": "Filters wissen",
+    "unavailable": "Diensten zoeken is niet beschikbaar",
+    "unavailableHint": "Probeer het later opnieuw.",
+    "retry": "Opnieuw proberen",
+    "emptyFiltered": "Geen diensten gevonden met deze filters",
+    "empty": "Er zijn nog geen persoonlijke diensten openbaar gepubliceerd",
+    "results": "Diensten",
+    "remote": "Op afstand",
+    "pagination": "Zoekpagina’s",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "page": "Pagina {page}",
+    "refine": "Verfijn uw zoekopdracht om relevantere diensten te vinden.",
+    "back": "Alle diensten",
+    "delivery": "Uitvoering",
+    "rate": "Tarief",
+    "personalService": "Persoonlijke dienst",
+    "signInToRequest": "Inloggen om aan te vragen",
+    "manage": "Deze dienst beheren",
+    "contactUnavailable": "Aanvragen is niet beschikbaar. Probeer het later opnieuw.",
+    "notFound": "Dienst niet gevonden",
+    "notFoundHint": "Deze dienst is niet meer openbaar beschikbaar.",
+    "allCountries": "Alle landen"
   }
 }

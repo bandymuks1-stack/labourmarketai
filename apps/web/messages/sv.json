@@ -7210,7 +7210,9 @@
       "countryPlaceholder": "t.ex. LT",
       "remoteLabel": "Kan utföras på distans",
       "rateLabel": "Pris (valfritt)",
-      "rateHint": "Endast fritext – till exempel ett ungefärligt timpris."
+      "rateHint": "Endast fritext – till exempel ett ungefärligt timpris.",
+      "publicLabel": "Visa denna personliga tjänst offentligt",
+      "publicHint": "När tjänsten är aktiv syns titel, beskrivning, kategori, land, distansalternativ och pris utan inloggning. Ange inga privata kontaktuppgifter. Avmarkera och spara för att stänga av offentlig visning."
     },
     "save": "Spara",
     "saving": "Sparar...",
@@ -7236,7 +7238,9 @@
     "linkToRequests": "Se förfrågningar om dina tjänster",
     "errorHasRequests": "Det här erbjudandet har förfrågningar, så det kan inte tas bort – deras historik måste finnas kvar. Du kan pausa det i stället.",
     "removeQuestion": "Ta bort den här tjänsten permanent? Det går inte att ångra. Pausa den i stället om du bara vill dölja den från sökningar.",
-    "removeYes": "Ja, ta bort"
+    "removeYes": "Ja, ta bort",
+    "publicAudience": "Offentlig sökning vald",
+    "memberAudience": "Inloggade medlemmar valda"
   },
   "communication": {
     "origin": {
@@ -20859,7 +20863,8 @@
       "setUpAgency": "Starta ditt bemanningsföretag",
       "setUpInstitution": "För utbildningsinstitutioner",
       "b2bEnquiry": "Förfrågan om företagstjänster (B2B)",
-      "projectEnquiry": "Förfrågan om individuellt projekt"
+      "projectEnquiry": "Förfrågan om individuellt projekt",
+      "findServices": "Hitta personliga tjänster"
     },
     "assistant": "Fråga assistenten",
     "start": {
@@ -20879,5 +20884,36 @@
       "fullList": "Hela listan"
     },
     "more": "Mer"
+  },
+  "publicServices": {
+    "title": "Hitta personliga tjänster",
+    "lead": "Tjänster som publicerats offentligt av enskilda personer.",
+    "search": "Sök",
+    "query": "Tjänst eller sökord",
+    "country": "Land",
+    "category": "Kategori",
+    "clear": "Rensa filter",
+    "unavailable": "Tjänstesökningen är inte tillgänglig",
+    "unavailableHint": "Försök igen senare.",
+    "retry": "Försök igen",
+    "emptyFiltered": "Inga tjänster matchar dessa filter",
+    "empty": "Inga personliga tjänster har publicerats offentligt ännu",
+    "results": "Tjänster",
+    "remote": "På distans",
+    "pagination": "Söksidor",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "page": "Sida {page}",
+    "refine": "Avgränsa sökningen för att hitta mer relevanta tjänster.",
+    "back": "Alla tjänster",
+    "delivery": "Utförande",
+    "rate": "Pris",
+    "personalService": "Personlig tjänst",
+    "signInToRequest": "Logga in för att skicka förfrågan",
+    "manage": "Hantera denna tjänst",
+    "contactUnavailable": "Det går inte att skicka en förfrågan just nu. Försök igen senare.",
+    "notFound": "Tjänsten hittades inte",
+    "notFoundHint": "Denna tjänst är inte längre offentligt tillgänglig.",
+    "allCountries": "Alla länder"
   }
 }

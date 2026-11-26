@@ -8233,7 +8233,8 @@
       "setUpAgency": "Registrer dit bureau",
       "setUpInstitution": "For uddannelsesinstitutioner",
       "b2bEnquiry": "Forespørgsel om erhvervsydelser (B2B)",
-      "projectEnquiry": "Forespørgsel om individuelt projekt"
+      "projectEnquiry": "Forespørgsel om individuelt projekt",
+      "findServices": "Find personlige tjenester"
     },
     "assistant": "Spørg assistenten",
     "start": {
@@ -8304,6 +8305,45 @@
       "not_authorized": "Du kan kun administrere dine egne poster.",
       "error": "Noget gik galt. Prøv igen."
     }
+  },
+  "publicServices": {
+    "title": "[EN] Find personal services",
+    "lead": "[EN] Services published by individuals.",
+    "search": "[EN] Search",
+    "query": "[EN] Service or keyword",
+    "country": "Land",
+    "category": "[EN] Category",
+    "clear": "[EN] Clear filters",
+    "unavailable": "[EN] Service search is unavailable",
+    "unavailableHint": "[EN] Please try again later.",
+    "retry": "[EN] Try again",
+    "emptyFiltered": "[EN] No services match these filters",
+    "empty": "[EN] No personal services have been published publicly yet",
+    "results": "[EN] Services",
+    "remote": "[EN] Remote",
+    "pagination": "[EN] Search pages",
+    "previous": "[EN] Previous",
+    "next": "[EN] Next",
+    "page": "[EN] Page {page}",
+    "refine": "[EN] Narrow your search to see more relevant services.",
+    "back": "[EN] All services",
+    "delivery": "[EN] Delivery",
+    "rate": "[EN] Rate",
+    "personalService": "[EN] Personal service",
+    "signInToRequest": "[EN] Sign in to request",
+    "manage": "[EN] Manage this service",
+    "contactUnavailable": "[EN] The request action is unavailable. Please try again later.",
+    "notFound": "[EN] Service not found",
+    "notFoundHint": "[EN] This service is no longer publicly available.",
+    "allCountries": "Alle lande"
+  },
+  "serviceOfferings": {
+    "form": {
+      "publicLabel": "[EN] Show this personal service publicly",
+      "publicHint": "[EN] When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
+    },
+    "publicAudience": "[EN] Public search selected",
+    "memberAudience": "[EN] Signed-in members selected"
   },
   "businessProfile": {
     "team": {

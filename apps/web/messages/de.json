@@ -7210,7 +7210,9 @@
       "countryPlaceholder": "z. B. LT",
       "remoteLabel": "Kann remote erledigt werden",
       "rateLabel": "Preis (optional)",
-      "rateHint": "Nur Freitext — zum Beispiel ein Richtwert für den Stundensatz."
+      "rateHint": "Nur Freitext — zum Beispiel ein Richtwert für den Stundensatz.",
+      "publicLabel": "Diese persönliche Dienstleistung öffentlich anzeigen",
+      "publicHint": "Wenn sie aktiv und nicht abgelaufen ist, sind Titel, Beschreibung, Kategorie, Land, Fernleistung und Preis ohne Anmeldung sichtbar. Geben Sie keine privaten Kontaktdaten an. Entfernen Sie das Häkchen und speichern Sie, um die öffentliche Anzeige zu beenden."
     },
     "save": "Speichern",
     "saving": "Wird gespeichert...",
@@ -7236,7 +7238,9 @@
     "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
     "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren.",
     "removeQuestion": "Diese Leistung endgültig löschen? Das lässt sich nicht rückgängig machen. Um sie nur aus der Suche zu nehmen, pausieren Sie sie.",
-    "removeYes": "Ja, löschen"
+    "removeYes": "Ja, löschen",
+    "publicAudience": "Öffentliche Suche ausgewählt",
+    "memberAudience": "Angemeldete Mitglieder ausgewählt"
   },
   "communication": {
     "origin": {
@@ -20859,7 +20863,8 @@
       "setUpAgency": "Agentur registrieren",
       "setUpInstitution": "Für Bildungseinrichtungen",
       "b2bEnquiry": "B2B-Dienstleistungsanfrage",
-      "projectEnquiry": "Anfrage für ein Einzelprojekt"
+      "projectEnquiry": "Anfrage für ein Einzelprojekt",
+      "findServices": "Persönliche Dienstleistungen finden"
     },
     "assistant": "Assistenten fragen",
     "start": {
@@ -20879,5 +20884,36 @@
       "fullList": "Vollständige Liste"
     },
     "more": "Mehr"
+  },
+  "publicServices": {
+    "title": "Persönliche Dienstleistungen finden",
+    "lead": "Von Einzelpersonen öffentlich veröffentlichte Dienstleistungen.",
+    "search": "Suchen",
+    "query": "Dienstleistung oder Stichwort",
+    "country": "Land",
+    "category": "Kategorie",
+    "clear": "Filter löschen",
+    "unavailable": "Die Dienstleistungssuche ist nicht verfügbar",
+    "unavailableHint": "Bitte versuchen Sie es später erneut.",
+    "retry": "Erneut versuchen",
+    "emptyFiltered": "Keine Dienstleistungen für diese Filter gefunden",
+    "empty": "Noch keine persönlichen Dienstleistungen öffentlich veröffentlicht",
+    "results": "Dienstleistungen",
+    "remote": "Aus der Ferne",
+    "pagination": "Suchseiten",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite {page}",
+    "refine": "Grenzen Sie die Suche ein, um passendere Dienstleistungen zu finden.",
+    "back": "Alle Dienstleistungen",
+    "delivery": "Ausführung",
+    "rate": "Preis",
+    "personalService": "Persönliche Dienstleistung",
+    "signInToRequest": "Anmelden und anfragen",
+    "manage": "Diese Dienstleistung verwalten",
+    "contactUnavailable": "Die Anfrage ist derzeit nicht möglich. Bitte versuchen Sie es später erneut.",
+    "notFound": "Dienstleistung nicht gefunden",
+    "notFoundHint": "Diese Dienstleistung ist nicht mehr öffentlich verfügbar.",
+    "allCountries": "Alle Länder"
   }
 }
