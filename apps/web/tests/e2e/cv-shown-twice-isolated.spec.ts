@@ -189,12 +189,14 @@ test("CV2-3. chat CV import proposes skills and saves only the explicitly select
 
   await p.setViewportSize({ width: 1440, height: 900 });
   await p.goto(`${BASE}/lt/dashboard`);
-  const composer = p.getByTestId("composer-input");
+  const main = p.getByRole("main");
+  const composer = main.getByTestId("composer-input");
   await expect(composer).toBeVisible({ timeout: 60_000 });
+  await p.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
   await composer.fill("Įkelk mano CV");
-  await p.getByTestId("composer-send").click();
-  await p.getByTestId("chat-chip-cv").last().click({ timeout: 60_000 });
-  const flow = p.getByTestId("conversation-cv-flow");
+  await main.getByTestId("composer-send").click();
+  await main.getByTestId("chat-chip-cv").filter({ visible: true }).last().click({ timeout: 60_000 });
+  const flow = main.getByTestId("conversation-cv-flow");
   await expect(flow).toBeVisible({ timeout: 60_000 });
   await flow.locator('input[type="file"]').setInputFiles({
     name: "skills.txt", mimeType: "text/plain",
