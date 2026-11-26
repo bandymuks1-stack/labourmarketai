@@ -35,6 +35,10 @@ import { onboardInvited } from "./isolated-web-a-helpers";
  *   I-14 least privilege: the institution's evidence list does not offer the employer's day;
  *   I-15 EDU-5: a skill the learner accepted reaches the reviewer's learning queue through the
  *        brief's door, and a human decision is recorded.
+ *   I-16 the same employer then hires the learner as an employee: the employment is added
+ *        beside the intern relationship, and the Living CV keeps the confirmed practice period
+ *        under practice while it lists the employment under work (owner addendum 2026-11-23,
+ *        chain step 9: reuse; decision 0025: one person, one continuous history).
  *
  * It refuses to run anywhere but the local stack (owner decision 2026-10-28: no synthetic accounts in
  * production). Outcomes are read back from that local database — the page saying "done" is not the
@@ -99,6 +103,22 @@ async function db<T>(path: string): Promise<T> {
     headers: { apikey: SB_SERVICE, Authorization: `Bearer ${SB_SERVICE}` },
   });
   if (!r.ok) throw new Error(`local db read ${path.split("?")[0]} → ${r.status}`);
+  return (await r.json()) as T;
+}
+
+/** A write to the THROWAWAY local database (the file refuses any other target). */
+async function dbWrite<T>(path: string, method: "POST" | "PATCH", body: unknown): Promise<T> {
+  const r = await fetch(`${SB_URL}/rest/v1/${path}`, {
+    method,
+    headers: {
+      apikey: SB_SERVICE,
+      Authorization: `Bearer ${SB_SERVICE}`,
+      "content-type": "application/json",
+      prefer: "return=representation",
+    },
+    body: JSON.stringify(body),
+  });
+  if (!r.ok) throw new Error(`local db ${method} ${path.split("?")[0]} → ${r.status}`);
   return (await r.json()) as T;
 }
 
@@ -474,6 +494,56 @@ test("I-8. the institution runs a programme, opens a cohort and places the learn
   await close();
 });
 
+// Regression for production run 45240106971 (L-5): the compass read a learner's
+// cohorts with a limit and no order, so with more than 20 live cohorts it kept an
+// arbitrary 20 and dropped the one just joined. Here the learner gets 21 OLDER
+// live cohorts on top of I-8's; a fresh table returns rows in insertion order, so
+// an unordered read keeps I-8's cohort and the OLDEST seeded ones. Only a
+// newest-first read shows I-8's cohort and leaves the oldest seeded one out.
+test("I-8b. with more than 20 live cohorts the compass shows the newest, not an arbitrary 20", async ({ browser }) => {
+  const programs = await db<Array<{ id: string }>>(
+    `education_programs?organization_id=eq.${s.orgId}&name=eq.${encodeURIComponent(PROGRAM)}&select=id`,
+  );
+  const programId = programs[0]?.id ?? "";
+  expect(programId, "I-8's programme exists").not.toBe("");
+  const seeded = await dbWrite<Array<{ id: string }>>(
+    "education_cohorts",
+    "POST",
+    Array.from({ length: 21 }, (_, i) => ({
+      program_id: programId,
+      organization_id: s.orgId,
+      name: `Synthetic Older Cohort ${RUN} ${String(i + 1).padStart(2, "0")}`,
+    })),
+  );
+  expect(seeded).toHaveLength(21);
+  await dbWrite(
+    "education_cohort_members",
+    "POST",
+    seeded.map((c, i) => ({
+      cohort_id: c.id,
+      profile_id: s.learnerId,
+      status: "active",
+      // Oldest first: 2025-01-01, 2025-01-02, … (all before I-8's membership).
+      added_at: new Date(Date.UTC(2025, 0, 1 + i)).toISOString(),
+    })),
+  );
+  try {
+    const { page, close } = await as(browser, LEARNER);
+    await page.goto(`${BASE}/en/dashboard/profile`);
+    const compass = page.getByTestId("learning-compass");
+    await expect(compass).toBeVisible({ timeout: 30_000 });
+    await expect(compass, "the cohort joined last (I-8) is on the compass").toContainText(COHORT, { timeout: 30_000 });
+    await expect(compass.getByTestId(`compass-cohort-${seeded[0]!.id}`), "the oldest membership is the one left out").toHaveCount(0);
+    await expect(compass.getByTestId(`compass-cohort-${seeded[20]!.id}`), "the newest seeded one is shown").toHaveCount(1);
+    await close();
+  } finally {
+    // Back to the world the later steps expect: the seeded groups are archived.
+    await dbWrite(`education_cohorts?id=in.(${seeded.map((c) => c.id).join(",")})`, "PATCH", {
+      archived_at: new Date().toISOString(),
+    });
+  }
+});
+
 test("I-9. a separate employer signs up and invites the same person as an intern; they accept", async ({ browser }) => {
   // The employer: its own sign-up, its own organization (not a training provider).
   const ctx = await browser.newContext({ timezoneId: "UTC" });
@@ -642,7 +712,8 @@ test("I-12. the employer confirms the intern's practice day", async ({ browser }
 });
 
 async function openCv(page: Page): Promise<Locator> {
-  await page.goto(`${BASE}/en/cv`);
+  // History, practice and skills sit in the CV's Experience block (decision 0034).
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   const main = page.getByRole("main").first();
   await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });
   return main;
@@ -660,7 +731,9 @@ test("I-13. the learner's Living CV shows the practice period and the recognitio
   await expect(main.getByTestId("cv-work-history").getByText(EMPLOYER_ORG), "practice is not listed as employment").toHaveCount(0);
   // The institution's practice, signed off in I-5, stands as confirmed.
   await expect(practice.getByTestId("cv-history-node").filter({ hasText: SCHOOL_ORG })).toHaveAttribute("data-standing", "confirmed");
-  // I-7's recognition is on the CV too, not only in the document centre.
+  // I-7's recognition is on the CV too, not only in the document centre — in its Reviews block.
+  await main.getByTestId("cv-tab-reviews").click();
+  await page.waitForURL(/tab=reviews/, { timeout: 30_000 });
   const recognised = main.getByTestId("recognised-by");
   await expect(recognised, "the recognition is on the CV").toBeVisible({ timeout: 30_000 });
   await expect(recognised).toHaveAttribute("data-evidence-class", "assessor_recognition");
@@ -808,3 +881,72 @@ test("I-15. EDU-5: the learner's accepted skill reaches the reviewer's learning 
   await close();
 });
 
+test("I-16. the employer hires the learner: the employment is added and the confirmed practice stays on the CV", async ({ browser }) => {
+  // The same employer, the same invitation door, now in the employee capacity.
+  const employer = await as(browser, EMPLOYER);
+  await employer.page.goto(
+    `${BASE}/en/dashboard/network?invite=1&type=join_organization&org=${s.employerOrgId}&relationship=employee#network-invite`,
+  );
+  const panel = employer.page.getByTestId("invite-panel");
+  await expect(panel).toBeVisible({ timeout: 30_000 });
+  const preset = panel.getByTestId("invite-preset");
+  await expect(preset).toBeVisible({ timeout: 30_000 });
+  await expect(preset).toHaveAttribute("data-organization", s.employerOrgId);
+  await expect(preset, "the employer now offers employment").toHaveAttribute("data-relationship", "employee");
+  await expect(panel.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
+  const name = panel.getByTestId("invite-name");
+  if (await name.isVisible().catch(() => false)) await name.fill(LEARNER_NAME);
+  await panel.getByTestId("invite-submit").click();
+  const copy = panel.getByTestId("invite-copy-link").first();
+  await expect(copy, "the invitation link is handed to the employer").toBeVisible({ timeout: 30_000 });
+  const raw = await copy.getAttribute("data-invite-link");
+  expect(raw, "an invitation link").toBeTruthy();
+  const u = new URL(raw!);
+  await employer.close();
+
+  const learner = await as(browser, LEARNER);
+  await learner.page.goto(`${BASE}${u.pathname}${u.search}`);
+  await expect(learner.page.getByTestId("invite-page")).toBeVisible({ timeout: 30_000 });
+  const accept = learner.page.getByTestId("invite-accept");
+  await expect(accept, "the person is asked to accept the employment").toBeVisible({ timeout: 30_000 });
+  await accept.click();
+  await learner.page.waitForURL((url) => !url.pathname.includes("/invite/"), { timeout: 30_000 }).catch(() => undefined);
+
+  // The employment is a second relationship; the intern one, and its confirmed day, are untouched.
+  await expect
+    .poll(
+      async () =>
+        (
+          await db<Array<{ relationship_slug: string; status: string }>>(
+            `engagement_contexts?profile_id=eq.${s.learnerId}&organization_id=eq.${s.employerOrgId}&select=relationship_slug,status`,
+          )
+        )
+          .map((e) => `${e.relationship_slug}:${e.status}`)
+          .sort(),
+      { message: "accepting adds the employment beside the intern relationship", timeout: 30_000 },
+    )
+    .toEqual(["employee:active", "intern:active"]);
+  const kept = await db<Array<{ engagement_context_id: string | null }>>(
+    `journal_entries?id=eq.${s.internEntryId}&select=engagement_context_id`,
+  );
+  expect(kept.map((r) => r.engagement_context_id), "the practice day stays in the intern relationship").toEqual([
+    s.internEngagementId,
+  ]);
+
+  // One continuous history on the Living CV: the practice period stays practice, confirmed; the
+  // employment is listed as work. Nothing is moved, merged or lost.
+  const main = await openCv(learner.page);
+  const practice = main.getByTestId("cv-practice-history").getByTestId("cv-history-node").filter({ hasText: EMPLOYER_ORG });
+  await expect(practice, "the practice period at the employer is still on the CV, once").toHaveCount(1, { timeout: 30_000 });
+  await expect(practice, "it still stands as confirmed by the employer").toHaveAttribute("data-standing", "confirmed");
+  const work = main.getByTestId("cv-work-history");
+  await expect(work, "the CV now has a work history").toBeVisible({ timeout: 30_000 });
+  await expect(work.getByTestId("cv-history-node").filter({ hasText: EMPLOYER_ORG }), "the employment is listed as work").toHaveCount(
+    1,
+  );
+  // The institution's practice, signed off in I-5, is still there too.
+  await expect(
+    main.getByTestId("cv-practice-history").getByTestId("cv-history-node").filter({ hasText: SCHOOL_ORG }),
+  ).toHaveAttribute("data-standing", "confirmed");
+  await learner.close();
+});

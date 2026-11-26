@@ -5,6 +5,7 @@
  *   node apps/web/scripts/public-cta-crawl.mjs [--origin https://labourmarket.ai]
  *        [--locales lt,en] [--widths 360,1440] [--press-widths 360,1440] [--max-pages 0] [--out report.json]
  *        [--no-clicks] [--max-presses 25] [--delay-ms 150] [--static-via-node]
+ *        [--only /en,/en/pricing] [--no-discover] [--verbose]
  *
  * What it reports, per page and width:
  *   Requests to other sites are aborted too (analytics, sign-in widgets): they are
@@ -65,6 +66,8 @@ const STATIC_VIA_NODE = flag("static-via-node");
 /** --only /en/pricing: crawl just these paths (comma-separated). --verbose: time each phase. */
 const ONLY = arg("only", "");
 const VERBOSE = flag("verbose");
+/** --no-discover: crawl exactly the listed pages, not the public pages linked from them. */
+const DISCOVER = !flag("no-discover");
 const lap = (t0, what) => VERBOSE && console.log(`      ${what}: ${Date.now() - t0} ms`);
 /** Buttons pressed per page and width; shared controls are skipped once proven elsewhere. */
 const MAX_PRESSES = Number(arg("max-presses", "25"));
@@ -443,7 +446,11 @@ async function crawlPage(context, path, width, discovered, firstFailure = null) 
           // radio): pressing it again rightly changes nothing. Only inside a group — a lone toggle
           // that is "on" must still switch off when pressed, so it is still pressed and judged.
           chosen:
-            (el.getAttribute("aria-pressed") === "true" && !!el.parentElement && el.parentElement.querySelectorAll(":scope > [aria-pressed]").length > 1) ||
+            // The group is the buttons' shared parent, or the list / group they sit in when each
+            // has its own item (a stepper: <li><button aria-pressed>…</li> per stage).
+            (el.getAttribute("aria-pressed") === "true" &&
+              ((!!el.parentElement && el.parentElement.querySelectorAll(":scope > [aria-pressed]").length > 1) ||
+                (el.closest("ul, ol, [role=group], [role=radiogroup], [role=toolbar]")?.querySelectorAll("[aria-pressed]").length ?? 0) > 1)) ||
             (el.getAttribute("role") === "radio" && el.getAttribute("aria-checked") === "true"),
           testid: el.getAttribute("data-testid") ?? "",
           // Site furniture (header, footer, navigation, a dialog such as the cookie bar) is the
@@ -583,8 +590,10 @@ async function main() {
     shapes.add(shape(p));
     extra.push(p);
   }
-  console.log(`linked public pages outside the sitemap: ${extra.length}`);
-  await run(extra);
+  if (DISCOVER) {
+    console.log(`linked public pages outside the sitemap: ${extra.length}`);
+    await run(extra);
+  }
   await browser.close();
 
   const byKind = {};

@@ -263,7 +263,9 @@ export async function HomeWaitingView({
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between" data-testid="today-next">
           <div className="min-w-0">
             <p className="font-display text-body font-semibold text-text-primary sm:text-card-title">{tCard(`next.${next.next.dim}`)}</p>
-            <p className={`mt-1 ${NOTE}`}>{tCard(next.next.whyKey)}</p>
+            {/* No "why" line under the action (owner decisions 0032 and 0034:
+                no explanatory text; the action names itself). The chat's
+                player card still says why when asked. */}
             {next.next.stale ? (
               <p className={`mt-1 ${NOTE}`} data-testid="today-next-stale">
                 {tCard("stale.body")}

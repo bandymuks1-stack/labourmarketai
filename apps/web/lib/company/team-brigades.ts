@@ -440,17 +440,20 @@ async function readTeamBrigadesData(): Promise<TeamBrigadesData> {
 
   if (!(await isTeamModelApplied(supabase))) return { applied: false };
 
-  const { data: orgRows, error: orgError } = await asAny(supabase)
-    .from("organizations")
-    .select("id, display_name, legal_name, created_at")
-    .eq("owner_profile_id", user.id)
-    .eq("organization_type", "team")
-    // ACTIVE brigades only. A disbanded brigade is an archived organization
-    // (disband_team_v1): history, read separately below, and no longer
-    // counted by create_team_v1's cap of 20 — which is also this limit.
-    .is("archived_at", null)
-    .order("created_at", { ascending: true })
-    .limit(20);
+  // Active brigades and disbanded history are independent, owner-scoped
+  // reads. Keep their separate limits while sharing one round trip wave.
+  const [{ data: orgRows, error: orgError }, disbanded] = await Promise.all([
+    asAny(supabase)
+      .from("organizations")
+      .select("id, display_name, legal_name, created_at")
+      .eq("owner_profile_id", user.id)
+      .eq("organization_type", "team")
+      // Disbanded brigades no longer count toward create_team_v1's cap of 20.
+      .is("archived_at", null)
+      .order("created_at", { ascending: true })
+      .limit(20),
+    readDisbandedTeams(supabase, user.id),
+  ]);
   if (orgError) {
     if (
       orgError.code === RELATION_NOT_FOUND_CODE ||
@@ -482,6 +485,8 @@ async function readTeamBrigadesData(): Promise<TeamBrigadesData> {
       invitationsApplied: true,
       detailsApplied: true,
       enquiriesApplied: true,
+      // Disbanding the last active brigade must not hide its history.
+      disbanded,
     };
   }
 
@@ -678,7 +683,7 @@ async function readTeamBrigadesData(): Promise<TeamBrigadesData> {
     invitationsApplied: ledger.applied,
     detailsApplied: details.applied,
     enquiriesApplied: enquiries.applied,
-    disbanded: await readDisbandedTeams(supabase, user.id),
+    disbanded,
   };
 }
 

@@ -4,6 +4,11 @@ import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
+import {
+  emitOfferAnsweredNotification,
+  emitOfferReceivedNotification,
+  resolveTeamOfferCounterpart,
+} from "@/lib/notifications/event-emitters";
 
 import type { MatchNeed } from "@/lib/market/match-v1";
 import { matchTeamToNeed } from "@/lib/market/match-team-v1";
@@ -69,6 +74,15 @@ async function authed(): Promise<{ supabase: SupabaseClient; userId: string } | 
   return user ? { supabase, userId: user.id } : null;
 }
 
+/**
+ * The OTHER party of a team offer, as the recipient of its notification. It
+ * is resolved server-side by `resolveTeamOfferCounterpart` (the notification
+ * module, with the caller id this action verified and the event); the id
+ * addresses one notification row and is never returned to the client
+ * (decision 0033).
+ */
+const teamOfferCounterpart = resolveTeamOfferCounterpart;
+
 async function readRows<T>(
   rpc: string,
   args: Record<string, unknown>,
@@ -92,8 +106,13 @@ async function readRows<T>(
   }
 }
 
-/** Open demand the manager of `teamId` may offer against (worker-board whitelist). */
-export function listOfferableDemand(teamId: string): Promise<ReadResult<OfferableDemand>> {
+/** Open demand the manager of `teamId` may offer against (worker-board whitelist).
+ *  v2 (20261122170000) = the same rows with duration, language, skills and
+ *  tools, and no client column. Until it is applied, v1 answers; the model
+ *  never reads v1's company_name, so the client is not shown either way. */
+export async function listOfferableDemand(teamId: string): Promise<ReadResult<OfferableDemand>> {
+  const v2 = await readRows("list_open_needs_for_offer_v2", { p_team_org_id: teamId }, parseOfferableDemand);
+  if (v2.status !== "needs_migration") return v2;
   return readRows("list_open_demand_for_team_offer_v1", { p_team_org_id: teamId }, parseOfferableDemand);
 }
 
@@ -195,7 +214,19 @@ export async function offerTeamToDemand(input: {
   });
   if (error) return { status: offerRefusalOf(error) };
   const parsed = parseOfferResult(data);
-  return parsed ? { status: "ok", ...parsed } : { status: "error" };
+  if (!parsed) return { status: "error" };
+  // The demand owner hears of a NEW offer, after the write (an existing open
+  // offer was already announced). Awaited, never fails the offer.
+  if (parsed.outcome === "created") {
+    await emitOfferReceivedNotification({
+      kind: "team",
+      offerId: parsed.offerId,
+      requestId: input.requestId,
+      recipientProfileId: await teamOfferCounterpart(parsed.offerId, ctx.userId, "offered"),
+      actorProfileId: ctx.userId,
+    });
+  }
+  return { status: "ok", ...parsed };
 }
 
 export async function withdrawTeamOffer(
@@ -232,6 +263,16 @@ export async function respondToTeamOffer(input: {
   }
   if (error) return { status: offerRefusalOf(error) };
   if (data === "accepted" || data === "declined" || data === "already_accepted" || data === "already_declined") {
+    // The team that offered hears the answer — once, on the real decision.
+    if (data === "accepted" || data === "declined") {
+      await emitOfferAnsweredNotification({
+        kind: "team",
+        offerId: input.offerId,
+        recipientProfileId: await teamOfferCounterpart(input.offerId, ctx.userId, data),
+        actorProfileId: ctx.userId,
+        decision: data,
+      });
+    }
     return { status: "ok", outcome: data };
   }
   return { status: "error" };

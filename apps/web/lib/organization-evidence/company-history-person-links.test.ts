@@ -40,7 +40,8 @@ describe("no link to a card this organization does not hold", () => {
 
   it("a chip opens the company's own card, never a person's page directly (the card carries that link, on the person's own confirmation)", () => {
     const block = ui.slice(ui.indexOf('data-testid="company-place-people"'), ui.indexOf("company-place-timeline"));
-    expect(block).toContain("href={`/dashboard/company/people/${pp.id}`");
+    // The card of THIS organization; `?org=` keeps the organization the history was read for.
+    expect(block).toContain("href={`/dashboard/company/people/${pp.id}${organizationId ? `?org=${encodeURIComponent(organizationId)}` : \"\"}`");
     expect(block).not.toContain("/dashboard/people/");
   });
 

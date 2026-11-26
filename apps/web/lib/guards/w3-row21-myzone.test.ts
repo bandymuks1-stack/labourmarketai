@@ -63,9 +63,13 @@ describe("W3 row 21 — the canonical work-card model carries MyZone's capabilit
     // canonical home named above — the player-card result.
     expect(model).toMatch(/WORK_CARD_EDITOR_HREF = "\/dashboard\?result=player-card"/);
     expect(model).toMatch(/href: card\.next\.href \?\? WORK_CARD_EDITOR_HREF/);
-    // The "why it helps" line travels with the action — the surviving form
-    // of the "Kas ką gerina" explainer, here too.
-    expect(read("components/app/home/home-regions.tsx")).toMatch(/tCard\(next\.next\.whyKey\)/);
+    // The home names the SAME model's next action. Its "why" line is no
+    // longer drawn under the action (owner decisions 0032 and 0034: no
+    // explanatory text); the chat's player card still carries it.
+    const home = read("components/app/home/home-regions.tsx");
+    expect(home).toMatch(/tCard\(`next\.\$\{next\.next\.dim\}`\)/);
+    expect(home).not.toMatch(/tCard\(next\.next\.whyKey\)/);
+    expect(read("lib/player-card/player-card-result.ts")).toMatch(/why: tw\(derived\.next\.whyKey\)/);
   });
 
   // The single-mount and explainer-single-consumer pins proved the deletion

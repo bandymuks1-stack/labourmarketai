@@ -718,7 +718,7 @@ export function WorkerPlayerCard({
     );
   const secWorkDoor = door("/dashboard/planning?view=week", "player-card-work-calendar", labels.modes.doorCalendar);
   const secRecordsDoor = door("/dashboard/journal#journal-entries", "player-card-records-journal", labels.modes.doorJournal);
-  const secHistoryDoor = door("/cv#cv-work-history", "player-card-history-cv", labels.modes.doorCv);
+  const secHistoryDoor = door("/cv?tab=experience#cv-work-history", "player-card-history-cv", labels.modes.doorCv);
   const secNextDoor = sample ? null : (
     <Link
       href={"/dashboard/opportunities" as "/dashboard"}

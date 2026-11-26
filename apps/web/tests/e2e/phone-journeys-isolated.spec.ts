@@ -21,6 +21,16 @@ import {
   onboardInvited,
 } from "./isolated-web-a-helpers";
 
+/** The profile's block that holds a section (decision 0034: one block per screen, `?tab=`). */
+function profileTabOf(hash: string): string {
+  if (hash === "profile-edit") return "edit";
+  if (hash === "capabilities" || hash === "candidate-skills") return "skills";
+  if (hash === "profile-about") return "about";
+  if (hash === "cv-languages" || hash === "cv-education" || hash === "cv-achievements") return "background";
+  return "details";
+}
+
+
 /**
  * A SIGNED-IN PERSON ON A PHONE, at 375 and at 390 px, on a THROWAWAY LOCAL Supabase stack
  * (.github/workflows/signup-isolated.yml). Owner 2026-11-14: "Patikrinti prisijungusio naudotojo
@@ -351,7 +361,7 @@ for (const phone of PHONES) {
       await expect(page.getByTestId("profile-destinations")).toBeVisible({ timeout: 30_000 });
       await fitsTheScreen(page, "the profile");
       // The public summary sits in the collapsed CV details; its hash opens them.
-      await page.goto(`${BASE}/en/dashboard/profile#profile-public-summary`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=details#profile-public-summary`);
       await page.reload();
       const section = page.getByTestId("profile-public-summary");
       await expect(section).toBeVisible({ timeout: 30_000 });
@@ -477,7 +487,7 @@ for (const phone of PHONES) {
       await tapUntil(vis.getByTestId("discoverability-open"), vis.getByTestId("discoverability-grant"));
       await vis.getByTestId("discoverability-grant").tap();
       await expect(vis.getByTestId("discoverability-granted"), "employers may now find them").toBeVisible({ timeout: 30_000 });
-      await w.page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+      await w.page.goto(`${BASE}/en/dashboard/profile?tab=details#work-card-editor-section`);
       const toggle = w.page.getByRole("main").getByTestId("work-card-editor-toggle");
       await expect(toggle, "the work card editor is offered on the worker's profile").toBeVisible({ timeout: 60_000 });
       const editor = w.page.getByRole("main").getByTestId("work-card-editor");
@@ -621,6 +631,35 @@ for (const phone of PHONES) {
       const heardHere = [...(heard.get(od.page) ?? [])].filter((n) => n.startsWith("pageerror"));
       expect(heardHere, "no page error for the outsider").toEqual([]);
     });
+    test(`M-6c (${phone.name}). the experience records opened by their address stay open on the phone`, async ({ browser }) => {
+      // Twin of production profile-cv-history P-15, which failed at 375 × 667 on build 386f11a0:
+      // the result was rendered but hidden. A `?result=` address opens the phone's sheet by itself;
+      // the person asked to SEE it, so it must still be on screen once the page has settled.
+      const { page, done } = await signedInOnPhone(browser, phone, worker);
+      const main = page.getByRole("main");
+      const shown = main
+        .getByTestId("experiences-result")
+        .or(main.getByTestId("experiences-result-unavailable").first())
+        .or(main.getByTestId("experiences-result-error"))
+        .first();
+      const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+      // Three loads in a row, each one the way production P-15 met it: as soon as
+      // the document is there, a "collapsed" chevron is tapped once. Before the
+      // fix the sheet opened one effect after mount, and that tap could toggle
+      // it back shut, leaving the result rendered inside a closed sheet.
+      for (const pass of [1, 2, 3]) {
+        await page.goto(`${BASE}/en/dashboard?result=experiences`, { waitUntil: "domcontentloaded" });
+        await toggle.waitFor({ state: "visible", timeout: 60_000 });
+        if ((await toggle.getAttribute("aria-expanded")) === "false") await toggle.click();
+        await expect(shown, `load ${pass}: the experience records are on screen`).toBeVisible({ timeout: 60_000 });
+        await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+        await page.waitForTimeout(3_000);
+        const state = await toggle.getAttribute("aria-expanded");
+        await expect(shown, `load ${pass}: still on screen once the page settled (sheet aria-expanded=${state})`).toBeVisible();
+        await expect(main.getByTestId("experiences-result-error"), `load ${pass}: the records loaded`).toHaveCount(0);
+      }
+      await done();
+    });
     test(`M-7 (${phone.name}). the worker's work journal fits the phone`, async ({ browser }) => {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await page.goto(`${BASE}/en/dashboard/journal`);
@@ -743,7 +782,7 @@ for (const phone of PHONES) {
       // The experience form lives in the capabilities section, which the profile
       // opens only when the address names it (DetailsHashOpener; the
       // production walk P-7 opens it the same way).
-      await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=skills#capabilities`);
       const profile = page.getByRole("main");
       await expect(profile.locator("details#capabilities").first(), "the capabilities section is open").toHaveAttribute("open", "", {
         timeout: 30_000,
@@ -757,7 +796,7 @@ for (const phone of PHONES) {
         "the current-job row",
       );
       // The licence toggles are in the CV-details section, opened the same way.
-      await page.goto(`${BASE}/en/dashboard/profile#cv-details`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=details#cv-details`);
       await expect(profile.locator("details#cv-details").first(), "the CV-details section is open").toHaveAttribute("open", "", {
         timeout: 30_000,
       });
@@ -775,7 +814,7 @@ for (const phone of PHONES) {
       // chip must show WITHOUT a reload, from the save's own answer, then persist on a real reload.
       // The same add at a desktop width follows, so a phone-only fault names itself.
       const addInPlace = async (page: Page, claim: string, where: string): Promise<void> => {
-        await page.goto(`${BASE}/en/dashboard/profile#capabilities`);
+        await page.goto(`${BASE}/en/dashboard/profile?tab=skills#capabilities`);
         const main = page.getByRole("main");
         await expect(main.locator("details#capabilities").first(), `${where}: the capabilities section is open`).toHaveAttribute("open", "", {
           timeout: 30_000,
@@ -811,7 +850,7 @@ for (const phone of PHONES) {
       const { page, done } = await signedInOnPhone(browser, phone, worker);
       await addInPlace(page, claim, `${phone.name} px`);
       await fitsTheScreen(page, "the profile with a new skill chip");
-      await page.goto(`${BASE}/en/cv`);
+      await page.goto(`${BASE}/en/cv?tab=experience`);
       await expect(
         page.getByRole("main").locator('[data-testid="cv-tier-declared"]', { hasText: claim }).first(),
         "a claim nobody has evidenced stays in the declared tier",
@@ -832,7 +871,7 @@ for (const phone of PHONES) {
       // `x-nextjs-action-not-found`, StaleBuildRecovery reloaded the page, and no answer ever showed
       // (the typed text was gone too). Here the third save meets the same answer, made locally.
       const { page, done } = await signedInOnPhone(browser, phone, worker);
-      await page.goto(`${BASE}/en/dashboard/profile#profile-public-summary`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=details#profile-public-summary`);
       await page.reload();
       const section = page.getByRole("main").getByTestId("profile-public-summary");
       await expect(section).toBeVisible({ timeout: 30_000 });
@@ -913,7 +952,7 @@ for (const phone of PHONES) {
     // edit again (change, or remove) → stored → a reload shows that. The summary is M-10, the
     // free-label skill M-9. One step per section, so one section's fault hides no other.
     const profileAt = async (page: Page, hash: string): Promise<Locator> => {
-      await page.goto(`${BASE}/en/dashboard/profile#${hash}`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=${profileTabOf(hash)}#${hash}`);
       await page.reload();
       const main = page.getByRole("main");
       const target = main.locator(`#${hash}`).first();
@@ -1562,6 +1601,9 @@ for (const phone of PHONES) {
       const { page, done } = await signedInOnPhone(browser, phone, STUDENT);
       await accountMenu(page, "account-menu-cv-link");
       await page.waitForURL(/\/en\/cv/, { timeout: 30_000 });
+      // Study sits in the CV's Documents block (decision 0034): one tap.
+      await page.getByTestId("cv-tab-documents").tap();
+      await page.waitForURL(/tab=documents/, { timeout: 30_000 });
       await expect(page.getByTestId("cv-education-row").first(), "the study is on the CV").toBeVisible({ timeout: 30_000 });
       await fitsTheScreen(page, "the student's CV");
       await done();

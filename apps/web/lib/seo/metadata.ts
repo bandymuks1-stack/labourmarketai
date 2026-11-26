@@ -51,43 +51,43 @@ export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
     title:
       "LabourMarket.ai — International platform for work and services",
     description:
-      "LabourMarket.ai: platform for work, specialists and services, locally and internationally. Any sector: jobs, workers, clients, services and project partners.",
+      "LabourMarket.ai: patent-backed platform based on a unique idea to organise and manage work relationships in any sector, locally and internationally.",
   },
   lt: {
     title:
       "LabourMarket.ai — tarptautinė darbo ir paslaugų platforma",
     description:
-      "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Bet kuriame sektoriuje raskite darbą, darbuotojus, užsakovus, paslaugas ir projektų partnerius.",
+      "LabourMarket.ai – patentu paremta platforma, sukurta remiantis unikalia darbo santykių organizavimo ir valdymo idėja. Visiems sektoriams.",
   },
   ru: {
     title:
       "LabourMarket.ai — международная платформа работы и услуг",
     description:
-      "LabourMarket.ai — международная платформа работы, специалистов и услуг. В любом секторе найдите работу, работников, заказчиков, услуги и партнёров по проектам.",
+      "LabourMarket.ai — платформа, основанная на патенте и уникальной идее организации и управления трудовыми отношениями. В любом секторе.",
   },
   nl: {
     title:
       "LabourMarket.ai — Internationaal platform voor werk en diensten",
     description:
-      "LabourMarket.ai: internationaal platform voor werk, specialisten en diensten. Vind in elke sector werk, werknemers, opdrachtgevers, diensten en projectpartners.",
+      "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. In elke sector.",
   },
   de: {
     title:
       "LabourMarket.ai — Plattform für Arbeit und Dienstleistungen in Europa",
     description:
-      "LabourMarket.ai: internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. In jeder Branche Arbeit, Personal, Auftraggeber und Projektpartner finden.",
+      "LabourMarket.ai: patentbasierte Plattform auf Basis einer einzigartigen Idee zur Organisation und Verwaltung von Arbeitsbeziehungen. Für alle Branchen.",
   },
   pl: {
     title:
       "LabourMarket.ai — międzynarodowa platforma pracy i usług",
     description:
-      "LabourMarket.ai: międzynarodowa platforma pracy, specjalistów i usług. W każdej branży znajdź pracę, pracowników, zleceniodawców, usługi i partnerów do projektów.",
+      "LabourMarket.ai to platforma oparta na patencie i unikalnej idei organizacji i zarządzania relacjami zawodowymi. W każdej branży.",
   },
   sv: {
     title:
       "LabourMarket.ai — internationell plattform för arbete och tjänster",
     description:
-      "LabourMarket.ai: internationell plattform för arbete, specialister och tjänster. Hitta jobb, personal, uppdragsgivare, tjänster och projektpartner i alla branscher.",
+      "LabourMarket.ai är en patentbaserad plattform, byggd på en unik idé för att organisera och hantera arbetsrelationer. För alla branscher.",
   },
 };
 

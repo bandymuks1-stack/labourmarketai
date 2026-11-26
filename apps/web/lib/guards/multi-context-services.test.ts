@@ -156,7 +156,9 @@ describe("honest empty states — every empty list says why and the next real st
     expect(page).toMatch(/ownActive === 0\s*\?\s*t\("incomingEmptyNoActive"\)/);
     expect(page).toMatch(/t\("incomingEmptyHasActive", \{ count: ownActive \}\)/);
     // the CTA exists ONLY when there is nothing active (no fake CTA otherwise)
-    expect(page).toMatch(/incomingEmptyCta: ownActive === 0 \? t\("linkToServices"\) : null/);
+    // The CTA is still derived from the caller's own active count; it yields only
+    // to the empty discover list's identical link (one link per page, P0 2026-11-24).
+    expect(page).toMatch(/incomingEmptyCta: ownActive === 0 && !discoverCarriesServicesLink \? t\("linkToServices"\) : null/);
   });
 
   it("the discover empty state explains itself and never promises a notification path that does not exist", () => {
