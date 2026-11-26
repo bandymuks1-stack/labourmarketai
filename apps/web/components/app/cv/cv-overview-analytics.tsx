@@ -83,12 +83,18 @@ export function CvSkillOverview({
   const preferredConnections = [...shown.flatMap((row) => row.connections.slice(0, 1)), ...shown.flatMap((row) => row.connections)];
   for (const connection of preferredConnections) {
     if (nodeByConnection.has(connection.key) || nodeByConnection.size >= 6) continue;
+    const labelPoints = Array.from(connection.label);
+    const label = labelPoints.length > 60 ? `${labelPoints.slice(0, 60).join("").trimEnd()}…` : connection.label;
+    const originalDetail = connection.detail ?? (label !== connection.label ? connection.label : undefined);
+    const detail = label !== connection.label && originalDetail && !originalDetail.includes(connection.label)
+      ? `${connection.label}\n${originalDetail}`
+      : originalDetail;
     nodeByConnection.set(connection.key, {
       id: `connection:${encodeURIComponent(connection.key)}`,
-      label: connection.label,
+      label,
       side: "right",
       ...(connection.meta ? { meta: connection.meta } : {}),
-      ...(connection.detail ? { detail: <p className="min-w-0 text-sm leading-relaxed text-text-primary [overflow-wrap:anywhere]">{connection.detail}</p> } : {}),
+      ...(detail ? { detail: <p className="min-w-0 whitespace-pre-line text-sm leading-relaxed text-text-primary [overflow-wrap:anywhere]">{detail}</p> } : {}),
     });
   }
   const edges: { from: string; to: string }[] = [];

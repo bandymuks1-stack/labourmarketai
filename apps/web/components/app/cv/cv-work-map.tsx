@@ -176,7 +176,7 @@ export function CvWorkMap({ title, leftLabel, rightLabel, nodes, edges, action }
                     data-connected={connected}
                     data-level={node.level}
                   >
-                    <span className={`min-w-0 text-sm font-semibold leading-snug text-text-primary [overflow-wrap:anywhere] ${active ? "" : "line-clamp-3"}`}>{node.label}</span>
+                    <span className={`min-w-0 text-sm font-semibold leading-snug text-text-primary [overflow-wrap:anywhere] ${active ? "" : "line-clamp-2"}`}>{node.label}</span>
                     {node.meta ? <span className={`min-w-0 text-meta leading-snug text-text-secondary [overflow-wrap:anywhere] ${active ? "" : "line-clamp-2"}`}>{node.meta}</span> : null}
                   </button>
                   {neighbourLabels.length > 0 ? <span id={descriptionId} className="sr-only">{side === "left" ? rightLabel : leftLabel}: {neighbourLabels.join("; ")}</span> : null}
