@@ -82,7 +82,7 @@ export function OrganizationLivingActivity({
     })),
     ...historyDetail.workContexts.map((context) => ({
       id: context.id,
-      label: context.label,
+      label: `${t(context.kind === "project" ? "companyWorkHistory.facts.project" : "companyWorkHistory.place")}: ${context.label}`,
       side: "right" as const,
       meta: t("companyWorkHistory.entries", { count: context.records }),
       detail: recordDetails(context.details, locale, t),
