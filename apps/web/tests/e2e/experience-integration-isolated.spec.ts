@@ -68,6 +68,8 @@ const O = mail("owner-a");
 const P = mail("owner-b");
 const W1 = mail("worker-one");
 const W2 = mail("worker-two");
+// W3 has no account when EX-7 starts: invited by e-mail from the roster.
+const W3 = mail("worker-three");
 
 const ORG_A = `QA-SYNTHETIC Alpha Works ${RUN}`;
 const ORG_B = `QA-SYNTHETIC Beta Services ${RUN}`;
@@ -75,15 +77,21 @@ const O_NAME = `Synthetic Owner Manager ${RUN}`;
 const P_NAME = `Synthetic Owner Beta ${RUN}`;
 const W1_NAME = `Synthetic Worker One ${RUN}`;
 const W2_NAME = `Synthetic Worker Two ${RUN}`;
+const W3_NAME = `Synthetic Worker Three ${RUN}`;
 const R1_NAME = `Synthetic Roster Linked ${RUN}`;
 const R2_NAME = `Synthetic Roster Unlinked ${RUN}`;
+const R3_NAME = `Synthetic Roster Invited ${RUN}`;
 
 /** Journal texts: plain sentences with one stated duration, no "including". */
+// The marks go into journal TEXT, which the work-log reader parses for
+// hours: a base-36 run tag such as "…5std3…" reads as "5 hours" before the
+// stated hours. The marks therefore carry the run tag in letters only.
+const TAG = RUN.replace(/\d/g, (d) => "qrstuvwxyz"[Number(d)]!);
 const MARK = {
-  w1a: `QA-SYNTHETIC w1a ${RUN}`,
-  w2a: `QA-SYNTHETIC w2a ${RUN}`,
-  w2b: `QA-SYNTHETIC w2b ${RUN}`,
-  oa: `QA-SYNTHETIC oa ${RUN}`,
+  w1a: `QA-SYNTHETIC w1a ${TAG}`,
+  w2a: `QA-SYNTHETIC w2a ${TAG}`,
+  w2b: `QA-SYNTHETIC w2b ${TAG}`,
+  oa: `QA-SYNTHETIC oa ${TAG}`,
 };
 const TEXT = {
   w1a: `${MARK.w1a}: plastered the hallway walls, 8 hours`,
@@ -101,6 +109,11 @@ const R2_RECORDS = [
   { date: "2025-04-08", hours: 4 },
 ] as const;
 const R1_HOURS = R1_RECORDS.reduce((s, r) => s + r.hours, 0); // 18
+const R3_RECORDS = [
+  { date: "2025-05-05", hours: 8 },
+  { date: "2025-05-06", hours: 3 },
+] as const;
+const R3_HOURS = R3_RECORDS.reduce((s, r) => s + r.hours, 0); // 11
 
 const s = {
   oId: "",
@@ -113,6 +126,9 @@ const s = {
   r1: "",
   r2: "",
   membershipId: "",
+  r3: "",
+  w3Id: "",
+  w3WorkerId: "",
 };
 
 // ── people: one browser context per person for the whole walk ──────────────
@@ -250,7 +266,16 @@ async function registerThroughLink(browser: Browser, link: string, address: stri
   await w.goto(link);
   await w.getByTestId("invite-register").click();
   await w.waitForURL(/\/en\/auth\/signup/, { timeout: 30_000 });
-  await w.locator('input[type="email"]').fill(address);
+  // A join link asks for the address; an invitation ADDRESSED to one person
+  // shows it masked and read-only, and must not be typed over.
+  const invited = w.locator('input[name="invited-address"]');
+  const open = w.locator('input[type="email"]');
+  await expect(invited.or(open).first(), "the sign-up form shows its address field").toBeVisible({ timeout: 30_000 });
+  if (await invited.count()) {
+    await expect(invited, "the addressed invitation keeps its address read-only").toHaveAttribute("readonly", "");
+  } else {
+    await open.fill(address);
+  }
   await w.locator('input[name="password"]').fill(PASSWORD);
   const confirm = w.locator('input[name="confirm_password"]');
   if (await confirm.count()) await confirm.fill(PASSWORD);
@@ -470,6 +495,18 @@ test("EX-0. two organizations, two owners, two workers, the journal, and A's imp
   await expect(o.getByRole("main").getByTestId(`organization-roster-person-${s.r1}`).locator('[data-link-state="link_proposed"]')).toBeAttached({
     timeout: 60_000,
   });
+
+  // The offer is announced to the person it names, and to nobody else.
+  await expect
+    .poll(
+      () =>
+        sql<{ recipient_profile_id: string }>(
+          `select recipient_profile_id from public.notification_events
+            where event_type = 'history_link_offered' and entity_id = ${lit(s.r1)}`,
+        ).map((r) => r.recipient_profile_id),
+      { message: "W1 is told about the offer, once", timeout: 30_000 },
+    )
+    .toEqual([s.w1Id]);
 
   // W1 CONFIRMS it on their own profile.
   const w1 = as(W1);
@@ -867,4 +904,110 @@ test("EX-6. W1 contests one of R1's imported records on their own profile, the r
     timeout: 60_000,
   });
   await expect(list2.getByTestId("evidence-dispute-withdrawn-history"), "the contest is not erased, only withdrawn").toHaveCount(1);
+});
+
+/** The roster sits in the people page's "More tools" fold, which its deep
+ *  link opens. If the fold is still closed, open it the way a person would,
+ *  so a closed fold fails fast and by name instead of at the test timeout. */
+async function rosterControlOnScreen(o: Page, control: Locator, what: string): Promise<void> {
+  const fold = o.getByTestId("people-more");
+  await expect(async () => {
+    if (!(await fold.evaluate((d) => (d as HTMLDetailsElement).open))) await fold.locator("summary").first().click();
+    await expect(control).toBeVisible({ timeout: 3_000 });
+  }, `${what} is on screen`).toPass({ timeout: 60_000 });
+}
+
+// ── EX-7 ────────────────────────────────────────────────────────────────────
+
+test("EX-7. a roster name with NO account reaches a Living CV: invited by e-mail, offered, told, confirmed — the organization's records once, as organization-reported", async ({ browser }) => {
+  expect(s.membershipId, "EX-0 set the walk up").toBeTruthy();
+  const o = as(O);
+  s.r3 = await seedRosterPerson(s.oId, R3_NAME, "r3", R3_RECORDS);
+
+  // 1. THE ORGANIZATION INVITES THE NAME BY E-MAIL (the roster's claim door).
+  //    It links nothing: the row stays `unlinked`.
+  await o.goto(`${BASE}/en/dashboard/company/people#people-import-section`);
+  const claim = o.getByRole("main").getByTestId(`roster-claim-invite-${s.r3}`);
+  await expect(claim, "an unlinked roster name offers the e-mail invitation").toBeAttached({ timeout: 60_000 });
+  const email = claim.getByTestId(`roster-claim-email-${s.r3}`);
+  await rosterControlOnScreen(o, email, "the invitation form");
+  await email.fill(W3, { timeout: 30_000 });
+  await claim.locator('button[type="submit"]').click();
+  const invited = o.getByRole("main").getByTestId(`roster-claim-invited-${s.r3}`);
+  await expect(invited, "the invitation is created").toBeVisible({ timeout: 30_000 });
+  const raw = await o.getByRole("main").getByTestId(`roster-claim-link-${s.r3}`).inputValue();
+  expect(raw, "the invitation link is handed to the organization").toMatch(/\/invite\//);
+  expect(
+    sql<{ link_state: string }>(`select link_state from public.organization_people where id = ${lit(s.r3)}`)[0]?.link_state,
+    "an invitation links nobody",
+  ).toBe("unlinked");
+
+  // The person registers through it and becomes A's employee.
+  s.w3Id = await registerThroughLink(browser, local(raw), W3, W3_NAME, s.orgA);
+  s.w3WorkerId =
+    sql<{ id: string }>(`select id from public.workers where profile_id = ${lit(s.w3Id)}`)[0]?.id ?? "";
+  expect(s.w3WorkerId, "the new person has a worker record").toBeTruthy();
+
+  // 2. THE ORGANIZATION OFFERS THE LINK to the person who now works for it.
+  await o.goto(`${BASE}/en/dashboard/company/people#people-import-section`);
+  const pick = o.getByRole("main").getByTestId(`roster-link-worker-${s.r3}`);
+  await expect(pick, "the new employee can be offered the roster name").toBeAttached({ timeout: 60_000 });
+  await rosterControlOnScreen(o, pick, "the link offer");
+  await pick.selectOption({ value: `${s.w3WorkerId}:${s.w3Id}` }, { timeout: 30_000 });
+  await o.getByRole("main").getByTestId(`roster-link-offer-${s.r3}`).locator('button[type="submit"]').click();
+  await expect(
+    o.getByRole("main").getByTestId(`organization-roster-person-${s.r3}`).locator('[data-link-state="link_proposed"]'),
+  ).toBeAttached({ timeout: 60_000 });
+
+  // 3. THE OFFER REACHES THE PERSON: a stored notification for them alone,
+  //    which opens their own profile, where the offer waits.
+  await expect
+    .poll(
+      () =>
+        sql<{ recipient_profile_id: string }>(
+          `select recipient_profile_id from public.notification_events
+            where event_type = 'history_link_offered' and entity_id = ${lit(s.r3)}`,
+        ).map((r) => r.recipient_profile_id),
+      { message: "the offer is announced to the person it names, once", timeout: 30_000 },
+    )
+    .toEqual([s.w3Id]);
+  const w3 = as(W3);
+  await w3.goto(`${BASE}/en/dashboard/activity`);
+  const event = w3.getByRole("main").locator('[data-testid^="activity-stored-event-"][data-event-type$="history_link_offered"]');
+  await expect(event, "the person sees the offer in their own feed").toHaveCount(1, { timeout: 60_000 });
+  await event.click();
+  await w3.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
+  const offer = w3.getByRole("main").locator(`[data-testid="roster-link-offer"][data-person-id="${s.r3}"]`);
+  await expect(offer, "the notification lands on the offer").toBeVisible({ timeout: 60_000 });
+
+  // 4. THE PERSON CONFIRMS.
+  await offer.locator('button[name="decision"][value="accept"]').click();
+  await expect
+    .poll(
+      () =>
+        sql<{ link_state: string; link_method: string | null; linked_profile_id: string | null }>(
+          `select link_state, link_method, linked_profile_id from public.organization_people where id = ${lit(s.r3)}`,
+        )[0],
+      { message: "R3 is linked to W3 by W3's own confirmation", timeout: 60_000 },
+    )
+    .toEqual({ link_state: "linked", link_method: "worker_confirmed", linked_profile_id: s.w3Id });
+
+  // 5. THE ORGANIZATION'S RECORDS ARE IN THE PERSON'S ONE HISTORY, ONCE, AS
+  //    ORGANIZATION-REPORTED: Work in Numbers and the CV say the same hours.
+  const exp = await openWorkInNumbers(w3);
+  await expect(exp.getByTestId("wi-experience-total")).toHaveAttribute("data-hours", String(R3_HOURS));
+  await expect(exp.getByTestId("wi-experience-total")).toHaveAttribute("data-organization-hours", String(R3_HOURS));
+  await expect(exp.getByTestId("wi-experience-org")).toHaveAttribute("data-hours", String(R3_HOURS));
+  await expect(wiOrgRow(exp, s.orgA)).toHaveAttribute("data-hours", String(R3_HOURS));
+  // Organization-reported, never the person's own journal: the hours sit in
+  // the organization's figure, the journal figure stays empty.
+  await expect(exp.getByTestId("wi-experience-journal")).toHaveAttribute("data-hours", "0");
+  const main = await openCv(w3);
+  const line = main.getByTestId("cv-professional-experience-total");
+  await expect(line).toHaveAttribute("data-total-hours", String(R3_HOURS));
+  await expect(line).toHaveAttribute("data-organization-hours", String(R3_HOURS));
+  expect(
+    await readAs<{ id: string }>(W3, `organization_evidence_records?organization_person_id=eq.${s.r3}&select=id`),
+    "W3 reads exactly the records they confirmed",
+  ).toHaveLength(R3_RECORDS.length);
 });
