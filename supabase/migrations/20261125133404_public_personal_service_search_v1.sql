@@ -1,4 +1,7 @@
--- RED DRAFT / needs-human-gate. NOT APPLIED. Exact SQL review required before apply.
+-- @human-gate-approved
+-- RED / needs-human-gate. Owner approved exact SQL in this session on 2026-11-26.
+-- Approved draft SHA256: DC4242E68182E0A2BAB9357EFC363E5632A444A58A469869B5C8E7C03CF13FAC
+-- PR #3818; executable SQL unchanged. Apply through the owner channel after merge.
 -- Extends service_offerings: owners explicitly choose a PUBLIC audience separately
 -- from the existing signed-in marketplace status. No existing offer is opted in.
 -- No raw-table grant, no organization-owner join, no changes to existing RLS.
