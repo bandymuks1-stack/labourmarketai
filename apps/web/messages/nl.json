@@ -182,10 +182,11 @@
       "heroContact": "Hoe u contact opneemt",
       "provenance": "Het bedrijf heeft deze pagina zelf ingevuld.",
       "living": {
+        "activityTitle": "Werkregistraties per periode",
         "eyebrow": "Levend cv",
         "figures": {
-          "years": "{count, plural, one {jaar actief} other {jaar actief}}",
-          "hours": "gewerkte uren",
+          "years": "periode gedekt door registraties (jaren)",
+          "hours": "geregistreerde uren",
           "people": "{count, plural, one {persoon werkte hier} other {personen werkten hier}}",
           "projects": "{count, plural, one {project} other {projecten}}",
           "places": "{count, plural, one {werklocatie} other {werklocaties}}",
@@ -213,7 +214,8 @@
         "pendingLabel": "Wacht op goedkeuring",
         "ringLabel": "{share}% van de journaaluren bevestigd",
         "open": "Levend cv openen",
-        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}"
+        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}",
+        "currentTeamTitle": "Huidig team"
       }
     }
   },
@@ -8882,6 +8884,23 @@
     "durationPendingUnnamed": "een organisatie",
     "durationPendingUndated": "data niet vastgelegd",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Verdeling van de uren",
+        "states": {
+          "actual": "Als werkelijk vastgelegd",
+          "reported": "Door de organisatie opgegeven",
+          "estimated": "Geschat",
+          "confirmed": "Ondersteund door een registratie van een andere partij"
+        },
+        "skillBasis": "Tijd uit het werkjournaal die aan afzonderlijke vaardigheden is toegerekend.",
+        "workTitle": "Werk en vaardigheden",
+        "attributedTime": "Aan deze vaardigheid toegewezen",
+        "confirmedTime": "Door de leidinggevende bevestigd: {hours}",
+        "activityLabel": "Fragment uit de registratie",
+        "contextLabel": "Werkcontext",
+        "mapTitle": "Vaardighedenkaart",
+        "workNodes": "Werk"
+      },
       "eyebrowFallback": "Levend cv",
       "facts": {
         "recorded": "vastgelegd in uw werkjournaal",
@@ -11180,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "Wat is LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Echt werk wordt professionele geschiedenis, bewijs en een levend cv.",
+    "metaDescription": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. In elke sector.",
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
-    "lede": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
+    "lede": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -16054,7 +16073,7 @@
       "lasting": "Uw ervaring en kansen blijven bereikbaar — als u van baan, project of land wisselt."
     },
     "v3": {
-      "lead": "Registreren en de basisplaatsing van een behoefte zijn gratis.",
+      "lead": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. Registreren en de basisplaatsing van een behoefte zijn gratis.",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
       "market": {

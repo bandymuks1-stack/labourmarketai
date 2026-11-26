@@ -67,6 +67,15 @@ describe("1 · the identity card and header", () => {
   });
 });
 
+describe("owner correction: one colour environment in each theme", () => {
+  it("the identity inherits the selected palette instead of forcing a dark island", () => {
+    const css = read("app/globals.css");
+    expect(css).not.toMatch(/\.living-cv-identity-frame\s*\{/);
+    expect(hero).not.toMatch(/bg-\[#|text-\[#|rgb\(/);
+    expect(render({ countryCode: "LT" })).toContain("text-text-primary");
+  });
+});
+
 describe("2 · the fact strip: years, projects, hours from the ONE experience reading", () => {
   it("each fact comes from cv.professionalExperience (decision 0025)", () => {
     expect(page).toMatch(/const experience = cv\.professionalExperience;/);

@@ -182,10 +182,11 @@
       "heroContact": "So erreichen Sie es",
       "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt.",
       "living": {
+        "activityTitle": "Arbeitsaufzeichnungen nach Zeitraum",
         "eyebrow": "Lebendiger Lebenslauf",
         "figures": {
-          "years": "{count, plural, one {Jahr aktiv} other {Jahre aktiv}}",
-          "hours": "geleistete Stunden",
+          "years": "durch Einträge abgedeckter Zeitraum (Jahre)",
+          "hours": "erfasste Stunden",
           "people": "{count, plural, one {Person hat hier gearbeitet} other {Personen haben hier gearbeitet}}",
           "projects": "{count, plural, one {Projekt} other {Projekte}}",
           "places": "{count, plural, one {Baustelle} other {Baustellen}}",
@@ -213,7 +214,8 @@
         "pendingLabel": "Wartet auf Freigabe",
         "ringLabel": "{share}% der Journalstunden bestätigt",
         "open": "Lebendigen Lebenslauf öffnen",
-        "clientsMore": "Arbeiten ausgeführt für: {names} und {count} weitere"
+        "clientsMore": "Arbeiten ausgeführt für: {names} und {count} weitere",
+        "currentTeamTitle": "Aktuelles Team"
       }
     }
   },
@@ -8882,6 +8884,23 @@
     "durationPendingUnnamed": "eine Organisation",
     "durationPendingUndated": "Daten nicht erfasst",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Zusammensetzung der Stunden",
+        "states": {
+          "actual": "Als tatsächlich erfasst",
+          "reported": "Von der Organisation angegeben",
+          "estimated": "Geschätzt",
+          "confirmed": "Durch den Eintrag einer anderen Partei belegt"
+        },
+        "skillBasis": "Einzelnen Fähigkeiten zugeordnete Zeit aus dem Arbeitsjournal.",
+        "workTitle": "Arbeiten und Fähigkeiten",
+        "attributedTime": "Dieser Fähigkeit zugeordnet",
+        "confirmedTime": "Von der Leitung bestätigt: {hours}",
+        "activityLabel": "Auszug aus dem Eintrag",
+        "contextLabel": "Arbeitskontext",
+        "mapTitle": "Kompetenzkarte",
+        "workNodes": "Arbeiten"
+      },
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {
         "recorded": "im Arbeitsjournal erfasst",
@@ -11180,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "Was ist LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai ist eine internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. Echte Arbeit wird zu Berufsgeschichte und Nachweisen.",
+    "metaDescription": "LabourMarket.ai: patentbasierte Plattform auf Basis einer einzigartigen Idee zur Organisation und Verwaltung von Arbeitsbeziehungen. Für alle Branchen.",
     "navLabel": "Über LabourMarket.ai",
     "eyebrow": "Über die Plattform",
     "title": "Was ist LabourMarket.ai",
-    "lede": "LabourMarket.ai ist eine internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
+    "lede": "LabourMarket.ai ist eine patentbasierte Plattform, die auf einer einzigartigen Idee zur Organisation und Verwaltung von Arbeitsbeziehungen beruht. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
     "hero": {
       "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
       "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
@@ -16054,7 +16073,7 @@
       "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
     },
     "v3": {
-      "lead": "Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
+      "lead": "LabourMarket.ai ist eine patentbasierte Plattform, die auf einer einzigartigen Idee zur Organisation und Verwaltung von Arbeitsbeziehungen beruht. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
       "market": {

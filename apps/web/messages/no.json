@@ -1818,6 +1818,23 @@
       "reviews": "Anbefalinger"
     },
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Fordeling av timer",
+        "states": {
+          "actual": "Registrert som faktiske",
+          "reported": "Oppgitt av organisasjonen",
+          "estimated": "Anslåtte",
+          "confirmed": "Underbygget av en annen parts registrering"
+        },
+        "skillBasis": "Tid fra arbeidsjournalen knyttet til de enkelte ferdighetene.",
+        "workTitle": "Arbeid og ferdigheter",
+        "attributedTime": "Tilordnet denne ferdigheten",
+        "confirmedTime": "Bekreftet av lederen: {hours}",
+        "activityLabel": "Utdrag fra registreringen",
+        "contextLabel": "Arbeidskontekst",
+        "mapTitle": "Kompetansekart",
+        "workNodes": "Arbeid"
+      },
       "eyebrowFallback": "Levende CV",
       "facts": {
         "recorded": "recorded in your work journal",
@@ -8327,5 +8344,13 @@
     },
     "publicAudience": "[EN] Public search selected",
     "memberAudience": "[EN] Signed-in members selected"
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Arbeidsregistreringer etter periode",
+        "currentTeamTitle": "Nåværende team"
+      }
+    }
   }
 }

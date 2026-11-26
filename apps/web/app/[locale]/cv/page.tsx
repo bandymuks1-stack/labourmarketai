@@ -38,6 +38,7 @@ import { organizationHistoryLines } from "@/components/app/cv/organization-histo
 import { FORMER_NAME_RELATIONS, periodFor } from "@/lib/journal/professional-experience";
 import { experienceStopsOf, type ExperienceStop } from "@/lib/cv-export/experience-stops";
 import { PremiumLivingCv, type PremiumCvFact } from "@/components/app/cv/premium-living-cv";
+import { CvSkillOverview, CvEvidenceMix, type CvSkillOverviewRow, type CvEvidenceSlice } from "@/components/app/cv/cv-overview-analytics";
 import { CvBlockTabs, CvTabPanel, CV_BLOCKS, parseCvBlock, type CvBlock } from "@/components/app/cv/cv-block-tabs";
 import { CvHashToBlock } from "@/components/app/cv/cv-hash-to-block";
 import { readAthleteProfileFacts } from "@/lib/cv/athlete-profile-read";
@@ -107,6 +108,14 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+const CONTEXT_LABEL_CODEPOINT_LIMIT = 90;
+function boundedContextLabel(value: string): string {
+  const chars = Array.from(value.trim());
+  return chars.length > CONTEXT_LABEL_CODEPOINT_LIMIT
+    ? `${chars.slice(0, CONTEXT_LABEL_CODEPOINT_LIMIT - 1).join("")}…`
+    : chars.join("");
+}
+
 export default async function VerifiedCvPage({
   params,
   searchParams,
@@ -143,12 +152,13 @@ export default async function VerifiedCvPage({
   const template = parseCvTemplateId(sp.template);
   // ONE SCREEN PER BLOCK (decision 0034): the active block comes from the
   // address, so a link, a notification or the chat opens it directly.
-  const activeBlock = parseCvBlock(sp.tab);
+  // Owner 2026-11-26: the existing professional journey is the temporary entry view.
+  const activeBlock = parseCvBlock(sp.tab ?? "experience");
   const compact = template === "compact";
   const needParam =
     (Array.isArray(sp.need) ? sp.need[0] : sp.need)?.trim() ?? "";
 
-  const result = await buildVerifiedCv();
+  const result = await buildVerifiedCv({ includeSkillSamples: true });
   if (!result.ok && result.code === "not_authenticated") {
     redirect(`/${locale}/auth/login`);
   }
@@ -402,15 +412,15 @@ export default async function VerifiedCvPage({
 
   // Template link helper — plain query links so the registry can grow.
   const templateHref = (id: string) =>
-    `?template=${id}${needParam ? `&need=${encodeURIComponent(needParam)}` : ""}`;
+    `?template=${id}&tab=${activeBlock}${needParam ? `&need=${encodeURIComponent(needParam)}` : ""}`;
 
   // Block link helper (decision 0034): the same query links, plus `tab`.
-  // Overview is the page's own address, so its link carries no `tab`.
+  // Explicit tab addresses keep every block reachable when the entry view changes.
   const blockHref = (b: CvBlock) => {
     const q = new URLSearchParams();
     if (sp.template && !Array.isArray(sp.template)) q.set("template", sp.template);
     if (needParam) q.set("need", needParam);
-    if (b !== "overview") q.set("tab", b);
+    q.set("tab", b);
     const qs = q.toString();
     return qs ? `?${qs}` : "?";
   };
@@ -669,6 +679,82 @@ export default async function VerifiedCvPage({
         premiumFacts.push({ value: premiumHours(experience.hours.journalConfirmed), label: tPremium("facts.confirmed"), testid: "premium-cv-fact-confirmed-hours" });
     }
   }
+  // Overview graphics are projections of the SAME skill presentation and
+  // capacity-adjusted hours ledger. The full evidence register stays below.
+  const overviewContexts = new Map(cv.workHistory.filter((context) => context.id).map((context) => [context.id, context]));
+  const overviewSkills: CvSkillOverviewRow[] = presentation.groups
+    .flatMap((group) => group.items)
+    .slice(0, 6)
+    .map((item) => {
+      const time = skillTimeReading(item.practice, cv.skillPractice !== null);
+      const attributed = time.kind === "attributed";
+      const involved = attributed || time.kind === "involvement_only" ? time.involvedHours : 0;
+      const share = attributed && item.practice && Number.isFinite(item.practice.share)
+        && item.practice.share >= 0 && item.practice.share <= 1 ? item.practice.share : null;
+      // A sample belongs to this exact skill in the canonical journal reading.
+      // Context descriptions and whole-project hours are never used as its proof.
+      const sample = item.practice?.samples?.[0] ?? null;
+      const contextIds = sample
+        ? sample.engagementContextId ? [sample.engagementContextId] : []
+        : item.practice?.contextIds?.slice(0, 3) ?? [];
+      const contexts = contextIds.map((id) => overviewContexts.get(id)).filter((context) => context !== undefined);
+      const contextNames = [...new Set(
+        contexts
+          .flatMap((context) => [context.projectName, context.orgName, context.title])
+          .filter((value): value is string => !!value)
+          .map(boundedContextLabel)
+          .filter(Boolean),
+      )].slice(0, 3);
+      const context = contextNames.length > 0 ? tPremium("analytics.contextLabel") + ": " + contextNames.join(" · ") : null;
+      const details = [
+        item.practice && item.practice.entries > 0 ? t("skillEntries", { count: item.practice.entries }) : null,
+        sample?.date ? formatUtcDate(sample.date, locale) : null,
+        time.kind === "none" && item.kind === "catalog" && item.magnitude === "none" ? t("skillNoRecords") : null,
+      ].filter((v): v is string => v !== null);
+      return {
+        key: item.key,
+        name: item.name,
+        level: item.tier === "confirmed" ? "confirmed" : item.tier === "evidence" ? "recorded" : "declared",
+        connections: item.practice?.samples?.length
+          ? item.practice.samples.map((work) => ({
+              key: "entry:" + work.entryId,
+              label: work.originalText,
+              detail: work.originalText + (work.textTruncated ? "…" : ""),
+              meta: work.date ? formatUtcDate(work.date, locale) ?? undefined : undefined,
+            }))
+          : contexts.map((work) => {
+              const label = boundedContextLabel([work.projectName, work.title, work.orgName].filter(Boolean).join(" · "));
+              return {
+                key: "context:" + work.id,
+                label: label || tPremium("analytics.contextLabel"),
+                detail: tPremium("analytics.contextLabel"),
+              };
+            }),
+        tier: item.tier === "self_stated" ? t("selfStatedTitle") : t(`tiers.${item.tier}`),
+        activity: sample ? sample.originalText + (sample.textTruncated ? "…" : "") : null,
+        context,
+        attributedHours: attributed ? premiumHours(time.attributedHours) : null,
+        involvementHours: involved > 0 ? t("skillInvolvedHours", { hours: fmtHours(involved) }) : null,
+        confirmation: attributed && time.confirmedHours > 0 ? tPremium("analytics.confirmedTime", { hours: premiumHours(time.confirmedHours) }) : null,
+        detail: details.length > 0 ? details.join(" · ") : null,
+        share,
+        shareLabel: share === null ? null : new Intl.NumberFormat(locale, { style: "percent", maximumFractionDigits: 1 }).format(share),
+      };
+    });
+  const coverageNote = cv.journalCoverage?.truncated
+    ? t("recordedHoursScopeTruncated", { count: cv.journalCoverage.entriesRead }) : null;
+  const evidenceSlices: CvEvidenceSlice[] = experience?.hours !== null && experience?.ledger
+    ? (["actual", "reported", "estimated", "confirmed"] as const).map((key) => ({
+        key,
+        label: tPremium(`analytics.states.${key}`),
+        hours: experience.ledger.byState[key],
+        value: premiumHours(experience.ledger.byState[key]),
+      })) : [];
+  const evidenceScope = [
+    experience?.hours?.organizationUnknown
+      ? tIntel("experience.totalSubJournalOnly") : t("athlete.stats.total.behind"),
+    coverageNote,
+  ].filter((v): v is string => v !== null);
   // SKILLS ARE LISTED ONCE (owner P0 2026-11-23): by the `cv-skills` section
   // below, through the ONE presentation (`presentSkills` above — claims folded
   // into the skill they already are, potential capabilities beside them). The
@@ -895,7 +981,7 @@ export default async function VerifiedCvPage({
     <main className="cv-doc min-h-screen bg-ink-900 px-4 py-6 text-text-primary sm:px-6 sm:py-8 print:p-0">
       {/* Wide on screen (the reference's 1440 layout); the printed document
           keeps its reading width. */}
-      <div className={`mx-auto flex max-w-3xl flex-col lg:max-w-5xl print:max-w-3xl ${pageGap}`}>
+      <div className={`mx-auto flex max-w-3xl flex-col lg:max-w-6xl print:max-w-3xl ${pageGap}`}>
         {/* Screen-only toolbar — never printed. */}
         <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
           <Link
@@ -1021,10 +1107,10 @@ export default async function VerifiedCvPage({
           <PremiumLivingCv
             name={cv.personName.trim() && cv.personName.trim() !== "—" ? cv.personName : t("nameNotProvided")}
             eyebrow={professionNames.length > 0 ? professionNames.join(" · ") : tPremium("eyebrowFallback")}
-            /* The summary renders ONCE, in its own section below (which also
-               prints); the hero carries name + professions only. */
-            summary={null}
-            facts={premiumFacts}
+            /* Overview introduces the person; the Experience block retains
+               the full printable summary without repeating it on screen. */
+            summary={activeBlock === "overview" ? cv.professionalSummary : null}
+            facts={premiumFacts.filter((fact) => fact.testid === "premium-cv-fact-projects")}
             portraitUrl={identityFacts.portraitUrl}
             initials={playerInitials(cv.personName)}
             countryCode={identityFacts.countryCode}
@@ -1037,7 +1123,7 @@ export default async function VerifiedCvPage({
               <>
                 <Link
                   href="/dashboard/journal"
-                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-[rgb(255_255_255/0.22)] px-4 text-sm font-medium text-[#f4f1e8] transition-colors hover:border-[rgb(255_255_255/0.45)]"
+                  className="inline-flex min-h-11 items-center justify-center rounded-full border border-ink-500 bg-ink-800 px-4 text-sm font-medium text-text-primary transition-colors hover:border-brand-blue hover:bg-ink-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-brand-blue"
                   data-testid="cv-record-work"
                 >
                   {tMyZone("recordWork.title")}
@@ -1045,9 +1131,6 @@ export default async function VerifiedCvPage({
                 <PrintButton label={t("print")} tone="primary" className="min-h-11" />
               </>
             }
-            /* Skills and work history are NOT listed in the hero: each is
-               listed once, by the sections below (owner P0 2026-11-23). */
-            leadership={<OrganizationsLeadership locale={locale} variant="cv" />}
           />
         ) : null}
 
@@ -1062,7 +1145,41 @@ export default async function VerifiedCvPage({
           />
         ) : null}
 
+        <CvTabPanel block="overview" active={activeBlock}>
+          {activeBlock === "overview" ? (
+            <div className={`grid min-w-0 gap-5 print:hidden`}>
+              <CvSkillOverview
+                title={tPremium("analytics.mapTitle")}
+                leftLabel={t("skills")}
+                rightLabel={tPremium("analytics.workNodes")}
+                attributedLabel={tPremium("analytics.attributedTime")}
+                activityLabel={tPremium("analytics.activityLabel")}
+                locale={locale}
+                basis={coverageNote}
+                rows={overviewSkills}
+                action={<a href={`${blockHref("experience")}#cv-skills`} className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue">{t("blocks.experience")} →</a>}
+              />
+              <div className="grid min-w-0 items-start gap-5 md:grid-cols-2">
+              <CvEvidenceMix
+                title={tPremium("analytics.evidenceTitle")}
+                locale={locale}
+                total={experience?.hours !== null ? experience?.ledger.total ?? 0 : 0}
+                totalValue={premiumHours(experience?.ledger.total ?? 0)}
+                totalLabel={tPremium("facts.experienceTotal")}
+                slices={evidenceSlices}
+                scope={evidenceScope}
+                action={<a href={blockHref("experience")} className="inline-flex min-h-11 items-center text-sm font-medium text-brand-blue">{t("blocks.experience")} →</a>}
+              />
+                <OrganizationsLeadership locale={locale} variant="cv" />
+              </div>
+            </div>
+          ) : null}
+        </CvTabPanel>
+
         <CvTabPanel block="experience" active={activeBlock}>
+        {/* Keep leadership facts and organization-history doors in Experience.
+            Inactive panels still render children, so only the active block reads them. */}
+        {activeBlock === "experience" ? <OrganizationsLeadership locale={locale} /> : null}
         {/* THE CAREER JOURNEY — screen-only route over the same rows. */}
         {template !== "eu" ? <CareerJourneyMap journey={journey} labels={journeyLabels} /> : null}
 

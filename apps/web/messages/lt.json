@@ -182,10 +182,11 @@
       "heroContact": "Kaip susisiekti",
       "provenance": "Šį puslapį užpildė pati įmonė.",
       "living": {
+        "activityTitle": "Veiklos įrašai pagal laikotarpį",
         "eyebrow": "Gyvas CV",
         "figures": {
-          "years": "{count, plural, one {veiklos metai} few {veiklos metai} other {veiklos metų}}",
-          "hours": "dirbtų valandų",
+          "years": "įrašų laikotarpio aprėptis (metais)",
+          "hours": "užfiksuotos valandos",
           "people": "{count, plural, one {žmogus dirbo} few {žmonės dirbo} other {žmonių dirbo}}",
           "projects": "{count, plural, one {projektas} few {projektai} other {projektų}}",
           "places": "{count, plural, one {objektas} few {objektai} other {objektų}}",
@@ -213,7 +214,8 @@
         "pendingLabel": "Laukia patvirtinimo",
         "ringLabel": "Patvirtinta {share}% žurnalo valandų",
         "open": "Atverti Gyvą CV",
-        "clientsMore": "Darbai atlikti užsakovui: {names} ir dar {count}"
+        "clientsMore": "Darbai atlikti užsakovui: {names} ir dar {count}",
+        "currentTeamTitle": "Dabartinė komanda"
       }
     }
   },
@@ -8883,6 +8885,23 @@
     "durationPendingUnnamed": "organizacija",
     "durationPendingUndated": "datos neužrašytos",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Valandų sudėtis",
+        "states": {
+          "actual": "Užfiksuotos kaip faktinės",
+          "reported": "Organizacijos nurodytos",
+          "estimated": "Apytikriai apskaičiuotos",
+          "confirmed": "Kitos šalies įrašu pagrįstos"
+        },
+        "skillBasis": "Darbo žurnalo laikas, priskirtas atskiriems įgūdžiams.",
+        "workTitle": "Darbai ir įgūdžiai",
+        "attributedTime": "Šiam įgūdžiui priskirta",
+        "confirmedTime": "Vadovo patvirtinta: {hours}",
+        "activityLabel": "Įrašo ištrauka",
+        "contextLabel": "Darbo kontekstas",
+        "mapTitle": "Kompetencijų žemėlapis",
+        "workNodes": "Darbai"
+      },
       "eyebrowFallback": "Gyvas CV",
       "facts": {
         "recorded": "užfiksuota darbo žurnale",
@@ -11180,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "Kas yra LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Tikras darbas tampa profesine istorija, įrodymais ir gyvu CV.",
+    "metaDescription": "LabourMarket.ai – patentu paremta platforma, sukurta remiantis unikalia darbo santykių organizavimo ir valdymo idėja. Visiems sektoriams.",
     "navLabel": "Apie LabourMarket.ai",
     "eyebrow": "Apie platformą",
     "title": "Kas yra LabourMarket.ai",
-    "lede": "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — nuo pirmo pokalbio iki kitos galimybės.",
+    "lede": "LabourMarket.ai – patentu paremta platforma, sukurta remiantis unikalia darbo santykių organizavimo ir valdymo idėja. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — nuo pirmo pokalbio iki kitos galimybės.",
     "hero": {
       "lead": "Žmogaus profesinė vertė neturi dingti kaskart, kai jis keičia darbdavį. Tikras darbas gali tapti ilgalaike profesine istorija: ką žmogus dirbo, kur, kada, kiek laiko, kokiu vaidmeniu, kokiais įgūdžiais ir kokie įrodymai bei patvirtinimai tai remia.",
       "leadOrg": "Organizacijoms tas pats tikras darbas kaupia įmonės realiai atlikto darbo istoriją: projektus, komandas, atliktus darbus, valandas, kompetencijas ir įrodymus.",
@@ -16054,7 +16073,7 @@
       "lasting": "Jūsų patirtis ir galimybės išlieka pasiekiamos nuolat — keičiant darbą, projektą ar šalį."
     },
     "v3": {
-      "lead": "Registracija ir pagrindinis poreikio skelbimas nemokami.",
+      "lead": "LabourMarket.ai – patentu paremta platforma, sukurta remiantis unikalia darbo santykių organizavimo ir valdymo idėja. Registracija ir pagrindinis poreikio skelbimas nemokami.",
       "or": "arba aprašykite savo žodžiais",
       "needFree": "Užklausą galite pateikti be registracijos. Pateikimas nemokamas; paslaugų sąlygos ir kaina derinamos atskirai.",
       "market": {

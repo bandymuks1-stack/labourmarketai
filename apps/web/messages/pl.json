@@ -182,10 +182,11 @@
       "heroContact": "Jak się skontaktować",
       "provenance": "Firma sama wypełniła tę stronę.",
       "living": {
+        "activityTitle": "Wpisy pracy według okresu",
         "eyebrow": "Żywe CV",
         "figures": {
-          "years": "{count, plural, one {rok działalności} few {lata działalności} many {lat działalności} other {lat działalności}}",
-          "hours": "przepracowanych godzin",
+          "years": "okres objęty wpisami (lata)",
+          "hours": "zapisane godziny",
           "people": "{count, plural, one {osoba pracowała} few {osoby pracowały} many {osób pracowało} other {osób pracowało}}",
           "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
           "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}",
@@ -213,7 +214,8 @@
         "pendingLabel": "Czeka na zatwierdzenie",
         "ringLabel": "Potwierdzono {share}% godzin z dziennika",
         "open": "Otwórz Żywe CV",
-        "clientsMore": "Prace wykonane dla: {names} i {count} więcej"
+        "clientsMore": "Prace wykonane dla: {names} i {count} więcej",
+        "currentTeamTitle": "Obecny zespół"
       }
     }
   },
@@ -8883,6 +8885,23 @@
     "durationPendingUnnamed": "organizacja",
     "durationPendingUndated": "daty nie zapisane",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Struktura godzin",
+        "states": {
+          "actual": "Zapisane jako rzeczywiste",
+          "reported": "Podane przez organizację",
+          "estimated": "Szacunkowe",
+          "confirmed": "Poparte wpisem drugiej strony"
+        },
+        "skillBasis": "Czas z dziennika pracy przypisany do poszczególnych umiejętności.",
+        "workTitle": "Prace i umiejętności",
+        "attributedTime": "Przypisane tej umiejętności",
+        "confirmedTime": "Potwierdzone przez przełożonego: {hours}",
+        "activityLabel": "Fragment wpisu",
+        "contextLabel": "Kontekst pracy",
+        "mapTitle": "Mapa umiejętności",
+        "workNodes": "Prace"
+      },
       "eyebrowFallback": "Żywe CV",
       "facts": {
         "recorded": "zapisane w dzienniku pracy",
@@ -11180,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "Czym jest LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Prawdziwa praca staje się historią zawodową, dowodami i żywym CV.",
+    "metaDescription": "LabourMarket.ai to platforma oparta na patencie i unikalnej idei organizacji i zarządzania relacjami zawodowymi. W każdej branży.",
     "navLabel": "O LabourMarket.ai",
     "eyebrow": "O platformie",
     "title": "Czym jest LabourMarket.ai",
-    "lede": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
+    "lede": "LabourMarket.ai to platforma oparta na patencie, stworzona w oparciu o unikalną ideę organizowania i zarządzania relacjami zawodowymi. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
     "hero": {
       "lead": "Zawodowa wartość człowieka nie powinna znikać za każdym razem, gdy zmienia pracodawcę. Prawdziwa praca może stać się trwałą historią zawodową: co osoba robiła, gdzie, kiedy, jak długo, w jakiej roli, z jakimi umiejętnościami i jakie dowody oraz potwierdzenia to wspierają.",
       "leadOrg": "Dla organizacji ta sama prawdziwa praca buduje historię tego, co firma faktycznie zrobiła: projekty, zespoły, wykonane prace, godziny, kompetencje i dowody.",
@@ -16054,7 +16073,7 @@
       "lasting": "Państwa doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     },
     "v3": {
-      "lead": "Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
+      "lead": "LabourMarket.ai to platforma oparta na patencie, stworzona w oparciu o unikalną ideę organizowania i zarządzania relacjami zawodowymi. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
       "market": {
