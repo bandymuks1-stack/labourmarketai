@@ -253,8 +253,9 @@ describe("MANO CV — one screen per block, each block by its own address (decis
 
   it("each block has its own address, so a link opens it directly", () => {
     expect(tabs).toMatch(/export function parseCvBlock/);
-    expect(page).toMatch(/const activeBlock = parseCvBlock\(sp\.tab\)/);
-    expect(page).toMatch(/q\.set\("tab", b\)/);
+    expect(page).toMatch(/const activeBlock = parseCvBlock\(sp\.tab \?\? "experience"\)/);
+    expect(page).toMatch(/^\s+q\.set\("tab", b\);$/m);
+    expect(page).toContain("&tab=${activeBlock}");
   });
 
   it("a hidden block still prints — the downloaded CV loses no section", () => {
