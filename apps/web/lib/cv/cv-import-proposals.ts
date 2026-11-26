@@ -20,7 +20,7 @@
 
 import type { SuggestionStatus } from "@/components/app/detected-suggestion-card";
 import { hasAnyProposal, parseCvSections, type CvSectionProposals } from "@/lib/cv/structured-parse";
-import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
+import { extractProfileSkillClaims, normalizeClaimLabel } from "@/lib/profile/skill-claim-extractor";
 
 /** One proposed skill claim and the person's answer to it so far. */
 export type CvClaimProposal = {
@@ -88,10 +88,14 @@ export function appendAiClaims(
   const seen = new Set(prev.map((it) => it.value));
   const extras: CvClaimProposal[] = [];
   for (const [i, label] of aiLabels.entries()) {
-    const norm = label.trim().toLowerCase();
+    const display = label.trim().replace(/\s+/g, " ");
+    // The canonical claim store accepts at most 80 characters. Do not offer
+    // an AI label which would be silently truncated after confirmation.
+    if (display.length > 80) continue;
+    const norm = normalizeClaimLabel(display);
     if (!norm || seen.has(norm) || savedClaimSet.has(norm)) continue;
     seen.add(norm);
-    extras.push({ key: `ai-${i}-${norm}`, status: "pending", value: norm, label: label.trim(), aiOrigin: true });
+    extras.push({ key: `ai-${i}-${norm}`, status: "pending", value: norm, label: display, aiOrigin: true });
   }
   return extras.length > 0 ? [...prev, ...extras] : [...prev];
 }
@@ -107,4 +111,22 @@ export function confirmedClaimLabels(claims: readonly CvClaimProposal[]): string
     .filter((it) => it.status === "confirmed")
     .map((it) => it.label.trim())
     .filter((l) => l.length > 0);
+}
+
+/** Intersect this submission with the canonical action's persisted rows.
+ * A bounded save may omit labels; unrelated existing rows acknowledge nothing. */
+export function persistedClaimLabels(
+  submitted: readonly string[],
+  rows: readonly { normalized_label: string }[],
+): string[] {
+  const saved = new Set(rows.map(row => row.normalized_label));
+  return submitted.filter(label => saved.has(normalizeClaimLabel(label)));
+}
+
+/** A completed save acknowledges only its persisted labels, not later selections. */
+export function markSavedClaims(claims: readonly CvClaimProposal[], labels: readonly string[]): CvClaimProposal[] {
+  const saved = new Set(labels.map(normalizeClaimLabel));
+  return claims.map((claim) =>
+    claim.status === "confirmed" && saved.has(claim.value) ? { ...claim, status: "saved" } : claim,
+  );
 }

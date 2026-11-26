@@ -119,7 +119,7 @@ describe("extracted CV text flows into recognition + real save (not a dead end)"
     // CV-18 / G-10: recognition and the claim save run through the shared
     // CV-import proposal state, which both CV import doors use. Follow the
     // chain end to end: flow → hook → pure rule → deterministic parser.
-    expect(flow).toMatch(/function analyse\(raw: string\)[\s\S]{0,3000}cvProposals\.propose\(raw\)/);
+    expect(flow).toMatch(/function analyse\(raw: string, source:[\s\S]{0,3000}cvProposals\.propose\(raw, source\)/);
     expect(flow).toMatch(/await cvProposals\.saveConfirmed\(/);
     const hook = read("components/app/use-cv-import-proposals.ts");
     expect(hook).toMatch(/const propose = useCallback\([\s\S]{0,200}proposeFromCvText\(raw/);

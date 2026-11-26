@@ -6,6 +6,8 @@ import {
   appendAiClaims,
   confirmedClaimLabels,
   hasAnyCvImportProposal,
+  markSavedClaims,
+  persistedClaimLabels,
   proposeFromCvText,
 } from "@/lib/cv/cv-import-proposals";
 import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
@@ -62,6 +64,38 @@ describe("one proposal rule for every CV door", () => {
     expect(out.at(-1)).toMatchObject({ label: "Kranų valdymas", status: "pending", aiOrigin: true });
   });
 
+  it("a save response does not acknowledge another claim selected while it was pending", () => {
+    const claims = proposeFromCvText(CV_TEXT, new Set()).claims.map(c => ({ ...c, status: "confirmed" as const }));
+    expect(claims.length).toBeGreaterThan(1);
+    const saved = markSavedClaims(claims, [claims[0]!.label]);
+    expect(saved[0]!.status).toBe("saved");
+    expect(saved.slice(1).every(c => c.status === "confirmed")).toBe(true);
+    expect(claims.every(c => c.status === "confirmed")).toBe(true);
+  });
+
+  it("pending and discarded claims stay unconfirmed even when labels repeat", () => {
+    const claims = proposeFromCvText(CV_TEXT, new Set()).claims;
+    const discarded = claims.map(c => ({ ...c, status: "discarded" as const }));
+    expect(markSavedClaims(claims, claims.map(c => c.label))).toEqual(claims);
+    expect(markSavedClaims(discarded, claims.map(c => c.label))).toEqual(discarded);
+  });
+
+  it("a bounded save acknowledges only the persisted subset of this submission", () => {
+    const labels = Array.from({ length: 14 }, (_, i) => `Įgūdis ${i}`);
+    const rows = labels.slice(0, 12).map(label => ({ normalized_label: label.toLowerCase() }));
+    rows.push({ normalized_label: "another pre-existing claim" });
+    expect(persistedClaimLabels(labels, rows)).toEqual(labels.slice(0, 12));
+    expect(persistedClaimLabels(["  Namų   statyba "], [{ normalized_label: "namų statyba" }])).toEqual(["  Namų   statyba "]);
+    expect(persistedClaimLabels(["a".repeat(81)], [{ normalized_label: "a".repeat(80) }])).toEqual([]);
+  });
+
+  it("AI proposals fit the canonical store before the person confirms them", () => {
+    expect(appendAiClaims([], ["a".repeat(81)], new Set())).toEqual([]);
+    const out = appendAiClaims([], ["  Namų   statyba ", "Namų statyba"], new Set());
+    expect(out).toHaveLength(1);
+    expect(out[0]).toMatchObject({ label: "Namų statyba", value: "namų statyba" });
+  });
+
   it("an empty text proposes nothing", () => {
     expect(hasAnyCvImportProposal(proposeFromCvText("", new Set()))).toBe(false);
   });
@@ -80,14 +114,25 @@ describe("the chat CV flow uses the same proposals and the same confirm step", (
     expect(chat).not.toMatch(/extractProfileSkillClaims\(|parseCvSections\(/);
   });
 
+  it("document imports do not cross the composed-profile AI boundary", () => {
+    const hook = codeOnly(read("components/app/use-cv-import-proposals.ts"));
+    expect(hook).toMatch(/source: "profile_text" \| "cv_document" = "cv_document"/);
+    expect(hook).toMatch(/if \(p.status === "ok" && source === "profile_text"\) \{\s*void aiCvStructuringSuggestions/);
+    expect(profile).toContain('analyse(v, "cv_document")');
+    expect(profile).toContain('cvProposals.propose(raw, source)');
+    expect(profile).toContain('source: "profile_text" | "cv_document" = textSource.current');
+    expect(profile).toContain("textSource.current = source");
+    expect(profile).toMatch(/const saved = await cvProposals\.saveConfirmed\(confirmedClaims\);\s*if \(id !== importRun.current\) return/);
+  });
+
   it("the chat proposes claims on extraction and saves only on the person's own click", () => {
     const onExtracted = chat.slice(chat.indexOf("function onExtracted"), chat.indexOf("async function saveClaims"));
     expect(onExtracted).toMatch(/proposals\.propose\(text\)/);
     expect(onExtracted).not.toMatch(/saveConfirmed|promote\(/);
     expect(chat).toMatch(/<DetectedSuggestionCard[\s\S]{0,400}onConfirm=\{\(\) => proposals\.toggle\(it\.key, "confirmed"\)\}/);
     expect(chat).toMatch(/onClick=\{saveClaims\}/);
-    expect(chat).toMatch(/await proposals\.saveConfirmed\(labels\)[\s\S]{0,120}await proposals\.promote\(labels\)/);
-    // The optional AI sections reach the chat's section review too.
+    expect(chat).toMatch(/const saved = await proposals\.saveConfirmed\(labels\)[\s\S]{0,300}await proposals\.promote\(saved\)/);
+    // The section review remains the canonical component.
     expect(chat).toMatch(/<CvImportSectionReview proposals=\{sections\} aiProposals=\{proposals\.aiSections\} \/>/);
   });
 });

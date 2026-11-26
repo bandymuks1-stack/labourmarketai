@@ -175,3 +175,50 @@ test("CV2-2. the Living CV lists every skill and every job once on the screen", 
     expect(overflow, `${width}px: no horizontal scroll`).toBeLessThanOrEqual(1);
   }
 });
+
+
+test("CV2-3. chat CV import proposes skills and saves only the explicitly selected claim", async () => {
+  const p = me();
+  const profileId = await userId(WORKER);
+  const labels = ["Programavimas", "Namų statyba"];
+  const stored = () => sql<{ label: string }>(
+    `select label from public.profile_skill_claims where profile_id = ${lit(profileId)}
+       and label in (${labels.map(lit).join(",")}) order by label`,
+  ).map(row => row.label);
+  expect(stored(), "neither imported claim exists before the review").toEqual([]);
+
+  await p.setViewportSize({ width: 1440, height: 900 });
+  await p.goto(`${BASE}/lt/dashboard`);
+  const composer = p.getByTestId("composer-input");
+  await expect(composer).toBeVisible({ timeout: 60_000 });
+  await composer.fill("Įkelk mano CV");
+  await p.getByTestId("composer-send").click();
+  await p.getByTestId("chat-chip-cv").last().click({ timeout: 60_000 });
+  const flow = p.getByTestId("conversation-cv-flow");
+  await expect(flow).toBeVisible({ timeout: 60_000 });
+  await flow.locator('input[type="file"]').setInputFiles({
+    name: "skills.txt", mimeType: "text/plain",
+    buffer: Buffer.from("Įgūdžiai\nMoku programuoti ir statyti namus, kloju plyteles, dažau sienas."),
+  });
+  const claims = flow.getByTestId("conversation-cv-skill-claims");
+  await expect(claims).toBeVisible({ timeout: 30_000 });
+  for (const label of labels) await expect(claims.getByText(label, { exact: true })).toBeVisible();
+  const save = flow.getByTestId("conversation-cv-skill-apply");
+  await expect(save, "upload is a proposal, never consent to save").toBeDisabled();
+  expect(stored(), "reading the file saved no claim").toEqual([]);
+  for (const width of [1440, 390]) {
+    await p.setViewportSize({ width, height: 900 });
+    await flow.screenshot({ path: join(OUT, `cv-import-review-${width}.png`) });
+    expect(await p.evaluate(() => document.documentElement.scrollWidth - document.documentElement.clientWidth)).toBeLessThanOrEqual(1);
+  }
+  await claims.getByRole("listitem").filter({ hasText: labels[0] })
+    .getByRole("button", { name: "Pridėti", exact: true }).click();
+  await expect(save).toBeEnabled();
+  expect(stored(), "selecting a suggestion still needs the save action").toEqual([]);
+  await save.click();
+  await expect(flow.getByTestId("conversation-cv-skill-applied")).toBeVisible({ timeout: 30_000 });
+  expect(stored(), "only the selected claim was stored").toEqual([labels[0]]);
+  await p.goto(`${BASE}/lt/cv?tab=experience`);
+  await expect(p.getByRole("main").getByTestId("cv-skills").getByText(labels[0]!, { exact: true }))
+    .toBeVisible({ timeout: 60_000 });
+});

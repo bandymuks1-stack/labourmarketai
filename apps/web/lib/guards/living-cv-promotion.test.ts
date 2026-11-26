@@ -52,7 +52,7 @@ describe("living-CV promotion — honesty contract", () => {
     expect(hook).toMatch(/const saveConfirmed = [\s\S]{0,300}await saveProfileSkillClaimsAction\(/);
     expect(hook).toMatch(/const promote = [\s\S]{0,200}promoteConfirmedClaimsAction\(/);
     const saveIdx = flow.indexOf("await cvProposals.saveConfirmed(confirmedClaims)");
-    const promoIdx = flow.indexOf("cvProposals.promote(confirmedClaims)");
+    const promoIdx = flow.indexOf("cvProposals.promote(saved)");
     expect(saveIdx).toBeGreaterThan(-1);
     expect(promoIdx).toBeGreaterThan(saveIdx);
   });

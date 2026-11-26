@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CvImportUpload } from "@/components/app/cv-import-upload";
 import { CvImportSectionReview } from "@/components/app/cv-import-section-review";
@@ -26,7 +26,7 @@ function isCvFile(file: File): boolean {
  *      text-first flow uses (CV-18 / G-10, decision 0023): skill claims read
  *      from the CV's own words (`extractProfileSkillClaims`), the
  *      deterministic section parser (`parseCvSections`, works with AI OFF),
- *      and the optional AI run (labelled, identical confirm). This flow used
+ *      without sending document contents to AI. This flow used
  *      to run the section parser only, so a CV imported here proposed no
  *      skill at all.
  *   3. The confirm step: each claim is a `DetectedSuggestionCard` saved only
@@ -56,8 +56,8 @@ export function WorkerCvFlow({
   const tBucket = useTranslations("structuring.buckets");
   const locale = useLocale();
   const proposals = useCvImportProposals({ locale });
-  const [proposed, setProposed] = useState(false);
-  const [parsedEmpty, setParsedEmpty] = useState(false);
+  const [hasExtracted, setHasExtracted] = useState(false);
+  const importRun = useRef(0);
   const [handedOver, setHandedOver] = useState<File | null>(initialFile);
   const [closed, setClosed] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -66,25 +66,29 @@ export function WorkerCvFlow({
   useAttachSink(onRegisterAttachSink, "cv", !closed, isCvFile, setHandedOver);
 
   function onExtracted(text: string) {
-    const r = proposals.propose(text);
+    importRun.current += 1;
+    proposals.propose(text);
     setApplied(false);
     setApplyError(false);
-    setProposed(r.hasAny);
-    setParsedEmpty(!r.hasAny);
+    setHasExtracted(true);
   }
 
   async function saveClaims() {
     const labels = proposals.confirmedLabels;
     if (labels.length === 0) return;
+    const id = importRun.current;
     setApplying(true);
     setApplyError(false);
     try {
-      await proposals.saveConfirmed(labels);
-      setApplied(true);
-      await proposals.promote(labels);
+      const saved = await proposals.saveConfirmed(labels);
+      if (id === importRun.current) {
+        setApplied(saved.length === labels.length);
+        setApplyError(saved.length !== labels.length);
+      }
+      if (saved.length > 0) await proposals.promote(saved);
     } catch (e) {
       console.error("[conversation-cv] claim save failed:", e);
-      setApplyError(true);
+      if (id === importRun.current) setApplyError(true);
     } finally {
       setApplying(false);
     }
@@ -94,6 +98,8 @@ export function WorkerCvFlow({
   const pendingClaims = claims.some((c) => c.status === "pending" || c.status === "confirmed");
   const sections = proposals.sections;
   const showSections = sections !== null && (hasAnyProposal(sections) || proposals.aiSections !== null);
+  // Render from the current import proposals, never a previous upload.
+  const hasProposals = claims.length > 0 || showSections;
 
   return (
     <div
@@ -117,13 +123,13 @@ export function WorkerCvFlow({
 
       <CvImportUpload onExtracted={onExtracted} file={handedOver} />
 
-      {parsedEmpty && (
+      {hasExtracted && !hasProposals && (
         <p className="text-support text-text-muted" role="status" data-testid="conversation-cv-empty">
           {t("noneFound")}
         </p>
       )}
 
-      {proposed && (
+      {hasExtracted && hasProposals && (
         <div className="flex flex-col gap-4" data-testid="conversation-cv-review" aria-live="polite">
           {claims.length > 0 && (
             <div className="flex flex-col gap-2" data-testid="conversation-cv-skill-claims">

@@ -7,6 +7,8 @@ import {
   appendAiClaims,
   confirmedClaimLabels,
   hasAnyCvImportProposal,
+  markSavedClaims,
+  persistedClaimLabels,
   proposeFromCvText,
   type CvClaimProposal,
 } from "@/lib/cv/cv-import-proposals";
@@ -25,7 +27,7 @@ import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims
  *
  *   · skill claims (`extractProfileSkillClaims`) and structured sections
  *     (`parseCvSections`) — deterministic, always on;
- *   · the optional AI structuring run (owner-gated; `off` adds nothing),
+ *   · for composed profile text only, the optional AI run (owner-gated),
  *     whose extra claims and sections are labelled AI.
  *
  * Nothing is saved by proposing. `saveConfirmed` persists ONLY the claims the
@@ -54,13 +56,14 @@ export function useCvImportProposals({
   /** Propose from one text. `extract_failed` = the skill reading threw (the
    *  sections, when any, still stand). */
   const propose = useCallback(
-    (raw: string): { status: "ok" | "extract_failed"; hasAny: boolean } => {
+    (raw: string, source: "profile_text" | "cv_document" = "cv_document"): { status: "ok" | "extract_failed"; hasAny: boolean } => {
       const p = proposeFromCvText(raw, savedSet);
       setClaims(p.claims);
       setSections(p.sections);
       setAiSections(null);
       const id = ++run.current;
-      if (p.status === "ok") {
+      // Uploaded or pasted CV documents never cross the composed-bio AI boundary.
+      if (p.status === "ok" && source === "profile_text") {
         void aiCvStructuringSuggestions(raw, locale)
           .then((res) => {
             if (id !== run.current || res.status !== "ok") return;
@@ -82,10 +85,13 @@ export function useCvImportProposals({
 
   /** Persist the confirmed claims (self-declared, owner-only) and mark them
    *  saved. Throws when the save fails — the caller names the failure. */
-  const saveConfirmed = useCallback(async (labels: readonly string[]): Promise<void> => {
-    if (labels.length === 0) return;
-    await saveProfileSkillClaimsAction([...labels]);
-    setClaims((prev) => prev.map((it) => (it.status === "confirmed" ? { ...it, status: "saved" } : it)));
+  const saveConfirmed = useCallback(async (labels: readonly string[]): Promise<string[]> => {
+    if (labels.length === 0) return [];
+    const id = run.current;
+    const rows = await saveProfileSkillClaimsAction([...labels]);
+    const saved = persistedClaimLabels(labels, rows);
+    if (id === run.current) setClaims((prev) => markSavedClaims(prev, saved));
+    return saved;
   }, []);
 
   /** The catalogue promotion of the same confirmation; null when it failed

@@ -157,6 +157,9 @@ export function ProfileTextFirstFlow({
   }, []);
 
   const [text, setText] = useState(initialText);
+  // Restored narrative may originate in a CV; unknown provenance stays local.
+  const textSource = useRef<"profile_text" | "cv_document">(initialText.trim() ? "cv_document" : "profile_text");
+  const importRun = useRef(0);
   // What the person typed on /worker-intake before they had an account
   // (owner P0 2026-11-15, F2): placed in the composer, never sent or saved
   // for them. Only when they have no profile text of their own yet.
@@ -215,7 +218,9 @@ export function ProfileTextFirstFlow({
     (s) => s.status === "saved",
   ).length;
 
-  function analyse(raw: string) {
+  function analyse(raw: string, source: "profile_text" | "cv_document" = textSource.current) {
+    textSource.current = source;
+    importRun.current += 1;
     setError(null);
     setApplied(false);
     setPromotion(null);
@@ -247,7 +252,7 @@ export function ProfileTextFirstFlow({
     // (state + the save above), sees an inline retryable error, and the app
     // never unmounts. Chips the user has ALREADY saved stay in the list,
     // marked `already_saved`, so they see why they are not actionable.
-    const proposed = cvProposals.propose(raw);
+    const proposed = cvProposals.propose(raw, source);
     if (proposed.status !== "ok") {
       setError(t("extractErrorLabel"));
       return; // stay on the compose stage — nothing is lost
@@ -277,6 +282,7 @@ export function ProfileTextFirstFlow({
   }
 
   async function applyConfirmed() {
+    const id = importRun.current;
     setApplying(true);
     setError(null);
     try {
@@ -296,19 +302,21 @@ export function ProfileTextFirstFlow({
       // like any other apply failure.
       if (chosenProfession && !hasPrimaryProfession && !professionSet) {
         const ok = await setPrimaryProfessionBySlug(chosenProfession);
+        if (id !== importRun.current) return;
         if (ok) setProfessionSet(true);
       }
 
       // The confirmed chips MOVE from `confirmed` → `saved` inside the
       // shared state once the save succeeded (SAVE-STATE LIFECYCLE below).
-      await cvProposals.saveConfirmed(confirmedClaims);
+      const saved = await cvProposals.saveConfirmed(confirmedClaims);
+      if (id !== importRun.current) return;
 
       // Pilot telemetry — fire-and-forget. We send a count of confirmed
       // skill claims (number, not labels) so the admin can see funnel
       // throughput without the labels themselves leaking into telemetry.
       recordEvent("profile_text_saved");
       recordEvent("profile_skill_suggestion_confirmed", {
-        skill_count: confirmedClaims.length,
+        skill_count: saved.length,
       });
 
       // SAVE-STATE LIFECYCLE (feat/cc/profile-save-state-and-idea-extraction):
@@ -318,7 +326,9 @@ export function ProfileTextFirstFlow({
       // to the unified `Mano gebėjimai` surface below. router.refresh()
       // re-fetches the page so `CapabilityProfileSection` shows the new
       // chips in the canonical area without a full reload.
-      setApplied(true);
+      const complete = saved.length === confirmedClaims.length;
+      setApplied(complete);
+      if (!complete) setError(t("applyErrorLabel"));
       router.refresh();
 
       // Living CV (canonical-journey P2): the SAME user confirmation is
@@ -328,17 +338,19 @@ export function ProfileTextFirstFlow({
       // rows). Best-effort AFTER the primary save+refresh: a promotion
       // failure never fails the save; a success refreshes once more so
       // the capability section shows the promoted rows.
-      const promo = await cvProposals.promote(confirmedClaims);
+      const promo = saved.length > 0 ? await cvProposals.promote(saved) : null;
+      if (id !== importRun.current) return;
       setPromotion(promo);
       if (promo && promo.promoted > 0) router.refresh();
       // Activation funnel (P0-A) — canonical profile-saved signal. Fired
       // after the save+refresh so the save→refresh path stays tight.
       trackFunnel(FUNNEL_EVENTS.profileSaved, {
         surface: "profile",
-        success: true,
+        success: complete,
       });
     } catch (e) {
       console.error("[profile-text-first] apply failed:", e);
+      if (id !== importRun.current) return;
       setError(t("applyErrorLabel"));
       // Failed attempt ≠ abandoned attempt (audit F-T5).
       trackFunnel(FUNNEL_EVENTS.profileSaved, {
@@ -397,7 +409,7 @@ export function ProfileTextFirstFlow({
         <CvInputPanel
           onPasteSubmit={(v) => {
             setPasted(v);
-            analyse(v);
+            analyse(v, "cv_document");
           }}
         />
         {manualSlot && (
@@ -433,6 +445,7 @@ export function ProfileTextFirstFlow({
           <button
             type="button"
             onClick={() => {
+              importRun.current += 1;
               // Defensive reset on back-navigation: the user may have
               // saved earlier and we don't want a stale success toast
               // re-appearing if they tap submit again with no
