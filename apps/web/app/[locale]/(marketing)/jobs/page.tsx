@@ -294,6 +294,7 @@ const SAME_JOB_SEARCH: L = {
   nl: "Zoek dezelfde functie:",
   de: "Dieselbe Tätigkeit suchen:",
   pl: "Szukaj tej samej pracy:",
+  sv: "Sök samma yrke:",
 };
 
 /** Honest state: the feature is not switched on — NOT "there are no jobs". */
