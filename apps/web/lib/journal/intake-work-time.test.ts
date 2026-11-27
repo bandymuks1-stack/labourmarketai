@@ -253,3 +253,26 @@ describe("intakeOutputFields — what the work produced rides the same intake (r
     expect(intakeOutputFields("Dirbau 8 val.")).toEqual({});
   });
 });
+
+
+describe("reference codes never add duration to the journal or Living CV", () => {
+  it.each(["AB5h", "AB30min", "ref_2days", "AB15hours", "AB3.5h", "AB3,5h"])("ignores %s and carries only the stated three hours to the canonical reading", (reference) => {
+    const text = `Reference ${reference}: priced the next renovation and ordered materials, 3 hours`;
+    const intake = deriveIntakeWorkTime(text, TODAY);
+    expect(intake.fragments.map((f) => [f.timeValue, f.timeUnit])).toEqual([[3, "hours"]]);
+    const time = deriveEntryWorkTime({ entryId: "e", createdAt: `${TODAY}T10:00:00Z`, metrics: toMetrics(intake.fragmentsJson) });
+    expect(time.totalHours).toBe(3);
+    expect(time.conflict).toBeNull();
+  });
+  it.each(["AB5h", "AB30min", "ref_2days"])("does not manufacture time when %s is the only number", (reference) => {
+    const intake = deriveIntakeWorkTime(`Inspected unit ${reference}`, TODAY);
+    expect(intake.fragments).toEqual([]);
+    expect(intake.quantityMinutes).toBeNull();
+  });
+  it("keeps unspaced real durations and decimals", () => {
+    const intake = deriveIntakeWorkTime("Painted 3h; cleaned 30min", TODAY);
+    const time = deriveEntryWorkTime({ entryId: "e", createdAt: `${TODAY}T10:00:00Z`, metrics: toMetrics(intake.fragmentsJson) });
+    expect(time.totalHours).toBe(3.5);
+    expect(deriveIntakeWorkTime("Painted 3.5h", TODAY).fragments[0]?.timeValue).toBe(3.5);
+  });
+});

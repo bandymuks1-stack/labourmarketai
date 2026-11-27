@@ -160,25 +160,27 @@ export const DAY_UNIT_SOURCES: readonly string[] = [
 const HOUR_UNIT_RX_SRC = HOUR_UNIT_SOURCES.join("|");
 const MINUTE_UNIT_RX_SRC = MINUTE_UNIT_SOURCES.join("|");
 const DAY_UNIT_RX_SRC = DAY_UNIT_SOURCES.join("|");
+// A duration starts at a number boundary. An alphanumeric reference such
+// as AB5h names no worked time; do not count its suffix as five hours.
 const DIGIT_HOURS_RX = new RegExp(
-  `(\\d+(?:[.,]\\d+)?)\\s*(?:${HOUR_UNIT_RX_SRC})`,
+  `(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${HOUR_UNIT_RX_SRC})`,
   "iu",
 );
 const DIGIT_MINUTES_RX = new RegExp(
-  `(\\d+(?:[.,]\\d+)?)\\s*(?:${MINUTE_UNIT_RX_SRC})`,
+  `(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${MINUTE_UNIT_RX_SRC})`,
   "iu",
 );
 const DIGIT_DAYS_RX = new RegExp(
-  `(\\d+(?:[.,]\\d+)?)\\s*(?:${DAY_UNIT_RX_SRC})`,
+  `(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${DAY_UNIT_RX_SRC})`,
   "iu",
 );
 /** The same readers for the text with written numbers turned into digits. The
  *  unit must end there, at a non-letter: in "ten minste" (Dutch, "at least")
  *  the English "ten" became 10, and the bare "min" then matched inside
  *  "minste". A written number only counts before a whole unit word. */
-const WORD_HOURS_RX = new RegExp(`(\\d+(?:[.,]\\d+)?)\\s*(?:${HOUR_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
-const WORD_MINUTES_RX = new RegExp(`(\\d+(?:[.,]\\d+)?)\\s*(?:${MINUTE_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
-const WORD_DAYS_RX = new RegExp(`(\\d+(?:[.,]\\d+)?)\\s*(?:${DAY_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
+const WORD_HOURS_RX = new RegExp(`(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${HOUR_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
+const WORD_MINUTES_RX = new RegExp(`(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${MINUTE_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
+const WORD_DAYS_RX = new RegExp(`(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${DAY_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
 /** One whole lower-cased word that IS a duration unit ("valandas", "hours",
  *  "uur", "std", "h"). The word test of `isTimeToken`, and of the
  *  recognition-side fragmenter's meaningfulness rule, for the same lists. */
