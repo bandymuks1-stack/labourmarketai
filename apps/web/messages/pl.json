@@ -13011,6 +13011,7 @@
     "available": "Dostępny",
     "availableFrom": "Od {date}",
     "experienceYears": "{n} lat doświadczenia",
+    "recordedExperienceHours": "Dostępne zapisy pracy: {hours} godz.",
     "skillsTitle": "Umiejętności",
     "skillsEmpty": "Brak umiejętności, które mogą Państwo zobaczyć.",
     "skillVerified": "Potwierdzone zapisem kierownika",
@@ -20003,7 +20004,7 @@
     },
     "noHours": "Wpisy bez podanych godzin: {count}. Nieznane godziny nie są liczone jako zero.",
     "undated": "Wpisy bez podanej daty: {count}. Zostają w historii poniżej.",
-    "periodApart": "{hours} godz. z sumy to sumy za okres, trzymane osobno i nigdy nierozdzielane na dni ani miesiące.",
+    "periodApart": "Ponadto: {hours} godz. podane jako sumy za okres — niewliczone w godziny powyżej i nigdy nierozdzielane na dni ani miesiące.",
     "noWorkObject": "Wpisy niepowiązane z projektem ani miejscem znanym platformie: {count}. Zostają w tej historii pod nazwą źródła.",
     "places": {
       "title": "Według projektu lub miejsca",

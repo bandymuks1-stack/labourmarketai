@@ -21,6 +21,7 @@ import type { DomainCaller } from "@/lib/domain/caller";
 import type { BusinessHistoryIdentity } from "./business-history-header";
 import { resolveHistoryReadOrganization } from "./history-read-grant";
 import { untypedClient } from "./evidence-store";
+import { recordProjectId } from "./professional-history-context";
 import {
   CLIENT_PARTY_ROLE,
   listEvidenceRecords,
@@ -500,7 +501,7 @@ async function readBusinessHistory(
         id: r.id,
         personId: r.personId,
         workObjectId: r.workObjectId,
-        projectId: r.projectId ?? (r.workObjectId ? (projectOfObject.get(r.workObjectId) ?? null) : null),
+        projectId: recordProjectId(r, projectOfObject),
         activityDate: r.activityDate,
         periodStart: r.periodStart,
         periodEnd: r.periodEnd,

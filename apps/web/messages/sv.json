@@ -13011,6 +13011,7 @@
     "available": "Tillgänglig",
     "availableFrom": "Från {date}",
     "experienceYears": "{n} års erfarenhet",
+    "recordedExperienceHours": "Tillgängliga arbetsregistreringar: {hours} tim",
     "skillsTitle": "Färdigheter",
     "skillsEmpty": "Inga färdigheter som du får se.",
     "skillVerified": "Bekräftad genom en chefs post",
@@ -20003,7 +20004,7 @@
     },
     "noHours": "Poster utan angivna timmar: {count}. Okända timmar räknas inte som noll.",
     "undated": "Poster utan angivet datum: {count}. De finns kvar i historiken nedan.",
-    "periodApart": "{hours} h av summan är periodsummor, hållna isär och aldrig fördelade på dagar eller månader.",
+    "periodApart": "Dessutom: {hours} h angivna som periodsummor — ingår inte i timmarna ovan och fördelas aldrig på dagar eller månader.",
     "noWorkObject": "Poster utan koppling till ett projekt eller en plats som plattformen känner till: {count}. De finns kvar i den här historiken under sin källbeteckning.",
     "places": {
       "title": "Per projekt eller plats",

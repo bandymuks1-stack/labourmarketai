@@ -13011,6 +13011,7 @@
     "available": "Verfügbar",
     "availableFrom": "Ab {date}",
     "experienceYears": "{n} J. Erfahrung",
+    "recordedExperienceHours": "Einsehbare Arbeitsnachweise: {hours} Std.",
     "skillsTitle": "Fähigkeiten",
     "skillsEmpty": "Keine Fähigkeiten, die Sie sehen dürfen.",
     "skillVerified": "Durch einen Manager-Eintrag bestätigt",
@@ -20003,7 +20004,7 @@
     },
     "noHours": "Einträge ohne angegebene Stunden: {count}. Unbekannte Stunden zählen nicht als null.",
     "undated": "Einträge ohne angegebenes Datum: {count}. Sie bleiben in der Historie unten.",
-    "periodApart": "{hours} Std. der Summe sind Zeitraumsummen, getrennt gehalten und nie auf Tage oder Monate verteilt.",
+    "periodApart": "Außerdem: {hours} Std. als Zeitraumsummen angegeben — nicht in den Stunden oben enthalten und nie auf Tage oder Monate verteilt.",
     "noWorkObject": "Einträge ohne Bezug zu einem der Plattform bekannten Projekt oder Ort: {count}. Sie bleiben unter ihrer Quellbezeichnung in dieser Historie.",
     "places": {
       "title": "Nach Projekt oder Ort",

@@ -13011,6 +13011,7 @@
     "available": "Beschikbaar",
     "availableFrom": "Vanaf {date}",
     "experienceYears": "{n} jr ervaring",
+    "recordedExperienceHours": "Toegankelijke werkregistraties: {hours} u",
     "skillsTitle": "Vaardigheden",
     "skillsEmpty": "Geen vaardigheden die u mag zien.",
     "skillVerified": "Bevestigd door een managersvermelding",
@@ -20003,7 +20004,7 @@
     },
     "noHours": "Records zonder opgegeven uren: {count}. Onbekende uren tellen niet als nul.",
     "undated": "Records zonder opgegeven datum: {count}. Ze blijven in de geschiedenis hieronder.",
-    "periodApart": "{hours} u van het totaal zijn periodetotalen, apart gehouden en nooit verdeeld over dagen of maanden.",
+    "periodApart": "Daarnaast: {hours} u opgegeven als periodetotalen — niet meegeteld in de uren hierboven en nooit verdeeld over dagen of maanden.",
     "noWorkObject": "Records die niet aan een bij het platform bekend project of bekende plek zijn gekoppeld: {count}. Ze blijven in deze geschiedenis onder hun bronlabel.",
     "places": {
       "title": "Per project of plek",
