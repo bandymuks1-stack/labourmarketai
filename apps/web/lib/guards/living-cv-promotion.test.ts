@@ -46,8 +46,13 @@ describe("living-CV promotion — honesty contract", () => {
   });
 
   it("flow promotes only after the confirmed claims were saved", () => {
-    const saveIdx = flow.indexOf("await saveProfileSkillClaimsAction(confirmedClaims)");
-    const promoIdx = flow.indexOf("promoteConfirmedClaimsAction(confirmedClaims)");
+    // CV-18 / G-10: the save and the promotion run through the shared
+    // CV-import proposal state; each is exactly the named server action.
+    const hook = read("components/app/use-cv-import-proposals.ts");
+    expect(hook).toMatch(/const saveConfirmed = [\s\S]{0,300}await saveProfileSkillClaimsAction\(/);
+    expect(hook).toMatch(/const promote = [\s\S]{0,200}promoteConfirmedClaimsAction\(/);
+    const saveIdx = flow.indexOf("await cvProposals.saveConfirmed(confirmedClaims)");
+    const promoIdx = flow.indexOf("cvProposals.promote(saved)");
     expect(saveIdx).toBeGreaterThan(-1);
     expect(promoIdx).toBeGreaterThan(saveIdx);
   });
