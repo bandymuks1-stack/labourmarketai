@@ -56,8 +56,15 @@ describe("1 · one reading, every surface", () => {
     expect(cvBuilder).toContain("readOwnExperienceRelationships(supabase, user.id)");
     expect(capabilities).toMatch(/read\("cv\.verified\.get"[\s\S]*?buildVerifiedCv\(\)/);
     expect(cvPage).toContain('data-testid="cv-professional-experience-total"');
+    // The fact strip states the total from the same reading (owner reference 2026-11-24).
+    expect(cvPage).toMatch(/experience\.hours !== null && experience\.hours\.total > 0/);
     expect(cvPage).toContain('tPremium("facts.experienceTotal")');
     expect(cvPage).toMatch(/const experienceTotal = cv\.professionalExperience\?\.hours \?\? null;/);
+  });
+  it("keeps source-text skill samples opt-in on the shared verified-CV reader", () => {
+    expect(cvBuilder).toMatch(/export async function buildVerifiedCv\(\s*options: \{ readonly includeSkillSamples\?: boolean \} = \{\}/);
+    expect(cvBuilder).toMatch(/loadWorkIntelligence\(\{ supabase, userId: user\.id \}, workerId, \{ includeSkillSamples: options\.includeSkillSamples === true \}\)/);
+    expect(cvBuilder).not.toContain("includeSkillSamples: true");
   });
   it("the profile fact strip states the same total, derived by the same function", () => {
     expect(profilePage).toContain("readOwnExperienceRelationships(supabase, user.id)");
@@ -93,7 +100,8 @@ describe("1 · one reading, every surface", () => {
     expect(personPage).toMatch(/experienceFiguresOf\(orgWorkIntelligence, visibleRelationships\)\.professionalExperienceHours/);
     expect(personPage).toContain("readVisibleExperienceRelationships(supabase,");
     expect(personPage).toContain('data-testid="person-experience-total"');
-    expect(personPage).toContain('tIdentity("experienceTotal")');
+    expect(personPage).toContain('t("recordedExperienceHours",');
+    expect(personPage).not.toContain('tIdentity("experienceTotal")');
     // the scale below gets the same relationships, so its total is the same figure
     expect(personPage).toMatch(/audience="organization"\s*relationships=\{visibleRelationships\}/);
     // a truncated read never prints a partial "total"
@@ -103,6 +111,8 @@ describe("1 · one reading, every surface", () => {
     const visible = reader.slice(start, reader.indexOf("\n}\n", start));
     expect(start).toBeGreaterThan(-1);
     expect(visible).toMatch(/\.from\("engagement_contexts"\)[\s\S]*?\.eq\("profile_id", profileId\)/);
+    expect(visible).toContain(".limit(READ_LIMIT + 1)");
+    expect(visible).toContain("if ((contexts.data?.length ?? 0) > READ_LIMIT) return null");
     expect(visible).not.toMatch(/readMyLedOrganizations|organization_people|readWorkedOrganizationPeriods|service_role|createAdminClient/);
   });
   it("the company-side person card never adds a period total into its headline hours (CV-4)", () => {

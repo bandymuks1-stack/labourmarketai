@@ -28,6 +28,8 @@ export type InvitationsPanelLabels = {
   readonly roleLabels: Record<MembershipRole, string>;
   readonly accept: string;
   readonly decline: string;
+  /** "Invited by {name}" — `{name}` is replaced with the inviter's name. */
+  readonly invitedBy: string;
   readonly outcomes: Record<string, string>;
 };
 
@@ -81,6 +83,11 @@ export function MembershipInvitationsPanel({
               <span className="rounded-sm border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary">
                 {labels.roleLabels[inv.role]}
               </span>
+              {inv.inviterName ? (
+                <span className="text-xs text-text-secondary" data-testid={`membership-invitation-inviter-${inv.membershipId}`}>
+                  {labels.invitedBy.replace("{name}", inv.inviterName)}
+                </span>
+              ) : null}
               <form action={action}>
                 <input type="hidden" name="intent" value="accept" />
                 <input type="hidden" name="membershipId" value={inv.membershipId} />

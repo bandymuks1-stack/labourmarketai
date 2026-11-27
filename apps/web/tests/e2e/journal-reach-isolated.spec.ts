@@ -33,6 +33,11 @@ test.setTimeout(240_000);
 
 const RUN = Date.now().toString(36);
 const W = `journal-reach-${RUN}@example.test`;
+// The run tag inside typed TEXT is letters only: a base-36 tag such as
+// "mwv92u4d" ends in a number and a unit that the journal reads as a stated
+// duration ("4 d"), which sends the detailed form to its time review and
+// fails R-3 at random (CI, #3782). Letters keep the tag unique and inert.
+const TEXT_TAG = RUN.replace(/\d/g, (d) => "abcdefghij"[Number(d)]);
 const OUT = join(process.cwd(), "test-results", "journal-day-choice");
 const SIZES = [
   { label: "390", width: 390, height: 844 },
@@ -120,7 +125,7 @@ test("R-2. a long-past day is stored as that day; a future day is refused", asyn
 
   await page.goto(`${BASE}/en/dashboard/journal?date=${past}`);
   await expect(main.getByTestId("journal-quick-record-day")).toHaveAttribute("data-day", past, { timeout: 60_000 });
-  await main.getByTestId("journal-quick-record-text").fill(`QA-SYNTHETIC past ${RUN}: laid paving stones`);
+  await main.getByTestId("journal-quick-record-text").fill(`QA-SYNTHETIC past ${TEXT_TAG}: laid paving stones`);
   await main.getByTestId("journal-quick-record-understand").click();
   await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 30_000 });
   await expect(main.getByTestId("worklog-date"), "R-2: the readback carries the past day").toHaveValue(past);
@@ -133,7 +138,7 @@ test("R-2. a long-past day is stored as that day; a future day is refused", asyn
         sql<{ day: string }>(
           `select m.value_text as day from public.journal_entries e join public.workers w on w.id = e.worker_id
              join public.journal_entry_metrics m on m.entry_id = e.id and m.metric_slug = 'work_date'
-            where w.profile_id = ${lit(me)} and e.original_text like ${lit(`%past ${RUN}%`)}`,
+            where w.profile_id = ${lit(me)} and e.original_text like ${lit(`%past ${TEXT_TAG}%`)}`,
         ).map((r) => r.day),
       { message: "R-2: stored as the past day", timeout: 60_000 },
     )
@@ -145,7 +150,7 @@ test("R-3. the entry survives a validation error, in the readback, after a reloa
   const me = await userId(W);
   const today = await journalToday(page);
   const future = isoShift(today, 5);
-  const WORDS = `QA-SYNTHETIC refused ${RUN}: fitted two doors`;
+  const WORDS = `QA-SYNTHETIC refused ${TEXT_TAG}: fitted two doors`;
   const main = page.getByRole("main");
 
   // Quick recorder: a future day in the readback is refused; nothing is lost.
@@ -166,7 +171,7 @@ test("R-3. the entry survives a validation error, in the readback, after a reloa
   expect(
     sql<{ n: number }>(
       `select count(*)::int as n from public.journal_entries e join public.workers w on w.id = e.worker_id
-        where w.profile_id = ${lit(me)} and e.original_text like ${lit(`%refused ${RUN}%`)}`,
+        where w.profile_id = ${lit(me)} and e.original_text like ${lit(`%refused ${TEXT_TAG}%`)}`,
     )[0]?.n,
     "R-3: nothing was stored",
   ).toBe(0);
@@ -199,7 +204,7 @@ test("R-4. at 390 px: natural language opens yesterday's readback in the assista
   const input = page.getByTestId("composer-input").filter({ visible: true }).first();
   await expect(input, "R-4: the assistant is open").toBeVisible({ timeout: 120_000 });
   const send = page.getByTestId("composer-send").filter({ visible: true }).first();
-  const SENTENCE = `Yesterday I tiled the bathroom floor for 6 hours QA-SYNTHETIC ${RUN}`;
+  const SENTENCE = `Yesterday I tiled the bathroom floor for 6 hours QA-SYNTHETIC ${TEXT_TAG}`;
   // The composer takes input only once it is live (same pattern as assistant-intent-isolated).
   await expect(async () => {
     await input.fill(SENTENCE);

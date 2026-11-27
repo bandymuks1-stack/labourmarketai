@@ -180,7 +180,43 @@
       "actionPhone": "Anrufen",
       "actionWebsite": "Website des Unternehmens öffnen",
       "heroContact": "So erreichen Sie es",
-      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt."
+      "provenance": "Das Unternehmen hat diese Seite selbst ausgefüllt.",
+      "living": {
+        "activityTitle": "Arbeitsaufzeichnungen nach Zeitraum",
+        "eyebrow": "Lebendiger Lebenslauf",
+        "figures": {
+          "years": "durch Einträge abgedeckter Zeitraum (Jahre)",
+          "hours": "erfasste Stunden",
+          "people": "{count, plural, one {Person hat hier gearbeitet} other {Personen haben hier gearbeitet}}",
+          "projects": "{count, plural, one {Projekt} other {Projekte}}",
+          "places": "{count, plural, one {Baustelle} other {Baustellen}}",
+          "team": "{count, plural, one {Teammitglied} other {Teammitglieder}}"
+        },
+        "doTitle": "Kompetenzen",
+        "team": "{count, plural, one {# Person im Team} other {# Personen im Team}}",
+        "experienceTitle": "Geleistete Stunden",
+        "confirmedLabel": "Bestätigt",
+        "confirmedSource": "Vom Mitarbeiter erfasst, von der Organisation freigegeben",
+        "recordedLabel": "Eigene Aufzeichnungen",
+        "recordedSource": "Aufzeichnungen der Organisation, von keiner anderen Seite bestätigt",
+        "pending": "{hours} warten auf Freigabe",
+        "hours": "{hours} Std.",
+        "running": "Laufend",
+        "completed": "Abgeschlossen",
+        "clients": "Arbeiten ausgeführt für: {names}",
+        "tabs": {
+          "overview": "Übersicht",
+          "projects": "Projekte",
+          "experience": "Erfahrung",
+          "gallery": "Galerie",
+          "team": "Mitarbeitende"
+        },
+        "pendingLabel": "Wartet auf Freigabe",
+        "ringLabel": "{share}% der Journalstunden bestätigt",
+        "open": "Lebendigen Lebenslauf öffnen",
+        "clientsMore": "Arbeiten ausgeführt für: {names} und {count} weitere",
+        "currentTeamTitle": "Aktuelles Team"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1188,7 @@
     "calendar": "Kalender",
     "addEntry": "Eintrag hinzufügen",
     "details": "Persönliche Daten",
+    "background": "Sprachen & Ausbildung",
     "improve": "Verbesserungspunkte",
     "capabilities": "Fähigkeiten & Arbeitshistorie",
     "fullRecordsInCv": "Alle Arbeitseinträge",
@@ -4392,7 +4429,7 @@
           },
           "education": {
             "title": "Ich vertrete eine Bildungseinrichtung",
-            "desc": "Laden Sie Lernende ein, sehen Sie ihre Teilnahme und verbinden Sie sie mit Praktika und Jobs."
+            "desc": "Laden Sie Lernende ein, führen Sie Programme durch und verfolgen Sie Praxis und Ergebnisse."
           }
         },
         "heading": "Starten Sie als Person oder als Unternehmen?",
@@ -5084,7 +5121,15 @@
         "event_invitation_accepted": "Jemand hat Ihre Einladung angenommen",
         "event_weekly_digest_profile_completion": "Damit wir Ihnen passende Jobs zeigen können, bestätigen Sie, welche Arbeit Sie machen",
         "event_weekly_digest_journal": "Die Wochenübersicht Ihres Arbeitsjournals ist fertig",
-        "event_history_link_offered": "Eine Organisation bietet an, Ihre erfasste Arbeitshistorie mit Ihrem Konto zu verbinden"
+        "event_history_link_offered": "Eine Organisation bietet an, Ihre erfasste Arbeitshistorie mit Ihrem Konto zu verbinden",
+        "event_team_offer_received": "Ein Team hat sich für Ihren Bedarf angeboten",
+        "event_team_offer_answered": "Auf das Angebot Ihres Teams wurde geantwortet",
+        "event_team_offer_answered_accepted": "Das Angebot Ihres Teams wurde angenommen",
+        "event_team_offer_answered_declined": "Das Angebot Ihres Teams wurde abgelehnt",
+        "event_candidate_offer_received": "Eine Agentur hat einen Kandidaten für Ihren Bedarf vorgeschlagen",
+        "event_candidate_offer_answered": "Auf Ihren vorgeschlagenen Kandidaten wurde geantwortet",
+        "event_candidate_offer_answered_accepted": "Ihr vorgeschlagener Kandidat wurde angenommen",
+        "event_candidate_offer_answered_declined": "Ihr vorgeschlagener Kandidat wurde abgelehnt"
       },
       "label": "Meine Benachrichtigungen",
       "emptyTitle": "Im Moment erfordert nichts Ihre Aufmerksamkeit.",
@@ -5822,9 +5867,9 @@
       "confirmedTitle": "Löschung bestätigt",
       "confirmedBody": "Das System löscht das Konto in den nächsten Minuten und sendet eine Bestätigung an Ihre Konto-E-Mail-Adresse. Muss etwas geprüft werden, informieren wir Sie.",
       "inReview": "Die automatische Löschung ist zur Prüfung angehalten: Das Konto enthält Daten, die gesetzlich aufbewahrt werden müssen oder andere Personen betreffen könnten. Entscheidung und Gründe erhalten Sie innerhalb eines Monats per E-Mail. Bis dahin wird Ihr Profil in der Suche nicht angezeigt.",
-      "confirmLabelWaiting": "Ich verstehe, dass das Konto und seine Daten 30 Tage nach der Bestätigung unwiderruflich gelöscht werden, sofern ich nicht vorher storniere.",
-      "confirmStepBodyWaiting": "Ihr Antrag auf Kontolöschung ist gestellt. Bestätigen Sie ihn — das Konto bleibt 30 Tage erhalten, in dieser Zeit können Sie auf dieser Seite stornieren. Danach löscht das System das Konto automatisch und sendet Ihnen eine Bestätigung per E-Mail.",
-      "confirmedBodyWaiting": "Das Konto wird in 30 Tagen gelöscht. Bis dahin können Sie auf dieser Seite stornieren. Nach der Löschung senden wir eine Bestätigung an Ihre Konto-E-Mail-Adresse.",
+      "confirmLabelWaiting": "Ich verstehe, dass das Konto und seine Daten spätestens 30 Tage nach der Bestätigung und spätestens einen Monat nach meinem Antrag unwiderruflich gelöscht werden, sofern ich nicht vorher storniere.",
+      "confirmStepBodyWaiting": "Ihr Antrag auf Kontolöschung ist gestellt. Bestätigen Sie ihn — das Konto bleibt höchstens 30 Tage erhalten (nie länger als einen Monat ab Ihrem Antrag), in dieser Zeit können Sie auf dieser Seite stornieren. Danach löscht das System das Konto automatisch und sendet Ihnen eine Bestätigung per E-Mail.",
+      "confirmedBodyWaiting": "Das Konto wird innerhalb von 30 Tagen gelöscht, spätestens einen Monat nach Ihrem Antrag. Bis dahin können Sie auf dieser Seite stornieren. Nach der Löschung senden wir eine Bestätigung an Ihre Konto-E-Mail-Adresse.",
       "status": {
         "pending": "Ihr Antrag auf Kontolöschung ist gestellt.",
         "pendingConfirmed": "Die Kontolöschung ist bestätigt und geplant.",
@@ -5832,7 +5877,7 @@
         "inProgress": "Die Kontolöschung läuft bereits — sie kann nicht mehr storniert werden.",
         "done": "Das Konto wurde gelöscht.",
         "submittedAt": "Gestellt: {date}",
-        "scheduledAt": "Das Konto wird am {date} gelöscht (nach einer Wartezeit von 30 Tagen).",
+        "scheduledAt": "Das Konto wird am {date} gelöscht.",
         "cancelUntil": "Bis dahin können Sie stornieren.",
         "loadError": "Der Status der Kontolöschung konnte nicht geladen werden. Laden Sie die Seite neu und versuchen Sie es erneut."
       },
@@ -7165,7 +7210,9 @@
       "countryPlaceholder": "z. B. LT",
       "remoteLabel": "Kann remote erledigt werden",
       "rateLabel": "Preis (optional)",
-      "rateHint": "Nur Freitext — zum Beispiel ein Richtwert für den Stundensatz."
+      "rateHint": "Nur Freitext — zum Beispiel ein Richtwert für den Stundensatz.",
+      "publicLabel": "Diese persönliche Dienstleistung öffentlich anzeigen",
+      "publicHint": "Wenn sie aktiv und nicht abgelaufen ist, sind Titel, Beschreibung, Kategorie, Land, Fernleistung und Preis ohne Anmeldung sichtbar. Geben Sie keine privaten Kontaktdaten an. Entfernen Sie das Häkchen und speichern Sie, um die öffentliche Anzeige zu beenden."
     },
     "save": "Speichern",
     "saving": "Wird gespeichert...",
@@ -7191,7 +7238,9 @@
     "linkToRequests": "Anfragen zu Ihren Dienstleistungen ansehen",
     "errorHasRequests": "Dieses Angebot hat Anfragen und kann daher nicht gelöscht werden – ihr Verlauf muss erhalten bleiben. Sie können es stattdessen pausieren.",
     "removeQuestion": "Diese Leistung endgültig löschen? Das lässt sich nicht rückgängig machen. Um sie nur aus der Suche zu nehmen, pausieren Sie sie.",
-    "removeYes": "Ja, löschen"
+    "removeYes": "Ja, löschen",
+    "publicAudience": "Öffentliche Suche ausgewählt",
+    "memberAudience": "Angemeldete Mitglieder ausgewählt"
   },
   "communication": {
     "origin": {
@@ -8835,13 +8884,32 @@
     "durationPendingUnnamed": "eine Organisation",
     "durationPendingUndated": "Daten nicht erfasst",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Zusammensetzung der Stunden",
+        "states": {
+          "actual": "Als tatsächlich erfasst",
+          "reported": "Von der Organisation angegeben",
+          "estimated": "Geschätzt",
+          "confirmed": "Durch den Eintrag einer anderen Partei belegt"
+        },
+        "skillBasis": "Einzelnen Fähigkeiten zugeordnete Zeit aus dem Arbeitsjournal.",
+        "workTitle": "Arbeiten und Fähigkeiten",
+        "attributedTime": "Dieser Fähigkeit zugeordnet",
+        "confirmedTime": "Von der Leitung bestätigt: {hours}",
+        "activityLabel": "Auszug aus dem Eintrag",
+        "contextLabel": "Arbeitskontext",
+        "mapTitle": "Kompetenzkarte",
+        "workNodes": "Arbeiten"
+      },
       "eyebrowFallback": "Lebendiger Lebenslauf",
       "facts": {
         "recorded": "im Arbeitsjournal erfasst",
         "confirmed": "mit Eintrag der Leitung",
         "organization": "in Aufzeichnungen von Organisationen",
         "experienceTotal": "Berufserfahrung insgesamt",
-        "languages": "Sprachen"
+        "languages": "Sprachen",
+        "projects": "Projekte",
+        "span": "erster und letzter Eintrag"
       },
       "capEyebrow": "Fähigkeiten",
       "capEyebrowHours": "{hours} Std. erfasste Arbeit",
@@ -8959,7 +9027,15 @@
         "unknown": "Konnte gerade nicht gelesen werden."
       }
     },
-    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft."
+    "educationSelfStated": "Ausbildung laut Angabe der Arbeitskraft.",
+    "blocks": {
+      "overview": "Übersicht",
+      "experience": "Erfahrung",
+      "projects": "Projekte",
+      "photos": "Fotos",
+      "documents": "Dokumente",
+      "reviews": "Bewertungen"
+    }
   },
   "todayScreen": {
     "eyebrow": "Heute",
@@ -11123,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "Was ist LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai ist eine internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. Echte Arbeit wird zu Berufsgeschichte und Nachweisen.",
+    "metaDescription": "LabourMarket.ai: patentbasierte Plattform auf Basis einer einzigartigen Idee zur Organisation und Verwaltung von Arbeitsbeziehungen. Für alle Branchen.",
     "navLabel": "Über LabourMarket.ai",
     "eyebrow": "Über die Plattform",
     "title": "Was ist LabourMarket.ai",
-    "lede": "LabourMarket.ai ist eine internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
+    "lede": "LabourMarket.ai ist eine patentbasierte Plattform, die auf einer einzigartigen Idee zur Organisation und Verwaltung von Arbeitsbeziehungen beruht. Sie verbindet Menschen, Arbeitgeber, Agenturen, Teams, Projekte, Weiterbildung und Arbeitsmarktdienste rund um echte Arbeit — vom ersten Gespräch bis zur nächsten Gelegenheit.",
     "hero": {
       "lead": "Der berufliche Wert eines Menschen sollte nicht jedes Mal verschwinden, wenn er den Arbeitgeber wechselt. Echte Arbeit kann zu dauerhafter beruflicher Geschichte werden: was die Person getan hat, wo, wann, wie lange, in welcher Rolle, mit welchen Fähigkeiten und welche Nachweise und Bestätigungen das stützen.",
       "leadOrg": "Für Organisationen baut dieselbe echte Arbeit die Historie dessen auf, was das Unternehmen tatsächlich geleistet hat: Projekte, Teams, ausgeführte Arbeiten, Stunden, Kompetenzen und Nachweise.",
@@ -12646,7 +12722,7 @@
       },
       "verify": {
         "title": "Bestätigen Sie Ihre E-Mail, um daran gerichtete Einladungen zu sehen",
-        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann. Alles andere in Ihrem Konto funktioniert wie bisher; das ist nur nötig, um diese Einladungen zu sehen oder anzunehmen.",
+        "body": "Einladungen, die an eine E-Mail-Adresse gerichtet sind, werden nur der Person gezeigt, die dieses Postfach öffnen kann.",
         "send": "Einmal-Link senden",
         "sending": "Wird gesendet…",
         "sent": "Wir haben einen Einmal-Link an {email} gesendet. Öffnen Sie ihn auf diesem Gerät, um abzuschließen.",
@@ -12935,6 +13011,7 @@
     "available": "Verfügbar",
     "availableFrom": "Ab {date}",
     "experienceYears": "{n} J. Erfahrung",
+    "recordedExperienceHours": "Einsehbare Arbeitsnachweise: {hours} Std.",
     "skillsTitle": "Fähigkeiten",
     "skillsEmpty": "Keine Fähigkeiten, die Sie sehen dürfen.",
     "skillVerified": "Durch einen Manager-Eintrag bestätigt",
@@ -14454,7 +14531,7 @@
       "navCalendar": "Kalender",
       "navProfile": "Profil",
       "clarifyWorkLog": "An welchem Tag und wie lange haben Sie gearbeitet? Zum Beispiel: „Heute von 8 bis 17, 30 Min Pause, Fenster montiert“.",
-      "calendarHint": "Ihren Plan finden Sie im Tab „Kalender“. Hier kann ich beim Erfassen der Arbeitszeit helfen oder Angebote zeigen.",
+      "calendarHint": "Ihren Plan finden Sie im Tab „Kalender“.",
       "messagesHint": "Hier sind Ihre Nachrichten — der Link unten öffnet sie.",
       "reminderBlocked": "Ich kann noch keine Erinnerungen senden — dafür gibt es keinen Mechanismus, also erstelle ich keine falsche. Ich füge es hinzu, sobald es aktiviert ist.",
       "switchContextPersonal": "persönlicher Bereich",
@@ -14710,6 +14787,34 @@
       "findWorkInCompanyContext": "Die Jobsuche ist Ihre eigene Sache — im Unternehmensbereich führe ich sie nicht aus. Wechseln Sie in Ihren persönlichen Bereich und fragen Sie noch einmal.",
       "findWorkInCompanyWhy": "Arbeit sucht ein Mensch, kein Unternehmen — ich antworte aus Ihrem persönlichen Bereich.",
       "personalOnlyInCompany": "Das ist eine persönliche Aktion — im Unternehmensbereich führe ich sie nicht aus. Wechseln Sie in Ihren persönlichen Bereich und machen Sie dort weiter.",
+      "needsOrganization": "Das geschieht für eine Organisation, und keiner Ihrer Bereiche kann das bisher.",
+      "readFailed": "Das konnte ich gerade nicht lesen — der Fehler liegt bei uns. Nichts wurde geändert. Versuchen Sie es gleich noch einmal.",
+      "taskStatusAsk": "Welchen Status soll die Aufgabe haben: begonnen, erledigt oder blockiert?",
+      "stageStatusAsk": "Welchen Status soll die Etappe haben: begonnen, erledigt oder blockiert?",
+      "chipStatusStarted": "Begonnen",
+      "chipStatusDone": "Erledigt",
+      "chipStatusBlocked": "Blockiert",
+      "professionAsk": "Welchen Beruf oder welches Handwerk meinen Sie?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Ihr Lebenslauf liegt in Ihrem persönlichen Bereich, nicht in der Organisation.",
+          "journal": "Ihr eigenes Arbeitstagebuch liegt in Ihrem persönlichen Bereich.",
+          "profile": "Ihr Profil liegt in Ihrem persönlichen Bereich.",
+          "calendar": "Ihr eigener Kalender liegt in Ihrem persönlichen Bereich."
+        },
+        "open": {
+          "cv": "Wechseln und meinen Lebenslauf öffnen",
+          "journal": "Wechseln und mein Tagebuch öffnen",
+          "profile": "Wechseln und mein Profil öffnen",
+          "calendar": "Wechseln und meinen Kalender öffnen"
+        },
+        "askWhoseCv": "Ihr eigener Lebenslauf oder der eines Kandidaten?",
+        "organizationHistory": "Die Aufzeichnung der Organisation ist ihre Arbeitshistorie.",
+        "openOrganizationHistory": "Historie der Organisation öffnen",
+        "organization": "Das geschieht im Bereich der Organisation: {name}.",
+        "switchTo": "Zu {name} wechseln und fortfahren",
+        "whichOrganization": "Das geschieht im Bereich einer Organisation. In welchem?"
+      },
       "newJobsIntro": "Neue Stellen nach Ihren Vorgaben: {count}.",
       "newJobsAll": "Alle Möglichkeiten",
       "newJobsNone": "In den letzten Tagen sind keine neuen Stellen zu Ihren Vorgaben erschienen. Alle Möglichkeiten finden Sie auf der Seite der Möglichkeiten.",
@@ -15969,8 +16074,7 @@
       "lasting": "Ihre Erfahrung und Möglichkeiten bleiben erreichbar — beim Wechsel von Job, Projekt oder Land."
     },
     "v3": {
-      "lead": "Für Arbeitskräfte, Arbeitgeber und Dienstleister aller Berufe und Branchen. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
-      "moreChoices": "Weitere Optionen",
+      "lead": "LabourMarket.ai ist eine patentbasierte Plattform, die auf einer einzigartigen Idee zur Organisation und Verwaltung von Arbeitsbeziehungen beruht. Registrierung und Basis-Bedarfsmeldung sind kostenlos.",
       "or": "oder beschreiben Sie es in eigenen Worten",
       "needFree": "Sie können eine Anfrage ohne Registrierung einreichen. Das Einreichen ist kostenlos; Bedingungen und Preis der Dienstleistungen werden gesondert vereinbart.",
       "market": {
@@ -18912,7 +19016,8 @@
       "heading": "Einladungen von Organisationen",
       "explainer": "An Sie gerichtete Einladungen in die Leitung. Nach der Annahme erscheint die Organisation in Ihrer Bereichsauswahl.",
       "accept": "Annehmen",
-      "decline": "Ablehnen"
+      "decline": "Ablehnen",
+      "invitedBy": "Eingeladen von {name}"
     },
     "members": {
       "heading": "Mitglieder der Organisation",
@@ -19373,7 +19478,11 @@
         "open": "Arbeitsbereich {name} öffnen",
         "opening": "Wird geöffnet…",
         "error": "Der Arbeitsbereich konnte nicht geöffnet werden."
-      }
+      },
+      "structure": "Frühere Arbeit wurde unter {names} erbracht.",
+      "structureLater": ", später ",
+      "structureForClient": "Frühere Arbeit unter {names} für den Auftraggeber {client}.",
+      "structureAsSubcontractor": "Subunternehmer: {names} → Auftraggeber {client}."
     },
     "projects": {
       "title": "Projekte auf der Plattform",
@@ -19391,7 +19500,21 @@
       "period": "Erfasst",
       "basis": "Aus {entries} Journaleinträgen, die Personen unter dieser Organisation erfasst haben. Getrennt von der importierten Historie oben gezählt und nie zu ihr addiert.",
       "unavailable": "Die unter dieser Organisation im Journal erfasste Arbeit konnte gerade nicht gelesen werden."
-    }
+    },
+    "forClient": {
+      "title": "Arbeit Ihrer Subunternehmer",
+      "confirmed": "Bestätigte Einträge",
+      "unconfirmed": "Nicht bestätigte Einträge",
+      "periodHours": "{hours} Std. als Zeitraumsumme angegeben, nicht zu einzelnen Tagen addiert.",
+      "basis": "Aus {count, plural, one {# Eintrag} other {# Einträgen}} in den eigenen Unterlagen Ihrer Subunternehmer. Getrennt von Ihrer eigenen Arbeit gezählt.",
+      "unreadable": "Die in den Unterlagen der Partner erfasste Arbeit konnte gerade nicht gelesen werden. Das heißt nicht, dass es keine gibt."
+    },
+    "clients": {
+      "title": "Auftraggeber",
+      "unnamed": "Auftraggebende Organisation",
+      "records": "{count, plural, one {# Eintrag} other {# Einträge}}"
+    },
+    "descriptionNotInSource": "Keine Arbeitsbeschreibung in der Quelle"
   },
   "workPlan": {
     "title": "Geplante Arbeit",
@@ -19625,6 +19748,14 @@
     "noDemand": "Derzeit gibt es keinen offenen Bedarf, für den sich ein Angebot lohnt.",
     "demandLabel": "Bedarf",
     "demandPlaceholder": "Bedarf wählen",
+    "need": {
+      "people": "Personen",
+      "start": "Beginn",
+      "duration": "Dauer",
+      "language": "Sprache",
+      "skills": "Fähigkeiten",
+      "tools": "Werkzeuge"
+    },
     "alreadyOffered": "bereits angeboten",
     "noteLabel": "Hinweis an das Unternehmen (optional)",
     "notePlaceholder": "Zum Beispiel: Trupp von 3, Start in zwei Wochen möglich",
@@ -19635,7 +19766,8 @@
       "heading": "Ihre Angebote",
       "none": "Noch keine Angebote.",
       "withdraw": "Zurückziehen",
-      "message": "Dem Auftraggeber schreiben"
+      "message": "Dem Auftraggeber schreiben",
+      "orgNext": "Der Auftraggeber hat grundsätzlich zugestimmt (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
     },
     "status": {
       "offered": "Wartet auf Antwort",
@@ -19736,7 +19868,7 @@
       "message": "Dem Team schreiben",
       "messageCompany": "Dem Unternehmen schreiben",
       "kindOrganization": "Unternehmensangebot",
-      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Details und die arbeitenden Personen klären Sie im Gespräch."
+      "orgNext": "Grundsätzlich vereinbart (kein Vertrag). Die Arbeit aus einem Firmenangebot über die Plattform zu starten ist noch nicht verfügbar: Klären Sie die Details und die ausführenden Personen im Gespräch."
     },
     "orgHeading": "Unser Unternehmen für einen offenen Bedarf anbieten",
     "orgIntro": "Bieten Sie Ihr Unternehmen selbst an — Ihre Leute, Ihre Leistung oder als Subunternehmer — für einen offenen Bedarf. Kein Team muss zuerst angelegt werden.",
@@ -20732,7 +20864,8 @@
       "setUpAgency": "Agentur registrieren",
       "setUpInstitution": "Für Bildungseinrichtungen",
       "b2bEnquiry": "B2B-Dienstleistungsanfrage",
-      "projectEnquiry": "Anfrage für ein Einzelprojekt"
+      "projectEnquiry": "Anfrage für ein Einzelprojekt",
+      "findServices": "Persönliche Dienstleistungen finden"
     },
     "assistant": "Assistenten fragen",
     "start": {
@@ -20752,5 +20885,36 @@
       "fullList": "Vollständige Liste"
     },
     "more": "Mehr"
+  },
+  "publicServices": {
+    "title": "Persönliche Dienstleistungen finden",
+    "lead": "Von Einzelpersonen öffentlich veröffentlichte Dienstleistungen.",
+    "search": "Suchen",
+    "query": "Dienstleistung oder Stichwort",
+    "country": "Land",
+    "category": "Kategorie",
+    "clear": "Filter löschen",
+    "unavailable": "Die Dienstleistungssuche ist nicht verfügbar",
+    "unavailableHint": "Bitte versuchen Sie es später erneut.",
+    "retry": "Erneut versuchen",
+    "emptyFiltered": "Keine Dienstleistungen für diese Filter gefunden",
+    "empty": "Noch keine persönlichen Dienstleistungen öffentlich veröffentlicht",
+    "results": "Dienstleistungen",
+    "remote": "Aus der Ferne",
+    "pagination": "Suchseiten",
+    "previous": "Zurück",
+    "next": "Weiter",
+    "page": "Seite {page}",
+    "refine": "Grenzen Sie die Suche ein, um passendere Dienstleistungen zu finden.",
+    "back": "Alle Dienstleistungen",
+    "delivery": "Ausführung",
+    "rate": "Preis",
+    "personalService": "Persönliche Dienstleistung",
+    "signInToRequest": "Anmelden und anfragen",
+    "manage": "Diese Dienstleistung verwalten",
+    "contactUnavailable": "Die Anfrage ist derzeit nicht möglich. Bitte versuchen Sie es später erneut.",
+    "notFound": "Dienstleistung nicht gefunden",
+    "notFoundHint": "Diese Dienstleistung ist nicht mehr öffentlich verfügbar.",
+    "allCountries": "Alle Länder"
   }
 }

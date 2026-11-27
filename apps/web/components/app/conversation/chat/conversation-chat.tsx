@@ -57,7 +57,7 @@ import {
   isEducationQuestionKind,
   type EducationQuestionKind,
 } from "@/lib/conversation/education-question";
-import { readStatedProgress } from "@/lib/conversation/progress-status-phrase";
+import { readStatedProgress, type StatedProgress } from "@/lib/conversation/progress-status-phrase";
 import { loadAgencyBridgeForChat } from "@/lib/conversation/agency-workspace";
 import { loadClientOffersForChat } from "@/lib/conversation/client-offers";
 import { openTeamOfferThreadForChat } from "@/lib/company/team-offer-conversation";
@@ -70,6 +70,13 @@ import { readMyCvState } from "@/lib/conversation/cv-state-server";
 import { readCapabilityAnswer } from "@/lib/conversation/capability-answer-server";
 import { aiStateMessageKey, understand } from "@/lib/conversation/utterance-understanding";
 import { asksForPersonalWorkspace, matchWorkspacesByName } from "@/lib/conversation/workspace-reference";
+import {
+  crossSpaceRequest,
+  ORGANIZATION_HISTORY_PATH,
+  PERSONAL_TARGET_PATH,
+  type CrossSpaceDecision,
+  type PersonalTarget,
+} from "@/lib/conversation/cross-space";
 import { readRenameTarget } from "@/lib/conversation/organization-rename-phrase";
 import { readRenameTargetForChat } from "@/lib/conversation/organization-rename-chat";
 import {
@@ -1543,6 +1550,47 @@ export function ConversationChat({
     [assistant, clarifyDoor],
   );
 
+  /**
+   * NEVER THE GENERIC MENU (owner order 2026-11-24, decision 0034 rule 3).
+   * An organization action asked where no workspace can do it is said as
+   * such, with the ONE door that makes it possible; a personal read asked in
+   * an organization offers the switch. The greeting's starter row is not an
+   * answer to a request.
+   */
+  const answerNeedsOrganization = useCallback(
+    () =>
+      assistant(t("needsOrganization"), [
+        { id: "link:/dashboard/start/company", label: labels.chipCreateOrganization },
+      ]),
+    [assistant, labels.chipCreateOrganization, t],
+  );
+  const answerPersonalOnly = useCallback(() => {
+    const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+    assistant(
+      t("personalOnlyInCompany"),
+      personal ? [{ id: `ws:${personal.id}`, label: t("workspacePersonal") }] : undefined,
+    );
+  }, [assistant, auth?.workspaces, t]);
+
+  /**
+   * "Which state?" with the three states as the answer (Codex P2 on #3783):
+   * the question alone could not be answered — the next sentence lost the
+   * task or stage it was about. Each chip re-runs the SAME handler on the
+   * SAME sentence with the state picked; nothing is written by the question.
+   */
+  const pendingStatusRef = useRef<{ kind: "task" | "stage"; sentence: string } | null>(null);
+  const askStatus = useCallback(
+    (kind: "task" | "stage", sentence: string) => {
+      pendingStatusRef.current = { kind, sentence };
+      assistant(t(kind === "task" ? "taskStatusAsk" : "stageStatusAsk"), [
+        { id: "pstatus:in_progress", label: t("chipStatusStarted") },
+        { id: "pstatus:done", label: t("chipStatusDone") },
+        { id: "pstatus:blocked", label: t("chipStatusBlocked") },
+      ]);
+    },
+    [assistant, t],
+  );
+
   const openForm = useCallback(
     (
       // A registered action id, or a spec BUILT for this turn (the agency
@@ -1693,10 +1741,10 @@ export function ConversationChat({
         })
         .catch(() => {
           setTyping(false);
-          assistant(fallbackText, starterChips);
+          assistant(t("readFailed"));
         });
     },
-    [assistant, pushMessage, locale, searchChips, starterChips, fallbackText, tAi],
+    [assistant, pushMessage, locale, searchChips, tAi, t],
   );
 
   /**
@@ -1743,9 +1791,9 @@ export function ConversationChat({
       })
       .catch(() => {
         setTyping(false);
-        assistant(fallbackText, starterChips);
+        assistant(t("readFailed"));
       });
-  }, [assistant, searchChips, starterChips, fallbackText]);
+  }, [assistant, searchChips, t]);
 
   /**
    * "Ieškau darbo" starts a DIALOGUE, not a verdict (owner audit P0.5). The
@@ -1860,10 +1908,10 @@ export function ConversationChat({
         })
         .catch(() => {
           setTyping(false);
-          if (!opts?.quiet) assistant(fallbackText, starterChips);
+          if (!opts?.quiet) assistant(t("readFailed"));
         });
     },
-    [pushMessage, assistant, starterChips, profileChips, fallbackText, tSummary],
+    [pushMessage, assistant, starterChips, profileChips, tSummary, t],
   );
   startProfileSummaryRef.current = startProfileSummary;
 
@@ -1976,9 +2024,9 @@ export function ConversationChat({
       })
       .catch(() => {
         setTyping(false);
-        assistant(fallbackText, starterChips);
+        assistant(t("readFailed"));
       });
-  }, [assistant, starterChips, fallbackText, labels.chipPrefs, labels.chipJobs]);
+  }, [assistant, starterChips, labels.chipPrefs, labels.chipJobs, t]);
 
   /**
    * THE PLAYER CARD OPENS IN THE PANEL (W3 row 1).
@@ -2476,12 +2524,13 @@ export function ConversationChat({
    * re-validates.
    */
   const performContextSwitch = useCallback(
-    (workspace: WorkspaceInfo, continueSentence?: string) => {
+    (workspace: WorkspaceInfo, continueSentence?: string, thenOpen?: string) => {
       // The chip's own label: an unnamed organization says so, never "".
       const displayName =
         workspace.kind === "personal" ? t("switchContextPersonal") : workspaceLabelOf(workspace);
       if (auth?.activeWorkspaceId === workspace.id) {
-        assistant(t("switchContextAlready", { name: displayName }));
+        if (thenOpen) router.push(thenOpen);
+        else assistant(t("switchContextAlready", { name: displayName }));
         return;
       }
       // THE SAME TASK CONTINUES ACROSS THE SWITCH (owner 2026-10-01). The
@@ -2513,6 +2562,9 @@ export function ConversationChat({
               ? t("switchContextDone", { name: displayName })
               : t("switchContextFailed"),
           );
+          // SWITCH AND OPEN (decision 0034 rule 3): the page asked for lives in
+          // the space just entered; it opens only once the server accepted.
+          if (accepted && thenOpen) router.push(thenOpen);
           if (!accepted && continueSentence) {
             try {
               window.sessionStorage.removeItem(CONTINUE_AFTER_SWITCH_KEY);
@@ -2526,7 +2578,56 @@ export function ConversationChat({
           assistant(t("switchContextFailed"));
         });
     },
-    [assistant, auth, t, workspaceLabelOf],
+    [assistant, auth, router, t, workspaceLabelOf],
+  );
+
+  /**
+   * A REQUEST THAT BELONGS TO THE OTHER SPACE (decision 0034 rule 3, owner P0
+   * 2026-11-24). One short line and ONE action that switches through the
+   * same server-validated switch and opens the target; or, when it is not
+   * clear whose thing is meant, ONE question with the real options. Never the
+   * other space's generic menu (see `lib/conversation/cross-space.ts`).
+   */
+  const pendingCrossSpaceSentenceRef = useRef("");
+  const presentCrossSpace = useCallback(
+    (decision: NonNullable<CrossSpaceDecision>, sentence: string) => {
+      const workspaces = auth?.workspaces ?? [];
+      const openChip = (target: PersonalTarget): ChoiceChip =>
+        workspaces.some((w) => w.kind === "personal")
+          ? { id: `xs:${target}`, label: t(`crossSpace.open.${target}`) }
+          : { id: `link:${PERSONAL_TARGET_PATH[target]}`, label: t(`crossSpace.open.${target}`) };
+      if (decision.kind === "to-personal") {
+        assistant(t(`crossSpace.personal.${decision.target}`), [openChip(decision.target)]);
+        return;
+      }
+      if (decision.kind === "organization-history") {
+        assistant(t("crossSpace.organizationHistory"), [
+          { id: `link:${ORGANIZATION_HISTORY_PATH}`, label: t("crossSpace.openOrganizationHistory") },
+        ]);
+        return;
+      }
+      if (decision.kind === "ask-whose-cv") {
+        assistant(t("crossSpace.askWhoseCv"), [
+          openChip("cv"),
+          { id: "candidates", label: labels.chipCandidates },
+        ]);
+        return;
+      }
+      const organizations = workspaces.filter((w) => w.kind !== "personal");
+      pendingCrossSpaceSentenceRef.current = sentence;
+      if (organizations.length === 1) {
+        const name = workspaceLabelOf(organizations[0]);
+        assistant(t("crossSpace.organization", { name }), [
+          { id: `xso:${organizations[0].id}`, label: t("crossSpace.switchTo", { name }) },
+        ]);
+        return;
+      }
+      assistant(
+        t("crossSpace.whichOrganization"),
+        organizations.map((w) => ({ id: `xso:${w.id}`, label: workspaceLabelOf(w) })),
+      );
+    },
+    [assistant, auth, labels.chipCandidates, t, workspaceLabelOf],
   );
 
   /**
@@ -3933,7 +4034,7 @@ export function ConversationChat({
                   },
           );
           assistant(
-            `${res.text}\n\n${labels.calendarHint}`,
+            res.text,
             chips.length > 0 ? chips : undefined,
           );
           // The panel holds the CURRENT visual plan while the thread keeps
@@ -4109,10 +4210,10 @@ export function ConversationChat({
       } else if (canActAsEmployer && workspaceChips.length > 0) {
         withTyping(() => assistant(labels.agencySwitchHint, workspaceChips));
       } else {
-        withTyping(() => assistant(fallbackText, starterChips));
+        withTyping(() => answerNeedsOrganization());
       }
     },
-    [identity, canActAsEmployer, workspaceChips, startAgencyBridge, withTyping, assistant, labels.agencySwitchHint, fallbackText, starterChips],
+    [identity, canActAsEmployer, workspaceChips, startAgencyBridge, withTyping, assistant, labels.agencySwitchHint, answerNeedsOrganization],
   );
 
   /** "Noriu pakviesti klientą" / "pakviesk darbuotoją": the ONE missing fact
@@ -4128,7 +4229,7 @@ export function ConversationChat({
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
-          assistant(fallbackText, starterChips);
+          answerNeedsOrganization();
         }
         return;
       }
@@ -4153,7 +4254,7 @@ export function ConversationChat({
         },
       );
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, labels.projectCreatedNext, fallbackText, starterChips, openForm],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.projectCreateIntro, labels.projectCreatedNext, openForm, answerNeedsOrganization],
   );
 
   /** PROGRESS (§11): a stage moved to a real status — the SAME token-confirmed
@@ -4287,7 +4388,7 @@ export function ConversationChat({
     (sentence: string, picked?: { workerProfileId: string; fromProjectId: string }) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       setTyping(true);
@@ -4332,7 +4433,7 @@ export function ConversationChat({
           assistant(labels.projectsUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, t, runMoveWhatIf],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, t, runMoveWhatIf, answerNeedsOrganization],
   );
 
   /** "Kokius kandidatus pasiūlė agentūra?" — the offers on the company's OWN
@@ -4378,7 +4479,7 @@ export function ConversationChat({
   const startClientBridge = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-      else assistant(fallbackText, starterChips);
+      else answerNeedsOrganization();
       return;
     }
     setTyping(true);
@@ -4420,12 +4521,12 @@ export function ConversationChat({
           { id: "link:/dashboard/company/partners", label: labels.chipCompanyHub },
         ]);
       });
-  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, answerNeedsOrganization]);
 
   const startClientOffers = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-      else assistant(fallbackText, starterChips);
+      else answerNeedsOrganization();
       return;
     }
     if (agencyWorkspace) {
@@ -4479,7 +4580,7 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.agencyUnavailable, [{ id: "candidates", label: labels.chipCandidates }]);
       });
-  }, [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips]);
+  }, [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, answerNeedsOrganization]);
 
   /** "Turiu naują A1 iki 2027-03" — a document RECORDED by sentence (owner
    *  contract §12/§14). The form is built from the canonical catalogues per
@@ -4678,7 +4779,7 @@ export function ConversationChat({
     (sentence: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       setTyping(true);
@@ -4716,7 +4817,7 @@ export function ConversationChat({
           assistant(labels.projectsUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.taskCreateIntro, labels.taskCreatedNext, labels.chipTasks, labels.projectsUnavailable, fallbackText, starterChips, openForm],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, labels.taskCreateIntro, labels.taskCreatedNext, labels.chipTasks, labels.projectsUnavailable, openForm, answerNeedsOrganization],
   );
 
   /** CAPACITY (§11): "kas laisvas šią savaitę?" — the company's roster against
@@ -4739,7 +4840,7 @@ export function ConversationChat({
     (sentence: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       setTyping(true);
@@ -4789,7 +4890,7 @@ export function ConversationChat({
           assistant(labels.confirmUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, answerNeedsOrganization],
   );
 
   /** The confirmation writes over the ONE dispatcher (confirm = important tier,
@@ -4969,12 +5070,12 @@ export function ConversationChat({
     (sentence: string) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       runProjectReadiness(null, sentence);
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, fallbackText, starterChips, runProjectReadiness],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels.agencySwitchHint, runProjectReadiness, answerNeedsOrganization],
   );
 
   /** §14 WORK PERFORMED → RESULT: a task moved to a real status — the SAME
@@ -5030,14 +5131,15 @@ export function ConversationChat({
    *  and, for a company, its projects'): one match runs it, several ask with
    *  one chip each, none is said honestly. Both identities. */
   const startTaskStatus = useCallback(
-    (sentence: string) => {
+    (sentence: string, picked?: StatedProgress) => {
       const lower = sentence.toLowerCase();
       // The state the sentence SAYS — never a default. A sentence that names a
       // task and states no state ("Was ist mit der Aufgabe Malen?") writes
-      // nothing: it used to be recorded as done.
-      const status: WorkTaskStatus | null = readStatedProgress(sentence, "task");
+      // nothing: it used to be recorded as done. The question offers the three
+      // states; a tap runs THIS handler again on the SAME sentence.
+      const status: WorkTaskStatus | null = picked ?? readStatedProgress(sentence, "task");
       if (status === null) {
-        assistant(fallbackText, starterChips);
+        askStatus("task", sentence);
         return;
       }
       setTyping(true);
@@ -5068,7 +5170,7 @@ export function ConversationChat({
           assistant(labels.taskUnavailable);
         });
     },
-    [identity, assistant, labels, runTaskStatus, fallbackText, starterChips],
+    [identity, assistant, labels, runTaskStatus, askStatus],
   );
 
   /** "Kuris projektas rizikoje?" (§11 / §16): every live project with the SAME
@@ -5079,7 +5181,7 @@ export function ConversationChat({
   const startProjectRisk = useCallback(() => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-      else assistant(fallbackText, starterChips);
+      else answerNeedsOrganization();
       return;
     }
     setTyping(true);
@@ -5124,12 +5226,12 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.riskUnavailable, [{ id: "projects", label: labels.chipProjects }]);
       });
-  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, answerNeedsOrganization]);
 
   const startWhoAvailable = useCallback((sentence = "") => {
     if (identity !== "company") {
       if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-      else assistant(fallbackText, starterChips);
+      else answerNeedsOrganization();
       return;
     }
     setTyping(true);
@@ -5193,24 +5295,24 @@ export function ConversationChat({
         setTyping(false);
         assistant(labels.capacityUnavailable, [{ id: "projects", label: labels.chipProjects }]);
       });
-  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips]);
+  }, [identity, canActAsEmployer, workspaceChips, assistant, labels, answerNeedsOrganization]);
 
   /** "Etapas pamatai baigtas" — the status the sentence names, resolved
    *  against the company's REAL stages: one match runs it, several ask with
    *  one chip each, none is said honestly. Company identity only. */
   const startStageStatus = useCallback(
-    (sentence: string) => {
+    (sentence: string, picked?: StatedProgress) => {
       if (identity !== "company") {
         if (canActAsEmployer && workspaceChips.length > 0) assistant(labels.agencySwitchHint, workspaceChips);
-        else assistant(fallbackText, starterChips);
+        else answerNeedsOrganization();
         return;
       }
       const lower = sentence.toLowerCase();
       // The state the sentence SAYS — never a default. "Erkläre die Etappe
       // Fundament" is a question; a stage is not marked done by one.
-      const status: StageStatus | null = readStatedProgress(sentence, "stage");
+      const status: StageStatus | null = picked ?? readStatedProgress(sentence, "stage");
       if (status === null) {
-        assistant(fallbackText, [{ id: "projects", label: labels.chipProjects }]);
+        askStatus("stage", sentence);
         return;
       }
       setTyping(true);
@@ -5239,7 +5341,7 @@ export function ConversationChat({
           assistant(labels.projectsUnavailable);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, runStageStatus],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, runStageStatus, answerNeedsOrganization, askStatus],
   );
 
   const startAgencyInvite = useCallback(
@@ -5249,7 +5351,7 @@ export function ConversationChat({
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
-          assistant(fallbackText, starterChips);
+          answerNeedsOrganization();
         }
         return;
       }
@@ -5288,7 +5390,7 @@ export function ConversationChat({
         },
       );
     },
-    [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, fallbackText, starterChips, roleContextNow, openForm, agencyFollowup],
+    [identity, canActAsEmployer, workspaceChips, agencyWorkspace, assistant, labels, roleContextNow, openForm, agencyFollowup, answerNeedsOrganization],
   );
 
   /**
@@ -5318,7 +5420,7 @@ export function ConversationChat({
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
-          assistant(fallbackText, starterChips);
+          answerNeedsOrganization();
         }
         return;
       }
@@ -5342,7 +5444,7 @@ export function ConversationChat({
           ),
       );
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, roleContextNow, openForm, educationFollowup],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, roleContextNow, openForm, educationFollowup, answerNeedsOrganization],
   );
 
   const runEducationProgrammes = useCallback(
@@ -5351,7 +5453,7 @@ export function ConversationChat({
         if (canActAsEmployer && workspaceChips.length > 0) {
           assistant(labels.agencySwitchHint, workspaceChips);
         } else {
-          assistant(fallbackText, starterChips);
+          answerNeedsOrganization();
         }
         return;
       }
@@ -5503,7 +5605,7 @@ export function ConversationChat({
           ]);
         });
     },
-    [identity, canActAsEmployer, workspaceChips, assistant, labels, fallbackText, starterChips, openForm, educationFollowup, educationChips, roleContextNow],
+    [identity, canActAsEmployer, workspaceChips, assistant, labels, openForm, educationFollowup, educationChips, roleContextNow, answerNeedsOrganization],
   );
   const runEducationProgrammesRef = useRef(runEducationProgrammes);
   runEducationProgrammesRef.current = runEducationProgrammes;
@@ -5953,6 +6055,35 @@ export function ConversationChat({
               user(chip.label);
               // The goal in flight continues in the workspace picked.
               performContextSwitch(target, goalContinuation());
+            }
+          } else if (chip.id.startsWith("xs:")) {
+            // Switch to the personal space and open the person's own thing
+            // there (decision 0034 rule 3). Only the target's NAME rides on the
+            // chip; the path comes from the fixed map, never from input.
+            const target = chip.id.slice(3) as PersonalTarget;
+            const personal = (auth?.workspaces ?? []).find((w) => w.kind === "personal");
+            const path = PERSONAL_TARGET_PATH[target];
+            if (personal && path) {
+              user(chip.label);
+              performContextSwitch(personal, undefined, path);
+            }
+          } else if (chip.id.startsWith("xso:")) {
+            // An organization request said in the personal space: switch to the
+            // organization picked, then continue the SAME sentence there.
+            const target = (auth?.workspaces ?? []).find((w) => w.id === chip.id.slice(4));
+            if (target) {
+              user(chip.label);
+              performContextSwitch(target, pendingCrossSpaceSentenceRef.current || undefined);
+            }
+          } else if (chip.id.startsWith("pstatus:")) {
+            // The state picked for the task or stage the question was about.
+            const picked = chip.id.slice(8) as StatedProgress;
+            const pending = pendingStatusRef.current;
+            if (pending && (picked === "in_progress" || picked === "done" || picked === "blocked")) {
+              pendingStatusRef.current = null;
+              user(chip.label);
+              if (pending.kind === "task") startTaskStatus(pending.sentence, picked);
+              else startStageStatus(pending.sentence, picked);
             }
           } else if (chip.id.startsWith("oc:")) {
             // "Which Jonas?" — the chip carries an id and nothing else; the
@@ -7021,7 +7152,7 @@ export function ConversationChat({
           }
           const stated = readProfessionStatement(text);
           if (!stated) {
-            assistant(fallbackText, starterChips);
+            askToClarify(t("professionAsk"));
             return;
           }
           const inCatalogue = Boolean(stated.professionSlug && tProfessions.has(stated.professionSlug));
@@ -7165,7 +7296,7 @@ export function ConversationChat({
         },
         savedOpportunities: () => {
           if (identity === "company") {
-            assistant(fallbackText, starterChips);
+            answerPersonalOnly();
             return;
           }
           setTyping(true);
@@ -7679,7 +7810,7 @@ export function ConversationChat({
               { id: "link:/dashboard/company", label: labels.chipCompanyHub },
             ]);
           } else {
-            assistant(fallbackText, starterChips);
+            answerNeedsOrganization();
           }
         },
         // "Sukurk įmonės profilį" — START an organization. Routes to the ONE
@@ -8011,6 +8142,16 @@ export function ConversationChat({
       // NOT UNDERSTOOD → one clarifying question + the ONE context-derived
       // door, never the greeting's starter row (see `askToClarify`).
       const fallback = () => askToClarify(t("notUnderstood"));
+      // EVERY routed request passes the space check first (decision 0034 rule
+      // 3): a request for the OTHER space is said as such, never answered
+      // with this space's menu or a different object.
+      const hasOrganization = (auth?.workspaces ?? []).some((w) => w.kind !== "personal");
+      const crossSpaceAnswered = (routed: Parameters<typeof dispatchIntent>[0]): boolean => {
+        const cross = crossSpaceRequest({ intent: routed, text, identity, hasOrganization });
+        if (!cross) return false;
+        withTyping(() => presentCrossSpace(cross, text));
+        return true;
+      };
       // The model half could not answer because of ITS state (not switched
       // on, allowance spent, a vendor fault, too many requests) — said as
       // that state, never as "I did not understand you" (owner 2026-09-23).
@@ -8041,6 +8182,7 @@ export function ConversationChat({
       }
 
       if (intent !== "unknown") {
+        if (crossSpaceAnswered(intent)) return;
         lastRoutedRef.current = { intent, text };
         routedTextRef.current = text;
         dispatchIntent(intent, handlers, withTyping, fallback);
@@ -8083,6 +8225,7 @@ export function ConversationChat({
             switch (res.kind) {
               case "intent":
                 trackResolution(res.intent, "llm");
+                if (crossSpaceAnswered(res.intent)) return;
                 dispatchIntent(res.intent, handlers, withTyping, fallback);
                 return;
               case "plan": {
@@ -8091,6 +8234,7 @@ export function ConversationChat({
                 // when tapped. Every step is an existing handler; a write is
                 // only ever the last step and only opens its confirm card.
                 trackResolution(res.steps[0].intent, "llm");
+                if (crossSpaceAnswered(res.steps[0].intent)) return;
                 const total = res.steps.length;
                 const rest = res.steps.slice(1);
                 planRef.current = {
@@ -8146,7 +8290,7 @@ export function ConversationChat({
           askToClarify(t("answerFailed"));
         });
     },
-    [noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, workspaceChips, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization],
+    [presentCrossSpace, noteUsage, sentencePinLabel, startCreateProject, startClientOffers, startAddDocument, startInvitations, startAcceptOffer, router, startEvidencePhotos, startWhatChanged, startEmployerVisibility, startCreateTask, startWhoAvailable, startStageStatus, startMoveWorker, user, withTyping, handleChip, assistant, labels, starterChips, runWorkflow, startEducationInvite, runEducationProgrammes, startWorkLog, startProfileSummary, startCompanyNextStep, startCriteria, startAgenda, startPlayerCard, startCvState, startCapabilities, handleReference, handleQuestion, handleFileIntent, startMessages, startExperiences, startEngagements, startSwitchContext, startFindPartners, startOpenConversation, startProjects, startEmployerCandidates, openForm, identity, t, tProfessions, demandPrefill, renderValueStatement, fallbackText, roleContextNow, canActAsEmployer, workspaceChips, startAgencyInvite, runAgencyRead, locale, askToClarify, startRenameOrganization, answerNeedsOrganization, answerPersonalOnly],
   );
 
   /**

@@ -38,7 +38,7 @@ export async function PersonHistorySummaryBlock({
 
   return (
     <div className="flex flex-col gap-5" data-testid="company-person-summary">
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <Stat concept="object" value={String(summary.liveRecords)} label={t("stats.records")} />
         {/* Day hours only: a period total is its own figure (below), never
             added in — the same figure each place line states. */}
@@ -64,7 +64,7 @@ export async function PersonHistorySummaryBlock({
 
       <section className="flex flex-col gap-2" aria-label={t("places.title")} data-testid="company-person-places">
         <h2 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("places.title")}</h2>
-        <ul className="grid gap-2 sm:grid-cols-2">
+        <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
           {history.places.map((p) => {
             // WHAT was done here: the organization's own words, most frequent
             // first, and the skills its words named in THESE records.
@@ -75,8 +75,8 @@ export async function PersonHistorySummaryBlock({
                 ? signals.signals.filter((s) => s.recordIds.some((id) => ids.has(id))).slice(0, 4)
                 : [];
             return (
-              <li key={p.key}>
-                <Card compact className="flex flex-col gap-2" data-testid="company-person-place" data-place={p.key}>
+              <li key={p.key} className="min-w-0">
+                <Card compact className="flex min-w-0 flex-col gap-2" data-testid="company-person-place" data-place={p.key}>
                   <span className="flex items-start justify-between gap-3">
                     <span className="flex min-w-0 flex-col gap-0.5">
                       {p.scope.projectId ? (
@@ -111,7 +111,7 @@ export async function PersonHistorySummaryBlock({
                   {work.length > 0 ? (
                     <ul className="flex flex-col gap-0.5" data-testid="company-person-place-work">
                       {work.map((w) => (
-                        <li key={w.text} className="text-meta leading-relaxed text-text-secondary">
+                        <li key={w.text} className="break-words text-meta leading-relaxed text-text-secondary">
                           {w.text}
                           {w.records > 1 ? <span className="font-mono text-text-muted"> ×{w.records}</span> : null}
                         </li>
@@ -169,7 +169,7 @@ export async function PersonHistorySummaryBlock({
                   key={s.slug}
                   data-testid="company-person-skill"
                   data-skill={s.slug}
-                  className="inline-flex items-center gap-2 rounded-full border border-ink-600 bg-ink-800/40 px-3 py-1 text-sm text-text-primary"
+                  className="inline-flex max-w-full items-center gap-2 break-words rounded-full border border-ink-600 bg-ink-800/40 px-3 py-1 text-sm text-text-primary"
                 >
                   {tSkill.has(s.slug) ? tSkill(s.slug) : s.slug}
                   <span className="font-mono text-meta text-text-muted">{t("skills.records", { count: s.records })}</span>

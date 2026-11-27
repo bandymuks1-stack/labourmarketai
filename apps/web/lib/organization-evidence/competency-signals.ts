@@ -157,3 +157,30 @@ export function competencySignalRows(
     confidence: s.confidence,
   }));
 }
+
+/**
+ * DOES THE CURRENT RECOGNIZER STILL READ THIS STORED SIGNAL? (owner P0
+ * 2026-11-24, decision 0023.)
+ *
+ * Signals are stored at import time. When a wrong reading is fixed in the
+ * recognizer — "tig" inside Dutch "bevestiging" read as welding, a kitchen
+ * named on construction work read as cooking — the rows already written keep
+ * the old label. Every read re-asks the recognizer and shows the signal only
+ * when the same skill is still read with exact or synonym evidence:
+ *   - over the RECORD'S OWN TEXT when the read has it (the context a fix like
+ *     the kitchen rule needs);
+ *   - otherwise over the stored term (the whole word, or multi-word phrase,
+ *     that produced it).
+ * Nothing is deleted: the row stays as written history, and a later fix that
+ * restores the reading restores the signal.
+ */
+export function storedSignalStillSupported(
+  skillSlug: string,
+  term: string | null | undefined,
+  recordText?: string | null,
+): boolean {
+  const source = (recordText ?? "").trim() || (term ?? "").trim();
+  if (!source) return false;
+  // No cap here: the question is whether this skill is read at all.
+  return recognizeSkills(source, Number.MAX_SAFE_INTEGER).some((r) => r.slug === skillSlug && r.via !== "fuzzy");
+}

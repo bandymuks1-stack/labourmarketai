@@ -97,10 +97,11 @@ describe("a sentence about hiring never dead-ends for an employer", () => {
     );
     expect(branch.length).toBeGreaterThan(0);
     expect(branch).toMatch(/identity === "company" \|\| canActAsEmployer/);
-    // 2026-09-04: the not-understood answer is the context-aware
-    // `fallbackText` (worker / employer / agency / education), never the
-    // worker copy read directly.
-    expect(branch).toMatch(/fallbackText/);
+    // 2026-11-24 (owner order, decision 0034 rule 3): somebody with no
+    // organization that can do it is told so, with the one door that makes
+    // it possible: never the generic menu (it was `fallbackText`).
+    expect(branch).toMatch(/answerNeedsOrganization\(\)/);
+    expect(branch).not.toMatch(/fallbackText/);
   });
 
   it("nothing is switched on the person's behalf", () => {

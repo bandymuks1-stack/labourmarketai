@@ -3,6 +3,7 @@
 import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { FoldedRows, FOLDED_ROWS_VISIBLE } from "@/components/app/folded-rows";
 import {
   Plus,
   MessageSquare,
@@ -143,6 +144,7 @@ export function MarketplaceListingsSection({
   unavailable = [],
   publisher = null,
   locale,
+  view = "all",
 }: {
   myRows: MarketplaceListingRow[];
   discoveryRows: MarketplaceDiscoveryRow[];
@@ -157,8 +159,11 @@ export function MarketplaceListingsSection({
    *  the publisher of a NEW listing (owner or manager only; the RPC re-checks). */
   publisher?: { id: string; name: string } | null;
   locale: string;
+  /** Which block the page shows (decision 0034: one block per screen). */
+  view?: "all" | "browse" | "mine";
 }) {
   const t = useTranslations("marketplaceListings");
+  const tDisclosure = useTranslations("common.disclosure");
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   // The ONE lifecycle contract's view of a listing (lib/market-lifecycle).
@@ -415,11 +420,14 @@ export function MarketplaceListingsSection({
           for finding work, services, goods and opportunities; managing one's
           own listings follows. */}
       {/* ── Browse active listings + enquire ───────────────────────────── */}
+      {view !== "mine" && (
       <section className="flex flex-col gap-3">
-        <div>
-          <h2 className="font-display text-lg font-semibold text-text-primary">{t("browseTitle")}</h2>
-          <p className="text-sm text-text-secondary">{t("browseIntro")}</p>
-        </div>
+        {view === "all" && (
+          <div>
+            <h2 className="font-display text-lg font-semibold text-text-primary">{t("browseTitle")}</h2>
+            <p className="text-sm text-text-secondary">{t("browseIntro")}</p>
+          </div>
+        )}
 
         {extended && (
           <div className="flex flex-col gap-2">
@@ -427,7 +435,7 @@ export function MarketplaceListingsSection({
               role="tablist"
               aria-label={t("domainFilterLabel")}
               data-testid="market-group-tabs"
-              className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+              className="flex flex-wrap gap-1"
             >
               {(["all", ...groupKeys] as const).map((g) => {
                 const selected = g === "all" ? domainTab === "all" : activeGroup === g;
@@ -439,7 +447,7 @@ export function MarketplaceListingsSection({
                     aria-selected={selected}
                     data-testid={`market-group-${g}`}
                     onClick={() => setDomainTab(g)}
-                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                    className={`inline-flex min-h-11 max-w-full items-center rounded-full border px-3 py-2 text-sm transition-colors ${
                       selected
                         ? "border-text-primary bg-ink-700 text-text-primary"
                         : "border-ink-500 text-text-secondary hover:border-text-secondary"
@@ -455,7 +463,7 @@ export function MarketplaceListingsSection({
                 role="group"
                 aria-label={groupLabel(activeGroup)}
                 data-testid="market-domain-chips"
-                className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+                className="flex flex-wrap gap-1"
               >
                 {[activeGroup, ...GROUPS[activeGroup]].map((d) => (
                   <button
@@ -464,7 +472,7 @@ export function MarketplaceListingsSection({
                     aria-pressed={domainTab === d}
                     data-testid={`market-domain-${d}`}
                     onClick={() => setDomainTab(d)}
-                    className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-1.5 text-meta transition-colors sm:min-h-9 ${
+                    className={`inline-flex min-h-11 max-w-full items-center rounded-full border px-3 py-1.5 text-meta transition-colors sm:min-h-9 ${
                       domainTab === d
                         ? "border-text-secondary text-text-primary"
                         : "border-ink-600 text-text-secondary hover:border-text-secondary"
@@ -483,7 +491,7 @@ export function MarketplaceListingsSection({
             role="group"
             aria-label={t("actorFilterLabel")}
             data-testid="market-actor-filter"
-            className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-1"
+            className="flex flex-wrap gap-1"
           >
             {(["all", ...actorKindsPresent] as const).map((k) => (
               <button
@@ -491,7 +499,7 @@ export function MarketplaceListingsSection({
                 type="button"
                 aria-pressed={actorTab === k}
                 onClick={() => setActorTab(k)}
-                className={`inline-flex min-h-11 shrink-0 items-center rounded-full border px-3 py-2 text-sm transition-colors ${
+                className={`inline-flex min-h-11 max-w-full items-center rounded-full border px-3 py-2 text-sm transition-colors ${
                   actorTab === k
                     ? "border-text-primary bg-ink-700 text-text-primary"
                     : "border-ink-500 text-text-secondary hover:border-text-secondary"
@@ -529,8 +537,19 @@ export function MarketplaceListingsSection({
             {t("browseEmpty")}
           </p>
         ) : (
-          <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            {shownRows.map((row) => (
+          // ONE SCREEN, THEN A FOLD (decision 0034, owner P0 2026-11-24): the
+          // first rows show and the rest open in place, so the page is never a
+          // long scroll. A row a link focuses (`?focus=`) is never folded away.
+          <FoldedRows
+            rows={shownRows}
+            testId="market-browse-more"
+            listClassName="grid grid-cols-1 gap-2 sm:grid-cols-2"
+            showAll={
+              focusId && shownRows.findIndex((r) => r.id === focusId) >= FOLDED_ROWS_VISIBLE
+                ? undefined
+                : (count) => tDisclosure("showAll", { count })
+            }
+            render={(row) => (
               <li
                 key={`${row.sourceTable}:${row.id}`}
                 id={row.sourceTable === "marketplace_listings" ? `listing-${row.id}` : undefined}
@@ -618,16 +637,20 @@ export function MarketplaceListingsSection({
                   </Link>
                 )}
               </li>
-            ))}
-          </ul>
+            )}
+          />
         )}
       </section>
+      )}
 
       {/* ── Manage my listings ─────────────────────────────────────────── */}
+      {view !== "browse" && (
       <section className="flex flex-col gap-3">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between sm:gap-2">
           <div>
-            <h2 className="font-display text-lg font-semibold text-text-primary">{t("myTitle")}</h2>
+            {view === "all" && (
+              <h2 className="font-display text-lg font-semibold text-text-primary">{t("myTitle")}</h2>
+            )}
             <p className="text-sm text-text-secondary">{t("intro")}</p>
           </div>
           {mode.kind === "idle" && (
@@ -994,6 +1017,7 @@ export function MarketplaceListingsSection({
           </ul>
         )}
       </section>
+      )}
     </div>
   );
 }

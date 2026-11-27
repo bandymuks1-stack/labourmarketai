@@ -568,6 +568,11 @@ export type WithheldRelation = {
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
   {
+    table: "organization_history_read_grants_v1",
+    reason:
+      "a time-boxed permission an organization's owner gave you to read that organization's work history (20261124053000) — the row names the owner who granted it; ask us and we will tell you which organizations and when",
+  },
+  {
     table: "privacy_erasure_confirmations_v1",
     reason:
       "your confirmation of an account-deletion request (how and when you confirmed it) — held server-side as evidence that the deletion was yours to ask for; the request and its status are shown to you on the privacy page",

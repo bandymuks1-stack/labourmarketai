@@ -5,7 +5,7 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { withSessionWorkspacePointer } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
-import { resolveEvidenceOrganization } from "./evidence-org-context";
+import { resolveHistoryReadOrganization } from "./history-read-grant";
 import { listAllEvidenceRecords } from "./evidence-pagination";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 import { readHistoryLookups } from "./history-context-read";
@@ -192,18 +192,21 @@ export async function readCompanyPerson(input: {
   };
 }
 
-export async function loadCompanyPerson(locale: string, personId: string): Promise<CompanyPersonLoad> {
+export async function loadCompanyPerson(
+  locale: string,
+  personId: string,
+  /** `?org=` - an organization the caller governs or holds a live read grant for. */
+  requestedOrganizationId: string | null = null,
+): Promise<CompanyPersonLoad> {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { kind: "hidden" };
   const caller = await withSessionWorkspacePointer({ supabase, userId: user.id, locale });
-  const org = await resolveEvidenceOrganization(caller, null);
+  const org = await resolveHistoryReadOrganization(caller, requestedOrganizationId);
   if (!org.ok) {
-    return org.reason === "error" || org.reason === "needs-migration"
-      ? { kind: "unavailable" }
-      : { kind: "hidden" };
+    return org.reason === "unavailable" ? { kind: "unavailable" } : { kind: "hidden" };
   }
   const base = await readCompanyPerson({
     caller,

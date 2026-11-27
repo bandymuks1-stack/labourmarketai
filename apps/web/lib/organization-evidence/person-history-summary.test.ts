@@ -78,6 +78,19 @@ describe("summarizePersonHistory", () => {
     expect(s.history.places.reduce((n, p) => n + p.periodHours, 0)).toBe(s.periodHours);
   });
 
+  it("counts only the correction, matching the place rows, while the original record stays intact", () => {
+    const records = [
+      rec({ id: "original", activityDate: "2025-03-01", hours: 8, superseded: true }),
+      rec({ id: "correction", activityDate: "2025-03-01", hours: 6, correctionOf: "original" }),
+    ];
+    const s = summarizePersonHistory(records);
+    expect(s.liveRecords).toBe(1);
+    expect(s.dayHours).toBe(6);
+    expect(s.byMonth).toEqual([{ month: "2025-03", hours: 6 }]);
+    expect(s.history.places.reduce((sum, place) => sum + place.dayHours, 0)).toBe(6);
+    expect(records[0].hours).toBe(8);
+  });
+
   it("withdrawn records count nowhere", () => {
     const s = summarizePersonHistory([rec({ id: "a", activityDate: "2025-03-01", hours: 8, withdrawn: true })]);
     expect(s.liveRecords).toBe(0);

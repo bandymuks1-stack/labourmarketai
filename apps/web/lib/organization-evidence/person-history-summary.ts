@@ -49,7 +49,7 @@ export function summarizePersonHistory(
   records: readonly EvidenceRecordView[],
   objects: readonly PlaceObjectFacts[] = [],
 ): PersonHistorySummary {
-  const live = records.filter((r) => !r.withdrawn);
+  const live = records.filter((r) => !r.withdrawn && !r.superseded);
   const months = new Map<string, number>();
   for (const r of live) {
     if (r.activityDate && r.hours !== null) {

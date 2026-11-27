@@ -1786,6 +1786,10 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
       // RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-12: team_offer_counterpart_v1, the gated recipient of a team offer's notification
+      // (SECURITY DEFINER + EXECUTE to authenticated). RED draft #3231, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261112213100_team_offer_counterpart_v1.sql",
       // 2026-11-13: owner P0 invitation delivery reliability, codes-only send diagnostics +
       // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
       // acknowledgement, NOT applied.
@@ -1814,7 +1818,36 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
       // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
       "20261120190000_former_employer_chain_fixes_v1.sql",
-]);
+      // 2026-11-21: owner P0 security directive (sign-up role allow-list, admin grant guard, manager grant
+      // consent; journal lineage and manager-labelled metrics). RED draft, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261121100000_signup_role_admin_guard_manager_consent_v1.sql",
+      "20261121100100_journal_lineage_and_metrics_authorship_v1.sql",
+      // 2026-11-21: owner P0 security (B): access arms follow ended governance membership; the inviter is
+      // shown on a membership invitation. RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261121100200_former_member_access_arms_v1.sql",
+      "20261121100300_membership_invitation_inviter_v1.sql",
+      // 2026-11-22: owner decision, a demoted owner loses owner rights at once. RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261122140000_demoted_owner_loses_owner_authority_v1.sql",
+      // 2026-11-22: owner decision (open agency board, no client identity). RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261122170000_open_need_board_no_client_identity_v1.sql",
+      // 2026-11-22: owner order, privacy requests never shared with an agency. RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261122180000_share_refuses_privacy_requests_v1.sql",
+      // 2026-11-22: owner request, erasure within one month of receipt. Owner-approved 2026-11-24,
+      // APPLIED ledger 20261124052729.
+      "20261122190500_privacy_deletion_within_one_month_v1.sql",
+      // 2026-11-23: owner P0 #3679, three bypassed v1 doors revoked. RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261123060000_revoke_bypassed_v1_doors_v1.sql",
+      // 2026-11-24: time-boxed read-only history grant (owner request 2026-11-23; RED draft, needs-human-gate, NOT applied).
+      "20261124053000_history_read_grant_v1.sql",
+      // 2026-11-26: owner approved the exact public personal-service SQL in PR #3818.
+      // RED; manual owner-channel apply after merge and required checks.
+      "20261125133404_public_personal_service_search_v1.sql",
+    ]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {

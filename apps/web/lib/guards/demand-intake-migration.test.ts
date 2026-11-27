@@ -97,7 +97,11 @@ describe("Guard: the demand-request CTA writes the CANONICAL intake (not leads)"
     // through the canonical submit action, never re-fork back onto the funnel.
     expect(button).toMatch(/submitDemandRequestAction/);
     expect(button).not.toMatch(/\/api\/leads/);
-    expect(button).not.toMatch(/fetch\(/); // server action, not a network POST
+    // The submit is the server action, never a network POST. The ONE fetch
+    // allowed is the read-only "was it saved?" lookup after a lost answer
+    // (production run 45241051644; it cannot ride the router's action queue).
+    expect(button).not.toMatch(/fetch\((?!"\/api\/demand\/just-saved")/);
+    expect(button.match(/fetch\(/g)?.length ?? 0).toBeLessThanOrEqual(1);
   });
 
   it("the submit helper writes customer_requests via submit_demand_request (owner-scoped)", () => {

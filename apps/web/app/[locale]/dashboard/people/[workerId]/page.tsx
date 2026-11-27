@@ -314,7 +314,6 @@ export default async function PersonPage({
     orgWorkIntelligence && !orgWorkIntelligence.coverage.truncated
       ? experienceFiguresOf(orgWorkIntelligence, visibleRelationships).professionalExperienceHours
       : null;
-  const tIdentity = await getTranslations("playerCard.identity");
   const tProfessions = await getTranslations("professions");
   const tUnits = await getTranslations("productivityUnits");
   const catalogueName =
@@ -448,8 +447,9 @@ export default async function PersonPage({
               className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
               data-testid="person-experience-total"
             >
-              {new Intl.NumberFormat(locale, { maximumFractionDigits: 0 }).format(experienceHours)}{" "}
-              {tIdentity("experienceTotal")}
+              {t("recordedExperienceHours", {
+                hours: new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(experienceHours),
+              })}
             </span>
           ) : null}
           {mobility.length > 0 ? (

@@ -49,6 +49,7 @@ type ContextRow = {
   status: string | null;
   started_at: string | null;
   ended_at: string | null;
+  country_code: string | null;
   organizations: { display_name: string | null; legal_name: string | null } | null;
 };
 
@@ -126,6 +127,7 @@ async function engagementRelationships(
       endedAt: row.ended_at,
       current: row.status === "active" && !row.ended_at,
       source: "engagement",
+      countryCode: row.country_code?.trim() || null,
       businessPeriods: row.organization_id ? (periodsByOrg.get(row.organization_id) ?? []) : [],
     });
   }
@@ -133,7 +135,7 @@ async function engagementRelationships(
 }
 
 const ENGAGEMENT_SELECT =
-  "id, relationship_slug, title, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)";
+  "id, relationship_slug, title, organization_id, status, started_at, ended_at, country_code, organizations(display_name, legal_name)";
 
 /**
  * ANOTHER PERSON'S RELATIONSHIPS, AS FAR AS THE VIEWER MAY READ THEM — the
@@ -158,11 +160,12 @@ export async function readVisibleExperienceRelationships(
     .eq("profile_id", profileId)
     .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS, ...LEADERSHIP_RELATIONSHIPS])
     .order("started_at", { ascending: false, nullsFirst: false })
-    .limit(READ_LIMIT)) as { data: ContextRow[] | null; error: { code?: string } | null };
+    .limit(READ_LIMIT + 1)) as { data: ContextRow[] | null; error: { code?: string } | null };
   if (contexts.error) {
     console.error("[experience] visible engagement read failed:", contexts.error.code);
     return null;
   }
+  if ((contexts.data?.length ?? 0) > READ_LIMIT) return null;
   return engagementRelationships(supabase, contexts.data ?? [], new Map());
 }
 

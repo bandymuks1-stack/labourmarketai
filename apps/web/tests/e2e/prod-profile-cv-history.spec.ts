@@ -6,6 +6,16 @@ import { test, expect, type Browser, type BrowserContext, type Locator, type Pag
 
 import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures";
 
+/** The profile's block that holds a section (decision 0034: one block per screen, `?tab=`). */
+function profileTabOf(hash: string): string {
+  if (hash === "profile-edit") return "edit";
+  if (hash === "capabilities" || hash === "candidate-skills") return "skills";
+  if (hash === "profile-about") return "about";
+  if (hash === "cv-languages" || hash === "cv-education" || hash === "cv-achievements") return "background";
+  return "details";
+}
+
+
 /**
  * PRODUCTION PROFILE · LIVING CV · HISTORY — owner areas 1 / 3 / 15: the
  * person's own profile, the Living CV, skills and the one continuous
@@ -92,7 +102,7 @@ async function profileAt(page: Page, hash: string): Promise<Locator> {
       return false;
     }
   })();
-  await page.goto(`/lt/dashboard/profile#${hash}`);
+  await page.goto(`/lt/dashboard/profile?tab=${profileTabOf(hash)}#${hash}`);
   if (already) await page.reload();
   const main = inMain(page);
   await expect(main.locator(`#${hash}`).first()).toBeVisible({ timeout: 30_000 });
@@ -105,12 +115,18 @@ async function pick(page: Page, scope: Locator, testId: string, option: string):
   await page.getByRole("option", { name: option, exact: true }).first().click();
 }
 
-async function livingCv(page: Page): Promise<Locator> {
-  await page.goto("/lt/cv");
+async function livingCv(
+  page: Page,
+  block: "experience" | "documents" | "projects" = "experience",
+): Promise<Locator> {
+  await page.goto(`/lt/cv?tab=${block}`);
   // The Living CV's own <main> (added for runs 40086140120 / 40153545718,
   // which found none). By role, so a hidden streaming copy never counts.
   const main = inMain(page);
   await expect(main.locator("h1").first()).toBeVisible({ timeout: 30_000 });
+  const tab = main.getByTestId(`cv-tab-${block}`);
+  await expect(tab).toBeVisible();
+  await expect(tab).toHaveAttribute("aria-current", "page");
   return main;
 }
 
@@ -236,7 +252,7 @@ async function openWorkCard(page: Page): Promise<Locator> {
   // The persistence check needs a FRESH document. Going to the same URL and
   // hash again is a same-document fragment navigation: nothing reloads, the
   // editor stays open, and the toggle then CLOSED it (run 39970719710).
-  const again = page.url().includes("/dashboard/profile#cv-availability");
+  const again = page.url().includes("/dashboard/profile?tab=details#cv-availability");
   let main = await profileAt(page, "cv-availability");
   if (again) {
     await page.reload();
@@ -575,7 +591,7 @@ test("P-9 (2.7). an education row is added and shows on the Living CV", async ({
   if (!(await row.isVisible())) throw new Error(`education not saved: ${await section.getByTestId("worker-education-error").innerText()}`);
   await expect(section.getByTestId("worker-education-self-stated"), "the profile says education is self-stated").toBeVisible();
 
-  const cv = await livingCv(page);
+  const cv = await livingCv(page, "documents");
   await expect(cv.getByTestId("cv-education-row").filter({ hasText: SCHOOL })).toBeVisible({ timeout: 30_000 });
   await ctx.close();
 });
@@ -617,12 +633,13 @@ test("P-10 (2.8). a declared certificate and an achievement are added and the Li
   await addAchievement(page, CERTIFICATE, "Nurodytas sertifikatas");
   await addAchievement(page, ACHIEVEMENT, "Pasiekimas");
 
-  const cv = await livingCv(page);
+  const cv = await livingCv(page, "documents");
   const cert = cv.getByTestId("cv-declared-certificate-row").filter({ hasText: CERTIFICATE });
   await expect(cert, "a declared certificate sits with the certificates").toBeVisible({ timeout: 30_000 });
   await expect(cert.getByTestId("cv-declared-certificate-label"), "…and says it was listed by the worker").toBeVisible();
+  const projects = await livingCv(page, "projects");
   await expect(
-    cv.locator('[data-testid="cv-achievement-row"][data-standing="declared"]', { hasText: ACHIEVEMENT }),
+    projects.locator('[data-testid="cv-achievement-row"][data-standing="declared"]', { hasText: ACHIEVEMENT }),
     "an achievement the app never confirmed stays declared",
   ).toBeVisible();
   await ctx.close();
@@ -763,7 +780,14 @@ test("P-15 (2.24). the experience records about the worker open, with the right 
   const result = inMain(page).getByTestId("experiences-result");
   const unavailable = inMain(page).getByTestId("experiences-result-unavailable").first();
   const error = inMain(page).getByTestId("experiences-result-error");
-  await expect(result.or(unavailable).or(error).first()).toBeVisible({ timeout: 45_000 });
+  try {
+    await expect(result.or(unavailable).or(error).first()).toBeVisible({ timeout: 45_000 });
+  } catch (e) {
+    // Say whether the phone's sheet was open: a closed sheet hides a rendered result.
+    const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+    const sheet = (await toggle.count()) ? `aria-expanded=${await toggle.getAttribute("aria-expanded")}` : "no sheet button";
+    throw new Error(`${(e as Error).message}\n[P-15] context panel: ${sheet}`);
+  }
   if (await error.isVisible()) throw new Error("experience records did not load");
   if (!(await result.isVisible())) throw new Error("experience records report themselves unavailable");
   await expect(result.getByTestId("experiences-about-me")).toBeVisible();
