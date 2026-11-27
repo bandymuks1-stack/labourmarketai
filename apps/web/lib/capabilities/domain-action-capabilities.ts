@@ -689,7 +689,17 @@ export const DOMAIN_ACTION_CAPABILITIES: readonly CapabilityDescriptor[] = [
     // #2349). The report travels whole under `report`.
     async ({ role }) => ({ kind: "ok", report: await (await import("@/lib/reports/reports-hub")).getReportsView(role) }),
   ),
-  read("timesheets.overview.get", "Timesheets", "The caller's timesheets and their approval state.", none, async () => (await import("@/lib/timesheets/timesheets")).getTimesheetsOverview()),
+  read("timesheets.overview.get", "Timesheets", "The caller's timesheets and their approval state.", none, async () => {
+    const overview = await (await import("@/lib/timesheets/timesheets")).getTimesheetsOverview({ syncDecisions: false });
+    if (overview.status !== "ok") return overview;
+    if (overview.error) return { kind: "error" };
+    // The web uses Maps; JSON would otherwise silently discard their entries.
+    return { ...overview,
+      workerNames: Object.fromEntries(overview.workerNames),
+      workflows: Object.fromEntries(overview.workflows),
+      templates: Object.fromEntries(overview.templates),
+    };
+  }),
   read("finance.records.list", "Finance records", "The caller's finance records (costs, invoices, expenses) and the summary.", none, async () => {
     const f = await import("@/lib/finance/finance");
     const [records, summary] = await Promise.all([f.listMyFinanceRecords(), f.getFinanceSummary()]);
