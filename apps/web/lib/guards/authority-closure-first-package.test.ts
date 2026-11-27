@@ -251,6 +251,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-25 separate public personal service search draft: explicit owner opt-in,
       // two public readers; RED, needs-human-gate, NOT APPLIED. Not part of the 20261006 closure package.
       "20261125133404_",
+      // Separate owner-approved source-label projection, outside the 20261006 closure package.
+      "20261127120000_public_vacancy_source_labels_v1.sql",
       // 2026-11-22 owner order: a privacy request is never shared with an agency (one SECURITY DEFINER body;
       // RED draft, needs-human-gate, NOT applied).
       "20261122180000_",
