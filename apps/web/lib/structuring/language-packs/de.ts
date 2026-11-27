@@ -81,10 +81,9 @@ export const DE_PACK: LanguagePack = {
     },
     // ── hospitality & food ─────────────────────────────────────────────────
     cooking: {
-      // "kochte" anchored to its German phrases: bare it sits inside Dutch
-      // "aangekochte"/"gekochte" (bought) — measured on production
-      // construction timesheets 2026-11-24.
-      exact: ["ich kochte", "kochte ich", "kochte fur", "kochte für", "als koch", "essen zubereitet", "mahlzeiten zubereitet", "in der kuche", "in der küche"],
+      // "kochte" matches only as a whole word (skill-recognition
+      // WHOLE_WORD_TERMS): inside Dutch "aangekochte" it means bought.
+      exact: ["kochte", "in der kuche", "in der küche", "als koch", "essen zubereitet", "mahlzeiten zubereitet"],
     },
     "kitchen-help": {
       exact: ["kuchenhilfe", "küchenhilfe", "kuchenhelfer", "küchenhelfer"],

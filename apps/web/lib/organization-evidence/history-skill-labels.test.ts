@@ -9,14 +9,12 @@ import { deriveCompetencySignals, storedSignalStillSupported } from "./competenc
 /**
  * OWNER P0 2026-11-24: the historical person card showed "Maisto gaminimas"
  * (cooking) and "Suvirinimas" (welding) on almost every place card of a Dutch
- * construction worker (prod walk 45401396990). Production's stored signals
- * named the cause (read-only, terms only):
- *   - cooking from "keuken" ×53 and its compounds (keukenkasten, keukenvloer,
+ * construction worker (prod walk 45401396990). The causes:
+ *   - cooking from "keuken" and its compounds (keukenkasten, keukenvloer,
  *     keukenplafond, keukenmontage…) — a kitchen is the room being worked on;
  *     and from "aangekochte" (NL: purchased) ⊃ DE "kochte";
- *   - welding from "bevestigen" ×50, "bevestiging" ×22, "vochtig",
- *     "voorzichtig", "regelmatige", "handmatige" — all contain the welding
- *     synonym "tig".
+ *   - welding from "bevestigen", "bevestiging", "vochtig", "voorzichtig",
+ *     "regelmatige", "handmatige" — all contain the welding synonym "tig".
  * Decision 0023: fix the wrong label, never disable inference.
  */
 
@@ -141,5 +139,43 @@ describe("the profile read hides stored wrong labels (nothing deleted)", () => {
     expect(bySlug["drywall"]).toEqual(["r1"]);
     // Cooking survives only where the record says someone cooked.
     expect(bySlug["cooking"]).toEqual(["r2"]);
+  });
+});
+
+describe("Codex P2 on #3774: only a real trade, after the other guards, takes cooking away", () => {
+  it("a transferable skill beside a kitchen does not remove cooking", () => {
+    expect(recognizeSkills("Worked in a kitchen with teamwork").map((r) => r.slug)).toContain("cooking");
+  });
+
+  it("a reading another guard removed does not count as a competing trade", () => {
+    // flooring is dropped by the cleaning guard; cooking must survive it.
+    expect(recognizeSkills("I worked in the kitchen and washed floors").map((r) => r.slug)).toContain("cooking");
+  });
+
+  it("a construction trade still makes the kitchen the room", () => {
+    expect(recognizeSkills("Gipsplaten gemonteerd in de keuken").map((r) => r.slug)).not.toContain("cooking");
+  });
+});
+
+describe("Codex P2 on #3774: German 'kochte' on its own is still cooking", () => {
+  it.each(["Kochte täglich frische Gerichte", "Er kochte gestern Suppe"])("%s → cooking", (text) => {
+    expect(recognizeSkills(text).map((r) => r.slug)).toContain("cooking");
+  });
+  it("inside Dutch 'aangekochte' it is not", () => {
+    expect(recognizeSkills("Aangekochte materialen gebracht").map((r) => r.slug)).not.toContain("cooking");
+  });
+});
+
+describe("Codex P2 on #3798: a kitchen place word never removes warehouse work", () => {
+  it("Stored kitchen supplies in the warehouse → warehouse work, not cooking", () => {
+    const slugs = recognizeSkills("Stored kitchen supplies in the warehouse").map((r) => r.slug);
+    expect(slugs).toContain("warehouse-operations");
+    expect(slugs).not.toContain("cooking");
+  });
+  it("Keukenkasten in het magazijn is not left with no reading", () => {
+    expect(recognizeSkills("Keukenkasten in het magazijn").map((r) => r.slug)).toContain("warehouse-operations");
+  });
+  it("a real trade in a warehouse still makes the warehouse the place", () => {
+    expect(recognizeSkills("Malowałem ściany w hali magazynowej").map((r) => r.slug)).not.toContain("warehouse-operations");
   });
 });
