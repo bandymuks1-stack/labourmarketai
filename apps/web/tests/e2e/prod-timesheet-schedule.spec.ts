@@ -99,6 +99,7 @@ test("worker chooses a delivery time; the existing cron submits journal hours to
     expect(engagement).toEqual([{ organization_id: org }]);
 
     await page.goto("/lt/dashboard/planning#timesheets");
+    await main.getByTestId("planning-timesheets-fold").locator(":scope > summary").click();
     const settings = main.getByTestId("timesheet-schedule-settings");
     await settings.locator("summary").click();
     const form = settings.locator("form").filter({ has: page.locator(`input[name="organizationId"][value="${org}"]`) });
@@ -144,11 +145,13 @@ test("worker chooses a delivery time; the existing cron submits journal hours to
     expect(await rows(`/rest/v1/timesheets?select=id&id=eq.${report[0].id}`, otherToken)).toHaveLength(0);
     await expect.poll(async () => (await rows(schedulePath, workerToken))[0]?.pending_instance_id, { timeout: 65_000, intervals: [5_000] }).toBeNull();
     await page.goto("/lt/dashboard/planning#timesheets");
+    await main.getByTestId("planning-timesheets-fold").locator(":scope > summary").click();
     await expect(main.locator(`[data-testid="timesheet-${report[0].id}"]`)).toBeVisible({ timeout: 30_000 });
     const employer = await browser.newContext({ storageState: state("owner"), locale: "lt-LT" });
     try {
       const employerPage = await employer.newPage();
       await employerPage.goto("/lt/dashboard/planning#timesheets");
+      await employerPage.getByRole("main").getByTestId("planning-timesheets-fold").locator(":scope > summary").click();
       await expect(employerPage.getByRole("main").locator(`[data-testid="timesheet-org-${report[0].id}"]`)).toBeVisible({ timeout: 30_000 });
     } finally { await employer.close(); }
     console.info("[timesheet-schedule] journalHours=2 scheduledSubmission=true chosenQaApprover=true approvalPending=true crossOrgDenied=true");
