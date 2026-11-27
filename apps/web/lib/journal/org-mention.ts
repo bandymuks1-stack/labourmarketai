@@ -18,22 +18,16 @@
  * Pure: no IO.
  */
 
+import { foldText } from "@/lib/structuring/normalize";
 const GENERIC = new Set([
   "qa", "synthetic", "testinis", "subjektas", "test", "uab", "mb", "ab", "vsi",
   "gmbh", "ag", "kg", "ltd", "limited", "llc", "inc", "sia", "as", "oy", "oyj", "bv", "nv",
   "sp", "zoo", "spolka", "sa", "srl", "company", "group", "imone", "agentura", "the", "and",
 ]);
 
-function fold(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-}
-
 /** Distinctive words of an organization name (folded, ≥ 3 letters). */
 export function distinctiveWords(name: string): string[] {
-  return fold(name)
+  return foldText(name)
     .split(/[^\p{L}\p{N}]+/u)
     .filter((w) => w.length >= 3 && !GENERIC.has(w));
 }
@@ -43,7 +37,7 @@ function capitalisedWords(text: string): string[] {
   return (text ?? "")
     .split(/[^\p{L}\p{N}-]+/u)
     .filter((w) => /^\p{Lu}/u.test(w))
-    .map((w) => fold(w));
+    .map((w) => foldText(w));
 }
 
 /** Stem that tolerates Lithuanian case endings: "Alfa" → "alf" (Alfos, Alfoje). */

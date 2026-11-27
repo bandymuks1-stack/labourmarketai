@@ -1,4 +1,5 @@
 import { looksSwedish } from "@/lib/structuring/looks-swedish";
+import { foldText } from "@/lib/structuring/normalize";
 
 /**
  * "NE 5, O 6 VALANDAS" — a correction said in words (owner continuation
@@ -18,17 +19,10 @@ export type CorrectionAsk =
   | { readonly kind: "day"; readonly day: "yesterday" | "day-before" }
   | { readonly kind: "unspecified" };
 
-function fold(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-}
-
 const num = (s: string) => Number.parseFloat(s.replace(",", "."));
 
 export function readCorrectionAsk(text: string): CorrectionAsk {
-  const q = fold(text ?? "");
+  const q = foldText(text ?? "");
   // Swedish words are read in a Swedish sentence only (`looksSwedish`).
   const swedish = looksSwedish(text);
   // "ne 5, o 6" / "not 5 but 6" / "не 5, а 6" / "nicht 5, sondern 6" / "niet 5 maar 6" / "nie 5, a 6"

@@ -1,4 +1,5 @@
 import { looksSwedish } from "@/lib/structuring/looks-swedish";
+import { foldText } from "@/lib/structuring/normalize";
 
 /**
  * A STATED PAY EXPECTATION (owner continuation command 2026-09-29 §5).
@@ -41,13 +42,6 @@ export type PayStatement =
 const MIN_MONTHLY = 100;
 const MAX_MONTHLY = 100_000;
 
-function fold(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-}
-
 // "3000", "3 000", "3.000", "3,000", "2500.50" → integer euros.
 const NUM = String.raw`(\d{1,3}(?:[ ., ]\d{3})+|\d+)(?:[.,]\d{1,2})?`;
 
@@ -81,7 +75,7 @@ const SV_TO_WORDS = String.raw`(?:(?<![a-z])(?:upp\s+till|till|hogst|som\s+mest)
 const CUR = String.raw`\s*(?:€|eur\w*|евро)?\s*`;
 
 export function readPayStatement(text: string): PayStatement {
-  const q = fold(text ?? "");
+  const q = foldText(text ?? "");
   const swedish = looksSwedish(text);
   const fromWords = swedish ? `(?:${FROM_WORDS}|${SV_FROM_WORDS})` : FROM_WORDS;
   const toWords = swedish ? `(?:${TO_WORDS}|${SV_TO_WORDS})` : TO_WORDS;

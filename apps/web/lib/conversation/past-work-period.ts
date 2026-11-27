@@ -1,4 +1,5 @@
 import { looksSwedish } from "@/lib/structuring/looks-swedish";
+import { foldText } from "@/lib/structuring/normalize";
 
 /**
  * PAST WORK STATED WITH ITS YEARS (owner continuation 2026-09-29 §6).
@@ -28,13 +29,6 @@ export interface PastWorkPeriod {
   readonly isCurrent: boolean;
 }
 
-function fold(s: string): string {
-  return s
-    .normalize("NFD")
-    .replace(/[̀-ͯ]/g, "")
-    .toLowerCase();
-}
-
 const PAST_VERB = /(dirbau|dirbo|dirbome|worked|работал|arbeitete|werkte|pracowa)/u;
 // sv: "jobbade" / "arbetade" and the perfect "har jobbat" / "har arbetat".
 // Every SV_ reader below applies to a Swedish sentence only (`looksSwedish`).
@@ -59,7 +53,7 @@ const SINGLE = new RegExp(
 const SV_SINGLE = new RegExp(String.raw`(?:^|\s)ar\s+${YEAR}`, "u");
 
 export function readPastWorkPeriod(text: string, currentYear: number): PastWorkPeriod | null {
-  const q = fold(text ?? "");
+  const q = foldText(text ?? "");
   const swedish = looksSwedish(text);
   if (!PAST_VERB.test(q) && !(swedish && SV_PAST_VERB.test(q))) return null;
   const ok = (y: number) => y >= 1950 && y <= currentYear;
