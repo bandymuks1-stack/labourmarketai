@@ -35,15 +35,17 @@ describe("candidate search on a phone", () => {
     expect(nav).not.toMatch(/px-3 py-1\.5 text-xs/);
   });
 
-  it("every filter chip is the shared chip link; the row scrolls inside itself on a phone", () => {
+  it("every filter chip is the shared chip link; the row wraps (carousel spec N11)", () => {
     const filters = section('data-testid="scouting-filters"', "</section>");
     expect(filters.match(/chipLinkClassName\(/g) ?? []).toHaveLength(3);
     expect(filters.match(/aria-current=/g) ?? []).toHaveLength(3);
     expect(filters).not.toMatch(/px-3 py-1\.5 text-xs/);
-    expect(filters).toMatch(/flex gap-2 overflow-x-auto[^"]*sm:flex-wrap sm:overflow-visible/);
+    // The doors are the one approved sideways strip (spec §8.2); filters wrap.
+    expect(filters).not.toMatch(/overflow-x-(auto|scroll)/);
+    expect(filters).toMatch(/<div className="flex flex-wrap gap-2">/);
     const clear = filters.indexOf('data-testid="scout-filter-clear"');
-    const row = filters.indexOf("overflow-x-auto");
-    expect(clear, "clear filters stays outside the sideways row").toBeGreaterThan(-1);
+    const row = filters.indexOf('<div className="flex flex-wrap gap-2">');
+    expect(clear, "clear filters stays outside the chip row").toBeGreaterThan(-1);
     expect(clear).toBeLessThan(row);
   });
 

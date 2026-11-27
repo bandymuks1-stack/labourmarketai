@@ -1753,7 +1753,7 @@ const demandCreateDraft: CapabilityDescriptor = {
   },
 };
 
-const demandConfirmInput = companyCreateDemandFields.extend({
+const demandConfirmInput = companyCreateDemandFields.safeExtend({
   confirmationToken: z.string().min(10),
 });
 

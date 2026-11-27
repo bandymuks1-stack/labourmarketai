@@ -121,6 +121,8 @@ export function assembleWorkIntelligence(input: {
    *  on their own entry is not a confirmation (review-status.ts); without it
    *  the result is the plain latest decision, as before. */
   subjectProfileId?: string | null;
+  /** Source excerpts are opt-in; default false keeps every non-CV projection aggregate-only. */
+  includeSkillSamples?: boolean;
 }): WorkIntelligence {
   const entries: WorkIntelligenceEntry[] = input.entries.map((e) => ({
     entryId: e.id,
@@ -157,6 +159,7 @@ export function assembleWorkIntelligence(input: {
     focus: input.focus,
     focusRange: input.focusRange ?? null,
     coverage: input.coverage,
+    includeSkillSamples: input.includeSkillSamples,
     organizationRecords: input.organizationRecords ?? null,
     organizationPeriodRecords: input.organizationPeriodRecords ?? null,
     organizationPendingRecords: input.organizationPendingRecords ?? null,
@@ -414,7 +417,7 @@ export async function workIntelligenceToday(): Promise<WorkToday> {
 export async function loadWorkIntelligence(
   caller: DomainCaller,
   workerId: string,
-  opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null } = {},
+  opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null; includeSkillSamples?: boolean } = {},
 ): Promise<WorkIntelligence | null> {
   const [entriesRead, linkRead, skillsRead, organizationLedger, subjectRead] = await Promise.all([
     listJournalEntries(caller, { workerId }),
@@ -485,6 +488,10 @@ export async function loadWorkIntelligence(
     organizationPeriodRecords: organizationLedger?.periodRecords ?? null,
     organizationPendingRecords: organizationLedger?.pendingRecords ?? null,
     subjectProfileId,
+    // A caller flag alone is not authority: samples are emitted only when the
+    // authenticated reader is the subject of this reading. Manager/team reads
+    // remain aggregates even for entries visible under their organization scope.
+    includeSkillSamples: opts.includeSkillSamples === true && subjectProfileId === caller.userId,
   });
 }
 

@@ -186,8 +186,14 @@ export function ContextPanel({
   const [entity, setEntity] = useState<EntityContextView | null>(null);
   const [work, setWork] = useState<WorkContextView | null>(null);
   const [unavailable, setUnavailable] = useState<string | null>(null);
-  /** Small screens open the panel on demand; from `lg` it is always open. */
-  const [expanded, setExpanded] = useState(false);
+  /** Small screens open the panel on demand; from `lg` it is always open.
+   *  A result the person asked for (`?result=`, `?full=`) is open FROM THE
+   *  FIRST RENDER, not one effect later: in between, the chevron said
+   *  "collapsed", and a tap in that window toggled the sheet the effect had
+   *  just opened back shut (production P-15, 375 px: the result rendered
+   *  inside a closed sheet). The opening effect below stays for a result that
+   *  arrives later. */
+  const [expanded, setExpanded] = useState(() => showsResult || isFull);
   const wideScreen = useWideScreen();
   /** The map is asked for by a SELECTION (see the body note) and is only
    *  mounted where it can be seen: the static column from `lg`, or the open

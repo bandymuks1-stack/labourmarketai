@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import { createHash } from "node:crypto";
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { signupIsolatedRunsFor } from "./signup-isolated-trigger";
 
 /**
  * A FORMER EMPLOYER KEEPS LIMITED ACCESS (owner decision 2026-11-17;
@@ -74,12 +75,25 @@ const WINDOW =
 describe("the read rule: retained history up to the end date, nothing new", () => {
   const sql = read(MIG);
 
+  // A later owner-approved migration may redefine one of these objects only if
+  // it keeps this file's rule for it (checked below).
+  const LATER: Record<string, { file: string; keeps: string }> = {
+    // 2026-11-21 owner P0 security: a manager's metric must be labelled
+    // manager_corrected; the active / paused window of this file is kept.
+    "create policy journal_entry_metrics_write on public.journal_entry_metrics": {
+      file: "20261121100100_journal_lineage_and_metrics_authorship_v1.sql",
+      keeps: "ec.status in ('active', 'paused')",
+    },
+  };
+
   it("is the latest definition of every object it replaces", () => {
     for (const opening of OBJECTS) {
       const later = migrations()
         .filter((f) => f > `${NAME}.sql`)
         .filter((f) => code(read(`supabase/migrations/${f}`)).includes(opening.toLowerCase()));
-      expect(later, opening).toEqual([]);
+      const allowed = LATER[opening];
+      expect(later, opening).toEqual(allowed ? [allowed.file] : []);
+      if (allowed) expect(code(read(`supabase/migrations/${allowed.file}`)), opening).toContain(allowed.keeps);
     }
   });
 
@@ -334,8 +348,8 @@ describe("the local-stack proof travels with the SQL", () => {
   it("the isolated job runs the walk, and runs when the migration changes", () => {
     const wf = read(".github/workflows/signup-isolated.yml");
     expect(wf).toContain("tests/e2e/former-employer-access-isolated.spec.ts");
-    expect(wf).toContain(`supabase/migrations/${NAME}.sql`);
-    expect(wf).toContain(`supabase/migrations/${FIX}.sql`);
+    expect(signupIsolatedRunsFor(wf, `supabase/migrations/${NAME}.sql`)).toBe(true);
+    expect(signupIsolatedRunsFor(wf, `supabase/migrations/${FIX}.sql`)).toBe(true);
   });
 });
 

@@ -34,8 +34,8 @@ const isoDate = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/);
  */
 /** The demand fields WITHOUT the web-chat `mode` switch — exported so the
  *  capability layer can reuse the exact shape (its draft is a token preview,
- *  not a persisted `customer_requests` draft row; see registry). A refined
- *  schema cannot be `.extend()`ed, hence the split. */
+ *  not a persisted `customer_requests` draft row; see registry). Consumers
+ *  use `.safeExtend()` so the declared date-range check stays intact. */
 export const companyCreateDemandFields = z.object({
   intent: z.enum(["hire_workers", "partner"]).default("hire_workers"),
   description: z.string().trim().min(3).max(4000),
@@ -65,22 +65,23 @@ export const companyCreateDemandFields = z.object({
    *  inferred from the description; absent = the employer stated none. */
   opportunityType: z.enum(OPPORTUNITY_TYPES).nullable().optional(),
   /** Stated start day (ISO) → `structured_v2.time.start_earliest`. */
-  startDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
+  startDate: z.iso.date()
     .nullable()
     .optional(),
   /** Stated end day (ISO) → `structured_v2.time.end_date`. */
-  endDate: z
-    .string()
-    .regex(/^\d{4}-\d{2}-\d{2}$/)
+  endDate: z.iso.date()
     .nullable()
     .optional(),
   /** Teams of a stated size → `structured_v2.team` (only while
    *  `teamSize` = teamCount × perTeamSize; the canonical submit checks). */
   teamCount: z.number().int().min(1).max(100).nullable().optional(),
   perTeamSize: z.number().int().min(1).max(100).nullable().optional(),
-});
+}).refine(
+  // Refuse before preview/confirm: the canonical sanitizer drops a reversed
+  // range, which would otherwise silently discard the confirmed facts.
+  ({ startDate, endDate }) => !startDate || !endDate || startDate <= endDate,
+  { path: ["endDate"] },
+);
 
 /**
  * The web chat's demand input: THE SAME base fields (one schema, so the chat
@@ -89,7 +90,7 @@ export const companyCreateDemandFields = z.object({
  * two letters; MCP and the phone also accept a country name, resolved later.
  */
 export const companyCreateDemandSchema = companyCreateDemandFields
-  .extend({
+  .safeExtend({
     mode: z.enum(["draft", "submit"]).default("submit"),
     country: z.string().trim().length(2).nullable().optional(),
   })

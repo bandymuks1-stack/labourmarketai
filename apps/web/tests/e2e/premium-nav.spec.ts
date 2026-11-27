@@ -123,10 +123,40 @@ for (const width of [1024, 1280, 1440] as const) {
       await expect(more).toBeFocused();
     });
 
-    test("the assistant entry is in the bar and points at the conversation home", async ({ page }) => {
+    test("the assistant entry is in the bar; signed out it opens the landing's question box", async ({ page }) => {
+      // Signed out, the entry is the landing's question box (`/#find`, owner
+      // P0 2026-11-15 F8); signed in it is the conversation home.
       await page.goto("/en/pricing");
-      await expect(page.getByTestId("intent-bar-assistant")).toHaveAttribute("href", /\/en\/dashboard$/);
+      await expect(page.getByTestId("intent-bar-assistant")).toHaveAttribute("href", /\/en#find$/);
+      await expect(page.getByTestId("header-assistant")).toBeHidden();
     });
+  });
+}
+
+// Between md and lg the intent bar is hidden: the assistant is an icon in the
+// header row instead (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC N2).
+for (const width of [768, 1023] as const) {
+  test.describe(`assistant in the header @${width}px`, () => {
+    test.use({ viewport: { width, height: 800 } });
+    // English and German: the narrowest and the widest header row measured.
+    for (const locale of ["en", "de"] as const) {
+      test(`${locale}: visible, 44px, opens the question box; the row does not overflow`, async ({ page }) => {
+        await page.goto(`/${locale}/pricing`);
+        const entry = page.getByTestId("header-assistant");
+        await expect(entry).toBeVisible();
+        await expect(entry).toHaveAttribute("href", new RegExp(`/${locale}#find$`));
+        const box = (await entry.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(44);
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        const brand = (await page.locator("header a").first().boundingBox())!;
+        expect(box.x, "the entry does not sit on the brand").toBeGreaterThanOrEqual(brand.x + brand.width);
+        expect(box.x + box.width).toBeLessThanOrEqual(width);
+        // Nothing in the row is pushed off the screen by it.
+        const menu = (await page.getByTestId("mobile-nav-toggle").boundingBox())!;
+        expect(menu.x + menu.width, "the menu button stays on screen").toBeLessThanOrEqual(width);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+      });
+    }
   });
 }
 

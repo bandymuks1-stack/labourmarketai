@@ -27,13 +27,16 @@ describe("historical organization identity — names only, own history only", ()
 
   it("the person's own history readers fall back to it; nothing else does", () => {
     for (const rel of [
-      "lib/player-card/work-history.ts",
+      // The card's own history derives from the decision-0025 reader
+      // (CV-15 / G-7), which falls back to it for every ended relationship.
+      "lib/journal/professional-experience-read.ts",
       "lib/player-card/player-card.ts",
       "lib/cv-export/verified-cv.ts",
       "app/[locale]/dashboard/journal/page.tsx",
     ]) {
       expect(read(rel), rel).toMatch(/withHistoricalOrgNames\(/);
     }
+    expect(read("lib/player-card/work-history.ts")).toMatch(/readOwnExperienceRelationships\(supabase, user\.id\)/);
     // v2 (claimed roster rows too, 20261020100000) first, v1 while v2 is absent.
     const helper = read("lib/company/historical-org-names.ts");
     expect(helper).toContain('"my_historical_organization_names_v2", "my_historical_organization_names_v1"');

@@ -11,7 +11,7 @@ import {
 } from "@/lib/company/active-organization";
 import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
-import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import { EMPLOYER_DEMAND_KINDS, listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listClaimablePublicIntakesState } from "@/lib/company/claim-public-intake";
 import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
@@ -32,9 +32,6 @@ import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 export const generateMetadata = dashboardPageMetadata("/dashboard/company/needs", "organizationDoors.pages.needs.title");
 
 
-// W3 rows 7/8/25: the employer demand kinds the owner readback is scoped to —
-// a dual-role user's buyer service requests stay in the buyer room.
-const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
 
 /**
  * POREIKIAI — the organization's demand door (owner IA correction

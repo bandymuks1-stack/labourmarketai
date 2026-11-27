@@ -24,7 +24,8 @@ import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-cont
  * The entry text carries the run id, so the walk finds exactly its own entry.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
-const ENTRY = `QA-SYNTHETIC ${RUN}: šiandien 6 valandas mūrijau blokelių sieną objekte`;
+// AB5h is a reference code, never five extra hours. Keep the real journal/CV path.
+const ENTRY = `QA-SYNTHETIC ${RUN} AB5h: šiandien 6 valandas mūrijau blokelių sieną objekte`;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["worker", "owner"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
@@ -96,6 +97,7 @@ test("1. the worker records the day's work in the journal", async ({ browser }) 
   const card = main.locator('[data-testid^="journal-entry-card-"]', { hasText: RUN }).first();
   await expect(card).toBeVisible({ timeout: 30_000 });
   entryId = (await card.getAttribute("data-testid"))!.replace("journal-entry-card-", "");
+  await expect(main.getByTestId(`journal-entry-duration-${entryId}`), "the saved duration excludes the reference code").toHaveText(/^6\s+val\.$/);
   // The worker's own declaration is recorded, and nobody has confirmed it.
   await expect(main.getByTestId(`journal-entry-status-${entryId}`).locator('li[data-step="approved"]')).toHaveCount(0);
   declared = await figures(page);

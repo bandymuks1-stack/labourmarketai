@@ -191,7 +191,7 @@ test("the work card saves through a translated page and a plain one, and what wa
   {
     const { ctx, page, crashes } = await open(browser, true);
     try {
-      await page.goto("/lt/dashboard/profile#cv-availability");
+      await page.goto("/lt/dashboard/profile?tab=details#cv-availability");
       await page.waitForLoadState("load");
       const main = inMain(page);
       await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 60_000 });
@@ -220,7 +220,7 @@ test("the work card saves through a translated page and a plain one, and what wa
     const label = `profile editor translated ${locale}`;
     const { ctx, page, crashes } = await open(browser, true);
     try {
-      await page.goto(`/${locale}/dashboard/profile#cv-availability`);
+      await page.goto(`/${locale}/dashboard/profile?tab=details#cv-availability`);
       await page.waitForLoadState("load");
       const main = inMain(page);
       await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 60_000 });
@@ -251,7 +251,7 @@ test("the work card saves through a translated page and a plain one, and what wa
     const title = `${TAG} vertimas ${f.name}`;
     const { ctx, page, crashes } = await open(browser, true);
     try {
-      await page.goto(`/lt/dashboard/profile#${f.hash}`);
+      await page.goto(`/lt/dashboard/profile?tab=background#${f.hash}`);
       await page.waitForLoadState("load");
       const box = inMain(page).getByTestId(f.box);
       await expect(box).toBeVisible({ timeout: 60_000 });
@@ -282,7 +282,7 @@ test("the work card saves through a translated page and a plain one, and what wa
   {
     const { ctx, page } = await open(browser, false);
     try {
-      await page.goto("/lt/dashboard/profile#cv-availability");
+      await page.goto("/lt/dashboard/profile?tab=details#cv-availability");
       const main = inMain(page);
       await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 60_000 });
       const toggle = main.getByTestId("work-card-editor-toggle");

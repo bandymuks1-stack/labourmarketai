@@ -8,6 +8,8 @@ import {
   type ReportedEvidenceState,
 } from "./evidence-state";
 import { readAllPages } from "./evidence-pagination";
+import { storedSignalStillSupported } from "./competency-signals";
+import { readRecordTextsForRecheck } from "./competency-signals-read";
 
 /**
  * HISTORY SIGNALS FOR MATCHING - what an organization's imported history
@@ -218,7 +220,7 @@ async function signalsByKey(
   for (const chunk of chunks([...workerByRecord.keys()], RECORD_CHUNK)) {
     const res = await db(supabase)
       .from("organization_evidence_competency_signals")
-      .select("record_id, skill_slug")
+      .select("record_id, skill_slug, term")
       .in("record_id", chunk)
       .not("skill_slug", "is", null)
       .limit(SIGNAL_READ_LIMIT);
@@ -227,10 +229,15 @@ async function signalsByKey(
       console.error("[history-signals] signals read failed:", res.error.code);
       return UNAVAILABLE_FAILED;
     }
-    for (const s of (res.data ?? []) as { record_id: string; skill_slug: string | null }[]) {
+    const rows = (res.data ?? []) as { record_id: string; skill_slug: string | null; term: string | null }[];
+    const textById = await readRecordTextsForRecheck(supabase, [...new Set(rows.map((r) => r.record_id))]);
+    for (const s of rows) {
       const slug = (s.skill_slug ?? "").trim();
       const worker = workerByRecord.get(s.record_id);
       if (!slug || !worker) continue;
+      // The same re-check as the profile read: a fixed wrong label never
+      // feeds matching either.
+      if (!storedSignalStillSupported(slug, s.term, textById.get(s.record_id))) continue;
       const bySlug = recordsBy.get(worker) ?? new Map<string, Set<string>>();
       const set = bySlug.get(slug) ?? new Set<string>();
       set.add(s.record_id);

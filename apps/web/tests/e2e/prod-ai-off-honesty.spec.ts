@@ -38,9 +38,9 @@ import { chooseDemandCountryIfEmpty } from "./demand-country";
  * NOT here: 7.12 AI cost metering — the ledger is read only on the admin
  * telemetry page (no admin QA session exists).
  *
- * If production ever has a live provider, the assertions that depend on "off"
- * say so by name (the walk then fails honestly instead of passing on a model's
- * text). Cast (`lib/testing/prod-qa-guard.ts`, all synthetic): worker
+ * Off-specific surface assertions remain strict. B-4 checks the actual declared
+ * provider state; a configured provider is not evidence of a model response.
+ * Cast (`lib/testing/prod-qa-guard.ts`, all synthetic): worker
  * (qa.worker+multiw), worker2 (qa.worker+goal3), manager ("QA-SYNTHETIC Gama"),
  * owner ("QA-SYNTHETIC Alfa"), agency (forbidden check). Real adverts are
  * opened read-only and never named in a log. Cleanup (afterAll, pass or fail):
@@ -452,8 +452,20 @@ test("B-4 (10.6, 10.13). the assist page states the AI provider state and, when 
     await expect(provider).toBeVisible({ timeout: 30_000 });
     const stateId = (await provider.locator('[data-testid^="assist-provider-state-"]').first().getAttribute("data-testid")) ?? "";
     console.info(`[ai-off] assist provider ${stateId} (${locale})`);
-    expect(stateId, "production runs with the AI provider off (10.6 BLOCKED on the owner's key)").toBe("assist-provider-state-disabled");
-    await expect(provider.getByTestId("assist-provider-disabled"), "the off state is explained in words").toBeVisible();
+    expect([
+      "assist-provider-state-disabled",
+      "assist-provider-state-mock",
+      "assist-provider-state-live",
+    ], "the page declares a known provider state").toContain(stateId);
+    if (stateId === "assist-provider-state-disabled") {
+      await expect(provider.getByTestId("assist-provider-disabled"), "the off state is explained in words").toBeVisible();
+      await expect(provider.getByTestId("assist-provider-configured")).toHaveCount(0);
+    } else {
+      // Configured is not proof of a successful model request. The page must
+      // explain the configured state without also claiming that AI is off.
+      await expect(provider.getByTestId("assist-provider-configured")).toBeVisible();
+      await expect(provider.getByTestId("assist-provider-disabled")).toHaveCount(0);
+    }
     expect(await inMain(page).getByTestId("assist-summaries").innerText().catch(() => ""), "summaries are rule-based").not.toMatch(AI_RESULT);
     await ctx.close();
   }

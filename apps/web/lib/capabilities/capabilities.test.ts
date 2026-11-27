@@ -2188,6 +2188,23 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
     expect(fieldsArg).toMatchObject({ country: "SE" });
   });
 
+  it.each([
+    { startDate: "2026-12-10", endDate: "2026-12-01" },
+    { startDate: "2026-02-30", endDate: "2026-03-01" },
+    { startDate: "2026-12-01", endDate: "2026-13-01" },
+  ])("invalid dates are refused before a token or a write: %j", async (dates) => {
+    demandSubmit.mockClear();
+    const input = { ...DRAFT, ...dates, teamCount: 1, perTeamSize: 3 };
+    const draft = await runCapability("demand.create_draft", caller({}), input);
+    expect(draft.ok).toBe(false);
+    expect(JSON.stringify(draft)).not.toContain("confirmationToken");
+    const confirm = await runCapability("demand.create_confirm", caller({}), {
+      ...input, confirmationToken: "invalid-date-proof-token",
+    });
+    expect(confirm.ok).toBe(false);
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
   it("F7 / AI-2: confirm keeps the start and end day and the team split, through the ONE mapper the chat uses", async () => {
     demandSubmit.mockClear();
     const stated = {

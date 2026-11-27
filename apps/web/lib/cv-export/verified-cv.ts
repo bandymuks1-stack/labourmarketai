@@ -388,7 +388,9 @@ function withUnknownTotalWhenUnattributed(
   return relationships == null ? { ...pe, hours: null } : pe;
 }
 
-export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
+export async function buildVerifiedCv(
+  options: { readonly includeSkillSamples?: boolean } = {},
+): Promise<VerifiedCvResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -461,7 +463,10 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       // Recorded hours per skill — the journal's own derivation, read through
       // the canonical journal-list core under the worker's RLS. Best-effort:
       // an unreadable journal yields `null`, never invented zeros.
-      loadWorkIntelligence({ supabase, userId: user.id }, workerId).catch(
+      // Long source excerpts are opt-in because this builder also serves
+      // aggregate-only report and capability callers. The page opts in only
+      // for this authenticated person's own CV.
+      loadWorkIntelligence({ supabase, userId: user.id }, workerId, { includeSkillSamples: options.includeSkillSamples === true }).catch(
         (): WorkIntelligence | null => null,
       ),
       // Which recorded skill confirmations still STAND (a later rejection,

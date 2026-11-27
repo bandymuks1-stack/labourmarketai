@@ -137,7 +137,9 @@ describe("the mobile menu covers exactly the viewports the desktop nav hides", (
     expect(menuSrc).not.toMatch(/<ThemeToggleIcon\b/);
     expect(menuSrc).not.toMatch(/<LocaleSwitcher\b/);
     // The language switcher is in the header row at every width (ad-locale rule).
-    expect(navSrc).toMatch(/<LocaleSwitcher className="flex" compactBelowSm \/>/);
+    // (It shows its code up to `lg`, where the row also carries the
+    // assistant entry: CAROUSEL_NAVIGATION_SPEC N2.)
+    expect(navSrc).toMatch(/<LocaleSwitcher className="flex" compactBelowSm compactBelowLg \/>/);
     expect(navSrc.match(/<LocaleSwitcher\b/g)).toHaveLength(1);
   });
 });

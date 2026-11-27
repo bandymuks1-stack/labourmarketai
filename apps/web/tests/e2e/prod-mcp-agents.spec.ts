@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { test, expect } from "./prod-walk";
 import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 
-import { bearerOf, qaMcp } from "./prod-qa-api";
+import { bearerOf, qaApi, qaMcp } from "./prod-qa-api";
 
 /**
  * PRODUCTION MCP — AI-AGENT SCENARIOS, driven exactly as an external assistant
@@ -218,7 +218,11 @@ test("A-1. BUYER AGENT: the manager states a need (prepare → confirm), reads i
     workType: "tiler",
     skills: "tiling, grouting",
     country: "LT",
-    teamSize: 1,
+    teamSize: 6,
+    teamCount: 2,
+    perTeamSize: 3,
+    startDate: new Date(Date.now() + 86_400_000).toISOString().slice(0, 10),
+    endDate: new Date(Date.now() + 7 * 86_400_000).toISOString().slice(0, 10),
     urgency: "flexible",
   };
   // An earlier run that stopped before its wrap-up must not hold the plan's
@@ -235,6 +239,9 @@ test("A-1. BUYER AGENT: the manager states a need (prepare → confirm), reads i
   expect(actingFor, "the buyer must act for a synthetic organization").toMatch(/QA-SYNTHETIC/);
   expect((await needs(tok.manager)).filter((n) => n.title === role), "prepare writes nothing").toHaveLength(0);
 
+  expect(draft.data?.preview, "the buyer sees the dates and team they are confirming").toMatchObject({
+    startDate: input.startDate, endDate: input.endDate, teamCount: 2, perTeamSize: 3,
+  });
   const confirmationToken = String(draft.data?.confirmationToken ?? "");
   const done = await tool(tok.manager, "demand_create_confirm", { ...input, confirmationToken });
   if (!done.ok && done.code === "over_open_need_limit") {
@@ -256,6 +263,17 @@ test("A-1. BUYER AGENT: the manager states a need (prepare → confirm), reads i
   expect(mine, "exactly one need, even after the replay").toHaveLength(1);
   expect(mine[0].id).toBe(demandId);
   expect(mine[0].status).toBe("submitted");
+  // Own synthetic row, under the same manager's token: draft fields must
+  // reach the canonical stored need, not just appear in the preview.
+  const stored = await qaApi(`/rest/v1/customer_requests?id=eq.${demandId}&select=payload,team_size`, tok.manager);
+  expect(stored.ok, "the buyer can read their own saved need").toBe(true);
+  const rows = await stored.json() as Array<{ team_size: number; payload: { structured_v2?: unknown } }>;
+  expect(rows).toHaveLength(1);
+  expect(rows[0].team_size).toBe(6);
+  expect(rows[0].payload.structured_v2).toMatchObject({
+    time: { start_earliest: input.startDate, end_date: input.endDate },
+    team: { count: 2, per_team: 3 },
+  });
 });
 
 test("A-2. SERVICE SEARCH: the buyer's discovery and matching tools answer", async () => {
@@ -521,7 +539,11 @@ test("A-8. WRAP-UP: the buyer closes the need and the owner completes the projec
   expect((await projects(tok.owner)).rows.find((p) => p.id === projectId)?.status).toBe("completed");
 });
 
-type JournalEntry = { entryId: string; text: string | null };
+type JournalEntry = {
+  entryId: string;
+  text: string | null;
+  metrics: Array<{ slug: string; valueText: string | null }>;
+};
 const ownEntries = async (token: string) => {
   const r = await tool(token, "journal_list", { limit: 50 });
   ok(r);
@@ -537,7 +559,8 @@ test("A-9. JOURNAL: the worker records an entry and corrects it — one live ver
   const workDate = new Date(Date.now() - 86_400_000).toISOString().slice(0, 10);
   // "none": the synthetic worker may hold a walk's project assignment; these
   // hours are not that project's.
-  const input = { notes: `${JOURNAL_TAG} klijavau plyteles vonios sienoje`, workDate, projectId: "none" };
+  const voice = { language: "lt", disclosureVersion: "2026-09-01" };
+  const input = { notes: `${JOURNAL_TAG} klijavau plyteles vonios sienoje`, workDate, projectId: "none", voice };
   let draft = await tool(tok.worker, "journal_create_draft", input);
   ok(draft);
   // The synthetic worker works in several synthetic organizations, so the
@@ -553,6 +576,7 @@ test("A-9. JOURNAL: the worker records an entry and corrects it — one live ver
   const preview = draft.data?.preview as Record<string, unknown> | undefined;
   const confirmationToken = String(draft.data?.confirmationToken ?? "");
   expect(preview, `journal_create_draft gave no preview: ${JSON.stringify(draft.data)}`).toBeTruthy();
+  expect(preview?.inputOrigin, "the draft discloses the stated voice origin").toBe("voice");
   expect(confirmationToken.length, "journal_create_draft returned no token").toBeGreaterThanOrEqual(10);
   const exact = {
     engagementContextId: preview?.engagementContextId,
@@ -560,6 +584,7 @@ test("A-9. JOURNAL: the worker records an entry and corrects it — one live ver
     workDate: preview?.workDate,
     siteName: preview?.siteName ?? null,
     projectId: preview?.projectId ?? "none",
+    voice,
   };
   const saved = await tool(tok.worker, "journal_confirm", { ...exact, confirmationToken });
   ok(saved);
@@ -570,6 +595,11 @@ test("A-9. JOURNAL: the worker records an entry and corrects it — one live ver
   if (retry.ok) expect(String(retry.data?.entryId ?? ""), "a retried confirm wrote a second entry").toBe(entryId);
   const mine = (await ownEntries(tok.worker)).filter((e) => (e.text ?? "").includes(JOURNAL_TAG));
   expect(mine.map((e) => e.entryId), "exactly one live entry of this run").toEqual([entryId]);
+  expect(mine[0].metrics, "saved work retains its declared voice provenance").toEqual(expect.arrayContaining([
+    expect.objectContaining({ slug: "input_origin", valueText: "voice" }),
+    expect.objectContaining({ slug: "voice_language", valueText: voice.language }),
+    expect.objectContaining({ slug: "voice_disclosure_version", valueText: voice.disclosureVersion }),
+  ]));
 
   const correctedWords = `${JOURNAL_TAG} klijavau plyteles vonios ir virtuvės sienose`;
   const fix = await prepareConfirm(tok.worker, "journal_correct", { entryId, notes: correctedWords });

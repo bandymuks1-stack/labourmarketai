@@ -37,7 +37,7 @@
  */
 
 import { foldText } from "@/lib/structuring/normalize";
-import type { WorkIntelligence } from "@/lib/journal/work-intelligence";
+import type { SkillWorkSample, WorkIntelligence } from "@/lib/journal/work-intelligence";
 import type { CvSkillTier, CvSkillTiers } from "./skill-tiers";
 
 /** The journal's per-skill figures as the ONE reader hands them over
@@ -58,6 +58,8 @@ export type SkillPracticeFacts = {
    *  career journey draw a skill line through the stop it was worked at
    *  (never through a stop it merely overlaps in time). */
   readonly contextIds?: readonly string[];
+  /** Canonical linked-entry examples; absent in older callers, never invented. */
+  readonly samples?: readonly SkillWorkSample[];
 };
 
 export type SkillPracticeBySlug = Readonly<Record<string, SkillPracticeFacts>>;
@@ -84,6 +86,7 @@ export function skillPracticeFromIntelligence(
       lastWorkedDay: s.lastWorkedDay,
       trend: s.trend,
       contextIds: s.contextIds,
+      ...(s.samples !== undefined ? { samples: s.samples } : {}),
     };
   }
   return out;
@@ -385,4 +388,28 @@ export function skillTimeReading(
   }
   if (involved > 0) return { kind: "involvement_only", involvedHours: involved };
   return { kind: "none" };
+}
+
+/**
+ * THE number of skills a person declared (audit CV-16).
+ *
+ * The profile used to state this three ways: the Player Card deduplicated
+ * claim labels against catalogue SLUGS (so a Lithuanian claim never met its
+ * skill), the evidence line added rows to claims with no folding at all, and
+ * the skills list folded variants. One person could read three numbers for
+ * one thing. Every count now asks `presentSkills`, the rule the list itself
+ * is drawn with, so the number always equals the items a person can see.
+ */
+export function countDeclaredSkills(input: {
+  /** Catalogue slugs the person holds, whatever their evidence state. */
+  readonly slugs: readonly string[];
+  readonly claims: readonly PresentableClaim[];
+  readonly nameOf: (slug: string) => string;
+}): number {
+  return presentSkills({
+    tiers: { confirmed: [], evidence: [], declared: [...input.slugs] },
+    claims: input.claims,
+    practice: null,
+    nameOf: input.nameOf,
+  }).visible;
 }

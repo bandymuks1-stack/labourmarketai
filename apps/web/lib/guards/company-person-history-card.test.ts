@@ -15,6 +15,7 @@ const read = (rel: string) => readFileSync(join(root, rel), "utf8");
 
 const page = read("app/[locale]/dashboard/company/people/[personId]/page.tsx");
 const reader = read("lib/organization-evidence/company-person-read.ts");
+const grant = read("lib/organization-evidence/history-read-grant.ts");
 const roster = read("components/app/organization-roster-section.tsx");
 const placeHistory = read("components/app/organization/company-work-history.tsx");
 const historyRead = read("lib/organization-evidence/company-work-history-read.ts");
@@ -25,14 +26,18 @@ const pagination = read("lib/organization-evidence/evidence-pagination.ts");
 describe("route and authority", () => {
   it("is keyed on the roster row (organization_people.id), not on a worker", () => {
     expect(page).toMatch(/params: Promise<\{ locale: string; personId: string \}>/);
-    expect(page).toMatch(/loadCompanyPerson\(locale, personId\)/);
+    expect(page).toMatch(/loadCompanyPerson\(locale, personId, org\)/);
   });
 
   it("another organization's manager gets notFound, never data", () => {
     expect(page).toMatch(/load\.kind === "hidden" \|\| load\.kind === "not-found"\) notFound\(\)/);
     // the roster row is bound to the caller's ACTIVE governed organization AND to RLS
     expect(reader).toMatch(/\.eq\("id", personId\)\s*\.eq\("organization_id", organizationId\)/);
-    expect(reader).toMatch(/resolveEvidenceOrganization\(caller, null\)/);
+    // The GOVERNED organization first; only then an owner-granted, time-boxed
+    // read-only grant (20261124053000) — never a write door.
+    expect(reader).toMatch(/resolveHistoryReadOrganization\(caller, requestedOrganizationId\)/);
+    expect(grant).toMatch(/const governed = await resolveEvidenceOrganization\(caller, requestedOrganizationId\);\s*if \(governed\.ok\)/);
+    expect(grant).toMatch(/rpc\("my_history_read_grants_v1"\)/);
     expect(reader).not.toMatch(/createAdminClient|service_role|SUPABASE_SERVICE/i);
   });
 

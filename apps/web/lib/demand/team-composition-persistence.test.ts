@@ -51,6 +51,13 @@ describe("teamCompositionFor — only while count × per_team = the number of wo
 });
 
 describe("both write paths carry the composition", () => {
+  it("chat refuses invalid or reversed dates before the canonical submit can drop the team", () => {
+    const input = { description: "Install the windows", country: "LT", teamSize: 6, teamCount: 2, perTeamSize: 3 };
+    expect(companyCreateDemandSchema.safeParse({ ...input, startDate: "2026-12-10", endDate: "2026-12-01" }).success).toBe(false);
+    expect(companyCreateDemandSchema.safeParse({ ...input, startDate: "2026-02-30" }).success).toBe(false);
+    expect(companyCreateDemandSchema.safeParse({ ...input, startDate: "2028-02-29", endDate: "2028-02-29" }).success).toBe(true);
+    expect(companyCreateDemandSchema.safeParse({ ...input, endDate: "2026-12-01" }).success).toBe(true);
+  });
   it("the chat form passes the derived teams to the create-demand action", () => {
     const form = getCompanyForm("company.create-demand");
     const built = form?.build({ description: "Reikia 3 brigadų po 4 žmones", teamSize: "12", teamCount: "3", perTeamSize: "4" });

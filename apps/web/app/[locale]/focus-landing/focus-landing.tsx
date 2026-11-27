@@ -99,18 +99,7 @@ export async function FocusLanding({
           <div className="mx-auto max-w-container px-4 pb-10 pt-5 sm:px-12 sm:pt-10">
             {/* 1. THE GOAL CENTRE */}
             <section className="flex min-w-0 flex-col gap-4">
-              <LandingIntentChoice
-                lead={tV3("lead")}
-                phoneMore={{ ids: ["partners", "agencies"], label: tV3("moreChoices") }}
-              />
-              <p
-                className="flex items-center gap-3 text-xs font-medium uppercase tracking-label text-text-muted"
-                data-testid="landing-or"
-              >
-                <span aria-hidden className="h-px flex-1 bg-ink-600" />
-                {tV3("or")}
-                <span aria-hidden className="h-px flex-1 bg-ink-600" />
-              </p>
+              <LandingIntentChoice lead={tV3("lead")} />
               {/* The two ways to SAY a need sit side by side on a wide screen:
                   in your own words, or through the short form. */}
               <div className="grid min-w-0 gap-4 lg:grid-cols-2 lg:items-start">
@@ -118,7 +107,7 @@ export async function FocusLanding({
                   {/* No example chips and no market counts here: the goals
                       above are the choice, and the counts are printed once,
                       in the market block. */}
-                  <PublicEntry examples="none" supply={null} requestLabel={tDoors("title")} />
+                  <PublicEntry examples="none" supply={null} requestLabel={tDoors("title")} quietLabel />
                 </div>
                 <LandingNeedPath locale={locale} />
               </div>
