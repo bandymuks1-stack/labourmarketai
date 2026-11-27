@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 vi.mock("server-only", () => ({}));
@@ -126,7 +126,10 @@ const fetchFixture: typeof fetch = async (input, init) => {
   return json(rows.slice(0, limit));
 };
 
+afterEach(() => vi.unstubAllGlobals());
+
 beforeEach(() => {
+  vi.stubGlobal("WebSocket", undefined);
   vi.clearAllMocks();
   rpcCalls.length = 0;
   readFailure = false;
@@ -142,6 +145,13 @@ beforeEach(() => {
     "fixture-anon-key",
     {
       global: { fetch: fetchFixture },
+      realtime: {
+        transport: class {
+          constructor() {
+            throw new Error("Realtime is not part of this REST-only test");
+          }
+        } as unknown as typeof WebSocket,
+      },
       auth: {
         persistSession: false,
         autoRefreshToken: false,
