@@ -4625,6 +4625,7 @@
             "back": "Tillbaka",
             "next": "Nästa",
             "descRequired": "Lägg till en beskrivning för att fortsätta.",
+            "countryRequired": "Välj landet där arbetet utförs.",
             "optionalTag": "(valfritt)",
             "reviewIntro": "Granska och skapa. Förfrågan förblir privat i din yta.",
             "locationLabel": "Plats eller land",
@@ -4633,7 +4634,6 @@
             "skillsPlaceholder": "t.ex. körkort, engelska, erfarenhet",
             "urgencyLabel": "När du behöver det",
             "urgencyFlexible": "Flexibelt",
-            "countryRequired": "Välj landet där arbetet utförs.",
             "urgencyThisWeek": "Den här veckan",
             "urgencyUrgent": "Brådskande",
             "notesLabel": "Övriga anteckningar",
@@ -7265,6 +7265,10 @@
       "title": "Det gick inte att öppna konversationen",
       "body": "Du kanske inte har behörighet att meddela den här personen, eller så är personen inte längre tillgänglig. Inget skickades."
     },
+    "noLongerAvailable": {
+      "title": "Den här konversationen är inte längre tillgänglig",
+      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
+    },
     "scope": {
       "support": "Supportkanal",
       "unknown": "Sammanhang inte angivet",
@@ -7373,11 +7377,7 @@
     "translatedFrom": "Maskinöversättning från {lang}",
     "showOriginal": "Original ({lang})",
     "translationUnavailable": "Original ({lang}) — ingen översättning tillgänglig",
-    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen.",
-    "noLongerAvailable": {
-      "title": "Den här konversationen är inte längre tillgänglig",
-      "body": "Du deltar inte längre i den, så dess meddelanden visas inte."
-    }
+    "loadError": "Meddelandena kunde inte läsas in just nu. Det du ser är inte hela bilden — försök igen."
   },
   "orgTier1Warning": {
     "eyebrow": "Din organisation",
@@ -9685,8 +9685,8 @@
       "withdraw": "Dra tillbaka förslaget",
       "findAnother": "Hitta en annan arbetstagare",
       "proposeAgain": "Föreslå igen med nya datum",
-      "planning": "Visa i kalendern",
-      "needClosed": "Arbetsgivaren har stängt detta behov, så förslaget kan inte längre accepteras. Du kan fortfarande tacka nej."
+      "needClosed": "Arbetsgivaren har stängt detta behov, så förslaget kan inte längre accepteras. Du kan fortfarande tacka nej.",
+      "planning": "Visa i kalendern"
     },
     "connections": {
       "title": "Kalenderkopplingar",
@@ -11491,7 +11491,9 @@
       "cta": "Aktivera organisationsplanen",
       "note": "Du skickas till Stripe Checkout; abonnemanget knyts till den här organisationen.",
       "chargedToday": "Ingen gratis provperiod: den första månaden debiteras i Stripe Checkout i dag och sedan varje månad tills du avslutar. Stripe visar det exakta beloppet inklusive moms innan du betalar."
-    }
+    },
+    "pilotPassEndsOn": "Pilotplanen gäller till {date}. Den upphör av sig själv och förnyas eller debiteras aldrig igen.",
+    "pilotPassEnds": "Pilotplanen gäller till slutet av sin period. Den upphör av sig själv och förnyas eller debiteras aldrig igen."
   },
   "accountPlan": {
     "title": "Din plan",
