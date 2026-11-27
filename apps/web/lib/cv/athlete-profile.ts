@@ -27,6 +27,7 @@ import { experienceStopsOf } from "@/lib/cv-export/experience-stops";
 import { ownEngagementHeading } from "@/lib/cv-export/own-engagement-heading";
 import { presentSkills, skillTimeReading, type SkillTimeReading } from "@/lib/cv-export/skill-presentation";
 import type { VerifiedCvData } from "@/lib/cv-export/verified-cv";
+import { endedUnnamedOrganizationContexts } from "@/lib/journal/engagement-label";
 import { FORMER_NAME_RELATIONS, periodFor } from "@/lib/journal/professional-experience";
 import { derivePotentialSkills } from "@/lib/skills/potential-skills";
 import { formatUtcDate } from "@/lib/time/display";
@@ -63,6 +64,10 @@ export type AthleteNames = {
   readonly relationship: (slug: string) => string;
   readonly documentType: (slug: string) => string;
   readonly language: (code: string) => string;
+  /** The reader's words for an organization without a name the person no
+   *  longer works with (`journal.unnamedOrganization.ended`, owner 2026-11-15,
+   *  #3356). Absent = such a season keeps its earlier heading. */
+  readonly endedUnnamedOrganization?: string;
 };
 
 export type AthleteAvailability = {
@@ -354,6 +359,8 @@ const BLANK: Pick<
 
 function seasonsOf(cv: AthleteCvInput, names: AthleteNames): AthleteSeason[] {
   const pe = cv.professionalExperience;
+  // Renamed, never hidden (#3356): the same rule as the CV page.
+  const endedUnnamed = endedUnnamedOrganizationContexts(pe?.roles);
   const periods = (pe?.roles ?? []).flatMap((r) => r.businessPeriods);
   const orgNameOfPeriod = new Map<string, string | null>();
   for (const r of pe?.roles ?? []) {
@@ -446,7 +453,9 @@ function seasonsOf(cv: AthleteCvInput, names: AthleteNames): AthleteSeason[] {
 
   const engagementSeasons = cv.workHistory.map((e, i): Sortable => {
     const heading = ownEngagementHeading({
-      orgName: e.orgName,
+      orgName:
+        e.orgName ??
+        (e.id && endedUnnamed.has(e.id) ? (names.endedUnnamedOrganization ?? null) : null),
       title: e.title,
       relationshipLabel: names.relationship(e.relationship),
       practice: e.kind === "practice",

@@ -14,6 +14,7 @@ import { Link } from "@/lib/i18n/navigation";
 // (lighter landing first screen, 2026-11-12).
 import {
   entryDoorHref,
+  entryRequestRoute,
   PUBLIC_ENTRY_MAX_CHARS,
   type EntryDoor,
 } from "@/lib/marketing/public-entry-carry";
@@ -169,8 +170,17 @@ export const SHORT_EXAMPLE_KEYS = ["hire", "work"] as const satisfies readonly E
 export function PublicEntry({
   supply,
   examples: exampleSet = "standard",
+  requestLabel,
+  quietLabel = false,
 }: {
   readonly supply: EntrySupply | null;
+  /** The request block's own title ("Submit a request"), from the server so the
+   *  landing's client messages stay `landing.entry` only. Without it the entry
+   *  offers no request route. */
+  readonly requestLabel?: string;
+  /** The field's label stays for assistive tech and is not printed
+   *  (decision 0032): the placeholder already says what to type. */
+  readonly quietLabel?: boolean;
   /**
    * `short` (the landing since 2026-11-13, owner: less noise on the first
    * screen): two example chips and no "more examples". `standard`: the four
@@ -273,6 +283,17 @@ export function PublicEntry({
     return null;
   })();
 
+  /** A request this page can take WITHOUT an account (employer path P0
+   *  2026-11-15). The page promises it, and both forms below work signed out,
+   *  yet a sentence about needing workers or a job done got only sign-up and
+   *  sign-in. Workers: the public need form, written with the sentence. A job
+   *  for someone to do: the project request on this page. Sign-up stays, second. */
+  const requestRoute = !requestLabel ? null : entryRequestRoute(
+    reading?.kind === "recognised" ? reading.intent : null,
+    chosen,
+    sentence,
+  );
+
   const numbers = new Intl.NumberFormat(locale);
   const refreshedAt = supply?.refreshedAt
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(
@@ -291,7 +312,7 @@ export function PublicEntry({
       <AuthCtaLink
         relPath={entryDoorHref(locale, kind, sentence)}
         className={cn(
-          buttonLinkClassName(kind === "signup" ? "primary" : "secondary"),
+          buttonLinkClassName(kind === "signup" && !requestRoute ? "primary" : "secondary"),
           "gap-1.5 rounded-full",
         )}
       >
@@ -335,7 +356,7 @@ export function PublicEntry({
         >
           <label
             htmlFor={inputId}
-            className="font-mono text-meta uppercase tracking-label text-text-muted"
+            className={quietLabel ? "sr-only" : "font-mono text-meta uppercase tracking-label text-text-muted"}
           >
             {t("label")}
           </label>
@@ -494,10 +515,43 @@ export function PublicEntry({
             <p className="mt-2 font-display text-card-title font-semibold text-text-primary">
               {understanding}
             </p>
-            <p className="mt-3 border-t border-ink-600 pt-2.5 text-basis text-text-secondary">
-              {t("nextHint")}
-            </p>
+            {/* "Sign in to save your request" is not true when the request can be
+                sent right here, so it is said only when it is. */}
+            {requestRoute ? null : (
+              <p className="mt-3 border-t border-ink-600 pt-2.5 text-basis text-text-secondary">
+                {t("nextHint")}
+              </p>
+            )}
             <div className="mt-3 flex flex-wrap gap-2">
+              {requestRoute ? (
+                <LandingCtaCapture
+                  testId="entry-request"
+                  surface="landing_entry"
+                  ctaId={requestRoute.kind === "need-form" ? "entry_need_form" : "entry_request_project"}
+                  intent={family ?? undefined}
+                >
+                  {requestRoute.kind === "need-form" ? (
+                    <Link
+                      href={requestRoute.href}
+                      className={cn(buttonLinkClassName("primary"), "gap-1.5 rounded-full")}
+                    >
+                      {requestLabel}
+                      <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                    </Link>
+                  ) : (
+                    // The project request is on this page: a plain fragment link,
+                    // so the browser announces the change the request block
+                    // listens for.
+                    <a
+                      href={requestRoute.href.slice(1)}
+                      className={cn(buttonLinkClassName("primary"), "gap-1.5 rounded-full")}
+                    >
+                      {requestLabel}
+                      <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                    </a>
+                  )}
+                </LandingCtaCapture>
+              ) : null}
               {door("signup")}
               {door("login")}
               {/* A person looking for WORK can look at real open jobs right

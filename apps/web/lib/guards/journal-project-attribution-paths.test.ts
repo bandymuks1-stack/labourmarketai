@@ -48,14 +48,17 @@ describe("journal project attribution — every creation path", () => {
 
   it("the chat action carries the choice end to end (schema -> executor -> form field)", () => {
     expect(read("lib/conversation/worker-schemas.ts")).toMatch(/projectId: z\.union\(\[uuid, z\.literal\("none"\)\]\)/);
-    expect(read("lib/conversation/worker-executors.ts")).toMatch(/project_id: input\.projectId \?\? ""/);
+    // The executor sends THE one log-work mapping (AI-3), which carries it.
+    expect(read("lib/conversation/worker-executors.ts")).toMatch(/export \{ logWorkFields \};/);
+    expect(read("lib/journal/log-work-fields.ts")).toMatch(/project_id: input\.projectId \?\? ""/);
   });
 
   it("the MCP draft asks before minting a token, and confirm threads the choice + surfaces choices", () => {
     const reg = read("lib/capabilities/registry.ts");
     expect(reg).toMatch(/projectsToChooseFrom\(\s*caller\.supabase, caller\.userId, engagement\.id\)/);
     expect(reg).toMatch(/status: "project_required"/);
-    expect(reg).toMatch(/project_id: draft\.projectId \?\? ""/);
+    // The confirm sends THE one log-work mapping (AI-3), which carries it.
+    expect(reg).toMatch(/return logWorkFields\(locale, draft\);/);
     expect(reg).toMatch(/result\.code === "project_required" && result\.projects/);
     expect(reg).toMatch(/projectId: draft\.projectId \?\? null/);
   });

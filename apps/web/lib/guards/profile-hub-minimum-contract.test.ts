@@ -55,6 +55,12 @@ describe("the profile page feeds the contract source from already-fetched data",
     expect(page).toMatch(/cardSource=\{\{/);
     expect(page).toMatch(/fullName: profile\?\.full_name/);
     expect(page).toMatch(/about: savedProfileText/);
-    expect(page).toMatch(/skillsDeclared: savedSkillClaims\.length \+ savedSkills\.length/);
+    // Audit CV-16 (2026-11-23): the one declared-skills number of the page,
+    // still derived only from rows the page already read — the skills list's
+    // own item count, with the raw rows as the no-worker fallback.
+    expect(page).toMatch(/skillsDeclared: declaredSkillCount,/);
+    expect(page).toMatch(
+      /const declaredSkillCount =\s+skillPresentation\?\.visible \?\? savedSkillClaims\.length \+ savedSkills\.length;/,
+    );
   });
 });

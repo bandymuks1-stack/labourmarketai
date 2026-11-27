@@ -171,6 +171,9 @@ export type ExperienceRelationship = {
   readonly current: boolean;
   readonly source: "engagement" | "membership";
   readonly businessPeriods: readonly ExperienceBusinessPeriod[];
+  /** The engagement row's own country (ISO code), when it records one; a
+   *  membership carries none. Optional: the hour model never reads it. */
+  readonly countryCode?: string | null;
 };
 
 export type ExperienceHourSource = "journal" | "organization_day" | "organization_period";

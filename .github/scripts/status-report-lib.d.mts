@@ -106,3 +106,37 @@ export declare function collect(input: {
   prs: Array<ReportPr & { number: number; head: string }>;
   [k: string]: unknown;
 }>;
+
+export declare const WALK_DEVICES: readonly string[];
+export type WalkRun = { id: number; title: string; sha: string; conclusion: string | null; status?: string; at: string };
+export type LedgerEntry = { spec: string; device: string; run: number; result: string; build: string; at: string };
+export type WalkLedger = { schema: number; walks: Record<string, LedgerEntry> };
+export declare function parseWalkTitle(title: string | null | undefined): { spec: string | null; device: string | null };
+export declare function mergeWalkLedger(
+  ledger: WalkLedger | null | undefined,
+  walks: WalkRun[] | null | undefined,
+): { ledger: WalkLedger; unknownDevice: WalkRun[]; conflicts: Array<{ key: string; run: number; ledger: string; github: string | null }> };
+export declare function staleOverwriteReason(existingGeneratedAt: string | null | undefined, newFetchedAt: string): string | null;
+export declare function narrativeDiscrepancies(
+  text: string | null | undefined,
+  input: { openPrNumbers?: number[]; closedPrNumbers?: number[]; ledger?: WalkLedger | null },
+): string[];
+export declare function privacyFindings(text: string | null | undefined): string[];
+
+export interface ParityReading {
+  applied: number;
+  files: number;
+  notApplied: string[];
+  passed: boolean;
+}
+export declare function parseParityLog(text: string): ParityReading | null;
+export declare function migrationClaimDiscrepancies(
+  text: string,
+  opts?: { prMigrations?: Record<string | number, string[]>; notApplied?: string[] },
+): string[];
+export declare function finalCompleteness(opts: {
+  errors?: unknown[];
+  registerProblems?: string[];
+  discrepancies?: string[];
+  migrationParity?: unknown;
+}): "COMPLETE" | "PARTIAL";

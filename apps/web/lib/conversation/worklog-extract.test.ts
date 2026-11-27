@@ -225,3 +225,16 @@ describe("Swedish work sentences are read, not only routed (sv active, 2026-11-1
     expect(extractWorkLog("Yesterday I worked 8 hours.", TODAY).workedMinutes).toBe(480);
   });
 });
+
+
+describe("duration preview ignores numbers inside reference codes", () => {
+  it.each(["AB15hours", "ref_5hr", "AB3val.", "AB3.5hours"])("%s alone is not work time", (reference) => {
+    expect(extractWorkLog(`Inspected ${reference}`, TODAY).workedMinutes).toBeNull();
+  });
+  it("reads a real duration after the reference instead of its suffix", () => {
+    expect(extractWorkLog("Inspected AB15hours, worked 3 hours", TODAY).workedMinutes).toBe(180);
+  });
+  it("applies the same boundary in Swedish", () => {
+    expect(extractWorkLog("Jag arbetade vid AB5tim, 3 timmar", TODAY).workedMinutes).toBe(180);
+  });
+});

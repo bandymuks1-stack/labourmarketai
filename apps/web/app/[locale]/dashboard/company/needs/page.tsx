@@ -11,7 +11,7 @@ import {
 } from "@/lib/company/active-organization";
 import { actsAsAgency, resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
-import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import { EMPLOYER_DEMAND_KINDS, listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listClaimablePublicIntakesState } from "@/lib/company/claim-public-intake";
 import { VerifyEmailPrompt } from "@/components/app/verify-email-prompt";
 import { listPendingInterestCountsForCompany } from "@/lib/opportunities/interest";
@@ -32,9 +32,6 @@ import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 export const generateMetadata = dashboardPageMetadata("/dashboard/company/needs", "organizationDoors.pages.needs.title");
 
 
-// W3 rows 7/8/25: the employer demand kinds the owner readback is scoped to —
-// a dual-role user's buyer service requests stay in the buyer room.
-const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
 
 /**
  * POREIKIAI — the organization's demand door (owner IA correction
@@ -145,6 +142,16 @@ export default async function CompanyNeedsPage({
   // Intent follows the company's own type: a staffing agency supplies
   // candidates (partner), any other company hires (hire_workers).
   const demandIntent = isStaffingAgency ? ("partner" as const) : ("hire_workers" as const);
+  // E-4 (UX gaps 2026-11-18): "Fill from my last request" only when there is
+  // one. Derived from the readback this page already reads (the caller's own
+  // rows of this direction, any status, drafts included); unknown (a failed
+  // read) keeps the button, as before.
+  const hasOwnPreviousRequest =
+    demandReadback.kind === "ok"
+      ? demandReadback.rows.some(
+          (r) => r.ownedByCaller && r.direction === (demandIntent === "partner" ? "supply" : "demand"),
+        )
+      : null;
   const demandPilotKey = demandIntent === "hire_workers" ? "hire" : "partner";
 
   return (
@@ -242,6 +249,7 @@ export default async function CompanyNeedsPage({
             intent={demandIntent}
             stepTitles={[tFlow("company.c1"), tFlow("company.c2"), tFlow("company.c3")]}
             repeatRequestId={repeatRequestId}
+            hasOwnPreviousRequest={hasOwnPreviousRequest}
             usage={openNeedsUsage}
             organizationId={employerCtx.kind === "ok" ? employerCtx.organizationId : null}
           />

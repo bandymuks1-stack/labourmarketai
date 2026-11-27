@@ -230,7 +230,7 @@ export function IdentityStage({
                         key={f.testid}
                         data-testid={f.testid}
                         data-absent="true"
-                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-[0.625rem] uppercase tracking-label text-text-secondary sm:text-meta"
+                        className="inline-flex min-h-8 max-w-full items-center gap-1.5 rounded-md border border-dashed border-ink-500 px-2 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
                       >
                         <CircleDashed className="h-3.5 w-3.5 shrink-0" strokeWidth={1.75} aria-hidden />
                         <span className="min-w-0 break-words">{f.label}</span>

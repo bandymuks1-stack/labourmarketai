@@ -112,7 +112,7 @@ export function AnalyticsConsentBanner({
           <Button
             variant="secondary"
             size="sm"
-            className="flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
+            className="min-h-11 flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
             data-testid="analytics-consent-refuse"
             onClick={refuseAnalytics}
           >
@@ -121,7 +121,7 @@ export function AnalyticsConsentBanner({
           <Button
             variant="secondary"
             size="sm"
-            className="flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
+            className="min-h-11 flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
             data-testid="analytics-consent-accept"
             onClick={() => setAnalyticsConsent("granted")}
           >
@@ -151,6 +151,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
         <Button
           variant="secondary"
           size="sm"
+          className="min-h-11"
           data-testid="analytics-consent-control-refuse"
           aria-pressed={choice === "refused"}
           onClick={refuseAnalytics}
@@ -160,6 +161,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
         <Button
           variant="secondary"
           size="sm"
+          className="min-h-11"
           data-testid="analytics-consent-control-allow"
           aria-pressed={choice === "granted"}
           onClick={() => setAnalyticsConsent("granted")}

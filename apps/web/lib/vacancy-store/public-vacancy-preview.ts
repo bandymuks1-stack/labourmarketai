@@ -81,10 +81,9 @@ export type PublicVacancyPreviewStatus = "ok" | "not_provisioned";
 /**
  * Exactly the fields an anonymous caller may receive. There is intentionally no
  * employerName, country, region, city, lat, lng, applicationUrl or description:
- * those are member-only and the SQL function never returns them. Since
- * 20260824120000_public_vacancy_anon_boundary_v2 the raw title and the named
- * source attribution are withheld too (both NULL): titles embed employer and
- * location wording, and the named source identifies the country.
+ * those are member-only and the SQL function never returns them. Raw titles
+ * remain withheld. Owner approval 2026-11-27 permits only the recorded NAV or
+ * Arbetsförmedlingen source label; this also identifies the source country.
  */
 export interface PublicVacancyPreview {
   readonly id: string;
@@ -103,10 +102,8 @@ export interface PublicVacancyPreview {
   readonly compensationMin: number | null;
   readonly compensationMax: number | null;
   readonly sourceLanguage: string | null;
-  /** ALWAYS NULL on the anonymous path since 2026-08-24: the named source is
-   *  a national employment service and therefore identifies the country. The
-   *  UI renders a generic source line anonymously; members receive the full
-   *  named attribution via their own read path. */
+  /** Owner-approved known source label only (2026-11-27). Unknown source
+   *  codes remain null; no source is inferred from language or location. */
   readonly attributionCode: string | null;
   readonly publishedAt: string | null;
 }
@@ -159,8 +156,8 @@ function toPreview(row: PreviewRow): PublicVacancyPreview {
     id: row.id,
     // Defense-in-depth for the anonymous boundary (owner directive
     // 2026-08-24): even if the SQL projection ever regressed and returned the
-    // raw title or the named attribution again, this module — the ONLY
-    // anonymous read path — drops them before they can reach a component,
+    // raw title again, this module — the ONLY anonymous read path — drops
+    // it before it can reach a component,
     // an RSC payload or generated metadata.
     title: null,
     professionSlug: row.profession_slug,
@@ -172,7 +169,9 @@ function toPreview(row: PreviewRow): PublicVacancyPreview {
     compensationMin: toNumber(row.compensation_min),
     compensationMax: toNumber(row.compensation_max),
     sourceLanguage: row.source_language,
-    attributionCode: null,
+    attributionCode: row.attribution_code === "vacancySources.attribution.nav" ||
+      row.attribution_code === "vacancySources.attribution.arbetsformedlingen"
+      ? row.attribution_code : null,
     publishedAt: row.published_at,
   };
 }

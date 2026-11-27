@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/Badge";
+import { vacancySourceName, vacancyOriginLabels } from "@/components/marketing/public-vacancy-card-facts";
 import type { ReactNode } from "react";
 import Link from "next/link";
 
@@ -215,8 +217,10 @@ export function ExternalOpportunityRow({
   whyCodes,
   labels,
   interest = null,
+  locale = "en",
 }: {
   readonly card: ExternalOpportunityCardV1;
+  readonly locale?: string;
   readonly band: FitBand;
   /** The engine's own codes for THIS worker against THIS ad, in the order
    *  the destination decided (gaps → unknowns). */
@@ -225,6 +229,7 @@ export function ExternalOpportunityRow({
   readonly interest?: ExternalVacancyInterestProps | null;
 }): ReactNode {
   const { key, view, capabilities, match, matchingGaps } = card;
+  const origin = vacancyOriginLabels(locale);
   const why = whyCodes
     .map(labels.whyText)
     .filter((s): s is string => s !== null);
@@ -243,6 +248,13 @@ export function ExternalOpportunityRow({
             {view.title}
           </p>
           <FitBandChip band={band} label={labels.bandLabel} />
+        </div>
+
+        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-text-secondary" data-testid="job-origin" data-origin="external">
+          <Badge tone="neutral" className="font-sans normal-case tracking-normal">
+            {vacancySourceName(view.provenance.attributionCode) ?? origin.external}
+          </Badge>
+          <span>{origin[view.provenance.applicationRoute]}</span>
         </div>
 
         {/* Organization · place · published. */}

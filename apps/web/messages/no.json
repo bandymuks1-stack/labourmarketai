@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "[EN] Message language",
+    "intro": "[EN] Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "[EN] I read messages in",
+    "sameAsInterface": "[EN] Same as the interface",
+    "saved": "[EN] Saved.",
+    "error": "[EN] The change could not be saved and was reverted. Please try again.",
+    "unavailable": "[EN] This setting is not available yet — messages follow the interface language until it is."
+  },
   "demandReadback": {
     "notVerifiedYet": "Bedriften din er ennå ikke verifisert, så behovene du sender inn her vises ikke for arbeidere før verifiseringen er fullført.",
     "notVerifiedHowTo": "Legg til organisasjonsnummer og be om en gjennomgang",
@@ -56,36 +65,6 @@
         {
           "a": "[EN] Yes, with assignment status tracking so nothing is double-booked.",
           "q": "[EN] Can one worker serve multiple clients?"
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "[EN] Why agencies",
-      "headline": "[EN] Leverage, not loss of control",
-      "items": [
-        {
-          "desc": "[EN] Workers, availability and status in one place.",
-          "title": "[EN] Manage your pool"
-        },
-        {
-          "desc": "[EN] Broker demand without losing the relationship.",
-          "title": "[EN] Post on behalf of clients"
-        },
-        {
-          "desc": "[EN] Place the right people faster.",
-          "title": "[EN] Fit direction"
-        },
-        {
-          "desc": "[EN] Public, agencies-only or direct — your call.",
-          "title": "[EN] Visibility controls"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic clients and workers.",
-          "title": "[EN] Cross-border reach"
-        },
-        {
-          "desc": "[EN] Capacity insights as demand shifts.",
-          "title": "[EN] Grow your desk"
         }
       ]
     },
@@ -306,6 +285,14 @@
       "moreSection": {
         "title": "Detaljert oversikt",
         "hint": "Status, forespørsler og ekstra kort"
+      },
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Registrer arbeid",
+            "desc": "Entries build your profile and CV"
+          }
+        }
       }
     },
     "errors": {
@@ -408,7 +395,15 @@
         "event_journal_review_decided_changes_requested": "Det er bedt om endringer i journalinnlegget ditt",
         "event_weekly_digest_profile_completion": "For å vise deg passende jobber, bekreft hvilket arbeid du gjør",
         "event_weekly_digest_journal": "Ukens oversikt over arbeidsjournalen din er klar",
-        "event_history_link_offered": "En organisasjon tilbyr å koble din registrerte arbeidshistorikk til kontoen din"
+        "event_history_link_offered": "En organisasjon tilbyr å koble din registrerte arbeidshistorikk til kontoen din",
+        "event_team_offer_received": "Et team har tilbudt seg til behovet ditt",
+        "event_team_offer_answered": "Teamets tilbud er besvart",
+        "event_team_offer_answered_accepted": "Teamets tilbud er akseptert",
+        "event_team_offer_answered_declined": "Teamets tilbud er avslått",
+        "event_candidate_offer_received": "Et byrå har foreslått en kandidat til behovet ditt",
+        "event_candidate_offer_answered": "Kandidaten du foreslo er besvart",
+        "event_candidate_offer_answered_accepted": "Kandidaten du foreslo er akseptert",
+        "event_candidate_offer_answered_declined": "Kandidaten du foreslo er avslått"
       },
       "email": {
         "open": "Åpne i LabourMarket.ai:",
@@ -477,7 +472,7 @@
           },
           "education": {
             "title": "Jeg representerer et utdanningssted",
-            "desc": "Inviter elever, se deltakelsen deres og koble dem til praksis og jobber."
+            "desc": "Inviter elever, driv programmer og følg praksisen og resultatene deres."
           }
         },
         "agency": {
@@ -534,7 +529,6 @@
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
-      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
       "divider": "[EN] or",
       "email_label": "[EN] Work email",
       "email_placeholder": "[EN] name@company.com",
@@ -561,6 +555,9 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Én profil for din arbeidserfaring og dine muligheter — i neste steg sier du hva du kommer for.",
+      "inviteFrom": "{inviter} inviterer deg til å bli med i {organization}.",
+      "inviteTo": "Du er invitert til å bli med i {organization}.",
+      "inviteNext": "Når du registrerer deg, blir du med i {organization}.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Send lenken på nytt",
       "resend_sent": "Sendt på nytt. Sjekk innboksen og søppelpostmappen.",
@@ -633,36 +630,6 @@
         {
           "a": "[EN] Through confirmed skills, employer-confirmed history and contextual fit signals — not self-reported CVs.",
           "q": "[EN] How is worker experience guaranteed?"
-        }
-      ]
-    },
-    "features": {
-      "eyebrow": "[EN] Why companies",
-      "headline": "[EN] Supply you can act on",
-      "items": [
-        {
-          "desc": "[EN] Every fit signal shows the reasons behind it.",
-          "title": "[EN] Explainable fit direction"
-        },
-        {
-          "desc": "[EN] Baltic + Nordic supply in one place.",
-          "title": "[EN] Cross-border worker pool"
-        },
-        {
-          "desc": "[EN] You see and own the relationship.",
-          "title": "[EN] No opaque middlemen"
-        },
-        {
-          "desc": "[EN] Hire on evidence, not on claims.",
-          "title": "[EN] Confirmed skills + fit signals"
-        },
-        {
-          "desc": "[EN] See availability shift as it happens.",
-          "title": "[EN] Real-time supply signals"
-        },
-        {
-          "desc": "[EN] You own the worker relationship.",
-          "title": "[EN] Direct contact"
         }
       ]
     },
@@ -1841,7 +1808,67 @@
     "generatedAt": "Generert",
     "verifyNote": "Bekreftelser kan kontrolleres på plattformen.",
     "notWorker": "CV-eksport er tilgjengelig for arbeiderprofiler — den bygges av arbeidsjournalen og bekreftede ferdigheter.",
-    "claimFromJournal": "[EN] from work journal"
+    "claimFromJournal": "[EN] from work journal",
+    "blocks": {
+      "overview": "Oversikt",
+      "experience": "Erfaring",
+      "projects": "Prosjekter",
+      "photos": "Bilder",
+      "documents": "Dokumenter",
+      "reviews": "Anbefalinger"
+    },
+    "premium": {
+      "analytics": {
+        "evidenceTitle": "Fordeling av timer",
+        "states": {
+          "actual": "Registrert som faktiske",
+          "reported": "Oppgitt av organisasjonen",
+          "estimated": "Anslåtte",
+          "confirmed": "Underbygget av en annen parts registrering"
+        },
+        "skillBasis": "Tid fra arbeidsjournalen knyttet til de enkelte ferdighetene.",
+        "workTitle": "Arbeid og ferdigheter",
+        "attributedTime": "Tilordnet denne ferdigheten",
+        "confirmedTime": "Bekreftet av lederen: {hours}",
+        "activityLabel": "Utdrag fra registreringen",
+        "contextLabel": "Arbeidskontekst",
+        "mapTitle": "Kompetansekart",
+        "workNodes": "Arbeid"
+      },
+      "eyebrowFallback": "Levende CV",
+      "facts": {
+        "recorded": "recorded in your work journal",
+        "confirmed": "med en leders registrering",
+        "organization": "in organisation records",
+        "experienceTotal": "yrkeserfaring totalt",
+        "languages": "språk",
+        "projects": "prosjekter",
+        "span": "første og siste registrering"
+      },
+      "capEyebrow": "Capabilities",
+      "capEyebrowHours": "{hours} h of recorded work",
+      "capTitle": "What you *can do*",
+      "expEyebrow": "Experience",
+      "expTitle": "Where you have *worked*",
+      "evidence": {
+        "both": "{confirmed} h with a manager's record · {recorded} h recorded",
+        "recorded": "{hours} h recorded",
+        "shown": "Shown by your records",
+        "declared": "You say so; nothing shows it yet",
+        "involved": "Involved in {hours} h, not attributed to it alone"
+      },
+      "source": {
+        "own": "Your record",
+        "organization": "Organisation records"
+      },
+      "orgDayHours": "{hours} h on {count, plural, one {# record} other {# records}}",
+      "orgPeriodHours": "{hours} h stated as a period total",
+      "present": "now",
+      "more": "+ {count} more in the full register below",
+      "emptyCapabilities": "No skills on record yet. Skills you add — and the work that shows them — appear here.",
+      "emptyExperience": "No work history yet. Your journal and the records of organisations you worked for build this.",
+      "untitled": "Work without a name in the source"
+    }
   },
   "todayScreen": {
     "eyebrow": "[EN] Today",
@@ -2107,7 +2134,8 @@
         "noMembers": "Ingen medlemmer akkurat nå.",
         "unavailable": "Teamene kunne ikke lastes inn. Prøv igjen.",
         "manage": "Endre team"
-      }
+      },
+      "organizationLink": "Organisasjonens historikk og prosjekter"
     },
     "workerView": {
       "eyebrow": "Mitt prosjekt",
@@ -2978,6 +3006,7 @@
     "available": "Tilgjengelig",
     "availableFrom": "Fra {date}",
     "experienceYears": "{n} års erfaring",
+    "recordedExperienceHours": "Tilgjengelige arbeidsregistreringer: {hours} t",
     "skillsTitle": "Ferdigheter",
     "skillsEmpty": "Ingen ferdigheter du har lov til å se.",
     "skillVerified": "[EN] Confirmed by a manager's record",
@@ -3877,9 +3906,7 @@
         "preferredCountries": "[EN] Preferred countries",
         "preferredCountriesPlaceholder": "[EN] e.g. NL, DE",
         "salaryMin": "[EN] Salary from (€)",
-        "salaryMinPlaceholder": "[EN] 1500",
         "salaryMax": "[EN] Salary to (€)",
-        "salaryMaxPlaceholder": "[EN] 2500",
         "willingToRelocate": "[EN] Willing to relocate?",
         "hasTransport": "[EN] Can you get to work on your own?",
         "needsAccommodation": "[EN] Need accommodation?",
@@ -4035,7 +4062,7 @@
       "navCalendar": "[EN] Calendar",
       "navProfile": "[EN] Profile",
       "clarifyWorkLog": "[EN] Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
-      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
@@ -4141,6 +4168,34 @@
       "findWorkInCompanyContext": "Å søke jobb er din egen handling — i bedriftsområdet kjører jeg det ikke. Bytt til ditt personlige område og spør igjen.",
       "findWorkInCompanyWhy": "En person søker jobb, ikke en bedrift — jeg svarer fra ditt personlige område.",
       "personalOnlyInCompany": "Det er en personlig handling — i en virksomhetsplass utfører jeg den ikke. Bytt til ditt personlige rom og fortsett der.",
+      "needsOrganization": "Det gjøres for en organisasjon, og ingen av dine områder kan gjøre det ennå.",
+      "readFailed": "Jeg kunne ikke lese det akkurat nå — feilen ligger hos oss. Ingenting er endret. Prøv igjen om litt.",
+      "taskStatusAsk": "Hvilken status skal oppgaven få: startet, ferdig eller blokkert?",
+      "stageStatusAsk": "Hvilken status skal etappen få: startet, ferdig eller blokkert?",
+      "chipStatusStarted": "Startet",
+      "chipStatusDone": "Ferdig",
+      "chipStatusBlocked": "Blokkert",
+      "professionAsk": "Hvilket yrke eller fag mener du?",
+      "crossSpace": {
+        "personal": {
+          "cv": "CV-en din ligger i ditt personlige område, ikke i organisasjonen.",
+          "journal": "Din egen arbeidsdagbok ligger i ditt personlige område.",
+          "profile": "Profilen din ligger i ditt personlige område.",
+          "calendar": "Din egen kalender ligger i ditt personlige område."
+        },
+        "open": {
+          "cv": "Bytt og åpne CV-en min",
+          "journal": "Bytt og åpne dagboken min",
+          "profile": "Bytt og åpne profilen min",
+          "calendar": "Bytt og åpne kalenderen min"
+        },
+        "askWhoseCv": "Din egen CV eller en kandidats?",
+        "organizationHistory": "Organisasjonens oppføring er dens arbeidshistorikk.",
+        "openOrganizationHistory": "Åpne organisasjonens historikk",
+        "organization": "Dette gjøres i organisasjonens område: {name}.",
+        "switchTo": "Bytt til {name} og fortsett",
+        "whichOrganization": "Dette gjøres i en organisasjons område. Hvilket?"
+      },
       "newJobsIntro": "Nye utlysninger som passer dine ønsker: {count}.",
       "newJobsAll": "Alle muligheter",
       "newJobsNone": "Det har ikke kommet nye utlysninger som passer dine ønsker de siste dagene. Alle muligheter finner du på siden for muligheter.",
@@ -4176,8 +4231,12 @@
           "chipHelpPeople": "Team og invitasjoner",
           "chipHelpPlanning": "Åpne planlegging",
           "chipHelpServices": "Mine tjenester",
-          "chipHelpJournal": "Arbeidsjournal"
-        }
+          "chipHelpJournal": "Arbeidsjournal",
+          "chipHelpSettings": "Innstillinger",
+          "chipHelpPrivacy": "Personvern og dine data"
+        },
+        "account": "Innlogging, e-post, varsler og utseende finner du under Innstillinger.",
+        "privacy": "Under Personvern og dine data kan du laste ned dataene dine, se hvem som ser profilen din, og be om at kontoen din slettes."
       },
       "interestInboxAmbiguous": "Det kan bety to ting — hva vil du se?",
       "chipInterestOnMyNeeds": "Interesse for mine forespørsler",
@@ -4865,8 +4924,7 @@
       "lasting": "Erfaringen og mulighetene dine forblir tilgjengelige — når du bytter jobb, prosjekt eller land."
     },
     "v3": {
-      "lead": "For arbeidstakere, arbeidsgivere og tjenesteleverandører i alle yrker og bransjer. Registrering og grunnleggende publisering av et behov er gratis.",
-      "moreChoices": "Flere valg",
+      "lead": "Registrering og grunnleggende publisering av et behov er gratis.",
       "or": "eller beskriv det med egne ord",
       "needFree": "Du kan sende en forespørsel uten å registrere deg. Det er gratis å sende den; vilkår og pris for tjenestene avtales separat.",
       "market": {
@@ -6481,9 +6539,10 @@
       "createProgram": "[EN] Add course",
       "noPrograms": "[EN] No courses added yet.",
       "assigneePlaceholder": "[EN] Person's email",
+      "assigneePick": "Person",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -6930,7 +6989,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Registrering, kontakt og rolle"
       },
       "workers": {
         "invitationsManagedElsewhere": "Invitasjoner håndteres av personen i bedriften som har ansvaret for dem.",
@@ -7037,7 +7097,8 @@
       "heading": "Invitasjoner fra organisasjoner",
       "explainer": "Ledelsesinvitasjoner adressert til deg. Når du godtar, vises organisasjonen i arbeidsområdevelgeren din.",
       "accept": "Godta",
-      "decline": "Avslå"
+      "decline": "Avslå",
+      "invitedBy": "Invitert av {name}"
     },
     "members": {
       "heading": "Organisasjonens medlemmer",
@@ -7132,7 +7193,8 @@
       "places": "Steder",
       "people": "Personer",
       "hours": "Registrerte timer",
-      "period": "Periode"
+      "period": "Periode",
+      "dayHours": "Timer på enkeltdager"
     },
     "place": "Sted",
     "noPlaceName": "Ingen sted oppgitt",
@@ -7152,7 +7214,8 @@
       "address": "Adresse",
       "project": "Prosjekt",
       "notInSource": "Ikke i kilden",
-      "linked": "Koblet"
+      "linked": "Koblet",
+      "openProject": "Åpne prosjektet"
     },
     "whoWorked": "Hvem som jobbet her",
     "timeline": "Hva som ble gjort",
@@ -7168,17 +7231,113 @@
       "progress": "{attributed} av {total} tilskrevet {name}",
       "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
       "refused": "Dette kunne ikke lagres. Ingenting er endret.",
-      "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
+      "person": "{hours} t, {count, plural, one {# post} other {# poster}}",
+      "personPeriod": "{hours} t periodesum (legges ikke til enkeltdager)"
     },
-    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem."
+    "truncated": "Det finnes flere poster enn én visning leser. De {count} leste vises; summer dekker bare dem.",
+    "projects": {
+      "title": "Prosjekter på plattformen",
+      "counts": "{running} pågående · {completed} fullført",
+      "untitled": "Prosjekt uten navn",
+      "running": "Pågående",
+      "completed": "Fullført",
+      "all": "Alle {count} prosjekter"
+    },
+    "journal": {
+      "title": "Arbeid registrert i journalen",
+      "hours": "Registrerte timer",
+      "confirmed": "Timer bekreftet av organisasjonen",
+      "people": "Personer som registrerte arbeid",
+      "period": "Registrert",
+      "basis": "Fra {entries} journalinnføringer som personer registrerte under denne organisasjonen. Telt atskilt fra den importerte historikken ovenfor og aldri lagt til den.",
+      "unavailable": "Arbeidet registrert i journalen under denne organisasjonen kunne ikke leses akkurat nå."
+    },
+    "forClient": {
+      "title": "Arbeid utført av underleverandørene deres",
+      "confirmed": "Bekreftede poster",
+      "unconfirmed": "Ikke bekreftede poster",
+      "periodHours": "{hours} t oppgitt som periodesum, ikke lagt til enkeltdager.",
+      "basis": "Fra {count, plural, one {# post} other {# poster}} i underleverandørenes egne registre. Telt separat fra deres eget arbeid.",
+      "unreadable": "Arbeid i partneres registre kunne ikke leses akkurat nå. Det betyr ikke at det ikke finnes."
+    },
+    "clients": {
+      "title": "Oppdragsgivere",
+      "unnamed": "Oppdragsgivers organisasjon",
+      "records": "{count, plural, one {# post} other {# poster}}"
+    },
+    "periodShort": "{hours} t periodesum",
+    "business": {
+      "unavailable": "Virksomhetshistorikken kunne ikke leses akkurat nå. Ingenting har gått tapt – prøv igjen senere.",
+      "eyebrow": "Virksomhetshistorikk",
+      "title": "{name}: én sammenhengende historikk",
+      "subtitle": "Hvert tall nedenfor teller organisasjonens eget registrerte arbeid én gang. Periodene viser hva som er oppgitt om tidligere juridiske enheter, og hva opplysningen bygger på.",
+      "titleHeld": "{name}: arbeidsposter organisasjonen har, per periode",
+      "subtitleHeld": "Arbeid utført under en tidligere juridisk enhet tilhører den enheten og personene som utførte det. {name} har disse postene som dokumentert kontinuitet; de vises ikke som {name}s eget arbeid.",
+      "headerOwn": "{name}s egen periode",
+      "headerEarlier": "Tidligere juridisk enhet: {name}",
+      "headerUnstated": "Perioden «{label}» – juridisk enhet ikke oppgitt",
+      "headerNotPlaced": "Poster som ingen oppgitt periode omfatter",
+      "continuityNotSuccession": "Kontinuitet dokumentert; rettslig suksesjon hevdes ikke.",
+      "totalsHeld": "Alle poster {name} har, på tvers av alle perioder, hver telt én gang – ikke alt er {name}s eget arbeid.",
+      "figures": "{records} poster · {hours} t · {people} personer · {places} steder",
+      "totals": {
+        "records": "Poster",
+        "hours": "Timer",
+        "people": "Personer",
+        "places": "Steder",
+        "projects": "Prosjekter",
+        "span": "Tidsrom"
+      },
+      "spanUnknown": "datoer ikke registrert",
+      "periodsTitle": "Virksomhetens perioder",
+      "noPeriods": "Ingen periode for denne virksomheten er oppgitt ennå. Hvis arbeidet startet under en tidligere juridisk enhet, kan det registreres som en oppgitt periode – selve postene forblir som de er.",
+      "bounds": "{from} – {to}",
+      "notDocumented": "ikke dokumentert",
+      "boundsNotDocumented": "Datoer ikke dokumentert",
+      "legalEntity": "Juridisk enhet på det tidspunktet: {name}",
+      "relation": {
+        "not_asserted": "Ikke oppgitt som samme juridiske enhet – én sammenhengende virksomhetshistorikk.",
+        "same_entity": "Oppgitt som samme juridiske enhet.",
+        "renamed": "Oppgitt som samme juridiske enhet under et tidligere navn.",
+        "successor": "Oppgitt som rettslig forgjenger.",
+        "sold_and_continued_by_new_entity": "Den tidligere enheten ble solgt; virksomheten fortsatte gjennom en ny enhet.",
+        "other": "En annen dokumentert relasjon mellom enhetene."
+      },
+      "basis": {
+        "owner_statement": "Eierens erklæring",
+        "registry_extract": "Registerutskrift",
+        "contract": "Avtale",
+        "other_document": "Dokument"
+      },
+      "periodNoRecords": "Ingen poster er plassert i denne perioden ennå.",
+      "placedBy": "Plassert etter kildeetiketten {labels}: {byLabel} poster; etter dokumenterte datoer: {byDate}.",
+      "notPlaced": "Ikke plassert i en oppgitt periode (kilden har ingen periodeetikett): {figures} · {span}.",
+      "yearsTitle": "Arbeid per år",
+      "undated": "{count, plural, one {# post mangler} other {# poster mangler}} dato og {count, plural, one {telles} other {telles}} bare med i totalene.",
+      "doorsLabel": "Åpne de samme postene",
+      "doors": {
+        "people": "Personer",
+        "projects": "Prosjekter",
+        "places": "Steder"
+      },
+      "workspace": {
+        "note": "Du åpnet historikken for {name} utenfor arbeidsområdet. Personer og prosjekter åpnes i det aktive arbeidsområdet.",
+        "open": "Åpne arbeidsområdet {name}",
+        "opening": "Åpner …",
+        "error": "Arbeidsområdet kunne ikke åpnes."
+      },
+      "structure": "Tidligere arbeid ble utført gjennom {names}.",
+      "structureLater": ", senere ",
+      "structureForClient": "Tidligere arbeid gjennom {names} for oppdragsgiveren {client}.",
+      "structureAsSubcontractor": "Underleverandør: {names} → oppdragsgiver {client}."
+    },
+    "descriptionNotInSource": "Ingen arbeidsbeskrivelse i kilden"
   },
   "workLifecycle": {
     "pending": "Ikke ennå",
     "title": "Hva som skjer med arbeidet du gjør",
     "titleCompany": "Hva som skjer med arbeidet du driver",
     "example": "Eksempel — ikke en ekte person eller ekte data",
-    "hint": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
-    "hintWorkers": "Velg et trinn. Hvert trinn åpner det virkelige stedet i arbeidsområdet ditt.",
     "open": "Åpne i arbeidsområdet ditt",
     "list": "Trinn i arbeidets livssyklus",
     "workers": {
@@ -7374,7 +7533,7 @@
     },
     "noHours": "Poster uten oppgitte timer: {count}. Ukjente timer regnes ikke som null.",
     "undated": "Poster uten oppgitt dato: {count}. De blir i historikken nedenfor.",
-    "periodApart": "{hours} t av summen er periodesummer, holdt adskilt og aldri fordelt på dager eller måneder.",
+    "periodApart": "I tillegg: {hours} t oppgitt som periodesummer — ikke regnet med i timene ovenfor og aldri fordelt på dager eller måneder.",
     "noWorkObject": "Poster uten tilknytning til et prosjekt eller sted plattformen kjenner: {count}. De blir i denne historikken under kildebetegnelsen.",
     "places": {
       "title": "Etter prosjekt eller sted",
@@ -7951,6 +8110,9 @@
       "invites": "Invitasjons- og varslings-e-post",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp og én testsending"
+    },
+    "alerts": {
+      "title": "Eiervarsler og pushvarsler"
     }
   },
   "historyDuplicates": {
@@ -8077,8 +8239,10 @@
       "partnerWithUs": "Bli partner",
       "forAgencies": "Slik fungerer det for byråer",
       "setUpAgency": "Registrer byrået ditt",
+      "setUpInstitution": "For utdanningsinstitusjoner",
       "b2bEnquiry": "Forespørsel om bedriftstjenester (B2B)",
-      "projectEnquiry": "Forespørsel om individuelt prosjekt"
+      "projectEnquiry": "Forespørsel om individuelt prosjekt",
+      "findServices": "Finn personlige tjenester"
     },
     "assistant": "Spør assistenten",
     "start": {
@@ -8093,7 +8257,6 @@
       "close": "Lukk",
       "functions": "Handlinger",
       "professions": "Yrker",
-      "opensNow": "Krever ingen konto",
       "signInWhenOpen": "Krever innlogging",
       "allSectors": "Alle bransjer",
       "fullList": "Full liste"
@@ -8149,6 +8312,53 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "publicServices": {
+    "title": "[EN] Find personal services",
+    "lead": "[EN] Services published by individuals.",
+    "search": "[EN] Search",
+    "query": "[EN] Service or keyword",
+    "country": "Land",
+    "category": "[EN] Category",
+    "clear": "[EN] Clear filters",
+    "unavailable": "[EN] Service search is unavailable",
+    "unavailableHint": "[EN] Please try again later.",
+    "retry": "[EN] Try again",
+    "emptyFiltered": "[EN] No services match these filters",
+    "empty": "[EN] No personal services have been published publicly yet",
+    "results": "[EN] Services",
+    "remote": "[EN] Remote",
+    "pagination": "[EN] Search pages",
+    "previous": "[EN] Previous",
+    "next": "[EN] Next",
+    "page": "[EN] Page {page}",
+    "refine": "[EN] Narrow your search to see more relevant services.",
+    "back": "[EN] All services",
+    "delivery": "[EN] Delivery",
+    "rate": "[EN] Rate",
+    "personalService": "[EN] Personal service",
+    "signInToRequest": "[EN] Sign in to request",
+    "manage": "[EN] Manage this service",
+    "contactUnavailable": "[EN] The request action is unavailable. Please try again later.",
+    "notFound": "[EN] Service not found",
+    "notFoundHint": "[EN] This service is no longer publicly available.",
+    "allCountries": "Alle land"
+  },
+  "serviceOfferings": {
+    "form": {
+      "publicLabel": "[EN] Show this personal service publicly",
+      "publicHint": "[EN] When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
+    },
+    "publicAudience": "[EN] Public search selected",
+    "memberAudience": "[EN] Signed-in members selected"
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Arbeidsregistreringer etter periode",
+        "currentTeamTitle": "Nåværende team"
+      }
     }
   },
   "companyOps": {

@@ -16,6 +16,8 @@ import {
   type ProjectEconomicsData,
   type VarianceState,
 } from "@/lib/economics/economics-model";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 const STATE_TONE: Record<VarianceState, string> = {
   over_budget: "text-state-danger",
@@ -138,17 +140,17 @@ export function ProjectEconomicsPanel({
                     {t(`budgetStatus.${l.status}`)}
                   </span>
                   <div className="ml-auto flex gap-2">
-                    <button type="button" disabled={pending}
+                    <Button type="button" disabled={pending}
                       onClick={() => toggleApprove(l.id, l.status === "approved" ? "draft" : "approved")}
-                      className="rounded-md border border-ink-500 px-2 py-1 text-meta text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                      variant="secondary" size="sm" className="min-h-11"
                       data-testid="economics-toggle-approve">
                       {l.status === "approved" ? t("unapprove") : t("approve")}
-                    </button>
-                    <button type="button" disabled={pending} onClick={() => remove(l.id)}
-                      className="rounded-md border border-ink-500 px-2 py-1 text-meta text-text-muted hover:border-state-danger hover:text-state-danger"
+                    </Button>
+                    <Button type="button" disabled={pending} onClick={() => remove(l.id)}
+                      variant="secondary" size="sm" className="min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger"
                       data-testid="economics-delete">
                       {t("delete")}
-                    </button>
+                    </Button>
                   </div>
                 </li>
               ))}
@@ -159,16 +161,16 @@ export function ProjectEconomicsPanel({
           <div className="flex flex-col gap-2 border-t border-ink-600 pt-3">
             <span className="font-mono text-meta uppercase tracking-label text-text-muted">{t("addHeading")}</span>
             <div className="flex flex-wrap items-center gap-2">
-              <select aria-label={t("categoryLabel")} value={category} disabled={pending}
+              <Select aria-label={t("categoryLabel")} value={category} disabled={pending}
                 onChange={(e) => setCategory(e.target.value as BudgetCategory)}
-                className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary" data-testid="economics-category">
+                className="w-auto max-sm:min-h-11 max-sm:text-base" data-testid="economics-category">
                 {BUDGET_CATEGORIES.map((c) => (<option key={c} value={c}>{t(`categories.${c}`)}</option>))}
-              </select>
-              <input inputMode="decimal" aria-label={t("amountLabel")} value={amount}
+              </Select>
+              <Input inputMode="decimal" aria-label={t("amountLabel")} value={amount}
                 onChange={(e) => setAmount(e.target.value)} placeholder={t("amountPlaceholder")}
-                className="w-32 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary" data-testid="economics-amount" />
+                className="w-32 max-sm:min-h-11 max-sm:text-base" data-testid="economics-amount" />
               <span className="text-xs text-text-muted">EUR</span>
-              <Button type="button" size="sm" disabled={pending || amount.trim() === ""} onClick={save} data-testid="economics-save">
+              <Button className="min-h-11" type="button" size="sm" disabled={pending || amount.trim() === ""} onClick={save} data-testid="economics-save">
                 {pending ? t("saving") : t("save")}
               </Button>
             </div>

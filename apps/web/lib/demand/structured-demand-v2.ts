@@ -526,3 +526,40 @@ export function parseAmountToCents(raw: string): number | null {
   const value = Number(whole) * 100 + Number((frac + "00").slice(0, 2));
   return Number.isSafeInteger(value) ? value : null;
 }
+
+/**
+ * THE ONE MAPPER from a declared demand (the chat's and MCP's shared input
+ * shape) to the `structured_v2` cluster the canonical submit sanitizes.
+ * Both callers used to build it themselves; the MCP copy kept only the
+ * opportunity type, so a need created there lost its start and end day and
+ * its team split (duplication audit AI-2 / simplification plan F7).
+ *
+ * Nothing is inferred: a field appears only when the person stated it. A team
+ * needs both numbers; whether it still explains `team_size` is checked by the
+ * canonical submit (`teamCompositionFor`), never here.
+ */
+export function structuredV2FromDeclaredDemand(input: {
+  readonly opportunityType?: OpportunityType | null;
+  readonly startDate?: string | null;
+  readonly endDate?: string | null;
+  readonly teamCount?: number | null;
+  readonly perTeamSize?: number | null;
+}): Record<string, unknown> | undefined {
+  const team =
+    input.teamCount != null && input.perTeamSize != null
+      ? { count: input.teamCount, per_team: input.perTeamSize }
+      : null;
+  if (!input.opportunityType && !input.startDate && !input.endDate && !team) return undefined;
+  return {
+    ...(input.opportunityType ? { opportunity_type: input.opportunityType } : {}),
+    ...(team ? { team } : {}),
+    ...(input.startDate || input.endDate
+      ? {
+          time: {
+            ...(input.startDate ? { start_earliest: input.startDate } : {}),
+            ...(input.endDate ? { end_date: input.endDate } : {}),
+          },
+        }
+      : {}),
+  };
+}

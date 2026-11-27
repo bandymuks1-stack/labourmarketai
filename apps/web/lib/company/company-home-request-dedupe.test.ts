@@ -467,10 +467,19 @@ describe("one /dashboard/company render reads each shared fact ONCE", () => {
     // The gated reviewable set: decisions count + brief queue (+ every
     // project's readiness pulse on the panel path) (was 4).
     expect(rpcCount("reviewable_journal_entry_ids")).toBe(1);
-    // Teams: the partners strip + the workforce read behind the conflicts
-    // count (was 2 probes + 2 team lists).
+    // Teams: the partners strip + the workforce read share one active list
+    // and one disbanded-history list, even when there are no active brigades.
     expect(rpcCount("get_team_capability_summary_v1")).toBe(1);
-    expect(fromCount("organizations", '"organization_type","team"')).toBe(1);
+    const teamReads = log.filter(
+      (c) => c.kind === "from" && c.name === "organizations" && c.ops.includes('eq(["organization_type","team"])'),
+    );
+    expect(teamReads).toHaveLength(2);
+    expect(teamReads.filter((c) => c.ops.includes('is(["archived_at",null])'))).toHaveLength(1);
+    expect(teamReads.filter((c) => c.ops.includes('not(["archived_at","is",null])'))).toHaveLength(1);
+    for (const read of teamReads) {
+      expect(read.ops).toContain(`eq(["owner_profile_id","${USER}"])`);
+      expect(read.ops).toContain("limit([20])");
+    }
     // Agency bridge: chat starter + opening brief + bell (was 3 / 3 / 2).
     expect(rpcCount("list_shared_requests_for_agency_v1")).toBe(1);
     expect(rpcCount("list_agency_offer_progress_v1")).toBe(1);
@@ -623,7 +632,11 @@ describe("the request-scoped readers keep their meaning", () => {
     expect(fromCount("worker_absence_scheduling")).toBe(3);
   });
 
-  it("a failed reviewable-set read is still UNKNOWN for the count and no queue for the brief", async () => {
+  // ORG-7 (SEP-7): the queue used to answer a failed read with `[]`, so its
+  // readers said "nothing to review". It now throws; every caller (the quick
+  // page, ConfirmPulse, the today view, the opening brief) catches and names
+  // the unknown state.
+  it("a failed reviewable-set read is UNKNOWN for the count and a failure, never an empty queue", async () => {
     const original = requestClient.rpc;
     requestClient.rpc = ((name: string) => {
       log.push({ kind: "rpc", name, ops: [], single: false });
@@ -633,7 +646,7 @@ describe("the request-scoped readers keep their meaning", () => {
       const { countReviewablePendingEntries } = await import("@/lib/journal/reviewable-count");
       const { fetchQuickReviewQueue } = await import("@/lib/journal/review-queue");
       expect(await countReviewablePendingEntries()).toBeNull();
-      expect(await fetchQuickReviewQueue()).toEqual([]);
+      await expect(fetchQuickReviewQueue()).rejects.toThrow("review_queue_unavailable:reviewable_ids");
       expect(rpcCount("reviewable_journal_entry_ids")).toBe(1);
     } finally {
       requestClient.rpc = original;

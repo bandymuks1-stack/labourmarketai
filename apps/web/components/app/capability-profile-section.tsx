@@ -10,6 +10,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
+import { SELF_DECLARED_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import type { ProfileSkillClaimRow } from "@/lib/profile/profile-skill-claims";
 import type { SkillPresentation } from "@/lib/cv-export/skill-presentation";
 import {
@@ -29,7 +31,7 @@ import {
   skillGroupLabelKey,
 } from "@/lib/skills/skill-groups";
 import { formatUtcDate } from "@/lib/time/display";
-import { visibleSkillClaims } from "@/lib/profile/visible-skill-claims";
+import { skillClaimChips, visibleSkillClaims } from "@/lib/profile/visible-skill-claims";
 
 /**
  * Unified CV / capability surface (replaces the disconnected
@@ -96,8 +98,12 @@ export function CapabilityProfileSection({
   // Derived from the prop on every render (lib/profile/visible-skill-claims):
   // a refresh after an add must show the new chip. Only the ids removed in
   // this session are local state, hidden until the refresh drops them.
+  // A claim the save CONFIRMED shows at once (useSavedRows, as the experience
+  // rows below): the refreshed page commits as one piece after its slowest
+  // read, so a chip that waited for it could miss 30 s (P-13, run 44637832323).
+  const { rows: claimsWithSaved, showSaved: showSavedClaim } = useSavedRows(claims);
   const [removedClaimIds, setRemovedClaimIds] = useState<ReadonlySet<string>>(() => new Set());
-  const savedClaims: ProfileSkillClaimRow[] = visibleSkillClaims(claims, removedClaimIds);
+  const savedClaims: ProfileSkillClaimRow[] = visibleSkillClaims(claimsWithSaved, removedClaimIds);
   const [error, setError] = useState<string | null>(null);
   const [isDeleting, startDelete] = useTransition();
   const [manualLabel, setManualLabel] = useState("");
@@ -122,19 +128,9 @@ export function CapabilityProfileSection({
   // the person saved under that spelling — an explicit act, never silent);
   // without one, the raw rows. Claims already folded INTO a catalogued
   // skill are not repeated here — they are that skill, shown above with
-  // its figures.
-  const savedIds = new Set(savedClaims.map((c) => c.id));
-  const claimItems: { key: string; label: string; ids: string[]; variants: readonly string[] }[] =
-    skillPresentation
-      ? (skillPresentation.groups.find((g) => g.tier === "self_stated")?.items ?? [])
-          .map((it) => ({
-            key: it.key,
-            label: it.name,
-            ids: it.claimIds.filter((id) => savedIds.has(id)),
-            variants: it.variants,
-          }))
-          .filter((it) => it.ids.length > 0)
-      : savedClaims.map((c) => ({ key: c.id, label: c.label, ids: [c.id], variants: [c.label] }));
+  // its figures. A claim saved after the presentation was built shows as its
+  // own chip until the refresh folds it (lib/profile/visible-skill-claims).
+  const claimItems = skillClaimChips(skillPresentation, savedClaims);
   const foldedIntoSkills = skillPresentation
     ? skillPresentation.claimsFoldedIntoSkills
     : 0;
@@ -155,7 +151,7 @@ export function CapabilityProfileSection({
     setError(null);
     startAdd(() => {
       saveProfileSkillClaimsAction([label])
-        .then(() => {
+        .then((stored) => {
           setManualLabel("");
           // router.refresh() re-fetches the server-rendered claims
           // list so the new chip appears in this section without a
@@ -163,6 +159,10 @@ export function CapabilityProfileSection({
           // constraint + `ignoreDuplicates: true` in the server
           // action handle the no-duplicate guarantee for us.
           router.refresh();
+          // The refreshed page commits only after its slowest read, so the
+          // rows the server read back after the insert show the new claim now.
+          const shown = new Set(claims.map((c) => c.id));
+          for (const row of stored) if (!shown.has(row.id)) showSavedClaim(row);
         })
         .catch((e: unknown) => {
           console.error("[capability-profile] add failed", e);
@@ -183,6 +183,10 @@ export function CapabilityProfileSection({
   const [expEndYear, setExpEndYear] = useState("");
   const [expEndMonth, setExpEndMonth] = useState("");
   const [expCurrent, setExpCurrent] = useState(false);
+  // What the engagement WAS. The form used to send nothing, so a study
+  // placement or volunteering typed here was stored as employment. Same
+  // closed list the chat form and the save function use.
+  const [expKind, setExpKind] = useState<string>("employee");
   const [expError, setExpError] = useState<string | null>(null);
   const [isSavingExp, startSaveExp] = useTransition();
 
@@ -264,6 +268,7 @@ export function CapabilityProfileSection({
         start: startPart,
         end: endPart,
         isCurrent: expCurrent,
+        relationship: expKind,
       })
         .then((res) => {
           if (res.ok) {
@@ -272,7 +277,7 @@ export function CapabilityProfileSection({
               showSaved({
                 id: res.id,
                 orgName: title,
-                relationship: "employee",
+                relationship: expKind,
                 startedAt: res.startedAt ?? null,
                 endedAt: res.endedAt ?? null,
                 title,
@@ -286,6 +291,7 @@ export function CapabilityProfileSection({
             setExpEndYear("");
             setExpEndMonth("");
             setExpCurrent(false);
+            setExpKind("employee");
           } else if (res.code === "needs_migration") {
             setExpError(t("expNeedsMigration"));
           } else if (res.code === "invalid") {
@@ -647,6 +653,21 @@ export function CapabilityProfileSection({
               placeholder={t("expTitlePlaceholder")}
               data-testid="add-experience-title"
             />
+          </div>
+          <div className="flex flex-col gap-1.5">
+            <Label htmlFor="add-experience-kind">{t("expKindLabel")}</Label>
+            <Select
+              id="add-experience-kind"
+              value={expKind}
+              onChange={(e) => setExpKind(e.target.value)}
+              data-testid="add-experience-kind"
+            >
+              {SELF_DECLARED_RELATIONSHIPS.map((slug) => (
+                <option key={slug} value={slug}>
+                  {tRel(slug)}
+                </option>
+              ))}
+            </Select>
           </div>
           {/* One column on a phone, so a year field is never squeezed to a
               letter; two from the small breakpoint up. */}

@@ -18,6 +18,7 @@ import {
   PROJECT_TITLE_MAX,
   PROJECT_TITLE_MIN,
 } from "@/lib/projects/create-project-core";
+import { PROJECT_CITY_MAX } from "@/lib/projects/project-title-limits";
 import {
   canTransition,
   isTerminalStatus,
@@ -539,7 +540,7 @@ const projectsList: CapabilityDescriptor = {
 const projectCreateFields = z
   .object({
     title: z.string().trim().min(PROJECT_TITLE_MIN).max(PROJECT_TITLE_MAX),
-    city: z.string().trim().min(1).max(200).nullish(),
+    city: z.string().trim().min(1).max(PROJECT_CITY_MAX).nullish(),
     /** ISO-3166 alpha-2 (or a country name) of the project's place. Required
      *  when `city` is given; the draft names it as missing otherwise. */
     country: z.string().trim().min(2).max(80).nullish(),

@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
+import { readReviewableJournalEntryIds, reviewableIdsOf } from "@/lib/journal/reviewable-count";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import { reviewerHoursOf, type ReviewerHours } from "@/lib/journal/reviewer-hours";
 import { resolveWorkDay, type WorkTimeMetricRow } from "@/lib/journal/work-time";
@@ -44,6 +44,10 @@ export type QuickQueueEntry = {
   organizationId: string | null;
   /** Its display name, for labelling a queue that spans organizations. Null: unreadable. */
   organizationName: string | null;
+  /** The project the worker recorded the entry for. Null: recorded without one. */
+  projectId: string | null;
+  /** Its title under the caller's RLS. Null: no project, or the title is unreadable. */
+  projectName: string | null;
   createdAt: string;
   /** The day the work happened — the SAME rule as the journal and the
    *  calendar (`resolveWorkDay`): the stated `work_date`, else the filing day.
@@ -78,20 +82,16 @@ function organizationOf(embed: unknown): { id: string | null; name: string | nul
 export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const supabase = await createClient();
 
-  // Gated reviewable set — degrades to an empty queue until applied (honest).
-  // The ONE `reviewable_journal_entry_ids` read, shared with the decisions
-  // count in the same render (request-scoped, see reviewable-count.ts).
-  let reviewableIds: string[] = [];
-  const { data: idRows } = await readReviewableJournalEntryIds();
-  if (Array.isArray(idRows)) {
-    reviewableIds = idRows
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((r: any) =>
-        typeof r === "string"
-          ? r
-          : (r?.reviewable_journal_entry_ids ?? r?.id ?? null),
-      )
-      .filter((v: unknown): v is string => typeof v === "string");
+  // Gated reviewable set: the ONE `reviewable_journal_entry_ids` read, shared
+  // with the decisions count in the same render (request-scoped, see
+  // reviewable-count.ts), parsed by the shared `reviewableIdsOf`. `[]`: none
+  // wait, or the RPC is not installed here (an honest empty queue). Null: the
+  // read FAILED — thrown like the entries read below, never returned as
+  // "nothing to review" (SEP-7; duplication audit ORG-7: this read used to drop
+  // its error and answer an empty queue while the inbox said "could not load").
+  const reviewableIds = reviewableIdsOf(await readReviewableJournalEntryIds());
+  if (reviewableIds === null) {
+    throw new Error("review_queue_unavailable:reviewable_ids");
   }
   if (reviewableIds.length === 0) return [];
 
@@ -103,7 +103,7 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const { data: rows, error: rowsError } = await supabase
     .from("journal_entries")
     .select(
-      `id, original_text, created_at, worker_id, workers(${WORKER_NAME_FIELDS}), engagement_contexts(organization_id, organizations(display_name, legal_name))`,
+      `id, original_text, created_at, worker_id, project_id, workers(${WORKER_NAME_FIELDS}), engagement_contexts(organization_id, organizations(display_name, legal_name))`,
     )
     .in("id", reviewableIds)
     .order("created_at", { ascending: true });
@@ -178,6 +178,16 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
     metricRows.set(m.entry_id, list);
   }
 
+  // The entries' project titles, one bounded read under the caller's RLS. A
+  // failed or refused read leaves the titles unknown (null); the queue itself
+  // is never withheld for a label.
+  const projectIds = [...new Set(entries.map((r) => r.project_id).filter(Boolean))] as string[];
+  const projectTitles = new Map<string, string | null>();
+  if (projectIds.length > 0) {
+    const prRes = await supabase.from("projects").select("id, title").in("id", projectIds);
+    for (const p of prRes.data ?? []) projectTitles.set(p.id, p.title ?? null);
+  }
+
   return entries.map((r) => {
     const workerName = resolveWorkerName(r.workers as WorkerNameRow);
     const depth = recognizeEntryDepth(r.original_text ?? "");
@@ -195,6 +205,8 @@ export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
       workerName,
       organizationId: organizationOf(r.engagement_contexts).id,
       organizationName: organizationOf(r.engagement_contexts).name,
+      projectId: r.project_id ?? null,
+      projectName: r.project_id ? (projectTitles.get(r.project_id) ?? null) : null,
       createdAt: r.created_at,
       workDay: resolveWorkDay(metricRows.get(r.id) ?? [], r.created_at),
       hours: reviewerHoursOf({ id: r.id, createdAt: r.created_at, metrics: metricRows.get(r.id) ?? [] }),

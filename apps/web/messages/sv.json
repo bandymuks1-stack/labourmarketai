@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Språk för meddelanden",
+    "intro": "Arbetsmeddelanden och instruktioner som skrivits på ett annat språk visas översatta till det här språket. Behåll gränssnittets språk om du inte läser ett annat språk bättre.",
+    "label": "Jag läser meddelanden på",
+    "sameAsInterface": "Samma som gränssnittet",
+    "saved": "Sparat.",
+    "error": "Ändringen kunde inte sparas och har ångrats. Försök igen.",
+    "unavailable": "Den här inställningen är inte tillgänglig än — tills dess följer meddelandena gränssnittets språk."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Granska och godkänn",
@@ -51,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktuell efterfrågan på marknaden",
-    "subtitleAgency": "Vad den öppna marknaden efterfrågar just nu – samma utbud som dina kandidater ser på tavlan.",
-    "subtitleInstitution": "Vad den öppna marknaden efterfrågar just nu – de inriktningar dina deltagare är på väg mot.",
     "active": "{count} aktuella lediga tjänster",
     "employers": "{count} arbetsgivare",
     "filtered": "{profession}: {count} lediga tjänster",
@@ -173,7 +180,43 @@
       "actionPhone": "Ring",
       "actionWebsite": "Öppna företagets webbplats",
       "heroContact": "Så kommer du i kontakt",
-      "provenance": "Företaget har själv fyllt i den här sidan."
+      "provenance": "Företaget har själv fyllt i den här sidan.",
+      "living": {
+        "activityTitle": "Arbetsregistreringar per period",
+        "eyebrow": "Levande CV",
+        "figures": {
+          "years": "period som täcks av poster (år)",
+          "hours": "registrerade timmar",
+          "people": "{count, plural, one {person har arbetat här} other {personer har arbetat här}}",
+          "projects": "{count, plural, one {projekt} other {projekt}}",
+          "places": "{count, plural, one {arbetsplats} other {arbetsplatser}}",
+          "team": "{count, plural, one {teammedlem} other {teammedlemmar}}"
+        },
+        "doTitle": "Kompetenser",
+        "team": "{count, plural, one {# person i teamet} other {# personer i teamet}}",
+        "experienceTitle": "Arbetade timmar",
+        "confirmedLabel": "Bekräftat",
+        "confirmedSource": "Registrerat av arbetstagaren, godkänt av organisationen",
+        "recordedLabel": "Egna registreringar",
+        "recordedSource": "Organisationens registreringar, inte bekräftade av någon annan part",
+        "pending": "{hours} väntar på godkännande",
+        "hours": "{hours} tim",
+        "running": "Pågående",
+        "completed": "Avslutade",
+        "clients": "Arbete utfört åt: {names}",
+        "tabs": {
+          "overview": "Översikt",
+          "projects": "Projekt",
+          "experience": "Erfarenhet",
+          "gallery": "Galleri",
+          "team": "Personal"
+        },
+        "pendingLabel": "Väntar på godkännande",
+        "ringLabel": "{share} % av journaltimmarna bekräftade",
+        "open": "Öppna Levande CV",
+        "clientsMore": "Arbete utfört åt: {names} och {count} till",
+        "currentTeamTitle": "Nuvarande team"
+      }
     }
   },
   "marketplaceListings": {
@@ -202,7 +245,6 @@
     "formLabelLabel": "Plats",
     "formLabelPlaceholder": "Stad eller region",
     "formPriceLabel": "Pris",
-    "formPricePlaceholder": "t.ex. 450 €/månad eller enligt överenskommelse",
     "priceHint": "Priset är valfritt och beskrivande. Ingen betalning tas emot här.",
     "save": "Spara",
     "saving": "Sparar…",
@@ -1146,6 +1188,7 @@
     "calendar": "Kalender",
     "addEntry": "Lägg till post",
     "details": "Personuppgifter",
+    "background": "Språk & utbildning",
     "improve": "Vad du kan förbättra",
     "capabilities": "Färdigheter och arbetshistorik",
     "fullRecordsInCv": "Alla arbetsposter",
@@ -2054,6 +2097,7 @@
     "addError": "Kunde inte lägga till. Försök igen.",
     "addExperienceTitle": "Lägg till arbetslivserfarenhet",
     "expTitleLabel": "Yrkestitel",
+    "expKindLabel": "Typ av uppdrag",
     "expTitlePlaceholder": "t.ex. svetsare, sjuksköterska, lagerarbetare, utvecklare",
     "expStartLabel": "Från (månad/år)",
     "expEndLabel": "Till (månad/år)",
@@ -2074,7 +2118,6 @@
       "eyebrow": "FÖRETAGETS ARBETSYTA",
       "programs": {
         "title": "Program och grupper",
-        "subtitle": "Vad du undervisar i, riktat mot en inriktning på arbetsmarknaden, och grupperna av deltagare inom det. Efterfrågan visar aktuella offentliga lediga tjänster för den inriktningen.",
         "empty": "Inga program ännu. Lägg till det första och rikta det mot den arbetsinriktning det leder till.",
         "addProgram": "Lägg till ett program",
         "noDirection": "Ingen arbetsinriktning angiven",
@@ -2210,7 +2253,7 @@
         },
         "noCompany": {
           "title": "Starta din företagsprofil",
-          "body": "Du har ingen företagsprofil ännu. Skapa en – den är aktiv och användbar direkt, utan att vänta på godkännande.",
+          "body": "Du har ingen företagsprofil ännu. Skapa en: du kan använda den direkt. Arbetstagare ser behoven du publicerar när företaget är verifierat.",
           "cta": "Starta företagsinställningen"
         },
         "personalSpace": {
@@ -2245,7 +2288,7 @@
         "formTitle": "Begäran om företagsprofil",
         "formTitleCreate": "Skapa företagsprofil",
         "formTitleEdit": "Redigera företagsprofil",
-        "formSubtitle": "Skapa din organisationsprofil från ditt personliga konto. Den är aktiv och användbar direkt – utan att vänta på godkännande. Verifiering är ett starkare, separat förtroendesteg.",
+        "formSubtitle": "Skapa din organisationsprofil från ditt personliga konto. Du kan använda den direkt: projekt, team, arbetsjournal. Arbetstagare ser behoven du publicerar när ditt företag är verifierat; begär verifiering nedan.",
         "existingHeading": "Företagsprofil",
         "legalName": "Företagets juridiska namn",
         "legalNameHelp": "Obligatoriskt. 2–200 tecken.",
@@ -2276,6 +2319,7 @@
         },
         "statusInvalidCountry": "Välj ett land i listan – andra värden stöds inte ännu.",
         "registrationCode": "Organisationsnummer/registreringskod",
+        "optionalDetails": "Registrering, kontakt och roll",
         "registrationCodeHelp": "Valfritt. Hjälper till att verifiera företaget senare.",
         "address": "Adress/plats",
         "addressPlaceholder": "t.ex. Storgatan 1, Vilnius",
@@ -2299,7 +2343,7 @@
         "agencyConnectionPending": "Inbjudan accepterad. Ett bemanningsföretag vill ansluta till ditt företag – skapa först din företagsprofil; anslutningsförfrågan väntar sedan på sidan Partner, där du bekräftar den med det här företaget.",
         "legalLockedNotice": "Det här företaget är verifierat. Dess juridiska uppgifter (juridiskt namn, organisationsnummer, land och registrerad adress) är låsta här och kan inte skrivas över – kontakta supporten för att begära en juridisk ändring. Du kan fortfarande uppdatera kontaktuppgifter, webbplats, företagstyp och din roll.",
         "saveDraft": "Spara företag",
-        "submitRequest": "Begär manuell granskning (valfritt)",
+        "submitRequest": "Begär verifiering (arbetstagare ser dina behov när företaget är verifierat)",
         "statusDraftSaved": "Företaget har sparats – det är aktivt och användbart nu.",
         "statusSubmitted": "Manuell granskning begärd (valfritt). Ditt företag går att använda under tiden.",
         "statusNeedsMigration": "Åtgärden kunde inte slutföras. Försök igen.",
@@ -2320,7 +2364,7 @@
           "draft": "Utkast. Spara för att aktivera ditt företag – det blir användbart direkt.",
           "active_unverified": "Aktivt och användbart nu. Grundläggande automatiska kontroller har godkänts. Ännu inte identitetsverifierat – det är ett separat, starkare steg. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "needs_checks": "Aktivt och användbart, men en grundläggande kontroll behöver åtgärdas (t.ex. lägg till ditt land eller rätta en felaktigt formaterad kod/webbplats/e-post). Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
-          "pending_verification": "Du har begärt en valfri manuell granskning. Ditt företag är fullt användbart medan den väntar. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
+          "pending_verification": "Du har begärt verifiering. Ditt företag är fullt användbart medan den väntar. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "unverified": "Inte verifierat. Du kan fortsätta använda ditt företag som vanligt. Förfrågningar du publicerar visas för arbetstagare först när ditt företag är verifierat.",
           "verified": "Verifierat – en starkare förtroendestatus som ges först efter en verklig kontroll."
         },
@@ -2970,8 +3014,7 @@
           "label": "Hur många arbetstagare behövs"
         },
         "salary": {
-          "label": "Lön (€)",
-          "placeholder": "T.ex. 2200"
+          "label": "Lön (€)"
         },
         "countries": {
           "label": "Föredragna länder (ISO-koder)",
@@ -4267,6 +4310,9 @@
         "admin": "Administratör"
       },
       "subcopy": "En profil för din arbetslivserfarenhet och dina möjligheter — i nästa steg berättar du vad du har kommit hit för.",
+      "inviteFrom": "{inviter} bjuder in dig att gå med i {organization}.",
+      "inviteTo": "Du är inbjuden att gå med i {organization}.",
+      "inviteNext": "När du registrerar dig går du med i {organization}.",
       "google_label": "Fortsätt med Google",
       "google_redirecting": "Omdirigerar...",
       "divider": "eller",
@@ -4277,7 +4323,6 @@
       "confirm_password_label": "Bekräfta lösenord",
       "submit_label": "Registrera dig",
       "signing": "Skapar...",
-      "disclaimer": "Din återkoppling formar produkten – berätta vad som fungerar och vad som saknas.",
       "has_account": "Har du redan ett konto?",
       "login_link": "Logga in",
       "error_generic": "Något gick fel. Försök igen om en stund.",
@@ -4386,7 +4431,7 @@
           },
           "education": {
             "title": "Jag representerar en utbildningsanordnare",
-            "desc": "Bjud in studerande, se deras deltagande och koppla dem till praktik och jobb."
+            "desc": "Bjud in studerande, driv program och följ deras praktik och resultat."
           }
         },
         "heading": "Börjar du som person eller som företag?",
@@ -4635,7 +4680,6 @@
               "hoursPerWorker": "Timmar per arbetstagare",
               "totalHours": "Totalt antal timmar (valfri överstyrning)",
               "rate": "Tim- / dagspris",
-              "ratePlaceholder": "t.ex. 20",
               "country": "Land / plats",
               "materials": "Material",
               "equipment": "Utrustning / verktyg",
@@ -5079,7 +5123,15 @@
         "event_invitation_accepted": "Någon har tackat ja till din inbjudan",
         "event_weekly_digest_profile_completion": "För att se jobb som passar dig, bekräfta vilket arbete du utför",
         "event_weekly_digest_journal": "Veckans sammanfattning av din arbetsjournal är klar",
-        "event_history_link_offered": "En organisation har erbjudit sig att koppla din registrerade arbetshistorik till ditt konto"
+        "event_history_link_offered": "En organisation har erbjudit sig att koppla din registrerade arbetshistorik till ditt konto",
+        "event_team_offer_received": "Ett team har erbjudit sig för ert behov",
+        "event_team_offer_answered": "Ert teams erbjudande har besvarats",
+        "event_team_offer_answered_accepted": "Ert teams erbjudande har accepterats",
+        "event_team_offer_answered_declined": "Ert teams erbjudande har avböjts",
+        "event_candidate_offer_received": "En byrå har föreslagit en kandidat för ert behov",
+        "event_candidate_offer_answered": "Er föreslagna kandidat har besvarats",
+        "event_candidate_offer_answered_accepted": "Er föreslagna kandidat har accepterats",
+        "event_candidate_offer_answered_declined": "Er föreslagna kandidat har avböjts"
       },
       "label": "Mina aviseringar",
       "emptyTitle": "Inget kräver din uppmärksamhet just nu.",
@@ -5257,36 +5309,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Varför företag",
-      "headline": "Utbud du kan agera på",
-      "items": [
-        {
-          "title": "Förklarad matchningsriktning",
-          "desc": "Varje matchningssignal visar skälen bakom den."
-        },
-        {
-          "title": "Arbetskraft över gränserna",
-          "desc": "Utbud från alla marknader där vi verkar, på ett ställe."
-        },
-        {
-          "title": "Inga ogenomskinliga mellanhänder",
-          "desc": "Du ser och äger relationen."
-        },
-        {
-          "title": "Färdighetsposter + matchningssignaler",
-          "desc": "Anställ på belägg, inte på påståenden."
-        },
-        {
-          "title": "Utbudssignaler",
-          "desc": "Se arbetstagarnas angivna tillgänglighet när profilerna uppdateras."
-        },
-        {
-          "title": "Direktkontakt",
-          "desc": "Du äger relationen med arbetstagaren."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "Vanliga frågor för företag",
       "headline": "Raka svar",
@@ -5297,7 +5319,7 @@
         },
         {
           "q": "Vad kostar det?",
-          "a": "Priserna publiceras på prissidan: en aktiv tjänst per organisation är gratis; fler tjänster kräver organisationsplanen, som aktiveras i ditt konto. Att skicka in ett behov av arbetskraft är gratis."
+          "a": "Att registrera sig och skicka in ett behov av arbetskraft är gratis. Den betalda organisationsplanen, dess pris och om den kan aktiveras i dag visas på prissidan."
         },
         {
           "q": "Kan vi filtrera på plats?",
@@ -5355,36 +5377,6 @@
         }
       ]
     },
-    "features": {
-      "eyebrow": "Varför bemanningsföretag",
-      "headline": "Hävstång, inte förlorad kontroll",
-      "items": [
-        {
-          "title": "Hantera din pool",
-          "desc": "Arbetstagare, tillgänglighet och status på ett ställe."
-        },
-        {
-          "title": "Lägg upp åt kunder",
-          "desc": "Förmedla behov utan att förlora relationen."
-        },
-        {
-          "title": "Matchningsriktning",
-          "desc": "Placera rätt personer snabbare."
-        },
-        {
-          "title": "Synlighetsinställningar",
-          "desc": "Offentligt, bara bemanningsföretag eller direkt — du bestämmer."
-        },
-        {
-          "title": "Räckvidd över gränserna",
-          "desc": "Kunder och arbetstagare på alla marknader där vi verkar."
-        },
-        {
-          "title": "Väx din verksamhet",
-          "desc": "Insikter om kapacitet när efterfrågan förändras."
-        }
-      ]
-    },
     "faq": {
       "eyebrow": "Vanliga frågor för bemanningsföretag",
       "headline": "Raka svar",
@@ -5395,7 +5387,7 @@
         },
         {
           "q": "Vad kostar det för bemanningsföretag?",
-          "a": "Ett bemanningsföretag är en organisation och använder samma planer: en aktiv tjänst är gratis, fler kräver organisationsplanen från prissidan. Det finns ingen separat taxa för bemanningsföretag."
+          "a": "Ett bemanningsföretag är en organisation och använder samma planer. Att registrera sig och ange den arbetskraft ni kan erbjuda är gratis; den betalda organisationsplanen, dess pris och om den kan aktiveras i dag finns på prissidan. Det finns ingen separat taxa för bemanningsföretag."
         },
         {
           "q": "Kan vi styra arbetstagarnas synlighet?",
@@ -5754,7 +5746,7 @@
     "titleAccent": "satta rättvist.",
     "subcopyLive": "Priserna gäller. Aktivering sker i organisationskontot genom en säker Stripe-betalning; inget debiteras på den här sidan.",
     "subcopy": "Priserna är inte slutgiltiga, och fakturering startas aldrig åt dig på den här sidan. Nivåerna nedan beskriver omfattning; aktiveringen är manuell – hör av dig så bekräftar vi pris och omfattning med dig innan något startar.",
-    "subcopyConfirmed": "Priserna är bekräftade. Aktivering online är inte öppen ännu – gå med i väntelistan så kontaktar vi dig för att starta din organisation manuellt; inget debiteras på den här sidan.",
+    "subcopyConfirmed": "Registrering är gratis för personer och för organisationer, och det är gratis att publicera personalbehov. Det finns en betald plan, den visas nedan. Den kan ännu inte köpas online, och inget debiteras på den här sidan.",
     "trialNote": "En organisations första prenumeration börjar med en 14 dagars provperiod. Därefter debiteras kortet månadspriset, och du kan avsluta innan provperioden tar slut.",
     "planCta": "Gå med i väntelistan för den här planen",
     "featuresLabel": "Ingår",
@@ -5764,6 +5756,12 @@
         "tagline": "För att komma igång",
         "features": [
           "1 aktiv position",
+          "Matchningslista och kontakt med kandidater",
+          "Bokningar, projekt, instruktioner",
+          "Arbetsbekräftelse från arbetsgivaren"
+        ],
+        "featuresClosed": [
+          "Publicera personalbehov",
           "Matchningslista och kontakt med kandidater",
           "Bokningar, projekt, instruktioner",
           "Arbetsbekräftelse från arbetsgivaren"
@@ -5821,8 +5819,8 @@
     ],
     "priceState": {
       "draft_pricing": "Priserna är inte slutgiltiga – inget kan köpas ännu.",
-      "owner_confirmed": "Priserna är bekräftade. Inget debiteras på den här sidan.",
-      "owner_confirmed_closed": "Priserna är bekräftade. Onlinebetalning är inte öppen ännu; inget debiteras på den här sidan."
+      "owner_confirmed": "Priserna är bekräftade. Inget debiteras på den här sidan. Priserna anges exklusive moms.",
+      "owner_confirmed_closed": "Onlinebetalning är inte öppen ännu; inget debiteras på den här sidan. Priserna anges exklusive moms."
     },
     "individual": {
       "name": "Särskilda krav",
@@ -5835,7 +5833,12 @@
     "pricePerMonth": "€{price}/månad",
     "ctaStartFree": "Kom igång gratis i ditt organisationskonto",
     "ctaSubscribe": "Aktivera i ditt organisationskonto",
-    "faqBillingClosed": "Onlinebetalning är inte öppen för allmänheten ännu, så inget kan köpas här. Registrering och en aktiv tjänst är gratis. För betalt arbete betjänas de första kunderna direkt och priset bekräftas med dig innan något börjar."
+    "faqClosed": [
+      "Varje organisation – arbetsgivare, bemanningsföretag, entreprenör eller utbildningsanordnare – får samma produkt och samma enda betalda plan. Onlinebetalning är inte öppen ännu, så inget debiteras i dag.",
+      "Ja. Personer förblir kostnadsfria, och det är gratis att registrera en organisation och publicera dess personalbehov.",
+      "Onlinebetalning är inte öppen för allmänheten ännu, så inget kan köpas här. Registrering och publicering av personalbehov är gratis.",
+      "Organisationsplanen har ingen fast gräns för aktiva positioner. Onlinebetalning är inte öppen ännu; en gräns i gratisplanen gäller bara för en organisation vars konto visar fakturering som aktiv, och då visar kontot gränsen. Vanligt skydd mot missbruk, till exempel begränsning av antalet förfrågningar, gäller fortfarande."
+    ]
   },
   "privacySelfService": {
     "title": "Integritet och dina uppgifter",
@@ -5866,9 +5869,9 @@
       "confirmedTitle": "Raderingen är bekräftad",
       "confirmedBody": "Systemet raderar kontot inom de närmaste minuterna och skickar en bekräftelse till kontots e-postadress. Om något behöver granskas meddelar vi dig.",
       "inReview": "Den automatiska raderingen är pausad för granskning: kontot innehåller uppgifter som kan behöva sparas enligt lag eller som rör andra personer. Du får beslutet och skälen för det via e-post inom en månad. Under tiden visas din profil inte i sökningar.",
-      "confirmLabelWaiting": "Jag förstår att kontot och dess uppgifter raderas oåterkalleligt 30 dagar efter bekräftelsen, om jag inte avbryter före dess.",
-      "confirmStepBodyWaiting": "Din begäran om radering av kontot är inlämnad. Bekräfta den – kontot sparas i 30 dagar, och du kan avbryta på den här sidan under den tiden. Därefter raderar systemet kontot automatiskt och mejlar dig en bekräftelse.",
-      "confirmedBodyWaiting": "Kontot raderas om 30 dagar. Fram till dess kan du avbryta på den här sidan. När det har raderats skickar vi en bekräftelse till kontots e-postadress.",
+      "confirmLabelWaiting": "Jag förstår att kontot och dess uppgifter raderas oåterkalleligt senast 30 dagar efter bekräftelsen och senast en månad efter min begäran, om jag inte avbryter före dess.",
+      "confirmStepBodyWaiting": "Din begäran om radering av kontot är inlämnad. Bekräfta den – kontot sparas i högst 30 dagar (aldrig längre än en månad från din begäran), och du kan avbryta på den här sidan under den tiden. Därefter raderar systemet kontot automatiskt och mejlar dig en bekräftelse.",
+      "confirmedBodyWaiting": "Kontot raderas inom 30 dagar, och senast en månad efter din begäran. Fram till dess kan du avbryta på den här sidan. När det har raderats skickar vi en bekräftelse till kontots e-postadress.",
       "status": {
         "pending": "Din begäran om radering av kontot är inlämnad.",
         "pendingConfirmed": "Raderingen av kontot är bekräftad och schemalagd.",
@@ -5876,7 +5879,7 @@
         "inProgress": "Raderingen av kontot pågår redan – den kan inte längre avbrytas.",
         "done": "Kontot har raderats.",
         "submittedAt": "Inlämnad: {date}",
-        "scheduledAt": "Kontot raderas den {date} (efter en väntetid på 30 dagar).",
+        "scheduledAt": "Kontot raderas den {date}.",
         "cancelUntil": "Fram till dess kan du avbryta.",
         "loadError": "Det gick inte att läsa in status för radering av kontot. Uppdatera sidan och försök igen."
       },
@@ -6027,6 +6030,8 @@
             "Stripe — betalningshantering för betalda plattformstjänster. När en organisation påbörjar en betalning får Stripe den betalande användarens e-postadress och en intern kontoidentifierare; kortuppgifter anges på Stripes egen betalsida och lagras inte av plattformen.",
             "Google, Facebook (Meta) och LinkedIn — endast om du väljer att logga in med dem, enligt beskrivningen ovan.",
             "Google (Gemini API) — endast enligt beskrivningen i avsnittet om AI nedan.",
+            "Cloudflare (Workers AI) — först efter aktivering: 1) för att förklara offentlig, sammanställd arbetsmarknadsstatistik; 2) när plattformen inte själv förstår en begäran som skrivits i chatten, för att föreslå vilken befintlig plattformsåtgärd den avser. Före sändning tas namn, kontaktuppgifter, siffror och alla ord som inte finns på en fast lista över åtgärdsord bort; en begäran med uppgifter om hälsa eller andra känsliga uppgifter skickas inte alls. Cloudflare använder inte innehållet för att träna modeller och sparar det inte efter begäran.",
+            "Mistral AI och Groq — först efter aktivering och endast för att förklara offentlig, sammanställd arbetsmarknadsstatistik. Inga meddelandetexter och inga personuppgifter skickas till dem.",
             "Den fullständiga listan över infrastrukturleverantörer finns på sidan “Dataskydd”."
           ]
         },
@@ -6165,6 +6170,8 @@
             "Cloudflare — nätverket framför webbplatsen: domännamnstjänst, kryptering under överföring, cachelagring och skydd mot attacker. Varje förfrågan till webbplatsen passerar genom det.",
             "GitHub — lagring av källkod. Inga användaruppgifter lagras där.",
             "Google (Gemini API) — AI-behandling för översättning av meddelanden och jobbannonser och för att föreslå vad en skriven chattmening efterfrågar. Endast den text som uppgiften behöver skickas.",
+            "Cloudflare (Workers AI) — först efter aktivering: 1) för att förklara offentlig, sammanställd arbetsmarknadsstatistik; 2) när plattformen inte själv förstår en begäran som skrivits i chatten, för att föreslå vilken befintlig plattformsåtgärd den avser. Före sändning tas namn, kontaktuppgifter, siffror och alla ord som inte finns på en fast lista över åtgärdsord bort; en begäran med uppgifter om hälsa eller andra känsliga uppgifter skickas inte alls. Cloudflare använder inte innehållet för att träna modeller och sparar det inte efter begäran.",
+            "Mistral AI och Groq — först efter aktivering och endast för att förklara offentlig, sammanställd arbetsmarknadsstatistik. Inga meddelandetexter och inga personuppgifter skickas till dem.",
             "Stripe — betalningshantering. En kundpost skapas endast när en organisation påbörjar en betalning för en prenumeration.",
             "Ingen annan leverantör av e-post, AI, översättning eller betalningar är aktiv. Om en sådan aktiveras uppdateras den här listan först."
           ]
@@ -6924,7 +6931,8 @@
         "noMembers": "Inga medlemmar just nu.",
         "unavailable": "Teamen kunde inte läsas in. Försök igen.",
         "manage": "Ändra team"
-      }
+      },
+      "organizationLink": "Organisationens historik och projekt"
     },
     "workerView": {
       "eyebrow": "Mitt projekt",
@@ -7148,7 +7156,6 @@
   "learning": {
     "pageTitle": "Lärande och granskning",
     "pageLead": "Förslag som bygger på verklig arbetsaktivitet och som sparas för att en person ska granska dem. Inget här behandlas som bevisat i sig.",
-    "title": "Granskningskö",
     "lead": "Signaler blir förslag, och en person beslutar. Lärandet avgör aldrig något på egen hand.",
     "notAvailable": "Inte tillgängligt just nu.",
     "empty": "Inget att granska än.",
@@ -7207,8 +7214,9 @@
       "countryPlaceholder": "t.ex. LT",
       "remoteLabel": "Kan utföras på distans",
       "rateLabel": "Pris (valfritt)",
-      "ratePlaceholder": "t.ex. ca 25 EUR/h, förhandlingsbart",
-      "rateHint": "Endast fritext – till exempel ett ungefärligt timpris."
+      "rateHint": "Endast fritext – till exempel ett ungefärligt timpris.",
+      "publicLabel": "Visa denna personliga tjänst offentligt",
+      "publicHint": "När tjänsten är aktiv syns titel, beskrivning, kategori, land, distansalternativ och pris utan inloggning. Ange inga privata kontaktuppgifter. Avmarkera och spara för att stänga av offentlig visning."
     },
     "save": "Spara",
     "saving": "Sparar...",
@@ -7234,7 +7242,9 @@
     "linkToRequests": "Se förfrågningar om dina tjänster",
     "errorHasRequests": "Det här erbjudandet har förfrågningar, så det kan inte tas bort – deras historik måste finnas kvar. Du kan pausa det i stället.",
     "removeQuestion": "Ta bort den här tjänsten permanent? Det går inte att ångra. Pausa den i stället om du bara vill dölja den från sökningar.",
-    "removeYes": "Ja, ta bort"
+    "removeYes": "Ja, ta bort",
+    "publicAudience": "Offentlig sökning vald",
+    "memberAudience": "Inloggade medlemmar valda"
   },
   "communication": {
     "origin": {
@@ -8879,13 +8889,32 @@
     "durationPendingUnnamed": "en organisation",
     "durationPendingUndated": "datum inte registrerade",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Timmarnas fördelning",
+        "states": {
+          "actual": "Registrerade som faktiska",
+          "reported": "Uppgivna av organisationen",
+          "estimated": "Uppskattade",
+          "confirmed": "Styrkta av en annan parts registrering"
+        },
+        "skillBasis": "Tid från arbetsjournalen som kopplats till enskilda färdigheter.",
+        "workTitle": "Arbete och färdigheter",
+        "attributedTime": "Tilldelat denna färdighet",
+        "confirmedTime": "Bekräftat av arbetsledaren: {hours}",
+        "activityLabel": "Utdrag ur posten",
+        "contextLabel": "Arbetssammanhang",
+        "mapTitle": "Kompetenskarta",
+        "workNodes": "Arbete"
+      },
       "eyebrowFallback": "Levande CV",
       "facts": {
         "recorded": "registrerat i din arbetsjournal",
         "confirmed": "med en chefs registrering",
         "organization": "i organisationers registreringar",
         "experienceTotal": "yrkeserfarenhet totalt",
-        "languages": "språk"
+        "languages": "språk",
+        "projects": "projekt",
+        "span": "första och senaste registrering"
       },
       "capEyebrow": "Förmågor",
       "capEyebrowHours": "{hours} h registrerat arbete",
@@ -9002,6 +9031,14 @@
         "none": "Inget nästa steg att visa ännu. Mer registrerat arbete ger mer att gå på.",
         "unknown": "Kunde inte läsas just nu."
       }
+    },
+    "blocks": {
+      "overview": "Översikt",
+      "experience": "Erfarenhet",
+      "projects": "Projekt",
+      "photos": "Foton",
+      "documents": "Dokument",
+      "reviews": "Omdömen"
     }
   },
   "todayScreen": {
@@ -9487,23 +9524,44 @@
       "notStructured": "Automatisk sökning {when}: behovet har för få detaljer för att matcha ännu. Lägg till färdigheter eller ett yrke för att söka.",
       "failed": "Automatisk sökning {when} kunde inte slutföras. Listan nedan beräknas fortfarande direkt.",
       "capped": "Kandidatpoolen begränsades."
+    },
+    "history": {
+      "title": "Historik",
+      "decision": "Anställda: {names}",
+      "created": "Behov skapat",
+      "closed": "Behov stängt",
+      "closedFilled": "Behov stängt: tillsatt",
+      "closedWithdrawn": "Behov stängt: återkallat",
+      "event": {
+        "proposed": "Bokning föreslagen till {name}",
+        "accepted": "{name} accepterade bokningen",
+        "declined": "{name} avböjde bokningen",
+        "withdrawn": "Bokning till {name} återkallad",
+        "expired": "Bokning till {name} har gått ut"
+      },
+      "actor": {
+        "you": "du",
+        "candidate": "kandidat",
+        "automatic": "automatiskt",
+        "other": "kollega eller administratör"
+      }
     }
   },
   "planBoundary": {
-    "title": "Vad betalplanerna omfattar",
-    "subcopy": "Betalningar är inte aktiverade ännu – ingen betalsida och inget kort. Betalplanerna visas så att du vet omfattningen; pilotåtkomst beviljas manuellt.",
+    "title": "Vad varje plan omfattar",
+    "subcopy": "Inget på den här sidan kan köpas och inget kort efterfrågas. Den betalda planen visas så att du vet vad den omfattar.",
     "note": "Planerna beskriver omfattning, inte aktiv debitering. Inget debiteras på den här sidan.",
     "plans": {
       "free_worker": "Arbetstagare gratis",
-      "worker_plus": "Person plus (erbjuds inte)",
+      "worker_plus": "Extra funktioner för personer (erbjuds inte)",
       "company_pilot": "Organisation",
-      "agency_pilot": "Nivå för bemanningsföretag (erbjuds inte)",
+      "agency_pilot": "Separat plan för bemanningsföretag (erbjuds inte)",
       "admin_internal": "Admin / Intern",
       "free_organization": "Organisation gratis"
     },
     "access": {
       "free": "Gratis",
-      "payment_not_enabled": "Betalning inte aktiverad",
+      "payment_not_enabled": "Kan inte köpas än",
       "internal": "Intern"
     },
     "audience": {
@@ -9514,22 +9572,22 @@
     },
     "cta": {
       "use": "Tillgänglig nu",
-      "request_pilot_access": "Pilotåtkomst – beviljas manuellt",
+      "request_pilot_access": "De första kunderna sätts upp av teamet",
       "contact": "Ordnas individuellt"
     },
     "readiness": {
       "draft_pricing": "Inget pris här är slutgiltigt och inget kan köpas ännu.",
-      "owner_confirmed": "Inget kan köpas förrän betalningar är aktiverade."
+      "owner_confirmed": "Den betalda planen kan inte köpas förrän onlinebetalning öppnar."
     },
-    "featuresLabel": "Ingår i denna gräns",
-    "limitValue": "upp till {count}",
+    "featuresLabel": "Ingår",
+    "limitValue": "upp till {count} när betalda planer startar",
     "freeToday": {
       "freeTitle": "Gratis idag",
-      "free": "Allt du för närvarande kan använda i produkten är gratis – piloten körs utan betalningar och inget ber om ett kort.",
-      "paidTitle": "Betalplaner",
-      "paid": "Inte tillgängligt just nu.",
-      "preparedTitle": "Inte köpbart än",
-      "prepared": "Det finns ingen betalsida och inget kan köpas. Pilotåtkomst till betalplanernas omfattning beviljas manuellt av teamet."
+      "free": "Allt du kan använda i produkten i dag är gratis, och inget ber om ett kort.",
+      "paidTitle": "Betald plan",
+      "paid": "Går inte att köpa än.",
+      "preparedTitle": "Betald, kan inte köpas än",
+      "prepared": "Det finns ingen betalsida och inget kan köpas. De första kunderna får den betalda planens funktioner direkt från teamet."
     },
     "features": {
       "worker_profile": "Arbetstagarprofil",
@@ -9556,7 +9614,7 @@
     "enforcement": {
       "free_surface": "Tillgängligt idag",
       "server_gate": "Tillgängligt idag, beroende på dina behörigheter",
-      "declared_boundary_only": "Startar först med debitering",
+      "declared_boundary_only": "Inte tillgängligt än",
       "admin_rbac": "Internt, endast admin"
     }
   },
@@ -9899,11 +9957,12 @@
       "body": "Offentliga betalningar är inte aktiverade ännu. De första kunderna betjänas direkt: att skicka en förfrågan om arbetskraft är gratis, och det slutliga priset bekräftas alltid med dig innan något betalt arbete börjar.",
       "cta": "Skicka en förfrågan om arbetskraft"
     },
-    "title": "Så fungerar den första betalda tjänsten",
+    "title": "Rekryteringstjänst från UAB ”Nonstop Group”",
+    "separate": "Det här är en separat tjänst, inte en LabourMarket.ai-plan. Plattformsplanerna ovan omfattar den inte, och du behöver den inte för att använda plattformen.",
     "steps": [
       {
         "title": "Skicka din förfrågan gratis",
-        "body": "Beskriv de arbetstagare eller det arbetslag du behöver i förfrågningsformuläret. Ingen avgift, inget kort, ingenting publiceras automatiskt."
+        "body": "Beskriv de personer eller det team du behöver i förfrågningsformuläret. Ingen avgift, inget kort, ingenting publiceras automatiskt."
       },
       {
         "title": "En person granskar den",
@@ -9911,14 +9970,14 @@
       },
       {
         "title": "Du får en manuellt kontrollerad kortlista",
-        "body": "Verkliga kandidater eller arbetslag, kontrollerade av en person mot din förfrågan. Om vi inte kan sätta ihop en lämplig kortlista utgår ingen avgift — och vi lovar aldrig att en kandidat alltid hittas."
+        "body": "Verkliga kandidater eller team, kontrollerade av en person mot din förfrågan. Om vi inte kan sätta ihop en lämplig kortlista utgår ingen avgift — och vi lovar aldrig att en kandidat alltid hittas."
       },
       {
         "title": "Du betalar bara för levererad tjänst",
-        "body": "En fast framgångsavgift gäller per anställd arbetstagare, arbetslag eller företagsplacering. En separat samordningsavgift gäller endast när samordning av dokument eller introduktion faktiskt har levererats. Det slutliga priset bekräftas innan betalt arbete påbörjas."
+        "body": "En framgångsavgift per anställning gäller endast om den har avtalats med dig i förväg. Dess belopp och villkor bekräftas skriftligt med dig innan något betalt arbete påbörjas. En separat samordningsavgift gäller endast när samordning av dokument eller introduktion faktiskt har levererats."
       }
     ],
-    "note": "Två saker löper parallellt, och den här sidan beskriver den andra. Själva plattformen är automatisk: jobbtavlan är offentlig, förhandsvisningen av matchningar är öppen utan konto, och en angiven förfrågan ger en rangordnad kortlista som förklarar varför varje person passar – en aktiv tjänst utan kostnad. Den betalda tjänsten ovan är den mänskliga: en operatör läser din förfrågan, kontaktar dig och kontrollerar kortlistan manuellt innan någon föreslås för dig. Ett helt arbetslag kan redan erbjuda sig mot din förfrågan som en enhet och, när båda parter är överens, ansluta till ditt projekt som ett team; den automatiska kortlistan föreslår ännu inte hela arbetslag – den rangordnar personer en och en.",
+    "note": "Två saker löper parallellt, och den här sidan beskriver den andra. Själva plattformen är automatisk: jobbtavlan är offentlig, förhandsvisningen av matchningar är öppen utan konto, och en angiven förfrågan ger en rangordnad kortlista som förklarar varför varje person passar – och den delen är gratis. Den betalda tjänsten ovan är den mänskliga: en operatör läser din förfrågan, kontaktar dig och kontrollerar kortlistan manuellt innan någon föreslås för dig. Ett helt team kan redan erbjuda sig mot din förfrågan som en enhet och, när båda parter är överens, ansluta till ditt projekt som ett team; den automatiska kortlistan föreslår ännu inte hela team – den rangordnar personer en och en.",
     "ctaLabel": "Skicka en förfrågan om arbetskraft →"
   },
   "adminLaunchReadiness": {
@@ -9992,6 +10051,9 @@
       "invites": "Inbjudnings- och aviseringsmejl",
       "invitesOn": "på",
       "invitesOff": "AV – slås på separat: INVITE_EMAIL_PROVIDER=smtp och ett testutskick"
+    },
+    "alerts": {
+      "title": "Ägarvarningar och pushnotiser"
     }
   },
   "adminMetrics": {
@@ -10635,8 +10697,8 @@
     }
   },
   "workerIntake": {
-    "title": "Registrering av arbetstagare",
-    "subtitle": "Berätta om ditt yrke och din tillgänglighet för att kontrollera dina uppgifter. Det här formuläret sparar ingenting – för att arbetsgivare ska kunna hitta dig, skapa din kostnadsfria profil och lägg in uppgifterna där.",
+    "title": "Formulär för arbetstagare",
+    "subtitle": "Inget här publiceras. Arbetsgivare hittar dig via en kostnadsfri profil, och det du skriver här följer med till den när du har registrerat dig.",
     "fullName": "Fullständigt namn",
     "profession": "Bransch och typ av arbete",
     "professionPlaceholder": "Välj din bransch och typ av arbete",
@@ -10713,7 +10775,6 @@
     "contactPerson": "Kontaktperson",
     "contactPersonHelp": "Valfritt. Vem vi ska kontakta om den här förfrågan.",
     "contactEmail": "Kontaktens e-post",
-    "contactEmailHelp": "Valfritt, men det hjälper oss att följa upp din förfrågan snabbare.",
     "cityRegion": "Stad eller region",
     "cityRegionHelp": "Valfritt. Var arbetet kommer att utföras.",
     "expectedDuration": "Förväntad varaktighet",
@@ -11142,11 +11203,11 @@
   },
   "about": {
     "metaTitle": "Vad är LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai är en internationell plattform för arbete, specialister och tjänster. Verkligt arbete blir yrkeshistorik, belägg och ett levande CV.",
+    "metaDescription": "LabourMarket.ai är en patentbaserad plattform, byggd på en unik idé för att organisera och hantera arbetsrelationer. För alla branscher.",
     "navLabel": "Om LabourMarket.ai",
     "eyebrow": "Om plattformen",
     "title": "Vad är LabourMarket.ai",
-    "lede": "LabourMarket.ai är en internationell plattform för arbete, specialister och tjänster. Den förbinder människor, arbetsgivare, bemanningsföretag, arbetslag, projekt, utbildning och arbetsmarknadstjänster kring verkligt arbete – från det första samtalet till nästa möjlighet.",
+    "lede": "LabourMarket.ai är en patentbaserad plattform, byggd på en unik idé för att organisera och hantera arbetsrelationer. Den förbinder människor, arbetsgivare, bemanningsföretag, arbetslag, projekt, utbildning och arbetsmarknadstjänster kring verkligt arbete – från det första samtalet till nästa möjlighet.",
     "hero": {
       "lead": "En människas yrkesvärde ska inte försvinna varje gång hon byter arbetsgivare. Verkligt arbete kan bli bestående yrkeshistorik: vad personen gjorde, var, när, hur länge, i vilken roll, med vilka färdigheter och vilka belägg och bekräftelser som stöder det.",
       "leadOrg": "För organisationer bygger samma verkliga arbete upp en redovisning av vad företaget faktiskt har gjort: projekt, arbetslag, utfört arbete, timmar, kompetenser och belägg.",
@@ -12665,7 +12726,7 @@
       },
       "verify": {
         "title": "Verifiera din e-post för att se inbjudningar som skickats till den",
-        "body": "Inbjudningar som är adresserade till en e-postadress visas bara för den som kan öppna den brevlådan. Allt annat i ditt konto fungerar som vanligt; detta behövs bara för att se eller acceptera de här inbjudningarna.",
+        "body": "Inbjudningar som är adresserade till en e-postadress visas bara för den som kan öppna den brevlådan.",
         "send": "Skicka mig en engångslänk",
         "sending": "Skickar…",
         "sent": "Vi har skickat en engångslänk till {email}. Öppna den på den här enheten för att slutföra.",
@@ -12854,7 +12915,7 @@
         "invite_to_demand": "En arbetsgivare har bjudit in dig till ett arbetsbehov"
       },
       "from": "Inbjuden av {name}",
-      "organization": "Företag: {name}",
+      "organization": "Organisation: {name}",
       "project": "Projekt: {name}",
       "role": "Föreslagen roll: {role}",
       "accept": "Acceptera inbjudan",
@@ -12883,10 +12944,9 @@
       "capacity": "Relation: {capacity}",
       "capacityNotEmployment": "Det här är inget jobberbjudande och skapar ingen anställning.",
       "selfStart": "Skapa ditt eget konto",
-      "anonExplainer": "Registrera dig eller logga in för att svara på den här inbjudan. Du behåller ditt eget konto, din profil och din arbetshistorik – personen som bjöd in dig skapar kopplingen, inget mer.",
+      "anonExplainer": "Registrera dig eller logga in för att svara på den här inbjudan. Ditt konto, din profil och din arbetshistorik förblir dina: att acceptera skapar bara kopplingen, aldrig en verifierad färdighet, en anställning eller ett uppdrag.",
       "register": "Registrera dig och fortsätt",
       "signIn": "Jag har redan ett konto",
-      "youOwnYourIdentity": "Din yrkesidentitet förblir din. Att acceptera en inbjudan skapar aldrig i sig en verifierad färdighet, en anställning eller ett uppdrag.",
       "referredVia": "Hänvisad via {source}",
       "campaign": "Inbjudan: {label}",
       "seats": "{used} av {max} platser tagna",
@@ -12955,6 +13015,7 @@
     "available": "Tillgänglig",
     "availableFrom": "Från {date}",
     "experienceYears": "{n} års erfarenhet",
+    "recordedExperienceHours": "Tillgängliga arbetsregistreringar: {hours} tim",
     "skillsTitle": "Färdigheter",
     "skillsEmpty": "Inga färdigheter som du får se.",
     "skillVerified": "Bekräftad genom en chefs post",
@@ -13104,6 +13165,7 @@
     },
     "goToRoster": "Gå till personalstyrkan",
     "invalidLabel": "Kontrollera e-postadressen – inbjudan skickades inte.",
+    "offerLimitLabel": "För många erbjudanden. Försök igen senare.",
     "deliveryHeading": "Inbjudningslänk",
     "deliveryCreated": "Inte skickad via e-post – e-postleverans är inte konfigurerad. Kopiera länken och skicka den till kunden själv.",
     "deliverySent": "Inbjudan skickades via e-post. Du kan fortfarande kopiera länken.",
@@ -14013,9 +14075,8 @@
         "csv": "Ladda ner CSV",
         "print": "Skriv ut / spara som PDF",
         "ctaTitle": "Gör om uppskattningen till en verklig förfrågan om arbetstagare",
-        "ctaBody": "Samma uppskattningsverktyg finns i behovsformuläret på LabourMarket.ai. Med ett konto kan du bifoga en uppskattning till en strukturerad förfrågan om arbetstagare; utan konto kan du beskriva ditt behov i det öppna formuläret.",
+        "ctaBody": "Med ett konto följer antal arbetstagare och land med till förfrågan; resten av uppskattningen kan du fylla i där. Utan konto använder du det öppna formuläret.",
         "ctaDashboard": "Skapa ett arbetsbehov (med konto)",
-        "ctaDashboardHelp": "Kontovägen öppnar behovsformuläret i din översikt – kalkylatorn överför inte dessa siffror.",
         "ctaCompanyNeed": "Beskriv ett behov utan konto",
         "ctaCompanyNeedHelp": "Det öppna formuläret tar bara emot antal arbetstagare och land – inga priser och inga beskrivningar skickas vidare."
       }
@@ -14310,9 +14371,7 @@
         "preferredCountries": "Önskade länder",
         "preferredCountriesPlaceholder": "t.ex. NL, DE",
         "salaryMin": "Lön från (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Lön till (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Villig att flytta?",
         "hasTransport": "Kan du ta dig till jobbet på egen hand?",
         "needsAccommodation": "Behöver du boende?",
@@ -14347,9 +14406,9 @@
         "saveAsDraft": "Spara som utkast",
         "opportunityType": "Typ av möjlighet",
         "clientEmail": "Kundens e-post",
-        "clientEmailPlaceholder": "name@company.com",
+        "clientEmailPlaceholder": "namn@foretag.se",
         "workerEmail": "Arbetstagarens e-post",
-        "workerEmailPlaceholder": "name@example.com",
+        "workerEmailPlaceholder": "namn@exempel.se",
         "inviteNote": "Anteckning (valfritt)",
         "inviteNotePlaceholder": "T.ex. start i oktober, arbetsplats i Kaunas",
         "documentType": "Dokumenttyp",
@@ -14479,7 +14538,7 @@
       "navCalendar": "Kalender",
       "navProfile": "Profil",
       "clarifyWorkLog": "Vilken dag och hur länge arbetade du? Till exempel: ”I dag 8–17, 30 min rast, monterade fönster”.",
-      "calendarHint": "Du hittar din plan under fliken ”Kalender”. Här kan jag hjälpa dig att registrera arbetstid eller granska erbjudanden.",
+      "calendarHint": "Du hittar din plan under fliken ”Kalender”.",
       "messagesHint": "Här är dina meddelanden – länken nedan öppnar dem.",
       "reminderBlocked": "Jag kan inte skicka påminnelser ännu – det finns ingen påminnelsefunktion på plats, så jag skapar ingen låtsad påminnelse. Jag lägger till det när det aktiveras.",
       "switchContextPersonal": "personligt utrymme",
@@ -14735,6 +14794,34 @@
       "findWorkInCompanyContext": "Att söka jobb är din egen handling — i företagsutrymmet kör jag den inte. Byt till ditt personliga utrymme och fråga igen.",
       "findWorkInCompanyWhy": "En person söker jobb, inte ett företag — jag svarar från ditt personliga utrymme.",
       "personalOnlyInCompany": "Det är en personlig åtgärd — i ett företagsutrymme utför jag den inte. Byt till ditt personliga utrymme och fortsätt där.",
+      "needsOrganization": "Det görs för en organisation, och inget av dina utrymmen kan göra det ännu.",
+      "readFailed": "Jag kunde inte läsa det just nu — felet ligger hos oss. Inget har ändrats. Försök igen om en stund.",
+      "taskStatusAsk": "Vilken status ska uppgiften få: påbörjad, klar eller blockerad?",
+      "stageStatusAsk": "Vilken status ska etappen få: påbörjad, klar eller blockerad?",
+      "chipStatusStarted": "Påbörjad",
+      "chipStatusDone": "Klar",
+      "chipStatusBlocked": "Blockerad",
+      "professionAsk": "Vilket yrke eller hantverk menar du?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Ditt CV finns i ditt personliga utrymme, inte i organisationen.",
+          "journal": "Din egen arbetsdagbok finns i ditt personliga utrymme.",
+          "profile": "Din profil finns i ditt personliga utrymme.",
+          "calendar": "Din egen kalender finns i ditt personliga utrymme."
+        },
+        "open": {
+          "cv": "Byt och öppna mitt CV",
+          "journal": "Byt och öppna min dagbok",
+          "profile": "Byt och öppna min profil",
+          "calendar": "Byt och öppna min kalender"
+        },
+        "askWhoseCv": "Ditt eget CV eller en kandidats?",
+        "organizationHistory": "Organisationens underlag är dess arbetshistorik.",
+        "openOrganizationHistory": "Öppna organisationens historik",
+        "organization": "Det görs i organisationens utrymme: {name}.",
+        "switchTo": "Byt till {name} och fortsätt",
+        "whichOrganization": "Det görs i en organisations utrymme. Vilket?"
+      },
       "newJobsIntro": "Nya annonser som passar dina önskemål: {count}.",
       "newJobsAll": "Alla möjligheter",
       "newJobsNone": "Inga nya annonser som passar dina önskemål har kommit de senaste dagarna. Alla möjligheter hittar du på sidan för möjligheter.",
@@ -14771,8 +14858,12 @@
           "chipHelpPeople": "Team och inbjudningar",
           "chipHelpPlanning": "Öppna planering",
           "chipHelpServices": "Mina tjänster",
-          "chipHelpJournal": "Arbetsjournal"
-        }
+          "chipHelpJournal": "Arbetsjournal",
+          "chipHelpSettings": "Inställningar",
+          "chipHelpPrivacy": "Integritet och dina uppgifter"
+        },
+        "account": "Inloggning, e-post, aviseringar och utseende finns under Inställningar.",
+        "privacy": "Under Integritet och dina uppgifter kan du ladda ner dina uppgifter, se vem som ser din profil och begära att ditt konto raderas."
       },
       "interestInboxAmbiguous": "Det kan betyda två saker — vilken av dem vill du ha?",
       "chipInterestOnMyNeeds": "Intresse för mina förfrågningar",
@@ -15594,6 +15685,10 @@
         "title": "Förfrågan om individuellt projekt",
         "body": "För privat- och företagskunder: beskriv projektet eller tjänsten du behöver."
       },
+      "partner": {
+        "title": "Partnerskapsförfrågan",
+        "body": "Beskriv samarbetet du föreslår."
+      },
       "title": "Lämna in en förfrågan",
       "promise": "Berätta vilka arbetstagare, tjänster eller vilket projektgenomförande du behöver. Din förfrågan skickas till LabourMarket.ai-teamet för granskning.",
       "name": "Namn eller företagsnamn",
@@ -15611,6 +15706,7 @@
       "scope": "Omfattning",
       "deadline": "Tidsfrister",
       "need": "Projekt eller tjänst du behöver",
+      "proposal": "Föreslaget samarbete",
       "customer": "Kund",
       "customerPrivate": "Privatperson",
       "customerBusiness": "Företag",
@@ -15985,8 +16081,7 @@
       "lasting": "Din erfarenhet och dina möjligheter finns kvar inom räckhåll — när du byter jobb, projekt eller land."
     },
     "v3": {
-      "lead": "För arbetstagare, arbetsgivare och tjänsteleverantörer i alla yrken och branscher. Registrering och grundläggande publicering av ett behov är gratis.",
-      "moreChoices": "Fler alternativ",
+      "lead": "LabourMarket.ai är en patentbaserad plattform, byggd på en unik idé för att organisera och hantera arbetsrelationer. Registrering och grundläggande publicering av ett behov är gratis.",
       "or": "eller beskriv det med egna ord",
       "needFree": "Du kan skicka en förfrågan utan att registrera dig. Det är kostnadsfritt att skicka den; villkor och pris för tjänsterna avtalas separat.",
       "market": {
@@ -17517,9 +17612,10 @@
       "createProgram": "Lägg till kurs",
       "noPrograms": "Inga kurser tillagda ännu.",
       "assigneePlaceholder": "Personens e-postadress",
+      "assigneePick": "Vem",
       "requiredByLabel": "Slutför senast",
       "assign": "Be denna person",
-      "certificateFilePlaceholder": "Certifikatfilens id",
+      "certificateFileLabel": "Certifikatfil",
       "issuedOnLabel": "Utfärdat den",
       "expiresOnLabel": "Giltigt till",
       "attachCertificate": "Spara certifikat",
@@ -18850,8 +18946,7 @@
         "invitationAccepted": "Inbjudan accepterad. Bekräfta bemanningsföretagets kopplingsförfrågan nedan med ditt företag."
       },
       "education": {
-        "title": "Lärande och program",
-        "subtitle": "Program, deltagare och marknadens efterfrågan inom deras inriktningar."
+        "title": "Lärande och program"
       },
       "history": {
         "title": "Dataimport och historik",
@@ -18928,7 +19023,8 @@
       "heading": "Inbjudningar från organisationer",
       "explainer": "Ledningsinbjudningar riktade till dig. När du accepterar visas organisationen i din arbetsyteväljare.",
       "accept": "Acceptera",
-      "decline": "Avböj"
+      "decline": "Avböj",
+      "invitedBy": "Inbjuden av {name}"
     },
     "members": {
       "heading": "Organisationens medlemmar",
@@ -19308,7 +19404,8 @@
       "address": "Adress",
       "project": "Projekt",
       "notInSource": "Finns inte i källan",
-      "linked": "Länkad"
+      "linked": "Länkad",
+      "openProject": "Öppna projektet"
     },
     "whoWorked": "Vem som arbetade här",
     "timeline": "Vad som gjordes",
@@ -19388,8 +19485,43 @@
         "open": "Öppna arbetsytan {name}",
         "opening": "Öppnar …",
         "error": "Arbetsytan kunde inte öppnas."
-      }
-    }
+      },
+      "structure": "Tidigare arbete utfördes genom {names}.",
+      "structureLater": ", senare ",
+      "structureForClient": "Tidigare arbete genom {names} för beställaren {client}.",
+      "structureAsSubcontractor": "Underleverantör: {names} → beställare {client}."
+    },
+    "projects": {
+      "title": "Projekt på plattformen",
+      "counts": "{running} pågående · {completed} avslutade",
+      "untitled": "Projekt utan namn",
+      "running": "Pågående",
+      "completed": "Avslutat",
+      "all": "Alla {count} projekt"
+    },
+    "journal": {
+      "title": "Arbete registrerat i journalen",
+      "hours": "Registrerade timmar",
+      "confirmed": "Timmar bekräftade av organisationen",
+      "people": "Personer som registrerade arbete",
+      "period": "Registrerat",
+      "basis": "Från {entries} journalposter som personer registrerade under den här organisationen. Räknas separat från den importerade historiken ovan och läggs aldrig till den.",
+      "unavailable": "Arbetet som registrerats i journalen under den här organisationen kunde inte läsas just nu."
+    },
+    "forClient": {
+      "title": "Arbete av era underentreprenörer",
+      "confirmed": "Bekräftade poster",
+      "unconfirmed": "Ej bekräftade poster",
+      "periodHours": "{hours} h angivna som periodsumma, inte lagda till enskilda dagar.",
+      "basis": "Från {count, plural, one {# post} other {# poster}} i era underentreprenörers egna register. Räknas separat från ert eget arbete.",
+      "unreadable": "Arbete i partners register kunde inte läsas just nu. Det betyder inte att det saknas."
+    },
+    "clients": {
+      "title": "Beställare",
+      "unnamed": "Beställande organisation",
+      "records": "{count, plural, one {# post} other {# poster}}"
+    },
+    "descriptionNotInSource": "Ingen arbetsbeskrivning i källan"
   },
   "workPlan": {
     "title": "Planerat arbete",
@@ -19447,8 +19579,6 @@
     "title": "Vad som händer med arbetet du utför",
     "titleCompany": "Vad som händer med arbetet du driver",
     "example": "Exempel — inte en riktig person eller riktiga data",
-    "hint": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
-    "hintWorkers": "Välj ett steg. Varje steg öppnar den verkliga platsen i din arbetsyta.",
     "open": "Öppna i din arbetsyta",
     "list": "Steg i arbetets livscykel",
     "workers": {
@@ -19618,22 +19748,33 @@
     "heading": "Erbjud det här teamet till ett behov",
     "intro": "Erbjud teamet som en enhet mot ett öppet behov från ett verifierat företag.",
     "privacy": "Företaget ser bara fakta på teamnivå: storlek, färdigheter, tillgänglighet. Erbjudandet namnger ingen medlem och visar ingen medlemsprofil. Medlemmarna visas i ett projekt först när företaget accepterar och tilldelar teamet dit.",
+    "orgPrivacy": "Företaget ser ert företags namn, ert meddelande och era villkor. Ingen person namnges förrän ni kommer överens om vem som arbetar.",
     "tooSmall": "Ett team behöver minst 2 aktiva medlemmar för att kunna erbjudas.",
     "loading": "Läser in …",
     "unavailable": "Öppna behov kunde inte läsas in just nu.",
     "noDemand": "Det finns inget öppet behov att erbjuda mot just nu.",
     "demandLabel": "Behov",
     "demandPlaceholder": "Välj ett behov",
+    "need": {
+      "people": "Personer",
+      "start": "Början",
+      "duration": "Varaktighet",
+      "language": "Språk",
+      "skills": "Färdigheter",
+      "tools": "Verktyg"
+    },
     "alreadyOffered": "redan erbjudet",
     "noteLabel": "Meddelande till företaget (valfritt)",
     "notePlaceholder": "Till exempel: arbetslag på 3, kan börja om två veckor",
     "submit": "Erbjud team",
+    "orgSubmit": "Erbjud vårt företag",
     "submitting": "Erbjuder …",
     "sent": {
       "heading": "Dina erbjudanden",
       "none": "Inga erbjudanden ännu.",
       "withdraw": "Återkalla",
-      "message": "Skicka meddelande till kunden"
+      "message": "Skicka meddelande till kunden",
+      "orgNext": "Beställaren har i princip tackat ja (inget avtal). Att starta arbetet från ett företagserbjudande via plattformen är inte tillgängligt än: kom överens om detaljerna och vilka som ska arbeta i samtalet."
     },
     "status": {
       "offered": "Väntar på svar",
@@ -19706,8 +19847,14 @@
       },
       "blockers": "Teamet som helhet uppfyller inte: {list}",
       "missing": "Inte angivet: {list}",
+      "missingData": {
+        "need_not_structured": "behovets krav",
+        "no_team_members": "aktiva medlemmar",
+        "team_skills_not_stated": "teamets färdigheter"
+      },
       "noNeedStructure": "Det här behovet är inte strukturerat ännu, så teamet kan inte matchas mot det.",
       "note": "Meddelande från teamet",
+      "noteCompany": "Meddelande från företaget",
       "accept": "Godkänn i princip",
       "decline": "Avböj",
       "noProjects": "Du har inget öppet projekt att tilldela teamet till ännu.",
@@ -19726,8 +19873,9 @@
       },
       "createProject": "Skapa ett projekt",
       "message": "Skicka meddelande till teamet",
+      "messageCompany": "Skicka meddelande till företaget",
       "kindOrganization": "Företagserbjudande",
-      "orgNext": "Överenskommet i princip (inget avtal). Kom överens om detaljerna och vilka personer som ska arbeta i samtalet."
+      "orgNext": "I princip överenskommet (inget avtal). Att starta arbetet från ett företagserbjudande via plattformen är inte tillgängligt än: kom överens om detaljerna och vilka som ska arbeta i samtalet."
     },
     "orgHeading": "Erbjud vårt företag till ett öppet behov",
     "orgIntro": "Erbjud själva företaget – era personer, er tjänst eller som underentreprenör – mot ett öppet behov. Inget arbetslag behöver skapas först.",
@@ -19749,7 +19897,6 @@
       },
       "capacity": "Personer",
       "rate": "Pris",
-      "ratePlaceholder": "t.ex. 32 €/h eller fast pris",
       "period": "Period",
       "start": "Start",
       "end": "Slut",
@@ -19864,7 +20011,7 @@
     },
     "noHours": "Poster utan angivna timmar: {count}. Okända timmar räknas inte som noll.",
     "undated": "Poster utan angivet datum: {count}. De finns kvar i historiken nedan.",
-    "periodApart": "{hours} h av summan är periodsummor, hållna isär och aldrig fördelade på dagar eller månader.",
+    "periodApart": "Dessutom: {hours} h angivna som periodsummor — ingår inte i timmarna ovan och fördelas aldrig på dagar eller månader.",
     "noWorkObject": "Poster utan koppling till ett projekt eller en plats som plattformen känner till: {count}. De finns kvar i den här historiken under sin källbeteckning.",
     "places": {
       "title": "Per projekt eller plats",
@@ -20722,8 +20869,10 @@
       "partnerWithUs": "Bli partner",
       "forAgencies": "Så fungerar det för bemanningsföretag",
       "setUpAgency": "Starta ditt bemanningsföretag",
+      "setUpInstitution": "För utbildningsinstitutioner",
       "b2bEnquiry": "Förfrågan om företagstjänster (B2B)",
-      "projectEnquiry": "Förfrågan om individuellt projekt"
+      "projectEnquiry": "Förfrågan om individuellt projekt",
+      "findServices": "Hitta personliga tjänster"
     },
     "assistant": "Fråga assistenten",
     "start": {
@@ -20738,11 +20887,41 @@
       "close": "Stäng",
       "functions": "Åtgärder",
       "professions": "Yrken",
-      "opensNow": "Inget konto krävs",
       "signInWhenOpen": "Inloggning krävs",
       "allSectors": "Alla branscher",
       "fullList": "Hela listan"
     },
     "more": "Mer"
+  },
+  "publicServices": {
+    "title": "Hitta personliga tjänster",
+    "lead": "Tjänster som publicerats offentligt av enskilda personer.",
+    "search": "Sök",
+    "query": "Tjänst eller sökord",
+    "country": "Land",
+    "category": "Kategori",
+    "clear": "Rensa filter",
+    "unavailable": "Tjänstesökningen är inte tillgänglig",
+    "unavailableHint": "Försök igen senare.",
+    "retry": "Försök igen",
+    "emptyFiltered": "Inga tjänster matchar dessa filter",
+    "empty": "Inga personliga tjänster har publicerats offentligt ännu",
+    "results": "Tjänster",
+    "remote": "På distans",
+    "pagination": "Söksidor",
+    "previous": "Föregående",
+    "next": "Nästa",
+    "page": "Sida {page}",
+    "refine": "Avgränsa sökningen för att hitta mer relevanta tjänster.",
+    "back": "Alla tjänster",
+    "delivery": "Utförande",
+    "rate": "Pris",
+    "personalService": "Personlig tjänst",
+    "signInToRequest": "Logga in för att skicka förfrågan",
+    "manage": "Hantera denna tjänst",
+    "contactUnavailable": "Det går inte att skicka en förfrågan just nu. Försök igen senare.",
+    "notFound": "Tjänsten hittades inte",
+    "notFoundHint": "Denna tjänst är inte längre offentligt tillgänglig.",
+    "allCountries": "Alla länder"
   }
 }

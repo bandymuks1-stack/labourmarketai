@@ -23,7 +23,10 @@ import {
 } from "@/lib/auth/role-gated-routes";
 import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
+import { isHistoryGrantPath } from "@/lib/organization-evidence/history-grant-paths";
+import { hasLiveHistoryReadGrant } from "@/lib/organization-evidence/history-read-access";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { StaleBuildRecovery } from "@/components/app/stale-build-recovery";
@@ -207,7 +210,14 @@ export default async function DashboardLayout({
   // switcher and the auth context below all read THIS binding.
   const workspace = await getWorkspaceContext();
 
-  if (companyMembershipArm && requirement && !workspaceOpensCompanySpace(workspace)) {
+  // THE HISTORY READ GRANT (20261124053000, owner-approved 2026-11-23): an
+  // owner-granted, time-boxed read of ONE organization's history opens
+  // exactly two pages (`isHistoryGrantPath`) and nothing else; those pages
+  // render read-only content for it (`requireCompanyOrHistoryGrant`). No live
+  // grant, or any other path: the refusal below is unchanged.
+  const historyGrantPage =
+    companyMembershipArm && isHistoryGrantPath(gatedPath) && (await hasLiveHistoryReadGrant());
+  if (companyMembershipArm && requirement && !workspaceOpensCompanySpace(workspace) && !historyGrantPage) {
     redirect(refusalDestination(locale, requirement));
   }
 
@@ -251,7 +261,15 @@ export default async function DashboardLayout({
   );
   // Simple-mode nav labels + the Rexora footer credit, resolved once and passed
   // to the client chrome selector (which needs no data fetch of its own).
-  const tChat = await getTranslations("conversation.chat");
+  // The active organization's declared capabilities name the education area
+  // in the header (UX_GAPS I-1). Request-cached: the organization pages read
+  // the same rows in the same render. Read beside the labels, not after them.
+  const [tChat, activeOrganizationCapabilities] = await Promise.all([
+    getTranslations("conversation.chat"),
+    activeOrganizationId
+      ? readOrganizationCapabilities(activeOrganizationId)
+      : Promise.resolve<readonly string[]>([]),
+  ]);
   const nav: ConversationNavLabels = {
     chat: tChat("navChat"),
     journal: tChat("navJournal"),
@@ -276,6 +294,7 @@ export default async function DashboardLayout({
           activeOrgName,
           organizations,
           activeOrganizationId,
+          activeOrganizationCapabilities,
           workspaces: [...workspace.workspaces],
           activeWorkspaceId: workspace.activeWorkspaceId,
           workspacePointerAvailable: workspace.pointerAvailable,

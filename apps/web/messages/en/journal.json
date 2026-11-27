@@ -261,7 +261,8 @@
   "unnamedOrganization": {
     "company": "Company without a name",
     "agency": "Agency without a name",
-    "other": "Organization without a name"
+    "other": "Organization without a name",
+    "ended": "Earlier organization without a name"
   },
   "activeWorkspaceNoRelationship": "You are acting for {org}, but no work relationship with {org} is recorded, so it is not offered here. Choose the context this work really belongs to.",
   "project": "Project",
@@ -439,7 +440,16 @@
       "outcomeBlocked": "not confirmed ({code})",
       "receipt": "Confirmed: {title}",
       "receiptSkills": "{count, plural, one {# skill} other {# skills}}",
-      "skillsUnavailable": "The skill list could not be read — the tap confirms the entry only."
+      "skillsUnavailable": "The skill list could not be read — the tap confirms the entry only.",
+      "projectFilterLabel": "Project",
+      "projectAll": "All projects ({n})",
+      "projectNone": "No project ({n})",
+      "projectUnnamed": "Project, name not available",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Show",
+      "projectResult": "Showing {shown} of {total} entries",
+      "projectOnCard": "Project: {name}",
+      "noProjectOnCard": "No project"
     },
     "loadFailed": "The review queue could not be loaded. That does not mean there is nothing to review — try again."
   },
@@ -598,6 +608,13 @@
     "dayEmpty": "No records on this day.",
     "moreDays": "Showing the latest recorded day. {count, plural, one {# more day} other {# more days}} with records — pick a date on the calendar.",
     "periodEmpty": "No records in this period."
+  },
+  "dayChoice": {
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "weekAgo": "A week ago",
+    "calendar": "Calendar",
+    "earlier": "Earlier entries"
   },
   "spreadsheet": {
     "title": "Spreadsheet mode — several entries at once",

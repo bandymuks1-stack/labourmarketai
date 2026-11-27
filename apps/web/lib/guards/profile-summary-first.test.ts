@@ -50,6 +50,7 @@ const DISCLOSURES = [
   "organization-history",
   "profile-edit",
   "cv-details",
+  "cv-background",
   "capabilities",
   "profile-about",
 ] as const;
@@ -80,6 +81,7 @@ describe("what stands OPEN on arrival — summary, current state, action", () =>
       PAGE.indexOf("<ProfileHubOverview"),
       PAGE.indexOf('id="profile-edit"'),
       PAGE.indexOf('id="cv-details"'),
+      PAGE.indexOf('id="cv-background"'),
       PAGE.indexOf('id="capabilities"'),
       PAGE.indexOf('id="profile-about"'),
     ];
@@ -87,10 +89,10 @@ describe("what stands OPEN on arrival — summary, current state, action", () =>
     expect([...order].sort((a, b) => a - b)).toEqual(order);
   });
 
-  it("the profile carries no quick-nav strip (IA 01 §4 'REMOVE (worker)') — /cv keeps its own", () => {
+  it("the profile carries no quick-nav strip (IA 01 §4 'REMOVE (worker)') — /cv has its block tabs (decision 0034)", () => {
     expect(PAGE).not.toMatch(/<PageQuickNav\b/);
     expect(PAGE).not.toMatch(/from "@\/components\/app\/page-quick-nav"/);
-    expect(read("app/[locale]/cv/page.tsx")).toMatch(/<PageQuickNav\b/);
+    expect(read("app/[locale]/cv/page.tsx")).toMatch(/<CvBlockTabs\b/);
   });
 });
 
@@ -127,12 +129,12 @@ describe("every moved section lives INSIDE its disclosure", () => {
     });
   }
 
-  it("the evidence card's OTHER mount is only the empty / not-enabled state inside #cv-details", () => {
+  it("the evidence card's OTHER mount is only the empty / not-enabled state inside #cv-background", () => {
     // Two mounts by design: the records inside `#organization-history`, and —
     // when there are none — the quiet "nothing recorded" card among the
     // personal details. Never a second, open copy of the records.
     expect(PAGE.split("<OrganizationEvidenceSection").length - 1).toBe(2);
-    const details = block("cv-details").text;
+    const details = block("cv-background").text;
     const at = details.indexOf("<OrganizationEvidenceSection");
     expect(at).toBeGreaterThan(-1);
     expect(details.slice(at, details.indexOf("/>", at))).toContain("records={[]}");
@@ -177,7 +179,8 @@ describe("DetailsHashOpener's decision, proven against the page's REAL nesting",
     // A section INSIDE a bar — the nested case every moved section relies on.
     ["#profile-identity", "cv-details"],
     ["#cv-availability", "cv-details"],
-    ["#cv-languages", "cv-details"],
+    ["#cv-background", "cv-background"],
+    ["#cv-languages", "cv-background"],
     ["#candidate-skills", "capabilities"],
     ["#roster-link-withdrawals", "organization-history"],
     ["#team-link-withdrawals", "organization-history"],
@@ -193,6 +196,8 @@ describe("DetailsHashOpener's decision, proven against the page's REAL nesting",
   const NEGATIVE: ReadonlyArray<[string, string]> = [
     // A section that lives in ANOTHER bar must not open this one.
     ["#candidate-skills", "cv-details"],
+    ["#cv-languages", "cv-details"],
+    ["#cv-availability", "cv-background"],
     ["#profile-identity", "capabilities"],
     ["#cv-availability", "organization-history"],
     ["#roster-link-withdrawals", "profile-about"],
@@ -213,7 +218,7 @@ describe("DetailsHashOpener's decision, proven against the page's REAL nesting",
   }
 
   it("the model is not vacuous: every bar resolved at least one id inside it", () => {
-    for (const id of ["organization-history", "cv-details", "capabilities"] as const) {
+    for (const id of ["organization-history", "cv-details", "cv-background", "capabilities"] as const) {
       expect(children.get(id)?.size ?? 0, `#${id} children`).toBeGreaterThan(0);
     }
   });
@@ -291,10 +296,11 @@ describe("one form of address on the profile hub (LT)", () => {
     } else if (typeof node === "string") out[prefix.slice(0, -1)] = node;
     return out;
   };
-  // Formal second-person forms the informal player card does not use.
-  const FORMAL = /\b(jūs|jus|jūsų|jums|galite|tinkate|pasirinkite|papasakokite|nurodykite|pažymėkite|patikrinkite|patvirtinkite|įkelkite|ieškote|norite|neįrašėte|papildykite)\b/i;
+  // Informal second-person forms. Since the owner decision of 2026-11-15 the
+  // hub and the player card rendered inside it both speak formal "jūs".
+  const INFORMAL = /(?<![a-ząčęėįšųūž])(tu|tave|tavo|tau|tinki|pasirink|papasakok|nurodyk|pažymėk|patikrink|patvirtink|įkelk|ieškai|nori|neįrašei|papildyk)(?![a-ząčęėįšųūž])/i;
 
-  it("the hub's namespaces read 'tu' like the player card rendered inside it", () => {
+  it("the hub's namespaces read 'jūs' like the player card rendered inside it", () => {
     const hub = {
       ...flat(lt.profileHub, "profileHub."),
       ...flat((lt.setupJourney as Record<string, unknown>).steps, "setupJourney.steps."),
@@ -302,9 +308,9 @@ describe("one form of address on the profile hub (LT)", () => {
       ...flat((lt.skills as Record<string, unknown>).reviewBanner, "skills.reviewBanner."),
       ...flat((lt.playerCard as Record<string, unknown>).live, "playerCard.live."),
     };
-    const formal = Object.entries(hub).filter(([, v]) => FORMAL.test(v));
-    expect(formal, formal.map(([k, v]) => `${k}: ${v}`).join("\n")).toEqual([]);
+    const informal = Object.entries(hub).filter(([, v]) => INFORMAL.test(v));
+    expect(informal, informal.map(([k, v]) => `${k}: ${v}`).join("\n")).toEqual([]);
     // Positive control: the regex does catch the old wording.
-    expect(FORMAL.test("Štai ką apie jus jau žinome.")).toBe(true);
+    expect(INFORMAL.test("Štai ką apie tave jau žinome.")).toBe(true);
   });
 });

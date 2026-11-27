@@ -261,7 +261,8 @@
   "unnamedOrganization": {
     "company": "Företag utan namn",
     "agency": "Bemanningsföretag utan namn",
-    "other": "Organisation utan namn"
+    "other": "Organisation utan namn",
+    "ended": "Tidigare organisation utan namn"
   },
   "activeWorkspaceNoRelationship": "Du agerar för {org}, men inget arbetsförhållande med {org} är registrerat, så det erbjuds inte här. Välj det sammanhang som arbetet verkligen hör till.",
   "project": "Projekt",
@@ -439,7 +440,16 @@
       "outcomeBlocked": "inte bekräftad ({code})",
       "receipt": "Bekräftat: {title}",
       "receiptSkills": "{count, plural, one {# färdighet} other {# färdigheter}}",
-      "skillsUnavailable": "Färdighetslistan kunde inte läsas — trycket bekräftar bara själva posten."
+      "skillsUnavailable": "Färdighetslistan kunde inte läsas — trycket bekräftar bara själva posten.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Alla projekt ({n})",
+      "projectNone": "Utan projekt ({n})",
+      "projectUnnamed": "Projekt, namnet visas inte",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Visa",
+      "projectResult": "Visar {shown} av {total} poster",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Utan projekt"
     },
     "loadFailed": "Granskningskön kunde inte läsas in. Det betyder inte att det inte finns något att granska — försök igen."
   },
@@ -598,6 +608,13 @@
     "dayEmpty": "Inga poster den här dagen.",
     "moreDays": "Visar den senast registrerade dagen. {count, plural, one {# dag till} other {# dagar till}} med poster – välj ett datum i kalendern.",
     "periodEmpty": "Inga poster under den här perioden."
+  },
+  "dayChoice": {
+    "today": "I dag",
+    "yesterday": "I går",
+    "weekAgo": "För en vecka sedan",
+    "calendar": "Kalender",
+    "earlier": "Tidigare poster"
   },
   "spreadsheet": {
     "title": "Kalkylbladsläge – flera poster på en gång",

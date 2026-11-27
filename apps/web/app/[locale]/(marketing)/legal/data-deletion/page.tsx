@@ -104,13 +104,13 @@ export default async function DataDeletionPage({
         </p>
       </section>
 
-      <nav aria-label={t("relatedLabel")} className="mt-10 flex flex-wrap gap-x-6 gap-y-2">
-        <Link href="/legal/privacy" className="text-sm text-text-secondary hover:text-text-primary">
+      <nav aria-label={t("relatedLabel")} className="mt-10 flex flex-wrap gap-x-6">
+        <Link href="/legal/privacy" className="inline-flex min-h-11 items-center text-sm text-text-secondary hover:text-text-primary">
           {t("relatedPrivacy")} →
         </Link>
         <Link
           href="/legal/data-access"
-          className="text-sm text-text-secondary hover:text-text-primary"
+          className="inline-flex min-h-11 items-center text-sm text-text-secondary hover:text-text-primary"
         >
           {t("relatedDataAccess")} →
         </Link>

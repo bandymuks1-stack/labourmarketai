@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useEffect, useRef } from "react";
+import { useActionState, useEffect, useRef, type ReactNode } from "react";
 import { parseCompanyNeedPrefill } from "@/lib/staffing/company-need-prefill";
 import {
   submitCompanyNeedAction,
@@ -27,7 +27,6 @@ export interface CompanyNeedFormLabels {
   readonly contactPerson: string;
   readonly contactPersonHelp: string;
   readonly contactEmail: string;
-  readonly contactEmailHelp: string;
   readonly profession: string;
   readonly country: string;
   readonly countryHelp: string;
@@ -86,8 +85,15 @@ export function CompanyNeedForm({
   labels,
   categories,
   countryOptions,
+  phone,
+  notice,
 }: {
   readonly labels: CompanyNeedFormLabels;
+  /** The phone field's label and its "optional" mark: the landing request
+   *  door's own words, now that this form is the one worker-need entry. */
+  readonly phone: { readonly label: string; readonly optional: string };
+  /** The privacy notice shown before sending (the request door's, unchanged). */
+  readonly notice: ReactNode;
   readonly categories: readonly WorkCategoryOptionGroup[];
   /** Constrained target-market list (code + localized name) — no free-text codes. */
   readonly countryOptions: ReadonlyArray<{ code: string; label: string }>;
@@ -162,10 +168,49 @@ export function CompanyNeedForm({
     if (shownAt.current === 0) shownAt.current = Date.now();
     if (stampRef.current) stampRef.current.value = String(shownAt.current);
   }, [state]);
+  // WHAT WAS TYPED SURVIVES A REFUSED SEND (owner P0 2026-11-22): React
+  // resets an action form after every send, so the visible fields are taken
+  // at submit and put back when the send did not succeed. Hidden fields keep
+  // their own handling above; a successful send stays reset.
+  const typedRef = useRef<Array<{ name: string; value: string; checked?: boolean }>>([]);
   function stampOnSubmit() {
     if (stampRef.current && shownAt.current > 0) stampRef.current.value = String(shownAt.current);
     if (entryInputRef.current) entryInputRef.current.value = entryRef.current;
+    const form = formRef.current;
+    typedRef.current = form
+      ? Array.from(form.elements).flatMap((el) => {
+          if (el instanceof HTMLInputElement) {
+            if (!el.name || el.type === "hidden") return [];
+            return [{ name: el.name, value: el.value, checked: el.type === "checkbox" || el.type === "radio" ? el.checked : undefined }];
+          }
+          if ((el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) && el.name) {
+            return [{ name: el.name, value: el.value }];
+          }
+          return [];
+        })
+      : [];
   }
+  useEffect(() => {
+    if (!state || state.ok !== false) return;
+    const form = formRef.current;
+    if (!form) return;
+    const refill = () => {
+      for (const f of typedRef.current) {
+        for (const el of Array.from(form.elements)) {
+          if (!(el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement)) continue;
+          if (el.name !== f.name) continue;
+          if (el instanceof HTMLInputElement && f.checked !== undefined) {
+            if (el.value === f.value || el.type === "checkbox") el.checked = f.checked;
+          } else {
+            el.value = f.value;
+          }
+        }
+      }
+    };
+    refill();
+    // React's own reset can land after this effect in the same commit.
+    queueMicrotask(refill);
+  }, [state]);
 
   function handleFirstInteraction() {
     if (startedRef.current) return;
@@ -230,9 +275,15 @@ export function CompanyNeedForm({
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.contactEmail}</span>
             <input type="email" name="contact_email" required maxLength={254} className={FIELD} />
-            <span className={HELP}>{labels.contactEmailHelp}</span>
           </label>
         </div>
+
+        <label className={LABEL}>
+          <span className="text-text-secondary">
+            {phone.label} <span className="text-text-muted">({phone.optional})</span>
+          </span>
+          <input type="tel" name="contact_phone" maxLength={40} autoComplete="tel" className={FIELD} />
+        </label>
 
         <label className={LABEL}>
           <span className="text-text-secondary">{labels.profession}</span>
@@ -261,7 +312,7 @@ export function CompanyNeedForm({
           </label>
           <label className={LABEL}>
             <span className="text-text-secondary">{labels.numberOfWorkers}</span>
-            <input type="number" name="number_of_workers" min={1} max={1000} defaultValue={1} className={FIELD} />
+            <input type="number" name="number_of_workers" min={1} max={100000} defaultValue={1} className={FIELD} />
           </label>
         </div>
 
@@ -330,6 +381,8 @@ export function CompanyNeedForm({
           <textarea name="description" required rows={4} maxLength={8000} className={FIELD} />
           <span className={HELP}>{labels.descriptionHelp}</span>
         </label>
+
+        <p className="text-xs leading-relaxed text-text-muted" data-testid="company-need-privacy-notice">{notice}</p>
 
         <button
           type="submit"
@@ -412,6 +465,16 @@ export function CompanyNeedForm({
                     </p>
                   ) : null}
                 </div>
+              ) : state.draftStatus === "disabled" ? (
+                // AI off: say so (the label the page already passes), never
+                // a silent gap where the suggestion would have been.
+                <p className="text-xs text-text-secondary" data-testid="company-need-ai-disabled">
+                  {labels.aiDisabled}
+                </p>
+              ) : state.draftStatus === "needs_review" ? (
+                <p className="text-xs text-text-secondary" data-testid="company-need-ai-none">
+                  {labels.aiNone}
+                </p>
               ) : null}
 
               {/* Construction-only honest fallback: if there is no suitable

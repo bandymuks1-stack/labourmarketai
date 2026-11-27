@@ -381,6 +381,13 @@ export async function collect({ client, repo, sinceIso, fetchHealth, sleep, conc
     `search/issues?q=${encodeURIComponent(`repo:${repo} is:pr is:merged merged:>=${sinceIso}`)}`,
     "items",
   );
+  // PRs closed (merged or not) in the last 30 days: lets the report tell a PR that was merged long ago
+  // from an issue number when the narrative still calls it blocking. Only numbers are kept.
+  const closedSince = new Date(Date.parse(sinceIso) - 30 * 86400_000).toISOString().slice(0, 10);
+  const closed = await client.getCounted(
+    `search/issues?q=${encodeURIComponent(`repo:${repo} is:pr is:closed closed:>=${closedSince}`)}`,
+    "items",
+  );
   const deploys = await client.getCounted(`${R}/actions/workflows/deploy-vps.yml/runs?created=>=${sinceIso}`, "workflow_runs");
   const walks = await client.getCounted(`${R}/actions/workflows/prod-qa-walk.yml/runs?created=>=${sinceIso}`, "workflow_runs");
 
@@ -407,6 +414,202 @@ export async function collect({ client, repo, sinceIso, fetchHealth, sleep, conc
       .map((r) => ({ sha: r.head_sha.slice(0, 8), conclusion: r.conclusion, status: r.status, at: r.updated_at, url: r.html_url })),
     walks: walks.items.map((r) => ({ id: r.id, title: r.display_title, sha: r.head_sha.slice(0, 8), conclusion: r.conclusion, status: r.status, at: r.updated_at })),
     merged: merged.items.map((i) => ({ number: i.number, title: i.title, closedAt: i.closed_at })),
+    closedPrNumbers: closed.items.map((i) => i.number),
     prs,
   };
+}
+
+// ---------------------------------------------------------------- report synchronisation (owner order 2026-11-15)
+//
+// The 12-hour report showed results that were already out of date: phone walks that had passed were
+// reported as "not run", a merged PR was listed as blocking, and "what changed" compared a report with
+// itself. The rules below keep ONE latest confirmed state, never let an older fact overwrite a newer
+// one, and flag a contradiction instead of guessing.
+
+/** Screens a production walk can run on (.github/workflows/prod-qa-walk.yml input `device`). */
+export const WALK_DEVICES = Object.freeze(["desktop", "phone", "phone-375", "tablet-768", "desktop-1440"]);
+
+/**
+ * A run dispatched in the dark colour scheme is named "prod-qa-walk <spec> <device> dark" (input
+ * `theme`). The ledger holds the light result per walk and screen; a dark run is not merged into it,
+ * so it never stands in for, or overwrites, the light one.
+ */
+export function isDarkWalkTitle(title) {
+  const parts = String(title ?? "").trim().split(/\s+/);
+  return parts[0] === "prod-qa-walk" && parts[3] === "dark";
+}
+
+/**
+ * "prod-qa-walk <spec> [<device>]" -> { spec, device }. Automatic walks (push, schedule) are always
+ * desktop (the workflow says so). A dispatch title from before the device was added to the run name
+ * has no device: `device` is then null (unknown), never guessed.
+ */
+export function parseWalkTitle(title) {
+  const parts = String(title ?? "").trim().split(/\s+/);
+  if (parts[0] !== "prod-qa-walk" || !parts[1]) return { spec: null, device: null };
+  const spec = parts[1];
+  if (spec === "push" || spec === "schedule") return { spec, device: "desktop" };
+  const device = parts[2] && WALK_DEVICES.includes(parts[2]) ? parts[2] : null;
+  return { spec, device };
+}
+
+const walkKey = (spec, device) => `${spec}|${device}`;
+
+/**
+ * Merge this period's walk runs into the confirmed-results ledger. Per (walk, screen) only the NEWEST
+ * finished run is kept; an older run never replaces a newer entry. A run whose screen is unknown is
+ * not merged (it is returned in `unknownDevice`). The same run id recorded with a different result is
+ * a contradiction (returned in `conflicts`) and the ledger entry is left unchanged.
+ */
+export function mergeWalkLedger(ledger, walks) {
+  const entries = { ...(ledger?.walks ?? {}) };
+  const unknownDevice = [];
+  const conflicts = [];
+  const knownRuns = new Set(Object.values(entries).map((e) => Number(e.run)));
+  for (const w of walks ?? []) {
+    if (w.status && w.status !== "completed") continue;
+    if (!w.conclusion || w.conclusion === "cancelled" || w.conclusion === "skipped") continue;
+    if (isDarkWalkTitle(w.title)) continue;
+    const { spec, device } = parseWalkTitle(w.title);
+    if (!spec || spec === "push" || spec === "schedule") continue;
+    if (!device) {
+      // Already recorded with its screen (e.g. seeded from the walk report): nothing is unknown.
+      if (!knownRuns.has(Number(w.id))) unknownDevice.push(w);
+      continue;
+    }
+    const key = walkKey(spec, device);
+    const cur = entries[key];
+    if (cur && Number(cur.run) === Number(w.id)) {
+      if (cur.result !== w.conclusion) conflicts.push({ key, run: w.id, ledger: cur.result, github: w.conclusion });
+      continue;
+    }
+    if (cur && Date.parse(cur.at) >= Date.parse(w.at)) continue;
+    entries[key] = { spec, device, run: w.id, result: w.conclusion, build: w.sha, at: w.at };
+  }
+  return { ledger: { schema: 1, walks: entries }, unknownDevice, conflicts };
+}
+
+/**
+ * Never overwrite a report with an older one: the data being rendered must be newer than the report
+ * already on file. Returns null when writing is safe, or the reason it is not.
+ */
+export function staleOverwriteReason(existingGeneratedAt, newFetchedAt) {
+  if (!existingGeneratedAt) return null;
+  const a = Date.parse(existingGeneratedAt);
+  const b = Date.parse(newFetchedAt);
+  if (!Number.isFinite(b)) return "the new data has no fetch time";
+  if (Number.isFinite(a) && a > b)
+    return `the report on file was generated at ${existingGeneratedAt}, after this data was fetched (${newFetchedAt})`;
+  return null;
+}
+
+const BLOCKING_WORDS = /\b(blokuoja|blokuot\w*|laukia|reikia|užblokuot\w*|stabdo|blocks?|blocked|waiting)\b/i;
+const NOT_RUN_WORDS = /(nepaleist\w*|neužfiksuot\w*|paleidimo nėra|nebuvo atlikt\w*|not run)/i;
+
+/**
+ * Contradictions between the coordinator's narrative and the facts the report holds. Each finding is a
+ * line to show and check, never an automatic rewrite of the narrative.
+ *  - a PR named as blocking / waiting that is closed (merged or not) and no longer open;
+ *  - phone walks called "not run" while the ledger holds a finished phone walk.
+ */
+export function narrativeDiscrepancies(text, { openPrNumbers, closedPrNumbers, ledger }) {
+  const open = new Set(openPrNumbers ?? []);
+  // Only a number known to be a CLOSED PR is flagged: an issue number (e.g. #3354) is never a PR.
+  const closed = new Set(closedPrNumbers ?? []);
+  const out = [];
+  const lines = String(text ?? "").split("\n");
+  for (const line of lines) {
+    if (!BLOCKING_WORDS.test(line)) continue;
+    for (const m of line.matchAll(/#(\d{3,5})\b/g)) {
+      const n = Number(m[1]);
+      if (!open.has(n) && closed.has(n)) out.push(`#${n} tekste minimas kaip blokuojantis ar laukiantis, bet jis nebėra atviras PR (sujungtas arba uždarytas).`);
+    }
+  }
+  const phone = Object.values(ledger?.walks ?? {}).filter((e) => e.device !== "desktop");
+  if (phone.length) {
+    for (const line of lines) {
+      if (/telefon|phone/i.test(line) && NOT_RUN_WORDS.test(line)) {
+        const ok = phone.filter((e) => e.result === "success").length;
+        out.push(
+          `Tekste teigiama, kad telefono bandymų nėra, bet patvirtintų rezultatų sąraše yra ${phone.length} telefono bandymų (${ok} sėkmingi): „${line.trim().slice(0, 120)}“.`,
+        );
+        break;
+      }
+    }
+  }
+  return [...new Set(out)];
+}
+
+// ------------------------------------------------------------------ migration truth (owner order 2026-11-20)
+
+/**
+ * Reads the LIVE migration-parity step of a `quality` run on main (`pnpm check:migration-parity`,
+ * which reads production's own `supabase_migrations.schema_migrations`). Returns the repo files that
+ * have NO production ledger row, and whether the gate passed. `null` when the log has no such step.
+ */
+export function parseParityLog(text) {
+  const lines = String(text ?? "").split("\n").map((l) => l.replace(/^[^\t]*\t[^\t]*\t\d{4}-\d\d-\d\dT[\d:.]+Z\s?/, ""));
+  const head = lines.findIndex((l) => /check-migration-parity: \d+ applied in production, \d+ files in repo/.test(l));
+  if (head < 0) return null;
+  const m = lines[head].match(/(\d+) applied in production, (\d+) files in repo/);
+  const notApplied = [];
+  let inList = false;
+  for (const l of lines.slice(head + 1, head + 400)) {
+    if (/Repo files with no production ledger row/.test(l)) { inList = true; continue; }
+    if (inList) {
+      const it = l.match(/^\s*-\s+(\d{4,}_[A-Za-z0-9_]+)\s*$/);
+      if (it) { notApplied.push(it[1]); continue; }
+      if (l.trim() === "") continue;
+      inList = false;
+    }
+    if (/^(PASS|FAIL) — /.test(l.trim())) break;
+  }
+  const passed = lines.slice(head).some((l) => /PASS — every production migration has a repository file/.test(l));
+  return { applied: Number(m[1]), files: Number(m[2]), notApplied, passed };
+}
+
+const NOT_APPLIED_WORDS = /(nepritaikyt\w*|neįrodyt\w*|not applied|nepritaikoma|laukia\b[^.]*pritaikym\w*|pritaikym\w*[^.]*(laukia|leidim\w*)|migracij\w*[^.]*laukia)/i;
+
+/**
+ * A narrative line that calls a PR's migration not applied / waiting, when every migration file that
+ * PR added is in production (in the repo and NOT in the parity gate's "no production ledger row" list).
+ * `prMigrations` maps a PR number to the migration stems it added on main.
+ */
+export function migrationClaimDiscrepancies(text, { prMigrations = {}, notApplied = [] } = {}) {
+  const missing = new Set(notApplied);
+  const out = [];
+  for (const line of String(text ?? "").split("\n")) {
+    if (!NOT_APPLIED_WORDS.test(line)) continue;
+    for (const m of line.matchAll(/#(\d{3,5})\b/g)) {
+      const stems = prMigrations[m[1]] ?? prMigrations[Number(m[1])];
+      if (!stems?.length) continue;
+      if (stems.every((s) => !missing.has(s))) {
+        out.push(`#${m[1]} tekste minimas kaip nepritaikytas ar laukiantis leidimo, bet jo migracija (${stems.join(", ")}) produkcijos žurnale jau yra.`);
+      }
+    }
+  }
+  return [...new Set(out)];
+}
+
+/** A report is COMPLETE only with all data AND no unresolved internal contradiction. */
+export function finalCompleteness({ errors = [], registerProblems = [], discrepancies = [], migrationParity }) {
+  if (errors.length || registerProblems.length) return "PARTIAL";
+  if (!migrationParity) return "PARTIAL";
+  return discrepancies.length ? "PARTIAL" : "COMPLETE";
+}
+
+/**
+ * Text that must not reach the public report (AGENTS.md: no personal or partner contact data, money
+ * amounts or production volumes). The coordinator's narrative is checked before anything is written.
+ */
+export function privacyFindings(text) {
+  const t = String(text ?? "");
+  const out = [];
+  for (const m of t.matchAll(/[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}/g)) {
+    if (/@(example\.invalid|e2e-proof\.local|users\.noreply\.github\.com|anthropic\.com)$/i.test(m[0])) continue;
+    out.push(`e-mail address: ${m[0].replace(/^[^@]+/, "***")}`);
+  }
+  for (const m of t.matchAll(/(?:€\s?\d[\d\s.,]*|\b\d[\d\s.,]*\s?(?:€|EUR|eur)\b)/g)) out.push(`money amount: ${m[0].trim()}`);
+  for (const m of t.matchAll(/\+\d[\d\s-]{7,}\d/g)) out.push(`phone number: ${m[0].slice(0, 4)}…`);
+  return out;
 }

@@ -3,9 +3,15 @@
 import { revalidatePath } from "next/cache";
 
 import { createClient } from "@/lib/supabase/server";
+import { agencyBoardBurstLimited } from "@/lib/agency/board-abuse-guard";
+import { decideAgencyOffer } from "@/lib/agency/board-abuse-limits";
 import { proposalLimitOf, type ProposalLimit } from "@/lib/booking/proposal-limit";
 import { resolveCountryCode } from "@/lib/location/country-model";
 import { notifyBooking } from "@/lib/booking/booking-notify";
+import {
+  emitOfferAnsweredNotification,
+  emitOfferReceivedNotification,
+} from "@/lib/notifications/event-emitters";
 import {
   isBridgeUuid,
   isMissingRpcCode,
@@ -95,6 +101,9 @@ export type BridgeActionState =
    *  (10 waiting for an answer, 30 per 24 h). Which cap it was, so the
    *  employer is told the way out instead of a generic failure. */
   | { status: "proposal-limit"; limit: ProposalLimit }
+  /** Too many offers: in a short burst, on one need, or in 24 h (owner
+   *  decision 2026-11-22: protection against floods and fake offers). */
+  | { status: "rate-limited" }
   | { status: "error"; reason?: string };
 
 function mapErr(code: string | undefined, message: string | undefined): BridgeActionState {
@@ -308,13 +317,80 @@ export async function submitOfferAction(
   const note = validateOfferNote(String(formData.get("note") ?? ""));
   if (!isBridgeUuid(shareId) || !isBridgeUuid(workerId)) return { status: "invalid" };
   const supabase = await createClient();
-  const { error } = await rpc(supabase).rpc("submit_agency_candidate_offer_v1", {
+  // Abuse limits (owner decision 2026-11-22): burst per account and IP, then
+  // caps counted from the agency's own offer rows. Unread counts refuse.
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { status: "forbidden" };
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+  // The daily cap is per AGENCY (the share's connection names it) and reads
+  // only columns signed-in callers keep after #3353's column grants
+  // (agency_company_id, created_at — never created_by). R2 P2-1 on #3629.
+  const agencyCompanyId = await (async () => {
+    try {
+      const { data: share } = await rpc(supabase)
+        .from("agency_client_request_shares")
+        .select("connection_id")
+        .eq("id", shareId)
+        .maybeSingle();
+      if (!share?.connection_id) return null;
+      const { data: conn } = await rpc(supabase)
+        .from("agency_client_connections")
+        .select("agency_company_id")
+        .eq("id", share.connection_id)
+        .maybeSingle();
+      return typeof conn?.agency_company_id === "string" ? (conn.agency_company_id as string) : null;
+    } catch {
+      return null;
+    }
+  })();
+  const [onNeed, today] = agencyCompanyId
+    ? await Promise.all([
+        rpc(supabase)
+          .from("agency_candidate_offers")
+          .select("id", { count: "exact", head: true })
+          .eq("request_share_id", shareId)
+          .eq("status", "offered")
+          .neq("worker_id", workerId),
+        rpc(supabase)
+          .from("agency_candidate_offers")
+          .select("id", { count: "exact", head: true })
+          .eq("agency_company_id", agencyCompanyId)
+          .gte("created_at", since),
+      ]).catch(() => [null, null] as const)
+    : ([null, null] as const);
+  const cap = decideAgencyOffer({
+    burstLimited: await agencyBoardBurstLimited("offer", user.id),
+    openOnNeed: onNeed && !onNeed.error && typeof onNeed.count === "number" ? onNeed.count : null,
+    last24h: today && !today.error && typeof today.count === "number" ? today.count : null,
+  });
+  if (!cap.allowed) return { status: "rate-limited" };
+  const { data: offerId, error } = await rpc(supabase).rpc("submit_agency_candidate_offer_v1", {
     p_request_share_id: shareId,
     p_worker_id: workerId,
     p_note: note,
   });
   if (error) return mapErr(error.code, error.message);
   emitFirstRealAction("agency", "offer_candidate", "agency_candidate_offer");
+  // The client company's demand owner hears of the candidate, after the
+  // write. Resolved from the OFFER ROW, under the agency's own session: its
+  // offer names the request, and the share it holds lets it read that
+  // request's owner (customer_requests_select_agency_share). Never from input.
+  if (typeof offerId === "string" && isBridgeUuid(offerId)) {
+    const { data: offerRow } = await rpc(supabase).from("agency_candidate_offers").select("request_id").eq("id", offerId).maybeSingle();
+    const requestId = (offerRow as { request_id?: string } | null)?.request_id ?? null;
+    const { data: need } = requestId
+      ? await rpc(supabase).from("customer_requests").select("profile_id").eq("id", requestId).maybeSingle()
+      : { data: null };
+    await emitOfferReceivedNotification({
+      kind: "candidate",
+      offerId,
+      requestId,
+      recipientProfileId: (need as { profile_id?: string | null } | null)?.profile_id ?? null,
+      actorProfileId: user.id,
+    });
+  }
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };
 }
@@ -332,6 +408,12 @@ export async function respondCandidateOfferAction(
   if (!isBridgeUuid(offerId)) return { status: "invalid" };
   if (decision !== "accepted" && decision !== "declined") return { status: "invalid" };
   const supabase = await createClient();
+  // Who proposed the candidate — read BEFORE the answer, under the client's
+  // own RLS (owns_company(client_company_id)), so the agency can hear it.
+  const [{ data: auth }, { data: offerRow }] = await Promise.all([
+    supabase.auth.getUser(),
+    rpc(supabase).from("agency_candidate_offers").select("created_by").eq("id", offerId).maybeSingle(),
+  ]);
   const { data: decided, error } = await rpc(supabase).rpc("respond_agency_candidate_offer_v1", {
     p_offer_id: offerId,
     p_decision: decision,
@@ -356,6 +438,15 @@ export async function respondCandidateOfferAction(
     await notifyBooking(supabase, decided, "booking_proposed");
   }
   emitFirstRealAction("company", "offer_" + decision, "agency_candidate_offer");
+  if (auth.user) {
+    await emitOfferAnsweredNotification({
+      kind: "candidate",
+      offerId,
+      recipientProfileId: (offerRow as { created_by?: string | null } | null)?.created_by ?? null,
+      actorProfileId: auth.user.id,
+      decision,
+    });
+  }
   revalidatePath("/[locale]/dashboard/company/scouting", "page");
   revalidatePath("/[locale]/dashboard/company", "page");
   return { status: "ok" };

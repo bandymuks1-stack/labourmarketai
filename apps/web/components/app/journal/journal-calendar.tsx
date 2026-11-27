@@ -43,11 +43,15 @@ export async function JournalCalendar({
   selected,
   /** The journal's other active query params, preserved on every cell link. */
   carry,
+  /** The journal holds no entry at all: the list's own empty state says so
+   *  (with the action), so the calendar does not repeat it underneath. */
+  quietWhenEmpty = false,
 }: {
   grid: JournalCalendarGrid;
   locale: ActiveLocale;
   selected: string | null;
   carry?: Readonly<Record<string, string>>;
+  quietWhenEmpty?: boolean;
 }) {
   const t = await getTranslations("journal.calendar");
   // The day whose week / fortnight / month the hours export covers.
@@ -183,7 +187,7 @@ export async function JournalCalendar({
           <span
             key={iso}
             aria-hidden
-            className="py-1 text-center font-mono text-[0.625rem] uppercase tracking-label text-text-muted"
+            className="py-1 text-center font-mono text-meta uppercase tracking-label text-text-muted"
           >
             {weekdayFmt.format(new Date(`${iso}T00:00:00Z`)).slice(0, 2)}
           </span>
@@ -318,7 +322,10 @@ export async function JournalCalendar({
         })}
       </div>
 
-      {/* What this period actually holds — the honest sum of the cells above. */}
+      {/* What this period actually holds — the honest sum of the cells above.
+          Left out only when the journal has no entry at all and the page's
+          one empty state already says so (owner P0 2026-11-23). */}
+      {quietWhenEmpty && grid.recordedDays === 0 && grid.reportedDays === 0 ? null : (
       <p
         className="text-meta leading-relaxed text-text-muted"
         data-testid="journal-calendar-summary"
@@ -342,6 +349,7 @@ export async function JournalCalendar({
                 entries: grid.recordedEntries,
               })}
       </p>
+      )}
       {/* HOURS OUT (owner command 2026-09-28 §13): the same canonical hours as
           a file, for one week, two weeks or one calendar month around the
           picked day (else today in view, else the period's last day). A
@@ -357,7 +365,7 @@ export async function JournalCalendar({
             key={period}
             href={`/${locale}/dashboard/journal/hours?period=${period}&date=${exportDay}`}
             download
-            className="inline-flex min-h-11 items-center font-medium text-brand-blue hover:underline"
+            className="inline-flex min-h-11 min-w-11 items-center justify-center px-2 font-medium text-brand-blue hover:underline"
             data-testid={`journal-hours-export-${period}`}
           >
             {t(`exportPeriod.${period}`)}

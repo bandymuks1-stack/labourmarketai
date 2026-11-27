@@ -17,15 +17,32 @@
  * Rules carried from the register: a function is "veikia produkcijoje" only when its register row
  * is LIVE_VERIFIED; existing code or a green CI is never counted as working.
  */
+import { spawnSync } from "node:child_process";
 import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { completeness, isRedPr, prBlocker } from "./status-report-lib.mjs";
+import {
+  completeness,
+  isRedPr,
+  mergeWalkLedger,
+  narrativeDiscrepancies,
+  migrationClaimDiscrepancies,
+  finalCompleteness,
+  parseWalkTitle,
+  prBlocker,
+  privacyFindings,
+  staleOverwriteReason,
+  WALK_DEVICES,
+} from "./status-report-lib.mjs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 const REGISTER = join(ROOT, "docs", "program", "FUNCTION_REGISTER.md");
 const OUT_DEFAULT = join(ROOT, "docs", "program", "STATUS_REPORT.md");
+// The latest CONFIRMED result per production walk and screen, kept across reports (owner order
+// 2026-11-15): a walk that passed stays visible after it leaves the 12-hour window, and an older run
+// never replaces a newer one. Holds only walk name, screen, result, run id, build and time.
+// It sits next to the report it feeds (docs/program/STATUS_EVIDENCE.json for the canonical report).
 const REPO_URL = "https://github.com/bandymuks1-stack/labourmarketai";
 
 const args = process.argv.slice(2);
@@ -36,8 +53,10 @@ const arg = (n, f) => {
 const DATA = arg("--data");
 const NARRATIVE = arg("--narrative");
 const OUT = arg("--out", OUT_DEFAULT);
+const LEDGER = arg("--ledger", join(dirname(OUT), "STATUS_EVIDENCE.json"));
+const PREVIOUS = arg("--previous");
 if (!DATA) {
-  console.error("usage: status-report.mjs --data <fetch.json> [--narrative <file.md>] [--out <file>]");
+  console.error("usage: status-report.mjs --data <fetch.json> [--narrative <file.md>] [--out <file>] [--ledger <file.json>] [--previous <report.md>]");
   process.exit(2);
 }
 
@@ -184,7 +203,7 @@ if (mapRows.size < 250) registerProblems.push(`Lithuanian function map rows pars
 if (!journeys.size) registerProblems.push("journeys table not found");
 if (data.schema !== 2) registerProblems.push(`fetch data schema ${data.schema ?? "missing"} (expected 2)`);
 const fetchErrors = Array.isArray(data.errors) ? data.errors : [{ path: "fetch", status: "missing", attempts: 0, message: "no error log in the fetch data" }];
-const REPORT_STATE = completeness({ errors: fetchErrors, registerProblems });
+let REPORT_STATE = completeness({ errors: fetchErrors, registerProblems });
 const openNums = new Set(data.prs.map((p) => p.number));
 
 function fnFields(r) {
@@ -294,11 +313,120 @@ if (NARRATIVE) {
   for (let i = 1; i < parts.length; i += 2) narrative[parts[i]] = parts[i + 1].trim();
 }
 const nar = (k) => narrative[k] || "_Koordinatorius šios dalies šiam laikotarpiui neparašė._";
+const narrativeText = Object.values(narrative).join("\n");
+const privacy = privacyFindings(narrativeText);
+if (privacy.length) {
+  console.error("REFUSED: the narrative holds data that must not reach the public report (AGENTS.md):");
+  for (const x of privacy) console.error(`  - ${x}`);
+  process.exit(5);
+}
+
+// ---------------------------------------------------------------- never overwrite a newer report
+/** Read a file, or null when it does not exist (one call: no check-then-read race). */
+function readIfPresent(path) {
+  try {
+    return readFileSync(path, "utf8");
+  } catch (e) {
+    if (e?.code === "ENOENT") return null;
+    throw e;
+  }
+}
+const GENERATED_RE = /^<!-- generated-at: (\S+) -->$/m;
+const generatedAtOf = (txt) => (txt.match(GENERATED_RE) ?? [])[1] ?? null;
+const reportOnFile = readIfPresent(OUT);
+if (reportOnFile !== null) {
+  const reason = staleOverwriteReason(generatedAtOf(reportOnFile), data.fetchedAt);
+  if (reason) {
+    console.error(`REFUSED: ${reason}. Fetch fresh data and generate again.`);
+    process.exit(4);
+  }
+}
+
+// ---------------------------------------------------------------- confirmed walk results
+// The ledger is kept twice: in STATUS_EVIDENCE.json and embedded at the end of the report itself, so a
+// run that commits only the report still carries every confirmed result forward. Both copies (and the
+// committed previous report) are united, newest result per walk and screen wins.
+const EVIDENCE_RE = /<!-- status-evidence-json\n([\s\S]*?)\n-->/;
+const embeddedLedger = (txt) => {
+  const m = String(txt ?? "").match(EVIDENCE_RE);
+  try {
+    return m ? JSON.parse(m[1]) : null;
+  } catch {
+    return null;
+  }
+};
+const asRuns = (l) =>
+  Object.values(l?.walks ?? {}).map((e) => ({
+    id: e.run,
+    title: `prod-qa-walk ${e.spec} ${e.device}`,
+    sha: e.build,
+    conclusion: e.result,
+    status: "completed",
+    at: e.at,
+  }));
+let ledgerIn = { schema: 1, walks: {} };
+const ledgerOnFile = readIfPresent(LEDGER);
+if (ledgerOnFile !== null) ledgerIn = JSON.parse(ledgerOnFile);
+for (const src of [reportOnFile, previousReportTextSafe()]) {
+  const l = embeddedLedger(src);
+  if (l) ledgerIn = mergeWalkLedger(ledgerIn, asRuns(l)).ledger;
+}
+const ledgerMerge = mergeWalkLedger(ledgerIn, data.walks);
+const ledger = ledgerMerge.ledger;
+const discrepancies = [
+  ...narrativeDiscrepancies(narrativeText, {
+    openPrNumbers: data.prs.map((p) => p.number),
+    closedPrNumbers: [...(data.closedPrNumbers ?? []), ...data.merged.map((m) => m.number)],
+    ledger,
+  }),
+  ...migrationClaimDiscrepancies(narrativeText, {
+    prMigrations: migrationsByPr(),
+    notApplied: data.migrationParity?.notApplied ?? [],
+  }),
+  ...ledgerMerge.conflicts.map(
+    (c) => `Bandymas ${c.key} (run ${c.run}): patvirtintų rezultatų sąraše „${c.ledger}“, GitHub rodo „${c.github}“. Reikia patikrinti.`,
+  ),
+];
+
+// A report is COMPLETE only with the production migration ledger read AND no open contradiction
+// (owner order 2026-11-20): the narrative is checked before the state is written.
+REPORT_STATE = finalCompleteness({ errors: fetchErrors, registerProblems, discrepancies, migrationParity: data.migrationParity });
+
+/** PR number -> migration stems it ADDED on the checked-out history (squash subjects end "(#N)"). */
+function migrationsByPr() {
+  const g = spawnSync("git", ["-C", ROOT, "log", "--diff-filter=A", "--name-only", "--format=@@%s", "--", "supabase/migrations"], { encoding: "utf8", maxBuffer: 64 * 1024 * 1024 });
+  const map = {};
+  let pr = null;
+  for (const l of (g.stdout ?? "").split("\n")) {
+    if (l.startsWith("@@")) { pr = l.match(/\(#(\d+)\)\s*$/)?.[1] ?? null; continue; }
+    const m = l.match(/^supabase\/migrations\/(.+)\.sql$/);
+    if (pr && m) (map[pr] ??= []).push(m[1]);
+  }
+  return map;
+}
 
 // ---------------------------------------------------------------- previous report (for "what changed")
 const prev = { states: new Map(), live: null, openPrs: null, at: null };
+// The previous report is the COMMITTED one (git HEAD), not the file on disk: generating twice in one
+// period must not compare a report with itself.
+function previousReportTextSafe() {
+  try {
+    return previousReportText();
+  } catch {
+    return null;
+  }
+}
+function previousReportText() {
+  if (PREVIOUS) return readFileSync(PREVIOUS, "utf8");
+  const rel = OUT.startsWith(ROOT) ? OUT.slice(ROOT.length + 1) : null;
+  if (rel) {
+    const g = spawnSync("git", ["-C", ROOT, "show", `HEAD:${rel}`], { encoding: "utf8" });
+    if (g.status === 0 && g.stdout) return g.stdout;
+  }
+  return readFileSync(OUT, "utf8");
+}
 try {
-  const old = readFileSync(OUT, "utf8").split("\n");
+  const old = previousReportText().split("\n");
   const a7 = old.findIndex((l) => /^## A7\./.test(l));
   for (const l of a7 >= 0 ? old.slice(a7) : []) {
     if (!ROW_ID.test(l)) continue;
@@ -308,6 +436,7 @@ try {
   prev.live = Number((old.find((l) => l.startsWith("**Funkcijos:**"))?.match(/įrodyta\) (\d+)/) ?? [])[1]) || null;
   prev.openPrs = Number((old.find((l) => /^### Atviri PR \(/.test(l))?.match(/\((\d+)\)/) ?? [])[1]) || null;
   prev.at = (old.find((l) => l.startsWith("Sugeneruota "))?.match(/^Sugeneruota ([^(]+)/) ?? [])[1]?.trim() ?? null;
+  prev.generatedAt = generatedAtOf(old.join("\n"));
 } catch {
   // first report: nothing to compare
 }
@@ -333,6 +462,8 @@ const stateHead = `| Sritis | Iš viso | ${STATE_ORDER.join(" | ")} |\n|---|---|
 
 function changesBlock() {
   if (!prev.states.size) return ["Ankstesnės ataskaitos nėra — tai pirmoji; pokyčiai bus rodomi nuo kitos."];
+  if (prev.at && prev.at === vilnius(data.fetchedAt))
+    return [`Ankstesnė ataskaita sugeneruota tuo pačiu metu (${prev.at}) — palyginimo nėra.`];
   const out = [`Lyginama su ataskaita, sugeneruota ${prev.at ?? "?"}.`, ""];
   const changed = [];
   for (const f of fns) {
@@ -359,12 +490,21 @@ const countedFns = fns.filter((f) => f.state !== "PAPILDOMAS TESTAS");
 const total = countStates(countedFns);
 const live = total["VEIKIA PRODUKCIJOJE"];
 
+const DEVICE_LT = { desktop: "kompiuteris", phone: "telefonas 390 px", "phone-375": "telefonas 375 px", "tablet-768": "planšetė 768 px", "desktop-1440": "kompiuteris 1440 px" };
+const RESULT_LT = { success: "sėkmingas", failure: "nepavyko", cancelled: "atšauktas", timed_out: "baigėsi laikas" };
+const ledgerRows = Object.values(ledger.walks).sort((a, b) => a.spec.localeCompare(b.spec) || walkDeviceOrder(a) - walkDeviceOrder(b));
+function walkDeviceOrder(e) {
+  return WALK_DEVICES.indexOf(e.device);
+}
+
 P(
   "# LabourMarket.ai — 12 valandų būklės ataskaita",
   "",
+  `<!-- generated-at: ${data.fetchedAt} -->`,
+  "",
   `Sugeneruota ${vilnius(data.fetchedAt)} (Lietuvos laiku). Laikotarpis: nuo ${vilnius(data.sinceIso)}.`,
   "",
-  `**Ataskaitos būsena: ${REPORT_STATE}**${REPORT_STATE === "COMPLETE" ? " — visos užklausos pavyko, registras perskaitytas visas." : " — dalis duomenų nesurinkta; žr. „Duomenų surinkimo klaidos“. Nepilnų PR būsena rodoma kaip nežinoma, ne kaip praėjusi."}`,
+  `**Ataskaitos būsena: ${REPORT_STATE}**${REPORT_STATE === "COMPLETE" ? " — visos užklausos pavyko, registras ir migracijų žurnalas perskaityti, prieštaravimų nėra." : discrepancies.length && !fetchErrors.length && !registerProblems.length && data.migrationParity ? " — tekste yra prieštaravimų faktams; žr. „Neatitikimai, kuriuos reikia patikrinti“. Ištaisius tekstą, ataskaita generuojama iš naujo." : " — dalis duomenų nesurinkta; žr. „Duomenų surinkimo klaidos“. Nepilnų PR būsena rodoma kaip nežinoma, ne kaip praėjusi."}`,
   "",
   ...(REPORT_STATE === "COMPLETE"
     ? []
@@ -381,10 +521,42 @@ P(
     "Funkcijų būsenos imamos tik iš [`FUNCTION_REGISTER.md`](FUNCTION_REGISTER.md) eilučių: funkcija laikoma veikiančia tik tada, kai jos eilutė turi produkcijos įrodymą (`LIVE_VERIFIED`). " +
     "Kodas ar žalias CI veikimo neįrodo. Generatorius: `.github/scripts/status-report.mjs`.",
   "",
-  `**Produkcija:** versija \`${data.health?.build ?? "nežinoma"}\`, sveikata ${data.health?.ok ? "gera" : "BLOGA"} (DB ${data.health?.dbMs ?? "?"} ms), patikrinta ${data.health?.at ? vilnius(data.health.at) : "?"}.`,
+  `**Produkcija:** versija \`${data.health?.build ?? "nežinoma"}\`, sveikata ${data.health?.ok ? "gera" : "BLOGA"}, patikrinta ${data.health?.at ? vilnius(data.health.at) : "?"}.`,
   "",
-  `**Funkcijos:** ${countedFns.length} privalomos apimties funkcijų; veikia produkcijoje (įrodyta) ${live} (${((live / countedFns.length) * 100).toFixed(1)} %). Tai nėra užbaigimo procentas: likusios ${countedFns.length - live} funkcijų išvardytos A7 dalyje.`,
+  `**Funkcijos:** ${countedFns.length} privalomos apimties funkcijų; veikia produkcijoje (įrodyta) ${live} (${((live / countedFns.length) * 100).toFixed(1)} %).`,
   "",
+  `Ką matuoja šis skaičius: kiek registro funkcijų turi produkcijos įrodymą (\`LIVE_VERIFIED\` — paleidimo ar patikros ID produkcijoje). Tai nėra užbaigimo procentas ir nereiškia, kad likusios ${countedFns.length - live} neveikia. ` +
+    `Jos skirstomos taip: ${STATE_ORDER.filter((x) => x !== "VEIKIA PRODUKCIJOJE")
+      .map((x) => `${x} ${total[x]}`)
+      .join(", ")}. Neveikiančiomis laikomos tik NEVEIKIA eilutės; NEPATIKRINTA, TIK KODE ir TIK CI PATIKRINTA reiškia „neįrodyta produkcijoje“, ne „sugedę“.`,
+  "",
+  `**Migracijos produkcijoje:** ${data.migrationParity ? `${data.migrationParity.applied} pritaikyta, ${data.migrationParity.notApplied.length} repozitorijos failų nepritaikyta (gyvas žurnalo patikrinimas, quality run ${data.migrationParity.run}, main ${String(data.migrationParity.headSha).slice(0, 8)})` : "žurnalas neperskaitytas — ataskaita PARTIAL"}.`,
+  `**Neatitikimai:** ${discrepancies.length ? `${discrepancies.length} — žr. „Neatitikimai, kuriuos reikia patikrinti“` : "nerasta"}.`,
+  "",
+  "## Patvirtinta naujausia būsena",
+  "",
+  "Paskutinis užbaigtas produkcijos bandymas kiekvienam scenarijui ir ekranui, nepriklausomai nuo 12 valandų laikotarpio. Senesnis paleidimas niekada nepakeičia naujesnio. Šaltinis: [`STATUS_EVIDENCE.json`](STATUS_EVIDENCE.json), papildomas iš GitHub kiekvienos ataskaitos metu.",
+  "",
+  ...(ledgerRows.length
+    ? [
+        "| Bandymas | Ekranas | Rezultatas | Versija | Laikas | Run |",
+        "|---|---|---|---|---|---|",
+        ...ledgerRows.map(
+          (e) =>
+            `| ${esc(e.spec)} | ${DEVICE_LT[e.device] ?? e.device} | ${RESULT_LT[e.result] ?? e.result} | \`${esc(e.build)}\` | ${vilnius(e.at)} | [${e.run}](${REPO_URL}/actions/runs/${e.run}) |`,
+        ),
+      ]
+    : ["Patvirtintų bandymų įrašų dar nėra."]),
+  "",
+  ...(ledgerMerge.unknownDevice.length
+    ? [
+        `Šio laikotarpio bandymai be ekrano informacijos (paleisti prieš ekrano įtraukimą į pavadinimą; į sąrašą neįtraukti, kad nebūtų spėliojama): ${ledgerMerge.unknownDevice.map((w) => `${esc(parseWalkTitle(w.title).spec)} [${w.id}](${REPO_URL}/actions/runs/${w.id})`).join(", ")}.`,
+        "",
+      ]
+    : []),
+  ...(discrepancies.length
+    ? ["### Neatitikimai, kuriuos reikia patikrinti", "", ...discrepancies.map((d) => `- ${esc(d)}`), ""]
+    : []),
   "## Pokyčiai nuo ankstesnės ataskaitos",
   "",
   ...changesBlock(),
@@ -439,9 +611,13 @@ P("", `Nepavykę diegimai: ${failedDeploys.length ? failedDeploys.map((d) => d.s
 P("### Produkcijos bandymai (walks) per laikotarpį", "");
 if (!data.walks.length) P("Nebuvo.");
 else {
-  P("| Bandymas | Versija | Rezultatas | Laikas |", "|---|---|---|---|");
-  for (const w of data.walks)
-    P(`| [${esc(w.title)}](${REPO_URL}/actions/runs/${w.id}) | \`${w.sha}\` | ${w.conclusion ?? w.status} | ${vilnius(w.at)} |`);
+  P("| Bandymas | Ekranas | Versija | Rezultatas | Laikas |", "|---|---|---|---|---|");
+  for (const w of data.walks) {
+    const d = parseWalkTitle(w.title).device;
+    P(
+      `| [${esc(w.title)}](${REPO_URL}/actions/runs/${w.id}) | ${d ? DEVICE_LT[d] : "nežinomas"} | \`${w.sha}\` | ${w.conclusion ?? w.status} | ${vilnius(w.at)} |`,
+    );
+  }
 }
 P("", `### Sujungti per laikotarpį (${data.merged.length})`, "");
 for (const m of data.merged) P(`- #${m.number} ${esc(m.title)}`);
@@ -507,5 +683,7 @@ for (const f of fns)
   );
 P("");
 
+L.push("", "<!-- status-evidence-json", JSON.stringify(ledger), "-->", "");
 writeFileSync(OUT, L.join("\n"));
+writeFileSync(LEDGER, JSON.stringify(ledger, null, 1) + "\n");
 console.log(`wrote ${OUT} [${REPORT_STATE}]: ${fns.length} functions, ${prs.length} open PRs, live ${live}/${countedFns.length}`);

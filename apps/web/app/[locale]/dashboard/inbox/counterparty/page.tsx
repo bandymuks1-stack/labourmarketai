@@ -3,6 +3,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
 import { EmptyState } from "@/components/app/empty-state";
+import { chipLinkClassName } from "@/components/ui/Chip";
 import {
   CounterpartyReviewCard,
   type CounterpartyCardView,
@@ -191,7 +192,7 @@ export default async function CounterpartyQueuePage({
         ) : null}
         <Link
           href="/dashboard/inbox"
-          className="w-fit text-xs font-medium text-brand-blue hover:underline"
+          className={`${chipLinkClassName(false)} w-fit`}
         >
           {t("employerInboxLink")}
         </Link>

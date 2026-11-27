@@ -1,7 +1,9 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
+import { clickUntilVisible } from "./click-until-visible";
 import { inviteCapGate } from "./invite-cap";
+import { archiveSyntheticCohorts, SYNTHETIC_PROGRAM } from "./prod-synthetic-cohorts";
 import { test, expect, type Browser, type Page } from "./prod-walk";
 
 /**
@@ -18,7 +20,7 @@ import { test, expect, type Browser, type Page } from "./prod-walk";
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
 const ALFA = "QA-SYNTHETIC Alfa";
-const PROGRAM = "QA-SYNTHETIC praktikos programa";
+const PROGRAM = SYNTHETIC_PROGRAM;
 const COHORT = `QA-SYNTHETIC grupė ${RUN}`;
 // The institution sees the learner by the name IT typed on the invitation
 // (learner privacy), or by the profile name where membership shows it.
@@ -44,7 +46,21 @@ async function workspace(page: Page, orgName: string): Promise<void> {
   await expect(chip).toContainText(orgName, { timeout: 30_000 });
 }
 
+// Independent of earlier walks (owner order 2026-11-23): before the walk, the
+// groups earlier runs left live are archived; after it (Playwright runs
+// afterAll when a test fails too), this run's group as well. Archiving keeps
+// the membership rows as history; it only takes the group off the compass.
+test.beforeAll(async () => {
+  if (!ENABLED) return;
+  await archiveSyntheticCohorts("before");
+});
+test.afterAll(async () => {
+  if (!ENABLED) return;
+  await archiveSyntheticCohorts("after");
+});
+
 let link = "";
+
 
 test("L-1. the organization declares it trains people, and runs a programme", async ({ browser }) => {
   const { page, close } = await as(browser, "owner");
@@ -90,13 +106,10 @@ test("L-2. the institution invites a learner with a link (no e-mail needed)", as
   await page.goto("/lt/dashboard/company/education");
   await page.getByTestId("institution-learners-invite").click();
   await page.waitForURL(/\/dashboard\/network/, { timeout: 30_000 });
-  const open = page.getByTestId("invite-panel-open");
-  if (await open.isVisible().catch(() => false)) await open.click();
-  const capacity = page.getByTestId("invite-capacity");
-  await expect(capacity).toBeVisible({ timeout: 30_000 });
-  await expect(capacity).toHaveValue("student");
-  const linkMode = page.getByTestId("invite-mode-link");
-  if (await linkMode.isVisible().catch(() => false)) await linkMode.click();
+  // UX_GAPS I-4: the door preset type, organisation and relationship — one read-only line, link mode by default.
+  const preset = page.getByTestId("invite-preset");
+  await expect(preset).toHaveAttribute("data-relationship", "student", { timeout: 30_000 });
+  await expect(page.getByTestId("invite-mode-link")).toHaveAttribute("aria-checked", "true");
   const name = page.getByTestId("invite-name");
   if (await name.isVisible().catch(() => false)) await name.fill(`QA-SYNTHETIC mokinys ${RUN}`);
   await page.getByTestId("invite-submit").click();
@@ -210,10 +223,8 @@ test("L-8. a company can offer practice without being a school: the intern capac
   await page.goto("/lt/dashboard");
   await workspace(page, ALFA);
   await page.goto("/lt/dashboard/network");
-  const open = page.getByTestId("invite-panel-open");
-  if (await open.isVisible().catch(() => false)) await open.click();
   const type = page.getByTestId("invite-type");
-  await expect(type).toBeVisible({ timeout: 30_000 });
+  await clickUntilVisible(page.getByTestId("invite-panel-open"), type, { timeout: 30_000, what: "the invite panel" });
   await type.selectOption("join_organization").catch(() => undefined);
   const capacity = page.getByTestId("invite-capacity");
   await expect(capacity).toBeVisible({ timeout: 30_000 });
