@@ -121,10 +121,14 @@ describe("the Work page: two tiers, navigation stays navigation", () => {
     // outlined, never a second gold primary — pinned by
     // lib/company/project-context-expansion.test.ts.
     expect(PAGE).toMatch(/data-testid="company-ops-projects-create"/);
-    for (const f of ["components/app/project-assignment-manager.tsx"]) {
-      const primary = read(f).match(/const primary =\s*"([^"]+)"/)?.[1] ?? "";
-      expect(primary, f).not.toMatch(/bg-gradient-cta/);
-      expect(primary, f).toMatch(/border-brand-blue\/60/);
+    // The project manager's buttons are the shared outlined Button too
+    // (duplication audit ORG-9): no hand-written <button>, no gold fill.
+    const manager = read("components/app/project-assignment-manager.tsx");
+    expect(manager).not.toMatch(/bg-gradient-cta/);
+    expect(manager).not.toMatch(/<button\b/);
+    for (const b of manager.match(/<Button\b(?:=>|[^>])*>/g) ?? []) {
+      expect(b).toMatch(/variant="secondary"/);
+      expect(b).toMatch(/className="min-h-11"/);
     }
     // The team block is on the shared Button (owner P0 2026-11-12: one design
     // system). The same rule holds there: every button is the OUTLINED

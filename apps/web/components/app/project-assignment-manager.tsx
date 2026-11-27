@@ -1,6 +1,7 @@
 "use client";
 
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
+import { Button } from "@/components/ui/Button";
 
 import { useActionState, useTransition, useState } from "react";
 
@@ -148,11 +149,10 @@ type ProjectWithAssignments = ManagedProject & {
   assignments: ProjectAssignment[];
 };
 
-// Form submits sit BELOW the page's one primary action (the action deck's
-// "New project"), so they are outlined gold, not a gold fill (owner design
-// pass 2026-10-26: one primary per screen).
-const primary =
-  "inline-flex min-h-11 w-fit items-center gap-2 rounded-md border border-brand-blue/60 px-4 py-2 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60";
+// Every button here is the shared OUTLINED secondary Button (owner P0
+// 2026-11-12: one design system; duplication audit ORG-9): form submits sit
+// below the page's one primary action (the action deck's "New project"), so
+// none of them is a gold fill (owner design pass 2026-10-26).
 const field =
   "rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base";
 
@@ -256,15 +256,17 @@ export function ReservationNotice({
             {alternatives.map((a) => (
               <li key={a.profileId} className="flex items-center justify-between gap-3">
                 <span className="min-w-0 truncate text-xs text-text-primary">{a.name}</span>
-                <button
+                <Button
                   type="button"
                   disabled={busy}
                   onClick={() => onSwap(a.profileId)}
                   data-testid="assign-reservation-swap"
-                  className="min-h-11 sm:min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
+                  variant="secondary"
+                  size="sm"
+                  className="min-h-11"
                 >
                   {labels.reservationSwap}
-                </button>
+                </Button>
               </li>
             ))}
           </ul>
@@ -295,26 +297,30 @@ export function ReservationNotice({
       ) : null}
       <div className="flex flex-wrap gap-2">
         {onKeep ? (
-          <button
+          <Button
             type="button"
             disabled={busy}
             onClick={() => onKeep(reason === "" ? null : reason)}
             data-testid="assign-reservation-keep"
-            className="min-h-11 sm:min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-blue"
+            variant="secondary"
+                  size="sm"
+                  className="min-h-11"
           >
             {labels.reservationKeep}
-          </button>
+          </Button>
         ) : null}
         {onUndo ? (
-          <button
+          <Button
             type="button"
             disabled={busy}
             onClick={onUndo}
             data-testid="assign-reservation-undo"
-            className="min-h-11 sm:min-h-8 rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-orange"
+            variant="secondary"
+                  size="sm"
+                  className="min-h-11"
           >
             {labels.reservationUndo}
-          </button>
+          </Button>
         ) : null}
       </div>
     </div>
@@ -495,9 +501,16 @@ export function ProjectAssignmentManager({
           <input name="city" placeholder={labels.createCityPlaceholder} className={field} data-testid="project-create-city" />
         </label>
         <div className="flex flex-wrap items-center gap-3">
-          <button type="submit" disabled={creating} className={primary} data-testid="project-create-inline-submit">
+          <Button
+            type="submit"
+            disabled={creating}
+            variant="secondary"
+            size="sm"
+            className="min-h-11"
+            data-testid="project-create-inline-submit"
+          >
             {creating ? labels.sending : labels.createSubmit}
-          </button>
+          </Button>
           {/* The project now exists: the success answer is the door into it,
               never silence (the result carries the new id). */}
           {createState?.ok && createState.id ? (
@@ -631,15 +644,17 @@ export function ProjectAssignmentManager({
             </div>
           ) : null}
           <div className="flex items-center gap-3">
-            <button
+            <Button
               id="assign-worker-submit"
               type="submit"
               disabled={assigning}
-              className={primary}
+              variant="secondary"
+                  size="sm"
+                  className="min-h-11"
               data-testid="assign-worker-submit"
             >
               {assigning ? labels.sending : labels.assignSubmit}
-            </button>
+            </Button>
             {assignState?.ok && !decided && (
               <span className="text-xs text-state-success" role="status" data-testid="assign-worker-done">{labels.assigned}</span>
             )}
@@ -715,7 +730,7 @@ export function ProjectAssignmentManager({
                       </span>
                     ) : null}
                     {!isEnded && (
-                      <button
+                      <Button
                         type="button"
                         disabled={endPending}
                         onClick={() =>
@@ -726,11 +741,13 @@ export function ProjectAssignmentManager({
                             else setEndFailed(key);
                           })
                         }
-                        className="rounded-md border border-ink-500 px-2.5 py-1 text-xs font-semibold text-text-secondary hover:border-brand-orange"
+                        variant="secondary"
+                  size="sm"
+                  className="min-h-11"
                         data-testid="assignment-end"
                       >
                         {labels.end}
-                      </button>
+                      </Button>
                     )}
                   </li>
                 );
