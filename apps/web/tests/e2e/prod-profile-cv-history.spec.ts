@@ -429,6 +429,7 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   // is stored and what the Living CV reads, as their own statement. The row is
   // removed in `afterAll` with the others, even after a red step.
   const corrected = `${TAG} pataisyta CV eilute`;
+  const importedSchool = `${TAG} importuota mokykla`;
   await importCv();
   await expect(job).toContainText(company, { timeout: 30_000 });
   await claims.getByRole("listitem").filter({ hasText: importedClaim }).getByRole("button", { name: "Pridėti", exact: true }).click();
@@ -442,6 +443,13 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   addedHistory.push(corrected);
   await inMain(page).getByTestId("cv-import-confirm-wh-0").last().click();
   await expect(inMain(page).getByTestId("cv-import-saved-wh-0").last()).toBeVisible({ timeout: 30_000 });
+  // F9: education confirmation uses the manual save's canonical path, and
+  // still returns without replacing the ongoing import review.
+  await inMain(page).getByTestId("cv-import-edit-edu-0").last().click();
+  await inMain(page).getByTestId("cv-import-field-edu-0-institution").last().fill(importedSchool);
+  addedEducation.push(importedSchool);
+  await inMain(page).getByTestId("cv-import-confirm-edu-0").last().click();
+  await expect(inMain(page).getByTestId("cv-import-saved-edu-0").last()).toBeVisible({ timeout: 30_000 });
   const after = await livingCv(page);
   await expect(after.getByTestId("cv-tier-declared").filter({ hasText: importedClaim }), "the confirmed claim reaches Living CV as self-declared").toBeVisible({ timeout: 30_000 });
   console.info("[cv-import] skill preview, explicit save, and declared CV readback PASS");
@@ -449,6 +457,12 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   await expect(saved, "the corrected row is on the Living CV, once").toHaveCount(1, { timeout: 60_000 });
   await expect(saved, "as stated by the person").toHaveAttribute("data-standing", "stated");
   await expect(after.getByText(company), "the parser's reading was not saved").toHaveCount(0);
+  const documents = await livingCv(page, "documents");
+  const education = documents.getByTestId("cv-education-row").filter({ hasText: importedSchool });
+  await expect(education, "the explicitly confirmed education reaches Living CV once").toHaveCount(1);
+  await expect(education).toContainText("2015");
+  await expect(education).toContainText("2019");
+  console.info("[cv-import] education explicit confirmation and Living CV readback PASS");
   await ctx.close();
 });
 
