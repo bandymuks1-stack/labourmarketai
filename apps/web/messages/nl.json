@@ -17046,9 +17046,36 @@
       "not_authorized": "U mag dit niet doen.",
       "not_found": "Urenstaat niet gevonden.",
       "limit_reached": "Te veel open urenstaten — dien eerst bestaande in of ruim ze op.",
-      "error": "Er is iets misgegaan. Er is niets opgeslagen."
+      "error": "Er is iets misgegaan. Er is niets opgeslagen.",
+      "schedule_saved": "Planning opgeslagen."
     },
-    "taskAmbiguous": "{count} taken gekoppeld — uren niet aan één toegewezen"
+    "taskAmbiguous": "{count} taken gekoppeld — uren niet aan één toegewezen",
+    "schedule": {
+      "title": "Automatische urenstaten",
+      "consent": "Dien mijn geregistreerde werk van de vorige dag, zeven dagen of kalendermaand in via de gekozen goedkeuringsprocedure. Werk wordt niet automatisch goedgekeurd.",
+      "enabled": "Ingeschakeld",
+      "frequency": "Frequentie",
+      "daily": "Dagelijks",
+      "weekly": "Wekelijks",
+      "monthly": "Maandelijks · op de 1e",
+      "weekday": "Wekelijkse indieningsdag",
+      "time": "Indieningstijd",
+      "zone": "Tijdzone",
+      "recipients": "Ontvangers voor goedkeuring",
+      "selectTemplate": "Selecteer een goedkeuringssjabloon",
+      "save": "Opslaan",
+      "next": "Volgende indiening: {date} ({zone})",
+      "manageRecipients": "Goedkeuringsontvangers beheren",
+      "outcome": {
+        "submitted": "Ingediend ter goedkeuring.",
+        "already_submitted": "Deze periode is al ingediend.",
+        "empty": "Geen geregistreerd werk in deze periode.",
+        "overlap": "Gepauzeerd: de periode overlapt een bestaande urenstaat.",
+        "not_allowed": "Gepauzeerd: toegang tot de organisatie is vervallen.",
+        "no_template": "Gepauzeerd: het goedkeuringssjabloon is niet beschikbaar.",
+        "error": "Indienen mislukt; er volgt een nieuwe poging."
+      }
+    }
   },
   "workObjects": {
     "title": "Objecten en locaties",

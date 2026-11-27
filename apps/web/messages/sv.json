@@ -17046,9 +17046,36 @@
       "not_authorized": "Du får inte göra detta.",
       "not_found": "Tidrapporten hittades inte.",
       "limit_reached": "För många öppna tidrapporter — lämna in eller ta bort befintliga först.",
-      "error": "Något gick fel. Inget sparades."
+      "error": "Något gick fel. Inget sparades.",
+      "schedule_saved": "Schemat har sparats."
     },
-    "taskAmbiguous": "{count} uppgifter kopplade — timmarna är inte hänförda till en enskild uppgift"
+    "taskAmbiguous": "{count} uppgifter kopplade — timmarna är inte hänförda till en enskild uppgift",
+    "schedule": {
+      "title": "Automatiska tidrapporter",
+      "consent": "Skicka mitt registrerade arbete från föregående dag, sju dagar eller kalendermånad till valt godkännandeflöde. Arbete godkänns inte automatiskt.",
+      "enabled": "Aktiverat",
+      "frequency": "Frekvens",
+      "daily": "Dagligen",
+      "weekly": "Varje vecka",
+      "monthly": "Varje månad · den 1:a",
+      "weekday": "Veckodag för inlämning",
+      "time": "Inlämningstid",
+      "zone": "Tidszon",
+      "recipients": "Mottagare för godkännande",
+      "selectTemplate": "Välj godkännandemall",
+      "save": "Spara",
+      "next": "Nästa inlämning: {date} ({zone})",
+      "manageRecipients": "Hantera godkännandemottagare",
+      "outcome": {
+        "submitted": "Inlämnat för godkännande.",
+        "already_submitted": "Den här perioden har redan lämnats in.",
+        "empty": "Inget registrerat arbete under perioden.",
+        "overlap": "Pausat: perioden överlappar en befintlig tidrapport.",
+        "not_allowed": "Pausat: åtkomsten till organisationen har upphört.",
+        "no_template": "Pausat: godkännandemallen är inte tillgänglig.",
+        "error": "Inlämningen misslyckades; ett nytt försök görs."
+      }
+    }
   },
   "workObjects": {
     "title": "Objekt och arbetsplatser",

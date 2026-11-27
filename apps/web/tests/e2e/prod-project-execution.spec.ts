@@ -19,7 +19,7 @@ import { bearerOf, qaApi, qaMcp } from "./prod-qa-api";
  * Cast (`lib/testing/prod-qa-guard.ts`, all synthetic):
  *   owner    owns "QA-SYNTHETIC Alfa" — runs the chain
  *   worker   Vytas Darbininkas, employee of Alfa — the person assigned
- *   manager  runs "QA-SYNTHETIC Gama" — another organization, must read nothing
+ *   manager  also belongs to Alfa; agency is the unrelated organization
  *
  * Runs only in `.github/workflows/prod-qa-walk.yml` (spec=project-execution)
  * with minted sessions. Every write is what a person does in the browser; the
@@ -200,7 +200,7 @@ test("E-1a. a project place requires a country and preserves the chosen ISO valu
     expect(saved).toHaveLength(1);
     expect(saved[0]).toMatchObject({ country: "SE", city: "Stockholm" });
     const other = await qaApi(
-      ("/rest/v1/projects?select=id&id=eq." + saved[0].id) as Parameters<typeof qaApi>[0], bearerOf("manager"),
+      ("/rest/v1/projects?select=id&id=eq." + saved[0].id) as Parameters<typeof qaApi>[0], bearerOf("agency"),
     );
     expect(other.ok).toBe(true);
     expect(await other.json()).toEqual([]);

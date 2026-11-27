@@ -1,3 +1,6 @@
+import { formatScheduledDelivery } from "@/lib/time/display";
+import { getTimesheetSchedules } from "@/lib/timesheets/timesheet-schedules";
+import { saveTimesheetScheduleAction } from "@/lib/timesheets/timesheet-schedule-actions";
 import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/Button";
@@ -70,6 +73,7 @@ const SUCCESS_NOTICES: readonly TimesheetNotice[] = [
   "reopened",
   "approved",
   "template_created",
+  "schedule_saved",
 ];
 
 export async function TimesheetsSection({
@@ -127,15 +131,17 @@ export async function TimesheetsSection({
     );
   }
 
-  const [workDay, workspace] = await Promise.all([
+  const [workDay, workspace, scheduling] = await Promise.all([
     viewerWorkToday(),
     getWorkspaceContext(),
+    getTimesheetSchedules(overview.orgOptions.map((o) => o.organizationId)),
   ]);
   const defaultPeriod = currentMonthPeriod(workDay.todayIso);
   // Prefer the displayed organization only if the existing reader allows it.
-  const defaultOrganizationId = overview.orgOptions.find(
-    (o) => o.organizationId === workspace.activeWorkspaceId,
-  )?.organizationId ?? overview.orgOptions[0]?.organizationId;
+  const defaultOrganizationId =
+    overview.orgOptions.find(
+      (o) => o.organizationId === workspace.activeWorkspaceId,
+    )?.organizationId ?? overview.orgOptions[0]?.organizationId;
   const fmt = (d: string) => dateFmt(d) ?? d;
 
   function totalsLine(sheet: TimesheetRow): string {
@@ -143,7 +149,9 @@ export async function TimesheetsSection({
       t("totals.hours", { hours: sheet.snapshot.totals.totalHours }),
     ];
     if (sheet.snapshot.totals.totalDayUnits > 0) {
-      parts.push(t("totals.dayUnits", { days: sheet.snapshot.totals.totalDayUnits }));
+      parts.push(
+        t("totals.dayUnits", { days: sheet.snapshot.totals.totalDayUnits }),
+      );
     }
     parts.push(t("totals.lines", { count: sheet.snapshot.totals.lineCount }));
     return parts.join(" · ");
@@ -154,13 +162,18 @@ export async function TimesheetsSection({
       return <p className="text-xs text-text-muted">{t("noLines")}</p>;
     }
     return (
-      <ul className="flex flex-col gap-1" data-testid={`timesheet-lines-${sheet.id}`}>
+      <ul
+        className="flex flex-col gap-1"
+        data-testid={`timesheet-lines-${sheet.id}`}
+      >
         {sheet.snapshot.lines.map((line) => (
           <li
             key={line.lineKey}
             className="flex flex-wrap items-center gap-2 text-xs text-text-secondary"
           >
-            <span className="font-mono text-meta text-text-muted">{line.day}</span>
+            <span className="font-mono text-meta text-text-muted">
+              {line.day}
+            </span>
             <span className="min-w-0 break-words">{line.title}</span>
             <span className="font-mono tabular-nums">
               {line.value} {t(`unit.${line.unit}`)}
@@ -291,6 +304,175 @@ export async function TimesheetsSection({
           <p className="text-xs text-text-muted">{t("mine.noOrganizations")}</p>
         )}
 
+        <details
+          className="rounded-md border border-ink-600 p-3"
+          data-testid="timesheet-schedule-settings"
+        >
+          <summary className="cursor-pointer text-sm text-text-primary">
+            {t("schedule.title")}
+          </summary>
+          <div className="mt-3 flex flex-col gap-3">
+            {!scheduling.available ? (
+              <p role="status" className="text-sm text-text-muted">
+                {t("readError")}
+              </p>
+            ) : (
+              <>
+                <p className="text-xs text-text-muted">
+                  {t("schedule.consent")}
+                </p>
+                {overview.orgOptions.map((org) => {
+                  const saved = scheduling.schedules.find(
+                    (s) => s.organization_id === org.organizationId,
+                  );
+                  const templates = scheduling.templates.filter(
+                    (d) => d.organization_id === org.organizationId,
+                  );
+                  const prefix = "ts-schedule-" + org.organizationId;
+                  return (
+                    <form
+                      key={org.organizationId}
+                      action={saveTimesheetScheduleAction}
+                      className="flex flex-wrap items-end gap-3 rounded-md border border-ink-600 p-3"
+                    >
+                      <h4 className="w-full text-sm font-semibold">
+                        {org.name ?? t("create.unnamedOrganization")}
+                      </h4>
+                      <input type="hidden" name="locale" value={locale} />
+                      <input
+                        type="hidden"
+                        name="organizationId"
+                        value={org.organizationId}
+                      />
+                      <label className="flex items-center gap-2 text-sm">
+                        <input
+                          type="checkbox"
+                          name="enabled"
+                          value="true"
+                          defaultChecked={saved?.enabled ?? false}
+                        />
+                        {t("schedule.enabled")}
+                      </label>
+                      <div className="flex flex-col gap-1">
+                        <Label htmlFor={prefix + "frequency"}>
+                          {t("schedule.frequency")}
+                        </Label>
+                        <Select
+                          id={prefix + "frequency"}
+                          name="frequency"
+                          defaultValue={saved?.frequency ?? "weekly"}
+                        >
+                          {(["daily", "weekly", "monthly"] as const).map(
+                            (f) => (
+                              <option key={f} value={f}>
+                                {t("schedule." + f)}
+                              </option>
+                            ),
+                          )}
+                        </Select>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Label htmlFor={prefix + "weekday"}>
+                          {t("schedule.weekday")}
+                        </Label>
+                        <Select
+                          id={prefix + "weekday"}
+                          name="weekday"
+                          defaultValue={saved?.weekday ?? 1}
+                        >
+                          {[1, 2, 3, 4, 5, 6, 7].map((day) => (
+                            <option key={day} value={day}>
+                              {new Intl.DateTimeFormat(locale, {
+                                weekday: "long",
+                                timeZone: "UTC",
+                              }).format(new Date(Date.UTC(2026, 0, 4 + day)))}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                      <div className="flex flex-col gap-1">
+                        <Label htmlFor={prefix + "time"}>
+                          {t("schedule.time")}
+                        </Label>
+                        <Input
+                          id={prefix + "time"}
+                          type="time"
+                          name="localTime"
+                          defaultValue={
+                            saved?.local_time.slice(0, 5) ?? "09:00"
+                          }
+                        />
+                      </div>
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <Label htmlFor={prefix + "zone"}>
+                          {t("schedule.zone")}
+                        </Label>
+                        <Input
+                          id={prefix + "zone"}
+                          name="timeZone"
+                          maxLength={64}
+                          defaultValue={
+                            saved?.time_zone ?? workDay.timeZone ?? "UTC"
+                          }
+                        />
+                      </div>
+                      <div className="flex min-w-0 flex-col gap-1">
+                        <Label htmlFor={prefix + "template"}>
+                          {t("schedule.recipients")}
+                        </Label>
+                        <Select
+                          id={prefix + "template"}
+                          name="definitionId"
+                          defaultValue={
+                            saved?.definition_id ?? templates[0]?.id ?? ""
+                          }
+                        >
+                          <option value="">
+                            {t("schedule.selectTemplate")}
+                          </option>
+                          {templates.map((d) => (
+                            <option key={d.id} value={d.id}>
+                              {d.name}
+                            </option>
+                          ))}
+                        </Select>
+                      </div>
+                      <Button type="submit">{t("schedule.save")}</Button>
+                      {templates.length === 0 ? (
+                        <p className="w-full text-xs text-text-muted">
+                          {t("noTemplateNote")}
+                        </p>
+                      ) : null}
+                      {saved?.enabled ? (
+                        <p className="w-full text-xs text-text-muted">
+                          {t("schedule.next", {
+                            date: formatScheduledDelivery(saved.next_run_at, locale, saved.time_zone) ?? "",
+                            zone: saved.time_zone,
+                          })}
+                        </p>
+                      ) : null}
+                      {saved?.last_outcome ? (
+                        <p
+                          role="status"
+                          className="w-full text-xs text-text-secondary"
+                        >
+                          {t("schedule.outcome." + saved.last_outcome)}
+                        </p>
+                      ) : null}
+                    </form>
+                  );
+                })}
+                <Link
+                  href={"/dashboard/network#approvals" as "/dashboard"}
+                  className="text-xs text-brand-blue"
+                >
+                  {t("schedule.manageRecipients")}
+                </Link>
+              </>
+            )}
+          </div>
+        </details>
+
         {overview.mine.length === 0 ? (
           <p
             className="rounded-md border border-dashed border-ink-500 p-4 text-sm text-text-muted"
@@ -299,7 +481,10 @@ export async function TimesheetsSection({
             {t("mine.empty")}
           </p>
         ) : (
-          <ul className="flex flex-col gap-2" data-testid="timesheets-mine-list">
+          <ul
+            className="flex flex-col gap-2"
+            data-testid="timesheets-mine-list"
+          >
             {overview.mine.map((sheet) => {
               const wf = overview.workflows.get(sheet.id);
               const template = templateFor(sheet.organizationId);
@@ -326,7 +511,9 @@ export async function TimesheetsSection({
                   </div>
                   <details className="rounded-md border border-ink-600 bg-ink-800/20 p-2">
                     <summary className="cursor-pointer text-xs text-text-secondary">
-                      {t("linesTitle", { count: sheet.snapshot.totals.lineCount })}
+                      {t("linesTitle", {
+                        count: sheet.snapshot.totals.lineCount,
+                      })}
                     </summary>
                     <div className="mt-2">
                       <SheetLines sheet={sheet} />
@@ -338,7 +525,11 @@ export async function TimesheetsSection({
                       <>
                         <form action={refreshTimesheetAction}>
                           <input type="hidden" name="locale" value={locale} />
-                          <input type="hidden" name="timesheetId" value={sheet.id} />
+                          <input
+                            type="hidden"
+                            name="timesheetId"
+                            value={sheet.id}
+                          />
                           <Button
                             type="submit"
                             variant="secondary"
@@ -350,7 +541,11 @@ export async function TimesheetsSection({
                         {template?.published ? (
                           <form action={submitTimesheetAction}>
                             <input type="hidden" name="locale" value={locale} />
-                            <input type="hidden" name="timesheetId" value={sheet.id} />
+                            <input
+                              type="hidden"
+                              name="timesheetId"
+                              value={sheet.id}
+                            />
                             <Button
                               type="submit"
                               data-testid={`timesheet-submit-${sheet.id}`}
@@ -371,7 +566,11 @@ export async function TimesheetsSection({
                     {sheet.status === "submitted" ? (
                       <form action={syncTimesheetDecisionAction}>
                         <input type="hidden" name="locale" value={locale} />
-                        <input type="hidden" name="timesheetId" value={sheet.id} />
+                        <input
+                          type="hidden"
+                          name="timesheetId"
+                          value={sheet.id}
+                        />
                         <Button
                           type="submit"
                           variant="secondary"
@@ -397,7 +596,10 @@ export async function TimesheetsSection({
       </div>
 
       {/* ── Documents of workers I manage (org side) ───────────────────── */}
-      {overview.org.length > 0 || overview.orgOptions.some((o) => !templateFor(o.organizationId)?.published) ? (
+      {overview.org.length > 0 ||
+      overview.orgOptions.some(
+        (o) => !templateFor(o.organizationId)?.published,
+      ) ? (
         <div className="flex flex-col gap-3">
           <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("org.title")}
@@ -431,7 +633,11 @@ export async function TimesheetsSection({
                   data-testid={`timesheet-template-offer-${o.organizationId}`}
                 >
                   <input type="hidden" name="locale" value={locale} />
-                  <input type="hidden" name="organizationId" value={o.organizationId} />
+                  <input
+                    type="hidden"
+                    name="organizationId"
+                    value={o.organizationId}
+                  />
                   <span className="text-xs text-text-secondary">
                     {t("org.noTemplateFor", { name: orgName })}
                   </span>
@@ -460,7 +666,10 @@ export async function TimesheetsSection({
             })}
 
           {overview.org.length > 0 ? (
-            <ul className="flex flex-col gap-2" data-testid="timesheets-org-list">
+            <ul
+              className="flex flex-col gap-2"
+              data-testid="timesheets-org-list"
+            >
               {overview.org.map((sheet) => {
                 const wf = overview.workflows.get(sheet.id);
                 return (
@@ -488,7 +697,9 @@ export async function TimesheetsSection({
                     </div>
                     <details className="rounded-md border border-ink-600 bg-ink-800/20 p-2">
                       <summary className="cursor-pointer text-xs text-text-secondary">
-                        {t("linesTitle", { count: sheet.snapshot.totals.lineCount })}
+                        {t("linesTitle", {
+                          count: sheet.snapshot.totals.lineCount,
+                        })}
                       </summary>
                       <div className="mt-2">
                         <SheetLines sheet={sheet} />
@@ -511,7 +722,11 @@ export async function TimesheetsSection({
                           data-testid={`timesheet-reopen-form-${sheet.id}`}
                         >
                           <input type="hidden" name="locale" value={locale} />
-                          <input type="hidden" name="timesheetId" value={sheet.id} />
+                          <input
+                            type="hidden"
+                            name="timesheetId"
+                            value={sheet.id}
+                          />
                           <div className="flex flex-col gap-1">
                             <Label htmlFor={`reopen-note-${sheet.id}`}>
                               {t("org.reopenNote")}

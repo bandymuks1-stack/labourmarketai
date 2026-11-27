@@ -17046,9 +17046,36 @@
       "not_authorized": "Das dürfen Sie nicht.",
       "not_found": "Stundenzettel nicht gefunden.",
       "limit_reached": "Zu viele offene Stundenzettel — reichen Sie bestehende zuerst ein oder räumen Sie sie auf.",
-      "error": "Etwas ist schiefgelaufen. Nichts wurde gespeichert."
+      "error": "Etwas ist schiefgelaufen. Nichts wurde gespeichert.",
+      "schedule_saved": "Zeitplan gespeichert."
     },
-    "taskAmbiguous": "{count} Aufgaben verknüpft — Stunden keiner einzelnen zugeordnet"
+    "taskAmbiguous": "{count} Aufgaben verknüpft — Stunden keiner einzelnen zugeordnet",
+    "schedule": {
+      "title": "Automatische Stundennachweise",
+      "consent": "Meine erfasste Arbeit des Vortags, der letzten sieben Tage oder des vorherigen Kalendermonats an den gewählten Freigabeprozess senden. Arbeit wird nicht automatisch genehmigt.",
+      "enabled": "Aktiviert",
+      "frequency": "Häufigkeit",
+      "daily": "Täglich",
+      "weekly": "Wöchentlich",
+      "monthly": "Monatlich · am 1.",
+      "weekday": "Wöchentlicher Abgabetag",
+      "time": "Abgabezeit",
+      "zone": "Zeitzone",
+      "recipients": "Freigabeempfänger",
+      "selectTemplate": "Freigabevorlage auswählen",
+      "save": "Speichern",
+      "next": "Nächste Abgabe: {date} ({zone})",
+      "manageRecipients": "Freigabeempfänger verwalten",
+      "outcome": {
+        "submitted": "Zur Freigabe eingereicht.",
+        "already_submitted": "Dieser Zeitraum wurde bereits eingereicht.",
+        "empty": "Keine erfasste Arbeit in diesem Zeitraum.",
+        "overlap": "Pausiert: Der Zeitraum überschneidet sich mit einem vorhandenen Nachweis.",
+        "not_allowed": "Pausiert: Kein Zugriff mehr auf die Organisation.",
+        "no_template": "Pausiert: Freigabevorlage nicht verfügbar.",
+        "error": "Einreichung fehlgeschlagen; erneuter Versuch folgt."
+      }
+    }
   },
   "workObjects": {
     "title": "Objekte und Standorte",

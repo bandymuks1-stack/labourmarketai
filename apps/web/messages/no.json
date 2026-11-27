@@ -5956,9 +5956,36 @@
       "not_authorized": "Du har ikke lov til dette.",
       "not_found": "Timeliste ikke funnet.",
       "limit_reached": "For mange åpne timelister — send inn eller rydd opp i de eksisterende først.",
-      "error": "Noe gikk galt. Ingenting ble lagret."
+      "error": "Noe gikk galt. Ingenting ble lagret.",
+      "schedule_saved": "Tidsplanen er lagret."
     },
-    "taskAmbiguous": "{count} oppgaver koblet — timer ikke tilordnet én"
+    "taskAmbiguous": "{count} oppgaver koblet — timer ikke tilordnet én",
+    "schedule": {
+      "title": "Automatiske timelister",
+      "consent": "Send mitt registrerte arbeid fra forrige dag, sju dager eller kalendermåned til valgt godkjenningsflyt. Arbeid godkjennes ikke automatisk.",
+      "enabled": "Aktivert",
+      "frequency": "Hyppighet",
+      "daily": "Daglig",
+      "weekly": "Ukentlig",
+      "monthly": "Månedlig · den 1.",
+      "weekday": "Ukentlig innsendingsdag",
+      "time": "Innsendingstid",
+      "zone": "Tidssone",
+      "recipients": "Godkjenningsmottakere",
+      "selectTemplate": "Velg godkjenningsmal",
+      "save": "Lagre",
+      "next": "Neste innsending: {date} ({zone})",
+      "manageRecipients": "Administrer godkjenningsmottakere",
+      "outcome": {
+        "submitted": "Sendt til godkjenning.",
+        "already_submitted": "Denne perioden er allerede sendt inn.",
+        "empty": "Ingen registrert arbeid i denne perioden.",
+        "overlap": "Satt på pause: perioden overlapper en eksisterende timeliste.",
+        "not_allowed": "Satt på pause: tilgangen til organisasjonen er borte.",
+        "no_template": "Satt på pause: godkjenningsmalen er utilgjengelig.",
+        "error": "Innsendingen mislyktes; prøver igjen senere."
+      }
+    }
   },
   "requests": {
     "title": "Forespørsler",

@@ -17046,9 +17046,36 @@
       "not_authorized": "Jums to daryti neleidžiama.",
       "not_found": "Žiniaraštis nerastas.",
       "limit_reached": "Per daug atvirų žiniaraščių — pirmiausia pateikite arba sutvarkykite esamus.",
-      "error": "Įvyko klaida. Niekas nebuvo išsaugota."
+      "error": "Įvyko klaida. Niekas nebuvo išsaugota.",
+      "schedule_saved": "Ataskaitų grafikas išsaugotas."
     },
-    "taskAmbiguous": "susietos {count} užduotys — valandos nepriskirtos vienai"
+    "taskAmbiguous": "susietos {count} užduotys — valandos nepriskirtos vienai",
+    "schedule": {
+      "title": "Automatinės darbo ataskaitos",
+      "consent": "Pateikti mano užregistruotus ankstesnės dienos, septynių dienų arba kalendorinio mėnesio darbus pasirinktiems tvirtintojams. Darbai automatiškai netvirtinami.",
+      "enabled": "Įjungta",
+      "frequency": "Periodiškumas",
+      "daily": "Kasdien",
+      "weekly": "Kas savaitę",
+      "monthly": "Kas mėnesį · 1 dieną",
+      "weekday": "Savaitinio pateikimo diena",
+      "time": "Pateikimo laikas",
+      "zone": "Laiko juosta",
+      "recipients": "Tvirtinimo gavėjai",
+      "selectTemplate": "Pasirinkite tvirtinimo šabloną",
+      "save": "Išsaugoti",
+      "next": "Kitas pateikimas: {date} ({zone})",
+      "manageRecipients": "Tvarkyti tvirtinimo gavėjus",
+      "outcome": {
+        "submitted": "Pateikta tvirtinti.",
+        "already_submitted": "Šio laikotarpio ataskaita jau pateikta.",
+        "empty": "Šiuo laikotarpiu užregistruotų darbų nėra.",
+        "overlap": "Sustabdyta: laikotarpis persidengia su esama ataskaita.",
+        "not_allowed": "Sustabdyta: prieigos prie organizacijos nebėra.",
+        "no_template": "Sustabdyta: tvirtinimo šablonas neprieinamas.",
+        "error": "Pateikti nepavyko; bus bandoma dar kartą."
+      }
+    }
   },
   "workObjects": {
     "title": "Objektai ir aikštelės",

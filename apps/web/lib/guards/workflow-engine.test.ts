@@ -167,6 +167,7 @@ describe("1. exactly one human-gated migration pair owns the engine", () => {
     // exists and its sync command READS workflow_instances; the stronger
     // no-create/no-drop assertions below still apply to it.
     const CONSUMERS = [
+      "20261127163000_timesheet_schedules_v1",
       "20260817170000_timesheets_v1",
       // Typed employee requests (train F): create/withdraw run the engine's
       // own start/withdraw commands in-transaction; sync READS
@@ -888,6 +889,8 @@ describe("6. TS layer — RPC-only writes, honest degradation, bounded reads", (
       // lib/tasks/task-approval-actions.ts and pinned by
       // lib/guards/task-approval-context.test.ts.
       "lib/approvals/task-approvals.ts",
+      // Self-owned schedule settings list published templates via the caller RLS client.
+      "lib/timesheets/timesheet-schedules.ts",
     ];
     expect(offenders.size).toBe(allowed.length);
     for (const a of allowed) {

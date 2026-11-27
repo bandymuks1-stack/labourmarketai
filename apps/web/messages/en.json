@@ -17046,9 +17046,36 @@
       "not_authorized": "You are not allowed to do this.",
       "not_found": "Timesheet not found.",
       "limit_reached": "Too many open timesheets — submit or remove existing ones first.",
-      "error": "Something went wrong. Nothing was saved."
+      "error": "Something went wrong. Nothing was saved.",
+      "schedule_saved": "Timesheet schedule saved."
     },
-    "taskAmbiguous": "{count} tasks linked — hours not attributed to one"
+    "taskAmbiguous": "{count} tasks linked — hours not attributed to one",
+    "schedule": {
+      "title": "Automatic timesheets",
+      "consent": "Submit my recorded work for the preceding day, seven days or calendar month to the selected approval flow. No work is approved automatically.",
+      "enabled": "Enabled",
+      "frequency": "Frequency",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly · day 1",
+      "weekday": "Weekly delivery day",
+      "time": "Delivery time",
+      "zone": "Time zone",
+      "recipients": "Approval recipients",
+      "selectTemplate": "Select an approval template",
+      "save": "Save",
+      "next": "Next: {date} ({zone})",
+      "manageRecipients": "Manage approval recipients",
+      "outcome": {
+        "submitted": "Submitted for approval.",
+        "already_submitted": "This period was already submitted.",
+        "empty": "No recorded work in this period.",
+        "overlap": "Paused: this period overlaps an existing timesheet.",
+        "not_allowed": "Paused: organization access is no longer available.",
+        "no_template": "Paused: the approval template is unavailable.",
+        "error": "Submission failed; it will be retried."
+      }
+    }
   },
   "workObjects": {
     "title": "Objects & sites",

@@ -17046,9 +17046,36 @@
       "not_authorized": "Nie mają Państwo do tego uprawnień.",
       "not_found": "Karty nie znaleziono.",
       "limit_reached": "Za dużo otwartych kart — najpierw proszę wysłać lub uporządkować istniejące.",
-      "error": "Coś poszło nie tak. Nic nie zostało zapisane."
+      "error": "Coś poszło nie tak. Nic nie zostało zapisane.",
+      "schedule_saved": "Harmonogram zapisany."
     },
-    "taskAmbiguous": "powiązane zadania: {count} — godziny nieprzypisane do jednego"
+    "taskAmbiguous": "powiązane zadania: {count} — godziny nieprzypisane do jednego",
+    "schedule": {
+      "title": "Automatyczne ewidencje czasu",
+      "consent": "Przekazuj moją zarejestrowaną pracę z poprzedniego dnia, siedmiu dni lub miesiąca kalendarzowego do wybranego procesu zatwierdzania. Praca nie jest zatwierdzana automatycznie.",
+      "enabled": "Włączone",
+      "frequency": "Częstotliwość",
+      "daily": "Codziennie",
+      "weekly": "Co tydzień",
+      "monthly": "Co miesiąc · 1. dnia",
+      "weekday": "Dzień wysyłki tygodniowej",
+      "time": "Godzina wysyłki",
+      "zone": "Strefa czasowa",
+      "recipients": "Odbiorcy zatwierdzenia",
+      "selectTemplate": "Wybierz szablon zatwierdzania",
+      "save": "Zapisz",
+      "next": "Następna wysyłka: {date} ({zone})",
+      "manageRecipients": "Zarządzaj odbiorcami",
+      "outcome": {
+        "submitted": "Przekazano do zatwierdzenia.",
+        "already_submitted": "Ten okres został już przekazany.",
+        "empty": "Brak zarejestrowanej pracy w tym okresie.",
+        "overlap": "Wstrzymano: okres pokrywa się z istniejącą ewidencją.",
+        "not_allowed": "Wstrzymano: dostęp do organizacji wygasł.",
+        "no_template": "Wstrzymano: szablon zatwierdzania jest niedostępny.",
+        "error": "Wysyłka nie powiodła się; nastąpi ponowna próba."
+      }
+    }
   },
   "workObjects": {
     "title": "Obiekty i budowy",
