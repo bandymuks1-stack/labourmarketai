@@ -23,6 +23,15 @@ describe("Level 2 work context — a projection of the one player card", () => {
     expect(n.history.count).toBe(c.workHistory.length);
   });
 
+  it("membership alone is history, not working now", () => {
+    const c = card("confirmed");
+    const n = by({ ...c, workHistory: c.workHistory.map(entry => ({ ...entry, current: true, source: "membership" as const })) });
+    expect(n.current.status).toBe("absent");
+    expect(n.current.names).toEqual([]);
+    expect(n.history.count).toBe(c.workHistory.length);
+    expect(n.history.status).toBe("done");
+  });
+
   it("recorded: records exist, nobody's record yet — manager node is absent, not failed", () => {
     const n = by(card("recorded"));
     expect(n.records.status).toBe("done");

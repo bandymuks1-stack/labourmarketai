@@ -1,4 +1,37 @@
-# LAUNCH COMPLETION ROADMAP — LabourMarket.ai (2026-11-12, 20:00 UTC)
+# LAUNCH COMPLETION ROADMAP — LabourMarket.ai
+
+## Current commercial stabilization sequence — 2026-11-25
+
+Coordination: [`COORDINATION_REGISTER.md`](../COORDINATION_REGISTER.md#2c-current-coordination--2026-11-25)
+and #3265. This updates the existing execution queue. Older dated snapshots below
+are retained as history, not current proof.
+
+The immediate acceptance target is a new visitor reaching a useful result without
+assistance. Preserve the approved Apple/macOS design language and all agreed core
+functions; do not hide capabilities to improve a readiness score. Complete the
+remaining scope in later stages without regressing the accepted core journeys.
+
+| Priority | Existing work | Acceptance |
+|---|---|---|
+| P0 | First visit, role clarity, navigation and public discovery | clear purpose and next action for worker, employer, service provider and subcontractor; public jobs, people, services and subcontractor search; usable phone and desktop navigation |
+| P0 | Registration, sign-in, publishing, contact and profiles | real production journeys reach a useful result: publish a need or offer, establish contact and exchange a message, manage personal and organization profiles; no misleading actions or dead links |
+| P0 | Consistent design and active locales | approved shared components, readable empty/error states, consistent translations in every active locale; actual Chrome screenshots of the core phone and desktop journeys |
+| P0 | #3782 Living CV and #3817 affected journeys | deployed build; addressable blocks, old links, complete print output; brigade history after the last active brigade is disbanded; saved-search, CV and configured-assistant checks pass without weakening assertions |
+| P0 support | #3811 deployment brake, #3813 bounded queue wait, #3815 notification walk | required checks green; recent actual deployments retain their quiet period; serialized production checks advance within existing caps; complete stored-notification path passes |
+| P1 | Remaining agreed functions and unrun core pairs | continue the existing readiness plan; preserve accepted core quality and record actual build/run with PASS/FAIL/NOT_RUN |
+
+Production evidence so far: deployment 45618256211 serves `880dd76f`; its first
+visitor/sign-up checks passed in lt/en at 360/1440 px, and its synthetic worker,
+employer and messaging surface smoke passed. This is partial runtime evidence,
+not complete commercial or visual acceptance. Chrome screenshots and the full
+publish/contact/profile result paths remain to be verified.
+
+Do not repeat already-proven unaffected journeys. A passed export step is not a
+failed export because a later saved-search assertion failed. A refused budget is
+NOT_RUN. CI, merge, deployment and production acceptance remain distinct states.
+The existing owner gates and #3594 remain unchanged.
+
+## Historical planning snapshot — 2026-11-12, 20:00 UTC
 
 Likusių darbų planas iki pirmojo viešo V2 leidimo ir iki pilno produkto. Būsenos ir įrodymai:
 [`LAUNCH_EXECUTIVE_STATUS.md`](LAUNCH_EXECUTIVE_STATUS.md). Visos 288 funkcijos:

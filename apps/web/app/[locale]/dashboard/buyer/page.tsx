@@ -26,12 +26,25 @@ const BUYER_FIELDS = [
   { key: "notes" as const, labelKey: "field.notes.label", placeholderKey: "field.notes.placeholder", variant: "textarea" as const },
 ];
 
+/**
+ * ONE SCREEN PER BLOCK (owner decision 0034, 2026-11-24). The page was one
+ * 4.4-screen scroll at 390 px: profile, requests, the request form and the
+ * private notes, one under another. Each is now a block with its own address
+ * (`?tab=`), reached from the row of tabs under the title. Nothing is removed.
+ */
+const BUYER_TABS = ["requests", "new", "profile", "notes"] as const;
+type BuyerTab = (typeof BUYER_TABS)[number];
+
 export default async function BuyerDashboardPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ tab?: string }>;
 }) {
   const { locale } = await params;
+  const asked = (await searchParams)?.tab;
+  const tab: BuyerTab = BUYER_TABS.includes(asked as BuyerTab) ? (asked as BuyerTab) : "requests";
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "customer");
 
@@ -263,9 +276,36 @@ export default async function BuyerDashboardPage({
           {t("companyContext")}
         </p>
         <PageTitle>{t("title")}</PageTitle>
-        <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
+      {/* The page's blocks, each with its own address (decision 0034). */}
+      <nav aria-label={t("title")} data-testid="buyer-tabs" className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+        {(
+          [
+            ["requests", tRequests("listHeading")],
+            ["new", tRequests("newRequestHeading")],
+            ["profile", tSetup("formTitle")],
+            ["notes", tRequests("fieldNotes")],
+          ] as const
+        ).map(([id, label]) => (
+          <Link
+            key={id}
+            href={(id === "requests" ? "/dashboard/buyer" : `/dashboard/buyer?tab=${id}`) as "/dashboard"}
+            aria-current={tab === id ? "page" : undefined}
+            data-testid={`buyer-tab-${id}`}
+            className={
+              tab === id
+                ? "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-brand-blue bg-ink-800 px-4 text-sm font-semibold text-text-primary"
+                : "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-ink-600 bg-ink-800/50 px-4 text-sm font-medium text-text-secondary hover:border-ink-500 hover:text-text-primary"
+            }
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
+
+      {tab === "profile" ? (
+        <>
       <CompanyActionNextActions room="buyer" primaryHref="/dashboard/start/buyer" />
 
       <section
@@ -364,7 +404,13 @@ export default async function BuyerDashboardPage({
           </Link>
         </section>
       )}
+        </>
+      ) : null}
 
+      {tab === "requests" || tab === "new" ? (
+        <>
+          {tab === "requests" ? (
+            <>
       {/* The way from the buyer workspace to the providers (J-13): the ONE
           service-request loop, where active offerings are discovered and
           requested. Navigation only — no second intake. */}
@@ -375,14 +421,19 @@ export default async function BuyerDashboardPage({
       >
         {t("findProviderLink")} →
       </Link>
-
+            </>
+          ) : null}
       <BuyerRequestsSection
         listResult={requestsResult}
         attachmentsResult={attachmentsResult}
         labels={requestsLabels}
         countryOptions={countryOptionsForLocale(locale)}
+        view={tab === "new" ? "form" : "list"}
       />
+        </>
+      ) : null}
 
+      {tab === "notes" ? (
       <section
         className="card-border flex flex-col gap-4 p-5"
         data-testid="buyer-dashboard-first-action"
@@ -402,7 +453,9 @@ export default async function BuyerDashboardPage({
           initialDraft={existingDraft}
         />
       </section>
+      ) : null}
 
+      {tab === "profile" ? (
       <Link
         href="/dashboard/profile"
         className="self-start text-sm text-brand-blue hover:underline"
@@ -410,6 +463,7 @@ export default async function BuyerDashboardPage({
       >
         {t("profileLink")} →
       </Link>
+      ) : null}
     </div>
   );
 }

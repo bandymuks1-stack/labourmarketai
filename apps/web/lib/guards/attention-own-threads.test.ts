@@ -24,6 +24,12 @@ describe("listAttentionInstructions", () => {
   });
 
   it("reads participation for the viewer only", () => {
-    expect(body).toMatch(/\.from\("conversation_participants"\)[\s\S]{0,120}\.eq\("profile_id", user\.id\)/);
+    const scope = SRC.slice(SRC.indexOf("const readInstructionParticipants"), SRC.indexOf("export async function listWorkerInstructions"));
+    expect(scope).toMatch(/\.from\("conversation_participants"\)[\s\S]{0,120}\.eq\("profile_id", profileId\)/);
+    expect(scope).toContain('.is("revoked_at", null)');
+    expect(body).toContain("await readInstructionParticipants(user.id)");
+    const fullList = SRC.slice(SRC.indexOf("export async function listWorkerInstructions"), SRC.indexOf("export async function listAttentionInstructions"));
+    expect(fullList).toContain("await readInstructionParticipants(user.id)");
+    expect(fullList).toContain('.in("conversation_id", conversationIds)');
   });
 });

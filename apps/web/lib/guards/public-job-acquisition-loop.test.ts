@@ -166,7 +166,7 @@ describe("the funnel the owner asked for has an emitter and a stage per step", (
   });
 
   it("an unavailable board is success:false, never zero jobs", () => {
-    expect(board).toMatch(/success: result\.status !== "unavailable"/);
+    expect(board).toMatch(/success: !savedReadFailed && result\.status !== "unavailable"/);
   });
 
   it("the admin funnel reads the same steps, interest included", () => {

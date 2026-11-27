@@ -57,7 +57,7 @@ export type ProjectActionResult =
     }
   | {
       ok: false;
-      code: "needs_migration" | "invalid" | "auth" | "no_company" | "not_authorized" | "error";
+      code: "needs_migration" | "invalid" | "country_required" | "auth" | "no_company" | "not_authorized" | "error";
       message?: string;
     };
 
@@ -91,6 +91,7 @@ export async function createProjectAction(
 
   const title = String(formData.get("title") ?? "").trim();
   const city = String(formData.get("city") ?? "").trim() || null;
+  const country = String(formData.get("country") ?? "").trim() || null;
 
   // Same gate as the dedicated create route (`project-context-actions`):
   // the ACTIVE workspace's company AND the manage-projects capability. Until
@@ -105,9 +106,10 @@ export async function createProjectAction(
 
   // Rebuild W5: BOTH project-create entry points insert through the ONE core
   // (validation + W10 org binding + insert shape live in exactly one place).
-  const created = await insertProjectForCompany(supabase, companyId, { title, city });
+  const created = await insertProjectForCompany(supabase, companyId, { title, city, country });
   if (!created.ok) {
     if (created.reason === "invalid_title") return { ok: false, code: "invalid" };
+    if (created.reason === "country_required") return { ok: false, code: "country_required" };
     if (migMissing(created.code)) return { ok: false, code: "needs_migration" };
     if (created.code === "42501") return { ok: false, code: "not_authorized" };
     console.error("[projects] create failed:", created.message);

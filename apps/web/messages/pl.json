@@ -60,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Aktualny popyt na rynku",
-    "subtitleAgency": "O co pyta teraz rynek publiczny — ta sama pula, którą Twoi kandydaci widzą na tablicy.",
-    "subtitleInstitution": "O co pyta teraz rynek publiczny — kierunki, w które idą Twoi uczniowie.",
     "active": "aktywne oferty: {count}",
     "employers": "pracodawcy: {count}",
     "filtered": "{profession}: oferty: {count}",
@@ -182,7 +180,43 @@
       "actionPhone": "Zadzwoń",
       "actionWebsite": "Otwórz stronę firmy",
       "heroContact": "Jak się skontaktować",
-      "provenance": "Firma sama wypełniła tę stronę."
+      "provenance": "Firma sama wypełniła tę stronę.",
+      "living": {
+        "activityTitle": "Wpisy pracy według okresu",
+        "eyebrow": "Żywe CV",
+        "figures": {
+          "years": "okres objęty wpisami (lata)",
+          "hours": "zapisane godziny",
+          "people": "{count, plural, one {osoba pracowała} few {osoby pracowały} many {osób pracowało} other {osób pracowało}}",
+          "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
+          "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}",
+          "team": "{count, plural, one {członek zespołu} few {członków zespołu} many {członków zespołu} other {członków zespołu}}"
+        },
+        "doTitle": "Kompetencje",
+        "team": "{count, plural, one {W zespole # osoba} few {W zespole # osoby} many {W zespole # osób} other {W zespole # osób}}",
+        "experienceTitle": "Przepracowane godziny",
+        "confirmedLabel": "Potwierdzone",
+        "confirmedSource": "Zapisane przez pracownika, zatwierdzone przez organizację",
+        "recordedLabel": "Własne zapisy",
+        "recordedSource": "Zapisy organizacji, niepotwierdzone przez drugą stronę",
+        "pending": "{hours} czeka na zatwierdzenie",
+        "hours": "{hours} godz.",
+        "running": "W toku",
+        "completed": "Zakończone",
+        "clients": "Prace wykonane dla: {names}",
+        "tabs": {
+          "overview": "Przegląd",
+          "projects": "Projekty",
+          "experience": "Doświadczenie",
+          "gallery": "Galeria",
+          "team": "Zespół"
+        },
+        "pendingLabel": "Czeka na zatwierdzenie",
+        "ringLabel": "Potwierdzono {share}% godzin z dziennika",
+        "open": "Otwórz Żywe CV",
+        "clientsMore": "Prace wykonane dla: {names} i {count} więcej",
+        "currentTeamTitle": "Obecny zespół"
+      }
     }
   },
   "marketplaceListings": {
@@ -211,7 +245,6 @@
     "formLabelLabel": "Lokalizacja",
     "formLabelPlaceholder": "Miasto lub region",
     "formPriceLabel": "Cena",
-    "formPricePlaceholder": "np. 450 €/miesiąc lub do uzgodnienia",
     "priceHint": "Cena jest opcjonalna i opisowa. Płatności nie są tu realizowane.",
     "save": "Zapisz",
     "saving": "Zapisywanie…",
@@ -1155,6 +1188,7 @@
     "calendar": "Kalendarz",
     "addEntry": "Dodaj wpis",
     "details": "Dane osobowe",
+    "background": "Języki i wykształcenie",
     "improve": "Co poprawić",
     "capabilities": "Umiejętności i historia pracy",
     "fullRecordsInCv": "Wszystkie dowody z pracy",
@@ -1842,7 +1876,9 @@
       "errorName": "Proszę wprowadzić nazwę projektu (co najmniej 2 znaki).",
       "errorNoCompany": "Tylko konto firmowe może utworzyć kontekst projektu.",
       "errorNotAuthorized": "Tworzenie projektów jest tu zastrzeżone dla właściciela lub administratora organizacji. Można poprosić ich o utworzenie projektu albo o przyznanie Państwa roli tego prawa.",
-      "error": "Nie udało się utworzyć. Proszę spróbować ponownie."
+      "error": "Nie udało się utworzyć. Proszę spróbować ponownie.",
+      "countryLabel": "Kraj",
+      "errorCountry": "Wybierz kraj, w którym jest miejsce projektu."
     },
     "needsTitle": "Zapytania",
     "needsBody": "Złóż ustrukturyzowane zapytanie i śledź jego status.",
@@ -2082,7 +2118,6 @@
       "eyebrow": "PRZESTRZEŃ ROBOCZA FIRMY",
       "programs": {
         "title": "Programy i grupy",
-        "subtitle": "To, czego Państwo uczą, powiązane z kierunkiem rynku pracy, oraz grupy uczestników w jego ramach. Popyt pokazuje aktualne publiczne oferty pracy dla tego kierunku.",
         "empty": "Brak programów. Proszę dodać pierwszy i wskazać kierunek zawodowy, do którego prowadzi.",
         "addProgram": "Dodaj program",
         "noDirection": "Nie ustawiono kierunku zawodowego",
@@ -2979,8 +3014,7 @@
           "label": "Ilu pracowników jest potrzebnych"
         },
         "salary": {
-          "label": "Wynagrodzenie (€)",
-          "placeholder": "np. 2200"
+          "label": "Wynagrodzenie (€)"
         },
         "countries": {
           "label": "Preferowane kraje (kody ISO)",
@@ -4276,6 +4310,9 @@
         "admin": "Administrator"
       },
       "subcopy": "Jeden profil dla Państwa doświadczenia zawodowego i możliwości — w następnym kroku wskażą Państwo, po co przychodzą.",
+      "inviteFrom": "{inviter} zaprasza Państwa do dołączenia do {organization}.",
+      "inviteTo": "Zaproszenie do dołączenia do {organization}.",
+      "inviteNext": "Po rejestracji dołączą Państwo do {organization}.",
       "google_label": "Kontynuuj przez Google",
       "google_redirecting": "Przekierowanie...",
       "divider": "lub",
@@ -4286,7 +4323,6 @@
       "confirm_password_label": "Powtórz hasło",
       "submit_label": "Zarejestruj się",
       "signing": "Tworzenie...",
-      "disclaimer": "Państwa opinia kształtuje produkt — prosimy napisać nam, co działa, a czego brakuje.",
       "has_account": "Mają Państwo już konto?",
       "login_link": "Logowanie",
       "error_generic": "Coś poszło nie tak. Proszę spróbować ponownie za chwilę.",
@@ -4395,7 +4431,7 @@
           },
           "education": {
             "title": "Reprezentuję instytucję edukacyjną",
-            "desc": "Zapraszanie uczących się, wgląd w ich udział i łączenie ich z praktykami i pracą."
+            "desc": "Zapraszanie uczących się, prowadzenie programów i śledzenie ich praktyk oraz wyników."
           }
         },
         "heading": "Zaczynają Państwo jako osoba czy jako firma?",
@@ -4644,7 +4680,6 @@
               "hoursPerWorker": "Godziny na pracownika",
               "totalHours": "Łączne godziny (opcjonalne nadpisanie)",
               "rate": "Stawka godzinowa / dniówka",
-              "ratePlaceholder": "np. 20",
               "country": "Kraj / lokalizacja",
               "materials": "Materiały",
               "equipment": "Sprzęt / narzędzia",
@@ -5088,7 +5123,15 @@
         "event_invitation_accepted": "Ktoś przyjął Państwa zaproszenie",
         "event_weekly_digest_profile_completion": "Aby pokazać pasujące oferty, proszę potwierdzić, jaką pracę Państwo wykonują",
         "event_weekly_digest_journal": "Podsumowanie Państwa dziennika pracy z tego tygodnia jest gotowe",
-        "event_history_link_offered": "Organizacja zaproponowała powiązanie zarejestrowanej historii Państwa pracy z Państwa kontem"
+        "event_history_link_offered": "Organizacja zaproponowała powiązanie zarejestrowanej historii Państwa pracy z Państwa kontem",
+        "event_team_offer_received": "Zespół zgłosił się do Państwa zapotrzebowania",
+        "event_team_offer_answered": "Odpowiedziano na ofertę Państwa zespołu",
+        "event_team_offer_answered_accepted": "Oferta Państwa zespołu została przyjęta",
+        "event_team_offer_answered_declined": "Oferta Państwa zespołu została odrzucona",
+        "event_candidate_offer_received": "Agencja zaproponowała kandydata do Państwa zapotrzebowania",
+        "event_candidate_offer_answered": "Odpowiedziano na zaproponowanego przez Państwa kandydata",
+        "event_candidate_offer_answered_accepted": "Zaproponowany przez Państwa kandydat został przyjęty",
+        "event_candidate_offer_answered_declined": "Zaproponowany przez Państwa kandydat został odrzucony"
       },
       "label": "Moje powiadomienia",
       "emptyTitle": "Nic nie wymaga teraz Państwa uwagi.",
@@ -5826,9 +5869,9 @@
       "confirmedTitle": "Usunięcie potwierdzone",
       "confirmedBody": "System usunie konto w ciągu kilku minut i wyśle potwierdzenie na adres e-mail konta. Jeśli coś będzie wymagało przeglądu, poinformujemy Państwa.",
       "inReview": "Automatyczne usunięcie wstrzymano do przeglądu: konto zawiera dane, które mogą wymagać przechowywania na mocy prawa lub dotyczą innych osób. Decyzję i jej uzasadnienie otrzymają Państwo e-mailem w ciągu miesiąca. Do tego czasu Państwa profil nie jest widoczny w wyszukiwaniu.",
-      "confirmLabelWaiting": "Rozumiem, że konto i jego dane zostaną usunięte nieodwracalnie 30 dni po potwierdzeniu, chyba że wcześniej anuluję.",
-      "confirmStepBodyWaiting": "Państwa wniosek o usunięcie konta został złożony. Proszę go potwierdzić — konto zostanie zachowane przez 30 dni i w tym czasie mogą Państwo anulować na tej stronie. Potem system usunie konto automatycznie i wyśle potwierdzenie e-mailem.",
-      "confirmedBodyWaiting": "Konto zostanie usunięte za 30 dni. Do tego czasu mogą Państwo anulować na tej stronie. Po usunięciu wyślemy potwierdzenie na adres e-mail konta.",
+      "confirmLabelWaiting": "Rozumiem, że konto i jego dane zostaną usunięte nieodwracalnie najpóźniej 30 dni po potwierdzeniu i najpóźniej miesiąc od mojego wniosku, chyba że wcześniej anuluję.",
+      "confirmStepBodyWaiting": "Państwa wniosek o usunięcie konta został złożony. Proszę go potwierdzić — konto zostanie zachowane przez najwyżej 30 dni (nie dłużej niż miesiąc od wniosku) i w tym czasie mogą Państwo anulować na tej stronie. Potem system usunie konto automatycznie i wyśle potwierdzenie e-mailem.",
+      "confirmedBodyWaiting": "Konto zostanie usunięte w ciągu 30 dni, najpóźniej miesiąc od wniosku. Do tego czasu mogą Państwo anulować na tej stronie. Po usunięciu wyślemy potwierdzenie na adres e-mail konta.",
       "status": {
         "pending": "Państwa wniosek o usunięcie konta został złożony.",
         "pendingConfirmed": "Usunięcie konta jest potwierdzone i zaplanowane.",
@@ -5836,7 +5879,7 @@
         "inProgress": "Usuwanie konta już trwa — nie można go już anulować.",
         "done": "Konto zostało usunięte.",
         "submittedAt": "Złożono: {date}",
-        "scheduledAt": "Konto zostanie usunięte {date} (po 30 dniach oczekiwania).",
+        "scheduledAt": "Konto zostanie usunięte {date}.",
         "cancelUntil": "Do tego czasu mogą Państwo anulować.",
         "loadError": "Nie udało się wczytać stanu usuwania konta. Proszę odświeżyć stronę i spróbować ponownie."
       },
@@ -5987,6 +6030,8 @@
             "Stripe — obsługa płatności za płatne usługi platformy. Gdy organizacja rozpoczyna płatność, Stripe otrzymuje adres e-mail płacącego użytkownika i wewnętrzny identyfikator konta; dane karty są wprowadzane na własnej stronie płatności Stripe i nie są przechowywane przez platformę.",
             "Google, Facebook (Meta) i LinkedIn — tylko jeśli zdecydujesz się logować przez nich, jak opisano powyżej.",
             "Google (Gemini API) — tylko w sposób opisany poniżej w części o AI.",
+            "Cloudflare (Workers AI) — dopiero po włączeniu: 1) do objaśniania publicznych, zagregowanych statystyk rynku pracy; 2) gdy platforma sama nie rozumie prośby wpisanej na czacie — do zaproponowania, o którą istniejącą funkcję platformy chodzi. Przed wysłaniem usuwane są imiona i nazwiska, dane kontaktowe, liczby oraz wszystkie słowa spoza ustalonej listy słów oznaczających czynności; prośba zawierająca informacje o zdrowiu lub inne dane wrażliwe w ogóle nie jest wysyłana. Cloudflare nie wykorzystuje tych treści do trenowania modeli i nie przechowuje ich po zakończeniu zapytania.",
+            "Mistral AI i Groq — dopiero po włączeniu i wyłącznie do objaśniania publicznych, zagregowanych statystyk rynku pracy. Nie przesyłamy im treści wiadomości ani danych osobowych.",
             "Pełna lista dostawców infrastruktury znajduje się na stronie „Ochrona danych”."
           ]
         },
@@ -6125,6 +6170,8 @@
             "Cloudflare — sieć przed stroną: usługa nazw domen, szyfrowanie podczas przesyłania, pamięć podręczna i ochrona przed atakami. Przez nią przechodzi każde żądanie do strony.",
             "GitHub — hosting kodu źródłowego. Nie są tam przechowywane żadne dane użytkowników.",
             "Google (Gemini API) — przetwarzanie AI do tłumaczenia wiadomości i ogłoszeń o pracy oraz do podpowiadania, o co prosi zdanie wpisane na czacie. Wysyłany jest tylko tekst potrzebny do zadania.",
+            "Cloudflare (Workers AI) — dopiero po włączeniu: 1) do objaśniania publicznych, zagregowanych statystyk rynku pracy; 2) gdy platforma sama nie rozumie prośby wpisanej na czacie — do zaproponowania, o którą istniejącą funkcję platformy chodzi. Przed wysłaniem usuwane są imiona i nazwiska, dane kontaktowe, liczby oraz wszystkie słowa spoza ustalonej listy słów oznaczających czynności; prośba zawierająca informacje o zdrowiu lub inne dane wrażliwe w ogóle nie jest wysyłana. Cloudflare nie wykorzystuje tych treści do trenowania modeli i nie przechowuje ich po zakończeniu zapytania.",
+            "Mistral AI i Groq — dopiero po włączeniu i wyłącznie do objaśniania publicznych, zagregowanych statystyk rynku pracy. Nie przesyłamy im treści wiadomości ani danych osobowych.",
             "Stripe — obsługa płatności. Rekord klienta powstaje tylko wtedy, gdy organizacja rozpoczyna płatność za subskrypcję.",
             "Żaden inny dostawca poczty e-mail, AI, tłumaczeń ani płatności nie jest aktywny. Jeśli któryś zostanie uruchomiony, ta lista zostanie wcześniej zaktualizowana."
           ]
@@ -6471,7 +6518,9 @@
       "cityLabel": "Miasto (opcjonalnie)",
       "cityPlaceholder": "np. Wilno",
       "submit": "Utwórz projekt",
-      "noCompany": "Najpierw proszę utworzyć profil firmy."
+      "noCompany": "Najpierw proszę utworzyć profil firmy.",
+      "countryLabel": "Kraj",
+      "errorCountry": "Wybierz kraj, w którym jest miejsce projektu."
     },
     "assign": {
       "title": "Przypisz pracownika do projektu",
@@ -7107,7 +7156,6 @@
   "learning": {
     "pageTitle": "Nauka i weryfikacja",
     "pageLead": "Sugestie wyciągnięte z rzeczywistej aktywności zawodowej, przechowywane do weryfikacji przez osobę. Nic tu nie jest traktowane jako udowodnione samo w sobie.",
-    "title": "Kolejka weryfikacji",
     "lead": "Sygnały stają się sugestiami, a decyduje osoba. Uczenie nigdy niczego nie rozstrzyga samodzielnie.",
     "notAvailable": "Chwilowo niedostępne.",
     "empty": "Nic jeszcze do weryfikacji.",
@@ -7166,8 +7214,9 @@
       "countryPlaceholder": "np. LT",
       "remoteLabel": "Można wykonać zdalnie",
       "rateLabel": "Stawka (opcjonalnie)",
-      "ratePlaceholder": "np. ok. 25 EUR/godz., do negocjacji",
-      "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa."
+      "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa.",
+      "publicLabel": "Pokazuj tę osobistą usługę publicznie",
+      "publicHint": "Gdy usługa jest aktywna i nie wygasła, jej tytuł, opis, kategoria, kraj, możliwość pracy zdalnej i stawka są widoczne bez logowania. Nie wpisuj prywatnych danych kontaktowych. Odznacz i zapisz, aby wyłączyć widoczność publiczną."
     },
     "save": "Zapisz",
     "saving": "Zapisywanie…",
@@ -7193,7 +7242,9 @@
     "linkToRequests": "Zapytania o Państwa usługi",
     "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Mogą ją Państwo wstrzymać.",
     "removeQuestion": "Usunąć tę usługę na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ją w wyszukiwaniu, proszę ją wstrzymać.",
-    "removeYes": "Tak, usuń"
+    "removeYes": "Tak, usuń",
+    "publicAudience": "Wybrano wyszukiwanie publiczne",
+    "memberAudience": "Wybrano zalogowanych użytkowników"
   },
   "communication": {
     "origin": {
@@ -8838,13 +8889,32 @@
     "durationPendingUnnamed": "organizacja",
     "durationPendingUndated": "daty nie zapisane",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Struktura godzin",
+        "states": {
+          "actual": "Zapisane jako rzeczywiste",
+          "reported": "Podane przez organizację",
+          "estimated": "Szacunkowe",
+          "confirmed": "Poparte wpisem drugiej strony"
+        },
+        "skillBasis": "Czas z dziennika pracy przypisany do poszczególnych umiejętności.",
+        "workTitle": "Prace i umiejętności",
+        "attributedTime": "Przypisane tej umiejętności",
+        "confirmedTime": "Potwierdzone przez przełożonego: {hours}",
+        "activityLabel": "Fragment wpisu",
+        "contextLabel": "Kontekst pracy",
+        "mapTitle": "Mapa umiejętności",
+        "workNodes": "Prace"
+      },
       "eyebrowFallback": "Żywe CV",
       "facts": {
         "recorded": "zapisane w dzienniku pracy",
         "confirmed": "z wpisem kierownika",
         "organization": "w zapisach organizacji",
         "experienceTotal": "doświadczenia zawodowego łącznie",
-        "languages": "języki"
+        "languages": "języki",
+        "projects": "projekty",
+        "span": "pierwszy i ostatni wpis"
       },
       "capEyebrow": "Umiejętności",
       "capEyebrowHours": "{hours} godz. zapisanej pracy",
@@ -8961,6 +9031,14 @@
         "none": "Nie ma jeszcze następnego kroku do pokazania. Więcej zapisanej pracy da więcej podstaw.",
         "unknown": "Nie udało się teraz odczytać."
       }
+    },
+    "blocks": {
+      "overview": "Przegląd",
+      "experience": "Doświadczenie",
+      "projects": "Projekty",
+      "photos": "Zdjęcia",
+      "documents": "Dokumenty",
+      "reviews": "Opinie"
     }
   },
   "todayScreen": {
@@ -11125,11 +11203,11 @@
   },
   "about": {
     "metaTitle": "Czym jest LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Prawdziwa praca staje się historią zawodową, dowodami i żywym CV.",
+    "metaDescription": "LabourMarket.ai to platforma oparta na patencie i unikalnej idei organizacji i zarządzania relacjami zawodowymi. W każdej branży.",
     "navLabel": "O LabourMarket.ai",
     "eyebrow": "O platformie",
     "title": "Czym jest LabourMarket.ai",
-    "lede": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
+    "lede": "LabourMarket.ai to platforma oparta na patencie, stworzona w oparciu o unikalną ideę organizowania i zarządzania relacjami zawodowymi. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
     "hero": {
       "lead": "Zawodowa wartość człowieka nie powinna znikać za każdym razem, gdy zmienia pracodawcę. Prawdziwa praca może stać się trwałą historią zawodową: co osoba robiła, gdzie, kiedy, jak długo, w jakiej roli, z jakimi umiejętnościami i jakie dowody oraz potwierdzenia to wspierają.",
       "leadOrg": "Dla organizacji ta sama prawdziwa praca buduje historię tego, co firma faktycznie zrobiła: projekty, zespoły, wykonane prace, godziny, kompetencje i dowody.",
@@ -12648,7 +12726,7 @@
       },
       "verify": {
         "title": "Proszę potwierdzić e-mail, aby zobaczyć zaproszenia wysłane na ten adres",
-        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę. Wszystko inne na koncie działa jak dotąd; potwierdzenie jest potrzebne tylko do zobaczenia lub przyjęcia tych zaproszeń.",
+        "body": "Zaproszenia zaadresowane na adres e-mail są pokazywane tylko osobie, która może otworzyć tę skrzynkę.",
         "send": "Wyślij mi jednorazowy link",
         "sending": "Wysyłanie…",
         "sent": "Wysłaliśmy jednorazowy link na {email}. Proszę go otworzyć na tym urządzeniu, aby dokończyć.",
@@ -12837,7 +12915,7 @@
         "invite_to_demand": "Pracodawca zaprosił Państwa do zapotrzebowania na pracowników"
       },
       "from": "Zaproszenie od {name}",
-      "organization": "Firma: {name}",
+      "organization": "Organizacja: {name}",
       "project": "Projekt: {name}",
       "role": "Proponowana rola: {role}",
       "accept": "Zaakceptuj zaproszenie",
@@ -12866,10 +12944,9 @@
       "capacity": "Relacja: {capacity}",
       "capacityNotEmployment": "To nie jest oferta pracy i nie tworzy zatrudnienia.",
       "selfStart": "Utwórz własne konto",
-      "anonExplainer": "Proszę się zarejestrować lub zalogować, aby odpowiedzieć na to zaproszenie. Zachowują Państwo własne konto, profil i historię pracy — osoba, która Państwa zaprosiła, tworzy jedynie połączenie, nic więcej.",
+      "anonExplainer": "Proszę się zarejestrować lub zalogować, aby odpowiedzieć na to zaproszenie. Konto, profil i historia pracy pozostają Państwa: przyjęcie tworzy jedynie połączenie, nigdy zweryfikowanej umiejętności, zatrudnienia ani przydziału.",
       "register": "Zarejestruj się i kontynuuj",
       "signIn": "Mam już konto",
-      "youOwnYourIdentity": "Państwa tożsamość zawodowa pozostaje Państwa. Zaakceptowanie zaproszenia samo w sobie nigdy nie tworzy zweryfikowanej umiejętności, zatrudnienia ani przydziału.",
       "referredVia": "Polecono przez {source}",
       "campaign": "Zaproszenie: {label}",
       "seats": "Zajęto {used} z {max} miejsc",
@@ -12938,6 +13015,7 @@
     "available": "Dostępny",
     "availableFrom": "Od {date}",
     "experienceYears": "{n} lat doświadczenia",
+    "recordedExperienceHours": "Dostępne zapisy pracy: {hours} godz.",
     "skillsTitle": "Umiejętności",
     "skillsEmpty": "Brak umiejętności, które mogą Państwo zobaczyć.",
     "skillVerified": "Potwierdzone zapisem kierownika",
@@ -13087,6 +13165,7 @@
     },
     "goToRoster": "Przejdź do listy",
     "invalidLabel": "Proszę sprawdzić adres e-mail — zaproszenie nie zostało wysłane.",
+    "offerLimitLabel": "Zbyt wiele ofert. Proszę spróbować później.",
     "deliveryHeading": "Link zaproszenia",
     "deliveryCreated": "Nie wysłano e-mailem — wysyłka e-maili nie jest skonfigurowana. Proszę skopiować link i wysłać go klientowi samodzielnie.",
     "deliverySent": "E-mail z zaproszeniem został wysłany. Nadal można skopiować link.",
@@ -14292,9 +14371,7 @@
         "preferredCountries": "Preferowane kraje",
         "preferredCountriesPlaceholder": "np. NL, DE",
         "salaryMin": "Wynagrodzenie od (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Wynagrodzenie do (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Gotowość do przeprowadzki?",
         "hasTransport": "Czy dojadą Państwo do pracy samodzielnie?",
         "needsAccommodation": "Potrzebują Państwo zakwaterowania?",
@@ -14357,7 +14434,9 @@
         "supplyTeamSize": "Ilu macie ludzi",
         "supplyLocation": "Gdzie mogą pracować",
         "demandCountry": "Kraj, w którym będzie praca",
-        "demandCountryPlaceholder": "np. Szwecja lub SE"
+        "demandCountryPlaceholder": "np. Szwecja lub SE",
+        "projectCountry": "Kraj",
+        "projectCountryPlaceholder": "np. Szwecja lub SE"
       },
       "availability": {
         "available": "Dostępny/a",
@@ -14393,7 +14472,8 @@
         "errorStale": "Podczas sprawdzania coś się zmieniło (na przykład aktywna przestrzeń robocza). Nic nie zostało zapisane — proszę zacząć od nowa.",
         "errorConflict": "Ta wartość jest już inna. Proszę otworzyć tryb zaawansowany, aby ją zastąpić.",
         "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Proszę zamknąć jedną lub aktywować plan Organizacja (99 €/mies.) na koncie organizacji.",
-        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Proszę skontaktować się z nami."
+        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Proszę skontaktować się z nami.",
+        "errorCountryRequired": "Podaj kraj miejsca (nazwę lub kod, np. Szwecja lub SE)."
       },
       "urgency": {
         "flexible": "Elastycznie",
@@ -14458,7 +14538,7 @@
       "navCalendar": "Kalendarz",
       "navProfile": "Profil",
       "clarifyWorkLog": "Którego dnia i jak długo Państwo pracowali? Na przykład: „Dziś od 8 do 17, 30 minut przerwy, montaż okien”.",
-      "calendarHint": "Swój plan znajdą Państwo w zakładce „Kalendarz”. Tutaj mogę pomóc zapisać czas pracy lub przejrzeć oferty.",
+      "calendarHint": "Swój plan znajdą Państwo w zakładce „Kalendarz”.",
       "messagesHint": "Oto Państwa wiadomości — poniższy link je otwiera.",
       "reminderBlocked": "Nie mogę jeszcze wysyłać przypomnień — nie ma mechanizmu przypomnień, więc nie stworzę fałszywego. Dodam tę funkcję, gdy zostanie włączona.",
       "switchContextPersonal": "przestrzeń osobista",
@@ -14714,6 +14794,34 @@
       "findWorkInCompanyContext": "Szukanie pracy to Państwa własne działanie — w przestrzeni firmy go nie uruchamiam. Proszę przełączyć się na przestrzeń osobistą i zapytać ponownie.",
       "findWorkInCompanyWhy": "Pracy szuka człowiek, nie firma — odpowiadam z Państwa przestrzeni osobistej.",
       "personalOnlyInCompany": "To działanie osobiste — w przestrzeni firmy go nie wykonuję. Proszę przełączyć się na przestrzeń osobistą i kontynuować tam.",
+      "needsOrganization": "To wykonuje się dla organizacji, a żadna z przestrzeni nie może tego jeszcze zrobić.",
+      "readFailed": "Nie udało się tego teraz odczytać — błąd po naszej stronie. Nic nie zmieniono. Proszę spróbować za chwilę.",
+      "taskStatusAsk": "Jaki stan ustawić dla zadania: rozpoczęte, wykonane czy zablokowane?",
+      "stageStatusAsk": "Jaki stan ustawić dla etapu: rozpoczęty, wykonany czy zablokowany?",
+      "chipStatusStarted": "Rozpoczęte",
+      "chipStatusDone": "Wykonane",
+      "chipStatusBlocked": "Zablokowane",
+      "professionAsk": "O jaki zawód lub fach chodzi?",
+      "crossSpace": {
+        "personal": {
+          "cv": "CV znajduje się w przestrzeni osobistej, nie w organizacji.",
+          "journal": "Własny dziennik pracy znajduje się w przestrzeni osobistej.",
+          "profile": "Profil znajduje się w przestrzeni osobistej.",
+          "calendar": "Własny kalendarz znajduje się w przestrzeni osobistej."
+        },
+        "open": {
+          "cv": "Przełącz i otwórz moje CV",
+          "journal": "Przełącz i otwórz mój dziennik",
+          "profile": "Przełącz i otwórz mój profil",
+          "calendar": "Przełącz i otwórz mój kalendarz"
+        },
+        "askWhoseCv": "Chodzi o własne CV czy o CV kandydata?",
+        "organizationHistory": "Zapisem organizacji jest jej historia prac.",
+        "openOrganizationHistory": "Otwórz historię organizacji",
+        "organization": "To wykonuje się w przestrzeni organizacji: {name}.",
+        "switchTo": "Przełącz na {name} i kontynuuj",
+        "whichOrganization": "To wykonuje się w przestrzeni organizacji. W której?"
+      },
       "newJobsIntro": "Nowe oferty zgodne z Państwa preferencjami: {count}.",
       "newJobsAll": "Wszystkie możliwości",
       "newJobsNone": "W ostatnich dniach nie pojawiły się nowe oferty zgodne z Państwa preferencjami. Wszystkie możliwości znajdą Państwo na stronie możliwości.",
@@ -15973,8 +16081,7 @@
       "lasting": "Państwa doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     },
     "v3": {
-      "lead": "Dla pracowników, pracodawców i usługodawców – ze wszystkich zawodów i branż. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
-      "moreChoices": "Więcej opcji",
+      "lead": "LabourMarket.ai to platforma oparta na patencie, stworzona w oparciu o unikalną ideę organizowania i zarządzania relacjami zawodowymi. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
       "market": {
@@ -16939,9 +17046,36 @@
       "not_authorized": "Nie mają Państwo do tego uprawnień.",
       "not_found": "Karty nie znaleziono.",
       "limit_reached": "Za dużo otwartych kart — najpierw proszę wysłać lub uporządkować istniejące.",
-      "error": "Coś poszło nie tak. Nic nie zostało zapisane."
+      "error": "Coś poszło nie tak. Nic nie zostało zapisane.",
+      "schedule_saved": "Harmonogram zapisany."
     },
-    "taskAmbiguous": "powiązane zadania: {count} — godziny nieprzypisane do jednego"
+    "taskAmbiguous": "powiązane zadania: {count} — godziny nieprzypisane do jednego",
+    "schedule": {
+      "title": "Automatyczne ewidencje czasu",
+      "consent": "Przekazuj moją zarejestrowaną pracę z poprzedniego dnia, siedmiu dni lub miesiąca kalendarzowego do wybranego procesu zatwierdzania. Praca nie jest zatwierdzana automatycznie.",
+      "enabled": "Włączone",
+      "frequency": "Częstotliwość",
+      "daily": "Codziennie",
+      "weekly": "Co tydzień",
+      "monthly": "Co miesiąc · 1. dnia",
+      "weekday": "Dzień wysyłki tygodniowej",
+      "time": "Godzina wysyłki",
+      "zone": "Strefa czasowa",
+      "recipients": "Odbiorcy zatwierdzenia",
+      "selectTemplate": "Wybierz szablon zatwierdzania",
+      "save": "Zapisz",
+      "next": "Następna wysyłka: {date} ({zone})",
+      "manageRecipients": "Zarządzaj odbiorcami",
+      "outcome": {
+        "submitted": "Przekazano do zatwierdzenia.",
+        "already_submitted": "Ten okres został już przekazany.",
+        "empty": "Brak zarejestrowanej pracy w tym okresie.",
+        "overlap": "Wstrzymano: okres pokrywa się z istniejącą ewidencją.",
+        "not_allowed": "Wstrzymano: dostęp do organizacji wygasł.",
+        "no_template": "Wstrzymano: szablon zatwierdzania jest niedostępny.",
+        "error": "Wysyłka nie powiodła się; nastąpi ponowna próba."
+      }
+    }
   },
   "workObjects": {
     "title": "Obiekty i budowy",
@@ -18839,8 +18973,7 @@
         "invitationAccepted": "Zaproszenie zaakceptowane. Proszę potwierdzić poniżej prośbę agencji o połączenie w imieniu swojej firmy."
       },
       "education": {
-        "title": "Nauka i programy",
-        "subtitle": "Programy, uczestnicy i popyt rynkowy na ich kierunki."
+        "title": "Nauka i programy"
       },
       "history": {
         "title": "Import danych i historia",
@@ -18917,7 +19050,8 @@
       "heading": "Zaproszenia od organizacji",
       "explainer": "Skierowane do Państwa zaproszenia do zarządu. Po przyjęciu organizacja pojawi się w przełączniku przestrzeni.",
       "accept": "Przyjmij",
-      "decline": "Odrzuć"
+      "decline": "Odrzuć",
+      "invitedBy": "Zaproszenie od {name}"
     },
     "members": {
       "heading": "Członkowie organizacji",
@@ -19378,7 +19512,11 @@
         "open": "Otwórz przestrzeń {name}",
         "opening": "Otwieranie…",
         "error": "Nie udało się otworzyć przestrzeni roboczej."
-      }
+      },
+      "structure": "Wcześniejsza praca była wykonywana w ramach {names}.",
+      "structureLater": ", później ",
+      "structureForClient": "Wcześniejsza praca w ramach {names} dla zleceniodawcy {client}.",
+      "structureAsSubcontractor": "Podwykonawca: {names} → zleceniodawca {client}."
     },
     "projects": {
       "title": "Projekty na platformie",
@@ -19396,7 +19534,21 @@
       "period": "Zapisano",
       "basis": "Z {entries} wpisów w dzienniku, które osoby zapisały w tej organizacji. Liczone osobno od zaimportowanej historii powyżej i nigdy do niej nie dodawane.",
       "unavailable": "Nie udało się teraz odczytać pracy zapisanej w dzienniku w tej organizacji."
-    }
+    },
+    "forClient": {
+      "title": "Prace podwykonawców",
+      "confirmed": "Potwierdzone wpisy",
+      "unconfirmed": "Niepotwierdzone wpisy",
+      "periodHours": "{hours} h podano jako sumę za okres; nie dodano do pojedynczych dni.",
+      "basis": "Z {count, plural, one {# wpisu} few {# wpisów} many {# wpisów} other {# wpisu}} w ewidencji podwykonawców. Liczone osobno od własnej pracy organizacji.",
+      "unreadable": "Nie udało się teraz odczytać prac zapisanych w ewidencji partnerów. Nie oznacza to, że ich nie ma."
+    },
+    "clients": {
+      "title": "Klienci",
+      "unnamed": "Organizacja klienta",
+      "records": "{count, plural, one {# wpis} few {# wpisy} many {# wpisów} other {# wpisu}}"
+    },
+    "descriptionNotInSource": "Brak opisu pracy w źródle"
   },
   "workPlan": {
     "title": "Zaplanowana praca",
@@ -19623,22 +19775,33 @@
     "heading": "Zaproponuj ten zespół do zapotrzebowania",
     "intro": "Proszę zaproponować zespół jako jedną jednostkę do jednego otwartego zapotrzebowania zweryfikowanej firmy.",
     "privacy": "Firma widzi tylko fakty na poziomie zespołu: wielkość, umiejętności, dostępność. Oferta nie wskazuje żadnego członka ani nie pokazuje profilu członka. Członkowie pojawiają się w projekcie dopiero po tym, jak firma przyjmie zespół i tam go przypisze.",
+    "orgPrivacy": "Firma widzi nazwę Państwa firmy, wiadomość i warunki. Nikt nie jest wymieniony z nazwiska, dopóki nie uzgodnią Państwo, kto będzie pracować.",
     "tooSmall": "Zespół można zaproponować tylko wtedy, gdy ma co najmniej 2 aktywnych członków.",
     "loading": "Ładowanie…",
     "unavailable": "Nie udało się teraz wczytać otwartego zapotrzebowania.",
     "noDemand": "Obecnie nie ma otwartego zapotrzebowania, do którego można złożyć ofertę.",
     "demandLabel": "Zapotrzebowanie",
     "demandPlaceholder": "Wybierz zapotrzebowanie",
+    "need": {
+      "people": "Osoby",
+      "start": "Początek",
+      "duration": "Czas trwania",
+      "language": "Język",
+      "skills": "Umiejętności",
+      "tools": "Narzędzia"
+    },
     "alreadyOffered": "już zaproponowano",
     "noteLabel": "Wiadomość do firmy (opcjonalnie)",
     "notePlaceholder": "Na przykład: brygada 3 osób, start za dwa tygodnie",
     "submit": "Zaproponuj zespół",
+    "orgSubmit": "Zaoferuj naszą firmę",
     "submitting": "Wysyłanie…",
     "sent": {
       "heading": "Państwa oferty",
       "none": "Brak ofert.",
       "withdraw": "Wycofaj",
-      "message": "Napisz do zleceniodawcy"
+      "message": "Napisz do zleceniodawcy",
+      "orgNext": "Zleceniodawca wstępnie się zgodził (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
     },
     "status": {
       "offered": "Czeka na odpowiedź",
@@ -19711,8 +19874,14 @@
       },
       "blockers": "Zespół jako całość nie spełnia: {list}",
       "missing": "Nie podano: {list}",
+      "missingData": {
+        "need_not_structured": "wymagania potrzeby",
+        "no_team_members": "aktywni członkowie",
+        "team_skills_not_stated": "umiejętności zespołu"
+      },
       "noNeedStructure": "To zapotrzebowanie nie jest jeszcze uporządkowane, więc zespołu nie można z nim porównać.",
       "note": "Wiadomość od zespołu",
+      "noteCompany": "Wiadomość od firmy",
       "accept": "Uzgodnij wstępnie",
       "decline": "Odrzuć",
       "noProjects": "Nie mają Państwo jeszcze otwartego projektu, do którego można przypisać zespół.",
@@ -19731,8 +19900,9 @@
       },
       "createProject": "Utwórz projekt",
       "message": "Napisz do zespołu",
+      "messageCompany": "Napisz do firmy",
       "kindOrganization": "Oferta firmy",
-      "orgNext": "Uzgodnione wstępnie (nie umowa). Szczegóły i ludzi, którzy będą pracować, proszę ustalić w rozmowie."
+      "orgNext": "Uzgodnione wstępnie (to nie jest umowa). Rozpoczęcie prac z oferty firmy przez platformę nie jest jeszcze dostępne: szczegóły i osoby, które będą pracować, prosimy ustalić w rozmowie."
     },
     "orgHeading": "Zaoferuj naszą firmę do otwartej potrzeby",
     "orgIntro": "Proszę zaoferować samą firmę — swoich ludzi, swoją usługę lub jako podwykonawca — do jednej otwartej potrzeby. Nie trzeba najpierw tworzyć brygady.",
@@ -19754,7 +19924,6 @@
       },
       "capacity": "Osób",
       "rate": "Stawka",
-      "ratePlaceholder": "np. 32 €/h lub cena ryczałtowa",
       "period": "Okres",
       "start": "Początek",
       "end": "Koniec",
@@ -19869,7 +20038,7 @@
     },
     "noHours": "Wpisy bez podanych godzin: {count}. Nieznane godziny nie są liczone jako zero.",
     "undated": "Wpisy bez podanej daty: {count}. Zostają w historii poniżej.",
-    "periodApart": "{hours} godz. z sumy to sumy za okres, trzymane osobno i nigdy nierozdzielane na dni ani miesiące.",
+    "periodApart": "Ponadto: {hours} godz. podane jako sumy za okres — niewliczone w godziny powyżej i nigdy nierozdzielane na dni ani miesiące.",
     "noWorkObject": "Wpisy niepowiązane z projektem ani miejscem znanym platformie: {count}. Zostają w tej historii pod nazwą źródła.",
     "places": {
       "title": "Według projektu lub miejsca",
@@ -20729,7 +20898,8 @@
       "setUpAgency": "Rejestracja agencji",
       "setUpInstitution": "Dla instytucji szkoleniowych",
       "b2bEnquiry": "Zapytanie o usługi dla firm (B2B)",
-      "projectEnquiry": "Zapytanie o projekt indywidualny"
+      "projectEnquiry": "Zapytanie o projekt indywidualny",
+      "findServices": "Znajdź usługi osób prywatnych"
     },
     "assistant": "Zapytaj asystenta",
     "start": {
@@ -20749,5 +20919,36 @@
       "fullList": "Pełna lista"
     },
     "more": "Więcej"
+  },
+  "publicServices": {
+    "title": "Znajdź usługi osób prywatnych",
+    "lead": "Usługi opublikowane publicznie przez osoby prywatne.",
+    "search": "Szukaj",
+    "query": "Usługa lub słowo kluczowe",
+    "country": "Kraj",
+    "category": "Kategoria",
+    "clear": "Wyczyść filtry",
+    "unavailable": "Wyszukiwanie usług jest niedostępne",
+    "unavailableHint": "Spróbuj ponownie później.",
+    "retry": "Spróbuj ponownie",
+    "emptyFiltered": "Brak usług pasujących do tych filtrów",
+    "empty": "Nie opublikowano jeszcze publicznie usług osób prywatnych",
+    "results": "Usługi",
+    "remote": "Zdalnie",
+    "pagination": "Strony wyszukiwania",
+    "previous": "Poprzednia",
+    "next": "Następna",
+    "page": "Strona {page}",
+    "refine": "Zawęź wyszukiwanie, aby znaleźć bardziej odpowiednie usługi.",
+    "back": "Wszystkie usługi",
+    "delivery": "Realizacja",
+    "rate": "Stawka",
+    "personalService": "Usługa osoby prywatnej",
+    "signInToRequest": "Zaloguj się i wyślij zapytanie",
+    "manage": "Zarządzaj tą usługą",
+    "contactUnavailable": "Wysłanie zapytania jest niedostępne. Spróbuj później.",
+    "notFound": "Nie znaleziono usługi",
+    "notFoundHint": "Ta usługa nie jest już publicznie dostępna.",
+    "allCountries": "Wszystkie kraje"
   }
 }

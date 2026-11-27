@@ -65,7 +65,7 @@ type ItemStatus =
   | { state: "discarded" }
   | { state: "conflict"; existing: string }
   | { state: "needs_migration" }
-  | { state: "error"; message: "error" | "invalid" };
+  | { state: "error"; message: "error" | "invalid" | "limit" };
 
 /** Where a line the parser could not place may go: through the SAME confirm
  *  actions as a proposal, so the person's choice is saved the same way. */
@@ -217,6 +217,9 @@ export function CvImportSectionReview({
             return;
           case "needs_migration":
             setItem(key, { state: "needs_migration" });
+            return;
+          case "limit":
+            setItem(key, { state: "error", message: "limit" });
             return;
           case "invalid":
             setItem(key, { state: "error", message: "invalid" });
@@ -608,6 +611,7 @@ function ItemRow({
   children?: React.ReactNode;
 }) {
   const t = useTranslations("cvImport");
+  const tEducation = useTranslations("cvSections.education");
   const { statusOf, setItem, run, editsOf, setEdit } = ctx;
   const [editing, setEditing] = useState(false);
   const s = statusOf(itemKey);
@@ -755,7 +759,7 @@ function ItemRow({
         )}
         {s.state === "error" && (
           <p className="text-xs text-state-danger" role="alert">
-            {s.message === "invalid" ? t("invalid") : t("error")}
+            {s.message === "limit" ? tEducation("limit") : s.message === "invalid" ? t("invalid") : t("error")}
           </p>
         )}
       </li>

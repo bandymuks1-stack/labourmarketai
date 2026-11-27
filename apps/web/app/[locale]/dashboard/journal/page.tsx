@@ -141,6 +141,8 @@ import {
 } from "@/lib/journal/work-in-numbers-view";
 import { resolveWorkLogLabels } from "@/components/app/conversation/chat/labels";
 import { JournalQuickRecord } from "./quick-record";
+import { JournalDayChoice } from "./day-choice";
+import { quickRecordDraftOwner } from "@/lib/journal/quick-record-draft";
 import { JournalCalendar } from "@/components/app/journal/journal-calendar";
 import { JournalDayObject } from "@/components/app/journal/journal-day-object";
 import { buildDayObject } from "@/lib/journal/day-object";
@@ -334,6 +336,13 @@ export default async function JournalPage({
     (r) =>
       (r as { journal_review_enabled?: boolean }).journal_review_enabled ===
       true,
+  );
+  // The "review is not switched on yet, the organization's owner switches it
+  // on" note only means something to a worker who HAS an organization context.
+  // A worker with only their own personal space has no owner to ask; showing
+  // it to them was noise (worker path walk 2026-11-24, decision 0032).
+  const anyOrganizationContext = (ecRows ?? []).some(
+    (r) => ((r as { organization_id?: string | null }).organization_id ?? null) !== null,
   );
 
   // WHICH CONTEXT DOES THIS WORK BELONG TO? (audit v1 FIRST_BROKEN_LINK)
@@ -1215,6 +1224,9 @@ export default async function JournalPage({
           organizationPeriodRecords,
         })
       : null;
+  // The person has no journal entry at all (the model's own signal, the one
+  // the numbers lead reads) — the screen then carries ONE empty state.
+  const journalHasNoEntries = dominantAnswer(workIntelligence, []).kind === "no_entries";
   // THE STRIP'S MONTH IS THE MODEL'S (issue #1689, lane B). This counted
   // entries by the `created_at` CALENDAR month while the section's "30
   // days" tile counted by the work day over a rolling window — two numbers
@@ -1292,7 +1304,7 @@ export default async function JournalPage({
             : t("cvBridgeEmpty")}
       </span>
       <Link
-        href="/cv"
+        href="/cv?tab=experience"
         className={chipLinkClassName(false)}
         data-testid="journal-cv-bridge-link"
       >
@@ -1425,7 +1437,7 @@ export default async function JournalPage({
           a confirmed-id is silently ignored so the worker can't be tricked
           into "editing" a confirmed entry — they would need the explicit
           correction-request UI for that. */}
-      {!anyReviewEnabled && (
+      {anyOrganizationContext && !anyReviewEnabled && (
         <p
           className="order-5 text-meta leading-relaxed text-text-muted"
           data-testid="journal-review-not-enabled-note"
@@ -1444,6 +1456,17 @@ export default async function JournalPage({
           conversation and the voice door stay reachable as text links inside
           the recorder (§1.5: nothing removed). */}
       <div id="journal-composer" className="order-1">
+        <div className="flex flex-col gap-3">
+        {/* THE WORK DAY FIRST (owner P1 2026-11-21): today, yesterday, a week
+            ago, the calendar, or the earlier entries — the same `?date=` the
+            calendar sets. An edit keeps its own saved date, so no choice. */}
+        {!editingEntry && (
+          <JournalDayChoice
+            today={todayIsoKey}
+            selected={selectedDate}
+            full={composeFull}
+          />
+        )}
         {editingEntry ? (
           <div className="flex flex-col gap-2">
             <JournalEntryComposer
@@ -1467,6 +1490,7 @@ export default async function JournalPage({
             <JournalEntryComposer
               key={selectedDate ?? "new"}
               defaultWorkDate={selectedDate}
+              draftOwner={quickRecordDraftOwner(user.id, activeOrganizationId)}
               engagements={composerEngagements}
               contextResolution={contextResolution}
               activeWorkspaceNotice={activeWorkspaceNotice}
@@ -1490,6 +1514,7 @@ export default async function JournalPage({
             locale={locale}
             labels={workLogLabels}
             selectedDay={selectedDate}
+            draftOwner={quickRecordDraftOwner(user.id, activeOrganizationId)}
             selectedDayLabel={
               selectedDate && selectedDate !== todayIsoKey
                 ? formatUtcDate(selectedDate, locale)
@@ -1529,6 +1554,7 @@ export default async function JournalPage({
             }
           />
         )}
+        </div>
       </div>
 
       {/* MANO VEIKLA SKAIČIAIS — one compact card (target IA §2): the
@@ -1543,6 +1569,12 @@ export default async function JournalPage({
         const period = wi ? focusPeriod(wi) : null;
         const scope = wi ? scopeText(wi, locale, tIntel) : tIntel("numbers.scope.all");
         const openChecks = wi ? splitChecks(wi.checks).open.length : 0;
+        // ONE EMPTY STATE (owner P0 2026-11-23). A journal with no entries
+        // at all said so three times in a row: under the calendar, in the
+        // list's empty state and here. The list's empty state is the one
+        // that carries the action, so it speaks alone; this card returns
+        // with the first entry.
+        if (answer.kind === "no_entries") return null;
         return (
           <section
             id="work-intelligence"
@@ -1646,6 +1678,7 @@ export default async function JournalPage({
           locale={locale as ActiveLocale}
           selected={selectedDate}
           carry={calendarCarry}
+          quietWhenEmpty={journalHasNoEntries}
         />
         {/* THE SELECTED DAY'S ACTIONS. What a person wants on a day they
             tapped: record work on that day, and see that same day on the one

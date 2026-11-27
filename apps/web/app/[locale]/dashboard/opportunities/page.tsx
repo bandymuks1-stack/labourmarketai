@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/Badge";
+import { LmLogo } from "@/components/ui/lm-logo";
+import { vacancyOriginLabels } from "@/components/marketing/public-vacancy-card-facts";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isAssessedFit } from "@/lib/opportunities/fit-band";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -518,7 +521,10 @@ export default async function OpportunitiesPage({
     patch: Partial<Record<keyof DiscoveryFilterState, string | null>> & {
       sort?: DiscoverySort;
     },
-  ) => `${boardHref}${buildDiscoveryQuery(filters, sort, patch)}`;
+  ) => `${boardHref}${buildDiscoveryQuery(filters, sort, patch, view)}`;
+  // Clearing filters keeps the person on the board they chose: the whole
+  // market stays the whole market, the default view stays the default view.
+  const resetHref = view === "all" ? `${boardHref}?view=all` : boardHref;
   const chipClass = (isActive: boolean) =>
     `inline-flex min-h-11 items-center rounded-md border px-2.5 text-support transition-colors ${
       isActive
@@ -1165,7 +1171,7 @@ export default async function OpportunitiesPage({
                         {active.length > 0 ? (
                           <div className="flex flex-wrap items-center justify-end gap-2">
                             <Link
-                              href={boardHref}
+                              href={resetHref}
                               data-testid="opportunities-filters-reset"
                               className="inline-flex min-h-11 items-center text-support font-medium text-brand-blue hover:text-brand-champagne"
                             >
@@ -1253,7 +1259,7 @@ export default async function OpportunitiesPage({
                       })}
                     </p>
                     <Link
-                      href={boardHref}
+                      href={resetHref}
                       className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
                       data-testid="opportunities-filtered-empty-reset"
                     >
@@ -1378,6 +1384,7 @@ export default async function OpportunitiesPage({
                           {section.rows.map((row) =>
                             row.kind === "external" ? (
                               <ExternalOpportunityRow
+                                locale={locale}
                                 key={row.key}
                                 card={row.card}
                                 band={row.band}
@@ -1478,6 +1485,14 @@ export default async function OpportunitiesPage({
                                           ) : null}
                                         </p>
                                         <FitBandChip band={row.band} label={bandChip(row.band)} />
+                                      </div>
+
+                                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-text-secondary" data-testid="job-origin" data-origin="platform">
+                                        <Badge tone="neutral" className="gap-1.5 font-sans normal-case tracking-normal">
+                                          <LmLogo className="h-4 w-4 shrink-0" title="" />
+                                          LabourMarket.ai
+                                        </Badge>
+                                        <span>{vacancyOriginLabels(locale).platform_internal}</span>
                                       </div>
 
                                       {/* Organization / source · place · start — ONE compact meta

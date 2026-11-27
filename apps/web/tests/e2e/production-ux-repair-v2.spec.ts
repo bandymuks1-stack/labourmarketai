@@ -147,7 +147,7 @@ test.describe("authenticated F-flows (local stack only)", () => {
     // Summary first (2026-09-23): the composer is inside the closed
     // `#profile-edit` bar; this hash opens it (its DetailsHashOpener). A
     // worker with no profession starts in the picker — step back to text.
-    await page.goto("/lt/dashboard/profile#profile-edit");
+    await page.goto("/lt/dashboard/profile?tab=edit#profile-edit");
     await expect(page.locator("main #profile-edit")).toHaveJSProperty("open", true);
     const back = page.getByTestId("profile-text-flow-manual-back");
     if (await back.isVisible()) await back.click();

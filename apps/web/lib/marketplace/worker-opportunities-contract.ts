@@ -242,6 +242,8 @@ export interface OpportunitiesResultExternalRow {
    * attribution wording.
    */
   readonly attributionText: string;
+  /** Known publisher from recorded provenance; optional for older result payloads. */
+  readonly sourceName?: string | null;
   /**
    * The ONE engine's own status for this worker against this ad — a
    * passthrough, never recomputed (#1689, defect H). It used to be DROPPED

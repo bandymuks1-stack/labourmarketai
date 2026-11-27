@@ -17,6 +17,7 @@ import {
   signIn,
   signUp,
   sql,
+  sqlExec,
   stackMailLink,
   userId,
 } from "./isolated-web-a-helpers";
@@ -256,8 +257,13 @@ async function registerThroughLink(browser: Browser, link: string, address: stri
   await w.locator('form button[type="submit"]').click();
   await w.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
   if (/\/onboarding/.test(w.url())) {
-    await w.getByTestId("onboarding-intent-work").click();
-    await w.getByTestId("onboarding-intents-continue").click();
+    // An invitation into an existing organization asks no "what did you
+    // come for" question (owner P0 2026-11-22); older links still may.
+    const intent = w.getByTestId("onboarding-intent-work");
+    if (await intent.waitFor({ state: "visible", timeout: 5_000 }).then(() => true, () => false)) {
+      await intent.click();
+      await w.getByTestId("onboarding-intents-continue").click();
+    }
     await w.getByTestId("onboarding-display-name").fill(name);
     await w.getByTestId("onboarding-country").click();
     await w.getByRole("option", { name: /Lithuania/ }).first().click();
@@ -392,7 +398,7 @@ function wiOrgRow(exp: Locator, orgId: string): Locator {
 }
 
 async function openCv(page: Page): Promise<Locator> {
-  await page.goto(`${BASE}/en/cv`);
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   const main = page.getByRole("main").first();
   await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });
   return main;
@@ -571,6 +577,26 @@ test("EX-1. O's CV: A as owner, B as manager (no hours), only O's own 3 h — ne
   await expect(wiOrgRow(exp, s.orgB), "B is a role of O's — with zero hours").toHaveAttribute("data-hours", "0");
 });
 
+// ── EX-1b ───────────────────────────────────────────────────────────────────
+
+test("EX-1b. O's profile card names A and B — the same organizations as Work in Numbers (CV-15 / G-7)", async () => {
+  expect(s.membershipId, "EX-0 set the walk up").toBeTruthy();
+  const o = as(O);
+  // Work in Numbers (the decision-0025 reading) holds both of O's roles.
+  const exp = await openWorkInNumbers(o);
+  await expect(wiOrgRow(exp, s.orgA)).toHaveCount(1);
+  await expect(wiOrgRow(exp, s.orgB), "B is a role of O's in Work in Numbers").toHaveCount(1);
+  // The profile card's history reads the same relationships: the manager
+  // role in B used to be missing from it (its own query left `manager` out).
+  await o.goto(`${BASE}/en/dashboard/profile`);
+  const history = o.getByRole("main").getByTestId("live-profile-history");
+  await expect(history, "the card's work history renders").toBeVisible({ timeout: 60_000 });
+  await expect(history).toContainText(ORG_A);
+  await expect(history, "the manager role in B is on the card too").toContainText(ORG_B);
+  await expect(o.getByRole("main").getByTestId("identity-stage-current-work").filter({ hasText: ORG_B }),
+    "membership-only management is a role, not current work").toHaveCount(0);
+});
+
 // ── EX-2 ────────────────────────────────────────────────────────────────────
 
 test("EX-2. W2's CV lists A (6 h) and B (5 h), 11 h in total, the same on the CV and the Living CV numbers", async () => {
@@ -663,12 +689,13 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
     await expect(place.getByRole("heading", { level: 2 })).toContainText(label);
     const chip = place.getByTestId("company-place-person-history-link");
     await expect(chip, `${ref}: one person, a door to A's own card`).toHaveCount(1);
-    await expect(chip).toHaveAttribute("href", new RegExp(`/dashboard/company/people/${personId}$`));
+    // The card keeps the organization the history was opened for (`?org=`, #3754).
+    await expect(chip).toHaveAttribute("href", new RegExp(`/dashboard/company/people/${personId}\\?org=${s.orgA}$`));
     await expect(chip).toHaveAttribute("data-linked", linked);
     await expect(place.getByTestId("company-place-person-other-workspace")).toHaveCount(0);
     await expect(place.getByTestId("company-place-person-other-roster")).toHaveCount(0);
     await chip.click();
-    await o.waitForURL(new RegExp(`/dashboard/company/people/${personId}$`), { timeout: 60_000 });
+    await o.waitForURL(new RegExp(`/dashboard/company/people/${personId}\\?org=${s.orgA}$`), { timeout: 60_000 });
     await expect(o.getByRole("main").getByTestId("company-person"), `${ref}: the card opens`).toHaveAttribute(
       "data-state",
       "ready",
@@ -723,6 +750,13 @@ test("EX-4. A's company surfaces: R1 opens W1's own page (confirmed), R2 stays a
 // ── EX-5 ────────────────────────────────────────────────────────────────────
 
 test("EX-5. screenshots at 375 and 1440: O's CV, W2's CV, company A's history and one place's detail", async ({ browser }) => {
+  // P0 2026-11-24 (Living CV run 45401396990): a long project title widened the
+  // company history's single-column grid past a 375 px screen. One synthetic
+  // project with a long unbroken title and city keeps that case in the
+  // no-sideways-scrolling check below; nothing above counts projects.
+  sqlExec(`insert into public.projects (organization_id, title, city)
+           values (${lit(s.orgA)}, ${lit(`QA-SYNTHETIC-${"a-very-long-unbroken-project-title-".repeat(4)}${RUN}`)},
+                   ${lit(`QA-SYNTHETIC-${"long-city-name-".repeat(6)}`)})`);
   mkdirSync(OUT, { recursive: true });
   const place = encodeURIComponent(`l:QA-SYNTHETIC history r1 ${RUN}`);
   const shots: { who: string; key: string; path: string; themes: readonly ("light" | "dark")[] }[] = [
@@ -853,4 +887,125 @@ test("EX-6. W1 contests one of R1's imported records on their own profile, the r
     timeout: 60_000,
   });
   await expect(list2.getByTestId("evidence-dispute-withdrawn-history"), "the contest is not erased, only withdrawn").toHaveCount(1);
+});
+
+// ── EX-7 ────────────────────────────────────────────────────────────────────
+
+test("EX-7. a record with project_id NULL reaches its project through its work object: A's history, R1's card and W1's CV all name it", async () => {
+  // The production shape (aggregate, owner addendum 2026-11-23): every record
+  // of an organization carries project_id NULL, the records carry a
+  // work_object_id, and the work object carries the project. Nothing is
+  // back-filled: the readers resolve record.project_id ?? work_object.project_id.
+  //
+  // Seeding: the project, the work object and the one imported record are
+  // written with the LOCAL service key (the same pattern as the imported rows
+  // above and integrated-fixes.spec.ts) — the import UI places records on a
+  // work object it creates itself, but there is no product door that leaves
+  // record.project_id empty while the object has a project. W1 is ASSIGNED to
+  // the project (service seed too) because a historical project's title is
+  // readable by a worker only through an assignment (projects_select RLS:
+  // owner / manager / is_assigned_to_project) — the walk does not widen that.
+  const PROJECT = `QA-SYNTHETIC Canal Renovation ${RUN}`;
+  const PLACE = `QA-SYNTHETIC Canal Site ${RUN}`;
+  const DAY = "2025-05-05";
+  const [{ legacy_company_id: companyId }] = sql<{ legacy_company_id: string | null }>(
+    `select legacy_company_id from public.organizations where id = ${lit(s.orgA)}`,
+  ) as [{ legacy_company_id: string | null }];
+  const project = await seed<{ id: string }>("projects", {
+    title: PROJECT,
+    organization_id: s.orgA,
+    company_id: companyId,
+    status: "live",
+  });
+  const object = await seed<{ id: string }>("work_objects", {
+    organization_id: s.orgA,
+    project_id: project.id,
+    name: PLACE,
+    status: "active",
+    created_by: s.oId,
+  });
+  const file = `experience-project-${RUN}.csv`;
+  const session = await seed<{ id: string }>("evidence_import_sessions", {
+    organization_id: s.orgA,
+    source_kind: "manual",
+    source_filename: file,
+    source_fingerprint: sha(`experience-session:project:${RUN}`),
+    source_language: "en",
+    supplied_by_organization_id: s.orgA,
+    supplier_role: "employer",
+    actor_kind: "human",
+    created_by: s.oId,
+    notes: `experience integration ${RUN}`,
+  });
+  const importedAt = new Date().toISOString();
+  const fingerprint = sha(`experience-record:${s.orgA}:${s.r1}:${DAY}:4:project:${RUN}`);
+  await seed("organization_evidence_records", {
+    organization_id: s.orgA,
+    organization_person_id: s.r1,
+    activity_kind: "work",
+    outcome_kind: "hours_worked",
+    work_object_id: object.id,
+    project_id: null,
+    activity_date: DAY,
+    hours: 4,
+    original_text: `Recorded work ${DAY}`,
+    original_language: "en",
+    evidence_state: "LEGACY_IMPORTED",
+    supplied_by_organization_id: s.orgA,
+    supplier_role: "employer",
+    supplied_by_profile_id: s.oId,
+    imported_by_profile_id: s.oId,
+    imported_at: importedAt,
+    session_id: session.id,
+    source_kind: "manual",
+    source_filename: file,
+    source_fact: { row: DAY },
+    derived: {},
+    record_fingerprint: fingerprint,
+    hash_prev: null,
+    hash_self: sha(`work-history-chain:v1::${fingerprint}:${importedAt}`),
+  });
+  await seed("project_worker_assignments", { project_id: project.id, worker_id: s.w1WorkerId, status: "active" });
+  // The fact shape this walk is about, read back.
+  expect(
+    sql<{ project_id: string | null; object_project: string | null }>(
+      `select r.project_id, o.project_id as object_project
+         from public.organization_evidence_records r join public.work_objects o on o.id = r.work_object_id
+        where r.work_object_id = ${lit(object.id)}`,
+    ),
+  ).toEqual([{ project_id: null, object_project: project.id }]);
+
+  // A's company history: the place's detail opens its project.
+  const o = as(O);
+  await o.goto(`${BASE}/en/dashboard/company/history?org=${s.orgA}`);
+  const tile = o.getByRole("main").getByTestId("company-work-history-place").filter({ hasText: PLACE });
+  await expect(tile, "one tile for the work object").toHaveCount(1, { timeout: 60_000 });
+  await tile.click();
+  const place = o.getByRole("main").locator("#company-place-detail").getByTestId("company-place");
+  await expect(place).toBeVisible({ timeout: 60_000 });
+  await expect(place.getByTestId("company-place-project-link"), "the place opens its project").toHaveAttribute(
+    "href",
+    new RegExp(`/dashboard/projects/${project.id}$`),
+  );
+
+  // R1's card in A: the place line links the project, and the organization
+  // history in the card names it.
+  await o.goto(`${BASE}/en/dashboard/company/people/${s.r1}`);
+  const card = o.getByRole("main").getByTestId("company-person");
+  await expect(card).toHaveAttribute("data-state", "ready", { timeout: 60_000 });
+  await expect(
+    card.locator(`[data-testid="company-person-place-project"][data-project="${project.id}"]`),
+    "the person card's place links the project",
+  ).toHaveCount(1);
+  await expect(
+    card.getByTestId("cv-organization-history-entry").filter({ hasText: PROJECT }),
+    "the card's organization history names the project",
+  ).toHaveCount(1);
+
+  // W1's own CV: the confirmed imported work is listed under its project.
+  const cv = await openCv(as(W1));
+  await expect(
+    cv.getByTestId("cv-organization-history-entry").filter({ hasText: PROJECT }),
+    "W1's CV names the project the record reached through its work object",
+  ).toHaveCount(1, { timeout: 60_000 });
 });

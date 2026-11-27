@@ -1,8 +1,8 @@
-import { test as base, devices, type BrowserContextOptions } from "@playwright/test";
+import { test as base, devices, type BrowserContext, type BrowserContextOptions } from "@playwright/test";
 
 import { WALK_TIME_ZONE, seedViewerTimeZone } from "./viewer-time-zone";
 import { seedWalkAnalyticsConsent } from "./analytics-consent-seed";
-import { walkDevice, walkPhone, withWalkDevice } from "../../lib/testing/prod-qa-walk-device";
+import { walkDevice, walkPhone, walkTheme, withWalkDevice } from "../../lib/testing/prod-qa-walk-device";
 
 /**
  * THE PRODUCTION WALK'S `test` — every browser context it opens is a returning
@@ -43,6 +43,11 @@ import { walkDevice, walkPhone, withWalkDevice } from "../../lib/testing/prod-qa
  * their test options, and every `browser.newContext(...)` that names no screen
  * of its own gets it in the wrapper. A step that names its own viewport keeps
  * it — see `lib/testing/prod-qa-walk-device.ts`. Unset, nothing changes.
+ * `tablet-768` and `desktop-1440` are two more screens through the same doors.
+ *
+ * THE THEME. `PROD_QA_THEME=dark` opens every context with the browser's dark
+ * colour scheme and the viewer's saved dark theme, through the same two doors; a
+ * context that names its own `colorScheme` keeps it. Unset (light), nothing changes.
  *
  * Overriding the worker-scoped `browser` fixture gives these tests their own
  * workers, so no test that imports the plain `@playwright/test` ever sees the
@@ -66,25 +71,47 @@ export function firstVisit(options: BrowserContextOptions = {}): FirstVisitConte
 
 /** Read once per worker; an unknown value stops the walk before it opens anything. */
 const DEVICE = walkDevice(process.env);
+const THEME = walkTheme(process.env);
+const SCHEME: Pick<BrowserContextOptions, "colorScheme"> = THEME === "dark" ? { colorScheme: "dark" } : {};
+/**
+ * The product resolves its theme from the viewer's saved choice (localStorage `theme`,
+ * lib/visual/theme-default.ts), not from the system scheme, so a dark walk is a viewer
+ * who chose dark: the choice is put in the browser before the first paint. Browser
+ * storage only — nothing is written to production.
+ */
+async function seedWalkTheme(ctx: BrowserContext, scheme: BrowserContextOptions["colorScheme"]): Promise<void> {
+  if (scheme !== "dark") return;
+  await ctx.addInitScript(() => {
+    try {
+      localStorage.setItem("theme", "dark");
+    } catch {
+      /* storage blocked: the page keeps its default */
+    }
+  });
+}
 /** What a step with its own viewport runs as on a phone walk: the desktop browser, as on a desktop walk. */
 const DESKTOP = { userAgent: devices["Desktop Chrome"].userAgent, deviceScaleFactor: devices["Desktop Chrome"].deviceScaleFactor };
 
 export const test = base.extend({
   timezoneId: WALK_TIME_ZONE,
   ...(walkPhone(DEVICE) ?? {}),
+  ...SCHEME,
   context: async ({ context }, use) => {
     await seedViewerTimeZone(context);
     await seedWalkAnalyticsConsent(context);
+    await seedWalkTheme(context, SCHEME.colorScheme);
     await use(context);
   },
   browser: [
     async ({ browser }, use) => {
       const newContext = browser.newContext;
       browser.newContext = async (options?: FirstVisitContextOptions) => {
-        const { [FIRST_VISIT]: unseeded, ...rest } = options ?? {};
+        const { [FIRST_VISIT]: unseeded, ...given } = options ?? {};
+        const rest = { ...SCHEME, ...given };
         const ctx = await newContext.call(browser, { ...withWalkDevice(DEVICE, rest, DESKTOP), timezoneId: WALK_TIME_ZONE });
         await seedViewerTimeZone(ctx);
         if (!unseeded) await seedWalkAnalyticsConsent(ctx);
+        await seedWalkTheme(ctx, rest.colorScheme);
         return ctx;
       };
       try {

@@ -29,6 +29,7 @@ const ad = (
     match: m,
     view: {
       title: `Tiler ${id}`,
+      provenance: { attributionCode: "vacancySources.attribution.arbetsformedlingen", applicationRoute: "source_original" },
       employerName: "Bygg AB",
       country: "SE",
       city: "Stockholm",
@@ -81,6 +82,20 @@ describe("your opportunities - relevant only, explained, at most three", () => {
     );
     expect(out.map((o) => o.id)).toEqual(["proof", "new", "old"]);
     expect(out).toHaveLength(3);
+  });
+
+  it("puts direct needs first within the same fit, without promoting weak or lower-fit needs", () => {
+    const reason = [{ code: "profession_match" }];
+    const possible = need("possible", match("possible", reason));
+    const out = selectPersonalOpportunities(
+      [need("direct", match("strong", reason)), { ...possible, need: { ...possible.need, companyName: "Another employer" } }, need("weak", match("weak", reason))],
+      [ad("imported", match("strong", reason, { matchedManagerConfirmed: 9 }))],
+      10,
+    );
+    expect(out.map(o => o.id)).toEqual(["direct", "imported", "possible"]);
+    expect(out[0]?.applicationRoute).toBe("platform_internal");
+    expect(out[1]?.attributionCode).toBe("vacancySources.attribution.arbetsformedlingen");
+    expect(out[1]?.applicationRoute).toBe("source_original");
   });
 
   it("the free discovery set holds up to ten", () => {

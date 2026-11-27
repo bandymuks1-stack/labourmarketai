@@ -37,7 +37,17 @@ const RUN = Date.now().toString(36);
 const W = `template-worker-${RUN}@example.test`;
 // No stated duration: the full form refuses to save an unconfirmed duration and
 // opens its review step first (doctrine §7), which is not what this walk is about.
-const OWN = `QA-SYNTHETIC template ${RUN}: tiled the bathroom floor`;
+/**
+ * The run id in the person's own words carries LETTERS ONLY. `Date.now()` in
+ * base 36 often holds a digit run followed by a unit letter — "mi8e945h",
+ * "mi8hk31u", "mi8khl3d" — which the journal's one time reader correctly
+ * reads as 945 hours, 31 hours ("uur") or 3 days (measured: 10 of 400 ids).
+ * The composer then stops the save until the person reviews that duration,
+ * which was the "intermittent" T-3 refusal: a property of the synthetic id,
+ * not of the product.
+ */
+const RUN_WORD = RUN.replace(/[0-9]/g, (d) => "abcdefghij"[Number(d)]!);
+const OWN = `QA-SYNTHETIC template ${RUN_WORD}: tiled the bathroom floor`;
 const SCAFFOLD_EN = ["Site / object:", "Work performed:", "Hours:"];
 
 test("T-1..T-3. the full composer offers an active template, it prefills the entry, and the person saves it as their own", async ({ page }) => {
@@ -74,9 +84,10 @@ test("T-1..T-3. the full composer offers an active template, it prefills the ent
   await text.fill(`${filled}\n${OWN}`);
   await expect(text, "T-3: the person's own words are in the entry before the save").toHaveValue(`${filled}\n${OWN}`);
   // Intermittent in CI (2 of ~9 runs, 2026-11-19): the entry was never stored
-  // and nothing said why. Not reproduced locally, so the walk now names the
-  // outcome itself (pattern S-7): the saved banner, the composer's own error,
-  // or a document load that would mean the form submitted without the app.
+  // and nothing said why, so the walk names the outcome itself (pattern S-7):
+  // the saved banner, the composer's own error, or a document load that would
+  // mean the form submitted without the app. The refusal it then named was the
+  // run id read as a duration (see RUN_WORD above).
   const pageErrors: string[] = [];
   page.on("pageerror", (e) => pageErrors.push(String(e.message).slice(0, 300)));
   const documentLoads: string[] = [];
@@ -110,7 +121,7 @@ test("T-1..T-3. the full composer offers an active template, it prefills the ent
 
 test("T-4. the saved entry reaches the person's Living CV as their own recorded work, not as confirmed work", async ({ page }) => {
   await signIn(page, BASE, W);
-  await page.goto(`${BASE}/en/cv`);
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   // Scoped to <main>: streaming can leave a hidden duplicate outside it.
   const main = page.getByRole("main");
   await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });

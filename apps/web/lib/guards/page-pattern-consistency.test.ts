@@ -18,11 +18,29 @@ const APP = join(__dirname, "..", "..");
 const read = (rel: string) => readFileSync(join(APP, rel), "utf8");
 
 const NAV_STRIPS = [
-  "components/app/organization/organization-doors.tsx",
   "components/app/historical/historical-workspace.tsx",
   "components/app/player-card/player-card-modes.tsx",
   "components/app/conversation/chat/my-space-row.tsx",
+  // Carousel spec N11 (finding M3): the marketplace's group tabs, domain
+  // chips and actor filter, and scouting's filter chips, wrap.
+  "components/app/marketplace-listings-section.tsx",
+  "app/[locale]/dashboard/company/scouting/page.tsx",
 ];
+
+// N11 (Codex review on #3719): once a row wraps instead of scrolling, an item
+// that cannot shrink below its label overflows a narrow phone, and the page
+// hides sideways overflow, so the label is cut off. Each item is capped at the
+// row's width and its label wraps inside it.
+describe("a wrapped filter or tab never holds an item wider than the row", () => {
+  it("the scouting filter chips and the marketplace tabs are capped at the row's width", () => {
+    const scouting = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    expect(scouting).not.toMatch(/shrink-0 whitespace-nowrap/);
+    expect(scouting.match(/\)\} max-w-full`/g)?.length).toBeGreaterThanOrEqual(3);
+    const listings = read("components/app/marketplace-listings-section.tsx");
+    expect(listings).not.toMatch(/inline-flex min-h-11 shrink-0 items-center rounded-full/);
+    expect(listings.match(/inline-flex min-h-11 max-w-full items-center rounded-full/g)).toHaveLength(3);
+  });
+});
 
 describe("navigation strips wrap instead of scrolling sideways", () => {
   for (const rel of NAV_STRIPS) {
@@ -32,6 +50,27 @@ describe("navigation strips wrap instead of scrolling sideways", () => {
       expect(src).toMatch(/flex-wrap/);
     });
   }
+});
+
+/**
+ * THE ORGANISATION DOORS ARE ONE ROW ON A PHONE (coordinator decision of
+ * 2026-11-22 on the owner's orders of 2026-11-21/22: horizontal card rows with
+ * the next card peeking on phones). Wrapped, 8–9 doors took three or four rows
+ * (150–200 px) above every organisation page. This replaces, for this strip
+ * only, the 2026-10-25 rule above; from `sm` the doors still wrap.
+ */
+describe("organisation doors: one sideways row on a phone, wrapped from sm", () => {
+  const src = read("components/app/organization/organization-doors.tsx");
+  it("scrolls sideways below sm and wraps from sm (no snap: the one rail is CardRail)", () => {
+    expect(src).toMatch(/max-sm:overflow-x-auto/);
+    expect(src).toMatch(/max-sm:flex-nowrap/);
+    expect(src).not.toMatch(/snap-x/);
+    expect(src).toMatch(/sm:flex-wrap/);
+  });
+  it("keeps 44 px door targets and brings the current door into view", () => {
+    expect(src).toMatch(/min-h-11 shrink-0/);
+    expect(src).toMatch(/aria-current="page"/);
+  });
 });
 
 /** Pages whose "up a level" link was converted to the shared primitive. */

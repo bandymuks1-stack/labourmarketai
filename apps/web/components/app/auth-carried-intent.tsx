@@ -2,7 +2,10 @@
 
 import { useTranslations } from "next-intl";
 
-import { sentenceFromReturnPath } from "@/lib/marketing/public-entry";
+// The carry half only: `@/lib/marketing/public-entry` also holds the intent
+// classifier and its lexicons (about 250 KiB of client JavaScript the sign-in
+// and sign-up pages never run; perf 2026-11-22).
+import { sentenceFromReturnPath } from "@/lib/marketing/public-entry-carry";
 
 /**
  * WHAT YOU ASKED FOR IS STILL HERE (owner window 11 §21).

@@ -16,6 +16,7 @@ import {
   stackMailLink,
   userId,
   verifyCompanyAsLocalAdmin,
+  onboardInvited,
 } from "./isolated-web-a-helpers";
 
 /**
@@ -275,7 +276,7 @@ async function joinByLink(browser: Browser, owner: Page, address: string, name: 
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await w.locator('form button[type="submit"]').click();
   await w.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(w.url())) await onboard(w, "work", name);
+  if (/\/onboarding/.test(w.url())) await onboardInvited(w, name);
   await w.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(w.url())) {
     const accept = w.getByTestId("invite-accept");
@@ -683,7 +684,8 @@ test("CR-2. R accepts the desktop entry on a 390 px phone; it is stored as K's a
   await expect(panel, "W sees the client's acceptance").toHaveAttribute("data-phase", "accepted", { timeout: 60_000 });
   await expect(panel.getByTestId(`entry-review-accepted-${entry}`), "named as K's acceptance").toContainText(orgName(s.kOrg));
   await fitsTheScreen(w.page, "the worker's journal with the accepted entry");
-  await w.page.goto(`${BASE}/en/cv`);
+  // The count lives in the CV's Experience block (decision 0034).
+  await w.page.goto(`${BASE}/en/cv?tab=experience`);
   const counted = w.page.getByRole("main").getByTestId("cv-client-accepted-work").filter({ visible: true }).first();
   await expect(counted, "the Living CV counts work the client accepted, as its own fact").toBeVisible({ timeout: 60_000 });
   expect(Number(await counted.getAttribute("data-entries"))).toBeGreaterThanOrEqual(1);

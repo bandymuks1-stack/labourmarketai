@@ -10,3 +10,6 @@ SHELL=/bin/sh
 */10 * * * * root sh /root/lm-prod/bin/lm-cron.sh privacy-erasure
 # Project FORECAST recompute (Stage 7, owner order 2026-10-24): every 5 min; bounded (25 projects / 60 s); weekly/daily/hourly/live cadence decided per organization in the app.
 */5 * * * * root sh /root/lm-prod/bin/lm-cron.sh forecast-recompute
+
+# Per-worker report settings determine the actual due time; this is only the bounded dispatcher.
+* * * * * root sh /root/lm-prod/bin/lm-cron.sh timesheet-reports

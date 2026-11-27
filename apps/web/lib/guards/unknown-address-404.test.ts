@@ -3,6 +3,8 @@ import { join, resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 import { isUnknownAddress, KNOWN_FIRST_SEGMENTS } from "@/lib/routing/known-first-segments";
+import { activeLocales } from "@/lib/i18n/config";
+import { stripLocaleSegment } from "@/lib/auth/role-gated-routes";
 
 /**
  * AN ADDRESS NOTHING CAN ANSWER GETS A REAL 404 PAGE (UX-9), and a page that exists is
@@ -106,6 +108,21 @@ describe("isUnknownAddress", () => {
   ])("%s", (rest, unknown) => {
     expect(isUnknownAddress(rest)).toBe(unknown);
   });
+});
+
+describe("public services route inventory", () => {
+  const id = "11111111-1111-4111-8111-111111111111";
+  it.each(["", ...activeLocales.map((locale) => "/" + locale)])(
+    "allows list/detail under '%s' while preserving depth and unknown-route denial",
+    (prefix) => {
+      for (const rest of ["/services", "/services/", "/services/" + id, "/services/" + id + "/"]) {
+        expect(isUnknownAddress(stripLocaleSegment(prefix + rest, activeLocales)), prefix + rest).toBe(false);
+      }
+      for (const rest of ["/services/" + id + "/extra", "/services-x", "/this-page-does-not-exist"]) {
+        expect(isUnknownAddress(stripLocaleSegment(prefix + rest, activeLocales)), prefix + rest).toBe(true);
+      }
+    },
+  );
 });
 
 describe("how it is wired", () => {

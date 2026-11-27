@@ -2,6 +2,7 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
@@ -520,4 +521,12 @@ test("G-5 (4.18). the worker withdraws the grant; Gama sees it withdrawn; the ne
   );
   expect(await closeNeed(gama.page, requestId)).toBe("closed");
   await gama.ctx.close();
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("documents-approvals");
 });

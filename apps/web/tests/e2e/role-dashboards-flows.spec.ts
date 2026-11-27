@@ -143,9 +143,12 @@ test("buyer role dashboard renders with disclaimer + first-action", async ({ pag
   await expect(page).toHaveURL(/\/lt\/dashboard\/buyer/);
   await expect(page.getByRole("heading", { name: buyer.title, level: 1 })).toBeVisible();
   await expect(page.getByTestId("buyer-dashboard")).toBeVisible();
+  // One screen per block (decision 0034): each block has its own address.
+  await page.goto("/lt/dashboard/buyer?tab=profile", { waitUntil: "networkidle" });
   await expect(page.getByTestId("buyer-dashboard-pilot-disclaimer")).toBeVisible();
-  await expect(page.getByTestId("buyer-dashboard-first-action")).toBeVisible();
   await assertProfileLink(page, "buyer-dashboard-profile-link");
+  await page.goto("/lt/dashboard/buyer?tab=notes", { waitUntil: "networkidle" });
+  await expect(page.getByTestId("buyer-dashboard-first-action")).toBeVisible();
   await assertNoFakeVerifiedCopy(page);
   await shot(page, "03-buyer-dashboard");
 });

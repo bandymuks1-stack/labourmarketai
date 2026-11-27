@@ -253,3 +253,59 @@ describe("intakeOutputFields — what the work produced rides the same intake (r
     expect(intakeOutputFields("Dirbau 8 val.")).toEqual({});
   });
 });
+
+
+describe("reference codes never add duration to the journal or Living CV", () => {
+  it.each(["AB5h", "AB30min", "ref_2days", "AB15hours", "AB3.5h", "AB3,5h"])("ignores %s and carries only the stated three hours to the canonical reading", (reference) => {
+    const text = `Reference ${reference}: priced the next renovation and ordered materials, 3 hours`;
+    const intake = deriveIntakeWorkTime(text, TODAY);
+    expect(intake.fragments.map((f) => [f.timeValue, f.timeUnit])).toEqual([[3, "hours"]]);
+    const time = deriveEntryWorkTime({ entryId: "e", createdAt: `${TODAY}T10:00:00Z`, metrics: toMetrics(intake.fragmentsJson) });
+    expect(time.totalHours).toBe(3);
+    expect(time.conflict).toBeNull();
+  });
+  it.each(["AB5h", "AB30min", "ref_2days"])("does not manufacture time when %s is the only number", (reference) => {
+    const intake = deriveIntakeWorkTime(`Inspected unit ${reference}`, TODAY);
+    expect(intake.fragments).toEqual([]);
+    expect(intake.quantityMinutes).toBeNull();
+  });
+  it("keeps unspaced real durations and decimals", () => {
+    const intake = deriveIntakeWorkTime("Painted 3h; cleaned 30min", TODAY);
+    const time = deriveEntryWorkTime({ entryId: "e", createdAt: `${TODAY}T10:00:00Z`, metrics: toMetrics(intake.fragmentsJson) });
+    expect(time.totalHours).toBe(3.5);
+    expect(deriveIntakeWorkTime("Painted 3.5h", TODAY).fragments[0]?.timeValue).toBe(3.5);
+  });
+});
+
+describe("a comma-separated duration stays with its one named activity", () => {
+  it.each([
+    ["Kochte täglich frische Gerichte, 3 hours", "cooking"],
+    ["Kochte täglich frische Gerichte, 3 Stunden.", "cooking"],
+    ["Cooked fresh meals, 3 hours", "cooking"],
+  ])("keeps the work and its duration together: %s", (text, skill) => {
+    const t = deriveIntakeWorkTime(text, TODAY);
+    expect(t.fragments).toHaveLength(1);
+    expect(t.fragments[0]).toMatchObject({
+      rawPhrase: text.replace(/\.$/, ""), timeValue: 3, timeUnit: "hours",
+      activitySlug: skill, selected: false, source: "ai_extracted",
+    });
+    expect(deriveEntryWorkTime({ entryId: "e", createdAt: TODAY, metrics: toMetrics(t.fragmentsJson) }).totalHours).toBe(3);
+  });
+
+  it.each([
+    "Cooked fresh meals. 3 hours",
+    "Cooked fresh meals; 3 hours",
+    "Cooked fresh meals, drove a truck, 3 hours",
+    "Cooked fresh meals, 3 hours driving",
+  ])("does not assign another clause's hours to cooking: %s", (text) => {
+    expect(deriveIntakeWorkTime(text, TODAY).fragments.every((f) => f.activitySlug !== "cooking")).toBe(true);
+  });
+
+  it("does not merge an already timed item or count a break as work", () => {
+    const text = "Cooked fresh meals 2 hours, 3 hours";
+    const t = deriveIntakeWorkTime(text, TODAY);
+    expect(t.fragments.map((f) => f.timeValue)).toEqual([2, 3]);
+    expect(t.fragments[1]?.activitySlug).toBeNull();
+    expect(deriveIntakeWorkTime("Cooked fresh meals, 30 min break", TODAY).fragments).toHaveLength(0);
+  });
+});

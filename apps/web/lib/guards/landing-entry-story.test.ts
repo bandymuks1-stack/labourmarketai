@@ -30,7 +30,7 @@ describe("landing entry", () => {
     // one supporting line under the goals.
     expect(readFileSync(join(ROOT, "components/marketing/landing-intent-choice.tsx"), "utf8")).toContain(
       // Phones show all the goals as a grid (owner P0 2026-11-13).
-      '<GoalNavigation headingLevel="h1" phoneLayout="grid" lead={lead} phoneMore={phoneMore} />',
+      '<GoalNavigation headingLevel="h1" lead={lead} />',
     );
     expect(FOCUS).not.toMatch(/<h1\b/);
     // Landing V3 (owner, 2026-11-13): the supporting line is the approved

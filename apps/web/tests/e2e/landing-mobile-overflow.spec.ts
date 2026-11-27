@@ -188,9 +188,10 @@ for (const width of MOBILE_WIDTHS) {
        * — so a future regression reads as itself rather than as a statistic.
        */
       const named: ReadonlyArray<readonly [string, string]> = [
-        // V3: the goal cards and the phone's "more" control are the choice.
-        ["goal cards", "[data-testid='goal-rail'] a[data-rail-card]:visible"],
-        ["more goals control", "[data-testid='goal-more-choices'] summary"],
+        // The goal rail is the choice (owner P0 2026-11-23: one rail on a
+        // phone). Its cards scroll inside the track, so the TRACK is what
+        // must fit the screen; a peeking card is clipped by it by design.
+        ["goal rail", "[data-testid='goal-rail'] [data-rail-part='track']"],
         ["request entry", "[data-testid='landing-need-path'] summary"],
         ["entry Suprasti submit", "[data-testid='entry-submit']"],
         ["entry understanding card", "[data-testid='entry-understanding']"],

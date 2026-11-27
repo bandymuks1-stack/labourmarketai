@@ -1,3 +1,4 @@
+import { chipLinkClassName } from "@/components/ui/Chip";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { Link } from "@/lib/i18n/navigation";
@@ -183,10 +184,6 @@ const TRANSITIONS: Record<
   cancelled: [{ action: "reopen", to: "draft" }],
 };
 
-const CHIP_BASE =
-  "inline-flex min-h-11 items-center rounded-md border px-3 py-1.5 font-mono text-meta uppercase tracking-label transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue";
-const CHIP_ACTIVE = "border-brand-blue text-brand-blue";
-const CHIP_IDLE = "border-ink-500 text-text-secondary hover:border-brand-blue";
 
 function financeHref(opts: {
   type?: FinanceRecordType | null;
@@ -682,7 +679,7 @@ export default async function FinancePage({
           href={financeHref({ status: statusFilter }) as "/dashboard"}
           aria-current={typeFilter === null ? "true" : undefined}
           data-testid="finance-filter-type-all"
-          className={`${CHIP_BASE} ${typeFilter === null ? CHIP_ACTIVE : CHIP_IDLE}`}
+          className={chipLinkClassName(typeFilter === null)}
         >
           {t("filters.allTypes")}
         </Link>
@@ -692,7 +689,7 @@ export default async function FinancePage({
             href={financeHref({ type, status: statusFilter }) as "/dashboard"}
             aria-current={typeFilter === type ? "true" : undefined}
             data-testid={`finance-filter-type-${type}`}
-            className={`${CHIP_BASE} ${typeFilter === type ? CHIP_ACTIVE : CHIP_IDLE}`}
+            className={chipLinkClassName(typeFilter === type)}
           >
             {t(`type.${type}`)}
           </Link>
@@ -710,7 +707,7 @@ export default async function FinancePage({
           href={financeHref({ type: typeFilter }) as "/dashboard"}
           aria-current={statusFilter === null ? "true" : undefined}
           data-testid="finance-filter-status-all"
-          className={`${CHIP_BASE} ${statusFilter === null ? CHIP_ACTIVE : CHIP_IDLE}`}
+          className={chipLinkClassName(statusFilter === null)}
         >
           {t("filters.allStatuses")}
         </Link>
@@ -720,7 +717,7 @@ export default async function FinancePage({
             href={financeHref({ type: typeFilter, status }) as "/dashboard"}
             aria-current={statusFilter === status ? "true" : undefined}
             data-testid={`finance-filter-status-${status}`}
-            className={`${CHIP_BASE} ${statusFilter === status ? CHIP_ACTIVE : CHIP_IDLE}`}
+            className={chipLinkClassName(statusFilter === status)}
           >
             {status === "overdue"
               ? t("filters.overdue")

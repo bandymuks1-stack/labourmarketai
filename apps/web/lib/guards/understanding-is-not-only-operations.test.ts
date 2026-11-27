@@ -157,9 +157,11 @@ describe("the router stays vendor-neutral", () => {
     // Capability is not permission. A cloud provider still needs a key AND an
     // egress grant; the grant table names exactly one provider, by owner act.
     // 2026-09-17 (RED-2): two rows, both Gemini, both task-scoped.
-    expect(AI_EGRESS_GRANTS).toHaveLength(2);
+    // 2026-11-22 (owner decision): a third row, Cloudflare, the intent task only.
+    expect(AI_EGRESS_GRANTS).toHaveLength(3);
     expect(AI_EGRESS_GRANTS[0].tasks).toEqual(["propose_conversation_intent"]);
     expect(AI_EGRESS_GRANTS[1].tasks).toEqual(["translate_message"]);
+    expect(AI_EGRESS_GRANTS[2]).toMatchObject({ provider: "cloudflare", tasks: ["propose_conversation_intent"] });
     const granted = new Set(AI_EGRESS_GRANTS.map((g) => g.provider));
     const cloudWithoutGrant = AI_PROVIDER_PROFILES.filter(
       (p) => p.locality === "cloud" && !granted.has(p.id),

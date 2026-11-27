@@ -217,51 +217,10 @@ export default async function CompanyPartnersPage({
             three actions are the agency's doors: its people, its offer, its
             scouting. */}
         <div id="company-agency" className="flex flex-col gap-6 scroll-mt-20">
-          <section
-            className="card-border flex flex-col gap-3 p-5"
-            data-testid="company-agency-mode"
-          >
-            <header className="flex flex-col gap-1">
-              <h2 className="font-display text-lg font-semibold text-text-primary">
-                {tCompany("agencyMode.title")}
-              </h2>
-              <p className="text-sm text-text-secondary">{tCompany("agencyMode.intro")}</p>
-            </header>
-            <div className="grid gap-2 sm:grid-cols-3">
-              {[
-                { key: "roster", href: "/dashboard/company/people#company-team" },
-                { key: "offer", href: "/dashboard/company/needs#demand-intake" },
-                { key: "scouting", href: "/dashboard/company/scouting" },
-              ].map((a) => (
-                <Link
-                  key={a.key}
-                  href={a.href as "/dashboard"}
-                  data-testid={`company-agency-mode-action-${a.key}`}
-                  className="flex min-h-[3.25rem] w-full flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-left text-sm text-text-primary transition-colors hover:border-brand-blue"
-                >
-                  <span className="font-semibold">
-                    {tCompany(`agencyMode.actions.${a.key}.label`)}
-                  </span>
-                  <span className="text-xs text-text-muted">
-                    {tCompany(`agencyMode.actions.${a.key}.note`)}
-                  </span>
-                </Link>
-              ))}
-            </div>
-            <p
-              className="text-meta leading-relaxed text-text-muted"
-              data-testid="company-agency-mode-legacy-note"
-            >
-              {tCompany("agencyMode.legacyNote")}
-            </p>
-          </section>
-          {/* P5 "Klientai": client → need → candidates path for the agency. */}
-          <AgencyClientsSection
-            clients={agencyClientsState}
-            demands={localizeTitles(agencyDemandsState) as typeof agencyDemandsState}
-            locale={locale}
-            labels={agencyClientsLabels}
-          />
+          {/* THE AGENCY'S WORK FIRST (owner P0 2026-11-24, decision 0034): the
+              needs real clients share and the candidate it offers lead; its
+              drafts for clients follow; its private client records and the
+              mode's doors come after. */}
           {/* REAL two-subject bridge (issue #859) — agency side. */}
           <AgencyBridgeSection
             workerOutcomeByOffer={
@@ -299,6 +258,45 @@ export default async function CompanyPartnersPage({
             locale={locale}
             countryOptions={countryOptionsForLocale(locale)}
           />
+          {/* P5 "Klientai": client → need → candidates path for the agency. */}
+          <AgencyClientsSection
+            clients={agencyClientsState}
+            demands={localizeTitles(agencyDemandsState) as typeof agencyDemandsState}
+            locale={locale}
+            labels={agencyClientsLabels}
+          />
+          <section
+            className="card-border flex flex-col gap-3 p-5"
+            data-testid="company-agency-mode"
+          >
+            <header className="flex flex-col gap-1">
+              <h2 className="font-display text-lg font-semibold text-text-primary">
+                {tCompany("agencyMode.title")}
+              </h2>
+              <p className="text-sm text-text-secondary">{tCompany("agencyMode.intro")}</p>
+            </header>
+            <div className="grid gap-2 sm:grid-cols-3">
+              {[
+                { key: "roster", href: "/dashboard/company/people#company-team" },
+                { key: "offer", href: "/dashboard/company/needs?audience=offer#demand-intake" },
+                { key: "scouting", href: "/dashboard/company/scouting" },
+              ].map((a) => (
+                <Link
+                  key={a.key}
+                  href={a.href as "/dashboard"}
+                  data-testid={`company-agency-mode-action-${a.key}`}
+                  className="flex min-h-[3.25rem] w-full flex-col rounded-md border border-ink-500 bg-ink-800/40 px-3 py-2 text-left text-sm text-text-primary transition-colors hover:border-brand-blue"
+                >
+                  <span className="font-semibold">
+                    {tCompany(`agencyMode.actions.${a.key}.label`)}
+                  </span>
+                  <span className="text-xs text-text-muted">
+                    {tCompany(`agencyMode.actions.${a.key}.note`)}
+                  </span>
+                </Link>
+              ))}
+            </div>
+          </section>
         </div>
         {/* The same organization as a CLIENT of other agencies — shown only
             when such a connection exists. */}

@@ -35,7 +35,7 @@ for (const locale of ["lt", "en", "ru"] as const) {
     const items = await main.locator('[data-testid^="wi-potential-"]').allInnerTexts();
     console.info(`[cv-growth] ${locale} potential shown=${hasPotential} items=${items.length}: ${items.slice(0, 6).join(" | ").replace(/\s+/g, " ")}`);
 
-    await page.goto(`/${locale}/cv`);
+    await page.goto(`/${locale}/cv?tab=experience`);
     // Strict over the VISIBLE nodes (#2721): the hidden holder is never visible.
     const confirmed = page.getByTestId("cv-confirmed-work").filter({ visible: true });
     await expect(confirmed).toBeVisible({ timeout: 30_000 });

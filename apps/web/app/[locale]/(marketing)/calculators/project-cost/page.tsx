@@ -85,7 +85,6 @@ export default async function ProjectCostCalculatorPage({
       totalHours: te("f.totalHours"),
       totalHoursHelp: t("totalHoursHelp"),
       rate: te("f.rate"),
-      ratePlaceholder: te("f.ratePlaceholder"),
       currency: te("f.currency"),
       country: te("f.country"),
       countryNone: t("countryNone"),

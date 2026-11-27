@@ -48,12 +48,14 @@ describe("create a project by sentence", () => {
     expect(schema.safeParse({ title: "Roterdamo sandėlis", city: "Roterdamas" }).success).toBe(true);
     expect(schema.safeParse({ title: "Roterdamo sandėlis" }).success).toBe(true);
     expect(schema.safeParse({ title: "R" }).success).toBe(false);
-    expect(schema.safeParse({ title: "x".repeat(121) }).success).toBe(false);
+    // The SAME bound as the canonical core and MCP (AI-1 sweep): 200.
+    expect(schema.safeParse({ title: "x".repeat(200) }).success).toBe(true);
+    expect(schema.safeParse({ title: "x".repeat(201) }).success).toBe(false);
   });
 
   it("the form is the same InlineActionForm (title required, city optional) and the city pre-fills from the sentence", () => {
     const form = getCompanyForm("company.create-project");
-    expect(form?.fields.map((f) => [f.name, "required" in f && f.required === true])).toEqual([["title", true], ["city", false]]);
+    expect(form?.fields.map((f) => [f.name, "required" in f && f.required === true])).toEqual([["title", true], ["city", false], ["country", false]]);
     const CHAT = readFileSync(join(__dirname, "..", "..", "components", "app", "conversation", "chat", "conversation-chat.tsx"), "utf8");
     expect(CHAT).toContain("const city = structureValueStatement(sentence).city");
     // The named project pre-fills too (walk 2026-10-11): title and city ride
@@ -69,7 +71,7 @@ describe("create a project by sentence", () => {
 
   it("the executor goes through the canonical createProjectAction — never its own insert", () => {
     const EXEC = readFileSync(join(__dirname, "company-executors.ts"), "utf8");
-    expect(EXEC).toContain("createProjectAction(null, fd({ title: input.title, city: input.city ?? \"\" }))");
+    expect(EXEC).toContain("createProjectAction(null, fd({ title: input.title, city: input.city ?? \"\", country: input.country ?? \"\" }))");
     expect(EXEC).not.toContain('from("projects")');
     expect(EXEC).not.toContain('from "@/lib/projects/create-project-core"');
   });

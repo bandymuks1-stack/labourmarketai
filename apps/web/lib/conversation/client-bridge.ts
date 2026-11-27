@@ -41,7 +41,10 @@ export async function loadClientBridgeForChat(): Promise<ClientBridgeChatResult>
         listCompanyDemands(),
         listSharedRequestsByClient(active.map((a) => a.id)),
       ]);
-      const open = demands.filter((d) => d.status !== "closed" && d.status !== "draft");
+      // Own needs only: the share RPC accepts the caller's own rows, so a
+      // colleague's need offered here could only be refused. The same rows as
+      // the share picker on /partners (duplication audit ORG-4).
+      const open = demands.filter((d) => d.ownedByCaller && d.status !== "closed" && d.status !== "draft");
       const shared = new Set(
         shares.kind === "ok" ? shares.rows.map((s) => `${s.connectionId}:${s.requestId}`) : [],
       );

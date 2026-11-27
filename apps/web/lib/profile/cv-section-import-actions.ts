@@ -11,13 +11,7 @@ import {
   parseWorkerLanguageLevel,
   classifyLanguagesError,
 } from "@/lib/worker/worker-languages-model";
-import {
-  EDUCATION_COLUMNS,
-  educationEntryFromRow,
-  findSameEducation,
-  validateEducationInput,
-  classifyEducationError,
-} from "@/lib/worker/worker-education-model";
+import { saveWorkerEducationAction } from "@/lib/worker/worker-education-actions";
 import {
   ACHIEVEMENT_COLUMNS,
   achievementEntryFromRow,
@@ -77,6 +71,7 @@ export type CvImportConfirmResult =
         | "unauthenticated"
         | "invalid"
         | "conflict"
+        | "limit"
         | "error";
       /** Human-renderable existing value for conflict display. */
       existing?: string;
@@ -239,56 +234,19 @@ export async function confirmCvEducationAction(input: {
   endYear: number | null;
   refreshLater?: boolean;
 }): Promise<CvImportConfirmResult> {
-  const ctx = await requireUser();
-  if (!ctx) return { ok: false, code: "unauthenticated" };
-
-  const validated = validateEducationInput({
-    institutionName: input.institution,
-    programOrField: input.program,
-    educationTypeSlug: input.educationTypeSlug,
-    startYear: input.startYear,
-    endYear: input.endYear,
-    isCurrent: false,
-    note: null,
+  // Import confirmation uses the same authenticated save as manual entry:
+  // validation, duplicate recovery and the existing education limit stay together.
+  const form = new FormData();
+  form.set("institution_name", input.institution ?? "");
+  form.set("program_or_field", input.program ?? "");
+  form.set("education_type_slug", input.educationTypeSlug ?? "");
+  form.set("start_year", input.startYear == null ? "" : String(input.startYear));
+  form.set("end_year", input.endYear == null ? "" : String(input.endYear));
+  form.set("is_current", "false");
+  const result = await saveWorkerEducationAction(null, form, {
+    refreshLater: input.refreshLater,
   });
-  if (!validated) return { ok: false, code: "invalid" };
-
-  // The same CV imported again answers with the row it already stored. Two requests
-  // at once both read nothing here: the database's unique index stops the second row,
-  // and its 23505 below means the same thing as finding the row now.
-  const { data: own, error: ownError } = await asAny(ctx.supabase)
-    .from("worker_education")
-    .select(EDUCATION_COLUMNS)
-    .eq("profile_id", ctx.userId);
-  if (ownError) {
-    const mapped = classifyEducationError(ownError.code);
-    return { ok: false, code: mapped };
-  }
-  const entries = ((own ?? []) as Parameters<typeof educationEntryFromRow>[0][]).map(educationEntryFromRow);
-  if (findSameEducation(entries, validated)) return { ok: true };
-
-  const { error } = await asAny(ctx.supabase).from("worker_education").insert({
-    profile_id: ctx.userId,
-    institution_name: validated.institutionName,
-    program_or_field: validated.programOrField,
-    education_type_slug: validated.educationTypeSlug,
-    start_year: validated.startYear,
-    end_year: validated.endYear,
-    is_current: false,
-    note: null,
-  });
-  if (error) {
-    if (error.code === UNIQUE_VIOLATION) return { ok: true };
-    const mapped = classifyEducationError(error.code);
-    if (mapped !== "error") return { ok: false, code: mapped };
-    if (["23514", "23503"].includes(error.code ?? "")) {
-      return { ok: false, code: "invalid" };
-    }
-    console.error("[cv-import] education save failed:", error.code, error.message);
-    return { ok: false, code: "error" };
-  }
-  if (!input.refreshLater) revalidatePath("/", "layout");
-  return { ok: true };
+  return result.ok ? { ok: true } : result;
 }
 
 // ── Language (conflict-aware upsert) ─────────────────────────────────────────

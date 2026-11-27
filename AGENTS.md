@@ -4,6 +4,58 @@
 
 ---
 
+## Mandatory continuity between agents
+
+**Owner instruction, 2026-11-27. Binding on Codex, Claude Code and every other
+agent, including a new or resumed session.**
+
+Before starting work or changing a file:
+
+1. Read the latest execution receipt and relevant entries in the existing
+   `docs/program/COORDINATION_REGISTER.md`, function register and current PR
+   bodies. Establish what the previous executor completed, where it stopped,
+   which acceptance criteria remain and which approvals already apply. A new
+   chat does not reset the task or invalidate an existing approval.
+2. Verify the repository, branch and working-tree changes; inspect relevant
+   open/merged PRs, their current heads/checks, and pending migrations or
+   deployments. Reconcile them with the affected production build and existing
+   production evidence. A historic handover is context, not current truth.
+3. Continue the existing unfinished implementation before creating another
+   branch or solution for the same problem. Preserve useful uncommitted work,
+   history and proven functionality; do not overwrite another active claim.
+   Repeat successful checks only for a concrete change, regression or missing
+   acceptance criterion. Do not restart a full audit to regain context.
+4. Confirm that a named executor is actually active before assigning work or
+   waiting for it. A tool, model name, old assignment or local process alone is
+   not evidence of an active executor. When no other executor is active, carry
+   out the authorized work yourself under the existing claim/takeover rules;
+   do not leave tasks assigned to an inactive agent or require the owner to
+   relay routine progress. A genuine gate blocks its dependent action only:
+   continue independent authorized work while CI or an approval is pending.
+
+Before ending or handing over work, and before a context transition when possible,
+record a continuation receipt in the **existing PR and/or coordination entry**:
+
+- objective, repository/branch, current SHA and relevant PRs;
+- what changed, what is committed/pushed, and any remaining local changes with
+  their paths; never call an uncommitted change shared or available elsewhere;
+- validation and actual production state, with existing run/build references;
+  distinguish implemented, reviewed, merged, deployed and production-verified;
+- remaining acceptance criteria, the next concrete action, and each real
+  blocker with the exact required decision/input and its governing rule;
+- already granted approvals and their scope, so the next executor neither
+  asks again nor extends them to a different migration or action.
+
+The next executor must be able to continue from that receipt without rebuilding
+the prior analysis. A chat transcript alone is not a shared handover. Use the
+existing private evidence location for sensitive details and only permitted
+identifiers/statuses in public GitHub records. **Do not create another register,
+audit, orchestration process or handoff system.** This rule extends the existing
+`docs/CHATGPT_CLAUDE_EXECUTION_PROTOCOL.md` and coordination protocol; it does
+not replace their safety, ownership, review or production gates.
+
+---
+
 ## Naming — labourmarket.ai only
 
 Owner ruling 2026-08-23: **"LABMA" is not a name, alias, predecessor,
@@ -103,6 +155,11 @@ Before you modify or create a material product capability:
 8. identify the regression guards that already protect it;
 9. classify the change: `CONNECT` · `FIX` · `EXTEND` · `REPLACE` · `NEW`;
 10. **search for an existing implementation before creating a new one.**
+
+    The concrete, reviewable form of this step (register lookup, similar
+    implementations, open PRs, decisions, extend-vs-new proof, one owner per
+    capability) is [`docs/AGENT_CHANGE_RULES.md`](docs/AGENT_CHANGE_RULES.md);
+    the PR template's "Reuse check" section records it.
 
 Hard rules:
 
@@ -214,6 +271,50 @@ is claimed — **local `HEAD` == the PR's `headRefOid`**. Never claim exact
 PR/repository identity without this evidence.
 
 If identity does not match → **STOP** for this repository.
+
+**An existing worktree may be reused (owner decision 2026-11-24).** A clean
+existing worktree or clone whose `git remote` names `bandymuks1-stack/labourmarketai`
+and whose checked-out branch is the PR's head branch may be used for that PR,
+even when its directory differs from the default path for new worktrees. The
+directory name or location is never a reason to stop, and never a reason to
+create another copy. Stop only for a real risk: a remote that does not match,
+uncommitted changes whose content is not yours, or a branch that is not the PR's.
+
+### Project knowledge graph (Graphify) — query before you read
+
+The owner approved Graphify (Apache-2.0, `graphifyy`, pinned **0.9.118**) on
+2026-11-24 as a local development aid, so that every agent works from the same
+checkable map of the code. It runs locally, uses no paid cloud, and changes no
+product or production setting.
+
+```bash
+python3 -m venv .graphify-venv && .graphify-venv/bin/pip install "graphifyy[sql,mcp]==0.9.118"
+.graphify-venv/bin/graphify update .                  # AST only, no LLM; 1–3 min on this repo
+.graphify-venv/bin/graphify explain "professional-experience.ts"   # a module and its importers, with file:line
+.graphify-venv/bin/graphify path "A" "B" --undirected # how two things connect
+.graphify-venv/bin/graphify query "<question>"        # keyword BFS: broad, check the hits
+```
+
+Rules:
+- **Facts versus inferences.** An edge tagged `EXTRACTED` was read from the
+  source at the cited file:line, and counts as a fact *about that checkout*. An
+  edge tagged `INFERRED`, a community label or a `query` answer is an inference:
+  confirm it in the code before you rely on it.
+- **The graph describes one commit, not production.** It is built from the
+  checkout you ran it on. Rebuild after `git pull`, because a graph older than
+  your `HEAD` is stale and is never the current state. Production state (what is
+  deployed, applied or walked) comes only from `/api/health`, the migration
+  ledger and production walks.
+- **Known gap.** Supabase table names used as strings (`.from("table")`) are
+  not edges, so the graph does not link app code to database tables. Use
+  `git grep` for those.
+- **Not memory.** `graphify-out/` (gitignored) is a per-checkout cache.
+  Decisions and history stay in `docs/DECISIONS/`, `docs/program/FUNCTION_REGISTER.md`,
+  `docs/program/COORDINATION_REGISTER.md` and git (decision 0024: no second
+  memory). `graphify save-result` and `reflect` output is not a record.
+- **No hooks in the repository.** Do not commit `graphify install` /
+  `hook install` output or a PreToolUse guard: agents without Graphify would be
+  blocked. Install it per user or per session only.
 
 ### Repository mission
 
@@ -438,6 +539,19 @@ filename convention; no reuse of an existing migration version (re-run hazard).
 repo setting *Allow auto-merge* must be ON, and branch protection on `main` must
 require both `quality` and `migration-safety` status checks. Until those are set,
 auto-merge is inert and Claude Code falls back to waiting for CI then merging.
+
+## Deploy freeze emergency — the owner only, in person (binding, owner P0 2026-11-24)
+
+`deploy-vps.yml` refuses every deploy while an issue labelled `deploy-freeze` is
+open (a post-deploy check genuinely failed). Its `emergency=true` dispatch goes
+through the freeze. The workflow can only check that the actor is the
+repository owner's GitHub ACCOUNT — and every agent session acts through that
+same account, so the check cannot tell an agent from the owner.
+
+Therefore: **agents never dispatch `deploy-vps.yml` with `emergency=true`, and
+never remove the `deploy-freeze` label or close a freeze issue to get a deploy
+through.** Only the owner does, in person. An agent that needs a deploy during a
+freeze reports the blocker and the fix PR to the owner and waits.
 
 ## Branch strategy
 

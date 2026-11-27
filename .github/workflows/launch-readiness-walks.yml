@@ -5,13 +5,21 @@ name: launch-readiness-walks
 # OWNER ORDER 2026-11-19: launch readiness of the free platform. Fifteen production walks on the
 # current production build: five scenarios x three screens. The verdict is READY only if all
 # fifteen pass.
+# OWNER ORDER 2026-11-21: final Chrome acceptance of the eight user scenarios (sign-up, worker,
+# employer, agency, subcontractor, student/education, AI, administration) appended to the plan, up to
+# 24 walks per UTC day until 2026-11-23 (owner); from 2026-11-24 the earlier owner setting, 6 per day.
 #
 # This is the acceptance-campaign pattern (owner-approved 2026-10-21), narrowed to one fixed plan.
 # GitHub's own scheduler runs it, independently of any agent session or the owner's computer. A tick:
 #   1. dispatches the next pair of the plan that has no completed workflow_dispatch run since
-#      WINDOW_START, through prod-qa-walk.yml, WITHOUT budget_override;
+#      WINDOW_START, through prod-qa-walk.yml, WITHOUT budget_override. The plan is in PRIORITY
+#      order (chat, Living CV, sign-up, navigation, core journeys first); a pair that has not run
+#      comes before the re-run of a failed one; a pair a brake refused in the last 30 min does not
+#      hold the queue: the next pair runs and the refused one is taken again later (owner 2026-11-24);
 #   2. waits for that run;
-#   3. hands over to a fresh tick.
+#   3. if a brake refused it (BLOCKED / NOT RUN), waits up to 30 min for the deploy brake to clear
+#      and dispatches the same pair once more;
+#   4. hands over to a fresh tick.
 #
 # At most DAILY_CAP plan walks per UTC day (owner decision 2026-11-19).
 # Every brake of prod-qa-walk.yml still applies unchanged: health, deploy, errors, the 180 s gap and
@@ -33,6 +41,7 @@ on:
 permissions:
   actions: write
   contents: read
+  deployments: read # the existing deploy brake reads production-vps records
 
 concurrency:
   group: launch-readiness-walks
@@ -41,25 +50,91 @@ concurrency:
 jobs:
   tick:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    # A refused walk, a bounded wait of up to 30 min and one more walk fit with room to spare.
+    timeout-minutes: 150
     steps:
+      # Only the brake script, to wait on the same deploy brake prod-qa-walk.yml uses.
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
       - name: Dispatch the next pair, wait for it, hand over
         env:
           GH_TOKEN: ${{ github.token }}
           REPO: ${{ github.repository }}
           WINDOW_START: "2026-11-19T20:00:00Z"
-          WINDOW_END: "2026-11-23T00:00:00Z"
-          # Owner decision 2026-11-19: at most 6 plan walks per UTC day, to stay inside the Supabase
-          # Free plan's daily log-ingestion quota (8 walks used 23,400 of 25,200 entries on 2026-10-17).
-          DAILY_CAP: "6"
+          WINDOW_END: "2026-11-30T00:00:00Z"  # owner order 2026-11-23: verify every fix in production after deploy; 48/day 11-24..11-26 (owner 2026-11-24), then 6
+          # Owner decision 2026-11-19: at most 6 plan walks per UTC day (Supabase Free log quota).
+          # Owner decision 2026-11-21: the project is on Supabase Pro; up to 24 per UTC day until
+          # 2026-11-23, while production stays stable (every prod-qa-walk brake still applies).
+          # From 2026-11-24 the tick lowers DAILY_CAP to the earlier owner setting, 6 (see the cap check).
+          DAILY_CAP: "24"
+          # invited-worker:phone is out of the plan: its synthetic account is created by the owner only
+          # (prod-qa-invited-provision.yml) and does not exist, so every re-run after a deploy failed at
+          # the mint and spent the day's budget (run 45001807853). Dispatch it by hand once provisioned.
+          # Owner order 2026-11-22: these pairs run once more on the current build, even though they
+          # passed earlier (P-13 phone-375, and orders-bookings after #3625). Only a run created after
+          # RERUN_START counts for them.
+          # 2026-11-23: the CV chain (P-13/P-15/P-26, fix #3653) passed on phone-375 (run 45091874326);
+          # the owner requires the FULL sequence on all three devices on the fixed build, so the
+          # phone and desktop CV pairs run once more after this start.
+          # Those re-ran and passed (45094839877 desktop, 45097071365 phone).
+          # Owner order 2026-11-23 08:00 UTC: company-chain on phone-375 and learning-practice on phone
+          # run once more on the current build (their last passes, 44882509064 and 44883030318, are
+          # from 11-21). mobile-surfaces:phone needs no entry: it failed (45098478024) before the
+          # 05:12 UTC deploy of #3678, so the failed-pair rule already re-runs it.
+          # Those passed on f0424833 (45140908370, 45141893755; mobile-surfaces 45142813658).
+          # Owner P0 2026-11-23: verify in production the merged fixes #3690 (each CV skill and
+          # job listed once) and #3685 (one journal empty state, 768 px name, DE skill names):
+          # the CV chain on all three devices and the journal pair run once more after this start.
+          # Owner order 2026-11-23 (final stabilisation): one regression batch on the build with the
+          # merged fixes #3720 #3725 #3711 #3715 #3712 #3726 #3717 (deployed as ff846126).
+          # 14 of 24 walks used today; these 8 fit the cap.
+          # Owner order 2026-11-23: an intermittent failure is fixed only after 3 consecutive passes.
+          # #3738 fixes the P-15 phone-375 race (context panel opens expanded); this re-runs the CV
+          # chain at 375 on the build with it. The other two passes follow on later ticks/days.
+          # 2026-11-23: N4 (#3733, goal rail on the signed-in homes) must pass mobile-surfaces on phone
+          # before N5/N7 merge; it joins the same consecutive-pass rule.
+          # Both earlier RERUN pairs met 3 consecutive passes on 2be7abf0 (P-15: 45274742131,
+          # 45277375181, 45312056043; N4 mobile-surfaces: 45315748950, 45317825514, 45319400714).
+          # Owner order 2026-11-24: refresh the core journeys whose newest production run is older
+          # than today's fixes. These are not intermittent, so one pass each (6 = one day's cap).
+          # Owner order 2026-11-24: verify EVERY core journey on the current build; 48/day through 11-26, then 6.
+          RERUN: "company-governance:desktop profile-cv-history:desktop profile-cv-history:phone profile-cv-history:phone-375 company-chain:desktop company-chain:phone company-chain:phone-375 need-intake:desktop need-intake:phone need-intake:phone-375 agency-chain:desktop agency-chain:phone agency-chain:phone-375 learning-practice:desktop learning-practice:phone learning-practice:phone-375 role-routes:desktop role-routes:phone fresh-activation:desktop jobs-search:desktop jobs-search:phone journal-confirm:desktop journal-confirm:phone chat-continuity:phone worker-records-exports:desktop notifications-inapp:phone org-roster:desktop org-roster:phone brigade-formation:desktop project-execution:desktop project-context:desktop calendar-planning:desktop rota-repeat:desktop marketplace-goods-services:desktop marketplace-goods-services:phone orders-bookings:desktop orders-bookings:phone marketplace:desktop buyer-workspace:desktop chat-confirm-once:desktop manager-chat:desktop manager-chat:phone manager-chat:phone-375 mcp-chain:desktop mcp-agents:desktop ai-off-honesty:desktop documents-approvals:desktop search-support-privacy:desktop company-talent-history:desktop worker-identity-split:desktop staff-review-notice:desktop public-org-locales:phone mobile-surfaces:phone"
+          RERUN_START: "2026-11-24T13:30:00Z"
+          RERUN_PASSES: "1"
+          # ONE-SHOT pairs (coordinator order 2026-11-23): run exactly once after ONCE_START and are
+          # settled by that one run whatever its outcome; never re-run after a deploy, never counted as
+          # a plan pair. For prod-living-cv-screens, which reads real organizations under a time-boxed
+          # read grant: set ONCE="living-cv-screens:desktop" and ONCE_START just after the grant is
+          # applied, in one reviewed change; the push to this file starts the tick. Empty: nothing.
+          ONCE: "living-cv-screens:desktop"
+          ONCE_START: "2026-11-24T12:57:00Z"
+          # 2026-11-23 00:45 UTC: GitHub's schedule fired no tick after 22:35 UTC again; a push to
+          # this file (the push trigger) starts the chain, which then hands over by itself.
         run: |
           set -euo pipefail
-          PLAN="company-governance:desktop
+          # PRIORITY ORDER (owner order 2026-11-24): the chat, Living CV, sign-up, navigation and
+          # the core user journeys first, then the rest. The tick walks the FIRST pair that still
+          # needs a run, so this order is the priority.
+          PLAN="manager-chat:desktop manager-chat:phone manager-chat:phone-375
+                chat-continuity:phone chat-confirm-once:desktop
                 profile-cv-history:desktop profile-cv-history:phone profile-cv-history:phone-375
-                company-chain:desktop company-chain:phone company-chain:phone-375
+                fresh-activation:desktop role-routes:desktop role-routes:phone
+                mobile-surfaces:phone public-org-locales:phone
+                jobs-search:desktop jobs-search:phone journal-confirm:desktop journal-confirm:phone
+                notifications-inapp:phone orders-bookings:desktop orders-bookings:phone
                 need-intake:desktop need-intake:phone need-intake:phone-375
+                company-chain:desktop company-chain:phone company-chain:phone-375
                 agency-chain:desktop agency-chain:phone agency-chain:phone-375
-                learning-practice:desktop learning-practice:phone learning-practice:phone-375"
+                learning-practice:desktop learning-practice:phone learning-practice:phone-375
+                company-governance:desktop worker-records-exports:desktop
+                org-roster:desktop org-roster:phone brigade-formation:desktop project-execution:desktop
+                project-context:desktop calendar-planning:desktop rota-repeat:desktop
+                marketplace-goods-services:desktop marketplace-goods-services:phone
+                marketplace:desktop buyer-workspace:desktop
+                mcp-chain:desktop mcp-agents:desktop ai-off-honesty:desktop
+                documents-approvals:desktop search-support-privacy:desktop company-talent-history:desktop
+                worker-identity-split:desktop staff-review-notice:desktop"
           log() { echo "$(date -u +%H:%M) $*" | tee -a "$GITHUB_STEP_SUMMARY"; }
           now=$(date -u +%FT%TZ)
           if [[ "$now" < "$WINDOW_START" || ! "$now" < "$WINDOW_END" ]]; then
@@ -73,8 +148,8 @@ jobs:
 
           # The pairs that already have a completed dispatch since the window opened (title: "prod-qa-walk <spec> <device>").
           done_titles=$(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --status completed \
-            --created ">=${WINDOW_START%%T*}" --limit 200 --json displayTitle,createdAt,conclusion,databaseId \
-            --jq ".[] | select(.createdAt >= \"$WINDOW_START\") | \"\(.displayTitle)\t\(.conclusion)\t\(.databaseId)\"")
+            --created ">=${WINDOW_START%%T*}" --limit 200 --json displayTitle,createdAt,updatedAt,conclusion,databaseId \
+            --jq ".[] | select(.createdAt >= \"$WINDOW_START\") | \"\(.displayTitle)\t\(.conclusion)\t\(.databaseId)\t\(.createdAt)\t\(.updatedAt)\"")
 
           # A pair counts as run only if its walk job actually ran (success or failure). A run refused by a
           # brake before the walk job (health, deploy, budget) does not count, and is dispatched again.
@@ -83,68 +158,177 @@ jobs:
           last_deploy=$(gh run list -R "$REPO" -w deploy-vps.yml --branch main --status success --limit 1 \
             --json updatedAt --jq '.[0].updatedAt // ""')
           ran() {
-            local ids id c ended
-            ids=$(printf '%s\n' "$done_titles" | awk -F'\t' -v t="prod-qa-walk $1 $2" '$1 == t {print $3}')
+            local ids id c ended since="$WINDOW_START" need=1 streak=0
+            case " $RERUN " in *" $1:$2 "*) since="$RERUN_START"; need="$RERUN_PASSES" ;; esac
+            ids=$(printf '%s\n' "$done_titles" | awk -F'\t' -v t="prod-qa-walk $1 $2" -v s="$since" '$1 == t && $4 >= s {print $3}')
+            # ids are newest first. A plan pair needs one pass; a RERUN pair needs RERUN_PASSES
+            # consecutive passes (owner 2026-11-23: an intermittent failure is fixed only after 3).
             for id in $ids; do
               c=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
+              # A walk job that ended BEFORE its Provision step (a brake re-checked inside the walk job,
+              # e.g. production health) never reached production: it is not a run of the pair. Since a
+              # brake refusal is NOT RUN (the walk job then succeeds and the run is cancelled), a
+              # success counts only when Provision started too.
+              if [ "$c" = failure ] || [ "$c" = success ]; then
+                reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+                  --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+                [ "${reached:-0}" -gt 0 ] || continue
+              fi
               case "$c" in
-                success) return 0 ;;
+                success)
+                  streak=$((streak + 1))
+                  [ "$streak" -ge "$need" ] && return 0 ;;
                 failure)
-                  ended=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .completedAt][0] // ""')
-                  [[ -n "$last_deploy" && "$last_deploy" > "$ended" ]] || return 0 ;;
+                  # The newest real run failed: re-run only once a fix has been deployed after it.
+                  if [ "$streak" -eq 0 ]; then
+                    ended=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .completedAt][0] // ""')
+                    [[ -n "$last_deploy" && "$last_deploy" > "$ended" ]] || return 0
+                  fi
+                  RAN_KIND=failed
+                  return 1 ;;
               esac
             done
             return 1
           }
           # Plan walks whose walk job ran today (UTC) count against the daily cap.
           today=$(date -u +%F); ran_today=0
-          while IFS=$'\t' read -r t c id; do
+          while IFS=$'\t' read -r t c id _created; do
             [ -n "${id:-}" ] || continue
             case "$t" in "prod-qa-walk "*) ;; *) continue ;; esac
             pair_ok=0; for pair in $PLAN; do [ "$t" = "prod-qa-walk ${pair%%:*} ${pair##*:}" ] && pair_ok=1; done
             [ "$pair_ok" = 1 ] || continue
-            started=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk" and (.conclusion=="success" or .conclusion=="failure")) | .startedAt][0] // ""')
+            started=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped") | .started_at][0] // ""')
             case "$started" in "$today"*) ran_today=$((ran_today + 1)) ;; esac
           done <<< "$done_titles"
-          if [ "$ran_today" -ge "$DAILY_CAP" ]; then
-            log "today's cap reached ($ran_today of $DAILY_CAP plan walks): the next UTC day continues"; exit 0
-          fi
+          # The owner set 24 per day until 2026-11-23; after that the earlier owner setting (6) applies.
+          if [[ "$today" > "2026-11-26" ]]; then DAILY_CAP=6; elif [[ "$today" > "2026-11-23" ]]; then DAILY_CAP=48; fi
+          # The cap limits PLAN walks only; a one-shot pair below is not a plan walk.
+          capped=0
+          [ "$ran_today" -ge "$DAILY_CAP" ] && capped=1
 
           next=""
-          for pair in $PLAN; do
-            spec=${pair%%:*}; device=${pair##*:}
-            if ! ran "$spec" "$device"; then next="$pair"; break; fi
-          done
+          # One-shot pairs first: settled by ONE run after ONCE_START that reached production.
+          if [ -n "$ONCE" ] && [ -n "$ONCE_START" ] && [[ ! "$now" < "$ONCE_START" ]]; then
+            for pair in $ONCE; do
+              spec=${pair%%:*}; device=${pair##*:}
+              once_ids=$(printf '%s\n' "$done_titles" | awk -F'\t' -v t="prod-qa-walk $spec $device" -v s="$ONCE_START" '$1 == t && $4 >= s {print $3}')
+              settled=0
+              for id in $once_ids; do
+                reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+                  --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+                [ "${reached:-0}" -gt 0 ] && settled=1
+              done
+              if [ "$settled" = 0 ]; then next="$pair"; break; fi
+            done
+          fi
+          if [ -z "$next" ] && [ "$capped" = 1 ]; then
+            log "today's cap reached ($ran_today of $DAILY_CAP plan walks): the next UTC day continues"; exit 0
+          fi
+          # A pair a brake refused in the last 30 min (deploy, health) does not hold the queue:
+          # the tick continues with the next pair that still needs a run and comes back to it.
+          # Measured from the refused run's COMPLETION ($5, updatedAt), not its creation: with the
+          # brake's waits a refused run can take longer than 30 min to end (Codex P2 on #3813).
+          refused_recently() {
+            local t="prod-qa-walk $1 $2" cutoff rid r
+            cutoff=$(date -u -d '30 minutes ago' +%FT%TZ)
+            for rid in $(printf '%s\n' "$done_titles" | awk -F'\t' -v t="$t" -v c="$cutoff" '$1 == t && $5 >= c {print $3}'); do
+              r=$(gh api "repos/$REPO/actions/runs/$rid/jobs?filter=all&per_page=100" \
+                --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+              [ "${r:-0}" -gt 0 ] || return 0
+            done
+            return 1
+          }
+          # A pair that has not run yet comes before the re-run of a failed one, so a run of deploys
+          # (each makes every failed pair eligible again) cannot keep the queue at its head.
+          if [ -z "$next" ]; then
+            retry=""; held=""
+            for pair in $PLAN; do
+              spec=${pair%%:*}; device=${pair##*:}
+              RAN_KIND=never
+              if ran "$spec" "$device"; then continue; fi
+              [ -n "$held" ] || held="$pair"
+              if refused_recently "$spec" "$device"; then log "$pair: a brake refused it in the last 30 min; the queue continues"; continue; fi
+              if [ "$RAN_KIND" = never ]; then next="$pair"; break; fi
+              [ -n "$retry" ] || retry="$pair"
+            done
+            next=${next:-${retry:-$held}}
+          fi
 
           if [ -z "$next" ]; then
-            log "all fifteen pairs have run since $WINDOW_START:"
+            log "every plan pair has run since $WINDOW_START:"
             printf '%s\n' "$done_titles" | sort | tee -a "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
           spec=${next%%:*}; device=${next##*:}
           prod_sha=$(gh run list -R "$REPO" -w deploy-vps.yml --branch main --status success --limit 1 --json headSha --jq '.[0].headSha // ""')
-          before=$(gh run list -R "$REPO" -w prod-qa-walk.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0')
-          gh workflow run prod-qa-walk.yml -R "$REPO" --ref main -f spec="$spec" -f device="$device"
-          log "dispatched: $spec $device (last successful deploy ${prod_sha:0:8}; no override)"
-          id=""
-          for _ in $(seq 1 30); do
-            sleep 10
-            id=$(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --limit 10 --json databaseId,displayTitle \
-              --jq "[.[] | select(.databaseId > $before and .displayTitle == \"prod-qa-walk $spec $device\") | .databaseId] | min // empty")
-            [ -n "$id" ] && break
-          done
-          if [ -z "$id" ]; then log "the dispatched run did not appear; the next scheduled tick continues"; exit 0; fi
-          until [ "$(gh run view "$id" -R "$REPO" --json status --jq .status)" = completed ]; do sleep 60; done
-          conclusion=$(gh run view "$id" -R "$REPO" --json conclusion --jq .conclusion)
-          walk=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
-          log "$spec $device run $id: $conclusion, walk job: ${walk:-none} (deploy ${prod_sha:0:8})"
+
+          # Dispatch the pair and wait for its run; sets $id, $conclusion, $walk ("refused" when the
+          # walk never reached production) and $notrun (1 when prod-qa-walk's `not-run` job recorded
+          # a brake refusal: BLOCKED / NOT RUN, the run cancelled, never a failure).
+          dispatch_and_wait() {
+            local before
+            before=$(gh run list -R "$REPO" -w prod-qa-walk.yml --limit 1 --json databaseId --jq '.[0].databaseId // 0')
+            gh workflow run prod-qa-walk.yml -R "$REPO" --ref main -f spec="$spec" -f device="$device"
+            log "dispatched: $spec $device (last successful deploy ${prod_sha:0:8}; no override)"
+            id=""
+            for _ in $(seq 1 30); do
+              sleep 10
+              id=$(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --limit 10 --json databaseId,displayTitle \
+                --jq "[.[] | select(.databaseId > $before and .displayTitle == \"prod-qa-walk $spec $device\") | .databaseId] | min // empty")
+              [ -n "$id" ] && break
+            done
+            [ -n "$id" ] || return 1
+            until [ "$(gh run view "$id" -R "$REPO" --json status --jq .status)" = completed ]; do sleep 60; done
+            conclusion=$(gh run view "$id" -R "$REPO" --json conclusion --jq .conclusion)
+            walk=$(gh run view "$id" -R "$REPO" --json jobs --jq '[.jobs[] | select(.name=="walk") | .conclusion][0] // ""')
+            log "$spec $device run $id: $conclusion, walk job: ${walk:-none} (deploy ${prod_sha:0:8})"
+            reached=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+            [ "${reached:-0}" -gt 0 ] || walk="refused"
+            notrun=$(gh api "repos/$REPO/actions/runs/$id/jobs?filter=all&per_page=100" \
+              --jq '[.jobs[] | select(.name == "not-run" and .conclusion != "skipped")] | length')
+          }
+
+          handover() {
+            gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
+            log "handed over to a fresh tick"
+          }
+
+          if ! dispatch_and_wait; then log "the dispatched run did not appear; the next scheduled tick continues"; exit 0; fi
+
+          # A BRAKE REFUSAL (owner P0 2026-11-24): the walk did not run. Today's merges keep the deploy
+          # brake busy and GitHub's hourly cron is unreliable, so the tick does not leave the retry to
+          # it: it waits, bounded, for production to be quiet by the SAME deploy brake prod-qa-walk
+          # uses (node walk-brakes.mjs deploy: no deploy running or queued, 5 min after the last one),
+          # re-dispatches the pair once, then hands over to a fresh tick as after a normal run. Every
+          # brake still applies to that run. At most 12 refused runs of one pair per UTC day.
+          # A run refused by the 24 h budget (the budget job failed, no `not-run` job) is not retried.
+          if [ "$walk" = refused ] && [ "${notrun:-0}" -gt 0 ]; then
+            refused_today=0
+            for rid in $(gh run list -R "$REPO" -w prod-qa-walk.yml --event workflow_dispatch --created ">=$(date -u +%F)" \
+                --limit 100 --json databaseId,displayTitle --jq ".[] | select(.displayTitle == \"prod-qa-walk $spec $device\") | .databaseId"); do
+              r=$(gh api "repos/$REPO/actions/runs/$rid/jobs?filter=all&per_page=100" \
+                --jq '[.jobs[] | select(.name == "walk") | .steps[]? | select(.name | startswith("Provision")) | select((.status == "in_progress" or .status == "completed") and .conclusion != "skipped")] | length')
+              [ "${r:-0}" -gt 0 ] || refused_today=$((refused_today + 1))
+            done
+            if [ "$refused_today" -ge 12 ]; then
+              log "a brake refused this pair $refused_today times today; stopped, the schedule retries"; exit 0
+            fi
+            log "a brake refused the walk (BLOCKED / NOT RUN, $refused_today today): waiting for a quiet production"
+            quiet=0
+            for _ in $(seq 1 30); do
+              if GITHUB_REPOSITORY="$REPO" node .github/scripts/walk-brakes.mjs deploy >/dev/null 2>&1; then quiet=1; break; fi
+              sleep 60
+            done
+            log "deploy brake $([ "$quiet" = 1 ] && echo clear || echo 'still busy after 30 min'): re-dispatching once"
+            if ! dispatch_and_wait; then log "the re-dispatched run did not appear; the next scheduled tick continues"; exit 0; fi
+            handover
+            exit 0
+          fi
+
           case "$walk" in
-            success|failure)
-              gh workflow run launch-readiness-walks.yml -R "$REPO" --ref main
-              log "handed over to a fresh tick" ;;
-            *)
-              # A brake refused it before the walk (health, deploy, budget): no fast loop. The hourly
-              # scheduled tick tries again.
-              log "a brake refused the walk; the next scheduled tick tries again" ;;
+            success|failure) handover ;;
+            *) log "the run was refused before the walk (${conclusion:-unknown}, no brake record: the 24 h budget or a setup failure); the schedule retries" ;;
           esac

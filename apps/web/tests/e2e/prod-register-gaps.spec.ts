@@ -380,7 +380,7 @@ test("J-2 (2.37). the QA worker contests the QA-SYNTHETIC record linked to them,
       const main = page.getByRole("main");
       // The profile rendered (this bar is unconditional); the history bar below
       // renders only when the worker has linked organization history.
-      await expect(main.getByTestId("profile-edit-disclosure"), "the worker's profile renders").toBeAttached({ timeout: 60_000 });
+      await expect(main.getByTestId("profile-tabs"), "the worker's profile renders").toBeAttached({ timeout: 60_000 });
       return main;
     };
     let main = await open();

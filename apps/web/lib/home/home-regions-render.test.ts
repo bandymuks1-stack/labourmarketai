@@ -324,11 +324,21 @@ describe("restraint: plain titles, real copy in every active locale", () => {
 });
 
 describe("one reading order on every screen", () => {
-  it("opportunities are 03 and recent events 04 — the DOM order, so the phone needs no renumbering", async () => {
+  it("regions are numbered by their place among the regions drawn — DOM order, no hard-coded figure, no gap", async () => {
     const outside = html(await HomeOutsideView({ outside: ALL_UNKNOWN.outside }));
     const because = html(await HomeBecauseView({ locale: "en", because: ALL_UNKNOWN.because }));
-    expect(outside).toMatch(/>04</);
-    expect(because).toMatch(/>05</);
+    // Each numbered region counts itself; the number is drawn by CSS from
+    // the one counter the regions container resets. A region left out
+    // ("Tuščia = tvarkinga") therefore leaves no gap: the home read
+    // 01, 02, 03, 05 when "Your opportunities" had nothing to show
+    // (design audit 2026-11-22).
+    for (const h of [outside, because]) {
+      expect(h).toContain("[counter-increment:home-region]");
+      expect(h).toContain("before:content-[counter(home-region,decimal-leading-zero)]");
+      expect(h).not.toMatch(/>0[1-5]</);
+    }
+    const screen = readFileSync(join(__dirname, "..", "..", "components/app/today/today-screen.tsx"), "utf8");
+    expect(screen).toMatch(/data-testid="today-regions" className="[^"]*\[counter-reset:home-region\]/);
     // A failed read always offers a way to read again.
     expect(outside).toContain('data-testid="home-opportunity-unknown-retry"');
     expect(because).toContain('data-testid="home-because-unknown-retry"');
@@ -417,7 +427,8 @@ describe("evidence first — a new worker's ONE gold action is the first work en
       // ONE gold action, and it leads to the journal.
       expect(w.match(/bg-gradient-cta/g), loc).toHaveLength(1);
       expect(w, loc).toMatch(/<a href="\/dashboard\/journal"[^>]*data-testid="today-next-cta"/);
-      expect(w, loc).toContain(lookup(loc, "auth.dashboard.workCard.why.evidenceFirst") as string);
+      // No explanatory line under the action (decisions 0032 and 0034).
+      expect(w, loc).not.toContain(lookup(loc, "auth.dashboard.workCard.why.evidenceFirst") as string);
       // Nothing hidden: the profile step is a plain text link, not a button.
       expect(w, loc).toMatch(/<a href="\/dashboard\/profile#profile-edit"[^>]*data-testid="today-next-secondary"[^>]*data-dim="work"/);
       const secondary = w.match(/<a [^>]*data-testid="today-next-secondary"[^>]*>/)?.[0] ?? "";

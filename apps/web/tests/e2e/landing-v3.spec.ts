@@ -81,19 +81,28 @@ for (const locale of LOCALES) {
         await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
         await expect(page.getByTestId("goal-lead")).toBeVisible();
         const rail = page.getByTestId("goal-rail");
-        const shown = size.phone ? ["work", "workers", "services", "contractors"] : ["work", "workers", "services", "contractors", "partners", "agencies"];
-        for (const id of shown) {
+        // All six goals in ONE rail at every width (owner P0 2026-11-23). On a
+        // phone the row overflows: the first card is whole, the rest scroll
+        // inside the track and the swipe hint shows.
+        const ids = ["work", "workers", "services", "contractors", "partners", "agencies"];
+        await expect(rail.locator("a[data-rail-card]")).toHaveCount(6);
+        for (const id of size.phone ? ids.slice(0, 1) : ids) {
           const box = (await rail.locator(`[data-card-id="${id}"]`).boundingBox())!;
           expect(box.x, `${id} starts on screen`).toBeGreaterThanOrEqual(0);
           expect(box.x + box.width, `${id} ends on screen`).toBeLessThanOrEqual(size.width + 0.5);
           expect(box.y + box.height, `${id} is on the first screen`).toBeLessThan(size.height);
         }
         if (size.phone) {
-          await expect(page.getByTestId("goal-more-choices").locator("summary")).toBeVisible();
-          await expect(rail.locator('[data-card-id="partners"]')).toBeHidden();
+          await expect(rail.locator('[data-rail-part="hint"]')).toBeVisible();
         } else {
-          // The request services are visible with no tap on a wide screen.
+          // The request block is closed until asked for, on every width
+          // (owner order 2026-11-24, decisions 0032 / 0034); one tap opens
+          // it and the services are there.
+          await expect(page.getByTestId("landing-need-path")).not.toHaveAttribute("open", "");
+          await expect(page.getByTestId("request-door-b2b-open")).toBeHidden();
+          await page.getByTestId("landing-need-path").locator("summary").click();
           await expect(page.getByTestId("request-door-b2b-open")).toBeVisible();
+          await page.getByTestId("landing-need-path").locator("summary").click();
         }
         // One of each block, in the approved order.
         const tops: number[] = [];
@@ -181,7 +190,7 @@ for (const locale of LOCALES) {
 // stacked consent buttons, a three-line card label). Now every routed
 // language is held to the same bound.
 for (const locale of LOCALES) {
-  test(`${locale}-320: the first screen holds the goals and "More options"; Sign up follows within 60px`, async ({ browser }) => {
+  test(`${locale}-320: the first screen holds the goal rail; Sign up follows within 60px`, async ({ browser }) => {
     const height = 640;
     const context = await browser.newContext({
       viewport: { width: 320, height },
@@ -193,17 +202,14 @@ for (const locale of LOCALES) {
     await page.goto(`/${locale}`);
     await expect(page.getByTestId("analytics-consent-banner")).toBeVisible();
     const rail = page.getByTestId("goal-rail");
-    for (const id of ["work", "workers", "services", "contractors"]) {
-      const box = (await rail.locator(`[data-card-id="${id}"]`).boundingBox())!;
-      expect(box.x, `${id} starts on screen`).toBeGreaterThanOrEqual(0);
-      expect(box.x + box.width, `${id} ends on screen`).toBeLessThanOrEqual(320.5);
-      expect(box.y + box.height, `${id} is whole on the first screen`).toBeLessThan(height);
-    }
+    await expect(rail.locator("a[data-rail-card]")).toHaveCount(6);
+    const track = (await rail.locator('[data-rail-part="track"]').boundingBox())!;
+    expect(track.x + track.width, "the goal rail fits the screen").toBeLessThanOrEqual(320.5);
+    expect(track.y + track.height, "the goal rail is whole on the first screen").toBeLessThan(height);
+    const first = (await rail.locator('[data-card-id="work"]').boundingBox())!;
+    expect(first.x, "the first goal starts on screen").toBeGreaterThanOrEqual(0);
     expect(await cutTexts(page, "goal-rail"), "a goal card text is cut").toEqual([]);
-    const more = (await page.getByTestId("goal-more-choices").locator("summary").boundingBox())!;
-    expect(more.y + more.height, '"More options" is whole on the first screen').toBeLessThan(height);
     const signUp = (await page.getByTestId("landing-signup").getByRole("link").boundingBox())!;
-    expect(signUp.y - (more.y + more.height), "Sign up follows More options directly").toBeLessThan(24);
     expect(signUp.y + signUp.height, "Sign up is within 60px of the fold").toBeLessThan(height + 60);
     expect(await overflow(page), "the page scrolls sideways").toBeLessThanOrEqual(1);
     await context.close();

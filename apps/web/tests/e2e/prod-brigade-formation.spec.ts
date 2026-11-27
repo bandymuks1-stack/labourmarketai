@@ -4,8 +4,9 @@ import { resolve } from "node:path";
 import { inviteCapGate } from "./invite-cap";
 import { chooseWorkContextIfAsked } from "./worklog-context";
 import { bearerOf, qaApi } from "./prod-qa-api";
-import { closeOwnNeed, findOwnNeed } from "./prod-need-close";
+import { closeOwnNeed, findOwnNeed, requestIdOf } from "./prod-need-close";
 import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 import { chooseDemandCountryIfEmpty } from "./demand-country";
 
 /**
@@ -286,12 +287,12 @@ test("B2B-1. buyer (Gama) posts a need through the company demand intake", async
   await chooseDemandCountryIfEmpty(page);
   await page.getByTestId("demand-next").click();
   await page.getByTestId("demand-create").click();
-  // Either the need is created, or the plan's open-need limit answers
-  // honestly (a need from an earlier run is still open) — both are real.
-  const done = page.getByTestId("demand-done");
-  const limit = page.getByTestId("demand-open-need-limit");
-  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
-  console.info(`[b2b] need: ${(await done.isVisible()) ? "created" : "open-need limit reached, the earlier need is used"}`);
+  // Follow only THIS run's confirmed need. A plan limit is a valid product
+  // refusal, but it cannot prove this end-to-end offer chain.
+  await expect(page.getByTestId("demand-done"), "this run's need is created").toBeVisible({ timeout: 30_000 });
+  needId = requestIdOf(await page.getByTestId("demand-done-scouting-link").getAttribute("href"));
+  expect(needId, "the buyer's receipt links to this exact need").not.toBe("");
+  console.info("[b2b] need: created; exact receipt retained");
   await ctx.close();
 });
 
@@ -300,18 +301,26 @@ test("B2B-2. the brigade (2 members) offers itself against exactly that need", a
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
   // The offer form is folded; opening it loads the offerable needs.
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const select = page.getByTestId(`team-offer-demand-${teamId}`);
   await expect(select).toBeVisible({ timeout: 20_000 });
-  // The free-text role is normalised to a profession slug, so the need is
-  // found by its buyer, the only synthetic company that posts needs here.
-  const option = select.locator("option:not([disabled])", { hasText: GAMA }).first();
-  needId = (await option.getAttribute("value")) ?? "";
-  expect(needId, "the brigade sees the buyer need by its name").not.toBe("");
+  // The open-need surface deliberately hides the client (decision 0033).
+  // Match the exact value from the buyer's own receipt, never a client name
+  // or the first unrelated need on the market.
+  expect(needId, "B2B-1 retained the newly created need").not.toBe("");
+  const option = select.locator(`option[value="${needId}"]`);
+  await expect(option, "this exact need is offerable").toHaveCount(1);
+  await expect(option).toBeEnabled();
+  await expect(option).not.toContainText(GAMA);
   await select.selectOption(needId);
   await page.getByTestId(`team-offer-note-${teamId}`).fill("QA-SYNTHETIC offer: 2 people, from next month.");
   await page.getByTestId(`team-offer-submit-${teamId}`).click();
-  await expect(page.getByTestId(`team-offer-sent-${teamId}`)).toContainText(GAMA, { timeout: 20_000 });
+  const sent = page.getByTestId(`team-offer-sent-${teamId}`);
+  await expect(sent.locator(":scope > li"), "the new brigade has one persisted offer").toHaveCount(1, { timeout: 20_000 });
+  await expect(sent).not.toContainText(GAMA);
+  offerId = (await sent.locator('[data-testid^="team-offer-sent-message-"]').getAttribute("data-testid"))!
+    .replace("team-offer-sent-message-", "");
+  expect(offerId, "the sent offer has its own receipt").toMatch(/^[0-9a-f-]{36}$/);
   await ctx.close();
 });
 
@@ -326,9 +335,9 @@ async function terms(page: Page, id: string) {
 test("B2B-3. buyer sees the offer and writes in its thread", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA, `/lt/dashboard/company/scouting?request=${needId}`);
-  const received = page.locator('[data-testid^="team-offer-received-"]', { hasText: "QA-SYNTHETIC Brigada" }).first();
+  const received = page.getByTestId(`team-offer-received-${offerId}`);
   await expect(received).toBeVisible({ timeout: 20_000 });
-  offerId = (await received.getAttribute("data-testid"))!.replace("team-offer-received-", "");
+  await expect(received).toContainText(TEAM);
   await page.getByTestId(`team-offer-message-${offerId}`).click();
   await page.waitForURL(/\/dashboard\/communication/, { timeout: 20_000 });
   // One thread per pair: opened from THIS offer, it names the need and the
@@ -353,7 +362,7 @@ test("B2B-4. supplier proposes terms v1 (people, rate, dates, scope)", async ({ 
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const box = await terms(page, offerId);
   const form = box.getByTestId(`team-offer-terms-form-${offerId}`);
   await form.locator('input[type="number"]').fill("2");
@@ -383,7 +392,7 @@ test("B2B-6. supplier agrees to v2: agreed in principle, history kept, message v
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   const teamId = teamTestId.replace("team-brigade-", "");
-  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator("summary").click();
+  await page.getByTestId(`team-demand-offer-section-${teamId}`).locator(":scope > summary").click();
   const box = await terms(page, offerId);
   await box.getByTestId(`team-offer-terms-agree-${offerId}`).click();
   const history = box.getByTestId(`team-offer-terms-history-${offerId}`);
@@ -598,7 +607,7 @@ test.afterAll(async ({ browser }) => {
     // (the list may show the normalised trade instead of the typed title).
     const id = needId || (await findOwnNeed(page, NEED_ROLE)) || (await findOwnNeed(page, RUN));
     if (!id) {
-      console.info("[b2b] need cleanup: no need of this run is on the buyer's list (none posted, or B2B-1 met the open-need limit)");
+      console.info("[b2b] need cleanup: no need of this run is on the buyer's list (none posted or creation was refused)");
       return;
     }
     console.info(`[b2b] need cleanup: ${await closeOwnNeed(page, id)}`);
@@ -607,4 +616,12 @@ test.afterAll(async ({ browser }) => {
   } finally {
     await ctx.close();
   }
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("brigade-formation");
 });

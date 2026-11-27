@@ -212,12 +212,18 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261105100000_",
       "20261105100100_",
       "20261104160100_",
+      // #3111: one CV statement once; RED draft, not applied.
+      "20261106090000_",
       // 2026-11-09 holder-cancelled account deletion (holder cancels own account-deletion request + 30-day grace + row lock; RED draft #3172, needs-human-gate, NOT applied).
       "20261109120000_",
       // 2026-11-10 company-need intake keeps the visitor's locale (one-line RPC re-create; RED draft #3195, needs-human-gate, NOT applied).
       "20261110140000_",
       // 2026-11-10 partner registration Slice 1: company takeover invitation, two-operator decision, link (RED draft #3211, needs-human-gate, NOT applied).
       "20261110190000_",
+      // 20261111230000 (offer_notification_types_v1: B2B offer notification types, strict CHECK superset, no grant; draft #3227, NOT applied).
+      "20261111230000_",
+      // 20261112213100 (team_offer_counterpart_v1: gated SECURITY DEFINER recipient of a team offer; RED draft, needs-human-gate, NOT applied).
+      "20261112213100_",
       // 2026-11-13 owner P0 invitation delivery reliability: codes-only send diagnostics, retry /
       // dead-letter / bounce fields (RED draft #3318, needs-human-gate, NOT applied).
       "20261113190000_",
@@ -239,6 +245,37 @@ describe("the four migrations ship paired, gated and stated", () => {
       // it corrects that context's record; the chain root walk is cycle-safe, no depth cap). Two SECURITY DEFINER
       // bodies; RED draft, needs-human-gate, NOT applied.
       "20261120190000_",
+      // 2026-11-22 owner request: a confirmed account deletion is erased within one month of receipt (GDPR
+      // Art. 12(3)); two SECURITY DEFINER bodies + one helper. Owner-approved, APPLIED ledger 20261124052729.
+      "20261122190500_",
+      // 2026-11-23 owner P0 #3679 (duplication audit SEC-1/2/4): three bypassed v1 doors revoked from
+      // authenticated (REVOKE only; RED draft, needs-human-gate, NOT applied).
+      "20261123060000_",
+      // 2026-11-24 owner request: time-boxed read-only history grant (RED draft, NOT applied).
+      "20261124053000_",
+      // 2026-11-25 separate public personal service search draft: explicit owner opt-in,
+      // two public readers; RED, needs-human-gate, NOT APPLIED. Not part of the 20261006 closure package.
+      "20261125133404_",
+      // Separate owner-approved source-label projection, outside the 20261006 closure package.
+      "20261127120000_public_vacancy_source_labels_v1.sql",
+      // Independent report-scheduling extension, not part of this historical closure package.
+      "20261127163000_timesheet_schedules_v1.sql",
+      "20261127180000_timesheet_schedule_privacy_v1.sql",
+      // 2026-11-22 owner order: a privacy request is never shared with an agency (one SECURITY DEFINER body;
+      // RED draft, needs-human-gate, NOT applied).
+      "20261122180000_",
+      // 2026-11-22 owner decision: a demoted owner loses owner rights at once (SECURITY DEFINER bodies + four
+      // narrowed company/agency policies; RED draft, needs-human-gate, NOT applied).
+      "20261122140000_",
+      // 2026-11-21 owner P0 security directive: sign-up role allow-list, admin grant guard, manager grant needs an
+      // accepted governance membership; journal lineage guard and manager-labelled metrics. SECURITY DEFINER bodies,
+      // a trigger and one policy; RED draft, needs-human-gate, NOT applied.
+      "20261121100000_",
+      "20261121100100_",
+      // 2026-11-21 owner P0 security (B): access arms follow ended governance membership; the invited person
+      // sees who invited them. RED draft, needs-human-gate, NOT applied.
+      "20261121100200_",
+      "20261121100300_",
       // 2026-11-18 COMM-1 profiles.communication_locale (renamed from 20260920122000; RED draft, needs-human-gate, NOT applied).
       "20261118100100_",
       // 2026-11-04 autovacuum v2 for public_vacancies (storage parameters only; RED draft by owner instruction).
@@ -252,6 +289,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       // 2026-11-18 (RED, needs-human-gate, NOT applied): registry 11.8 — assign_training_v1 admits the four
       // owner-decided groups (members, interns, learners, invited external people) while their link is active.
       "20261118143000_",
+      // 2026-11-22 owner decision (open agency board): the open-need readers name no client; v2 adds the
+      // need's facts. Two SECURITY DEFINER bodies replaced + one new reader; draft, NOT applied.
+      "20261122170000_",
     ];
     const before = names.filter(
       (n) => !Object.values(M).some((m) => n.startsWith(m)) && !SIBLINGS.some((s) => n.startsWith(s)),

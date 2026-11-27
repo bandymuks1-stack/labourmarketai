@@ -34,6 +34,8 @@ import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
 import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { readVisibleExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import {
   WORK_PERIOD_KEYS,
   type WorkPeriodKey,
@@ -294,6 +296,24 @@ export default async function PersonPage({
           { focus: periodKey },
         )
       : null;
+  /**
+   * ── EXPERIENCE IS THE ONE READING, NOT `workers.experience_years` ───────
+   *
+   * This page printed `workers.experience_years` — a column nothing writes —
+   * as the person's experience. The experience an organization may see is the
+   * decision-0025 reading (`experienceFiguresOf` → `deriveProfessionalExperience`)
+   * over the SAME RLS-scoped work model rendered below, with the person's
+   * engagements as far as THIS viewer's RLS returns them (nothing widened).
+   * Unreadable relationships or a truncated journal read → no figure (UNKNOWN,
+   * never an inflated or partial "total").
+   */
+  const visibleRelationships = orgWorkIntelligence
+    ? await readVisibleExperienceRelationships(supabase, (worker.profile_id as string | null) ?? "")
+    : null;
+  const experienceHours =
+    orgWorkIntelligence && !orgWorkIntelligence.coverage.truncated
+      ? experienceFiguresOf(orgWorkIntelligence, visibleRelationships).professionalExperienceHours
+      : null;
   const tProfessions = await getTranslations("professions");
   const tUnits = await getTranslations("productivityUnits");
   const catalogueName =
@@ -422,10 +442,14 @@ export default async function PersonPage({
               })}
             </span>
           ) : null}
-          {typeof worker.experience_years === "number" &&
-          worker.experience_years > 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
-              {t("experienceYears", { n: worker.experience_years })}
+          {experienceHours !== null && experienceHours > 0 ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+              data-testid="person-experience-total"
+            >
+              {t("recordedExperienceHours", {
+                hours: new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(experienceHours),
+              })}
             </span>
           ) : null}
           {mobility.length > 0 ? (
@@ -599,6 +623,7 @@ export default async function PersonPage({
           wi={orgWorkIntelligence}
           locale={locale}
           audience="organization"
+          relationships={visibleRelationships}
           labels={{
             skillName: catalogueName(tSkillNames),
             professionName: catalogueName(tProfessions),
