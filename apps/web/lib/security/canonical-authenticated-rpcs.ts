@@ -87,6 +87,8 @@ export const CANONICAL_APP_RPCS = [
   "get_public_business_listings_v1",
   "get_public_business_profile_v1",
   "get_public_business_services_v1",
+  // 2026-11-25 RED draft call site; NOT APPLIED / no runtime availability claim.
+  "get_public_service_offering_v1",
   "get_team_capability_summary_v1",
   "grant_employer_data_disclosure",
   "grant_profile_discoverability_consent",
@@ -185,6 +187,8 @@ export const CANONICAL_APP_RPCS = [
   "save_worker_external_profile_v1",
   "save_worker_language_v1",
   "save_worker_opportunity_v1",
+  // Paired public read in the same unapplied, owner-gated RED draft.
+  "search_public_service_offerings_v1",
   "send_work_instruction",
   "send_work_instruction_to_project",
   "set_agency_worker_journal_review",

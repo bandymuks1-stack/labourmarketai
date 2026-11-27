@@ -128,8 +128,8 @@ describe("the stage", () => {
   });
 
   it("working-now is current engagements only — an ended organization stays in history", () => {
-    expect(LABELS).toMatch(/\.filter\(\(h\) => h\.current\)/);
-    expect(HUB).toMatch(/\.filter\(\(h\) => h\.current\)/);
+    expect(LABELS).toMatch(/\.filter\(isCurrentWork\)/);
+    expect(HUB).toMatch(/\.filter\(isCurrentWork\)/);
   });
 
   it("the card transforms through its modes under ONE identity stage — IDENTITY is the card CLOSED", () => {

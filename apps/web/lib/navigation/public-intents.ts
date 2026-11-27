@@ -106,11 +106,12 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
   },
   {
     // The BUYER's goal (D1, variant A): someone who needs a service or a
-    // contractor. Its two actions open the matching form of the landing's
-    // "Submit a request" block — no account, no new form, no new route.
+    // contractor. Public personal services reuse the existing offering loop;
+    // both structured enquiry doors remain reachable.
     id: "contractors",
     iconKey: "fileSignature",
     links: [
+      { id: "findServices", href: "/services", account: false },
       { id: "b2bEnquiry", href: requestDoorHref("b2b"), account: false },
       { id: "projectEnquiry", href: requestDoorHref("project"), account: false },
     ],

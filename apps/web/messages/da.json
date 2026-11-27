@@ -285,6 +285,14 @@
       "moreSection": {
         "title": "Detaljeret overblik",
         "hint": "Status, forespørgsler og ekstra kort"
+      },
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Registrér arbejde",
+            "desc": "Entries build your profile and CV"
+          }
+        }
       }
     },
     "errors": {
@@ -1800,7 +1808,67 @@
     "generatedAt": "Genereret",
     "verifyNote": "Bekræftelser kan kontrolleres på platformen.",
     "notWorker": "CV-eksport er tilgængelig for medarbejderprofiler — det opbygges af arbejdsjournalen og bekræftede færdigheder.",
-    "claimFromJournal": "[EN] from work journal"
+    "claimFromJournal": "[EN] from work journal",
+    "blocks": {
+      "overview": "Oversigt",
+      "experience": "Erfaring",
+      "projects": "Projekter",
+      "photos": "Billeder",
+      "documents": "Dokumenter",
+      "reviews": "Anbefalinger"
+    },
+    "premium": {
+      "analytics": {
+        "evidenceTitle": "Timernes fordeling",
+        "states": {
+          "actual": "Registreret som faktiske",
+          "reported": "Oplyst af organisationen",
+          "estimated": "Anslåede",
+          "confirmed": "Understøttet af en anden parts registrering"
+        },
+        "skillBasis": "Tid fra arbejdsjournalen knyttet til de enkelte færdigheder.",
+        "workTitle": "Arbejde og færdigheder",
+        "attributedTime": "Tildelt denne færdighed",
+        "confirmedTime": "Bekræftet af lederen: {hours}",
+        "activityLabel": "Uddrag af registreringen",
+        "contextLabel": "Arbejdskontekst",
+        "mapTitle": "Kompetencekort",
+        "workNodes": "Arbejde"
+      },
+      "eyebrowFallback": "Levende CV",
+      "facts": {
+        "recorded": "recorded in your work journal",
+        "confirmed": "med en leders registrering",
+        "organization": "in organisation records",
+        "experienceTotal": "faglig erfaring i alt",
+        "languages": "sprog",
+        "projects": "projekter",
+        "span": "første og seneste registrering"
+      },
+      "capEyebrow": "Capabilities",
+      "capEyebrowHours": "{hours} h of recorded work",
+      "capTitle": "What you *can do*",
+      "expEyebrow": "Experience",
+      "expTitle": "Where you have *worked*",
+      "evidence": {
+        "both": "{confirmed} h with a manager's record · {recorded} h recorded",
+        "recorded": "{hours} h recorded",
+        "shown": "Shown by your records",
+        "declared": "You say so; nothing shows it yet",
+        "involved": "Involved in {hours} h, not attributed to it alone"
+      },
+      "source": {
+        "own": "Your record",
+        "organization": "Organisation records"
+      },
+      "orgDayHours": "{hours} h on {count, plural, one {# record} other {# records}}",
+      "orgPeriodHours": "{hours} h stated as a period total",
+      "present": "now",
+      "more": "+ {count} more in the full register below",
+      "emptyCapabilities": "No skills on record yet. Skills you add — and the work that shows them — appear here.",
+      "emptyExperience": "No work history yet. Your journal and the records of organisations you worked for build this.",
+      "untitled": "Work without a name in the source"
+    }
   },
   "todayScreen": {
     "eyebrow": "I dag",
@@ -2934,6 +3002,7 @@
     "available": "Tilgængelig",
     "availableFrom": "Fra {date}",
     "experienceYears": "{n} års erfaring",
+    "recordedExperienceHours": "Tilgængelige arbejdsregistreringer: {hours} t",
     "skillsTitle": "Kompetencer",
     "skillsEmpty": "Ingen kompetencer, du må se.",
     "skillVerified": "Bekræftet af en leders registrering",
@@ -7457,7 +7526,7 @@
     },
     "noHours": "Poster uden angivne timer: {count}. Ukendte timer tælles ikke som nul.",
     "undated": "Poster uden angivet dato: {count}. De bliver i historikken nedenfor.",
-    "periodApart": "{hours} t af summen er periodesummer, holdt adskilt og aldrig fordelt på dage eller måneder.",
+    "periodApart": "Desuden: {hours} t angivet som periodesummer — ikke medregnet i timerne ovenfor og aldrig fordelt på dage eller måneder.",
     "noWorkObject": "Poster uden tilknytning til et projekt eller sted, platformen kender: {count}. De bliver i denne historik under deres kildebetegnelse.",
     "places": {
       "title": "Efter projekt eller sted",
@@ -8165,7 +8234,8 @@
       "setUpAgency": "Registrer dit bureau",
       "setUpInstitution": "For uddannelsesinstitutioner",
       "b2bEnquiry": "Forespørgsel om erhvervsydelser (B2B)",
-      "projectEnquiry": "Forespørgsel om individuelt projekt"
+      "projectEnquiry": "Forespørgsel om individuelt projekt",
+      "findServices": "Find personlige tjenester"
     },
     "assistant": "Spørg assistenten",
     "start": {
@@ -8235,6 +8305,53 @@
       "auth": "Log ind igen.",
       "not_authorized": "Du kan kun administrere dine egne poster.",
       "error": "Noget gik galt. Prøv igen."
+    }
+  },
+  "publicServices": {
+    "title": "[EN] Find personal services",
+    "lead": "[EN] Services published by individuals.",
+    "search": "[EN] Search",
+    "query": "[EN] Service or keyword",
+    "country": "Land",
+    "category": "[EN] Category",
+    "clear": "[EN] Clear filters",
+    "unavailable": "[EN] Service search is unavailable",
+    "unavailableHint": "[EN] Please try again later.",
+    "retry": "[EN] Try again",
+    "emptyFiltered": "[EN] No services match these filters",
+    "empty": "[EN] No personal services have been published publicly yet",
+    "results": "[EN] Services",
+    "remote": "[EN] Remote",
+    "pagination": "[EN] Search pages",
+    "previous": "[EN] Previous",
+    "next": "[EN] Next",
+    "page": "[EN] Page {page}",
+    "refine": "[EN] Narrow your search to see more relevant services.",
+    "back": "[EN] All services",
+    "delivery": "[EN] Delivery",
+    "rate": "[EN] Rate",
+    "personalService": "[EN] Personal service",
+    "signInToRequest": "[EN] Sign in to request",
+    "manage": "[EN] Manage this service",
+    "contactUnavailable": "[EN] The request action is unavailable. Please try again later.",
+    "notFound": "[EN] Service not found",
+    "notFoundHint": "[EN] This service is no longer publicly available.",
+    "allCountries": "Alle lande"
+  },
+  "serviceOfferings": {
+    "form": {
+      "publicLabel": "[EN] Show this personal service publicly",
+      "publicHint": "[EN] When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
+    },
+    "publicAudience": "[EN] Public search selected",
+    "memberAudience": "[EN] Signed-in members selected"
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Arbejdsregistreringer efter periode",
+        "currentTeamTitle": "Nuværende team"
+      }
     }
   }
 }

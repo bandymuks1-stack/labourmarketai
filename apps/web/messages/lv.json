@@ -285,6 +285,14 @@
       "moreSection": {
         "title": "Detalizēts pārskats",
         "hint": "Statuss, pieprasījumi un papildu kartītes"
+      },
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Reģistrēt darbu",
+            "desc": "Entries build your profile and CV"
+          }
+        }
       }
     },
     "errors": {
@@ -1800,7 +1808,67 @@
     "generatedAt": "Izveidots",
     "verifyNote": "Apstiprinājumus var pārbaudīt platformā.",
     "notWorker": "CV eksports ir pieejams darbinieka profilam — to veido no darba žurnāla un apstiprinātām prasmēm.",
-    "claimFromJournal": "[EN] from work journal"
+    "claimFromJournal": "[EN] from work journal",
+    "blocks": {
+      "overview": "Pārskats",
+      "experience": "Pieredze",
+      "projects": "Projekti",
+      "photos": "Foto",
+      "documents": "Dokumenti",
+      "reviews": "Atsauksmes"
+    },
+    "premium": {
+      "analytics": {
+        "evidenceTitle": "Stundu sadalījums",
+        "states": {
+          "actual": "Reģistrētas kā faktiskas",
+          "reported": "Organizācijas norādītas",
+          "estimated": "Aplēstas",
+          "confirmed": "Pamatotas ar citas puses ierakstu"
+        },
+        "skillBasis": "Darba žurnāla laiks, kas attiecināts uz atsevišķām prasmēm.",
+        "workTitle": "Darbi un prasmes",
+        "attributedTime": "Attiecināts uz šo prasmi",
+        "confirmedTime": "Vadītāja apstiprināts: {hours}",
+        "activityLabel": "Ieraksta fragments",
+        "contextLabel": "Darba konteksts",
+        "mapTitle": "Prasmju karte",
+        "workNodes": "Darbi"
+      },
+      "eyebrowFallback": "Dzīvais CV",
+      "facts": {
+        "recorded": "recorded in your work journal",
+        "confirmed": "ar vadītāja ierakstu",
+        "organization": "in organisation records",
+        "experienceTotal": "profesionālā pieredze kopā",
+        "languages": "valodas",
+        "projects": "projekti",
+        "span": "pirmais un pēdējais ieraksts"
+      },
+      "capEyebrow": "Capabilities",
+      "capEyebrowHours": "{hours} h of recorded work",
+      "capTitle": "What you *can do*",
+      "expEyebrow": "Experience",
+      "expTitle": "Where you have *worked*",
+      "evidence": {
+        "both": "{confirmed} h with a manager's record · {recorded} h recorded",
+        "recorded": "{hours} h recorded",
+        "shown": "Shown by your records",
+        "declared": "You say so; nothing shows it yet",
+        "involved": "Involved in {hours} h, not attributed to it alone"
+      },
+      "source": {
+        "own": "Your record",
+        "organization": "Organisation records"
+      },
+      "orgDayHours": "{hours} h on {count, plural, one {# record} other {# records}}",
+      "orgPeriodHours": "{hours} h stated as a period total",
+      "present": "now",
+      "more": "+ {count} more in the full register below",
+      "emptyCapabilities": "No skills on record yet. Skills you add — and the work that shows them — appear here.",
+      "emptyExperience": "No work history yet. Your journal and the records of organisations you worked for build this.",
+      "untitled": "Work without a name in the source"
+    }
   },
   "todayScreen": {
     "eyebrow": "[EN] Today",
@@ -2934,6 +3002,7 @@
     "available": "Pieejams",
     "availableFrom": "No {date}",
     "experienceYears": "{n} g. pieredze",
+    "recordedExperienceHours": "Pieejamajos darba ierakstos: {hours} st.",
     "skillsTitle": "Prasmes",
     "skillsEmpty": "Nav prasmju, ko drīkstat redzēt.",
     "skillVerified": "[EN] Confirmed by a manager's record",
@@ -7457,7 +7526,7 @@
     },
     "noHours": "Ieraksti bez norādītām stundām: {count}. Nezināmas stundas netiek skaitītas kā nulle.",
     "undated": "Ieraksti bez norādīta datuma: {count}. Tie paliek vēsturē zemāk.",
-    "periodApart": "{hours} h no kopsummas ir perioda kopsummas, turētas atsevišķi un nekad nesadalītas pa dienām vai mēnešiem.",
+    "periodApart": "Turklāt: {hours} h norādītas kā perioda kopsummas — nav iekļautas augstāk norādītajās stundās un nekad netiek sadalītas pa dienām vai mēnešiem.",
     "noWorkObject": "Ieraksti, kas nav saistīti ar platformai zināmu projektu vai vietu: {count}. Tie paliek šajā vēsturē ar avota nosaukumu.",
     "places": {
       "title": "Pēc projekta vai vietas",
@@ -8165,7 +8234,8 @@
       "setUpAgency": "Reģistrēt aģentūru",
       "setUpInstitution": "Mācību iestādēm",
       "b2bEnquiry": "Uzņēmējdarbības pakalpojumu pieprasījums (B2B)",
-      "projectEnquiry": "Individuāla projekta pieprasījums"
+      "projectEnquiry": "Individuāla projekta pieprasījums",
+      "findServices": "Meklēt personīgos pakalpojumus"
     },
     "assistant": "Jautāt asistentam",
     "start": {
@@ -8235,6 +8305,53 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "publicServices": {
+    "title": "[EN] Find personal services",
+    "lead": "[EN] Services published by individuals.",
+    "search": "[EN] Search",
+    "query": "[EN] Service or keyword",
+    "country": "Valsts",
+    "category": "[EN] Category",
+    "clear": "[EN] Clear filters",
+    "unavailable": "[EN] Service search is unavailable",
+    "unavailableHint": "[EN] Please try again later.",
+    "retry": "[EN] Try again",
+    "emptyFiltered": "[EN] No services match these filters",
+    "empty": "[EN] No personal services have been published publicly yet",
+    "results": "[EN] Services",
+    "remote": "[EN] Remote",
+    "pagination": "[EN] Search pages",
+    "previous": "[EN] Previous",
+    "next": "[EN] Next",
+    "page": "[EN] Page {page}",
+    "refine": "[EN] Narrow your search to see more relevant services.",
+    "back": "[EN] All services",
+    "delivery": "[EN] Delivery",
+    "rate": "[EN] Rate",
+    "personalService": "[EN] Personal service",
+    "signInToRequest": "[EN] Sign in to request",
+    "manage": "[EN] Manage this service",
+    "contactUnavailable": "[EN] The request action is unavailable. Please try again later.",
+    "notFound": "[EN] Service not found",
+    "notFoundHint": "[EN] This service is no longer publicly available.",
+    "allCountries": "Visas valstis"
+  },
+  "serviceOfferings": {
+    "form": {
+      "publicLabel": "[EN] Show this personal service publicly",
+      "publicHint": "[EN] When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
+    },
+    "publicAudience": "[EN] Public search selected",
+    "memberAudience": "[EN] Signed-in members selected"
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Darba ieraksti pa periodiem",
+        "currentTeamTitle": "Pašreizējā komanda"
+      }
     }
   }
 }

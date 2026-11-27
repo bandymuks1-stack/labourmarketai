@@ -32,6 +32,10 @@ export async function BusinessHistoryOverview({
   clients = [],
   performedAsSubcontractor = false,
   locale,
+  compact = false,
+  truncated = false,
+  recordsRead,
+  placesHref = "#company-work-history-places",
 }: {
   readonly business: BusinessHistory | null;
   readonly organizationId: string;
@@ -44,13 +48,27 @@ export async function BusinessHistoryOverview({
   /** Its own records name it as `subcontractor` (never inferred from a client party). */
   readonly performedAsSubcontractor?: boolean;
   readonly locale: string;
+  /** Living CV already names the organization and carries the overview. */
+  readonly compact?: boolean;
+  /** Coverage metadata from the same canonical history read. */
+  readonly truncated?: boolean;
+  readonly recordsRead?: number;
+  readonly placesHref?: string;
 }) {
   const t = await getTranslations("companyWorkHistory.business");
+  const coverage = await getTranslations("companyWorkHistory");
   if (business === null) {
     return (
-      <p className="text-meta text-text-muted" data-testid="business-history-unavailable">
-        {t("unavailable")}
-      </p>
+      <div className="flex flex-col gap-2">
+        <p className="text-meta text-text-muted" data-testid="business-history-unavailable">
+          {t("unavailable")}
+        </p>
+        {truncated ? (
+          <p className="text-meta text-text-muted" data-testid="business-history-truncated">
+            {coverage("truncated", { count: recordsRead ?? 0 })}
+          </p>
+        ) : null}
+      </div>
     );
   }
   const n = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
@@ -172,14 +190,20 @@ export async function BusinessHistoryOverview({
       data-header-split={header.split ? "true" : "false"}
     >
       <header className="flex flex-col gap-2">
-        <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted">{t("eyebrow")}</span>
+        {!compact ? <span className="font-mono text-[0.7rem] uppercase tracking-[0.14em] text-text-muted">{t("eyebrow")}</span> : null}
         <h2 className="font-display text-[clamp(1.55rem,2.6vw,2.15rem)] font-semibold leading-[1.05] tracking-[-0.04em] text-text-primary">
-          {header.split ? t("titleHeld", { name: organizationName }) : t("title", { name: organizationName })}
+          {compact ? t("eyebrow") : header.split ? t("titleHeld", { name: organizationName }) : t("title", { name: organizationName })}
         </h2>
-        <p className="max-w-[60ch] text-sm leading-relaxed text-text-secondary">
+        {!compact || header.split ? <p className="max-w-[60ch] text-sm leading-relaxed text-text-secondary">
           {header.split ? (structure ?? t("subtitleHeld", { name: organizationName })) : t("subtitle")}
-        </p>
+        </p> : null}
       </header>
+
+      {truncated ? (
+        <p className="text-meta leading-relaxed text-text-muted" data-testid="business-history-truncated">
+          {coverage("truncated", { count: recordsRead ?? totals.records })}
+        </p>
+      ) : null}
 
       {/* P0-B: whose work — the periods, each with its own figures, before any total. */}
       {header.split ? periodsBlock : null}
@@ -261,7 +285,7 @@ export async function BusinessHistoryOverview({
           {t("doors.projects")} →
         </Link>
         <a
-          href="#company-work-history-places"
+          href={placesHref}
           className="inline-flex min-h-11 items-center rounded-full border border-text-primary/20 px-4 text-sm font-semibold text-text-primary hover:border-brand-blue"
           data-testid="business-history-door-places"
         >

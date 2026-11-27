@@ -1844,6 +1844,9 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261123060000_revoke_bypassed_v1_doors_v1.sql",
       // 2026-11-24: time-boxed read-only history grant (owner request 2026-11-23; RED draft, needs-human-gate, NOT applied).
       "20261124053000_history_read_grant_v1.sql",
+      // 2026-11-26: owner approved the exact public personal-service SQL in PR #3818.
+      // RED; manual owner-channel apply after merge and required checks.
+      "20261125133404_public_personal_service_search_v1.sql",
     ]);
   });
 

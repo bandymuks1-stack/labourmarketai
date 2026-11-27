@@ -17,8 +17,8 @@ import { Stat, nf, span } from "@/components/app/organization/company-work-histo
  * `PersonImportedHistory` (one record renderer, not two).
  *
  * Honesty carried on screen: hours are the STATED hours; records that state
- * none are counted, not zeroed; a period total is kept apart from days and
- * months; a record with no project/place stays in the history under its source
+ * none are counted, not zeroed; a period total is its own figure, never in
+ * the headline or a place's hours and never spread onto days or months; a record with no project/place stays in the history under its source
  * label or under "not recorded"; skills are DERIVED and not verified; a failed
  * skill read is said, never rendered as "no skills".
  */
@@ -40,7 +40,9 @@ export async function PersonHistorySummaryBlock({
     <div className="flex flex-col gap-5" data-testid="company-person-summary">
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <Stat concept="object" value={String(summary.liveRecords)} label={t("stats.records")} />
-        <Stat concept="time" value={`${nf(summary.statedHours)} h`} label={t("stats.hours")} />
+        {/* Day hours only: a period total is its own figure (below), never
+            added in — the same figure each place line states. */}
+        <Stat concept="time" value={`${nf(summary.dayHours)} h`} label={t("stats.hours")} />
         <Stat concept="calendar" value={when ?? "—"} label={t("stats.period")} />
       </div>
       <div className="flex flex-col gap-1 text-meta leading-relaxed text-text-muted">
@@ -102,7 +104,9 @@ export async function PersonHistorySummaryBlock({
                     </span>
                   </span>
                   {p.periodHours > 0 ? (
-                    <span className="text-meta text-text-muted">{t("periodApart", { hours: nf(p.periodHours) })}</span>
+                    <span className="text-meta text-text-muted" data-testid="company-person-place-period-apart">
+                      {t("periodApart", { hours: nf(p.periodHours) })}
+                    </span>
                   ) : null}
                   {work.length > 0 ? (
                     <ul className="flex flex-col gap-0.5" data-testid="company-person-place-work">

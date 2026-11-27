@@ -8,6 +8,8 @@ import { readCommunicationLocale, viewerLocaleFor } from "@/lib/i18n/communicati
 import {
   listWorkerInstructions,
   listManagedWorkers,
+  listProjectAssignedWorkers,
+  mergeInstructionRecipients,
 } from "@/lib/instructions/instructions";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { loadOwnProjectAsks } from "@/lib/projects/worker-project-access";
@@ -91,10 +93,15 @@ export default async function InstructionsPage({
   );
 
   if (isManager) {
-    const [workers, projects] = await Promise.all([
+    const [roster, projects] = await Promise.all([
       listManagedWorkers(),
       listManagedProjects(),
     ]);
+    // A direct hire is on a project, not on the roster: reachable there only.
+    const workers = mergeInstructionRecipients(
+      roster,
+      await listProjectAssignedWorkers(projects.map((p) => p.id)),
+    );
     const labels: ComposerLabels = {
       workerLabel: t("manager.workerLabel"),
       workerPlaceholder: t("manager.workerPlaceholder"),

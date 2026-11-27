@@ -604,3 +604,15 @@ export async function sendMessageCore(
   return { ok: true, data: { id: result.data.id as string, attachmentsFailed } };
 }
 
+/**
+ * The same "new message" notification for a message written through another
+ * canonical door: the work-instruction RPCs and the worker's clarification
+ * reply (MSG-3). One emitter for every message insert; never a second one.
+ */
+export async function notifyNewMessageRecipients(
+  supabase: SupabaseClient,
+  authorId: string,
+  conversationId: string,
+): Promise<void> {
+  await notifyOtherParticipants(supabase, authorId, conversationId);
+}

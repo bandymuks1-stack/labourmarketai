@@ -182,10 +182,11 @@
       "heroContact": "How to get in touch",
       "provenance": "The company filled in this page itself.",
       "living": {
+        "activityTitle": "Work records by period",
         "eyebrow": "Living CV",
         "figures": {
-          "years": "{count, plural, one {year active} other {years active}}",
-          "hours": "hours worked",
+          "years": "period covered by records (years)",
+          "hours": "recorded hours",
           "people": "{count, plural, one {person worked here} other {people worked here}}",
           "projects": "{count, plural, one {project} other {projects}}",
           "places": "{count, plural, one {work site} other {work sites}}",
@@ -213,7 +214,8 @@
         "pendingLabel": "Waiting for approval",
         "ringLabel": "{share}% of journal hours confirmed",
         "open": "Open the Living CV",
-        "clientsMore": "Work done for: {names} and {count} more"
+        "clientsMore": "Work done for: {names} and {count} more",
+        "currentTeamTitle": "Current team"
       }
     }
   },
@@ -7208,7 +7210,9 @@
       "countryPlaceholder": "e.g. LT",
       "remoteLabel": "Can be done remotely",
       "rateLabel": "Rate (optional)",
-      "rateHint": "Free text only — for example an indicative hourly rate."
+      "rateHint": "Free text only — for example an indicative hourly rate.",
+      "publicLabel": "Show this personal service publicly",
+      "publicHint": "When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
     },
     "save": "Save",
     "saving": "Saving...",
@@ -7234,7 +7238,9 @@
     "linkToRequests": "See requests for your services",
     "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead.",
     "removeQuestion": "Delete this service permanently? This cannot be undone. To only hide it from search, pause it instead.",
-    "removeYes": "Yes, delete"
+    "removeYes": "Yes, delete",
+    "publicAudience": "Public search selected",
+    "memberAudience": "Signed-in members selected"
   },
   "communication": {
     "origin": {
@@ -8879,13 +8885,32 @@
     "durationPendingUnnamed": "an organization",
     "durationPendingUndated": "dates not recorded",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Hours breakdown",
+        "states": {
+          "actual": "Recorded as actual",
+          "reported": "Reported by the organisation",
+          "estimated": "Estimated",
+          "confirmed": "Supported by another party's record"
+        },
+        "skillBasis": "Work-journal time attributed to individual skills.",
+        "workTitle": "Work and skills",
+        "attributedTime": "Attributed to this skill",
+        "confirmedTime": "Manager-confirmed: {hours}",
+        "activityLabel": "Record excerpt",
+        "contextLabel": "Work context",
+        "mapTitle": "Skills map",
+        "workNodes": "Work"
+      },
       "eyebrowFallback": "Living CV",
       "facts": {
         "recorded": "recorded in your work journal",
         "confirmed": "with a manager's record",
         "organization": "in organisation records",
         "experienceTotal": "professional experience in total",
-        "languages": "languages"
+        "languages": "languages",
+        "projects": "projects",
+        "span": "first and latest record"
       },
       "capEyebrow": "Capabilities",
       "capEyebrowHours": "{hours} h of recorded work",
@@ -9002,6 +9027,14 @@
         "none": "No next move to show yet. More recorded work gives this more to go on.",
         "unknown": "Could not be read right now."
       }
+    },
+    "blocks": {
+      "overview": "Overview",
+      "experience": "Experience",
+      "projects": "Projects",
+      "photos": "Photos",
+      "documents": "Documents",
+      "reviews": "Reviews"
     }
   },
   "todayScreen": {
@@ -11166,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "What is LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai is an international platform for work, specialists and services. Real work becomes professional history, evidence and a living CV.",
+    "metaDescription": "LabourMarket.ai: patent-backed platform based on a unique idea to organise and manage work relationships in any sector, locally and internationally.",
     "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
     "title": "What is LabourMarket.ai",
-    "lede": "LabourMarket.ai is an international platform for work, specialists and services. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — from the first conversation to the next opportunity.",
+    "lede": "LabourMarket.ai is a patent-based platform built on a unique idea for organizing and managing work relationships. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — from the first conversation to the next opportunity.",
     "hero": {
       "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
       "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
@@ -12978,6 +13011,7 @@
     "available": "Available",
     "availableFrom": "From {date}",
     "experienceYears": "{n} yrs experience",
+    "recordedExperienceHours": "Accessible work records: {hours} h",
     "skillsTitle": "Skills",
     "skillsEmpty": "No skills you are permitted to see.",
     "skillVerified": "Confirmed by a manager's record",
@@ -16040,7 +16074,7 @@
       "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
     },
     "v3": {
-      "lead": "Registration and basic request posting are free.",
+      "lead": "LabourMarket.ai is a patent-based platform built on a unique idea for organizing and managing work relationships. Registration and basic request posting are free.",
       "or": "or describe it in your own words",
       "needFree": "You can submit an enquiry without registering. Submission is free; service terms and price are agreed separately.",
       "market": {
@@ -19970,7 +20004,7 @@
     },
     "noHours": "Records that state no hours: {count}. Unknown hours are not counted as zero.",
     "undated": "Records with no stated date: {count}. They stay in the history below.",
-    "periodApart": "{hours} h of the total are period totals, kept apart and never spread onto days or months.",
+    "periodApart": "Also: {hours} h stated as period totals — not included in the hours above, never spread onto days or months.",
     "noWorkObject": "Records tied to no project or place the platform knows: {count}. They stay in this history under their source label.",
     "places": {
       "title": "By project or place",
@@ -20830,7 +20864,8 @@
       "setUpAgency": "Set up your agency",
       "setUpInstitution": "For training institutions",
       "b2bEnquiry": "Business services enquiry (B2B)",
-      "projectEnquiry": "Individual project enquiry"
+      "projectEnquiry": "Individual project enquiry",
+      "findServices": "Find personal services"
     },
     "assistant": "Ask the assistant",
     "start": {
@@ -20850,5 +20885,36 @@
       "fullList": "Full list"
     },
     "more": "More"
+  },
+  "publicServices": {
+    "title": "Find personal services",
+    "lead": "Services published by individuals.",
+    "search": "Search",
+    "query": "Service or keyword",
+    "country": "Country",
+    "category": "Category",
+    "clear": "Clear filters",
+    "unavailable": "Service search is unavailable",
+    "unavailableHint": "Please try again later.",
+    "retry": "Try again",
+    "emptyFiltered": "No services match these filters",
+    "empty": "No personal services have been published publicly yet",
+    "results": "Services",
+    "remote": "Remote",
+    "pagination": "Search pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page}",
+    "refine": "Narrow your search to see more relevant services.",
+    "back": "All services",
+    "delivery": "Delivery",
+    "rate": "Rate",
+    "personalService": "Personal service",
+    "signInToRequest": "Sign in to request",
+    "manage": "Manage this service",
+    "contactUnavailable": "The request action is unavailable. Please try again later.",
+    "notFound": "Service not found",
+    "notFoundHint": "This service is no longer publicly available.",
+    "allCountries": "All countries"
   }
 }

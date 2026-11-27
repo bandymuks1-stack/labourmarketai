@@ -182,10 +182,11 @@
       "heroContact": "Hoe u contact opneemt",
       "provenance": "Het bedrijf heeft deze pagina zelf ingevuld.",
       "living": {
+        "activityTitle": "Werkregistraties per periode",
         "eyebrow": "Levend cv",
         "figures": {
-          "years": "{count, plural, one {jaar actief} other {jaar actief}}",
-          "hours": "gewerkte uren",
+          "years": "periode gedekt door registraties (jaren)",
+          "hours": "geregistreerde uren",
           "people": "{count, plural, one {persoon werkte hier} other {personen werkten hier}}",
           "projects": "{count, plural, one {project} other {projecten}}",
           "places": "{count, plural, one {werklocatie} other {werklocaties}}",
@@ -213,7 +214,8 @@
         "pendingLabel": "Wacht op goedkeuring",
         "ringLabel": "{share}% van de journaaluren bevestigd",
         "open": "Levend cv openen",
-        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}"
+        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}",
+        "currentTeamTitle": "Huidig team"
       }
     }
   },
@@ -7208,7 +7210,9 @@
       "countryPlaceholder": "bijv. LT",
       "remoteLabel": "Kan op afstand worden gedaan",
       "rateLabel": "Tarief (optioneel)",
-      "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief."
+      "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief.",
+      "publicLabel": "Deze persoonlijke dienst openbaar tonen",
+      "publicHint": "Als de dienst actief en niet verlopen is, zijn titel, beschrijving, categorie, land, uitvoering op afstand en tarief zichtbaar zonder inloggen. Vermeld geen privécontactgegevens. Vink uit en sla op om de openbare weergave uit te schakelen."
     },
     "save": "Opslaan",
     "saving": "Opslaan...",
@@ -7234,7 +7238,9 @@
     "linkToRequests": "Bekijk aanvragen voor uw diensten",
     "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren.",
     "removeQuestion": "Deze dienst definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wilt u hem alleen uit de zoekresultaten halen, pauzeer hem dan.",
-    "removeYes": "Ja, verwijderen"
+    "removeYes": "Ja, verwijderen",
+    "publicAudience": "Openbare zoekweergave gekozen",
+    "memberAudience": "Ingelogde leden gekozen"
   },
   "communication": {
     "origin": {
@@ -8878,13 +8884,32 @@
     "durationPendingUnnamed": "een organisatie",
     "durationPendingUndated": "data niet vastgelegd",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Verdeling van de uren",
+        "states": {
+          "actual": "Als werkelijk vastgelegd",
+          "reported": "Door de organisatie opgegeven",
+          "estimated": "Geschat",
+          "confirmed": "Ondersteund door een registratie van een andere partij"
+        },
+        "skillBasis": "Tijd uit het werkjournaal die aan afzonderlijke vaardigheden is toegerekend.",
+        "workTitle": "Werk en vaardigheden",
+        "attributedTime": "Aan deze vaardigheid toegewezen",
+        "confirmedTime": "Door de leidinggevende bevestigd: {hours}",
+        "activityLabel": "Fragment uit de registratie",
+        "contextLabel": "Werkcontext",
+        "mapTitle": "Vaardighedenkaart",
+        "workNodes": "Werk"
+      },
       "eyebrowFallback": "Levend cv",
       "facts": {
         "recorded": "vastgelegd in uw werkjournaal",
         "confirmed": "met registratie van een leidinggevende",
         "organization": "in registraties van organisaties",
         "experienceTotal": "beroepservaring in totaal",
-        "languages": "talen"
+        "languages": "talen",
+        "projects": "projecten",
+        "span": "eerste en laatste registratie"
       },
       "capEyebrow": "Vaardigheden",
       "capEyebrowHours": "{hours} u vastgelegd werk",
@@ -9002,7 +9027,15 @@
         "unknown": "Kon nu niet worden gelezen."
       }
     },
-    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer."
+    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer.",
+    "blocks": {
+      "overview": "Overzicht",
+      "experience": "Ervaring",
+      "projects": "Projecten",
+      "photos": "Foto's",
+      "documents": "Documenten",
+      "reviews": "Beoordelingen"
+    }
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -11166,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "Wat is LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Echt werk wordt professionele geschiedenis, bewijs en een levend cv.",
+    "metaDescription": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. In elke sector.",
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
-    "lede": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
+    "lede": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -12978,6 +13011,7 @@
     "available": "Beschikbaar",
     "availableFrom": "Vanaf {date}",
     "experienceYears": "{n} jr ervaring",
+    "recordedExperienceHours": "Toegankelijke werkregistraties: {hours} u",
     "skillsTitle": "Vaardigheden",
     "skillsEmpty": "Geen vaardigheden die u mag zien.",
     "skillVerified": "Bevestigd door een managersvermelding",
@@ -16040,7 +16074,7 @@
       "lasting": "Uw ervaring en kansen blijven bereikbaar — als u van baan, project of land wisselt."
     },
     "v3": {
-      "lead": "Registreren en de basisplaatsing van een behoefte zijn gratis.",
+      "lead": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. Registreren en de basisplaatsing van een behoefte zijn gratis.",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
       "market": {
@@ -19970,7 +20004,7 @@
     },
     "noHours": "Records zonder opgegeven uren: {count}. Onbekende uren tellen niet als nul.",
     "undated": "Records zonder opgegeven datum: {count}. Ze blijven in de geschiedenis hieronder.",
-    "periodApart": "{hours} u van het totaal zijn periodetotalen, apart gehouden en nooit verdeeld over dagen of maanden.",
+    "periodApart": "Daarnaast: {hours} u opgegeven als periodetotalen — niet meegeteld in de uren hierboven en nooit verdeeld over dagen of maanden.",
     "noWorkObject": "Records die niet aan een bij het platform bekend project of bekende plek zijn gekoppeld: {count}. Ze blijven in deze geschiedenis onder hun bronlabel.",
     "places": {
       "title": "Per project of plek",
@@ -20830,7 +20864,8 @@
       "setUpAgency": "Bureau registreren",
       "setUpInstitution": "Voor opleidingsinstellingen",
       "b2bEnquiry": "Aanvraag zakelijke diensten (B2B)",
-      "projectEnquiry": "Aanvraag individueel project"
+      "projectEnquiry": "Aanvraag individueel project",
+      "findServices": "Persoonlijke diensten zoeken"
     },
     "assistant": "Vraag de assistent",
     "start": {
@@ -20850,5 +20885,36 @@
       "fullList": "Volledige lijst"
     },
     "more": "Meer"
+  },
+  "publicServices": {
+    "title": "Persoonlijke diensten zoeken",
+    "lead": "Diensten die door personen openbaar zijn gepubliceerd.",
+    "search": "Zoeken",
+    "query": "Dienst of trefwoord",
+    "country": "Land",
+    "category": "Categorie",
+    "clear": "Filters wissen",
+    "unavailable": "Diensten zoeken is niet beschikbaar",
+    "unavailableHint": "Probeer het later opnieuw.",
+    "retry": "Opnieuw proberen",
+    "emptyFiltered": "Geen diensten gevonden met deze filters",
+    "empty": "Er zijn nog geen persoonlijke diensten openbaar gepubliceerd",
+    "results": "Diensten",
+    "remote": "Op afstand",
+    "pagination": "Zoekpagina’s",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "page": "Pagina {page}",
+    "refine": "Verfijn uw zoekopdracht om relevantere diensten te vinden.",
+    "back": "Alle diensten",
+    "delivery": "Uitvoering",
+    "rate": "Tarief",
+    "personalService": "Persoonlijke dienst",
+    "signInToRequest": "Inloggen om aan te vragen",
+    "manage": "Deze dienst beheren",
+    "contactUnavailable": "Aanvragen is niet beschikbaar. Probeer het later opnieuw.",
+    "notFound": "Dienst niet gevonden",
+    "notFoundHint": "Deze dienst is niet meer openbaar beschikbaar.",
+    "allCountries": "Alle landen"
   }
 }

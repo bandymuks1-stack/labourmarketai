@@ -182,10 +182,11 @@
       "heroContact": "Jak się skontaktować",
       "provenance": "Firma sama wypełniła tę stronę.",
       "living": {
+        "activityTitle": "Wpisy pracy według okresu",
         "eyebrow": "Żywe CV",
         "figures": {
-          "years": "{count, plural, one {rok działalności} few {lata działalności} many {lat działalności} other {lat działalności}}",
-          "hours": "przepracowanych godzin",
+          "years": "okres objęty wpisami (lata)",
+          "hours": "zapisane godziny",
           "people": "{count, plural, one {osoba pracowała} few {osoby pracowały} many {osób pracowało} other {osób pracowało}}",
           "projects": "{count, plural, one {projekt} few {projekty} many {projektów} other {projektów}}",
           "places": "{count, plural, one {obiekt} few {obiekty} many {obiektów} other {obiektów}}",
@@ -213,7 +214,8 @@
         "pendingLabel": "Czeka na zatwierdzenie",
         "ringLabel": "Potwierdzono {share}% godzin z dziennika",
         "open": "Otwórz Żywe CV",
-        "clientsMore": "Prace wykonane dla: {names} i {count} więcej"
+        "clientsMore": "Prace wykonane dla: {names} i {count} więcej",
+        "currentTeamTitle": "Obecny zespół"
       }
     }
   },
@@ -7208,7 +7210,9 @@
       "countryPlaceholder": "np. LT",
       "remoteLabel": "Można wykonać zdalnie",
       "rateLabel": "Stawka (opcjonalnie)",
-      "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa."
+      "rateHint": "Tylko dowolny tekst — na przykład orientacyjna stawka godzinowa.",
+      "publicLabel": "Pokazuj tę osobistą usługę publicznie",
+      "publicHint": "Gdy usługa jest aktywna i nie wygasła, jej tytuł, opis, kategoria, kraj, możliwość pracy zdalnej i stawka są widoczne bez logowania. Nie wpisuj prywatnych danych kontaktowych. Odznacz i zapisz, aby wyłączyć widoczność publiczną."
     },
     "save": "Zapisz",
     "saving": "Zapisywanie…",
@@ -7234,7 +7238,9 @@
     "linkToRequests": "Zapytania o Państwa usługi",
     "errorHasRequests": "Ta oferta ma zapytania, więc nie można jej usunąć – ich historia musi zostać zachowana. Mogą ją Państwo wstrzymać.",
     "removeQuestion": "Usunąć tę usługę na zawsze? Tego nie da się cofnąć. Aby tylko ukryć ją w wyszukiwaniu, proszę ją wstrzymać.",
-    "removeYes": "Tak, usuń"
+    "removeYes": "Tak, usuń",
+    "publicAudience": "Wybrano wyszukiwanie publiczne",
+    "memberAudience": "Wybrano zalogowanych użytkowników"
   },
   "communication": {
     "origin": {
@@ -8879,13 +8885,32 @@
     "durationPendingUnnamed": "organizacja",
     "durationPendingUndated": "daty nie zapisane",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Struktura godzin",
+        "states": {
+          "actual": "Zapisane jako rzeczywiste",
+          "reported": "Podane przez organizację",
+          "estimated": "Szacunkowe",
+          "confirmed": "Poparte wpisem drugiej strony"
+        },
+        "skillBasis": "Czas z dziennika pracy przypisany do poszczególnych umiejętności.",
+        "workTitle": "Prace i umiejętności",
+        "attributedTime": "Przypisane tej umiejętności",
+        "confirmedTime": "Potwierdzone przez przełożonego: {hours}",
+        "activityLabel": "Fragment wpisu",
+        "contextLabel": "Kontekst pracy",
+        "mapTitle": "Mapa umiejętności",
+        "workNodes": "Prace"
+      },
       "eyebrowFallback": "Żywe CV",
       "facts": {
         "recorded": "zapisane w dzienniku pracy",
         "confirmed": "z wpisem kierownika",
         "organization": "w zapisach organizacji",
         "experienceTotal": "doświadczenia zawodowego łącznie",
-        "languages": "języki"
+        "languages": "języki",
+        "projects": "projekty",
+        "span": "pierwszy i ostatni wpis"
       },
       "capEyebrow": "Umiejętności",
       "capEyebrowHours": "{hours} godz. zapisanej pracy",
@@ -9002,6 +9027,14 @@
         "none": "Nie ma jeszcze następnego kroku do pokazania. Więcej zapisanej pracy da więcej podstaw.",
         "unknown": "Nie udało się teraz odczytać."
       }
+    },
+    "blocks": {
+      "overview": "Przegląd",
+      "experience": "Doświadczenie",
+      "projects": "Projekty",
+      "photos": "Zdjęcia",
+      "documents": "Dokumenty",
+      "reviews": "Opinie"
     }
   },
   "todayScreen": {
@@ -11166,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "Czym jest LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Prawdziwa praca staje się historią zawodową, dowodami i żywym CV.",
+    "metaDescription": "LabourMarket.ai to platforma oparta na patencie i unikalnej idei organizacji i zarządzania relacjami zawodowymi. W każdej branży.",
     "navLabel": "O LabourMarket.ai",
     "eyebrow": "O platformie",
     "title": "Czym jest LabourMarket.ai",
-    "lede": "LabourMarket.ai to międzynarodowa platforma pracy, specjalistów i usług. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
+    "lede": "LabourMarket.ai to platforma oparta na patencie, stworzona w oparciu o unikalną ideę organizowania i zarządzania relacjami zawodowymi. Łączy ludzi, pracodawców, agencje, zespoły, projekty, szkolenia i usługi rynku pracy wokół prawdziwej pracy — od pierwszej rozmowy do następnej szansy.",
     "hero": {
       "lead": "Zawodowa wartość człowieka nie powinna znikać za każdym razem, gdy zmienia pracodawcę. Prawdziwa praca może stać się trwałą historią zawodową: co osoba robiła, gdzie, kiedy, jak długo, w jakiej roli, z jakimi umiejętnościami i jakie dowody oraz potwierdzenia to wspierają.",
       "leadOrg": "Dla organizacji ta sama prawdziwa praca buduje historię tego, co firma faktycznie zrobiła: projekty, zespoły, wykonane prace, godziny, kompetencje i dowody.",
@@ -12978,6 +13011,7 @@
     "available": "Dostępny",
     "availableFrom": "Od {date}",
     "experienceYears": "{n} lat doświadczenia",
+    "recordedExperienceHours": "Dostępne zapisy pracy: {hours} godz.",
     "skillsTitle": "Umiejętności",
     "skillsEmpty": "Brak umiejętności, które mogą Państwo zobaczyć.",
     "skillVerified": "Potwierdzone zapisem kierownika",
@@ -16040,7 +16074,7 @@
       "lasting": "Państwa doświadczenie i możliwości pozostają stale dostępne — przy zmianie pracy, projektu czy kraju."
     },
     "v3": {
-      "lead": "Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
+      "lead": "LabourMarket.ai to platforma oparta na patencie, stworzona w oparciu o unikalną ideę organizowania i zarządzania relacjami zawodowymi. Rejestracja i podstawowe zgłoszenie zapotrzebowania są bezpłatne.",
       "or": "lub proszę opisać własnymi słowami",
       "needFree": "Zapytanie można wysłać bez rejestracji. Wysłanie jest bezpłatne; warunki i cena usług są uzgadniane osobno.",
       "market": {
@@ -19970,7 +20004,7 @@
     },
     "noHours": "Wpisy bez podanych godzin: {count}. Nieznane godziny nie są liczone jako zero.",
     "undated": "Wpisy bez podanej daty: {count}. Zostają w historii poniżej.",
-    "periodApart": "{hours} godz. z sumy to sumy za okres, trzymane osobno i nigdy nierozdzielane na dni ani miesiące.",
+    "periodApart": "Ponadto: {hours} godz. podane jako sumy za okres — niewliczone w godziny powyżej i nigdy nierozdzielane na dni ani miesiące.",
     "noWorkObject": "Wpisy niepowiązane z projektem ani miejscem znanym platformie: {count}. Zostają w tej historii pod nazwą źródła.",
     "places": {
       "title": "Według projektu lub miejsca",
@@ -20830,7 +20864,8 @@
       "setUpAgency": "Rejestracja agencji",
       "setUpInstitution": "Dla instytucji szkoleniowych",
       "b2bEnquiry": "Zapytanie o usługi dla firm (B2B)",
-      "projectEnquiry": "Zapytanie o projekt indywidualny"
+      "projectEnquiry": "Zapytanie o projekt indywidualny",
+      "findServices": "Znajdź usługi osób prywatnych"
     },
     "assistant": "Zapytaj asystenta",
     "start": {
@@ -20850,5 +20885,36 @@
       "fullList": "Pełna lista"
     },
     "more": "Więcej"
+  },
+  "publicServices": {
+    "title": "Znajdź usługi osób prywatnych",
+    "lead": "Usługi opublikowane publicznie przez osoby prywatne.",
+    "search": "Szukaj",
+    "query": "Usługa lub słowo kluczowe",
+    "country": "Kraj",
+    "category": "Kategoria",
+    "clear": "Wyczyść filtry",
+    "unavailable": "Wyszukiwanie usług jest niedostępne",
+    "unavailableHint": "Spróbuj ponownie później.",
+    "retry": "Spróbuj ponownie",
+    "emptyFiltered": "Brak usług pasujących do tych filtrów",
+    "empty": "Nie opublikowano jeszcze publicznie usług osób prywatnych",
+    "results": "Usługi",
+    "remote": "Zdalnie",
+    "pagination": "Strony wyszukiwania",
+    "previous": "Poprzednia",
+    "next": "Następna",
+    "page": "Strona {page}",
+    "refine": "Zawęź wyszukiwanie, aby znaleźć bardziej odpowiednie usługi.",
+    "back": "Wszystkie usługi",
+    "delivery": "Realizacja",
+    "rate": "Stawka",
+    "personalService": "Usługa osoby prywatnej",
+    "signInToRequest": "Zaloguj się i wyślij zapytanie",
+    "manage": "Zarządzaj tą usługą",
+    "contactUnavailable": "Wysłanie zapytania jest niedostępne. Spróbuj później.",
+    "notFound": "Nie znaleziono usługi",
+    "notFoundHint": "Ta usługa nie jest już publicznie dostępna.",
+    "allCountries": "Wszystkie kraje"
   }
 }

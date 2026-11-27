@@ -66,6 +66,13 @@ export function ManagerInstructionComposer({
     workers.length === 1 ? workers[0].profileId : "",
   );
   const [selectError, setSelectError] = useState<string | null>(null);
+  // A worker reachable only through a project assignment (a direct hire) can be
+  // instructed on those projects only: the team-level option is not offered.
+  const projectOnly = workers.find((w) => w.profileId === workerId)?.projectIds ?? null;
+  const scopeProjects = projectOnly ? projects.filter((p) => projectOnly.includes(p.id)) : projects;
+  const [projectId, setProjectId] = useState("");
+  const effectiveProjectId =
+    projectOnly && !projectOnly.includes(projectId) ? (scopeProjects[0]?.id ?? "") : projectId;
 
   if (workers.length === 0) {
     return (
@@ -130,19 +137,20 @@ export function ManagerInstructionComposer({
       {/* F5 — optional project scope. "" = team/roster-level (unchanged). When a
           project is chosen the RPC requires the worker to be ACTIVELY assigned to
           it, else returns not_authorized. Only shown when the manager has projects. */}
-      {projects.length > 0 && (
+      {scopeProjects.length > 0 && (
         <label className="flex flex-col gap-1 text-xs">
           <span className="font-mono uppercase tracking-label text-text-muted">
             {labels.projectScopeLabel}
           </span>
           <select
             name="project_id"
-            defaultValue=""
+            value={effectiveProjectId}
+            onChange={(e) => setProjectId(e.target.value)}
             data-testid="instruction-project-scope"
             className="rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary"
           >
-            <option value="">{labels.teamLevelOption}</option>
-            {projects.map((p) => (
+            {projectOnly ? null : <option value="">{labels.teamLevelOption}</option>}
+            {scopeProjects.map((p) => (
               <option key={p.id} value={p.id}>
                 {p.title ?? p.id.slice(0, 8)}
                 {p.city ? ` · ${p.city}` : ""}

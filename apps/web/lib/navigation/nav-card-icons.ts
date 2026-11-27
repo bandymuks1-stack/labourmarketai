@@ -22,6 +22,7 @@ export const FUNCTION_ICONS = {
   serviceRequests: "inbox",
   marketListings: "store",
   commercial: "fileSignature",
+  findServices: "search",
   b2bEnquiry: "clipboardList",
   projectEnquiry: "fileText",
   network: "users",

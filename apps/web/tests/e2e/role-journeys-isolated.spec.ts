@@ -832,7 +832,7 @@ test("J-WRK. the placed worker records work on the company's project; the compan
   await expect(
     pw.getByRole("main").getByTestId(`journal-entry-status-${s.entryId}`).locator('li[data-step="approved"]'),
   ).toHaveCount(1, { timeout: 30_000 });
-  await pw.goto(`${BASE}/en/cv`);
+  await pw.goto(`${BASE}/en/cv?tab=experience`);
   const confirmed = pw.getByTestId("cv-confirmed-work").filter({ visible: true });
   await expect(confirmed, "the Living CV shows confirmed work").toBeVisible({ timeout: 30_000 });
   expect(Number(await confirmed.getAttribute("data-entries"))).toBeGreaterThan(0);

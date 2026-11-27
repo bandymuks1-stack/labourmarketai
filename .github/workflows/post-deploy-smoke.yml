@@ -233,6 +233,7 @@ jobs:
     permissions:
       contents: read
       actions: read # the deploy brake reads deploy-vps.yml runs
+      deployments: read # standalone re-checks verify production-vps records
     # The service-role key is NOT here: a job-level variable is handed to every step,
     # including dependency install and the browser run. It is set only on the one step
     # that mints the two sessions (guard: post-deploy-smoke-secret-scope).

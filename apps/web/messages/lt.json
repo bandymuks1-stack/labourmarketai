@@ -182,10 +182,11 @@
       "heroContact": "Kaip susisiekti",
       "provenance": "Šį puslapį užpildė pati įmonė.",
       "living": {
+        "activityTitle": "Veiklos įrašai pagal laikotarpį",
         "eyebrow": "Gyvas CV",
         "figures": {
-          "years": "{count, plural, one {veiklos metai} few {veiklos metai} other {veiklos metų}}",
-          "hours": "dirbtų valandų",
+          "years": "įrašų laikotarpio aprėptis (metais)",
+          "hours": "užfiksuotos valandos",
           "people": "{count, plural, one {žmogus dirbo} few {žmonės dirbo} other {žmonių dirbo}}",
           "projects": "{count, plural, one {projektas} few {projektai} other {projektų}}",
           "places": "{count, plural, one {objektas} few {objektai} other {objektų}}",
@@ -213,7 +214,8 @@
         "pendingLabel": "Laukia patvirtinimo",
         "ringLabel": "Patvirtinta {share}% žurnalo valandų",
         "open": "Atverti Gyvą CV",
-        "clientsMore": "Darbai atlikti užsakovui: {names} ir dar {count}"
+        "clientsMore": "Darbai atlikti užsakovui: {names} ir dar {count}",
+        "currentTeamTitle": "Dabartinė komanda"
       }
     }
   },
@@ -7208,7 +7210,9 @@
       "countryPlaceholder": "pvz. LT",
       "remoteLabel": "Gali būti atliekama nuotoliniu būdu",
       "rateLabel": "Įkainis (nebūtina)",
-      "rateHint": "Tik laisvas tekstas — pavyzdžiui, orientacinis valandinis įkainis."
+      "rateHint": "Tik laisvas tekstas — pavyzdžiui, orientacinis valandinis įkainis.",
+      "publicLabel": "Rodyti šią asmeninę paslaugą viešai",
+      "publicHint": "Aktyvios ir galiojančios paslaugos pavadinimą, aprašymą, kategoriją, šalį, nuotolinio atlikimo galimybę ir įkainį matys ir neprisijungę lankytojai. Nerašykite privačių kontaktų. Nuimkite žymę ir išsaugokite, kad viešas rodymas būtų išjungtas."
     },
     "save": "Išsaugoti",
     "saving": "Saugoma...",
@@ -7234,7 +7238,9 @@
     "linkToRequests": "Peržiūrėkite užklausas dėl savo paslaugų",
     "errorHasRequests": "Šis pasiūlymas turi užklausų, todėl jo ištrinti negalima – užklausų istorija turi išlikti. Galite jį sustabdyti.",
     "removeQuestion": "Ištrinti paslaugą visam laikui? Atkurti nebus galima. Jei norite tik paslėpti iš paieškos, pristabdykite.",
-    "removeYes": "Taip, ištrinti"
+    "removeYes": "Taip, ištrinti",
+    "publicAudience": "Pasirinkta vieša paieška",
+    "memberAudience": "Pasirinkti prisijungę nariai"
   },
   "communication": {
     "origin": {
@@ -8879,13 +8885,32 @@
     "durationPendingUnnamed": "organizacija",
     "durationPendingUndated": "datos neužrašytos",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Valandų sudėtis",
+        "states": {
+          "actual": "Užfiksuotos kaip faktinės",
+          "reported": "Organizacijos nurodytos",
+          "estimated": "Apytikriai apskaičiuotos",
+          "confirmed": "Kitos šalies įrašu pagrįstos"
+        },
+        "skillBasis": "Darbo žurnalo laikas, priskirtas atskiriems įgūdžiams.",
+        "workTitle": "Darbai ir įgūdžiai",
+        "attributedTime": "Šiam įgūdžiui priskirta",
+        "confirmedTime": "Vadovo patvirtinta: {hours}",
+        "activityLabel": "Įrašo ištrauka",
+        "contextLabel": "Darbo kontekstas",
+        "mapTitle": "Kompetencijų žemėlapis",
+        "workNodes": "Darbai"
+      },
       "eyebrowFallback": "Gyvas CV",
       "facts": {
         "recorded": "užfiksuota darbo žurnale",
         "confirmed": "su vadovo įrašu",
         "organization": "organizacijų įrašuose",
         "experienceTotal": "profesinės patirties iš viso",
-        "languages": "kalbos"
+        "languages": "kalbos",
+        "projects": "projektai",
+        "span": "pirmas ir paskutinis įrašas"
       },
       "capEyebrow": "Gebėjimai",
       "capEyebrowHours": "{hours} val. užfiksuoto darbo",
@@ -9002,6 +9027,14 @@
         "none": "Kito žingsnio kol kas parodyti negalime. Daugiau įrašyto darbo duos daugiau pagrindo.",
         "unknown": "Dabar nepavyko perskaityti."
       }
+    },
+    "blocks": {
+      "overview": "Apžvalga",
+      "experience": "Patirtis",
+      "projects": "Projektai",
+      "photos": "Nuotraukos",
+      "documents": "Dokumentai",
+      "reviews": "Atsiliepimai"
     }
   },
   "todayScreen": {
@@ -11166,11 +11199,11 @@
   },
   "about": {
     "metaTitle": "Kas yra LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Tikras darbas tampa profesine istorija, įrodymais ir gyvu CV.",
+    "metaDescription": "LabourMarket.ai – patentu paremta platforma, sukurta remiantis unikalia darbo santykių organizavimo ir valdymo idėja. Visiems sektoriams.",
     "navLabel": "Apie LabourMarket.ai",
     "eyebrow": "Apie platformą",
     "title": "Kas yra LabourMarket.ai",
-    "lede": "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — nuo pirmo pokalbio iki kitos galimybės.",
+    "lede": "LabourMarket.ai – patentu paremta platforma, sukurta remiantis unikalia darbo santykių organizavimo ir valdymo idėja. Ji jungia žmones, darbdavius, agentūras, komandas, projektus, mokymus ir darbo rinkos paslaugas aplink tikrą darbą — nuo pirmo pokalbio iki kitos galimybės.",
     "hero": {
       "lead": "Žmogaus profesinė vertė neturi dingti kaskart, kai jis keičia darbdavį. Tikras darbas gali tapti ilgalaike profesine istorija: ką žmogus dirbo, kur, kada, kiek laiko, kokiu vaidmeniu, kokiais įgūdžiais ir kokie įrodymai bei patvirtinimai tai remia.",
       "leadOrg": "Organizacijoms tas pats tikras darbas kaupia įmonės realiai atlikto darbo istoriją: projektus, komandas, atliktus darbus, valandas, kompetencijas ir įrodymus.",
@@ -12978,6 +13011,7 @@
     "available": "Pasiekiamas",
     "availableFrom": "Nuo {date}",
     "experienceYears": "{n} m. patirtis",
+    "recordedExperienceHours": "Matomuose darbo įrašuose: {hours} val.",
     "skillsTitle": "Įgūdžiai",
     "skillsEmpty": "Įgūdžių, kuriuos galite matyti, nėra.",
     "skillVerified": "Patvirtinta vadovo įrašu",
@@ -16040,7 +16074,7 @@
       "lasting": "Jūsų patirtis ir galimybės išlieka pasiekiamos nuolat — keičiant darbą, projektą ar šalį."
     },
     "v3": {
-      "lead": "Registracija ir pagrindinis poreikio skelbimas nemokami.",
+      "lead": "LabourMarket.ai – patentu paremta platforma, sukurta remiantis unikalia darbo santykių organizavimo ir valdymo idėja. Registracija ir pagrindinis poreikio skelbimas nemokami.",
       "or": "arba aprašykite savo žodžiais",
       "needFree": "Užklausą galite pateikti be registracijos. Pateikimas nemokamas; paslaugų sąlygos ir kaina derinamos atskirai.",
       "market": {
@@ -19970,7 +20004,7 @@
     },
     "noHours": "Įrašai, kuriuose nenurodytos valandos: {count}. Nežinomos valandos neskaičiuojamos kaip nulis.",
     "undated": "Įrašai be nurodytos datos: {count}. Jie lieka istorijoje žemiau.",
-    "periodApart": "{hours} val. iš bendros sumos yra laikotarpio sumos, laikomos atskirai ir niekada neišskaidomos į dienas ar mėnesius.",
+    "periodApart": "Be to: {hours} val. nurodyta kaip laikotarpio sumos — neįtraukta į aukščiau nurodytas valandas ir niekada neišskaidoma į dienas ar mėnesius.",
     "noWorkObject": "Įrašai, nesusieti su platformai žinomu projektu ar vieta: {count}. Jie lieka šioje istorijoje pagal šaltinio pavadinimą.",
     "places": {
       "title": "Pagal projektą ar vietą",
@@ -20830,7 +20864,8 @@
       "setUpAgency": "Užregistruoti agentūrą",
       "setUpInstitution": "Mokymo įstaigoms",
       "b2bEnquiry": "Verslo paslaugų užklausa (B2B)",
-      "projectEnquiry": "Individualaus projekto užklausa"
+      "projectEnquiry": "Individualaus projekto užklausa",
+      "findServices": "Ieškoti asmeninių paslaugų"
     },
     "assistant": "Klausti asistento",
     "start": {
@@ -20850,5 +20885,36 @@
       "fullList": "Visas sąrašas"
     },
     "more": "Daugiau"
+  },
+  "publicServices": {
+    "title": "Ieškoti asmeninių paslaugų",
+    "lead": "Asmenų viešai paskelbtos paslaugos.",
+    "search": "Ieškoti",
+    "query": "Paslauga arba raktažodis",
+    "country": "Šalis",
+    "category": "Kategorija",
+    "clear": "Išvalyti filtrus",
+    "unavailable": "Paslaugų paieška nepasiekiama",
+    "unavailableHint": "Bandykite dar kartą vėliau.",
+    "retry": "Bandyti dar kartą",
+    "emptyFiltered": "Pagal šiuos filtrus paslaugų nerasta",
+    "empty": "Viešai paskelbtų asmeninių paslaugų dar nėra",
+    "results": "Paslaugos",
+    "remote": "Nuotoliniu būdu",
+    "pagination": "Paieškos puslapiai",
+    "previous": "Ankstesnis",
+    "next": "Kitas",
+    "page": "Puslapis {page}",
+    "refine": "Patikslinkite paiešką, kad rastumėte tinkamesnių paslaugų.",
+    "back": "Visos paslaugos",
+    "delivery": "Atlikimas",
+    "rate": "Įkainis",
+    "personalService": "Asmeninė paslauga",
+    "signInToRequest": "Prisijungti ir pateikti užklausą",
+    "manage": "Tvarkyti šią paslaugą",
+    "contactUnavailable": "Užklausos pateikti nepavyksta. Bandykite vėliau.",
+    "notFound": "Paslauga nerasta",
+    "notFoundHint": "Ši paslauga nebėra viešai prieinama.",
+    "allCountries": "Visos šalys"
   }
 }

@@ -348,6 +348,7 @@ jobs:
     permissions:
       contents: read
       actions: read # the deploy brake and the last green run
+      deployments: read # permission ceiling for the reusable smoke workflow
       issues: write # the one regression issue (deploy-freeze)
     uses: ./.github/workflows/post-deploy-smoke.yml
     with:

@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+import { LivingCvIdentityFrame } from "@/components/app/cv/premium-living-cv";
+import { OrganizationLivingActivity } from "@/components/app/organization/organization-living-activity";
 import { Globe, Mail, Phone } from "lucide-react";
 
 import {
@@ -196,17 +198,12 @@ function numberFormatter(locale: string) {
   return (n: number) => nf.format(n);
 }
 
-function spanText(span: OrganizationLivingRecord["span"]): string | null {
-  if (!span) return null;
-  return span.from === span.to ? String(span.from) : `${span.from}–${span.to}`;
-}
-
 function Panel({ title, testId, children }: { readonly title: string; readonly testId: string; readonly children: ReactNode }) {
   return (
     <section
       aria-label={title}
       data-testid={testId}
-      className="flex min-w-0 flex-col gap-4 rounded-card border border-ink-600 bg-ink-800/40 p-4 sm:p-5"
+      className="flex min-w-0 flex-col gap-4 rounded-card border border-border-subtle bg-surface-1 p-4 sm:p-5"
     >
       <h3 className="font-display text-card-title font-semibold text-text-primary">{title}</h3>
       {children}
@@ -214,41 +211,19 @@ function Panel({ title, testId, children }: { readonly title: string; readonly t
   );
 }
 
-/** The collectible identity card: gold frame, monogram, name, country, years. */
-function IdentityCard({
-  name,
-  country,
-  span,
-  t,
-}: {
-  readonly name: string;
-  readonly country: string | null;
-  readonly span: string | null;
-  readonly t: CompanyTeamTranslate;
-}) {
+/** Compact monogram; the visible name and country sit beside it. */
+function IdentityCard({ name }: { readonly name: string }) {
   return (
-    <div
-      data-testid="org-living-card"
-      className="relative mx-auto flex w-full min-w-0 max-w-[18rem] flex-col items-center gap-4 overflow-hidden rounded-[1.75rem] border-2 border-brand-blue/80 bg-gradient-to-b from-ink-700 to-ink-900 px-5 pb-6 pt-7 text-center shadow-2xl lg:mx-0"
-    >
-      <span aria-hidden className="pointer-events-none absolute inset-1.5 rounded-[1.45rem] border border-brand-blue/25" />
-      <Eyebrow className="text-brand-blue">{t(`${LIVING}.eyebrow`)}</Eyebrow>
-      <span
-        aria-hidden
-        className="flex h-28 w-28 items-center justify-center rounded-full border-2 border-brand-blue/70 bg-ink-900 font-display text-[2.6rem] font-bold tracking-[-0.04em] text-brand-blue"
-      >
-        {organizationMonogram(name)}
-      </span>
-      <p className="font-display text-xl font-bold uppercase leading-tight tracking-[-0.02em] text-text-primary [overflow-wrap:anywhere]">
-        {name}
-      </p>
-      {country || span ? (
-        <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-          {country ? <Stamp>{country}</Stamp> : null}
-          {span ? <Stamp>{span}</Stamp> : null}
-        </div>
-      ) : null}
-    </div>
+    <LivingCvIdentityFrame testId="org-living-card">
+      <div className="flex min-w-0 items-center justify-center rounded-xl bg-surface-2 py-2 md:py-4">
+        <span
+          aria-hidden
+          className="flex size-16 items-center justify-center rounded-full bg-surface-1 font-display text-2xl font-bold tracking-tight text-brand-blue md:size-24 md:text-4xl"
+        >
+          {organizationMonogram(name)}
+        </span>
+      </div>
+    </LivingCvIdentityFrame>
   );
 }
 
@@ -262,89 +237,22 @@ function FactStrip({
   readonly t: CompanyTeamTranslate;
   readonly num: (n: number) => string;
 }) {
-  if (living.figures.length === 0) return null;
+  const figures = living.figures.filter((figure) => figure.key !== "years" && figure.key !== "hours" && figure.key !== "team");
+  if (figures.length === 0) return null;
   return (
     <dl
       data-testid="org-living-figures"
-      className="grid grid-cols-2 gap-px overflow-hidden rounded-card border border-ink-600 bg-ink-600 sm:grid-cols-4"
+      className="flex min-w-0 flex-wrap items-baseline gap-x-6 gap-y-2"
     >
-      {living.figures.map((f) => (
-        <div key={f.key} className="flex min-w-0 flex-col gap-1 bg-ink-800 px-4 py-3.5" data-figure={f.key}>
-          <dd className="whitespace-nowrap font-display text-[clamp(1.5rem,5.5vw,2.1rem)] font-bold leading-none tracking-[-0.03em] text-text-primary [font-feature-settings:'tnum']">
+      {figures.map((f) => (
+        <div key={f.key} className="flex min-w-0 flex-wrap items-baseline gap-x-2 gap-y-1" data-figure={f.key}>
+          <dd className="font-display text-xl font-semibold leading-tight tabular-nums text-text-primary">
             {num(f.value)}
           </dd>
           <dt className="text-meta text-text-muted">{t(`${LIVING}.figures.${f.key}`, { count: f.value })}</dt>
         </div>
       ))}
     </dl>
-  );
-}
-
-/** Confirmed share of the journal's hours, as a ring; the organization's own records beside it, never in it. */
-function ConfirmedRing({ share, label }: { readonly share: number; readonly label: string }) {
-  const r = 34;
-  const c = 2 * Math.PI * r;
-  return (
-    <svg viewBox="0 0 84 84" role="img" aria-label={label} className="h-20 w-20 shrink-0" data-testid="org-living-ring">
-      <circle cx="42" cy="42" r={r} fill="none" strokeWidth="8" className="stroke-ink-600" />
-      <circle
-        cx="42"
-        cy="42"
-        r={r}
-        fill="none"
-        strokeWidth="8"
-        strokeLinecap="round"
-        strokeDasharray={`${(share / 100) * c} ${c}`}
-        transform="rotate(-90 42 42)"
-        className="stroke-state-success"
-      />
-      <text x="42" y="47" textAnchor="middle" className="fill-text-primary font-display text-sm font-bold">
-        {share}%
-      </text>
-    </svg>
-  );
-}
-
-function ExperienceSummary({
-  living,
-  t,
-  hours,
-}: {
-  readonly living: OrganizationLivingRecord;
-  readonly t: CompanyTeamTranslate;
-  readonly hours: (n: number) => string;
-}) {
-  const exp = living.experience;
-  if (!exp) return null;
-  const journal =
-    exp.confirmedHours !== null && exp.pendingHours !== null ? exp.confirmedHours + exp.pendingHours : 0;
-  const share = journal > 0 ? Math.round((exp.confirmedHours! / journal) * 100) : null;
-  const all: { key: string; level: "confirmed" | "recorded" | "declared"; label: string; value: number | null }[] = [
-    { key: "confirmed", level: "confirmed", label: t(`${LIVING}.confirmedLabel`), value: exp.confirmedHours },
-    { key: "pending", level: "declared", label: t(`${LIVING}.pendingLabel`), value: exp.pendingHours },
-    { key: "recorded", level: "recorded", label: t(`${LIVING}.recordedLabel`), value: exp.recordedHours },
-  ];
-  // An unread source shows no row at all, never "0 h".
-  const rows = all.filter((r): r is typeof r & { value: number } => r.value !== null && r.value > 0);
-  return (
-    <Panel title={t(`${LIVING}.experienceTitle`)} testId="org-living-summary">
-      <div className="flex min-w-0 items-center gap-4">
-        {share !== null ? <ConfirmedRing share={share} label={t(`${LIVING}.ringLabel`, { share })} /> : null}
-        <ul className="flex min-w-0 flex-1 flex-col gap-2">
-          {rows.map((r) => (
-            <li key={r.key} className="flex min-w-0 items-center justify-between gap-3 text-support" data-row={r.key}>
-              <span className="flex min-w-0 items-center gap-2 text-text-secondary">
-                <LevelMark level={r.level} />
-                <span className="[overflow-wrap:anywhere]">{r.label}</span>
-              </span>
-              <span className="whitespace-nowrap font-semibold text-text-primary [font-feature-settings:'tnum']">
-                {hours(r.value)}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </div>
-    </Panel>
   );
 }
 
@@ -355,42 +263,46 @@ function Competencies({
   readonly living: OrganizationLivingRecord;
   readonly t: CompanyTeamTranslate;
 }) {
-  const skills = (living.skills ?? [])
-    .map((s) => ({ ...s, label: t.has(`skillNames.${s.slug}`) ? t(`skillNames.${s.slug}`) : null }))
-    .filter((s): s is typeof s & { label: string } => s.label !== null);
-  if (living.capabilities.length === 0 && skills.length === 0 && living.rosterSize === null) return null;
+  if (living.capabilities.length === 0) return null;
   return (
-    <Panel title={t(`${LIVING}.doTitle`)} testId="org-living-work">
+    <Panel title={t(`${LIVING}.doTitle`)} testId="org-living-capabilities-panel">
       {living.capabilities.length > 0 ? (
         <ul className="flex flex-wrap gap-2" data-testid="org-living-capabilities">
           {living.capabilities.map((slug) => (
             <li
               key={slug}
-              className="min-w-0 rounded-full border border-brand-blue/40 bg-brand-blue/10 px-3 py-1 text-support text-text-primary [overflow-wrap:anywhere]"
+              className="min-w-0 rounded-full border border-brand-blue/40 bg-surface-2 px-3 py-1 text-support text-text-primary [overflow-wrap:anywhere]"
             >
               {t(CAPABILITY_LABEL[slug] ?? slug)}
             </li>
           ))}
         </ul>
       ) : null}
+    </Panel>
+  );
+}
+
+function CurrentTeam({ living, t }: { readonly living: OrganizationLivingRecord; readonly t: CompanyTeamTranslate }) {
+  const skills = (living.skills ?? [])
+    .map((skill) => ({ ...skill, label: t.has(`skillNames.${skill.slug}`) ? t(`skillNames.${skill.slug}`) : null }))
+    .filter((skill): skill is typeof skill & { label: string } => skill.label !== null);
+  if (living.rosterSize === null && skills.length === 0) return null;
+  return (
+    <Panel title={t(`${LIVING}.currentTeamTitle`)} testId="org-living-work">
+      {living.rosterSize !== null ? (
+        <p className="font-display text-2xl font-semibold tabular-nums text-text-primary" data-testid="org-living-team">
+          {t(`${LIVING}.team`, { count: living.rosterSize })}
+        </p>
+      ) : null}
       {skills.length > 0 ? (
         <ul className="flex flex-wrap gap-2" data-testid="org-living-skills">
-          {skills.map((s) => (
-            <li
-              key={s.slug}
-              data-confirmed={s.confirmed ? "true" : "false"}
-              className="flex min-w-0 items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-support text-text-primary [overflow-wrap:anywhere]"
-            >
-              <LevelMark level={s.confirmed ? "confirmed" : "declared"} />
-              {s.label}
+          {skills.map((skill) => (
+            <li key={skill.slug} data-confirmed={skill.confirmed ? "true" : "false"} className="flex min-w-0 items-center gap-2 rounded-full border border-border-default px-3 py-1 text-support text-text-primary [overflow-wrap:anywhere]">
+              <LevelMark level={skill.confirmed ? "confirmed" : "declared"} />
+              {skill.label}
             </li>
           ))}
         </ul>
-      ) : null}
-      {living.rosterSize !== null ? (
-        <p className="text-support text-text-secondary" data-testid="org-living-team">
-          {t(`${LIVING}.team`, { count: living.rosterSize })}
-        </p>
       ) : null}
     </Panel>
   );
@@ -432,13 +344,13 @@ function Gallery({
               src={m.url}
               alt={m.caption ?? ""}
               loading="lazy"
-              className="aspect-square w-full rounded-card border border-ink-600 object-cover"
+              className="aspect-square w-full rounded-card border border-border-subtle object-cover"
             />
             {overlay ? (
               <a
                 href={more.href}
                 aria-label={more.label}
-                className="absolute inset-0 flex items-center justify-center rounded-card bg-ink-900/70 font-display text-xl font-bold text-text-primary"
+                className="absolute inset-0 flex items-center justify-center rounded-card bg-surface-1/80 font-display text-xl font-bold text-text-primary"
               >
                 +{more.count}
               </a>
@@ -465,7 +377,7 @@ function LivingTabs({
     // A segmented control that fits a 375 px screen: three to a row on a
     // phone, one row from `sm`; it never scrolls sideways (decision 0034).
     <nav aria-label={t(`${LIVING}.eyebrow`)} data-testid="org-living-tabs">
-      <ul className="grid grid-cols-3 gap-1 rounded-card border border-ink-600 bg-ink-800/40 p-1 sm:flex sm:w-max sm:max-w-full sm:flex-wrap">
+      <ul className="grid grid-cols-3 gap-1 rounded-card border border-border-subtle bg-surface-1 p-1 sm:flex sm:w-max sm:max-w-full sm:flex-wrap">
         {available.map((key) => (
           <li key={key} className="min-w-0">
             <a
@@ -474,7 +386,7 @@ function LivingTabs({
               data-tab={key}
               className={
                 key === tab
-                  ? "flex min-h-11 items-center justify-center rounded-[0.6rem] bg-brand-blue/15 px-3 text-center text-support font-semibold text-text-primary [overflow-wrap:anywhere]"
+                  ? "flex min-h-11 items-center justify-center rounded-[0.6rem] bg-surface-2 px-3 text-center text-support font-semibold text-text-primary [overflow-wrap:anywhere]"
                   : "flex min-h-11 items-center justify-center rounded-[0.6rem] px-3 text-center text-support text-text-secondary [overflow-wrap:anywhere] hover:text-text-primary"
               }
             >
@@ -493,7 +405,7 @@ function CompactIdentity({ name, t }: { readonly name: string; readonly t: Compa
     <div className="flex min-w-0 items-center gap-3" data-testid="company-team-hero">
       <span
         aria-hidden
-        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-brand-blue/70 bg-ink-900 font-display text-base font-bold text-brand-blue"
+        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border-2 border-brand-blue/70 bg-surface-2 font-display text-base font-bold text-brand-blue"
       >
         {organizationMonogram(name)}
       </span>
@@ -512,10 +424,12 @@ function OrganizationLivingCv({
   locale,
   tab: requested,
   tabHref,
+  history,
 }: {
   readonly view: CompanyTeamProfileView;
   readonly living: OrganizationLivingRecord;
   readonly t: CompanyTeamTranslate;
+  readonly history?: ReactNode;
   readonly locale: string;
   readonly tab: OrganizationLivingTab;
   readonly tabHref: Readonly<Record<OrganizationLivingTab, string>>;
@@ -537,7 +451,7 @@ function OrganizationLivingCv({
   const has: Record<OrganizationLivingTab, boolean> = {
     overview: true,
     projects: allProjects.length > 0,
-    experience: exp !== null || living.places !== null || living.clients.length > 0,
+    experience: living.historyDetail !== null || exp !== null || living.places !== null || living.clients.length > 0,
     gallery: living.gallery.length > 0,
     team: living.rosterSize !== null || living.peopleWorked !== null || skills.length > 0,
   };
@@ -551,28 +465,38 @@ function OrganizationLivingCv({
   return (
     <section data-testid="org-living-cv" aria-label={hero.name} className="flex w-full min-w-0 flex-col gap-6">
       {tab === "overview" ? (
-        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[minmax(0,18rem)_minmax(0,1fr)] lg:items-start" data-testid="org-living-tab-overview">
-          <IdentityCard name={hero.name} country={hero.country} span={spanText(living.span)} t={t} />
-          <div className="flex min-w-0 flex-col gap-5">
-            <header className="flex min-w-0 flex-col gap-2" data-testid="company-team-hero">
-              <h2 className="font-display text-[clamp(1.9rem,6vw,3.25rem)] font-bold leading-[1] tracking-[-0.035em] text-text-primary [overflow-wrap:anywhere]">
+        <div className="flex min-w-0 flex-col gap-5" data-testid="org-living-tab-overview">
+          <header className="flex min-w-0 items-start gap-4 md:gap-6" data-testid="company-team-hero">
+            <div className="w-24 min-w-0 shrink-0 md:w-40">
+              <IdentityCard name={hero.name} />
+            </div>
+            <div className="flex min-w-0 flex-1 flex-col gap-2">
+              <Eyebrow className="text-brand-blue">{t(`${LIVING}.eyebrow`)}</Eyebrow>
+              <h2 className="font-display text-[clamp(1.5rem,3.5vw,2.5rem)] font-semibold leading-tight tracking-tight text-text-primary [overflow-wrap:anywhere]">
                 {hero.name}
               </h2>
               {hero.tagline ? (
-                <p className="max-w-[48ch] text-body leading-snug text-text-secondary [overflow-wrap:anywhere]">{hero.tagline}</p>
+                <p className="max-w-[48ch] text-sm leading-relaxed text-text-secondary [overflow-wrap:anywhere] sm:text-base">{hero.tagline}</p>
               ) : null}
-              {about ? (
-                <p className="line-clamp-3 max-w-[68ch] text-support leading-relaxed text-text-secondary [overflow-wrap:anywhere]">
-                  {about}
-                </p>
-              ) : null}
-            </header>
-            <FactStrip living={living} t={t} num={num} />
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-              <Competencies living={living} t={t} />
-              <ExperienceSummary living={living} t={t} hours={hours} />
+              {hero.country ? <Stamp className="text-text-secondary [overflow-wrap:anywhere]">{hero.country}</Stamp> : null}
             </div>
+          </header>
+          {about ? (
+            <p className="line-clamp-3 max-w-[68ch] text-support leading-relaxed text-text-secondary [overflow-wrap:anywhere]">
+              {about}
+            </p>
+          ) : null}
+          <FactStrip living={living} t={t} num={num} />
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+            <CurrentTeam living={living} t={t} />
+            <Competencies living={living} t={t} />
           </div>
+          <OrganizationLivingActivity
+            historyDetail={living.historyDetail}
+            locale={locale}
+            t={t}
+            action={<a href={tabHref.experience} className="text-sm font-medium text-brand-blue hover:underline">{t(`${LIVING}.tabs.experience`)} <span aria-hidden>→</span></a>}
+          />
         </div>
       ) : (
         <CompactIdentity name={hero.name} t={t} />
@@ -597,8 +521,8 @@ function OrganizationLivingCv({
 
       {tab === "experience" ? (
         <div className="flex min-w-0 flex-col gap-5" data-testid="org-living-tab-experience">
-          {exp ? (
-            <Card>
+          {exp && (exp.confirmedHours !== null || (!history && exp.recordedHours !== null)) ? (
+            <Card data-testid="org-living-summary">
               <FigurePair testId="org-living-experience-pair">
                 {exp.confirmedHours !== null ? (
                   <Figure
@@ -610,7 +534,7 @@ function OrganizationLivingCv({
                     testId="org-living-confirmed"
                   />
                 ) : null}
-                {exp.recordedHours !== null ? (
+                {!history && exp.recordedHours !== null ? (
                   <Figure
                     label={t(`${LIVING}.recordedLabel`)}
                     value={hours(exp.recordedHours)}
@@ -622,7 +546,8 @@ function OrganizationLivingCv({
               </FigurePair>
             </Card>
           ) : null}
-          {living.places !== null ? (
+          {history}
+          {!history && living.places !== null ? (
             <p className="text-support text-text-secondary" data-testid="org-living-places">
               <span className="font-semibold text-text-primary [font-feature-settings:'tnum']">{num(living.places)}</span>{" "}
               {t(`${LIVING}.figures.places`, { count: living.places })}
@@ -647,9 +572,9 @@ function OrganizationLivingCv({
       {tab === "team" ? (
         <div className="flex min-w-0 flex-col gap-5" data-testid="org-living-tab-team">
           {teamFigures.length > 0 ? (
-            <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-card border border-ink-600 bg-ink-600 sm:max-w-md" data-testid="org-living-team-figures">
+            <dl className="grid grid-cols-2 gap-px overflow-hidden rounded-card border border-border-subtle bg-border-subtle sm:max-w-md" data-testid="org-living-team-figures">
               {teamFigures.map((f) => (
-                <div key={f.key} className="flex min-w-0 flex-col gap-1 bg-ink-800 px-4 py-3.5" data-figure={f.key}>
+                <div key={f.key} className="flex min-w-0 flex-col gap-1 bg-surface-1 px-4 py-3.5" data-figure={f.key}>
                   <dd className="whitespace-nowrap font-display text-[clamp(1.5rem,5.5vw,2.1rem)] font-bold leading-none tracking-[-0.03em] text-text-primary [font-feature-settings:'tnum']">
                     {num(f.value)}
                   </dd>
@@ -664,7 +589,7 @@ function OrganizationLivingCv({
                 <li
                   key={s.slug}
                   data-confirmed={s.confirmed ? "true" : "false"}
-                  className="flex min-w-0 items-center gap-2 rounded-full border border-ink-500 px-3 py-1 text-support text-text-primary [overflow-wrap:anywhere]"
+                  className="flex min-w-0 items-center gap-2 rounded-full border border-border-default px-3 py-1 text-support text-text-primary [overflow-wrap:anywhere]"
                 >
                   <LevelMark level={s.confirmed ? "confirmed" : "declared"} />
                   {s.label}
@@ -690,6 +615,7 @@ export function CompanyTeamProfile({
     readonly locale: string;
     readonly tab: OrganizationLivingTab;
     readonly tabHref: Readonly<Record<OrganizationLivingTab, string>>;
+    readonly history?: ReactNode;
   };
 }) {
   if (view.living && member) {
