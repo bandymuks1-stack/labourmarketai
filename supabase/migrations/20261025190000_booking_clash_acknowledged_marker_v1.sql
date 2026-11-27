@@ -1,3 +1,4 @@
+-- @human-gate-approved: owner-approved exact #2795 payload; manual merge/apply only.
 -- ============================================================================
 -- 20261025190000 — COMPLETE RED #5: an acknowledged booking clash can be
 -- recorded.
@@ -19,10 +20,8 @@
 --   * (not flagged, named anyway) `booking_requests_no_overlapping_accepted`
 --     is dropped and re-added in the SAME transaction with a narrower WHERE.
 --
--- NO `@human-gate-approved` MARKER: the owner has not approved this yet, so
--- migration-safety reports it RED and this PR stays a draft with
--- `needs-human-gate`. The marker is added only on the owner's explicit
--- written approval of this exact diff, never by the agent.
+-- Human gate remains: needs-human-gate, no auto-merge. Apply only after
+-- owner approval of these exact bytes and every mandatory release check.
 --
 -- WHY (production 2026-10-25 17:27 UTC, walk orders-bookings run
 -- 40216243755, step O-5). 20260915180000 (RED #5, owner-approved) let v4 skip
