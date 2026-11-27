@@ -11,6 +11,7 @@ import {
   evaluateRateCap,
   rateCapWindowStartIso,
 } from "@/lib/communication/rate-caps";
+import { notifyNewMessageRecipients } from "@/lib/communication/communication-core";
 
 /**
  * Work-instructions server actions (slice work-instructions-v1).
@@ -83,7 +84,7 @@ export async function sendWorkInstructionAction(
     return { ok: false, code: "invalid" };
   }
 
-  const { error } = projectId
+  const { data: messageId, error } = projectId
     ? await asAny(supabase).rpc("send_work_instruction_to_project", {
         p_worker_profile_id: workerProfileId,
         p_body: body,
@@ -103,6 +104,19 @@ export async function sendWorkInstructionAction(
       return { ok: false, code: "not_authorized" };
     console.error("[instructions] send failed:", error.message);
     return { ok: false, code: "error", message: error.message };
+  }
+
+  // MSG-3: the worker is told a new message arrived, through the one emitter
+  // every message uses. The RPC returns the message id; its thread is read
+  // under the sender's own session. Best-effort: the instruction is sent.
+  if (typeof messageId === "string" && messageId) {
+    const { data: row } = await asAny(supabase)
+      .from("conversation_messages")
+      .select("conversation_id")
+      .eq("id", messageId)
+      .maybeSingle();
+    const conversationId = (row as { conversation_id?: string } | null)?.conversation_id;
+    if (conversationId) await notifyNewMessageRecipients(supabase, user.id, conversationId);
   }
 
   revalidatePath("/", "layout");
@@ -183,6 +197,9 @@ export async function requestInstructionClarificationAction(
     console.error("[instructions] clarification failed:", error.message);
     return { ok: false, code: "error", message: error.message };
   }
+
+  // MSG-3: the manager is told the worker replied (the one emitter).
+  await notifyNewMessageRecipients(supabase, user.id, conversationId);
 
   revalidatePath("/", "layout");
   return { ok: true };
