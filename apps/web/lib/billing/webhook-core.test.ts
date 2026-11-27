@@ -52,6 +52,8 @@ describe("webhook-core — event mapping", () => {
     expect(mapStripeStatus("canceled")).toBe("cancelled");
     expect(mapStripeStatus("incomplete")).toBe("incomplete");
     expect(mapStripeStatus("incomplete_expired")).toBe("expired");
+    // Paused collects nothing: never a paid "grace" (owner approval 2026-11-12 (a)).
+    expect(mapStripeStatus("paused")).toBe("unpaid");
     expect(mapStripeStatus(undefined)).toBe("none");
   });
 
