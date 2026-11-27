@@ -12,6 +12,7 @@ import {
 import { EmptyState } from "@/components/app/empty-state";
 import { chipLinkClassName } from "@/components/ui/Chip";
 import { createClient } from "@/lib/supabase/server";
+import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
 import { readCounterpartyQueue } from "@/lib/journal/counterparty-review";
 import { queueBucket } from "@/lib/journal/counterparty-review-model";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
@@ -64,10 +65,9 @@ export default async function InboxPage({
   // honest "could not load" state instead.
   let reviewableIds: string[] = [];
   let loadFailed = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: idRows, error: idError } = await (supabase as any).rpc(
-    "reviewable_journal_entry_ids",
-  );
+  // The ONE request-scoped read of the set (reviewable-count.ts), shared with
+  // the counts in the same render (duplication audit ORG-7).
+  const { data: idRows, error: idError } = await readReviewableJournalEntryIds();
   if (idError) {
     loadFailed = true;
   } else if (Array.isArray(idRows)) {
