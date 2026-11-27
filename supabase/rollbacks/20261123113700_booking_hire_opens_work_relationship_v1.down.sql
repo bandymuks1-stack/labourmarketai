@@ -6,6 +6,11 @@
 
 begin;
 
+-- Serialize the history check with every hire INSERT/status UPDATE before
+-- deciding that the triggers have never been used. A concurrent hire commits
+-- first; the following READ COMMITTED check then refuses this rollback.
+lock table public.company_worker_engagements in access exclusive mode;
+
 do $$
 begin
   if exists (select 1 from public.audit_logs

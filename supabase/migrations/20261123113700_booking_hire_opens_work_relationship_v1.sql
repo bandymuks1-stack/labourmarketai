@@ -24,12 +24,13 @@
 --   1. No new table (the employment model stays engagement_contexts, freeze
 --      register §3): which relationship a hire OPENED is read back from the
 --      audit row the opening writes.
---   2. An AFTER INSERT trigger on company_worker_engagements: for an ACTIVE
+--   2. An INSERT / status UPDATE trigger on company_worker_engagements: for an ACTIVE
 --      hire it resolves the hiring organization exactly like the booking
 --      accept does (the booking's need organization, else the company's one
 --      bound organization) and REUSES any active relationship of the person
 --      with it; otherwise it opens ONE 'collaborator' relationship from the
---      hire's start. A trigger, not a fifth copy of the four booking-accept
+--      hire's start. Re-acceptance opens a new interval from today (or the future
+--      hire start), preserving the former ended interval. A trigger, not another copy of booking-accept
 --      bodies (the same reason as 20261114100000).
 --   3. An AFTER UPDATE trigger: when the hire ends, the relationship it
 --      OPENED ends with it (never one it only reused).
@@ -57,9 +58,22 @@ declare
   v_org     uuid;
   v_ctx     uuid;
   v_opened  boolean := false;
+  v_actual_slug text;
+  v_start date;
 begin
   if new.status <> 'active' or new.worker_id is null then
     return null;
+  end if;
+  -- Agency offers keep their existing placement-owned opening/end lifecycle.
+  if exists (select 1 from public.agency_candidate_offers
+              where booking_id = new.source_booking_id) then
+    return null;
+  end if;
+  if tg_op = 'UPDATE' then
+    if old.status = 'active' then return null; end if;
+    v_start := greatest(new.started_at::date, current_date);
+  else
+    v_start := new.started_at::date;
   end if;
   select w.profile_id into v_profile from public.workers w where w.id = new.worker_id;
   if v_profile is null then
@@ -83,22 +97,22 @@ begin
     return null;
   end if;
 
-  select id into v_ctx from public.engagement_contexts
+  select id, relationship_slug into v_ctx, v_actual_slug from public.engagement_contexts
    where profile_id = v_profile and organization_id = v_org and status = 'active'
    order by created_at limit 1;
   if v_ctx is null then
     insert into public.engagement_contexts
         (profile_id, organization_id, relationship_slug, status, started_at, is_primary, hash_self)
-      values (v_profile, v_org, v_slug, 'active', new.started_at, false,
+      values (v_profile, v_org, v_slug, 'active', v_start, false,
               encode(extensions.digest(v_profile::text || ':' || v_slug || ':' || v_org::text || ':' || new.id::text, 'sha256'), 'hex'))
-    returning id into v_ctx;
+    returning id, relationship_slug into v_ctx, v_actual_slug;
     v_opened := true;
   end if;
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
     values (new.created_by, case when v_opened then 'booking_hire_relationship_opened' else 'booking_hire_relationship_reused' end,
             'engagement_contexts', v_ctx,
             jsonb_build_object('organization_id', v_org, 'company_worker_engagement_id', new.id,
-                               'booking_id', new.source_booking_id, 'relationship_slug', v_slug));
+                               'booking_id', new.source_booking_id, 'relationship_slug', v_actual_slug));
   return null;
 end;
 $$;
@@ -113,27 +127,39 @@ set search_path = public, pg_temp
 as $$
 declare
   v_ctx uuid;
+  v_before_stage text;
 begin
   if old.status <> 'active' or new.status = 'active' then
     return null;
   end if;
-  -- Only a relationship THIS hire opened (its audit row), never one it reused.
-  select a.entity_id into v_ctx
+  -- Only a still-open interval THIS hire created, never one it reused.
+  -- Re-acceptance keeps the former ended interval and has its own new audit row.
+  select a.entity_id, coalesce(e.lifecycle_stage, 'active') into v_ctx, v_before_stage
     from public.audit_logs a
+    join public.engagement_contexts e on e.id = a.entity_id and e.status <> 'ended'
    where a.action = 'booking_hire_relationship_opened'
      and a.entity = 'engagement_contexts'
      and a.payload->>'company_worker_engagement_id' = new.id::text
-   order by a.created_at
-   limit 1;
+   order by a.created_at desc, a.id desc
+   limit 1 for update of e;
   if v_ctx is null then
     return null;
   end if;
   update public.engagement_contexts
-     set status = 'ended', ended_at = coalesce(ended_at, new.ended_at, now())
+     set status = 'ended', ended_at = coalesce(ended_at, new.ended_at, now()),
+         journal_review_enabled = false, is_primary = false,
+         lifecycle_stage = 'ended', ended_reason = coalesce(ended_reason, 'contract_end'),
+         updated_at = now()
    where id = v_ctx and status <> 'ended';
+  if not found then return null; end if;
   insert into public.audit_logs (actor_id, action, entity, entity_id, payload)
     values (new.ended_by, 'booking_hire_relationship_ended', 'engagement_contexts', v_ctx,
             jsonb_build_object('company_worker_engagement_id', new.id));
+  insert into public.engagement_lifecycle_events
+    (engagement_context_id, actor_profile_id, action, before_stage, after_stage, metadata)
+    values (v_ctx, new.ended_by, 'engagement_ended', v_before_stage, 'ended',
+            jsonb_build_object('reason', 'contract_end', 'source', 'booking_hire_ended',
+                               'company_worker_engagement_id', new.id));
   return null;
 end;
 $$;
@@ -141,7 +167,7 @@ revoke all on function public.booking_hire_close_relationship_v1() from public, 
 
 drop trigger if exists booking_hire_opens_relationship on public.company_worker_engagements;
 create trigger booking_hire_opens_relationship
-  after insert on public.company_worker_engagements
+  after insert or update of status on public.company_worker_engagements
   for each row execute function public.booking_hire_open_relationship_v1();
 drop trigger if exists booking_hire_closes_relationship on public.company_worker_engagements;
 create trigger booking_hire_closes_relationship

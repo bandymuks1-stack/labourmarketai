@@ -17,7 +17,7 @@ const DOWN = strip(readFileSync(join(REPO, `supabase/rollbacks/${N}.down.sql`), 
 
 describe("a direct hire opens the work relationship (HIRE-5)", () => {
   it("one trigger on the booking ledger, not a fifth copy of the booking-accept bodies", () => {
-    expect(UP).toMatch(/create trigger booking_hire_opens_relationship\s+after insert on public\.company_worker_engagements/);
+    expect(UP).toMatch(/create trigger booking_hire_opens_relationship\s+after insert or update of status on public\.company_worker_engagements/);
     expect(UP).toMatch(/create trigger booking_hire_closes_relationship\s+after update of status on public\.company_worker_engagements/);
     expect(UP).not.toMatch(/create or replace function public\.respond_booking_request/);
   });
