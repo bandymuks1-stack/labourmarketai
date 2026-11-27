@@ -29,6 +29,17 @@ additional_redirect_urls = ["http://localhost:3000", "http://127.0.0.1:3000/**",
 jwt_expiry = 3600
 enable_signup = true
 
+# OAuth 2.1 authorization server on the LOCAL stack (Supabase CLI >= 2.54.11;
+# the repo pins ^2.116.0). Production has the same feature enabled in the
+# dashboard. This lets tests/e2e/mcp-oauth-client.spec.ts walk the full
+# external-client chain (DCR -> PKCE -> /oauth/consent -> token -> /api/mcp)
+# against the local server. Public clients register themselves (DCR), as
+# ChatGPT's and Claude's connector clients do.
+[auth.oauth_server]
+enabled = true
+authorization_url_path = "/oauth/consent"
+allow_dynamic_registration = true
+
 [auth.email]
 enable_signup = true
 enable_confirmations = false

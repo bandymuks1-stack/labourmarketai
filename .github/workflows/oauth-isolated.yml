@@ -1,0 +1,292 @@
+name: OAuth Isolated (local Supabase)
+
+# SECURITY TASK B5a — real OAuth tokens, tested ONLY against a throwaway local
+# Supabase stack that lives and dies inside this job.
+#
+# Owner decision 2026-10-26: free GitHub Actions job, isolated LOCAL Supabase
+# stack; no paid services, no production keys or secrets, no production
+# database, no user data, no production API calls; synthetic data and test
+# OAuth tokens only. RED-class CI: this file is approved by the owner on its own.
+#
+# WHAT IT DOES
+#   1. starts the Supabase stack locally (Docker on the runner, CLI pinned) with
+#      the OAuth 2.1 server on (supabase/config.toml [auth.oauth_server]) and the
+#      repo migrations replayed from scratch (one named, hash-pinned exception —
+#      see SKIP_MIGRATION below);
+#   2. creates ONE synthetic person through the LOCAL GoTrue admin API;
+#   3. builds and serves the web app against that stack (env from
+#      `supabase status`, never from a secret), with LM_ACCEPTANCE_MODE=1 so the
+#      app itself refuses to serve against anything that is not the local stack;
+#   4. runs apps/web/tests/e2e/mcp-oauth-isolated.spec.ts — DCR, PKCE, consent,
+#      token, use, refresh, revoke, plus the negative checks — which refuses to
+#      run unless every OAuth endpoint it discovers is the local stack;
+#   5. uploads ONE file: numbers and verdicts (no token, no trace, no screenshot),
+#      kept 3 days; the public log carries verdict ids only;
+#   6. always stops the stack.
+#
+# WHAT IT NEVER DOES
+#   - reads `secrets.*` (the first step fails the job if this file ever does);
+#   - talks to the production project or origin: their hostnames are pointed at
+#     0.0.0.0 on the runner before anything is built or started;
+#   - links a Supabase project, pushes config, or uses an access token.
+#
+# TRIGGER: workflow_dispatch only. GitHub can dispatch a workflow only once the
+# file exists on the default branch; after that, `--ref <branch>` runs the file
+# and code of that branch. See b5a-draft/REVIEW.md "How to run".
+#
+# Deliberately NOT on pull_request (yet): the job is secret-free, so a fork PR
+# would gain nothing, but it costs ~15 runner minutes and starts nine
+# containers; it can join pull_request with a `paths:` filter (auth, api, mcp,
+# supabase/config.toml, this file, the spec) after a few green dispatches.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: oauth-isolated-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  oauth-isolated:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      APP_ORIGIN: http://127.0.0.1:3000
+      SYNTHETIC_EMAIL: oauth.worker@local.test
+      SPEC: tests/e2e/mcp-oauth-isolated.spec.ts
+      RESULT_FILE: ${{ github.workspace }}/oauth-isolated-result.json
+      # Floor on recorded verdicts (PASS+FAIL+REPORT). A run where checks
+      # silently stop executing must not look green. Measure on the first green
+      # run and raise; never lower it to turn a red run green.
+      MIN_VERDICTS: "35"
+      # ONE migration is not replayed: it is a production DATA migration (it
+      # inserts a period for one production organization id, which does not
+      # exist in a fresh database → FK violation) and it also names columns that
+      # only open PR #2739 adds. On an empty database its effect is nothing, so
+      # skipping it is the faithful replay. Pinned by hash: if the file changes,
+      # this job fails and a human re-decides. Replay evidence: REVIEW.md §2.
+      SKIP_MIGRATION: 20261025120000_business_history_periods_vivatrex_lmai_bounds_v1.sql
+      SKIP_MIGRATION_SHA256: e4dea150dbd1c344ab7319af74066f12090f764ccdb5511571be65e8244b233e
+      # Everything that could leave the runner stays OFF (env.ts defaults,
+      # stated explicitly so a future default change cannot switch them on).
+      PAYMENTS_ENABLED: "false"
+      BILLING_PROVIDER: none
+      AI_PROVIDER_MODE: disabled
+      OWNER_TELEGRAM_ALERTS_ENABLED: "false"
+      AGENTAI_OS_ALERTS_ENABLED: "false"
+      NEXT_TELEMETRY_DISABLED: "1"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # ── Isolation guards ─────────────────────────────────────────────────
+      - name: Guard — this workflow reads no secrets and links no project
+        run: |
+          set -euo pipefail
+          if grep -nE '\$\{\{[[:space:]]*secrets\.' .github/workflows/oauth-isolated.yml; then
+            echo "::error title=Secret reference::oauth-isolated.yml must not read secrets."; exit 1
+          fi
+          if [ -e supabase/.temp/project-ref ]; then
+            echo "::error title=Linked project::supabase/.temp/project-ref exists — refusing to run next to a linked project."; exit 1
+          fi
+          for f in apps/web/.env apps/web/.env.local apps/web/.env.production apps/web/.env.production.local .env .env.local; do
+            if [ -e "$f" ]; then echo "::error title=Env file present::$f exists in the checkout — refusing."; exit 1; fi
+          done
+          grep -q '^\[auth\.oauth_server\]' supabase/config.toml || {
+            echo "::error title=OAuth server off::supabase/config.toml has no [auth.oauth_server] section (see #2454 / this PR)."; exit 1; }
+
+      - name: Guard — production hosts resolve to nowhere on this runner
+        run: |
+          set -euo pipefail
+          # Tripwire, not the only control: the spec refuses non-local endpoints
+          # and the app runs in acceptance mode. Anything that still tries to
+          # reach production fails to connect instead of succeeding.
+          printf '0.0.0.0 %s\n' \
+            gorgitwvdzxbnaxhrsrw.supabase.co \
+            labourmarket.ai www.labourmarket.ai labourmarket-ai.vercel.app \
+            | sudo tee -a /etc/hosts >/dev/null
+          for h in gorgitwvdzxbnaxhrsrw.supabase.co labourmarket.ai; do
+            getent hosts "$h" | grep -q '^0\.0\.0\.0' || { echo "::error::$h still resolves"; exit 1; }
+          done
+
+      # ── Toolchain ────────────────────────────────────────────────────────
+      - name: Set up pnpm
+        uses: pnpm/action-setup@0977fd99725f1db4007ccb2928dbb4e90d06cc86 # v6.0.10
+        with:
+          version: 10.33.2
+
+      - name: Set up Node
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile --filter=!mobile
+
+      # Same version as the repo lockfile (supabase@2.116.0).
+      - name: Set up Supabase CLI
+        uses: supabase/setup-cli@b60b5899c73b63a2d2d651b1e90db8d4c9392f51 # v1.6.0
+        with:
+          version: 2.116.0
+
+      - name: Install Playwright chromium
+        run: pnpm -F web exec playwright install --with-deps chromium
+
+      # ── Local Supabase stack ─────────────────────────────────────────────
+      - name: Set aside the one non-replayable migration (hash-pinned)
+        run: |
+          set -euo pipefail
+          f="supabase/migrations/$SKIP_MIGRATION"
+          if [ ! -e "$f" ]; then
+            echo "::notice::$SKIP_MIGRATION is gone — nothing set aside; replay runs every file."; exit 0
+          fi
+          echo "$SKIP_MIGRATION_SHA256  $f" | sha256sum -c - || {
+            echo "::error title=Skipped migration changed::$SKIP_MIGRATION no longer matches its pinned hash. Re-decide whether it is still a fresh-database no-op."; exit 1; }
+          mv "$f" "$RUNNER_TEMP/"
+
+      # `supabase start` ends by printing the local URLs and the (well-known,
+      # shared) local demo keys. They unlock nothing real, but the log stays
+      # free of key material anyway: output goes to a file and only key-free
+      # lines are shown.
+      - name: Start local Supabase (migrations replayed from scratch)
+        run: |
+          set -uo pipefail
+          supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
+          rc=$?
+          grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 80
+          exit $rc
+
+      - name: Export the LOCAL stack env (masked; refuses anything non-local)
+        run: |
+          set -euo pipefail
+          supabase status -o env > "$RUNNER_TEMP/sb.env"
+          get() { sed -n "s/^$1=\"\{0,1\}\([^\"]*\)\"\{0,1\}$/\1/p" "$RUNNER_TEMP/sb.env" | head -1; }
+          API_URL="$(get API_URL)"; ANON="$(get ANON_KEY)"; SERVICE="$(get SERVICE_ROLE_KEY)"; JWT="$(get JWT_SECRET)"
+          [ -n "$ANON" ] || ANON="$(get PUBLISHABLE_KEY)"; [ -n "$SERVICE" ] || SERVICE="$(get SECRET_KEY)"
+          rm -f "$RUNNER_TEMP/sb.env"
+          for v in "$ANON" "$SERVICE" "$JWT"; do [ -n "$v" ] && echo "::add-mask::$v"; done
+          [ "$API_URL" = "http://127.0.0.1:54321" ] || { echo "::error::API_URL is not the local stack"; exit 1; }
+          [ -n "$ANON" ] && [ -n "$SERVICE" ] || { echo "::error::supabase status returned no keys"; exit 1; }
+          # A cloud key carries a `ref` claim; the local demo keys do not.
+          for k in "$ANON" "$SERVICE"; do
+            node -e 'const p=JSON.parse(Buffer.from((process.argv[1].split(".")[1]||""),"base64url").toString()||"{}");if(p.ref){console.error("cloud key");process.exit(1)}' "$k"
+          done
+          CTS="$(openssl rand -hex 32)"; echo "::add-mask::$CTS"
+          {
+            echo "NEXT_PUBLIC_SUPABASE_URL=$API_URL"
+            echo "NEXT_PUBLIC_SUPABASE_ANON_KEY=$ANON"
+            echo "SUPABASE_SERVICE_ROLE_KEY=$SERVICE"
+            echo "E2E_SUPABASE_URL=$API_URL"
+            echo "E2E_SUPABASE_ANON_KEY=$ANON"
+            echo "E2E_SUPABASE_SERVICE_ROLE_KEY=$SERVICE"
+            echo "E2E_LOCAL_JWT_SECRET=$JWT"
+            echo "CONVERSATION_TOKEN_SECRET=$CTS"
+            echo "LM_ACCEPTANCE_MODE=1"
+          } >> "$GITHUB_ENV"
+
+      - name: Prove the replay — ledger rows equal migration files
+        run: |
+          set -euo pipefail
+          files=$(ls supabase/migrations/*.sql | wc -l)
+          rows=$(docker exec supabase_db_labourmarketai psql -U postgres -tAc "select count(*) from supabase_migrations.schema_migrations")
+          echo "migration files=$files ledger rows=$rows (set aside: 1 if present above)"
+          [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
+
+      - name: Seed ONE synthetic person through the local admin API
+        run: |
+          set -euo pipefail
+          h=(-H "apikey: $SUPABASE_SERVICE_ROLE_KEY" -H "Authorization: Bearer $SUPABASE_SERVICE_ROLE_KEY" -H "content-type: application/json")
+          uid=$(curl -fsS "${h[@]}" -X POST "$NEXT_PUBLIC_SUPABASE_URL/auth/v1/admin/users" \
+            -d "{\"email\":\"$SYNTHETIC_EMAIL\",\"email_confirm\":true,\"user_metadata\":{\"role\":\"worker\",\"locale\":\"en\"}}" \
+            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(JSON.parse(s).id||""))')
+          [ -n "$uid" ] || { echo "::error::admin user create returned no id"; exit 1; }
+          # The role=worker signup trigger creates profile, worker and an active
+          # context; the profile is completed like the dev fixtures do.
+          curl -fsS "${h[@]}" -X PATCH "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/profiles?id=eq.$uid" \
+            -d '{"full_name":"QA Synthetic OAuth Worker","country":"LT","onboarded":true}' >/dev/null
+          ctx=$(curl -fsS "${h[@]}" "$NEXT_PUBLIC_SUPABASE_URL/rest/v1/engagement_contexts?profile_id=eq.$uid&status=eq.active&select=id" \
+            | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write(String(JSON.parse(s).length)))')
+          echo "synthetic person created (id ${uid:0:8}…), active work contexts: $ctx"
+          [ "$ctx" -ge 1 ] || { echo "::error::synthetic person has no active work context"; exit 1; }
+
+      # ── App against the local stack ──────────────────────────────────────
+      # NEXT_PUBLIC_* are inlined at BUILD time, so the build must already see
+      # the local values (env.ts would otherwise fall back to the cloud URL).
+      - name: Build
+        run: pnpm -F web build
+
+      - name: Guard — the build inlined the local Supabase URL
+        run: |
+          set -euo pipefail
+          grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::the build does not carry the local Supabase URL"; exit 1; }
+
+      - name: Start app (acceptance mode — refuses a non-local target)
+        run: |
+          set -euo pipefail
+          pnpm -F web exec next start -H 127.0.0.1 -p 3000 > "$RUNNER_TEMP/next.log" 2>&1 &
+          echo $! > "$RUNNER_TEMP/next.pid"
+          for i in $(seq 1 60); do curl -fsS -o /dev/null "$APP_ORIGIN/lt" && break; sleep 2; done
+          curl -fsS -o /dev/null "$APP_ORIGIN/lt"
+          as=$(curl -fsS "$APP_ORIGIN/.well-known/oauth-protected-resource" | node -e 'let s="";process.stdin.on("data",d=>s+=d).on("end",()=>process.stdout.write((JSON.parse(s).authorization_servers||[])[0]||""))')
+          echo "authorization server advertised by the app: $as"
+          [ "$as" = "http://127.0.0.1:54321/auth/v1" ] || { echo "::error::the app advertises a non-local authorization server"; exit 1; }
+
+      - name: Mint the synthetic person's local browser session
+        working-directory: apps/web
+        run: E2E_OWNER_EMAIL="$SYNTHETIC_EMAIL" pnpm exec tsx scripts/e2e-mint-session.ts
+
+      # ── The spec ─────────────────────────────────────────────────────────
+      - name: Run the isolated OAuth spec
+        working-directory: apps/web
+        env:
+          OAUTH_ISOLATED: "1"
+          # Public repository → public log: ids and verdicts only; details in the artifact.
+          OAUTH_ISOLATED_LOG_DETAIL: "0"
+          OAUTH_ISOLATED_RESULT: ${{ github.workspace }}/oauth-isolated-result.json
+          E2E_BASE_URL: http://127.0.0.1:3000
+          E2E_NO_SERVER: "1"
+          E2E_LOCAL_STACK: "1"
+        run: pnpm exec playwright test "$SPEC" --reporter=list
+
+      - name: Verdict floor and token scrub
+        if: always()
+        run: |
+          set -euo pipefail
+          [ -f "$RESULT_FILE" ] || { echo "::error::no result file"; exit 1; }
+          if grep -qE 'eyJ[A-Za-z0-9_-]{4,}\.[A-Za-z0-9_-]{4,}\.' "$RESULT_FILE"; then
+            echo "::error::result file contains a JWT-shaped value — deleting it, nothing is uploaded"; rm -f "$RESULT_FILE"; exit 1
+          fi
+          node -e '
+            const r = require(process.env.RESULT_FILE);
+            const c = r.counts || {};
+            const n = (c.PASS||0) + (c.FAIL||0) + (c.REPORT||0);
+            console.log(`verdicts PASS=${c.PASS||0} FAIL=${c.FAIL||0} REPORT=${c.REPORT||0} SKIP=${c.SKIP||0} floor=${process.env.MIN_VERDICTS}`);
+            // ids only — details stay in the artifact (public log).
+            for (const v of r.verdicts || []) if (v.verdict !== "PASS") console.log(`${v.verdict} ${v.id}`);
+            if ((c.FAIL||0) > 0) process.exit(1);
+            if (n < Number(process.env.MIN_VERDICTS)) { console.log("::error::fewer verdicts than the floor — checks stopped running"); process.exit(1); }
+          '
+
+      - name: Upload numbers and verdicts (no tokens, no traces)
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: oauth-isolated-result
+          path: ${{ github.workspace }}/oauth-isolated-result.json
+          # Artifacts of a public repository can be downloaded by any signed-in
+          # GitHub user while they exist: keep the window short (REVIEW.md §7).
+          retention-days: 3
+          if-no-files-found: ignore
+
+      - name: Stop app and local Supabase
+        if: always()
+        run: |
+          if [ -f "$RUNNER_TEMP/next.pid" ]; then kill "$(cat "$RUNNER_TEMP/next.pid")" 2>/dev/null || true; fi
+          supabase stop --no-backup || true
