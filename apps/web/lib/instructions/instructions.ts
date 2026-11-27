@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
@@ -54,7 +56,19 @@ function migMissing(code?: string): boolean {
   );
 }
 
-/** Instructions addressed to the current worker (RLS-scoped to their threads). */
+// The full list and its attention summary use the same caller-membership read.
+// Request-local caching keeps that scope check from adding a second query when
+// both surfaces render. Database visibility remains the final authority.
+const readInstructionParticipants = cache(async (profileId: string) => {
+  const supabase = await createClient();
+  return asAny(supabase)
+    .from("conversation_participants")
+    .select("conversation_id, last_read_at")
+    .eq("profile_id", profileId)
+    .is("revoked_at", null);
+});
+
+/** Instructions addressed to the current worker, within their own threads. */
 export async function listWorkerInstructions(): Promise<InstructionRead> {
   const supabase = await createClient();
   const {
@@ -62,12 +76,26 @@ export async function listWorkerInstructions(): Promise<InstructionRead> {
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", instructions: [] };
 
+  // Broader database visibility is not a personal instruction inbox. Apply
+  // the same membership scope as the attention summary BEFORE the row limit,
+  // so another conversation cannot displace the caller's own older instruction.
+  const parts = await readInstructionParticipants(user.id);
+  if (parts.error) {
+    if (migMissing(parts.error.code)) return { kind: "needs-migration" };
+    throw new Error("instruction_participants_unavailable");
+  }
+  const conversationIds = [...new Set(
+    ((parts.data ?? []) as { conversation_id: string }[]).map(p => p.conversation_id),
+  )];
+  if (conversationIds.length === 0) return { kind: "ok", instructions: [] };
+
   const res = await asAny(supabase)
     .from("conversation_messages")
     .select(
       "id, conversation_id, project_id, body, original_language, translated_text, translation_status, created_at, author_id, author:profiles!conversation_messages_author_id_fkey(full_name)",
     )
     .eq("is_instruction", true)
+    .in("conversation_id", conversationIds)
     .neq("author_id", user.id) // instructions TO the worker, not ones they sent
     .order("created_at", { ascending: false })
     .limit(100);
@@ -130,10 +158,7 @@ export async function listAttentionInstructions(): Promise<WorkerInstruction[]> 
   } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const parts = await asAny(supabase)
-    .from("conversation_participants")
-    .select("conversation_id, last_read_at")
-    .eq("profile_id", user.id);
+  const parts = await readInstructionParticipants(user.id);
   if (parts.error) return [];
 
   const lastRead = new Map<string, string | null>();
