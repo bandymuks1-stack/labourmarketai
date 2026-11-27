@@ -14,6 +14,7 @@ import {
 import type { FeatureKey, PlanAudience } from "@/lib/billing/plans";
 import type { SubStatus } from "@/lib/billing/webhook-core";
 import { resolveBillingSubject, type BillingSubject } from "@/lib/billing/billing-subject";
+import { isVipOrganization } from "@/lib/billing/vip-organizations";
 
 /**
  * Effective entitlements (Stripe sprint PR5) — the server read path. Joins the
@@ -244,7 +245,12 @@ export async function getEffectiveEntitlements(caller?: EntitlementCaller): Prom
     subscriptionPlanKey,
     subscriptionStatus,
     manualOverridePlanKey,
+    // The PROVEN organization subject, never a client value (owner 2026-11-15).
+    vip: actsForOrganization && isVipOrganization(subject?.id),
   });
+  // A VIP plan has no period and nothing ends at it: the old pilot pass's end
+  // date and cancel flag are not shown as the plan's (owner 2026-11-15).
+  if (ctx.source === "vip") return { ...ctx, profileId: user.id, cancelAtPeriodEnd: false, currentPeriodEnd: null };
   return { ...ctx, profileId: user.id, cancelAtPeriodEnd, currentPeriodEnd };
 }
 

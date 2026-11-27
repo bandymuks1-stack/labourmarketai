@@ -50,7 +50,8 @@ export async function POST(req: Request) {
       organizationId = subject.subject.id;
       billingAuthority = subject.billingAuthority;
       const ent = await getEffectiveEntitlements();
-      planActive = ent.source === "subscription" && ent.active;
+      // A VIP organization holds the plan permanently (owner 2026-11-15): no pass.
+      planActive = (ent.source === "subscription" || ent.source === "vip") && ent.active;
     }
   }
 
