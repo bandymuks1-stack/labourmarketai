@@ -189,7 +189,7 @@ export function PublicVacancyCard({
 }) {
   const chips = vacancyFactChips(vacancy, locale);
   const origin = vacancyOriginLabels(locale);
-  const sourceName = vacancySourceName(memberFacts?.attributionCode);
+  const sourceName = vacancySourceName(memberFacts?.attributionCode ?? vacancy.attributionCode);
   const memberLine = memberFacts
     ? [memberFacts.employer, memberFacts.place].filter((x): x is string => Boolean(x)).join(" · ")
     : "";

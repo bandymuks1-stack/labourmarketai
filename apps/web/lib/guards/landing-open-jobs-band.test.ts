@@ -270,14 +270,13 @@ describe("the band owns no vacancy logic of its own", () => {
 });
 
 describe("job origin is recorded provenance, not a language guess", () => {
-  it("anonymous previews stay generic even if a named source reaches the card", () => {
+  it("an anonymous preview shows its approved source without promising an application URL", () => {
     const html = renderToStaticMarkup(createElement(PublicVacancyCard, {
       vacancy: vacancy(1, { attributionCode: "vacancySources.attribution.nav", sourceLanguage: "sv" }), locale: "en",
     }));
-    expect(html).toContain("External source");
+    expect(html).toContain(">NAV<");
     expect(html).toContain("No on-platform application");
     expect(html).not.toContain("Apply on an external website");
-    expect(html).not.toContain(">NAV<");
     expect(html).not.toContain("Arbetsförmedlingen");
   });
   it.each([
