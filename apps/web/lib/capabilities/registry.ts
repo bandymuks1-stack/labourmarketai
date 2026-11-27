@@ -2,6 +2,7 @@ import "server-only";
 
 import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { z } from "zod";
+import { isIsoCountry, resolveCountryCode } from "@/lib/location/country-model";
 import { getTranslations } from "next-intl/server";
 
 import {
@@ -10,7 +11,6 @@ import {
 } from "@/lib/journal/journal-write-core";
 import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
-import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
 import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
@@ -45,6 +45,7 @@ import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
 import { TEAM_ASSIGNMENT_CAPABILITIES } from "./team-assignment-capabilities";
 import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
+import { COMPANY_CLAIM_CAPABILITIES } from "./company-claim-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
@@ -71,6 +72,8 @@ import {
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
 import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
+import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
+import { logWorkFields } from "@/lib/journal/log-work-fields";
 import {
   activeOrganizationOf,
   orderContextsForChoice,
@@ -493,6 +496,7 @@ function normalizedDraftForHash(draft: {
   workDate: string;
   siteName?: string | null;
   projectId?: string | null;
+  voice?: { language: string; disclosureVersion: string } | null;
 }): Record<string, unknown> {
   return {
     engagementContextId: draft.engagementContextId,
@@ -502,6 +506,10 @@ function normalizedDraftForHash(draft: {
     // The project the hours belong to ("none" = deliberately not project
     // work) is part of what the human confirmed, so it is part of the hash.
     projectId: draft.projectId ?? null,
+    // Voice provenance is bound too, but only when stated: a typed draft's
+    // hash is unchanged, and a confirm cannot add a voice label the draft
+    // never carried (AI-3).
+    ...(draft.voice ? { voice: { language: draft.voice.language, disclosureVersion: draft.voice.disclosureVersion } } : {}),
   };
 }
 
@@ -789,6 +797,8 @@ const journalCreateDraft: CapabilityDescriptor = {
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
       projectId: draft.projectId ?? null,
+      // Dictated text keeps its provenance through confirm (AI-3).
+      ...(draft.voice ? { voice: draft.voice } : {}),
     };
     const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
@@ -805,6 +815,7 @@ const journalCreateDraft: CapabilityDescriptor = {
           notes: resolved.notes,
           engagementContextId: resolved.engagementContextId,
           projectId: resolved.projectId,
+          ...(draft.voice ? { inputOrigin: "voice" } : {}),
           // The RESOLVED context, named — the human must SEE which context
           // the entry will land in before confirming (preselect-and-show,
           // never silently assign).
@@ -827,17 +838,10 @@ function journalConfirmFields(
   locale: string,
   draft: z.infer<typeof workerLogWorkSchema>,
 ): Record<string, string> {
-  return {
-    locale,
-    engagement_context_id: draft.engagementContextId,
-    notes: draft.notes,
-    work_date: draft.workDate,
-    site_name: draft.siteName ?? "",
-    project_id: draft.projectId ?? "",
-    // The stated time becomes time on the record — the same derivation
-    // the conversation executor applies (issue #1689).
-    ...intakeWorkTimeFields(draft.notes, draft.workDate),
-  };
+  // THE ONE mapping the chat's worker.log-work sends too (AI-3): the stated
+  // time becomes time on the record (#1689) and a dictated entry keeps its
+  // voice provenance.
+  return logWorkFields(locale, draft);
 }
 
 /**
@@ -1465,7 +1469,9 @@ const workCardSaveDraft: CapabilityDescriptor = {
     "available-from date, salary range, location country, preferred " +
     "countries) and returns a preview of exactly what would change plus a " +
     "one-time confirmation token. NOTHING is saved. Omitted fields keep " +
-    "their current values; a field sent as null clears it. Confirming " +
+    "their current values, and so does a field sent as null (the canonical " +
+    "save keeps a null value). To empty the preferred countries send an " +
+    "empty list []. Confirming " +
     "requires work_card.save_confirm with this exact draft and token.",
   exposed: true,
   // Read-only is HONEST: the draft reads the current card and mints a token —
@@ -1644,10 +1650,26 @@ const DEMAND_FIELDS = [
   "accommodation",
   "transport",
   "opportunityType",
+  // Bound by the token too: a confirm cannot swap in other dates or another
+  // team split than the person saw in the draft.
+  "startDate",
+  "endDate",
+  "teamCount",
+  "perTeamSize",
 ] as const;
 
 /** null-vs-absent must not change the hash for optional fields — absent and
  *  null both mean "not stated" to the canonical submit. */
+/** The country as the person typed it — a code or a name in any supported
+ *  language — resolved to ISO by the ONE canonical resolver, in the draft AND
+ *  the confirm, so the token binds the resolved code both times. A name the
+ *  resolver does not know stays as typed and is refused as `country_required`
+ *  below: never a guessed market. */
+function withResolvedCountry(draft: DemandDraftInput): DemandDraftInput {
+  if (!draft.country) return draft;
+  return { ...draft, country: resolveCountryCode(draft.country) ?? draft.country };
+}
+
 function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const f of DEMAND_FIELDS) out[f] = draft[f] ?? null;
@@ -1664,9 +1686,15 @@ const demandCreateDraft: CapabilityDescriptor = {
     "ACTING FOR (their active workspace), and returns a human-readable " +
     "preview naming that organization plus a one-time confirmation token. " +
     "NOTHING is created or sent. `description` is the need in the caller's " +
-    "own words (required); role/location/skills/urgency/notes are optional " +
-    "free text; workType/country/teamSize/accommodation/transport are " +
-    "structured facts a worker's board may later see. Confirming requires " +
+    "own words (required) and `country` (required: ISO-3166 alpha-2 code, or " +
+    "the country's name in any supported language, which is resolved to the code, of " +
+    "the country where the work is; ASK the person when they have not said " +
+    "it, never guess); role/location/skills/urgency/notes are optional " +
+    "free text; workType/teamSize/accommodation/transport are structured " +
+    "facts a worker's board may later see. startDate/endDate (YYYY-MM-DD) and " +
+    "teamCount × perTeamSize (teams of a stated size, only when they multiply " +
+    "to teamSize) are kept only when the person stated them. Without a country the draft " +
+    "returns missing: [\"country\"] and no token. Confirming requires " +
     "demand.create_confirm with this exact draft and token.",
   exposed: true,
   annotations: {
@@ -1677,10 +1705,22 @@ const demandCreateDraft: CapabilityDescriptor = {
   },
   inputSchema: companyCreateDemandFields,
   run: async (caller, input): Promise<ExecResult> => {
-    const draft = companyCreateDemandFields.parse(input);
+    const draft = withResolvedCountry(companyCreateDemandFields.parse(input));
     // THE employer-workspace gate — same chain as the web (wagon 3 core).
     const employer = await requireEmployerCompanyForCaller(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
+    // No country, no token: the canonical submit refuses a need without one
+    // (`country_required`), so the draft says what to ask before anything
+    // could be confirmed. Never a guessed market.
+    if (!draft.country || !isIsoCountry(draft.country.toUpperCase())) {
+      return {
+        ok: false,
+        code: "country_required",
+        missing: ["country"],
+        message:
+          "Ask the person which country the work is in and pass its ISO-3166 alpha-2 code as `country`. Nothing was drafted.",
+      };
+    }
 
     const fingerprint = await demandStateFingerprint(caller);
     const token = mintCapabilityConfirmation({
@@ -1701,6 +1741,10 @@ const demandCreateDraft: CapabilityDescriptor = {
           country: draft.country ?? null,
           workType: draft.workType ?? null,
           urgency: draft.urgency ?? null,
+          startDate: draft.startDate ?? null,
+          endDate: draft.endDate ?? null,
+          teamCount: draft.teamCount ?? null,
+          perTeamSize: draft.perTeamSize ?? null,
         },
         confirmationToken: token,
         note: "Nothing was created. Confirming requires demand.create_confirm with this exact draft and token; the demand will be created for the named organization.",
@@ -1709,7 +1753,7 @@ const demandCreateDraft: CapabilityDescriptor = {
   },
 };
 
-const demandConfirmInput = companyCreateDemandFields.extend({
+const demandConfirmInput = companyCreateDemandFields.safeExtend({
   confirmationToken: z.string().min(10),
 });
 
@@ -1736,7 +1780,8 @@ const demandCreateConfirm: CapabilityDescriptor = {
   inputSchema: demandConfirmInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = demandConfirmInput.parse(input);
-    const { confirmationToken, ...draft } = parsed;
+    const { confirmationToken, ...typed } = parsed;
+    const draft = withResolvedCountry(typed);
     const fingerprint = await demandStateFingerprint(caller);
     const verdict = await verifyCapabilityConfirmation({
       actionId: "demand.create_confirm",
@@ -1776,9 +1821,10 @@ const demandCreateConfirm: CapabilityDescriptor = {
         teamSize: draft.teamSize ?? undefined,
         accommodation: draft.accommodation ?? undefined,
         transport: draft.transport ?? undefined,
-        // Declared opportunity type → structured cluster (same as the web
-        // and chat legs); absent when not stated.
-        structuredV2: draft.opportunityType ? { opportunity_type: draft.opportunityType } : undefined,
+        // The ONE mapper the chat uses too: opportunity type, start and end
+        // day, team split. Absent when not stated; the canonical submit drops
+        // a team that no longer explains teamSize.
+        structuredV2: structuredV2FromDeclaredDemand(draft),
       },
     );
     if (!result.ok) {
@@ -1786,7 +1832,9 @@ const demandCreateConfirm: CapabilityDescriptor = {
         ok: false,
         code: result.code,
         message:
-          result.code === "needs_migration"
+          result.code === "country_required"
+            ? "The demand needs the country where the work is (ISO-3166 alpha-2 `country`). Nothing was created."
+            : result.code === "needs_migration"
             ? "The demand intake is not enabled on this environment."
             : result.code === "no_company_context"
               ? "No employer company resolves for this caller."
@@ -1948,6 +1996,7 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // Real market companies in as DISCOVERED organizations (owner NULL) —
   // the marketplace_company_ingest capability only; import is never a claim.
   ...COMPANY_INGEST_CAPABILITIES,
+  ...COMPANY_CLAIM_CAPABILITIES,
   // Organization evidence import — the FIFTEEN capabilities (thirteen steps;
   // attest and withdraw are each a draft→confirm pair) that give an
   // authorized assistant the same historical-import flow the web UI performs,

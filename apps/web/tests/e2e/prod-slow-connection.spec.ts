@@ -1,7 +1,7 @@
 import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
-import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { test, expect, firstVisit, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 
@@ -28,13 +28,9 @@ const seconds = (since: number) => Math.round((Date.now() - since) / 1000);
 const TYPED = "qa.synthetic.slow@example.invalid";
 
 async function open(browser: Browser, signedIn: boolean): Promise<{ ctx: BrowserContext; page: Page; crashes: string[] }> {
-  const ctx = await browser.newContext({
-    viewport: PHONE,
-    hasTouch: true,
-    isMobile: true,
-    locale: "en-US",
-    ...(signedIn ? { storageState: state } : {}),
-  });
+  // A stranger has never answered the consent banner: it has to be in what is measured (UX-3).
+  const options = { viewport: PHONE, hasTouch: true, isMobile: true, locale: "en-US" };
+  const ctx = await browser.newContext(signedIn ? { ...options, storageState: state } : firstVisit(options));
   const page = await ctx.newPage();
   const cdp = await ctx.newCDPSession(page);
   await cdp.send("Network.enable");
@@ -74,7 +70,7 @@ async function statusOf(): Promise<string | null> {
 
 async function editor(page: Page): Promise<{ form: Locator; openAfter: number }> {
   const started = Date.now();
-  await page.goto("/en/dashboard/profile#cv-availability", { waitUntil: "commit" });
+  await page.goto("/en/dashboard/profile?tab=details#cv-availability", { waitUntil: "commit" });
   const main = inMain(page);
   await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 120_000 });
   const toggle = main.getByTestId("work-card-editor-toggle");
@@ -177,11 +173,16 @@ test("forms work on a slow phone: what was typed stays, a save shows its state, 
       await form.locator('select[name="availability_status"]').selectOption("available");
       await ctx.setOffline(true);
       await form.getByTestId("work-card-save").click();
-      const told = await form.getByTestId("work-card-error").waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
+      const told = await page.getByTestId("connection-notice").waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
       const dead = await deadScreen(page);
-      const body = (await page.locator("body").innerText({ timeout: 5_000 }).catch(() => "")).length;
       await ctx.setOffline(false);
-      record(label, told && !dead, `error_shown=${told} dead_screen=${dead} body_chars=${body} crash=${crashes.join("/") || "none"}`);
+      // Back online the notice goes, and the same form still saves.
+      await expect(page.getByTestId("connection-notice")).toHaveCount(0, { timeout: 30_000 });
+      const save = form.getByTestId("work-card-save");
+      await expect(save).toBeEnabled({ timeout: 120_000 });
+      await save.click();
+      const again = await form.getByTestId("work-card-saved").waitFor({ state: "visible", timeout: 120_000 }).then(() => true, () => false);
+      record(label, told && !dead && again, `notice_shown=${told} dead_screen=${dead} saved_after_reconnect=${again} crash=${crashes.join("/") || "none"}`);
     } catch (e) {
       record(label, false, `stopped (${short(e)}) crash=${crashes.join("/") || "none"}`);
     } finally {
@@ -200,7 +201,20 @@ test("forms work on a slow phone: what was typed stays, a save shows its state, 
       const headingAfter = seconds(started);
       await settled(page);
       const wide = await page.evaluate(() => document.documentElement.scrollWidth > window.innerWidth + 1);
-      record(label, (res?.status() ?? 0) < 400 && crashes.length === 0 && !wide, `status=${res?.status()} heading_s=${headingAfter} loaded_s=${seconds(started)} sideways_scroll=${wide} crash=${crashes.join("/") || "none"}`);
+      // UX-3: nothing below the consent banner may move while the page wakes up.
+      const shift = await page.evaluate(
+        () =>
+          new Promise<number>((done) => {
+            let total = 0;
+            new PerformanceObserver((list) => {
+              for (const e of list.getEntries() as unknown as { value: number; hadRecentInput: boolean }[]) {
+                if (!e.hadRecentInput) total += e.value;
+              }
+            }).observe({ type: "layout-shift", buffered: true });
+            setTimeout(() => done(total), 500);
+          }),
+      );
+      record(label, (res?.status() ?? 0) < 400 && crashes.length === 0 && !wide && shift <= 0.1, `status=${res?.status()} heading_s=${headingAfter} loaded_s=${seconds(started)} layout_shift=${shift.toFixed(3)} sideways_scroll=${wide} crash=${crashes.join("/") || "none"}`);
     } catch (e) {
       record(label, false, `stopped (${short(e)})`);
     } finally {

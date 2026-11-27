@@ -106,6 +106,23 @@ describe("company-need copy is operational, not weak 'preview' framing", () => {
   });
 });
 
+describe("the bridge never says an account is needed to send an inquiry", () => {
+  // The form stores the inquiry without an account (persisted → "received").
+  // The always-visible bridge under it once read "To submit this inquiry,
+  // create a free account" — an employer took that as "not sent" (lane D
+  // audit 2026-11-10). The account is offered for managing it, not sending it.
+  const SEND_NEEDS_ACCOUNT =
+    /to submit this inquiry|um diese anfrage .*einzureichen|om deze aanvraag in te dienen|kad pateiktum šią užklausą|aby przesłać to zapytanie|чтобы отправить этот запрос|and submit your inquiry|und anfrage einreichen|en dien je aanvraag in|ir pateikti užklausą|i prześlij zapytanie|и отправить запрос/i;
+  it("bridgeNote and bridgeSignup in every active locale", () => {
+    for (const loc of ACTIVE) {
+      const cn = catalog(loc).companyNeed;
+      for (const k of ["bridgeNote", "bridgeSignup"]) {
+        expect(String(cn[k] ?? ""), `${loc} companyNeed.${k}`).not.toMatch(SEND_NEEDS_ACCOUNT);
+      }
+    }
+  });
+});
+
 describe("lt/en/ru parity for the new intake keys", () => {
   it("all new keys exist and are non-empty in every active locale", () => {
     for (const loc of ACTIVE) {
@@ -115,5 +132,24 @@ describe("lt/en/ru parity for the new intake keys", () => {
         expect(String(cn[k]).trim().length, `${loc} companyNeed.${k} empty`).toBeGreaterThan(0);
       }
     }
+  });
+});
+
+describe("the inquiry-to-account link is described as it works (owner P0 2026-11-10)", () => {
+  // The claim bridge (lib/company/claim-public-intake.ts) shows an intake only
+  // to an account whose PROVEN e-mail equals the intake's contact e-mail, and
+  // the company takes it over by hand. The copy must say "same address",
+  // "confirmed" and "not automatic" — never promise an automatic link.
+  const SAME_ADDRESS = /same e-mail|tuo pačiu el\. pašto|derselben E-Mail|hetzelfde e-mailadres|tym samym adresem|тем же адресом/i;
+  const NOT_AUTOMATIC = /not linked automatically|nesusiejama automatiškai|nicht automatisch verknüpft|niet automatisch gekoppeld|nie jest łączone automatycznie|не связывается автоматически/i;
+  it("receivedBody names the same address and says it is not automatic", () => {
+    for (const loc of ACTIVE) {
+      const body = String(catalog(loc).companyNeed.receivedBody ?? "");
+      expect(body, `${loc} receivedBody`).toMatch(SAME_ADDRESS);
+      expect(body, `${loc} receivedBody`).toMatch(NOT_AUTOMATIC);
+    }
+  });
+  it("bridgeNote names the same address", () => {
+    for (const loc of ACTIVE) expect(String(catalog(loc).companyNeed.bridgeNote), loc).toMatch(SAME_ADDRESS);
   });
 });

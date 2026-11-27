@@ -122,10 +122,15 @@ export default async function CandidatesPage({
         drafts={read.kind === "ok" ? read.drafts : []}
         labels={labels}
         needsMigration={read.kind === "needs-migration"}
+        honestyInPageFold={inCompanySpace}
       />
 
       {inCompanySpace ? (
-        <CompanyActionNextActions room="candidates" primaryHref="/dashboard/company/scouting" />
+        <CompanyActionNextActions
+          room="candidates"
+          primaryHref="/dashboard/company/scouting"
+          extra={<p data-testid="candidate-drafts-honesty">{labels.honestyNote}</p>}
+        />
       ) : null}
     </div>
   );

@@ -84,8 +84,10 @@ export function AnalyticsConsentBanner({
 }) {
   const { ready, choice } = useConsentChoice();
   const pathname = usePathname();
-  // Server render and first paint show nothing: the choice lives on the device.
-  if (!ready || choice !== null) return null;
+  // In the server render and the first paint, so its height is there from the start
+  // and nothing below it moves (UX-3). A person who already chose never sees it: the
+  // inline CONSENT_BOOTSTRAP_SCRIPT hides it before paint, and this removes it.
+  if (ready && choice !== null) return null;
   if (placement === "top" && isAuthPath(pathname)) return null;
   return (
     <section
@@ -95,12 +97,12 @@ export function AnalyticsConsentBanner({
       data-placement={placement}
       className={
         placement === "top"
-          ? "border-b border-border-subtle bg-surface-1 px-4 py-2.5 sm:px-6 print:hidden"
+          ? "border-b border-border-subtle bg-surface-1 px-3 py-2 sm:px-6 sm:py-2.5 print:hidden"
           : "mt-6 rounded-md border border-border-subtle bg-surface-1 px-4 py-2.5 print:hidden"
       }
     >
-      <div className="mx-auto flex max-w-4xl flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <p className="text-sm leading-snug text-text-secondary">
+      <div className="mx-auto flex max-w-4xl flex-col gap-1.5 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
+        <p className="text-xs leading-snug text-text-secondary sm:text-sm">
           {strings.text}{" "}
           <Link href="/legal/cookies" className="underline hover:text-text-primary">
             {strings.more}
@@ -110,7 +112,7 @@ export function AnalyticsConsentBanner({
           <Button
             variant="secondary"
             size="sm"
-            className="flex-auto whitespace-nowrap px-3 sm:flex-none"
+            className="min-h-11 flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
             data-testid="analytics-consent-refuse"
             onClick={refuseAnalytics}
           >
@@ -119,7 +121,7 @@ export function AnalyticsConsentBanner({
           <Button
             variant="secondary"
             size="sm"
-            className="flex-auto whitespace-nowrap px-3 sm:flex-none"
+            className="min-h-11 flex-auto whitespace-nowrap px-3 max-[359px]:!px-2 sm:flex-none"
             data-testid="analytics-consent-accept"
             onClick={() => setAnalyticsConsent("granted")}
           >
@@ -149,6 +151,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
         <Button
           variant="secondary"
           size="sm"
+          className="min-h-11"
           data-testid="analytics-consent-control-refuse"
           aria-pressed={choice === "refused"}
           onClick={refuseAnalytics}
@@ -158,6 +161,7 @@ export function AnalyticsConsentControl({ strings }: { strings: AnalyticsConsent
         <Button
           variant="secondary"
           size="sm"
+          className="min-h-11"
           data-testid="analytics-consent-control-allow"
           aria-pressed={choice === "granted"}
           onClick={() => setAnalyticsConsent("granted")}

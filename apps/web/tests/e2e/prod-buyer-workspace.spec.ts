@@ -2,6 +2,7 @@ import { appendFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 
 /**
  * PRODUCTION — THE BUYER WORKSPACE (matrix 6.4), with the ONE owner-created
@@ -120,7 +121,8 @@ test("B-1 (6.4). the buyer's customer record saves and the workspace reads it ba
   await page.getByTestId("buyer-setup-need-summary").fill(`${NOTE}: testinis pirkėjas (produkcijos walk).`);
   await page.getByTestId("buyer-setup-submit").click();
   await expect(page.getByTestId("buyer-setup-result")).toBeVisible({ timeout: 30_000 });
-  await page.goto("/lt/dashboard/buyer");
+  // The profile is its own block (decision 0034, `?tab=profile`).
+  await page.goto("/lt/dashboard/buyer?tab=profile");
   await settle(page);
   const customer = page.getByTestId("buyer-dashboard-customer-state");
   await expect(customer, "the workspace reads the saved customer record").toBeVisible({ timeout: 30_000 });
@@ -130,12 +132,16 @@ test("B-1 (6.4). the buyer's customer record saves and the workspace reads it ba
 
 test("B-2 (6.4). a request saved as a draft appears once in the buyer's own list", async ({ browser }) => {
   const { page, close } = await as(browser);
-  await page.goto("/lt/dashboard/buyer");
+  // The new-request form is its own block (decision 0034, `?tab=new`).
+  await page.goto("/lt/dashboard/buyer?tab=new");
   await settle(page);
   const form = page.getByTestId("buyer-requests-form");
   await expect(form, "the request form is open to a set-up customer").toBeVisible({ timeout: 30_000 });
   await page.getByTestId("buyer-requests-field-title").fill(`${NOTE} užsakymas`);
   await page.getByTestId("buyer-requests-field-need-summary").fill(`${NOTE}: plytelių klojimas vonios kambaryje (testas).`);
+  // The country is a required ISO choice since #3234; an unchosen select
+  // stops the submit in the browser and no result is ever shown.
+  await page.getByTestId("buyer-requests-field-country").selectOption("LT");
   await page.getByTestId("buyer-requests-status-draft").check();
   await page.getByTestId("buyer-requests-submit").click();
   await expect(page.getByTestId("buyer-requests-result")).toBeVisible({ timeout: 30_000 });
@@ -282,6 +288,8 @@ test("B-5 (6.4). a non-customer discovers buying and becomes a customer through 
   await page.goto("/lt/dashboard/buyer");
   await settle(page);
   expect(new URL(page.url()).pathname, "the saved customer record opens the buyer workspace").toMatch(/\/dashboard\/buyer$/);
+  await page.goto("/lt/dashboard/buyer?tab=profile");
+  await settle(page);
   await expect(page.getByTestId("buyer-dashboard-customer-state")).toContainText("QA-SYNTHETIC Naujas pirkėjas", { timeout: 30_000 });
   console.info(`[non-buyer] customer workspace open (${RUN})`);
   await close();
@@ -394,4 +402,12 @@ test.afterAll(async ({ browser }) => {
     }
   }
   if (failed.length > 0) reportCleanupProblem(failed);
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("buyer-workspace");
 });

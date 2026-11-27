@@ -1,3 +1,5 @@
+import { Badge } from "@/components/ui/Badge";
+import { vacancySourceName, vacancyOriginLabels } from "./public-vacancy-card-facts";
 import { Link } from "@/lib/i18n/navigation";
 import type { ActiveLocale } from "@/lib/i18n/config";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
@@ -36,6 +38,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Vast",
     de: "Unbefristet",
     pl: "Na czas nieokreślony",
+    sv: "Tillsvidare",
   },
   temporary: {
     en: "Temporary",
@@ -44,6 +47,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Tijdelijk",
     de: "Befristet",
     pl: "Na czas określony",
+    sv: "Visstid",
   },
   seasonal: {
     en: "Seasonal",
@@ -52,6 +56,7 @@ const EMPLOYMENT_FORM: Record<string, L> = {
     nl: "Seizoenswerk",
     de: "Saisonal",
     pl: "Sezonowa",
+    sv: "Säsongsarbete",
   },
 };
 
@@ -63,6 +68,7 @@ const WORKING_TIME: Record<string, L> = {
     nl: "Voltijd",
     de: "Vollzeit",
     pl: "Pełny etat",
+    sv: "Heltid",
   },
   part_time: {
     en: "Part time",
@@ -71,6 +77,7 @@ const WORKING_TIME: Record<string, L> = {
     nl: "Deeltijd",
     de: "Teilzeit",
     pl: "Niepełny etat",
+    sv: "Deltid",
   },
 };
 
@@ -81,6 +88,7 @@ const POSITIONS: L = {
   nl: "plaatsen",
   de: "Stellen",
   pl: "miejsc",
+  sv: "platser",
 };
 
 /**
@@ -140,7 +148,7 @@ export function PublicVacancyCard({
    * member read path. Never passed for an anonymous viewer; the anonymous
    * projection cannot carry them (owner directive 2026-08-24).
    */
-  readonly memberFacts?: { readonly employer: string | null; readonly place: string | null } | null;
+  readonly memberFacts?: { readonly employer: string | null; readonly place: string | null; readonly attributionCode?: string | null; readonly hasApplicationUrl?: boolean } | null;
   /** Already-localized "employer and place after sign-in" line, passed by the
    *  board for an anonymous viewer INSTEAD of `memberFacts`, so the card says
    *  what exists instead of leaving the gap unexplained. Omitted = no line. */
@@ -180,6 +188,8 @@ export function PublicVacancyCard({
   readonly sourceLanguageLabel?: string;
 }) {
   const chips = vacancyFactChips(vacancy, locale);
+  const origin = vacancyOriginLabels(locale);
+  const sourceName = vacancySourceName(memberFacts?.attributionCode ?? vacancy.attributionCode);
   const memberLine = memberFacts
     ? [memberFacts.employer, memberFacts.place].filter((x): x is string => Boolean(x)).join(" · ")
     : "";
@@ -225,6 +235,11 @@ export function PublicVacancyCard({
             {savedLabel}
           </span>
         )}
+      </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-text-secondary" data-testid="job-origin" data-origin="external">
+        <Badge tone="neutral" className="font-sans normal-case tracking-normal">{sourceName ?? origin.external}</Badge>
+        <span>{memberFacts?.hasApplicationUrl === true ? origin.source_original : memberFacts?.hasApplicationUrl === false ? origin.unavailable : origin.external_unchecked}</span>
       </div>
 
       {/* THE AD'S OWN LANGUAGE, ON ONE LINE (owner §6, 2026-09-27).

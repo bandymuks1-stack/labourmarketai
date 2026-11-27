@@ -11,6 +11,7 @@ import type {
 import { useLocale } from "../../src/i18n/locale-context";
 import { CapabilityFailureNotice } from "../../src/screens/capability-failure";
 import { CapabilityGate } from "../../src/screens/capability-gate";
+import { CvEntries } from "../../src/screens/cv-entries";
 import { SkillFigureList } from "../../src/screens/work-figures";
 import { Body, Button, Divider, Title } from "../../src/ui/primitives";
 import { theme } from "../../src/ui/theme";
@@ -106,6 +107,7 @@ export default function Screen() {
             )
           }
         </CapabilityGate>
+        <CvEntries />
         <Button
           variant="quiet"
           testID="profile-open-journal"

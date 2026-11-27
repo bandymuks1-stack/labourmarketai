@@ -3,9 +3,11 @@ import { notFound } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { Globe, Mail, Phone, MapPin, Boxes } from "lucide-react";
 
+import { CompanyTeamProfile, type CompanyTeamTranslate } from "@/components/app/company-team-profile";
 import { getPublicBusinessProfile } from "@/lib/company/public-profile";
 import { publicWebsiteHref } from "@/lib/company/public-website";
-import { BRAND_NAME, buildPageMetadata } from "@/lib/seo/metadata";
+import { buildCompanyTeamProfile, isCompanyTeamView } from "@/lib/company/team-profile-model";
+import { buildPageMetadata } from "@/lib/seo/metadata";
 
 export const dynamic = "force-dynamic";
 
@@ -17,39 +19,56 @@ export const dynamic = "force-dynamic";
  * `marketplace_listings`. No private org / worker / project / contact /
  * membership / financial data. Services are not shown: `service_offerings` has
  * no organization column, so its read returns the owner's PERSONAL offerings.
+ *
+ * `?view=team` opens the team-presentation form of the same read: opt-in, noindex,
+ * linked from nowhere, its visual awaiting the owner's verdict. Without it this
+ * page is exactly the default profile.
  */
+
+type BusinessProfilePageProps = {
+  params: Promise<{ locale: string; slug: string }>;
+  searchParams: Promise<{ view?: string | string[] }>;
+};
 
 export async function generateMetadata({
   params,
-}: {
-  params: Promise<{ locale: string; slug: string }>;
-}): Promise<Metadata> {
+  searchParams,
+}: BusinessProfilePageProps): Promise<Metadata> {
   const { locale, slug } = await params;
   const view = await getPublicBusinessProfile(slug);
-  if (!view) return { title: BRAND_NAME, robots: { index: false, follow: false } };
+  // No title of its own: the not-found title applies (UX-9), as on a missing job.
+  if (!view) return { robots: { index: false, follow: false } };
   const { profile } = view;
   const desc = profile.tagline ?? profile.description ?? undefined;
   // Canonical + hreflang + brand share card from the one builder every other
   // public page uses (2026-09-19: this page declared none of them).
-  return buildPageMetadata({
+  const metadata = buildPageMetadata({
     locale,
     path: `/business/${slug}`,
     title: profile.displayName,
     description: desc?.slice(0, 160),
   });
+  return isCompanyTeamView((await searchParams).view)
+    ? { ...metadata, robots: { index: false, follow: false } }
+    : metadata;
 }
 
 export default async function BusinessProfilePage({
   params,
-}: {
-  params: Promise<{ locale: string; slug: string }>;
-}) {
+  searchParams,
+}: BusinessProfilePageProps) {
   const { locale, slug } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("businessProfile");
 
   const view = await getPublicBusinessProfile(slug);
   if (!view) notFound();
+
+  if (isCompanyTeamView((await searchParams).view)) {
+    const translate = (await getTranslations()) as unknown as CompanyTeamTranslate;
+    return <CompanyTeamProfile view={buildCompanyTeamProfile(view, locale)} t={translate} />;
+  }
+
   const { profile, listings } = view;
   const websiteHref = publicWebsiteHref(profile.website);
 

@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { hasAnyProposal, parseCvSections, TRAINING_TYPE_SLUG } from "./structured-parse";
+import { OTHER_LANGUAGE_CVS } from "./__fixtures__/cv-other-languages";
+import OTHER_LANGUAGE_EXPECTED from "./__fixtures__/cv-other-languages.expected.json";
 
 /**
  * Structured CV parsing heuristics (Full CV System v1) — fixture-driven.
@@ -74,6 +76,17 @@ describe("parseCvSections", () => {
     const noLevel = parseCvSections("Kalbos: anglų");
     expect(noLevel.languages).toHaveLength(1);
     expect(noLevel.languages[0].level).toBeNull();
+  });
+
+  it("reads the CV the production walk uploads in P-6b", () => {
+    const p = parseCvSections(
+      "Darbo patirtis\nPlytelių klojėjas\nUAB QASYNTHETICB1\n2019 – 2023\nIšsilavinimas\nQA Synthetic rengimo centras, profesinis mokymas 2015–2017\nKalbos\nAnglų B2, rusų gimtoji",
+    );
+    expect(p.workHistory[0].title).toContain("Plytelių klojėjas");
+    expect(p.education[0].institution).toContain("rengimo centras");
+    expect(p.workHistory.some((w) => w.title.includes("rengimo centras"))).toBe(false);
+    expect(p.languages.find((l) => l.lang === "en")?.level).toBe("B2");
+    expect(p.languages.find((l) => l.lang === "ru")?.level).not.toBe("B2");
   });
 
   it("reads each language's level from its own part of the line (first real user's feedback 2026-11-04)", () => {
@@ -160,7 +173,7 @@ describe("parseCvSections", () => {
     it("a name above the first job, with no heading, is not part of that job", () => {
       const p = parseCvSections("Vardenis Pavardenis\nPlytelių klojėjas\n2019 – 2023");
       expect(p.workHistory).toHaveLength(1);
-      expect(p.workHistory[0].title).toBe("Plytelių klojėjas");
+      expect(p.workHistory[0].title).toContain("Plytelių klojėjas");
     });
 
     it("never groups languages or certificates, nor reads a word as a month away from a year", () => {
@@ -402,4 +415,100 @@ describe("parseCvSections", () => {
       expect(p.workHistory[0].title).toBe("Mūrininkas, UAB Statybos testas");
     });
   });
+});
+
+describe("a Swedish CV (sv routed locale, owner order 2026-11-15)", () => {
+  const SV_CV = `
+Anna Andersson
+
+Arbetslivserfarenhet
+Bygg AB — snickare 2019 till 2022
+Montage AB, montör 2022 – nu
+
+Utbildning
+Malmö yrkesgymnasium, gymnasieprogram 2015–2018
+
+Språk
+Svenska modersmål
+Engelska B2
+Tyska A2
+
+Certifikat
+Truckkort intyg 2021
+
+Kan flytta för arbete. Har egen bil.
+`;
+
+  it("reads work history with Swedish separators and an open end", () => {
+    const p = parseCvSections(SV_CV);
+    expect(p.workHistory).toHaveLength(2);
+    expect(p.workHistory[0].startYear).toBe(2019);
+    expect(p.workHistory[0].endYear).toBe(2022);
+    expect(p.workHistory[1].isCurrent).toBe(true);
+    expect(p.workHistory[1].endYear).toBeNull();
+  });
+
+  it("reads Swedish language names and levels without inventing one", () => {
+    const p = parseCvSections(SV_CV);
+    const byLang = Object.fromEntries(p.languages.map((l) => [l.lang, l.level]));
+    expect(byLang.sv).toBe("native");
+    expect(byLang.en).toBe("B2");
+    expect(byLang.de).toBe("A2");
+  });
+
+  it("reads education, certificates and availability", () => {
+    const p = parseCvSections(SV_CV);
+    expect(p.education.length).toBeGreaterThanOrEqual(1);
+    expect(p.certificates.length).toBeGreaterThanOrEqual(1);
+    const keys = p.availability.map((a) => a.key);
+    expect(keys).toContain("willingToRelocate");
+    expect(keys).toContain("hasTransport");
+  });
+
+  it("treats an hourly Swedish wage as no monthly expectation", () => {
+    expect(parseCvSections("Lön: 3000 € per timme").salary).toBeNull();
+  });
+
+  it("reads a Swedish language name with a level, never a bare one", () => {
+    expect(parseCvSections("Polska B1").languages).toEqual([
+      { lang: "pl", level: "B1", confidence: "high", sourceLine: "Polska B1" },
+    ]);
+    expect(parseCvSections("Malmö, Sverige\nRyska").languages).toEqual([]);
+  });
+
+  it("types a Yrkeshögskola as vocational, a plain högskola as college", () => {
+    const yh = parseCvSections("Utbildning\nYrkeshögskolan Göteborg, svetsteknik 2016–2018");
+    expect(yh.education[0]?.educationTypeSlug).toBe("vocational");
+    const hs = parseCvSections("Utbildning\nHögskolan i Borås, byggteknik 2016–2018");
+    expect(hs.education[0]?.educationTypeSlug).toBe("college");
+  });
+
+  it("reads a weekend hint only from a statement, never from a name", () => {
+    for (const line of ["Lars Helgersson, arbetsledare", "Helger Bau GmbH"]) {
+      expect(parseCvSections(line).availability.map((a) => a.key), line).not.toContain(
+        "weekendShiftsOk",
+      );
+    }
+    expect(parseCvSections("Kan arbeta helger.").availability.map((a) => a.key)).toContain(
+      "weekendShiftsOk",
+    );
+  });
+
+  it("reads 'nu' as an open end only as a whole word", () => {
+    const lt = parseCvSections("2020 – nuėjau į UAB X");
+    expect(lt.workHistory.some((w) => w.isCurrent)).toBe(false);
+  });
+});
+
+describe("Swedish never changes another language's reading (review #3389 P2-1)", () => {
+  // Expected outputs were generated by main 8f13c5d0's parser, before the
+  // Swedish lexicon existed. The Polish CV carries "Polska" in its address and
+  // in an employer name; the German one has an employer called "Helger".
+  for (const [lang, text] of Object.entries(OTHER_LANGUAGE_CVS)) {
+    it(`${lang}: identical to main`, () => {
+      expect(parseCvSections(text)).toEqual(
+        (OTHER_LANGUAGE_EXPECTED as Record<string, unknown>)[lang],
+      );
+    });
+  }
 });

@@ -122,7 +122,7 @@ describe("2. the education workspace gets education-shaped starters", () => {
     // The invite panel (learner relationship lives there), the programmes
     // section on the company hub, the hub itself. All exist as canonical
     // screens today — link chips route, never duplicate.
-    expect(STARTERS).toMatch(/id: "link:\/dashboard\/network\?relationship=student", labelKey: "chipInviteStudent"/);
+    expect(STARTERS).toMatch(/id: "link:\/dashboard\/network\?invite=1&type=join_organization&relationship=student", labelKey: "chipInviteStudent"/);
     expect(STARTERS).toMatch(/id: "link:\/dashboard\/company\/education#institution-programs-title", labelKey: "chipProgrammes"/);
     expect(STARTERS).toMatch(/id: "link:\/dashboard\/company", labelKey: "chipEduCapabilities"/);
   });
@@ -211,7 +211,7 @@ describe("4. i18n parity for the M10 keys", () => {
   });
 
   it("the routed locales carry REAL translations (no [EN] markers)", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const chat = (
         JSON.parse(read(`messages/${loc}.json`)) as {
           conversation: { chat: Record<string, string> };

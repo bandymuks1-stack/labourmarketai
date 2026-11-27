@@ -2,11 +2,13 @@
 
 import type { CountryOption } from "@/lib/location/country-options";
 
-import { useActionState, useRef, useState } from "react";
+import { useActionState, useEffect, useRef, useState } from "react";
 
 import { Link } from "@/lib/i18n/navigation";
 import { NeedDoorLink } from "@/components/app/need-door-link";
-import { buttonLinkClassName } from "@/components/ui/Button";
+import { Button, buttonLinkClassName } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import {
   saveCompanySetupAction,
   type CompanySetupFormState,
@@ -57,6 +59,8 @@ export interface CompanySetupFormLabels {
   readonly statusInvalidCountry: string;
   readonly registrationCode: string;
   readonly registrationCodeHelp: string;
+  /** Summary of the closed group of optional fields on a first setup. */
+  readonly optionalDetails: string;
   readonly address: string;
   readonly addressPlaceholder: string;
   readonly website: string;
@@ -141,15 +145,41 @@ export function CompanySetupForm({
   // tap away. An agency or an education institution keeps the workspace as
   // its door — their first step is clients / learners, not a need.
   const needFirst = savedType !== "staffing_agency" && presetCapability !== "training_provider";
+  // An institution whose capability really landed goes straight to its
+  // education home (programmes, groups, learners) — the page it registered
+  // for — instead of the generic workspace where it had to find that door.
+  // Only on a confirmed declaration: the education page redirects away
+  // without the capability.
+  const educationHome =
+    presetCapability === "training_provider" && state?.ok === true && state.capabilityDeclared === true;
+
+  // UX gaps 2026-11-18, E-2: a first setup asks for what is needed (name, type,
+  // country); everything optional waits in one closed group. Editing an
+  // existing company keeps every field open.
+  const collapseOptional = existing === null || firstSetup;
+  // The page shows the existing company's status card only for a company
+  // that is set up (`company && !firstSetup`); everywhere else the form is
+  // where the person reads what creating a company means.
+  const showCreateFrame = existing === null || firstSetup;
+  // E-3: after a save, the result and its next door come into view; the door
+  // is then the one primary action and Save steps back to secondary.
+  const resultRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (!state) return;
+    const reduce =
+      typeof window !== "undefined" && window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    resultRef.current?.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "start" });
+  }, [state]);
 
   // Verified companies have LOCKED legal-registry fields (legal name,
   // country, registration code, address): rendered read-only so a normal
   // user can't overwrite verified data. Contacts / website / type / role
   // stay editable. The server (saveCompanySetup) enforces this too.
   const legalLocked = existing?.verificationStatus === "verified";
-  const lockedInputCls = legalLocked
-    ? "cursor-not-allowed border-border-default bg-ink-800 text-text-muted"
-    : "border-border-default bg-surface-1 text-text-primary focus:border-brand-blue";
+  // A locked legal field keeps the shared field and only dims itself; the
+  // state variants win over the primitive's base colours.
+  const lockedInputCls =
+    "max-sm:min-h-11 max-sm:text-base read-only:cursor-not-allowed read-only:bg-ink-800 read-only:text-text-muted disabled:cursor-not-allowed disabled:bg-ink-800 disabled:text-text-muted";
 
   const banner: { tone: "success" | "warning"; text: string } | null = (() => {
     if (!state) return null;
@@ -175,6 +205,95 @@ export function CompanySetupForm({
     }
   })();
 
+  const optionalFields = (
+    <>
+      <label className="flex flex-col gap-1 text-xs">
+        <span className="text-text-secondary">{labels.registrationCode}</span>
+        <Input
+          type="text"
+          name="registration_code"
+          maxLength={100}
+          defaultValue={existing?.registrationCode ?? ""}
+          readOnly={legalLocked}
+          aria-readonly={legalLocked}
+          className={lockedInputCls}
+          data-testid="company-setup-registration-code"
+        />
+        <span className="text-meta text-text-muted">
+          {labels.registrationCodeHelp}
+        </span>
+      </label>
+
+      <label className="flex flex-col gap-1 text-xs">
+        <span className="text-text-secondary">{labels.address}</span>
+        <Input
+          type="text"
+          name="address"
+          maxLength={300}
+          defaultValue={existing?.address ?? ""}
+          placeholder={labels.addressPlaceholder}
+          readOnly={legalLocked}
+          aria-readonly={legalLocked}
+          className={lockedInputCls}
+          data-testid="company-setup-address"
+        />
+      </label>
+
+      <label className="flex flex-col gap-1 text-xs">
+        <span className="text-text-secondary">{labels.website}</span>
+        <Input
+          type="text"
+          name="website"
+          maxLength={200}
+          defaultValue={existing?.website ?? ""}
+          placeholder={labels.websitePlaceholder}
+          className="max-sm:min-h-11 max-sm:text-base"
+          data-testid="company-setup-website"
+        />
+      </label>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-text-secondary">{labels.contactEmail}</span>
+          <Input
+            type="email"
+            name="contact_email"
+            maxLength={200}
+            defaultValue={existing?.contactEmail ?? ""}
+            className="max-sm:min-h-11 max-sm:text-base"
+            data-testid="company-setup-contact-email"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="text-text-secondary">{labels.contactPhone}</span>
+          <Input
+            type="text"
+            name="contact_phone"
+            maxLength={50}
+            defaultValue={existing?.contactPhone ?? ""}
+            className="max-sm:min-h-11 max-sm:text-base"
+            data-testid="company-setup-contact-phone"
+          />
+        </label>
+      </div>
+
+      <fieldset className="flex flex-col gap-1.5 text-xs">
+        <legend className="text-text-secondary">{labels.requesterRole}</legend>
+        <OptionCards
+          name="requester_role"
+          ariaLabel={labels.requesterRole}
+          defaultValue={existing?.requesterRole ?? "owner"}
+          columns={3}
+          testId="company-setup-requester-role"
+          options={REQUESTER_ROLE_ORDER.map((role) => ({
+            value: role,
+            label: labels.requesterRoleOptions[role],
+          }))}
+        />
+      </fieldset>
+    </>
+  );
+
   return (
     <form
       action={formAction}
@@ -196,17 +315,24 @@ export function CompanySetupForm({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {labels.title}
         </h2>
-        <p className="text-sm text-text-secondary">{labels.subtitle}</p>
+        {showCreateFrame ? <p className="text-sm text-text-secondary">{labels.subtitle}</p> : null}
       </header>
 
       {/* Honest verification notice — full company use requires human
-          verification that does not happen automatically. */}
-      <p
-        className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
-        data-testid="company-setup-verification-notice"
-      >
-        {labels.verificationNotice}
-      </p>
+          verification that does not happen automatically. On the CREATE form
+          and on the FIRST setup of the shell row sign-up makes (no status card
+          is shown then): only an existing company's card above already
+          states its status and what it means
+          (company-start-verification-explainer), so only its edit form said
+          it a second time (decision 0032, 2026-11-24; R2 review on #3786). */}
+      {showCreateFrame ? (
+        <p
+          className="rounded-md border border-state-warning/40 bg-state-warning/5 px-3 py-2 text-xs leading-relaxed text-text-secondary"
+          data-testid="company-setup-verification-notice"
+        >
+          {labels.verificationNotice}
+        </p>
+      ) : null}
 
       {legalLocked ? (
         <p
@@ -219,7 +345,7 @@ export function CompanySetupForm({
 
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.legalName}</span>
-        <input
+        <Input
           type="text"
           name="legal_name"
           required
@@ -229,7 +355,7 @@ export function CompanySetupForm({
           placeholder={labels.legalNamePlaceholder}
           readOnly={legalLocked}
           aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
+          className={lockedInputCls}
           data-testid="company-setup-legal-name"
         />
         <span className="text-meta text-text-muted">{labels.legalNameHelp}</span>
@@ -268,12 +394,12 @@ export function CompanySetupForm({
           server stores NULL (honest absence), never Lithuania. */}
       <label className="flex flex-col gap-1 text-xs">
         <span className="text-text-secondary">{labels.country}</span>
-        <select
+        <Select
           name="country"
           defaultValue={existing?.country ?? ""}
           disabled={legalLocked}
           aria-disabled={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
+          className={lockedInputCls}
           data-testid="company-setup-country"
         >
           <option value="" disabled>
@@ -284,126 +410,61 @@ export function CompanySetupForm({
               {labels.countryOptions[o.value] ?? o.label}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
 
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-text-secondary">{labels.registrationCode}</span>
-        <input
-          type="text"
-          name="registration_code"
-          maxLength={100}
-          defaultValue={existing?.registrationCode ?? ""}
-          readOnly={legalLocked}
-          aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
-          data-testid="company-setup-registration-code"
-        />
-        <span className="text-meta text-text-muted">
-          {labels.registrationCodeHelp}
-        </span>
-      </label>
-
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-text-secondary">{labels.address}</span>
-        <input
-          type="text"
-          name="address"
-          maxLength={300}
-          defaultValue={existing?.address ?? ""}
-          placeholder={labels.addressPlaceholder}
-          readOnly={legalLocked}
-          aria-readonly={legalLocked}
-          className={`rounded-md border px-3 py-2 text-sm outline-none ${lockedInputCls}`}
-          data-testid="company-setup-address"
-        />
-      </label>
-
-      <label className="flex flex-col gap-1 text-xs">
-        <span className="text-text-secondary">{labels.website}</span>
-        <input
-          type="text"
-          name="website"
-          maxLength={200}
-          defaultValue={existing?.website ?? ""}
-          placeholder={labels.websitePlaceholder}
-          className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-          data-testid="company-setup-website"
-        />
-      </label>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <label className="flex flex-col gap-1 text-xs">
-          <span className="text-text-secondary">{labels.contactEmail}</span>
-          <input
-            type="email"
-            name="contact_email"
-            maxLength={200}
-            defaultValue={existing?.contactEmail ?? ""}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-            data-testid="company-setup-contact-email"
-          />
-        </label>
-        <label className="flex flex-col gap-1 text-xs">
-          <span className="text-text-secondary">{labels.contactPhone}</span>
-          <input
-            type="text"
-            name="contact_phone"
-            maxLength={50}
-            defaultValue={existing?.contactPhone ?? ""}
-            className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
-            data-testid="company-setup-contact-phone"
-          />
-        </label>
-      </div>
-
-      <fieldset className="flex flex-col gap-1.5 text-xs">
-        <legend className="text-text-secondary">{labels.requesterRole}</legend>
-        <OptionCards
-          name="requester_role"
-          ariaLabel={labels.requesterRole}
-          defaultValue={existing?.requesterRole ?? "owner"}
-          columns={3}
-          testId="company-setup-requester-role"
-          options={REQUESTER_ROLE_ORDER.map((role) => ({
-            value: role,
-            label: labels.requesterRoleOptions[role],
-          }))}
-        />
-      </fieldset>
+      {/* The optional fields stay inside the form either way: a closed
+          <details> still submits its controls. */}
+      {collapseOptional ? (
+        <details className="group flex flex-col gap-4" data-testid="company-setup-optional">
+          <summary className="flex min-h-11 cursor-pointer select-none items-center text-sm font-medium text-text-primary marker:text-text-muted">
+            {labels.optionalDetails}
+          </summary>
+          <div className="flex flex-col gap-4 pt-2">
+            {optionalFields}
+          </div>
+        </details>
+      ) : (
+        optionalFields
+      )}
 
       <div className="flex flex-wrap gap-3">
         {/* AUTOMATIC-FIRST: the primary action saves the company as usable
             now (active_unverified / needs_checks). Requesting a manual review
             is an OPTIONAL secondary action, never required to use the company. */}
-        <button
+        <Button
           type="submit"
           onClick={() => setIntent("draft")}
           disabled={isPending}
-          className="rounded-md bg-brand-blue px-4 py-2 text-sm font-semibold text-text-primary hover:bg-brand-blue/80 disabled:opacity-50"
+          variant={state?.ok ? "secondary" : "primary"}
+          size="sm"
+          className="min-h-11"
           data-testid="company-setup-save-draft"
         >
           {labels.saveDraft}
-        </button>
-        <button
+        </Button>
+        <Button
           type="submit"
           onClick={() => setIntent("submit")}
           disabled={isPending}
-          className="rounded-md border border-border-default bg-surface-1 px-4 py-2 text-sm font-medium text-text-secondary hover:border-brand-blue disabled:opacity-50"
+          variant="secondary"
+          size="sm"
+          className="min-h-11"
           data-testid="company-setup-submit-request"
         >
           {labels.submitRequest}
-        </button>
+        </Button>
       </div>
 
       {banner ? (
         <p
           className={
             banner.tone === "success"
-              ? "rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
-              : "rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
+              ? "scroll-mt-20 rounded-md border border-state-success bg-state-success/10 px-3 py-2 text-xs text-state-success"
+              : "scroll-mt-20 rounded-md border border-state-warning bg-state-warning/10 px-3 py-2 text-xs text-state-warning"
           }
           role="status"
+          ref={resultRef}
           data-testid="company-setup-result"
         >
           {banner.text}
@@ -418,7 +479,7 @@ export function CompanySetupForm({
           — one primary action. Agencies and institutions keep the workspace
           as their primary door. */}
       {state?.ok ? (
-        <div className="flex flex-col gap-2" data-testid="company-setup-next" data-first-door={needFirst ? "need" : "workspace"}>
+        <div className="flex flex-col gap-2" data-testid="company-setup-next" data-first-door={needFirst ? "need" : educationHome ? "education" : "workspace"}>
           {state.capabilityDeclared === false ? (
             <p className="text-xs leading-relaxed text-state-warning" role="status">
               {labels.capabilityNotDeclared}
@@ -433,7 +494,7 @@ export function CompanySetupForm({
               />
             ) : null}
             <Link
-              href="/dashboard/company"
+              href={educationHome ? "/dashboard/company/education" : "/dashboard/company"}
               className={`${buttonLinkClassName(needFirst ? "secondary" : "primary", "sm")} w-fit max-md:w-full`}
               data-testid="company-setup-go-workspace"
             >

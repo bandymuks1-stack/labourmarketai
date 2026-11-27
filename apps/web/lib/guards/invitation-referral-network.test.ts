@@ -308,7 +308,6 @@ describe("app layer — the same boundaries above the database", () => {
       ["network", "invitePage", "anonExplainer"],
       ["network", "invitePage", "register"],
       ["network", "invitePage", "signIn"],
-      ["network", "invitePage", "youOwnYourIdentity"],
       ["network", "invitePage", "referredVia"],
       ["network", "invitePage", "demandNotMatch"],
       ["network", "invitePage", "titles", "invite_to_demand"],

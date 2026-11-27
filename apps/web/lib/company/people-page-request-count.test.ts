@@ -432,6 +432,30 @@ describe("one /dashboard/company/people render, 1 vs 15 brigades", () => {
 });
 
 describe("the brigade panel stays honest", () => {
+  it("keeps disbanded history when the owner has no active brigades", async () => {
+    await beginRequest(0);
+    const archivedAt = "2026-10-24T12:00:00Z";
+    TABLE_ROWS.organizations = [{
+      id: tid(1),
+      owner_profile_id: USER,
+      organization_type: "team",
+      display_name: "Archived brigade",
+      legal_name: null,
+      created_at: "2026-10-01T00:00:00Z",
+      archived_at: archivedAt,
+    }];
+    const { getTeamBrigadesData } = await import("@/lib/company/team-brigades");
+    const data = await getTeamBrigadesData();
+    if (!data.applied) throw new Error("team model should read as applied");
+    expect(data.teams).toEqual([]);
+    expect(data.disbanded).toEqual([{
+      id: tid(1),
+      name: "Archived brigade",
+      createdAt: "2026-10-01T00:00:00Z",
+      disbandedAt: archivedAt,
+    }]);
+  });
+
   it("a failed capability read is UNKNOWN for that brigade only, never empty or zero", async () => {
     await beginRequest(6);
     capabilityFailsFor.add(tid(2)).add(tid(5));

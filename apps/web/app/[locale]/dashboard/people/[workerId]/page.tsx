@@ -34,6 +34,8 @@ import { Card } from "@/components/ui/Card";
 import { MessageButton } from "@/components/app/message-button";
 import { JournalWorkIntelligence } from "@/components/app/journal-work-intelligence";
 import { loadWorkIntelligence } from "@/lib/journal/work-intelligence-read";
+import { experienceFiguresOf } from "@/lib/journal/experience-figures";
+import { readVisibleExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import {
   WORK_PERIOD_KEYS,
   type WorkPeriodKey,
@@ -106,6 +108,7 @@ export default async function PersonPage({
   const serviceRequestLabels: PersonServiceRequestLabels = {
     request: tMarket("request"),
     requested: tMarket("requested"),
+    myRequests: tMarket("outgoingHeading"),
     duplicate: tMarket("duplicate"),
     offeringInactive: tMarket("offeringInactive"),
     notAvailable: tMarket("notAvailable"),
@@ -220,6 +223,12 @@ export default async function PersonPage({
   // Permission is the database's: `engagement_contexts` select RLS returns
   // only the engagements this viewer is entitled to (their own, or an
   // organization they manage). Nothing is loosened to render it.
+  // A person found through the visibility consent comes back with NO profile
+  // id (see above), so their services, photos and recorded work are not read
+  // at all. An unread record is not an empty one (SEP-7, SEP-8): the three
+  // sections are withheld and one sentence says when they appear, instead of
+  // "Nothing offered yet" / "No recorded work yet" about a record never read.
+  const recordReadable = Boolean(worker.profile_id);
   const recordedWork = await readRecordedWorkFor(
     (worker.profile_id as string | null) ?? "",
   );
@@ -286,6 +295,24 @@ export default async function PersonPage({
           worker.id as string,
           { focus: periodKey },
         )
+      : null;
+  /**
+   * ── EXPERIENCE IS THE ONE READING, NOT `workers.experience_years` ───────
+   *
+   * This page printed `workers.experience_years` — a column nothing writes —
+   * as the person's experience. The experience an organization may see is the
+   * decision-0025 reading (`experienceFiguresOf` → `deriveProfessionalExperience`)
+   * over the SAME RLS-scoped work model rendered below, with the person's
+   * engagements as far as THIS viewer's RLS returns them (nothing widened).
+   * Unreadable relationships or a truncated journal read → no figure (UNKNOWN,
+   * never an inflated or partial "total").
+   */
+  const visibleRelationships = orgWorkIntelligence
+    ? await readVisibleExperienceRelationships(supabase, (worker.profile_id as string | null) ?? "")
+    : null;
+  const experienceHours =
+    orgWorkIntelligence && !orgWorkIntelligence.coverage.truncated
+      ? experienceFiguresOf(orgWorkIntelligence, visibleRelationships).professionalExperienceHours
       : null;
   const tProfessions = await getTranslations("professions");
   const tUnits = await getTranslations("productivityUnits");
@@ -415,10 +442,14 @@ export default async function PersonPage({
               })}
             </span>
           ) : null}
-          {typeof worker.experience_years === "number" &&
-          worker.experience_years > 0 ? (
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary">
-              {t("experienceYears", { n: worker.experience_years })}
+          {experienceHours !== null && experienceHours > 0 ? (
+            <span
+              className="inline-flex items-center gap-1.5 rounded-full border border-ink-500 bg-ink-800 px-3 py-1 font-mono text-meta uppercase tracking-label text-text-secondary"
+              data-testid="person-experience-total"
+            >
+              {t("recordedExperienceHours", {
+                hours: new Intl.NumberFormat(locale, { maximumFractionDigits: 1 }).format(experienceHours),
+              })}
             </span>
           ) : null}
           {mobility.length > 0 ? (
@@ -449,6 +480,7 @@ export default async function PersonPage({
           Only ACTIVE offerings: the table's own discovery policy publishes
           those and withholds drafts, so the filter matches the permission
           rather than widening past it. */}
+      {recordReadable ? (
       <section className="flex flex-col gap-3" data-testid="person-services">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <Hammer className="h-3.5 w-3.5" aria-hidden />
@@ -516,12 +548,20 @@ export default async function PersonPage({
           </ul>
         )}
       </section>
+      ) : (
+        <Card variant="muted" compact>
+          <p className="text-sm text-text-secondary" data-testid="person-shared-after-work">
+            {t("sharedAfterWork")}
+          </p>
+        </Card>
+      )}
 
       {/* REAL WORK — photographs of work actually done, from the SAME journal
           evidence store the author's own gallery reads. No portfolio model, no
           second upload path, and no journal text: this page selects no private
           narrative, and a photo of a finished weld is not the sentence the
           person wrote about their day. */}
+      {recordReadable ? (
       <section className="flex flex-col gap-3" data-testid="person-photos">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <Images className="h-3.5 w-3.5" aria-hidden />
@@ -572,6 +612,7 @@ export default async function PersonPage({
           </>
         )}
       </section>
+      ) : null}
 
       {/* WHAT THEIR RECORDED WORK ADDS UP TO — in this organization's own
           records. Hours, kinds of work, the skills the hours reach and what
@@ -582,6 +623,7 @@ export default async function PersonPage({
           wi={orgWorkIntelligence}
           locale={locale}
           audience="organization"
+          relationships={visibleRelationships}
           labels={{
             skillName: catalogueName(tSkillNames),
             professionName: catalogueName(tProfessions),
@@ -644,6 +686,7 @@ export default async function PersonPage({
           is what they did, and the page carried none of it. The rows come from
           the SAME `engagement_contexts` spine the person's own card, CV and
           profile read — one history, not a fourth variant of it. */}
+      {recordReadable ? (
       <section className="flex flex-col gap-3" data-testid="person-work">
         <h2 className="inline-flex items-center gap-2 font-mono text-meta uppercase tracking-label text-text-muted">
           <History className="h-3.5 w-3.5" aria-hidden />
@@ -706,6 +749,7 @@ export default async function PersonPage({
           {t("workScopeNote")}
         </p>
       </section>
+      ) : null}
 
       {/* WHAT THIS ORGANIZATION IMPORTED ABOUT THEM. The page read no
           imported history at all (2026-09-20): the ONE evidence read, through

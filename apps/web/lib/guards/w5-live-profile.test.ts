@@ -71,10 +71,17 @@ describe("W5 — one model, never a parallel one", () => {
 
   it("the history read is own-data only and never inner-joins the org name", () => {
     const src = read(HISTORY_READ);
-    expect(src).toMatch(/\.eq\("profile_id", user\.id\)/);
+    // CV-15 / G-7: the card's own history IS the decision-0025 reading, read
+    // for the signed-in user only — the own-data scope now lives in that one
+    // reader, and is asserted there.
+    expect(src).toMatch(/readOwnExperienceRelationships\(supabase, user\.id\)/);
+    const experienceRead = read("lib/journal/professional-experience-read.ts");
+    expect(experienceRead).toMatch(/\.eq\("profile_id", userId\)/);
+    expect(experienceRead).toMatch(/\.eq\("linked_profile_id", userId\)/);
     // The W4 lesson: an `!inner` join for an OPTIONAL display name deletes the
     // row it was decorating. The organization name is optional here.
     expect(src).not.toMatch(/organizations!inner/);
+    expect(experienceRead).not.toMatch(/organizations!inner/);
   });
 
   it("the pure model computes no ranking and no score", () => {

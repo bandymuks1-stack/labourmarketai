@@ -694,6 +694,58 @@ export const SCOPED_OWNER_WAIVERS = [
       // content. Only the number is added; axiom, codes, surfaces, files, expiry and
       // subset rule are unchanged.
       3087,
+      // OWNER APPROVAL 2026-11-08, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3149 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3149: a job id that does not exist gets the not-found page title. Only
+      // the number is added; axiom, codes, surfaces, files, expiry and subset
+      // rule are unchanged.
+      3149,
+      // OWNER APPROVAL 2026-11-08, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3154 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3154: the not-found page of a missing job gets the not-found title and
+      // noindex. Only the number is added; axiom, codes, surfaces, files, expiry
+      // and subset rule are unchanged.
+      3154,
+      // OWNER APPROVAL 2026-11-09, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3171 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3171: a ?country= link says country filtering is not available yet instead of looking applied. Only the number is added; axiom, codes, surfaces, files,
+      // expiry and subset rule are unchanged.
+      3171,
+      // OWNER APPROVAL 2026-11-09, verbatim (given to the coordinator in its own
+      // session): "I approve adding ONLY PR 3123 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // #3123: a typed profession word keeps its page (SR-4). Only the number is
+      // added; axiom, codes, surfaces, files, expiry and subset rule are unchanged.
+      3123,
+      // OWNER APPROVAL 2026-11-12, verbatim (given to the coordinator in its own
+      // session): "Pakartotinai patvirtinu savininko leidimą įtraukti PR #3255 į public-acquisition-route-jobs išimčių sąrašą, laikantis anksčiau patvirtintų sąlygų."
+      // Checked before the change by running the gate on head fac8740f5 twice:
+      // as PR 3255 → 18 findings, every one with the single reason
+      // `pr-not-covered`; as an already listed PR → pass, zero new findings.
+      // #3255: a /jobs profession listing gets its own canonical, title, h1 and
+      // description, and is indexable only from 10 live ads. No new route. Only
+      // the number is added; axiom, codes, surfaces, files, expiry and subset
+      // rule are unchanged; `product-gate.mjs` is not touched.
+      3255,
+      // OWNER APPROVAL 2026-11-12, verbatim (given to the coordinator in its own
+      // session): "Patvirtinu jūsų patikrintą tikslinį produkto vartų išimčių papildymą, nekeičiant kitų vartų sąlygų."
+      // Checked by the coordinator on the PR head, gate run twice: as PR 3261 →
+      // 18 findings, every one with the single reason `pr-not-covered`; as an
+      // already listed PR → pass, zero new findings.
+      // #3261: the job board's per-locale text tables gain the Swedish entry. Only the number is added; axiom, codes, surfaces, files,
+      // expiry and subset rule are unchanged; `product-gate.mjs` is not touched.
+      3261,
+      // OWNER APPROVAL 2026-11-16, verbatim (given in this PR's session): "I approve adding ONLY PRs 3181 and 3448 to the existing public-acquisition-route-jobs waiver pullRequests list."
+      // Checked before the change: on #3448's head 4ef7e25d1 the CI gate reported every finding with the
+      // single reason `pr-not-covered` and no new finding code; #3181 stopped at the same reason.
+      // #3448: a signed-out visitor on /jobs/[id] gets one tracked link to the worker-need form.
+      // #3181: each /jobs/[id] page gets its own meta description from the anonymous preview.
+      // Each PR added only its own number; axiom, codes, surfaces, files, expiry and subset rule are
+      // unchanged; `product-gate.mjs` is not touched.
+      3448,
+      3181,
+      // OWNER APPROVAL 2026-11-27: "Leidžiu įtraukti tik #3327".
+      // Only this PR binding is added; all other waiver constraints stay unchanged.
+      3327,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
@@ -987,7 +1039,12 @@ export const SCOPED_OWNER_WAIVERS = [
     // project creation, which never creates a site, so it looped back to the
     // same empty state; it now opens the existing sites form. Only that dead
     // end, like #2101; the three waived answers are unchanged.
-    pullRequests: [1344, 2101, 2159, 2234, 2526],
+    // #3140 — OWNER APPROVAL 2026-11-07, verbatim: "/dashboard/hours: leidžiu pridėti
+    // viršuje aiškiai matomą nuorodą „Laukia patvirtinimo: N“, vedančią į patvirtinimo
+    // eilę, jei N skaičiuojamas pagal realiai šiam naudotojui leidžiamas patvirtinti
+    // ataskaitas. Nekeisti duomenų, teisių ar esamos patvirtinimo verslo logikos."
+    // Only that link; the three waived answers are unchanged.
+    pullRequests: [1344, 2101, 2159, 2234, 2526, 3140],
     // Deliberately empty — the waiver lives IN the branch whose CI must
     // honour it, so pinning the head SHA would change the head SHA.
     approvedHeadShas: [],
@@ -1061,6 +1118,52 @@ export const SCOPED_OWNER_WAIVERS = [
     approvedAt: "2026-09-30",
     owner:
       "Owner decision 2026-09-30, in chat — selected 'Scoped owner waiver #2026 (Recommended)' for the Journal photo viewer modal (scope: #2026 / journal-photo-viewer.tsx only).",
+  },
+  {
+    id: "public-acquisition-route-services",
+    axioms: ["A-01"],
+    // Owner instruction 2026-11-25: public service search must return real
+    // results before mandatory registration; authentication is required for
+    // saving, publishing or contacting. Existing privacy permissions remain.
+    // This records that explicit product decision for its implementation PR;
+    // it does not inherit the /jobs waiver or approve SQL/anonymous grants.
+    // The declarations honestly retain the six pre-auth workspace answers as
+    // false. Product Gate measured exactly these 12 new A-01 findings after
+    // both declarations were added. Prospective object history is supplied
+    // by the existing private audit chain; no A-09 history finding is waived.
+    scope:
+      "Public personal-service search and detail before login, preserving explicit author opt-in and the existing authenticated request workflow",
+    pullRequests: [3818],
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    files: [
+      "/services",
+      "/services/[id]",
+      "apps/web/app/[locale]/(marketing)/services/page.tsx",
+      "apps/web/app/[locale]/(marketing)/services/search-form.tsx",
+      "apps/web/app/[locale]/(marketing)/services/[id]/page.tsx",
+      "apps/web/app/[locale]/(marketing)/services/[id]/not-found.tsx",
+    ],
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "/services" },
+      { code: "not_reflected_on_map", file: "/services" },
+      { code: "not_ai_controlled", file: "/services" },
+      { code: "requires_leaving_workspace", file: "/services" },
+      { code: "requires_new_page", file: "/services" },
+      { code: "world_state_cannot_control_it", file: "/services" },
+      { code: "not_world_state_driven", file: "/services/[id]" },
+      { code: "not_reflected_on_map", file: "/services/[id]" },
+      { code: "not_ai_controlled", file: "/services/[id]" },
+      { code: "requires_leaving_workspace", file: "/services/[id]" },
+      { code: "requires_new_page", file: "/services/[id]" },
+      { code: "world_state_cannot_control_it", file: "/services/[id]" },
+    ],
+    reason:
+      "The owner explicitly requires useful public service results before registration. A visitor without an authenticated workspace has no World State, map or assistant; this record excuses only those six category-mismatch answers on the two public routes. SQL, anonymous-access and migration approval remain separate and pending.",
+    resolvedBy: "gate-learns-public-acquisition-route-category (owner constitution decision)",
+    approvedAt: "2026-11-25",
+    owner:
+      "Owner commercial-priority instruction 2026-11-25: real public service-search results before registration, with existing privacy and access permissions preserved (implementation: PR #3818).",
   },
 ];
 

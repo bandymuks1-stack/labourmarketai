@@ -81,6 +81,8 @@ export const DE_PACK: LanguagePack = {
     },
     // ── hospitality & food ─────────────────────────────────────────────────
     cooking: {
+      // "kochte" matches only as a whole word (skill-recognition
+      // WHOLE_WORD_TERMS): inside Dutch "aangekochte" it means bought.
       exact: ["kochte", "in der kuche", "in der küche", "als koch", "essen zubereitet", "mahlzeiten zubereitet"],
     },
     "kitchen-help": {

@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 
@@ -8,6 +9,13 @@ import { Link } from "@/lib/i18n/navigation";
  * back, home as the second. Rendered inside the marketing layout, so the
  * header and theme are already there.
  */
+/** A 404 reads its metadata here, not from the page that threw (UX-9): without it a
+ * missing job carried the home page title, whatever the page's own metadata said. */
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("notFound");
+  return { title: t("title"), robots: { index: false, follow: false } };
+}
+
 export default async function JobNotFound() {
   const [t, tm] = await Promise.all([
     getTranslations("notFound"),

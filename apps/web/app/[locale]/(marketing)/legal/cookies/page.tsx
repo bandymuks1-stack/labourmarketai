@@ -93,16 +93,16 @@ export default async function LegalPage({
       <div className="mt-8 flex flex-col gap-3">
         <p className="text-sm leading-relaxed text-text-secondary">{t("requestContact")}</p>
       </div>
-      <nav aria-label={t("related")} className="mt-8 flex flex-wrap gap-x-6 gap-y-2">
+      <nav aria-label={t("related")} className="mt-8 flex flex-wrap gap-x-6">
         <Link
           href="/legal/privacy"
-          className="text-sm text-text-secondary hover:text-text-primary"
+          className="inline-flex min-h-11 items-center text-sm text-text-secondary hover:text-text-primary"
         >
           {t("privacy.title")} →
         </Link>
         <Link
           href="/legal/data-access"
-          className="text-sm text-text-secondary hover:text-text-primary"
+          className="inline-flex min-h-11 items-center text-sm text-text-secondary hover:text-text-primary"
         >
           {t("dataAccess.title")} →
         </Link>

@@ -2,7 +2,7 @@ name: Signup Isolated (local Supabase)
 
 # SELF-SERVE SIGN-UP, end to end, against a throwaway LOCAL Supabase stack that
 # lives and dies inside this job (apps/web/tests/e2e/signup-isolated.spec.ts):
-# a worker, a company and an agency each fill the real sign-up form, onboard,
+# a worker, a student, a company and an agency each fill the real sign-up form, onboard,
 # and reach their first surface; the stored rows are checked. The same stack
 # then walks agency roles and permissions (agency-roles-isolated.spec.ts):
 # invite by link, a limited governance seat, refusals, cross-org isolation.
@@ -15,65 +15,25 @@ name: Signup Isolated (local Supabase)
 #     is built or started; no project is linked, no access token is used;
 #   - the app runs with LM_ACCEPTANCE_MODE=1 and refuses a non-local target;
 #   - payments, AI providers and outbound alerts stay off;
-#   - only Playwright's list output is kept (no traces, no screenshots).
+#   - only Playwright's list output is kept (no traces), with ONE exception:
+#     experience-integration-isolated.spec.ts uploads its own screenshots and
+#     failure notes as the `experience-integration` artifact (synthetic
+#     accounts on this stack only; owner decision 2026-11-14, CV screenshots
+#     from synthetic accounts as CI artifacts), and journal-day-choice-isolated
+#     uploads its 375 / 1280 px screenshots as `journal-day-choice` (owner P1
+#     2026-11-21, synthetic worker), and cv-shown-twice-isolated uploads its
+#     375 / 390 / 768 / 1440 px Living CV screenshots as `cv-shown-twice`
+#     (owner P0 2026-11-23, synthetic worker). No other walk's output is kept.
 
 on:
   workflow_dispatch:
+  # EVERY pull request (owner order 2026-11-23, regression protection). The
+  # `changes` job decides whether the core journeys must run: any change to
+  # the web app, the database, the shared packages, the lockfile or this
+  # workflow runs them. `core-journeys` always reports, so it can be the one
+  # required check. A per-file path list let a PR that changed shared
+  # components, navigation, auth, data or an API skip every journey.
   pull_request:
-    paths:
-      - ".github/workflows/signup-isolated.yml"
-      - "apps/web/tests/e2e/signup-isolated.spec.ts"
-      - "apps/web/tests/e2e/agency-roles-isolated.spec.ts"
-      - "apps/web/tests/e2e/role-journeys-isolated.spec.ts"
-      - "apps/web/tests/e2e/skills-chain-isolated.spec.ts"
-      - "apps/web/lib/journal/entry-skill-retraction.ts"
-      - "apps/web/lib/journal/journal-entry-skills-actions.ts"
-      - "apps/web/lib/journal/skill-pipeline-actions.ts"
-      - "apps/web/app/*/dashboard/company/people/**"
-      - "apps/web/app/*/dashboard/company/settings/**"
-      - "apps/web/app/*/dashboard/network/**"
-      - "apps/web/components/app/organization-members-section.tsx"
-      - "apps/web/components/app/membership-invitations-panel.tsx"
-      - "apps/web/components/app/company-workers-section.tsx"
-      - "apps/web/components/app/company-next-actions.tsx"
-      - "apps/web/components/app/conversation/chat/workspace-chip.tsx"
-      - "apps/web/lib/company/*authority*"
-      - "apps/web/lib/company/*membership*"
-      - "apps/web/lib/company/role-capabilities.ts"
-      - "apps/web/lib/company/employer-company-context.ts"
-      - "apps/web/lib/company/active-organization.ts"
-      - "apps/web/components/app/signup-form.tsx"
-      - "apps/web/components/app/onboarding-wizard.tsx"
-      - "apps/web/components/app/company-setup-form.tsx"
-      - "apps/web/app/*/auth/**"
-      - "apps/web/app/*/onboarding/**"
-      - "apps/web/app/*/dashboard/start/**"
-      - "apps/web/lib/onboarding/**"
-      - "apps/web/lib/invitations/signup-*"
-      - "apps/web/components/app/login-form.tsx"
-      - "apps/web/components/app/invite-panel.tsx"
-      - "apps/web/app/*/invite/**"
-      - "apps/web/components/app/reset-password-form.tsx"
-      - "apps/web/app/*/dashboard/journal/**"
-      - "supabase/config.toml"
-      - "apps/web/tests/e2e/*-isolated-web-a.spec.ts"
-      - "apps/web/tests/e2e/isolated-web-a-helpers.ts"
-      - "apps/web/lib/notifications/**"
-      - "apps/web/lib/email/**"
-      - "apps/web/app/api/cron/weekly-digest/**"
-      - "apps/web/lib/opportunities/saved-search*"
-      - "apps/web/components/app/saved-searches-strip.tsx"
-      - "apps/web/components/app/notification-preferences-section.tsx"
-      - "apps/web/components/app/company-need-form.tsx"
-      - "apps/web/lib/staffing/company-need-*"
-      - "apps/web/lib/demand/demand-lifecycle*"
-      - "apps/web/tests/e2e/job-fit-evidence-isolated.spec.ts"
-      - "apps/web/tests/e2e/job-fit-main-compat-isolated.spec.ts"
-      - "apps/web/lib/opportunities/opportunity-need.ts"
-      - "apps/web/lib/opportunities/formal-requirements.ts"
-      - "apps/web/lib/market/need-skills*"
-      - "apps/web/lib/demand/demand-request.ts"
-      - "supabase/migrations/20261029190000_worker_board_need_skill_slugs_v1.sql"
 
 permissions:
   contents: read
@@ -83,22 +43,76 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  signup-isolated:
+  changes:
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 5
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+      - name: Does this change reach the web app, the database or the shared packages?
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          if [ "$EVENT" != "pull_request" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          base="$(git merge-base "$BASE_SHA" "$HEAD_SHA")"
+          git diff --name-only "$base" "$HEAD_SHA" > "$RUNNER_TEMP/changed.txt"
+          # Markdown alone never runs the journeys; everything else under these roots does.
+          # Two steps through a file, never a pipe into a quiet grep: it exits on its first
+          # match, the upstream grep then dies of SIGPIPE, and pipefail would turn a
+          # large web change into run=false (Codex review on #3744).
+          grep -vE '\.md$' "$RUNNER_TEMP/changed.txt" > "$RUNNER_TEMP/not-markdown.txt" || true
+          if grep -qE '^(apps/web/|supabase/|packages/|pnpm-lock\.yaml$|pnpm-workspace\.yaml$|package\.json$|\.github/workflows/signup-isolated\.yml$)' "$RUNNER_TEMP/not-markdown.txt"; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+            echo "No web app, database or package change: the core journeys are not needed." >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+  signup-isolated:
+    needs: changes
+    if: needs.changes.outputs.run == 'true'
+    name: signup-isolated (shard ${{ matrix.shard }}/2)
+    runs-on: ubuntu-latest
+    # TWO SHARDS, each with its own throwaway stack: the whole walk on one
+    # runner took ~45 min of the 60 (run 45230577152). The split is by measured
+    # time per spec file (~17 min each) and is FIXED, not Playwright's --shard:
+    # the compatibility walk below needs the stack job-fit-evidence migrated, so
+    # both run in shard 2. lib/guards/signup-isolated-core-gate.test.ts keeps the
+    # two lists disjoint and keeps every core journey in one of them.
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2]
+    # 45 stopped the walk at test 442 of 452 (2026-11-22, one worker, ~7 min of
+    # setup before it): the job was cancelled by its own limit, not by a
+    # failure. Room for the whole walk; no test is skipped or shortened.
+    timeout-minutes: 60
     env:
       APP_ORIGIN: http://127.0.0.1:3000
+      # Owner P0 2026-11-21 / 11-22 walks, run after SPEC; kept apart from the SPEC line so new entries there never conflict.
+      SPEC_P0: tests/e2e/security-p0-isolated.spec.ts tests/e2e/invite-join-isolated.spec.ts tests/e2e/outsider-isolation-isolated.spec.ts tests/e2e/cv-shown-twice-isolated.spec.ts tests/e2e/history-read-grant-isolated.spec.ts tests/e2e/demoted-owner-isolated.spec.ts
       # The walks share this one throwaway stack: self-serve sign-up, the
       # agency roles / permissions walk (agency-roles-isolated.spec.ts), the
       # Web A walks, the role journeys, and the journal -> skills -> Living CV
-      # -> matching -> dispute chain (skills-chain-isolated.spec.ts), and job fit from evidence
+      # -> matching -> dispute chain (skills-chain-isolated.spec.ts), the practice -> sign-off -> recognition
+      # chain that production no longer writes (recognition-chain-isolated.spec.ts), and job fit from evidence
       # (job-fit-evidence-isolated.spec.ts).
-      SPEC: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts
+      # Shard 1 and shard 2 (see the strategy above). Together they are the whole walk.
+      SPEC_1: tests/e2e/signup-isolated.spec.ts tests/e2e/agency-roles-isolated.spec.ts tests/e2e/experience-integration-isolated.spec.ts tests/e2e/history-client-aggregate-isolated.spec.ts tests/e2e/recognition-chain-isolated.spec.ts tests/e2e/phone-journeys-isolated.spec.ts tests/e2e/phone-header-fit-isolated.spec.ts tests/e2e/client-review-isolated.spec.ts tests/e2e/public-paths-isolated.spec.ts tests/e2e/training-groups-isolated.spec.ts tests/e2e/journeys-coverage-isolated.spec.ts
+      SPEC_2: tests/e2e/sv-journey-isolated.spec.ts tests/e2e/public-need-isolated-web-a.spec.ts tests/e2e/audit-trail-isolated-web-a.spec.ts tests/e2e/notifications-isolated-web-a.spec.ts tests/e2e/role-journeys-isolated.spec.ts tests/e2e/skills-chain-isolated.spec.ts tests/e2e/job-fit-evidence-isolated.spec.ts tests/e2e/teams-projects-isolated.spec.ts tests/e2e/journal-template-isolated.spec.ts tests/e2e/former-employer-access-isolated.spec.ts tests/e2e/assistant-intent-isolated.spec.ts tests/e2e/acceptance-matrix-isolated.spec.ts tests/e2e/journal-day-choice-isolated.spec.ts tests/e2e/header-desktop-fit-isolated.spec.ts tests/e2e/journal-reach-isolated.spec.ts tests/e2e/pay-placeholder-isolated.spec.ts tests/e2e/hiring-chain-isolated.spec.ts tests/e2e/employer-journey-isolated.spec.ts tests/e2e/need-confirmation-isolated.spec.ts
       # One production DATA migration is not replayable on an empty database
       # (see the OAuth isolated job); pinned by hash, set aside, and the job
       # fails if it changes so a human re-decides.
       SKIP_MIGRATION: 20261025120000_business_history_periods_vivatrex_lmai_bounds_v1.sql
-      SKIP_MIGRATION_SHA256: e4dea150dbd1c344ab7319af74066f12090f764ccdb5511571be65e8244b233e
+      SKIP_MIGRATION_SHA256: 43f04f60b120bdd0b8be10044163012b7f65033508d3e1eb94bca2cc968a1f45
       PAYMENTS_ENABLED: "false"
       BILLING_PROVIDER: none
       AI_PROVIDER_MODE: disabled
@@ -169,8 +183,24 @@ jobs:
           # The runner shell is `bash -e`: without +e a failed start exits before
           # its log is printed and the cause (e.g. a migration error) is lost.
           set +e -uo pipefail
-          supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
-          rc=$?
+          # The stack publishes 54321-54334 (the tests read the mail catcher on
+          # 54324). Those ports sit inside the runner's ephemeral range
+          # (32768-60999), so an outgoing connection can hold one at start
+          # ("failed to bind host port ... address already in use"). New outgoing
+          # connections are kept below 54000, and a start that still meets a held
+          # port is stopped cleanly and tried once more. Any other failure exits.
+          sudo sysctl -w net.ipv4.ip_local_port_range="32768 54000" >/dev/null || true
+          start() {
+            supabase start -x studio,imgproxy,realtime,edge-runtime,logflare,vector,supavisor,postgres-meta > "$RUNNER_TEMP/sb-start.log" 2>&1
+          }
+          start; rc=$?
+          if [ $rc -ne 0 ] && grep -q "address already in use" "$RUNNER_TEMP/sb-start.log"; then
+            grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | grep -i "already in use"
+            echo "::warning::a stack port was held at start; stopping and starting once more"
+            supabase stop --no-backup >/dev/null 2>&1
+            sleep 5
+            start; rc=$?
+          fi
           grep -viE 'key|secret|jwt|token|password|eyJ' "$RUNNER_TEMP/sb-start.log" | tail -n 60
           exit $rc
 
@@ -209,7 +239,26 @@ jobs:
           echo "migration files=$files ledger rows=$rows"
           [ "$files" -eq "$rows" ] || { echo "::error::replay incomplete"; exit 1; }
 
+      # A CLOSED NEED REFUSES A NEW PROPOSAL OR A FIRST ACCEPT
+      # (20261114100000_booking_refuses_closed_need_v1). Database-level cases in
+      # one rolled-back transaction, then two real sessions racing a close
+      # against an accept in both orders. Synthetic rows only, this stack only.
+      - name: Closed need refuses an accept — database cases
+        run: |
+          set -euo pipefail
+          docker exec -i supabase_db_labourmarketai psql -U postgres -X -q -v ON_ERROR_STOP=1 \
+            < supabase/tests/20261114100000_booking_refuses_closed_need_regression.sql
+
+      - name: Closed need refuses an accept — concurrent close and accept
+        run: bash supabase/tests/20261114100000_booking_refuses_closed_need_race.sh
+
+      # The same heap the other build jobs give `next build` (quality.yml, e2e-smoke.yml,
+      # deploy-vps.yml). Its type-check worker passes 2 GB on this code base; without the
+      # setting the build depends on Node's default for the runner's memory, next to a
+      # running Supabase stack.
       - name: Build
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build
 
       - name: Guard — the build inlined the local Supabase URL
@@ -267,7 +316,48 @@ jobs:
           E2E_LOCAL_STACK: "1"
           MAIL_APP_BASE: http://127.0.0.1:3001
           APP_MAIL_API: http://127.0.0.1:54334
-        run: pnpm exec playwright test $SPEC --reporter=list --trace=off
+        run: |
+          if [ "${{ matrix.shard }}" = "1" ]; then set -- $SPEC_1; else set -- $SPEC_2 $SPEC_P0; fi
+          pnpm exec playwright test "$@" --reporter=list --trace=off
+
+      # One continuous professional history across organizations
+      # (experience-integration-isolated.spec.ts, issue #3354), and the client
+      # aggregate (history-client-aggregate-isolated.spec.ts, #3739, at 1440 /
+      # 390 / 375 px): synthetic accounts on this stack only. Kept as a CI artifact.
+      - name: Upload the experience-integration screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: experience-integration-shard-${{ matrix.shard }}
+          path: |
+            apps/web/test-results/experience-integration/
+            apps/web/test-results/experience-integration-iso*/error-context.md
+            apps/web/test-results/invite-join/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # Each skill and each job listed once on the Living CV (owner P0
+      # 2026-11-23): a synthetic worker on this stack, 375 / 390 / 768 / 1440 px.
+      - name: Upload the cv-shown-twice screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: cv-shown-twice-shard-${{ matrix.shard }}
+          path: apps/web/test-results/cv-shown-twice/
+          if-no-files-found: warn
+          retention-days: 14
+
+      # The journal's day choice and reach (journal-day-choice-isolated and
+      # journal-reach-isolated, owner P1 2026-11-21/22): synthetic workers on
+      # this stack, 375 / 390 / 1280 px.
+      - name: Upload the journal day-choice screenshots
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: journal-day-choice-shard-${{ matrix.shard }}
+          path: apps/web/test-results/journal-day-choice/
+          if-no-files-found: warn
+          retention-days: 14
 
       # APP-ROLLBACK COMPATIBILITY (owner gate for 20261029190000, deploy order
       # migration -> app): the LAST app build before the job-fit code (#2887)
@@ -277,6 +367,7 @@ jobs:
       # migration stays applied. Pinned, because origin/main now contains #2887
       # and reads the new columns by design. Local-only; nothing leaves the runner.
       - name: App-rollback compatibility — build the pre-#2887 app against the migrated stack
+        if: matrix.shard == 2
         env:
           PRE_JOBFIT_SHA: 88a60b567edbe5c6894d087d0c679da54c90ea67
         run: |
@@ -287,7 +378,7 @@ jobs:
           git archive FETCH_HEAD | tar -x -C "$RUNNER_TEMP/main"
           cd "$RUNNER_TEMP/main"
           pnpm install --frozen-lockfile --filter=!mobile > "$RUNNER_TEMP/main-install.log" 2>&1 || { tail -n 40 "$RUNNER_TEMP/main-install.log"; exit 1; }
-          pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
+          NODE_OPTIONS=--max-old-space-size=6144 pnpm -F web build > "$RUNNER_TEMP/main-build.log" 2>&1 || { grep -viE "key|secret|jwt|token|password|eyJ" "$RUNNER_TEMP/main-build.log" | tail -n 60; exit 1; }
           grep -rqF "127.0.0.1:54321" apps/web/.next/static apps/web/.next/server || { echo "::error::main build lacks the local Supabase URL"; exit 1; }
           pnpm -F web exec next start -H 127.0.0.1 -p 3002 > "$RUNNER_TEMP/next-main.log" 2>&1 &
           echo $! > "$RUNNER_TEMP/next-main.pid"
@@ -295,6 +386,7 @@ jobs:
           curl -fsS -o /dev/null "http://127.0.0.1:3002/en"
 
       - name: Run the compatibility walk (pre-#2887 app, migrated database)
+        if: matrix.shard == 2
         working-directory: apps/web
         env:
           SIGNUP_ISOLATED: "1"
@@ -303,6 +395,15 @@ jobs:
           E2E_NO_SERVER: "1"
           E2E_LOCAL_STACK: "1"
         run: pnpm exec playwright test tests/e2e/job-fit-main-compat-isolated.spec.ts --reporter=list --trace=off
+
+      # UX gap W-1 (2026-11-18): a new worker's home showed "Open items could
+      # not be read". The work-intelligence reads log only a read name and an
+      # error code (no ids, no values); print those lines on every run.
+      - name: Work-intelligence read failures (W-1)
+        if: always()
+        run: |
+          out="$(grep -E -A6 '\[(work-intelligence|today)\]' "$RUNNER_TEMP/next.log" | grep -viE 'key|secret|jwt|token|password|eyJ|@' | head -n 80 || true)"
+          if [ -n "$out" ]; then echo "$out"; else echo "none: no work-intelligence or today read failed"; fi
 
       - name: App log tail on failure (no secrets are printed by the app)
         if: failure()
@@ -321,3 +422,24 @@ jobs:
           if [ -f "$RUNNER_TEMP/next-main.pid" ]; then kill "$(cat "$RUNNER_TEMP/next-main.pid")" 2>/dev/null || true; fi
           docker rm -f ci_app_mailpit >/dev/null 2>&1 || true
           supabase stop --no-backup || true
+
+  # THE ONE REQUIRED CHECK. It always runs: it passes when the change reaches
+  # no journey (docs only) or when both shards passed, and fails otherwise,
+  # including a cancelled or skipped shard on a change that needed them.
+  core-journeys:
+    if: always()
+    needs: [changes, signup-isolated]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Core journeys verdict
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          RUN: ${{ needs.changes.outputs.run }}
+          WALK: ${{ needs.signup-isolated.result }}
+        run: |
+          set -euo pipefail
+          if [ "$CHANGES" != "success" ]; then echo "::error::the change filter did not finish ($CHANGES)"; exit 1; fi
+          if [ "$RUN" != "true" ]; then echo "No web app, database or package change: the core journeys are not needed."; exit 0; fi
+          if [ "$WALK" != "success" ]; then echo "::error::core journeys: $WALK"; exit 1; fi
+          echo "core journeys passed on both shards"

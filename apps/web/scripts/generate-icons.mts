@@ -17,7 +17,7 @@
  * owner gate (see docs/mobile/STORE_RELEASE_READINESS_2026-09-13.md §4.1) and
  * this script neither performs nor implies it.
  *
- * `app/favicon.ico` is written here too (owner defect 2026-11-04): it sat outside
+ * `public/favicon.ico` is written here too (owner defect 2026-11-04): it sat outside
  * this script, kept the old ascending bars for four months after the mark
  * changed, and Chrome chose it for the browser tab.
  *
@@ -139,8 +139,8 @@ async function main(): Promise<void> {
           .toBuffer(),
       })),
     );
-    writeFileSync(resolve(WEB_ROOT, "app/favicon.ico"), icoFromPngs(images));
-    written.push("../app/favicon.ico");
+    writeFileSync(resolve(WEB_ROOT, "public/favicon.ico"), icoFromPngs(images));
+    written.push("favicon.ico");
   }
 
   console.log(`generate-icons: wrote ${written.length} files from the owner's vector`);

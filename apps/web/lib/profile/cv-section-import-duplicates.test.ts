@@ -21,10 +21,15 @@ vi.mock("@/lib/supabase/server", () => ({
       select: () => ({
         eq: async () => (readError ? { data: null, error: readError } : { data: stored[table] ?? [], error: null }),
       }),
-      insert: async (row: Record<string, unknown>) => {
-        if (uniqueIndex && inserted.some((i) => i.table === table)) return { error: { code: "23505", message: "unique" } };
-        inserted.push({ table, row });
-        return { error: null };
+      insert: (row: Record<string, unknown>) => {
+        const duplicate = uniqueIndex && inserted.some((i) => i.table === table);
+        if (!duplicate) inserted.push({ table, row });
+        const result = duplicate
+          ? { data: null, error: { code: "23505", message: "unique" } }
+          : { data: { id: "new-row", ...row }, error: null };
+        return Object.assign(Promise.resolve(result), {
+          select: () => ({ single: async () => result }),
+        });
       },
     }),
   }),
@@ -35,6 +40,9 @@ import {
   confirmCvCertificateAction,
   confirmCvEducationAction,
 } from "./cv-section-import-actions";
+
+import { saveWorkerEducationAction } from "@/lib/worker/worker-education-actions";
+import { EDUCATION_MAX_ROWS } from "@/lib/worker/worker-education-model";
 
 const school = { institution: "Vilniaus kolegija", program: "Statyba", educationTypeSlug: "college", startYear: 2014, endYear: 2017 };
 const schoolRow = {
@@ -129,5 +137,47 @@ describe("what a confirm re-renders", () => {
   it("any other caller still gets the page it relies on", async () => {
     await confirmCvAchievementAction({ title: "Kita" });
     expect(revalidated).toEqual(["/"]);
+  });
+});
+
+describe("education import and manual save share the existing row limit", () => {
+  function fillEducation(count: number) {
+    stored.worker_education = Array.from({ length: count }, (_, i) => ({
+      ...schoolRow, id: `e${i}`, institution_name: `School ${i}`,
+    }));
+  }
+
+  it("both refuse a new row at the limit without writing or refreshing", async () => {
+    fillEducation(EDUCATION_MAX_ROWS);
+    const form = new FormData();
+    form.set("institution_name", school.institution);
+    form.set("education_type_slug", school.educationTypeSlug);
+    expect(await saveWorkerEducationAction(null, form)).toEqual({ ok: false, code: "limit" });
+    expect(await confirmCvEducationAction(school)).toEqual({ ok: false, code: "limit" });
+    expect(inserted).toHaveLength(0);
+    expect(revalidated).toEqual([]);
+  });
+
+  it("a repeated statement at the limit is still accepted without adding a row", async () => {
+    fillEducation(EDUCATION_MAX_ROWS - 1);
+    stored.worker_education.push(schoolRow);
+    expect(await confirmCvEducationAction(school)).toEqual({ ok: true });
+    expect(inserted).toHaveLength(0);
+  });
+
+  it("the final allowed row is saved with its stated fields, unverified", async () => {
+    fillEducation(EDUCATION_MAX_ROWS - 1);
+    expect(await confirmCvEducationAction(school)).toEqual({ ok: true });
+    expect(inserted).toEqual([{ table: "worker_education", row: {
+      profile_id: "u1", institution_name: school.institution, program_or_field: school.program,
+      education_type_slug: school.educationTypeSlug, start_year: 2014, end_year: 2017,
+      is_current: false, note: null,
+    } }]);
+    expect(revalidated).toEqual(["/"]);
+  });
+
+  it("invalid education still does not write", async () => {
+    expect(await confirmCvEducationAction({ ...school, institution: "" })).toEqual({ ok: false, code: "invalid" });
+    expect(inserted).toHaveLength(0);
   });
 });

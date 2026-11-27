@@ -1,6 +1,9 @@
 "use client";
 
 import { useRef, useState, useTransition } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 import { DISPLAYED_WORKSPACE_FIELD } from "@/lib/company/organization-switch";
 import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
@@ -58,10 +61,10 @@ type Choices = Readonly<Record<Exclude<PhotoAnchorKind, "organization">, readonl
 
 type Outcome = { readonly name: string; readonly status: string };
 
-const field = "w-full rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
+const field = "max-sm:min-h-11 max-sm:text-base";
+/** The native file picker keeps its own box: a file input is not a text field. */
+const fileField = "w-full rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
 const labelText = "font-mono text-meta uppercase tracking-label text-text-muted";
-const button =
-  "rounded-md border border-brand-orange/50 bg-brand-orange/10 px-4 py-2 text-sm font-semibold text-brand-orange disabled:opacity-50";
 
 const KINDS: readonly PhotoAnchorKind[] = ["record", "place", "person", "organization"];
 
@@ -183,7 +186,7 @@ export function HistoricalPhotoImportForm({
         ) : (
           <label className="flex flex-col gap-1">
             <span className={labelText}>{labels.chooseAnchor[kind]}</span>
-            <select
+            <Select
               className={field}
               value={anchorId}
               onChange={(e) => setAnchorId(e.target.value)}
@@ -196,7 +199,7 @@ export function HistoricalPhotoImportForm({
                   {c.label}
                 </option>
               ))}
-            </select>
+            </Select>
             {truncated[kind] ? <span className="text-xs text-text-muted">{labels.truncated}</span> : null}
           </label>
         )
@@ -204,7 +207,7 @@ export function HistoricalPhotoImportForm({
 
       <label className="flex flex-col gap-1">
         <span className={labelText}>{labels.sourceSystem}</span>
-        <input
+        <Input
           className={field}
           value={source}
           onChange={(e) => setSource(e.target.value)}
@@ -217,13 +220,13 @@ export function HistoricalPhotoImportForm({
 
       <label className="flex flex-col gap-1">
         <span className={labelText}>{labels.sourceReference}</span>
-        <input className={field} value={reference} onChange={(e) => setReference(e.target.value)} maxLength={500} />
+        <Input className={field} value={reference} onChange={(e) => setReference(e.target.value)} maxLength={500} />
       </label>
 
       <div className="grid gap-3 sm:grid-cols-2">
         <label className="flex flex-col gap-1">
           <span className={labelText}>{labels.date}</span>
-          <input
+          <Input
             type="date"
             className={field}
             value={date}
@@ -235,7 +238,7 @@ export function HistoricalPhotoImportForm({
         {date ? (
           <label className="flex flex-col gap-1">
             <span className={labelText}>{labels.basis}</span>
-            <select
+            <Select
               className={field}
               value={basis}
               onChange={(e) => setBasis(e.target.value)}
@@ -246,14 +249,14 @@ export function HistoricalPhotoImportForm({
                   {labels.bases[b]}
                 </option>
               ))}
-            </select>
+            </Select>
           </label>
         ) : null}
       </div>
 
       <label className="flex flex-col gap-1">
         <span className={labelText}>{labels.caption}</span>
-        <input className={field} value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={1000} />
+        <Input className={field} value={caption} onChange={(e) => setCaption(e.target.value)} maxLength={1000} />
       </label>
 
       <label className="flex flex-col gap-1">
@@ -264,16 +267,16 @@ export function HistoricalPhotoImportForm({
           multiple
           required
           accept="image/jpeg,image/png,image/webp,image/heic"
-          className={field}
+          className={fileField}
           data-testid="historical-photo-files"
         />
         <span className="text-xs text-text-muted">{labels.filesHint}</span>
       </label>
 
       <div>
-        <button type="submit" className={button} disabled={pending} data-testid="historical-photo-submit">
+        <Button type="submit" variant="primary" size="sm" className="min-h-11" disabled={pending} data-testid="historical-photo-submit">
           {pending ? labels.working : labels.submit}
-        </button>
+        </Button>
       </div>
 
       <p role="alert" className={message ? "text-xs text-state-warning" : "sr-only"} data-testid="historical-photo-message">

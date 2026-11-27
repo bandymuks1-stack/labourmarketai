@@ -1,5 +1,6 @@
 import "server-only";
 
+import { resolveCountryCode } from "@/lib/location/country-model";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 import { createClient } from "@/lib/supabase/server";
@@ -136,12 +137,15 @@ function mapRow(
   };
 }
 
-/** The demand kinds that belong to the EMPLOYER spine. A list scoped to any
- *  of these is an employer read and must pass the Stage A workspace gate. */
-const EMPLOYER_REQUEST_KINDS: ReadonlySet<string> = new Set([
-  "company_request",
-  "agency_offer",
-]);
+/** The demand kinds that belong to the EMPLOYER spine, both directions: the
+ *  company's needs and an agency's offers. The company room and its needs door
+ *  read exactly these, so a dual-role user's buyer service requests stay in
+ *  the buyer room. ONE list (duplication audit ORG-4): the pages import it. */
+export const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
+
+/** A list scoped to any of these is an employer read and must pass the Stage A
+ *  workspace gate. */
+const EMPLOYER_REQUEST_KINDS: ReadonlySet<string> = new Set(EMPLOYER_DEMAND_KINDS);
 
 export async function listOwnCustomerRequests(
   /** Optional room scoping (W3 rows 7/8/25): the company room reads ONLY the
@@ -240,12 +244,18 @@ export async function saveCustomerRequest(
       };
     }
   }
+  // The country is an ISO code or a name resolved to one; nothing else is
+  // stored. A request with none is invisible to every country filter.
+  const country = resolveCountryCode(input.country ?? null);
+  if (!country) {
+    return { kind: "invalid", message: "Choose the country where the work takes place." };
+  }
   const supabase = await createClient();
   const { data, error } = await asAny(supabase).rpc("save_customer_request", {
     p_request_id: input.requestId ?? null,
     p_title: title,
     p_need_summary: input.needSummary?.trim() || null,
-    p_country: input.country?.trim() || null,
+    p_country: country,
     p_location: input.location?.trim() || null,
     p_role_or_work_type: input.roleOrWorkType?.trim() || null,
     p_team_size: input.teamSize ?? null,

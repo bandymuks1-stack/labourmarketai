@@ -135,7 +135,18 @@ describe("other rows and results", () => {
     ).toMatchObject({ offerId: "o", requestId: "r", status: "accepted" });
     expect(
       parseOfferableDemand({ request_id: "r", role_text: "welder", team_size: 3, open_offer_id: null, open_offer_status: null }),
-    ).toMatchObject({ requestId: "r", teamSize: 3, openOfferId: null });
+    ).toMatchObject({ requestId: "r", teamSize: 3, openOfferId: null, needSkillSlugs: [], requiredTools: [] });
+  });
+
+  it("an open need carries what it is, never whose it is", () => {
+    const d = parseOfferableDemand({
+      request_id: "r", role_text: "tiler", country: "LT", team_size: 2, start_period: "flexible",
+      duration: "3 weeks", language_requirement: "LT", need_skill_slugs: ["tiling", 7, ""], required_tools: ["hand-tools"],
+      company_name: "Client UAB",
+    });
+    expect(d).toMatchObject({ duration: "3 weeks", languageRequirement: "LT", needSkillSlugs: ["tiling"], requiredTools: ["hand-tools"] });
+    expect(Object.keys(d ?? {})).not.toContain("companyName");
+    expect(JSON.stringify(d)).not.toContain("Client UAB");
   });
 
   it("parses write results", () => {

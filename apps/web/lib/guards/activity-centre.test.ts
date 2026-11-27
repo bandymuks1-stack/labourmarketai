@@ -282,3 +282,22 @@ describe("5. copy resolves in every ACTIVE locale (frozen-subset convention)", (
     });
   }
 });
+
+describe("source chips offer only sources with something in them (design audit 2026-11-22)", () => {
+  it("needs-attention offers sources with a pending signal; all-signals every source with a row; the selection stays", async () => {
+    const { activitySourceChips } = await import("@/lib/dashboard/activity-centre");
+    type Row = Parameters<typeof activitySourceChips>[0][number];
+    const row = (moduleId: string, count: number) => ({ id: moduleId, typeKey: "x", href: "/", count, moduleId, moduleLabelKey: "k" }) as unknown as Row;
+    const ids = ["messages", "bookings", "absences"] as unknown as Parameters<typeof activitySourceChips>[1];
+    const rows = [row("messages", 2), row("bookings", 0)];
+    expect(activitySourceChips(rows, ids, { moduleId: null, state: "attention" })).toEqual(["messages"]);
+    expect(activitySourceChips(rows, ids, { moduleId: null, state: "all" })).toEqual(["messages", "bookings"]);
+    expect(activitySourceChips(rows, ids, { moduleId: "absences" as never, state: "attention" })).toEqual(["messages", "absences"]);
+    expect(activitySourceChips([], ids, { moduleId: null, state: "attention" })).toEqual([]);
+  });
+  it("the page renders the chips from that helper, never the whole module list", () => {
+    const page = readFileSync(join(process.cwd(), "app/[locale]/dashboard/activity/page.tsx"), "utf8");
+    expect(page).toContain("{sourceChips.map((id) => (");
+    expect(page).not.toContain("{ACTIVITY_SOURCE_MODULE_IDS.map((id) => (");
+  });
+});

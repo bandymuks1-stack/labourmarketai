@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/Badge";
+import { LmLogo } from "@/components/ui/lm-logo";
+import { vacancySourceName, vacancyOriginLabels } from "@/components/marketing/public-vacancy-card-facts";
 import { getTranslations } from "next-intl/server";
 import Link from "next/link";
 
@@ -65,6 +68,7 @@ export async function PersonalOpportunities({
   readonly canShowMore: boolean;
 }) {
   const t = await getTranslations("opportunities.personal");
+  const origin = vacancyOriginLabels(locale);
   const base = `/${locale}/dashboard/opportunities`;
 
   const detailHref = (o: PersonalOpportunity) =>
@@ -141,6 +145,13 @@ export async function PersonalOpportunities({
                     />
                     {t(`status.${o.status}`)} · {t(`kind.${o.kind}`)}
                   </p>
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-text-secondary" data-testid="job-origin" data-origin={o.kind}>
+                    <Badge tone="neutral" className="gap-1.5 font-sans normal-case tracking-normal">
+                      {o.kind === "demand" ? <LmLogo className="h-4 w-4 shrink-0" title="" /> : null}
+                      {o.kind === "demand" ? "LabourMarket.ai" : vacancySourceName(o.attributionCode) ?? origin.external}
+                    </Badge>
+                    <span>{origin[o.applicationRoute]}</span>
+                  </div>
                   <h2 className="font-display text-[1.2rem] font-semibold leading-snug tracking-[-0.02em] text-text-primary">
                     <Link
                       href={detailHref(o)}

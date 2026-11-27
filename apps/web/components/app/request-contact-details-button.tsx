@@ -8,6 +8,7 @@ import {
 } from "@/lib/privacy/contact-disclosure-actions";
 import type { ContactDisclosureStatus } from "@/lib/privacy/contact-disclosure-shared";
 import { useDisplayedWorkspaceId } from "@/components/app/workspace/displayed-workspace-field";
+import { Button } from "@/components/ui/Button";
 
 /**
  * Company "request contact details" on a scouting candidate (Wagon 1, shared
@@ -127,15 +128,17 @@ export function RequestContactDetailsButton({
             in this render pass and its id has not come back from the server
             yet — offering a control we cannot address would be a dead button. */}
         {requestRowId && state !== "sent" ? (
-          <button
+          <Button
             type="button"
+            variant="secondary"
+            size="sm"
             onClick={withdraw}
             disabled={pending}
             data-testid={`contact-request-withdraw-${workerId}`}
-            className="min-h-11 sm:min-h-0 w-fit rounded-md border border-ink-500 px-2.5 py-1 text-meta font-medium text-text-muted transition-colors hover:bg-ink-500/10 disabled:opacity-60"
+            className="min-h-11 w-fit"
           >
             {pending ? labels.withdrawing : labels.withdraw}
-          </button>
+          </Button>
         ) : null}
         {withdrawState === "not_open" ? (
           <p className="text-meta text-text-muted">{labels.withdrawNotOpen}</p>
@@ -191,15 +194,17 @@ export function RequestContactDetailsButton({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex flex-wrap items-center gap-2">
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           onClick={send}
           disabled={pending}
           data-testid={`contact-request-open-${workerId}`}
-          className="min-h-11 sm:min-h-0 w-fit rounded-md border border-brand-blue/40 px-2.5 py-1 text-meta font-medium text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60"
+          className="min-h-11 w-fit"
         >
           {pending ? labels.sending : labels.button}
-        </button>
+        </Button>
         {effectiveStatus === "declined" ? (
           <span className="text-meta text-text-muted" data-status="declined">
             {labels.declined}

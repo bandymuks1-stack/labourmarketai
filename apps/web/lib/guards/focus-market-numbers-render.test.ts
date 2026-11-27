@@ -28,7 +28,7 @@ vi.mock("next-intl/server", () => ({
     }),
 }));
 
-vi.mock("@/components/marketing/reveal", () => ({
+vi.mock("@/components/marketing/lazy-motion", () => ({
   Reveal: ({ children }: { children: React.ReactNode }) => children,
 }));
 

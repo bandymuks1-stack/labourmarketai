@@ -2,6 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { PageBack } from "@/components/app/premium/page-back";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { ProjectContextCreateForm } from "@/components/app/project-context-create-form";
+import { countryOptionsForLocale } from "@/lib/location/country-options";
 import { PageTitle } from "@/components/app/premium/page-title";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
@@ -34,7 +35,7 @@ export default async function NewProjectContextPage({
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
       </header>
 
-      <ProjectContextCreateForm />
+      <ProjectContextCreateForm countryOptions={countryOptionsForLocale(locale)} />
     </div>
   );
 }

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { FoldedRows } from "@/components/app/folded-rows";
 import { TrackedLink } from "@/components/app/tracked-link";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 
@@ -47,6 +48,9 @@ const OWNER_LIFECYCLE_STATUSES: ReadonlySet<string> = new Set(["draft", "submitt
  */
 
 export interface DemandRequestsReadbackLabels {
+  /** "Show all (n)": the rows past the first few open in place. Optional:
+   *  without it every row is listed as before. */
+  showAll?: (count: number) => string;
   /** Localized stand-ins for the two ENGLISH placeholder titles the write
    *  path stamps when an employer submits a need without naming the role.
    *  Optional: omitted → the stored string renders exactly as before. */
@@ -225,7 +229,9 @@ function RequestRow({
           a total would be worse than showing none. Interest count is response,
           never a claim that anyone is committed. */}
       {r.teamSize && r.teamSize > 0 ? (
-        <div data-testid="demand-readback-capacity">
+        // A list row carries the band at 32 px, not its 56 px card height (the
+        // band itself is frozen with the landing; the row sizes it).
+        <div data-testid="demand-readback-capacity" className="[&>span]:h-8">
           <CapacityBand
             filled={waiting?.count ?? 0}
             total={r.teamSize}
@@ -256,17 +262,7 @@ function RequestRow({
           audit 2026-10-26 §2): the same event and a surface of its own. Its
           label stays "repeat" — it names a different start, not a second
           wording of "describe a need". */}
-      {scoutable && r.status !== "draft" ? (
-        <TrackedLink
-          event={FUNNEL_EVENTS.companyDemandActionClicked}
-          eventMetadata={{ surface: "company_needs_repeat", role_context: "company" }}
-          href={`/${locale}/dashboard/company/needs?repeat=${r.id}#demand-intake`}
-          className="inline-flex w-fit items-center gap-1 text-xs font-medium text-text-secondary transition-colors hover:text-brand-blue"
-          data-testid="demand-readback-repeat-link"
-        >
-          ↻ {labels.repeatLink}
-        </TrackedLink>
-      ) : null}
+      <div className="flex flex-wrap items-center justify-between gap-x-3">
       {scoutable ? (
         <Link
           href={`/${locale}/dashboard/company/scouting?request=${r.id}`}
@@ -280,36 +276,57 @@ function RequestRow({
           {labels.scoutLink} →
         </Link>
       ) : null}
-      {detailRows.length > 0 && (
-        <details className="group">
-          <summary className="cursor-pointer select-none font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary">
+      {/* ONE fold for everything that is not the row's next step (responsive
+          pass 2026-11-22): 18 needs were 7,500 px at 390 px, about 400 px each,
+          because the details, the estimate, the location capture and the
+          repeat link all stood open on every row. Closed, it sits beside the
+          matches link; open, it takes the row. */}
+      {detailRows.length > 0 || estimate || scoutable ? (
+        <details className="group open:basis-full" data-testid="demand-readback-more">
+          <summary className="flex min-h-11 cursor-pointer select-none items-center font-mono text-meta uppercase tracking-label text-text-muted hover:text-text-secondary">
             {labels.detailsLabel}
           </summary>
-          <dl
-            className="mt-2 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs"
-            data-testid="demand-readback-details"
-          >
-            {detailRows.map(([label, value]) => (
-              <DetailRow key={label} label={label} value={value} />
-            ))}
-          </dl>
+          <div className="mt-2 flex flex-col gap-3">
+            {detailRows.length > 0 ? (
+              <dl
+                className="grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-xs"
+                data-testid="demand-readback-details"
+              >
+                {detailRows.map(([label, value]) => (
+                  <DetailRow key={label} label={label} value={value} />
+                ))}
+              </dl>
+            ) : null}
+            {estimate && (
+              <div data-testid="demand-readback-estimate">
+                <EstimateSummary
+                  result={estimate.result}
+                  assumptions={estimate.assumptions}
+                  missingInfo={estimate.missingInfo}
+                  compact
+                />
+              </div>
+            )}
+            {/* Signal-only location capture for THIS demand (#423 table). Writes
+                country/city/label/address with no coordinates — a map point only
+                appears once coordinates are confirmed. Demand only: the capture
+                writes to the demand-location table, which has no supply meaning. */}
+            {scoutable ? <DemandLocationCapture requestId={r.id} /> : null}
+            {scoutable && r.status !== "draft" ? (
+              <TrackedLink
+                event={FUNNEL_EVENTS.companyDemandActionClicked}
+                eventMetadata={{ surface: "company_needs_repeat", role_context: "company" }}
+                href={`/${locale}/dashboard/company/needs?repeat=${r.id}#demand-intake`}
+                className="inline-flex w-fit items-center gap-1 text-xs font-medium text-text-secondary transition-colors hover:text-brand-blue"
+                data-testid="demand-readback-repeat-link"
+              >
+                ↻ {labels.repeatLink}
+              </TrackedLink>
+            ) : null}
+          </div>
         </details>
-      )}
-      {estimate && (
-        <div className="mt-1" data-testid="demand-readback-estimate">
-          <EstimateSummary
-            result={estimate.result}
-            assumptions={estimate.assumptions}
-            missingInfo={estimate.missingInfo}
-            compact
-          />
-        </div>
-      )}
-      {/* Signal-only location capture for THIS demand (#423 table). Writes
-          country/city/label/address with no coordinates — a map point only
-          appears once coordinates are confirmed. Demand only: the capture
-          writes to the demand-location table, which has no supply meaning. */}
-      {scoutable ? <DemandLocationCapture requestId={r.id} /> : null}
+      ) : null}
+      </div>
     </li>
   );
 }
@@ -360,7 +377,6 @@ export function DemandRequestsReadback({
           >
             {labels.heading}
           </h2>
-          <p className="text-xs leading-relaxed text-text-secondary">{labels.note}</p>
           <p
             className="rounded-md border border-state-warning/30 bg-state-warning/5 px-3 py-2 text-meta leading-relaxed text-text-secondary"
             data-testid="demand-readback-worker-visibility-note"
@@ -369,20 +385,14 @@ export function DemandRequestsReadback({
           </p>
         </div>
 
-        {needs.length > 0 && (
-          <p
-            className="rounded-md border border-border-subtle bg-surface-1/60 px-3 py-2 text-meta leading-relaxed text-text-muted"
-            data-testid="demand-readback-manage-help"
-          >
-            {labels.manageHelp}
-          </p>
-        )}
-
         {needs.length === 0 ? (
           <p className="text-sm text-text-muted">{labels.empty}</p>
         ) : (
-          <ul className="flex flex-col gap-2">
-            {needs.map((r) => (
+          <FoldedRows
+            rows={needs}
+            showAll={labels.showAll}
+            testId="demand-readback-rest"
+            render={(r) => (
               <RequestRow
                 key={r.id}
                 r={r}
@@ -392,8 +402,8 @@ export function DemandRequestsReadback({
                 scoutable
                 gateMet={workersSeeNeeds}
               />
-            ))}
-          </ul>
+            )}
+          />
         )}
       </section>
       </Card>
@@ -426,8 +436,11 @@ export function DemandRequestsReadback({
               {labels.supplyNote}
             </p>
           </div>
-          <ul className="flex flex-col gap-2">
-            {offers.map((r) => (
+          <FoldedRows
+            rows={offers}
+            showAll={labels.showAll}
+            testId="supply-readback-rest"
+            render={(r) => (
               <RequestRow
                 key={r.id}
                 r={r}
@@ -436,8 +449,8 @@ export function DemandRequestsReadback({
                 scoutable={false}
                 gateMet={false}
               />
-            ))}
-          </ul>
+            )}
+          />
         </section>
         </Card>
       )}

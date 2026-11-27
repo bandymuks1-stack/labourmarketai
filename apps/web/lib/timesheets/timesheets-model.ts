@@ -1,3 +1,5 @@
+import { csvExportCell } from "@/lib/projects/operations-report";
+
 /**
  * Pure timesheet model (functional completion train V2, audit WORK section —
  * the MISSING "timesheet" row) — shared by the server read service, the
@@ -349,12 +351,8 @@ export const TIMESHEET_CSV_COLUMNS = [
   "evidence",
 ] as const;
 
-function csvCell(value: string): string {
-  return /[",\r\n]/.test(value) ? `"${value.replaceAll('"', '""')}"` : value;
-}
-
 function csvRow(cells: readonly string[]): string {
-  return cells.map(csvCell).join(",");
+  return cells.map(csvExportCell).join(",");
 }
 
 /**
@@ -445,6 +443,7 @@ export const TIMESHEET_NOTICES = [
   "no_instance",
   "no_template",
   "template_created",
+  "schedule_saved",
   "overlap",
   "invalid_period",
   "no_worker",

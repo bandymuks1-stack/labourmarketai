@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import { reviewerHoursOf } from "@/lib/journal/reviewer-hours";
 import type { WorkTimeMetricRow } from "@/lib/journal/work-time";
@@ -71,8 +72,8 @@ export async function getReviewReport(
   // Same gated set the inbox uses (degrades to empty before migration 0034).
   let reviewableIds: string[] = [];
   let loadFailed = false;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: idRows, error: idError } = await (supabase as any).rpc("reviewable_journal_entry_ids");
+  // The ONE request-scoped read of the set (reviewable-count.ts; ORG-7).
+  const { data: idRows, error: idError } = await readReviewableJournalEntryIds();
   if (idError) {
     loadFailed = true;
   } else if (Array.isArray(idRows)) {

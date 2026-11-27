@@ -91,3 +91,24 @@ describe("markets whose job ads are on the board are not called coming soon", ()
     }
   });
 });
+
+describe("IDX-20: a country page is indexed only with text of its own", () => {
+  it("the sitemap lists exactly the indexable country pages", async () => {
+    const { default: sitemap } = await import("@/app/sitemap");
+    const { INDEXABLE_COUNTRY_PAGES } = await import("../labour-market/country-evidence");
+    const listed = new Set(
+      sitemap()
+        .map((e) => /\/labour-market\/([a-z]{2})$/.exec(e.url)?.[1]?.toUpperCase())
+        .filter(Boolean),
+    );
+    expect([...listed].sort()).toEqual([...INDEXABLE_COUNTRY_PAGES].sort());
+  });
+
+  it("a page that is not indexable says noindex, follow (and keeps its canonical)", () => {
+    const page = readFileSync(
+      resolve(webRoot, "app", "[locale]", "(marketing)", "labour-market", "[country]", "page.tsx"),
+      "utf-8",
+    );
+    expect(page).toMatch(/isCountryPageIndexable\(code as CountryCode\)\s*\?\s*meta\s*:\s*\{ \.\.\.meta, robots: \{ index: false, follow: true \} \}/);
+  });
+});

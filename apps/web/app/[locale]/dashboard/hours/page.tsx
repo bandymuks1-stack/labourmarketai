@@ -4,6 +4,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { PageTitle } from "@/components/app/premium/page-title";
 
 import { WorkHoursQuickEntry } from "@/components/app/work-hours-quick-entry";
+import { countReviewablePendingEntries } from "@/lib/journal/reviewable-count";
 import { getHoursPageData } from "@/lib/work-hours/hours-page-data";
 import { isValidWorkDate } from "@/lib/work-hours/allocations-model";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
@@ -33,18 +34,31 @@ export default async function WorkHoursPage({
   setRequestLocale(locale);
   const t = await getTranslations("workHours");
   const tSites = await getTranslations("workObjects");
+  const tApprovals = await getTranslations("companyModel.approvals");
 
   const sp = await searchParams;
   const requested = typeof sp.d === "string" ? sp.d : "";
   const workDate = isValidWorkDate(requested) ? requested : (await viewerWorkToday()).todayIso;
 
-  const data = await getHoursPageData(workDate);
+  // What this reader may actually approve: the same gated set as the first screen's card.
+  // Null: the read failed, so the link says no number rather than zero.
+  const [data, pendingApprovals] = await Promise.all([getHoursPageData(workDate), countReviewablePendingEntries()]);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-5 pb-16">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("title")}</PageTitle>
         <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+        {/* Owner 2026-11-07: this door says hours, and approving them lives one tap away. */}
+        {data.kind === "no-company" ? null : (
+          <Link
+            href={"/dashboard/inbox/quick" as "/dashboard"}
+            data-testid="hours-approvals-link"
+            className="mt-2 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-control border border-brand-blue/50 px-4 text-sm font-semibold text-brand-blue hover:underline"
+          >
+            {pendingApprovals === null ? tApprovals("titleUnknown") : tApprovals("title", { n: pendingApprovals })} →
+          </Link>
+        )}
       </header>
 
       {data.kind === "ok" ? (

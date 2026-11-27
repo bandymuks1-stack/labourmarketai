@@ -202,3 +202,13 @@ export function utcDayKey(value: DateInput): string | null {
 export function utcTodayKey(now: Date = new Date()): string {
   return now.toISOString().slice(0, 10);
 }
+
+/** Owner-selected report delivery instant (2026-11-27); never a work-day label.
+ * The explicit saved zone is required. Existing UTC helpers stay unchanged. */
+export function formatScheduledDelivery(value: DateInput, locale: string, timeZone: string): string | null {
+  const date = toUtcDate(value);
+  if (!date || !timeZone.trim()) return null;
+  try {
+    return new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeStyle: "short", timeZone }).format(date);
+  } catch { return null; }
+}

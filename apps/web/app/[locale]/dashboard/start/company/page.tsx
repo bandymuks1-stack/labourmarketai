@@ -246,6 +246,7 @@ export default async function CompanyStartPage({
     statusInvalidCountry: t("statusInvalidCountry"),
     registrationCode: t("registrationCode"),
     registrationCodeHelp: t("registrationCodeHelp"),
+    optionalDetails: t("optionalDetails"),
     address: t("address"),
     addressPlaceholder: t("addressPlaceholder"),
     website: t("website"),

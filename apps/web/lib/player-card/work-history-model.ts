@@ -19,6 +19,7 @@
  */
 
 import { orgDisplayName } from "@/lib/company/org-display";
+import type { ExperienceRelationship } from "@/lib/journal/professional-experience";
 
 /** The relationship slugs that count as PAID / CONTRACTED work. */
 export const WORKER_RELATIONSHIPS = [
@@ -97,6 +98,8 @@ export interface WorkHistoryEntry {
   readonly endedAt: string | null;
   /** True only when the row says active AND has no end date. */
   readonly current: boolean;
+  /** Canonical provenance. Legacy engagement-only readers omit this field. */
+  readonly source?: ExperienceRelationship["source"];
   readonly countryCode: string | null;
 }
 
@@ -201,6 +204,55 @@ export function deriveWorkHistory(
     countryCode: nonEmpty(r.country_code),
   }));
 
+  return sortNewestFirst(entries);
+}
+
+/**
+ * How many history rows a card SHOWS at once. A display bound only, applied
+ * where the rows are rendered: the card is an identity summary, not an
+ * employment archive. The model itself carries the person's whole history
+ * (decision 0025), so counts and "working now" are never cut by it.
+ */
+export const WORK_HISTORY_LIMIT = 20;
+
+/** The rows a card renders — the newest `WORK_HISTORY_LIMIT` of the history. */
+export function shownWorkHistory<T>(entries: readonly T[]): readonly T[] {
+  return entries.slice(0, WORK_HISTORY_LIMIT);
+}
+
+/**
+ * The card's history FROM the one professional-experience reading
+ * (decision 0025, `readOwnExperienceRelationships`). The card used to run its
+ * own `engagement_contexts` query — 20 rows, no `manager`, no led
+ * organization, no confirmed roster row — so a director, or a person with
+ * more than 20 engagements, had one history on the card and another in Work
+ * in Numbers. Now both are the same relationships; this only reshapes them.
+ *
+ * A relationship with no engagement row (a governing membership, a confirmed
+ * roster row) has no `engagement_contexts.id`; its id is built from what it
+ * is, so it can never collide with an engagement id and never joins a
+ * journal figure (hours stay joined on real engagement ids only).
+ * Nothing is invented: no date, no title, no country the reading lacks.
+ */
+export function workHistoryFromExperience(
+  relationships: readonly ExperienceRelationship[],
+): WorkHistoryEntry[] {
+  const entries = relationships.map((r) => ({
+    id: r.engagementContextId ?? `${r.source}:${r.organizationId ?? "none"}:${r.relationship}`,
+    title: nonEmpty(r.title),
+    organizationName: nonEmpty(r.organizationName),
+    relationshipSlug: r.relationship,
+    kind: historyKindOf(r.relationship),
+    startedAt: nonEmpty(r.startedAt),
+    endedAt: nonEmpty(r.endedAt),
+    current: r.current && !nonEmpty(r.endedAt),
+    source: r.source,
+    countryCode: nonEmpty(r.countryCode),
+  }));
+  return sortNewestFirst(entries);
+}
+
+function sortNewestFirst(entries: WorkHistoryEntry[]): WorkHistoryEntry[] {
   return entries.sort((a, b) => {
     if (a.startedAt === b.startedAt) return 0;
     if (a.startedAt === null) return 1; // undated last — never guessed into place
@@ -209,9 +261,14 @@ export function deriveWorkHistory(
   });
 }
 
-/** How many of these engagements are running right now. A count of real rows. */
+/** Current membership is a role, not evidence that work is happening now. */
+export function isCurrentWork(entry: WorkHistoryEntry): boolean {
+  return entry.current && entry.source !== "membership";
+}
+
+/** How many recorded engagements are running right now. */
 export function countCurrentEngagements(entries: readonly WorkHistoryEntry[]): number {
-  return entries.filter((e) => e.current).length;
+  return entries.filter(isCurrentWork).length;
 }
 
 function nonEmpty(v: string | null | undefined): string | null {

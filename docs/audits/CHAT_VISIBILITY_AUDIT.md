@@ -419,6 +419,15 @@ audit.
   `chat-visibility-rls.test.ts` caller inventory. Full design and acceptance
   evidence: `docs/handoffs/FIRST_PARTY_SUPPLY_BRIDGE_V1.md`.
 
+- `app/api/internal/commercial-requests/v1/route.ts` (2026-11-07) — the Agentai OS
+  pull of commercial requests. Behind its own `COMMERCIAL_REQUESTS_FEED_TOKEN`
+  machine secret (401 while unset). Service role is needed because no signed-in
+  user's RLS view holds these rows (RLS on, no policies), and it reads with the
+  `select` grant from `20260713190000`. Names, e-mail, company and description are
+  read only to recognise a test row; the body holds id, door, creation time, status,
+  admin link and that flag (`lib/staffing/commercial-requests-feed.ts`). Touches no
+  chat table and sends nothing.
+
 - `app/api/internal/capability-readback/v1/route.ts` (2026-10-22) — the
   Agentai OS capability readback. Behind the same `SUPPLY_FEED_BEARER_TOKEN`
   machine secret (503 while unset, 401 on a wrong token). Service role is
@@ -437,6 +446,17 @@ audit.
   table directly, writes nothing, touches no chat table, answers only for a
   still-usable addressed invitation, and grants nothing: acceptance still needs
   the session e-mail to equal the invited address (`20261003151100`).
+
+- **2026-11-13 — `lib/invitations/delivery-attempts.ts` and
+  `lib/invitations/delivery-retry-run.ts`** (invitation delivery reliability, owner
+  P0). The first records WHY a send failed through one service_role-only function,
+  `record_invitation_delivery_attempt_v1` (reason code, class, next retry — never an
+  address, never `delivery_status`). The second is the CRON_SECRET-only scheduled retry of
+  TEMPORARY failures of already-authorised partner referral sends; it calls only
+  service_role-only functions from migration `20261113190000` (RED, unapplied at the time
+  of writing) plus the existing `reissue_external_referral_v1` /
+  `mark_external_referral_delivery_v1`. Neither reads or writes a table directly or
+  touches a chat table. Pinned in the `chat-visibility-rls.test.ts` caller inventory.
 
 - **2026-09-17 — `lib/invitations/external-referral-receive.ts` and
   `lib/invitations/public-preview.ts`** (universal invitation / referral

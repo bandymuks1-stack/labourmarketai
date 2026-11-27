@@ -235,7 +235,8 @@ function confirmed<S extends z.ZodObject>(spec: {
       title: `Confirm: ${spec.title}`,
       description: `Carries out "${spec.title}" after its prepare step: verifies the token against the caller, the exact input and the CURRENT state, then runs the same canonical action the web runs, once.`,
       exposed: true,
-      annotations: { readOnlyHint: false, destructiveHint: !!spec.destructive, idempotentHint: true, openWorldHint: false },
+      // A confirm spends a single-use token: a repeat is refused, never a no-op.
+      annotations: { readOnlyHint: false, destructiveHint: !!spec.destructive, idempotentHint: false, openWorldHint: false },
       inputSchema: confirmInput,
       run: (caller, raw) =>
         guarded(caller, async () => {
@@ -688,7 +689,17 @@ export const DOMAIN_ACTION_CAPABILITIES: readonly CapabilityDescriptor[] = [
     // #2349). The report travels whole under `report`.
     async ({ role }) => ({ kind: "ok", report: await (await import("@/lib/reports/reports-hub")).getReportsView(role) }),
   ),
-  read("timesheets.overview.get", "Timesheets", "The caller's timesheets and their approval state.", none, async () => (await import("@/lib/timesheets/timesheets")).getTimesheetsOverview()),
+  read("timesheets.overview.get", "Timesheets", "The caller's timesheets and their approval state.", none, async () => {
+    const overview = await (await import("@/lib/timesheets/timesheets")).getTimesheetsOverview({ syncDecisions: false });
+    if (overview.status !== "ok") return overview;
+    if (overview.error) return { kind: "error" };
+    // The web uses Maps; JSON would otherwise silently discard their entries.
+    return { ...overview,
+      workerNames: Object.fromEntries(overview.workerNames),
+      workflows: Object.fromEntries(overview.workflows),
+      templates: Object.fromEntries(overview.templates),
+    };
+  }),
   read("finance.records.list", "Finance records", "The caller's finance records (costs, invoices, expenses) and the summary.", none, async () => {
     const f = await import("@/lib/finance/finance");
     const [records, summary] = await Promise.all([f.listMyFinanceRecords(), f.getFinanceSummary()]);

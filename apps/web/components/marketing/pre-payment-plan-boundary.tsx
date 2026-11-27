@@ -81,7 +81,9 @@ export async function PrePaymentPlanBoundary() {
       </div>
 
       <div className="mt-6 grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-        {PRE_PAYMENT_PLANS.map((plan) => {
+        {/* The internal administrator plan is staff tooling, not an offer:
+            a public visitor cannot choose it, so the public page never lists it. */}
+        {PRE_PAYMENT_PLANS.filter((plan) => plan.audience !== "admin").map((plan) => {
           // Registry-derived boundary: only features the plan actually
           // declares (boolean true or limit > 0). `false` entries (e.g.
           // priority_visibility on worker_plus) are never claimed.
@@ -110,10 +112,19 @@ export async function PrePaymentPlanBoundary() {
                 {t(`audience.${plan.audience}` as never)}
               </p>
 
-              <div>
-                <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-                  {t("featuresLabel")}
-                </p>
+              {/* The plan's feature list folds behind its own label (coordinator
+                  decision 2026-11-22: fold long copy on /pricing; no price or
+                  legal text changes). Name, access state, audience and the
+                  plan's statement stay in view. */}
+              <details className="group" data-testid="plan-boundary-features">
+                <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-2 font-mono text-meta uppercase tracking-label text-text-muted [&::-webkit-details-marker]:hidden">
+                  <span>
+                    {t("featuresLabel")} · {features.length}
+                  </span>
+                  <span aria-hidden className="transition-transform group-open:rotate-180 motion-reduce:transition-none">
+                    ▾
+                  </span>
+                </summary>
                 <ul
                   className="mt-2 flex flex-col gap-1.5"
                   data-features-from="plans-registry"
@@ -142,7 +153,7 @@ export async function PrePaymentPlanBoundary() {
                     );
                   })}
                 </ul>
-              </div>
+              </details>
 
               <span className="mt-auto text-xs text-text-secondary">
                 {t(`cta.${plan.cta as PlanCta}` as never)}

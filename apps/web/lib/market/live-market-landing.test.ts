@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import {
   LANDING_VACANCY_SAMPLE_SIZE,
+  isVisitorLanguage,
   landingVacancyFingerprint,
   pickLandingVacancySample,
 } from "./live-market-landing";
@@ -205,5 +206,56 @@ describe("landingVacancyFingerprint — exactly what the anonymous card paints",
     expect(landingVacancyFingerprint(row(1, { professionSlug: null }))).not.toBe(
       landingVacancyFingerprint(base),
     );
+  });
+});
+
+/**
+ * ADVERTS IN THE VISITOR'S LANGUAGE COME FIRST (owner decision 2026-11-15).
+ *
+ * The owner saw only Swedish adverts on the landing and decided: the
+ * visitor's language first, then the other suitable adverts — a sort
+ * priority, NEVER a filter; suitable offers from other EU countries are never
+ * hidden because of their language.
+ */
+describe("pickLandingVacancySample — the visitor's language first, never a filter", () => {
+  const mixed = [
+    row(1, { professionSlug: "cook", occupation: "Kock" }),
+    row(2, { professionSlug: "driver", occupation: "Chaufför", employmentForm: "permanent", positions: 1 }),
+    row(3, { professionSlug: "electrician", occupation: "Elektrikas", sourceLanguage: "lt", positions: 2 }),
+    row(4, { professionSlug: "teacher", occupation: "Lärare", positions: null }),
+    row(5, { professionSlug: null, occupation: "Suvirintojas", sourceLanguage: "lt-LT", positions: 3 }),
+    row(6, { professionSlug: "cleaner", occupation: "Städare", positions: 4 }),
+  ];
+  const ids = (sample: readonly PublicVacancyPreview[]) => sample.map((v) => v.id.slice(-1));
+
+  it("puts the visitor's own-language adverts first, slugged first among them", () => {
+    expect(ids(pickLandingVacancySample(mixed, "lt"))).toEqual(["3", "5", "1", "2"]);
+  });
+
+  it("fills the rest with adverts in other languages — they are never dropped for their language", () => {
+    const sample = pickLandingVacancySample(mixed, "lt");
+    expect(sample.filter((v) => !isVisitorLanguage(v.sourceLanguage, "lt"))).toHaveLength(2);
+    // An English visitor has no English advert on this page: the sample is the
+    // board's own selection, exactly as without a language.
+    expect(ids(pickLandingVacancySample(mixed, "en"))).toEqual(ids(pickLandingVacancySample(mixed)));
+    expect(pickLandingVacancySample(mixed, "en")).toHaveLength(LANDING_VACANCY_SAMPLE_SIZE);
+  });
+
+  it("keeps the board's order inside each language group", () => {
+    const sv = pickLandingVacancySample(mixed, "sv");
+    expect(ids(sv)).toEqual(["1", "2", "4", "6"]);
+  });
+
+  it("still skips a look-alike, across the language groups too", () => {
+    const page = [row(1), row(2, { sourceLanguage: "lt" })];
+    // Same card face (the language is not on the card's fingerprint): one only.
+    expect(ids(pickLandingVacancySample(page, "lt"))).toEqual(["2"]);
+  });
+
+  it("reads a regional code as its language, and nothing as no language", () => {
+    expect(isVisitorLanguage("sv-SE", "sv")).toBe(true);
+    expect(isVisitorLanguage("SV", "sv")).toBe(true);
+    expect(isVisitorLanguage("lt", "lv")).toBe(false);
+    expect(isVisitorLanguage(null, "lt")).toBe(false);
   });
 });

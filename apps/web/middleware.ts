@@ -1,3 +1,4 @@
+import { isUnknownAddress, UNKNOWN_ADDRESS_SEGMENT } from "@/lib/routing/known-first-segments";
 import { NextResponse, NextRequest } from "next/server";
 import createIntlMiddleware from "next-intl/middleware";
 import { createServerClient } from "@supabase/ssr";
@@ -356,6 +357,19 @@ export async function middleware(request: NextRequest) {
 
   const { locale, rest } = stripLocale(request.nextUrl.pathname);
 
+  // 1a. No route can answer this address: the real 404 page, not Next's error shell
+  //     (UX-9). Redirects in next.config ran before this, so their spellings still work.
+  if (isUnknownAddress(rest)) {
+    // Only the document answers 404. A router fetch of this address after hydration
+    // (a first visit refreshes once) must not: a 404 there makes the router reload the
+    // whole page. Next strips `rsc` before middleware, so the browser's own header
+    // tells them apart; a crawler or curl sends none and gets the 404.
+    const target = new URL(`/${locale}/${UNKNOWN_ADDRESS_SEGMENT}`, request.url);
+    return request.headers.get("sec-fetch-dest") === "empty"
+      ? NextResponse.rewrite(target)
+      : NextResponse.rewrite(target, { status: 404 });
+  }
+
   // 1b. The landing has ONE arm (owner decision 2026-09-30: the optional
   //     LIVE arm and its cookie rewrite are removed). The root landing page
   //     stays STATIC and CDN-cached for every visitor; an old LIVE cookie
@@ -376,6 +390,13 @@ export async function middleware(request: NextRequest) {
   //    traffic on the public marketing surface never pays a Supabase round-trip.
   const isAuthedRequest = hasSupabaseAuthCookie(request);
   if (!needsAuth && !isAuthedRequest) return intlResponse;
+
+  // A protected route with NO auth cookie has no session to validate: GoTrue
+  // can only answer "no user". Send the visitor to login now instead of after a
+  // network round-trip (perf 2026-11-22: signed-out /dashboard, /dashboard/company
+  // and /dashboard/assist answered in ~440 ms against ~220 ms for a public page;
+  // the difference was this wait, one Auth API call per such request).
+  if (needsAuth && !isAuthedRequest) return redirectToLogin(request, locale);
 
   // Fast path (P0 perf): a comfortably-fresh access token needs neither
   // rotation nor a middleware-level validation round-trip — the RSC layer
@@ -421,34 +442,7 @@ export async function middleware(request: NextRequest) {
   // refreshed session — never gate.
   if (!needsAuth) return response;
 
-  if (!user) {
-    const loginUrl = request.nextUrl.clone();
-    loginUrl.pathname = `/${locale}/auth/login`;
-    // W7 slice 3 — deep-link continuity. Two defects were fixed here:
-    //
-    //  1. `next` was built from `pathname` ALONE, so every query the workspace
-    //     uses to address itself (`?result=experiences&interaction=…`, the
-    //     planning `?view`/`date`, the journal `?editing`) was dropped. After
-    //     login the person landed on the bare route and had to find their way
-    //     back to the thing they had clicked.
-    //  2. `clone()` copies the ORIGINAL query onto the login URL, so those
-    //     params were not merely lost — they were smeared onto `/auth/login`,
-    //     where nothing reads them and a token-shaped one would sit in logs.
-    //
-    // `buildReturnValue` applies the same path rules as the sanitiser that
-    // reads this value back, and strips credential-shaped / chaining params.
-    // Clearing the cloned query first is what fixes (2); `next` is then the
-    // ONLY param on the login URL.
-    const returnValue = buildReturnValue(
-      request.nextUrl.pathname,
-      request.nextUrl.search,
-    );
-    for (const key of [...loginUrl.searchParams.keys()]) {
-      loginUrl.searchParams.delete(key);
-    }
-    if (returnValue) loginUrl.searchParams.set("next", returnValue);
-    return NextResponse.redirect(loginUrl);
-  }
+  if (!user) return redirectToLogin(request, locale);
 
   // Onboarding gating happens in the dashboard layout, which already reads
   // the profile row for the auth shell and redirects to /onboarding when
@@ -458,6 +452,36 @@ export async function middleware(request: NextRequest) {
   // keeps only the auth gate + session refresh above.
 
   return response;
+}
+
+/** The protected-route bounce: `/<locale>/auth/login` with a safe `next` as its only param. */
+function redirectToLogin(request: NextRequest, locale: string): NextResponse {
+  const loginUrl = request.nextUrl.clone();
+  loginUrl.pathname = `/${locale}/auth/login`;
+  // W7 slice 3 — deep-link continuity. Two defects were fixed here:
+  //
+  //  1. `next` was built from `pathname` ALONE, so every query the workspace
+  //     uses to address itself (`?result=experiences&interaction=…`, the
+  //     planning `?view`/`date`, the journal `?editing`) was dropped. After
+  //     login the person landed on the bare route and had to find their way
+  //     back to the thing they had clicked.
+  //  2. `clone()` copies the ORIGINAL query onto the login URL, so those
+  //     params were not merely lost — they were smeared onto `/auth/login`,
+  //     where nothing reads them and a token-shaped one would sit in logs.
+  //
+  // `buildReturnValue` applies the same path rules as the sanitiser that
+  // reads this value back, and strips credential-shaped / chaining params.
+  // Clearing the cloned query first is what fixes (2); `next` is then the
+  // ONLY param on the login URL.
+  const returnValue = buildReturnValue(
+    request.nextUrl.pathname,
+    request.nextUrl.search,
+  );
+  for (const key of [...loginUrl.searchParams.keys()]) {
+    loginUrl.searchParams.delete(key);
+  }
+  if (returnValue) loginUrl.searchParams.set("next", returnValue);
+  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {

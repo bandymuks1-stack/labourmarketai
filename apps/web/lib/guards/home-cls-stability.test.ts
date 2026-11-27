@@ -73,9 +73,11 @@ describe("no late region appears out of nothing above the stations", () => {
     expect(aboveStations.indexOf('data-testid="today-header"')).toBeGreaterThan(-1);
     expect(aboveStations).not.toMatch(/fallback=\{null\}/);
     const boundaries = aboveStations.match(/<Suspense fallback=\{[^}]*\}/g) ?? [];
-    // header profession + header state + WAITING + visibility + TRACE +
-    // RUNNING + OUTSIDE + BECAUSE.
-    expect(boundaries.length).toBe(8);
+    // header profession + header state + THE SIX GOALS (N4) + WAITING +
+    // visibility + TRACE + RUNNING + OUTSIDE + BECAUSE.
+    expect(boundaries.length).toBe(9);
+    // The goals stream behind a box of the rail's height (CAROUSEL N4).
+    expect(aboveStations).toMatch(/<Suspense fallback=\{<div data-testid="signed-in-goals-pending" className="min-h-\[\d+rem\]" aria-hidden \/>\}>\s*<SignedInGoalNavigation \/>/);
   });
 
   it("the regions reserve their height while they read", () => {

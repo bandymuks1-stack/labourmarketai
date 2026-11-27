@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { test, expect, type Browser, type BrowserContext, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { MESSAGE_COALESCE_WINDOW_MS } from "../../lib/notifications/message-coalescing";
 
 /**
  * PRODUCTION ORGANIZATION ROSTER — the organization side of owner area 4
@@ -92,7 +93,7 @@ test("R-1 (3.21 / 5.12). Alfa's roster lists its worker with a team state", asyn
   const { ctx, page } = await as(browser, "owner");
   await useWorkspace(page, ALFA);
   await rendered(page, "people");
-  await expect(page.getByTestId("company-people")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByRole("main").getByTestId("company-people")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId("company-workers-migration-blocker")).toHaveCount(0);
   const row = page.getByTestId(`company-worker-row-${id}`);
   await expect(row, "the worker is on the roster").toBeVisible({ timeout: 30_000 });
@@ -207,6 +208,23 @@ test("R-4 (3.30). company settings save the declared capabilities as they are, a
 test("R-5 (3.26). an instruction sent to the worker reaches the worker", async ({ browser }) => {
   const { profileId } = await ownWorkerId();
   const body = `${MARK} instrukcija`;
+  const sentAt = Date.now();
+  // The shared emitter deliberately coalesces a burst in the same thread.
+  // Require a current-window event, never an old notification from another run.
+  const bucketStart = new Date(Math.floor(sentAt / MESSAGE_COALESCE_WINDOW_MS) * MESSAGE_COALESCE_WINDOW_MS).toISOString();
+  let conversationId = "";
+  const notified = async (slot: "owner" | "worker") => {
+    const res = await qaApi(`/rest/v1/notification_events?select=id,created_at&event_type=eq.message_received&metadata->>conversationId=eq.${conversationId}&created_at=gte.${encodeURIComponent(bucketStart)}`, bearerOf(slot));
+    expect(res.ok, "the recipient can read their own notification").toBe(true);
+    const rows = await res.json() as Array<{ id: string; created_at: string }>;
+    expect(rows.length, "a current-window message notification exists for this thread").toBeGreaterThan(0);
+    const fresh = rows.some(r => Date.parse(r.created_at) >= sentAt);
+    if (!fresh) test.info().annotations.push({
+      type: "not-covered",
+      description: `${slot}: instruction delivery coalesced with an earlier current-window event; this run does not prove a new notification insert`,
+    });
+    console.info(`[instructions] ${slot}: current notification present, new this step=${fresh}`);
+  };
   {
     const { ctx, page } = await as(browser, "owner");
     await useWorkspace(page, ALFA);
@@ -227,12 +245,29 @@ test("R-5 (3.26). an instruction sent to the worker reaches the worker", async (
     const { ctx, page } = await as(browser, "worker");
     await page.goto("/lt/dashboard/instructions");
     await rendered(page, "instructions (worker)");
-    await expect(
-      page.getByTestId("worker-instruction-card").filter({ hasText: MARK }),
-      "the worker reads this run's instruction",
-    ).toHaveCount(1, { timeout: 30_000 });
+    const card = page.getByTestId("worker-instruction-card").filter({ hasText: MARK });
+    await expect(card, "the worker reads this run's instruction").toHaveCount(1, { timeout: 30_000 });
+    const message = await qaApi(`/rest/v1/conversation_messages?select=conversation_id&body=eq.${encodeURIComponent(body)}`, bearerOf("worker"));
+    expect(message.ok).toBe(true);
+    const messages = await message.json() as Array<{ conversation_id: string }>;
+    expect(messages).toHaveLength(1);
+    conversationId = messages[0].conversation_id;
+    await notified("worker");
+
+    // The worker's existing clarification action is the other corrected door.
+    await card.getByTestId("instruction-clarify").click();
+    await expect(card.getByTestId("instruction-clarify-thread-link")).toBeVisible({ timeout: 30_000 });
+    await expect(card.getByTestId("instruction-clarify-error")).toHaveCount(0);
+
+    await page.goto("/lt/dashboard/activity");
+    const event = page.locator('[data-testid^="activity-stored-event-"][data-event-type="event_message_received"]')
+      .and(page.locator(`[href*="/dashboard/communication/${conversationId}"]`)).first();
+    await expect(event, "the notification opens the instruction's real thread").toBeVisible({ timeout: 30_000 });
+    await event.click();
+    await expect(page.locator("main")).toContainText(body, { timeout: 30_000 });
     await ctx.close();
   }
+  await notified("owner");
 });
 
 test("R-6 (3.32). an asset is issued to the worker, acknowledged by them, and returned", async ({ browser }) => {
