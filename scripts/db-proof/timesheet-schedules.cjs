@@ -105,10 +105,42 @@ as('',`select public.ack_timesheet_schedule_notification_v1('${SM}','${IM}',fals
 assert.equal(as('',`select count(*) from public.pending_timesheet_schedule_notifications_v1()`,'service_role'),'0');
 run(`update public.timesheet_schedules set retry_after=now()-interval '1 minute' where id='${SM}'`);
 assert.equal(as('',`select count(*) from public.pending_timesheet_schedule_notifications_v1()`,'service_role'),'1');
+
+// Repeat bounded scheduling selectors on one connection across the generic-plan switch.
+// Uses the plan-cache-probe.sql method; synthetic data only, no production timing claim.
+const perf = json(`do $$ declare mode text; i integer; begin
+  foreach mode in array array['auto','force_generic_plan'] loop
+    perform set_config('plan_cache_mode',mode,true);
+    for i in 1..12 loop
+      perform id from public.timesheet_schedules ts where ts.enabled and ts.next_run_at<=now()
+        and ts.pending_instance_id is null and (ts.retry_after is null or ts.retry_after<=now())
+        order by ts.next_run_at,ts.id limit 20;
+      perform id from public.timesheet_schedules ts where ts.pending_instance_id is not null
+        and (ts.retry_after is null or ts.retry_after<=now()) order by ts.id limit 40;
+    end loop;
+  end loop;
+end $$; select json_build_object('modes',2,'callsPerSelectorPerMode',12);`);
+// Existing privacy registry shape, one additive decision and a history-preserving rollback.
+const registrySource=file('supabase/migrations/20261019140000_privacy_erasure_executor_v3.sql');
+const ri=registrySource.indexOf('create table if not exists public.privacy_erasure_registry_v3 (');
+run(registrySource.slice(ri,registrySource.indexOf(');',ri)+2));
+const privacy=file('supabase/migrations/20261127180000_timesheet_schedule_privacy_v1.sql');
+const privacyDown=file('supabase/rollbacks/20261127180000_timesheet_schedule_privacy_v1.down.sql');
+run(privacy);run(privacy);
+assert.equal(run("select count(*) from public.privacy_erasure_registry_v3 where table_name='timesheet_schedules' and treatment='allow_cascade'"),'1');
+run(privacyDown);
+assert.equal(run("select count(*) from public.privacy_erasure_registry_v3 where table_name='timesheet_schedules'"),'1','rollback keeps the decision while settings exist');
+// Isolated account without work history: its opt-in preferences follow the approved cascade.
+assert.equal(save(X),'not_allowed');
+run(`insert into public.timesheet_schedules(profile_id,organization_id,definition_id,frequency,local_time,time_zone,next_run_at)
+values('${X}','${O}','${D}','daily','09:00','UTC',now()+interval '1 day');
+delete from public.profiles where id='${X}';`);
+assert.equal(run(`select count(*) from public.timesheet_schedules where profile_id='${X}'`),'0');
 // Nonempty rollback denies execution but preserves all settings/history/approvals.
+
 const before=json("select json_build_object('settings',(select count(*) from public.timesheet_schedules),'sheets',(select count(*) from public.timesheets),'events',(select count(*) from public.timesheet_events),'instances',(select count(*) from public.workflow_instances))");
 run(rollback);denied('',"select public.run_due_timesheet_schedules_v1()",'service_role');denied(U,`select public.save_timesheet_schedule_v1('${O}',null,null,null,null,null,false)`);
 const after=json("select json_build_object('settings',(select count(*) from public.timesheet_schedules),'sheets',(select count(*) from public.timesheets),'events',(select count(*) from public.timesheet_events),'instances',(select count(*) from public.workflow_instances))");assert.deepEqual(after,before);
-const proof={localOnly:true,syntheticOnly:true,postgres:run('show server_version'),canonicalJournalHours:5,selfOnlyRls:true,serviceOnlyExecution:true,membershipRechecked:true,manualDraftPreserved:true,atomicSubmission:true,failedWorkflowRollsBackReport:true,concurrentDispatchOnce:true,notificationRetryRetained:true,notificationRetryBackoff:true,contextRestored:true,dst:true,leapYear:true,rollbackEmptyAndNonempty:true,historyPreserved:after};
+const proof={planCache:perf,privacyDecisionIdempotent:true,privacyRollbackRetained:true,preferencesCascadeOnly:true,localOnly:true,syntheticOnly:true,postgres:run('show server_version'),canonicalJournalHours:5,selfOnlyRls:true,serviceOnlyExecution:true,membershipRechecked:true,manualDraftPreserved:true,atomicSubmission:true,failedWorkflowRollsBackReport:true,concurrentDispatchOnce:true,notificationRetryRetained:true,notificationRetryBackoff:true,contextRestored:true,dst:true,leapYear:true,rollbackEmptyAndNonempty:true,historyPreserved:after};
 console.log(JSON.stringify(proof));
 })().catch(e=>{console.error(e);process.exitCode=1});

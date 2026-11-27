@@ -253,6 +253,9 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261125133404_",
       // Separate owner-approved source-label projection, outside the 20261006 closure package.
       "20261127120000_public_vacancy_source_labels_v1.sql",
+      // Independent report-scheduling extension, not part of this historical closure package.
+      "20261127163000_timesheet_schedules_v1.sql",
+      "20261127180000_timesheet_schedule_privacy_v1.sql",
       // 2026-11-22 owner order: a privacy request is never shared with an agency (one SECURITY DEFINER body;
       // RED draft, needs-human-gate, NOT applied).
       "20261122180000_",

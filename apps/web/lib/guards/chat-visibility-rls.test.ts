@@ -576,6 +576,9 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/profile/avatar.ts",
       "lib/sales/lead-intake.ts",
       "lib/supply-bridge/feed-source.ts",
+      // Owner-approved self opt-in dispatcher: three service-only bounded schedule RPCs;
+      // no chat reads, actor input, direct report writes or approval decisions.
+      "lib/timesheets/timesheet-schedule-runner.ts",
       "lib/usage/usage-cost-store.ts",
       "lib/vacancy-runner/vacancy-admin-actions.ts",
       "lib/vacancy-store/vacancy-translation-entitlement.ts",

@@ -1,3 +1,4 @@
+import { formatScheduledDelivery } from "@/lib/time/display";
 import { getTimesheetSchedules } from "@/lib/timesheets/timesheet-schedules";
 import { saveTimesheetScheduleAction } from "@/lib/timesheets/timesheet-schedule-actions";
 import { getTranslations } from "next-intl/server";
@@ -445,11 +446,7 @@ export async function TimesheetsSection({
                       {saved?.enabled ? (
                         <p className="w-full text-xs text-text-muted">
                           {t("schedule.next", {
-                            date: new Intl.DateTimeFormat(locale, {
-                              dateStyle: "medium",
-                              timeStyle: "short",
-                              timeZone: saved.time_zone,
-                            }).format(new Date(saved.next_run_at)),
+                            date: formatScheduledDelivery(saved.next_run_at, locale, saved.time_zone) ?? "",
                             zone: saved.time_zone,
                           })}
                         </p>

@@ -1,4 +1,6 @@
--- DRAFT: owner-approved module extension, exact SQL NOT approved/applied.
+-- @human-gate-approved: owner approved #3837 manual merge/apply/cron on 2026-11-27; NOT APPLIED.
+-- Approved payload SHA256 A5202D18C79DF732D956553BF6ED987FF36E340AA8AD25EDACF4A2C3A3E1B9EE; only header comments differ.
+-- @plan-cache-proof: scripts/db-proof/plan-cache-probe.sql method; scripts/db-proof/timesheet-schedules.cjs repeats both bounded selectors 12 times under auto and force_generic_plan.
 -- RED: private opt-in settings and explicitly delegated scheduled submission.
 -- Existing journal, timesheet, workflow and notification stores remain canonical.
 begin;
