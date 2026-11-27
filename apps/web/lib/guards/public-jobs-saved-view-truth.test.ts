@@ -123,6 +123,16 @@ describe("the real saved-jobs page distinguishes missing ads from read failures"
     expect(mocks.previews).not.toHaveBeenCalled();
   });
 
+  it("a failed public search is never counted as a successful empty board", async () => {
+    mocks.session.mockResolvedValue(false);
+    mocks.search.mockResolvedValue({ status: "unavailable", vacancies: [], totalCount: 0, hasMore: false });
+    await render();
+    expect(mocks.telemetry).toHaveBeenCalledWith(expect.objectContaining({
+      metadata: expect.objectContaining({ success: false }),
+    }));
+    expect(mocks.saved).not.toHaveBeenCalled();
+  });
+
   it("an anonymous visit cannot read any member bookmarks", async () => {
     mocks.session.mockResolvedValue(false);
     const html = await render();
