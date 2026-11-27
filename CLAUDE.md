@@ -1,5 +1,12 @@
 # Agent Operating Contract — labourmarket.ai
 
+> **Mandatory session continuity:** before starting or resuming work, follow
+> [AGENTS.md — Mandatory continuity between agents](AGENTS.md#mandatory-continuity-between-agents).
+> Recover the previous executor's work, continue the existing unfinished change,
+> verify current PR/production state, and leave a usable continuation receipt.
+> Do not assign work to or wait for an inactive agent. This is the same binding
+> rule for Claude Code, Codex and every other executor.
+
 > ⚡ **FIRST COMMAND — run this before any architectural or product change:**
 >
 > ```bash

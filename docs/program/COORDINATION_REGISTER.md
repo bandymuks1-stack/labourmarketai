@@ -154,6 +154,16 @@ independent work or launch of other features (owner order 2026-10-28).
 
 ### 2c. Current coordination — 2026-11-25
 
+**Continuation, owner instruction 2026-11-27:** Codex is the active executor;
+Claude Code is inactive and has no assigned work. Existing PR #3111 is being
+continued on `fix/cc/cv-rows-one-statement-once`: merge current main, preserve
+the SQL, review current compatibility, then obtain its specific owner approval
+before production apply. Existing #2642 is next: saved-jobs read/empty-state
+fix, with its own scoped waiver still required. Shared continuity instructions
+are in #3839; existing review, migration and deployment gates remain in force.
+The table below is the historical 2026-11-25 handover, not a current deployment
+or unfinished-work claim. Current PR receipts and live evidence supersede it.
+
 Codex now holds coordination under the owner's current instruction. This supersedes
 older coordinator assignments, without deleting their work or history. The existing
 completion roadmap and #3265 remain the shared queue; no second register is created.
