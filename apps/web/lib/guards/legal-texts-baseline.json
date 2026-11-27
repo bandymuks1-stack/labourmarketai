@@ -592,9 +592,9 @@
       "legal.terms.title": "d63035a8a01fe21aeed25cf8212251a16ac3981efde7dfb07a50a51dd61fb6e3"
     },
     "lt.json": {
-      "auth.legalNotice.controller": "1ff8f91b9b8e4ae3501a7065fc93a85efe8c378a0eccbf8ae7affca2bb42ac65",
-      "auth.legalNotice.googleLogin": "e1eea8b8fb56d26d110a24ef39feb80c7fa53a2b688499892363d31e1db2e471",
-      "auth.legalNotice.signup": "6a0a36504d9405a4fac0b3fbcfe60481eb913d5980df4fd8ab440f7fe541b626",
+      "auth.legalNotice.controller": "6843b83c96b1e8949d526edcfc92af01762c4ebad25ee34e65bd1e49d3f298f2",
+      "auth.legalNotice.googleLogin": "e8010f9a204f5c424958bb266c4a3663da3d2555d6104de3cec5ece3ee06a5f7",
+      "auth.legalNotice.signup": "3d60918d77749f250b94bd1cff2d4437c45e7ef0bbf51911313443a53f680dcd",
       "consent.banner.accept": "fa944e8486386c249418f8c0903bdc524400950e8aca0422f0109c93a560e24e",
       "consent.banner.label": "421ab1aed264cc9908bd74d54bd6bcc6c2abba2d9fed14ec2b4ae80f5390f2a4",
       "consent.banner.more": "9b926c24874c72b66e0820012bb04879fb17d5edc66a99c3ea4b96fcb897bcfd",
@@ -887,9 +887,9 @@
       "legal.terms.title": "d63035a8a01fe21aeed25cf8212251a16ac3981efde7dfb07a50a51dd61fb6e3"
     },
     "nl.json": {
-      "auth.legalNotice.controller": "97a064dd356aa8b909acaf025bf08071406ec6e81dce525e3b12af51e21c6f86",
-      "auth.legalNotice.googleLogin": "509ebaa437ddffe6e7dd44c5c57b7dbb3d097e0aa13d8194047f60d72a749ed2",
-      "auth.legalNotice.signup": "164be080485693be0f1cf9f2bd90a95494dd16275f7c1da6c709be3cf1b77a2a",
+      "auth.legalNotice.controller": "8ed9ec96a184603e78309baea4d0c8d72b5e0dd530ddb8d03aa6bf7b4202308f",
+      "auth.legalNotice.googleLogin": "5600510a1cd100729f7180b033e1e3a5d7eb67b69cfab25e28cb7f7282f23b79",
+      "auth.legalNotice.signup": "262a0e7adbb063b26ec195b78795925b23cbe3c1c8c4d3732ab6dfe7bd8eaffb",
       "consent.banner.accept": "680d8eb7d7b237e472eeb40ae6e8d63f9c1a357e546e2d2a945a86edc2238b87",
       "consent.banner.label": "5bce2109c3c2d7afe4840deca400bcd2e266f5888d6957427bbdb974d628cbec",
       "consent.banner.more": "a0ae9a83aadfe8a8b889b4c2170a376028e989b7a26e43dab78c0c6b3fbc2a36",
@@ -1182,9 +1182,9 @@
       "legal.terms.title": "d63035a8a01fe21aeed25cf8212251a16ac3981efde7dfb07a50a51dd61fb6e3"
     },
     "pl.json": {
-      "auth.legalNotice.controller": "d9c71d1366c3c6d53a4dfc2240c2f45d89dbcd8b1076ce2537b2e267eb8f6c74",
-      "auth.legalNotice.googleLogin": "87e061cd7c22ad92c3a911be45c8f99336389661398ade9e7d85c45486b6622c",
-      "auth.legalNotice.signup": "40f2ee031c201a6d80455adecc45f7a327dd5d172b6023f3a3d62b021edfa99e",
+      "auth.legalNotice.controller": "231a92c28bbe0245faf23954ffa5ab743608b9ce909b86a10f6acefe9b49ed7e",
+      "auth.legalNotice.googleLogin": "dc35ff52043e0cb3bdb26c45ed5e5082aeb1b908dfc1a36f3da6d6f912d686a2",
+      "auth.legalNotice.signup": "e8760198e231839bbb7a925ff617f931fbcff2bf697726338e7c67ab25c8bac5",
       "consent.banner.accept": "f1d68b8e42cb1f66b42ad6680bf15687231301b1a0bc92d3927b51d6af18eb38",
       "consent.banner.label": "6bf11a1a05ed1cb16560696119ec8f6ed5b1810a4913d09b0ff0721199d2ad1f",
       "consent.banner.more": "8da5aa5eb401cbc5d1fcf191b9abc3e0bdb60940cb654ca11394b2f746898b9e",

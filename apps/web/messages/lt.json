@@ -4272,9 +4272,9 @@
       "inAppBrowser": "Esate programėlės vidinėje naršyklėje, kurioje prisijungimas per „Google“ dažnai neveikia. Atidarykite šį puslapį telefono naršyklėje („Safari“ arba „Chrome“) arba žemiau naudokite el. paštą ir slaptažodį."
     },
     "legalNotice": {
-      "signup": "Kuriant paskyrą patvirtini, kad susipažinai su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
-      "googleLogin": "Jei paskyros dar neturi, prisijungiant per socialinę paskyrą (pvz., „Google“) ji bus sukurta. Kuriant paskyrą patvirtini, kad susipažinai su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
-      "controller": "Tavo paskyros duomenų valdytoja — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
+      "signup": "Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
+      "googleLogin": "Jei paskyros dar neturite, prisijungiant per socialinę paskyrą (pvz., „Google“) ji bus sukurta. Kurdami paskyrą patvirtinate, kad susipažinote su <terms>Naudojimo sąlygomis</terms> ir <privacy>Privatumo politika</privacy>.",
+      "controller": "Jūsų paskyros duomenų valdytoja — UAB „Nonstop Group“. Duomenys tvarkomi paskyrai sukurti ir paslaugai teikti; rinkodarai jie nenaudojami be atskiro, neprivalomo sutikimo."
     },
     "errors": {
       "userAlreadyRegistered": "Šis el. paštas jau registruotas. Prisijunkite vietoj registracijos.",
@@ -11509,9 +11509,9 @@
     },
     "status": {
       "hidden": "Profilis darbdaviams nematomas",
-      "hiddenBody": "Tavo profilį, CV ir kontaktus matai tik tu. Pasirink, ar nori, kad tave rastų įmonės.",
+      "hiddenBody": "Jūsų profilį, CV ir kontaktus matote tik jūs. Pasirinkite, ar norite, kad jus rastų įmonės.",
       "visible": "Profesinis profilis matomas įmonėms",
-      "visibleBody": "Įmonės gali rasti ribotą tavo profesinį profilį. Kontaktai ir CV perduodami tik su atskiru tavo patvirtinimu.",
+      "visibleBody": "Įmonės gali rasti ribotą jūsų profesinį profilį. Kontaktai ir CV perduodami tik su atskiru jūsų patvirtinimu.",
       "withdrawn": "Matomumas išjungtas",
       "stale": "Sutikimo tekstas atnaujintas — reikalingas naujas pasirinkimas"
     },
@@ -11523,7 +11523,7 @@
       "review": "Peržiūrėti matomumo nustatymus"
     },
     "preview": {
-      "title": "Taip tavo profilį matys įmonės",
+      "title": "Taip jūsų profilį matys įmonės",
       "empty": "Profilis dar neužpildytas — įmonės matytų tik tuščią kortelę.",
       "displayName": "Vardas",
       "professions": "Profesija",
@@ -11550,18 +11550,18 @@
     "labels": {
       "decidedAt": "Pasirinkta",
       "version": "Versija",
-      "needsMigration": "Ši funkcija dar neįjungta serveryje. Tavo profilis lieka privatus.",
-      "error": "Nepavyko išsaugoti. Bandyk dar kartą.",
-      "declinedNote": "Gerai — profilis lieka privatus. Šį pasirinkimą rasi čia bet kada.",
-      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — pabandyk dar kartą vėliau.",
+      "needsMigration": "Ši funkcija dar neįjungta serveryje. Jūsų profilis lieka privatus.",
+      "error": "Nepavyko išsaugoti. Bandykite dar kartą.",
+      "declinedNote": "Gerai — profilis lieka privatus. Šį pasirinkimą rasite čia bet kada.",
+      "readFailed": "Nepavyko patikrinti, ar darbdaviai mato jūsų profilį. Tai nereiškia, kad matomumas išjungtas — pabandykite dar kartą vėliau.",
       "legalTextInEnglish": "Šis teisinis tekstas rodomas anglų kalba: jo versija jūsų kalba dar nepatvirtinta. Galioja angliškas tekstas."
     },
     "disclosures": {
-      "intro": "Kiekvienas CV, kontaktų ar kitų duomenų perdavimas konkrečiai įmonei vyksta tik po atskiro tavo patvirtinimo.",
-      "empty": "Kol kas jokių perdavimų nėra. Be tavo patvirtinimo įmonėms neperduodama nieko."
+      "intro": "Kiekvienas CV, kontaktų ar kitų duomenų perdavimas konkrečiai įmonei vyksta tik po atskiro jūsų patvirtinimo.",
+      "empty": "Kol kas jokių perdavimų nėra. Be jūsų patvirtinimo įmonėms neperduodama nieko."
     },
     "history": {
-      "empty": "Įrašų dar nėra. Čia matysi kiekvieną savo sutikimą ir atšaukimą.",
+      "empty": "Įrašų dar nėra. Čia matysite kiekvieną savo sutikimą ir atšaukimą.",
       "action": {
         "granted": "Suteikta",
         "withdrawn": "Atšaukta"
@@ -11570,7 +11570,7 @@
         "profile_discoverability": "Darbdavių matomumas",
         "employer_data_disclosure": "Duomenų perdavimas įmonei"
       },
-      "unavailable": "Nepavyko nuskaityti tavo sutikimų istorijos. Tai nereiškia, kad įrašų nėra — pabandyk dar kartą vėliau."
+      "unavailable": "Nepavyko nuskaityti jūsų sutikimų istorijos. Tai nereiškia, kad įrašų nėra — pabandykite dar kartą vėliau."
     },
     "fields": {
       "full_name": "Vardas ir pavardė",
@@ -11582,12 +11582,12 @@
       "salary_expectation": "Atlygio lūkestis"
     },
     "rights": {
-      "notice": "Daugiau apie tavo teises ir duomenų tvarkymą:",
+      "notice": "Daugiau apie jūsų teises ir duomenų tvarkymą:",
       "noticeLink": "privatumo pranešimas"
     },
     "contactRequests": {
       "section": "Prašymai dėl kontaktinių duomenų",
-      "intro": "Čia įmonės prašo tavo kontaktinių duomenų dėl vieno konkretaus poreikio. Kiekvieną kartą sprendi tu. Jei nieko nedarysi, niekas nebus perduota.",
+      "intro": "Čia įmonės prašo jūsų kontaktinių duomenų dėl vieno konkretaus poreikio. Kiekvieną kartą sprendžiate jūs. Jei nieko nedarysite, niekas nebus perduota.",
       "empty": "Šiuo metu prašymų nėra.",
       "unknownCompany": "Įmonė",
       "unknownNeed": "Darbo poreikis",
@@ -11600,48 +11600,48 @@
         "declined": "Atmesta",
         "withdrawn": "Įmonė atšaukė",
         "expired": "Nebegalioja",
-        "created": "Laukia tavęs",
+        "created": "Laukia jūsų",
         "accepted": "Priimta"
       },
       "withdrawGrant": "Atšaukti kontaktinių duomenų dalijimąsi",
-      "withdrawGrantNote": "Gali atšaukti bet kada. Įmonė netenka prieigos prie duomenų, kuriais pasidalijai; to, ką ji jau perskaitė, atšaukti negalima.",
-      "withdrawnNote": "Atšaukta. Ši įmonė nebeturi prieigos prie tavo kontaktinių duomenų.",
+      "withdrawGrantNote": "Galite atšaukti bet kada. Įmonė netenka prieigos prie duomenų, kuriais pasidalijote; to, ką ji jau perskaitė, atšaukti negalima.",
+      "withdrawnNote": "Atšaukta. Ši įmonė nebeturi prieigos prie jūsų kontaktinių duomenų.",
       "grantedNote": "Leista. Šis leidimas įrašytas sutikimų istorijoje žemiau.",
       "declinedNote": "Atmesta. Niekas nebuvo perduota.",
-      "error": "Nepavyko išsaugoti tavo atsakymo. Bandyk dar kartą.",
-      "acceptNote": "Priėmimas tik parodo įmonei, kad tau tai įdomu. Priėmus kontaktiniai duomenys NĖRA perduodami — tai atskiras pasirinkimas, kurį galėsi padaryti po priėmimo.",
+      "error": "Nepavyko išsaugoti jūsų atsakymo. Bandykite dar kartą.",
+      "acceptNote": "Priėmimas tik parodo įmonei, kad jums tai įdomu. Priėmus kontaktiniai duomenys NĖRA perduodami — tai atskiras pasirinkimas, kurį galėsite padaryti po priėmimo.",
       "accept": "Priimti",
       "acceptedNote": "Priimta. Kol kas niekas neperduota — leisti kontaktinius duomenis yra atskiras pasirinkimas žemiau.",
       "grantTitle": "Perduoti kontaktinius duomenis?",
       "grantIntro": "Tai atskiras sprendimas. Šiai įmonei ir tik šiam poreikiui būtų perduoti tik žemiau išvardyti duomenys."
     },
     "partnerSupply": {
-      "sectionIntro": "Būti palygintam su darbo pasiūlymu ir būti įvardytam — ne tas pat. Šis leidimas leidžia LabourMarket.ai ieškoti tau tinkamo darbo pas darbdavius ir projektuose už šios platformos ribų, per patvirtintą partnerių infrastruktūrą. Perduodama tik profesinė santrauka be tiesioginių identifikuojančių duomenų — niekada vardas ar kontaktai.",
-      "noWorkerProfile": "Kol kas neturi darbuotojo profilio, todėl niekas nebūtų pristatoma. Pirmiausia susikurk profesinį profilį — šie atsakymai išsaugomi ir pradės galioti, kai jis atsiras.",
-      "statusNotRepresented": "Už LabourMarket.ai ribų tau neatstovaujama",
-      "statusNotRepresentedBody": "Niekas apie tave nesiunčiama už šios platformos ribų. Paskyra, CV ir darbo žurnalas be šio leidimo veikia lygiai taip pat.",
-      "statusRepresented": "Tau atstovaujama ir už LabourMarket.ai ribų",
-      "statusConsentOnly": "Leidimas duotas — dabar nurodyk, ko ieškai",
-      "statusWithdrawn": "Šį leidimą atšaukei",
-      "statusStale": "Šio leidimo tekstas pasikeitė — perskaityk jį iš naujo",
-      "statusAgeing": "Tavo atsakymas sensta — patvirtink, ar jis vis dar teisingas",
-      "statusExpired": "Tavo atsakymo galiojimas baigėsi ir jis nebesiunčiamas",
+      "sectionIntro": "Būti palygintam su darbo pasiūlymu ir būti įvardytam — ne tas pat. Šis leidimas leidžia LabourMarket.ai ieškoti jums tinkamo darbo pas darbdavius ir projektuose už šios platformos ribų, per patvirtintą partnerių infrastruktūrą. Perduodama tik profesinė santrauka be tiesioginių identifikuojančių duomenų — niekada vardas ar kontaktai.",
+      "noWorkerProfile": "Kol kas neturite darbuotojo profilio, todėl niekas nebūtų pristatoma. Pirmiausia susikurkite profesinį profilį — šie atsakymai išsaugomi ir pradės galioti, kai jis atsiras.",
+      "statusNotRepresented": "Už LabourMarket.ai ribų jums neatstovaujama",
+      "statusNotRepresentedBody": "Niekas apie jus nesiunčiama už šios platformos ribų. Paskyra, CV ir darbo žurnalas be šio leidimo veikia lygiai taip pat.",
+      "statusRepresented": "Jums atstovaujama ir už LabourMarket.ai ribų",
+      "statusConsentOnly": "Leidimas duotas — dabar nurodykite, ko ieškote",
+      "statusWithdrawn": "Šį leidimą atšaukėte",
+      "statusStale": "Šio leidimo tekstas pasikeitė — perskaitykite jį iš naujo",
+      "statusAgeing": "Jūsų atsakymas sensta — patvirtinkite, ar jis vis dar teisingas",
+      "statusExpired": "Jūsų atsakymo galiojimas baigėsi ir jis nebesiunčiamas",
       "authoritiesTitle": "Ką reiškia kiekvienas leidimas",
       "authorityMatch": "Palyginimas su pasiūlymais",
-      "authorityMatchBody": "Tave galima įskaičiuoti ir palyginti su tinkamu darbu. Darbdavys mato skaičių ir neatpažįstamą nuorodą.",
+      "authorityMatchBody": "Jus galima įskaičiuoti ir palyginti su tinkamu darbu. Darbdavys mato skaičių ir neatpažįstamą nuorodą.",
       "authorityContact": "Susisiekimas",
-      "authorityContactBody": "Darbdavys gali būti sujungtas su tavimi per LabourMarket.ai.",
+      "authorityContactBody": "Darbdavys gali būti sujungtas su jumis per LabourMarket.ai.",
       "authorityPresentation": "Pristatymas",
-      "authorityPresentationBody": "Tavo prieinamumą galima parodyti auditorijai — pavyzdžiui, bendru skaičiumi „3 staliai laisvi nuo spalio“.",
+      "authorityPresentationBody": "Jūsų prieinamumą galima parodyti auditorijai — pavyzdžiui, bendru skaičiumi „3 staliai laisvi nuo spalio“.",
       "authorityIdentity": "Vardo atskleidimas",
-      "authorityIdentityBody": "Tave galima įvardyti. Be šio leidimo tave pristatome tik anonimiškai.",
-      "matchNeverReveals": "Vien palyginimas niekada neatskleidžia tavo vardo, el. pašto, telefono ar adreso. Susisiekimas ir vardo atskleidimas — atskiri leidimai, kuriuos duodi žemiau, ir abu pradžioje yra išjungti.",
+      "authorityIdentityBody": "Jus galima įvardyti. Be šio leidimo jus pristatome tik anonimiškai.",
+      "matchNeverReveals": "Vien palyginimas niekada neatskleidžia jūsų vardo, el. pašto, telefono ar adreso. Susisiekimas ir vardo atskleidimas — atskiri leidimai, kuriuos duodate žemiau, ir abu pradžioje yra išjungti.",
       "grant": "Sutinku — atstovauk man",
       "decline": "Dabar neįjungti",
       "declinedNote": "Niekas neišsaugota. Profilis, CV ir darbo žurnalas nepakito.",
       "manage": "Tvarkyti",
       "withdrawConsent": "Atšaukti šį leidimą",
-      "formTitle": "Ko ieškai šiuo metu?",
+      "formTitle": "Ko ieškote šiuo metu?",
       "intentLabel": "Dabartinė situacija",
       "intentAvailableNow": "Galiu pradėti dabar",
       "intentAvailableFrom": "Galiu pradėti nuo datos",
@@ -11650,9 +11650,9 @@
       "intentLookingForProjects": "Ieškau projektų",
       "availableFromLabel": "Galiu pradėti nuo",
       "workCountriesLabel": "Šalys, kuriose galiu teisėtai dirbti",
-      "workCountriesHelp": "Dviraidžiai šalių kodai, atskirti kableliais. Tai apie tavo teisę dirbti, ne apie pageidavimą.",
+      "workCountriesHelp": "Dviraidžiai šalių kodai, atskirti kableliais. Tai apie jūsų teisę dirbti, ne apie pageidavimą.",
       "marketsLabel": "Šalys, kuriose sutinku būti siūlomas",
-      "marketsHelp": "Atskiras klausimas. Tave galima siūlyti tik šių šalių darbdaviams, ir jos turi būti tarp aukščiau nurodytų šalių.",
+      "marketsHelp": "Atskiras klausimas. Jus galima siūlyti tik šių šalių darbdaviams, ir jos turi būti tarp aukščiau nurodytų šalių.",
       "validDaysLabel": "Kiek dienų šis atsakymas galioja",
       "validDaysHelp": "Po to paklausime iš naujo. Jei nepaklausime, atsakymas nustoja būti siunčiamas, o ne pasensta.",
       "save": "Išsaugoti",
@@ -11660,7 +11660,7 @@
       "saved": "Išsaugota.",
       "edit": "Keisti atsakymus",
       "cancel": "Atšaukti",
-      "currentTitle": "Tavo dabartiniai atsakymai",
+      "currentTitle": "Jūsų dabartiniai atsakymai",
       "currentIntent": "Dabartinė situacija",
       "currentAvailableFrom": "Galiu pradėti nuo",
       "currentWorkCountries": "Galiu teisėtai dirbti",
@@ -11674,15 +11674,15 @@
       "reconfirm": "Taip, vis dar teisinga",
       "reconfirmed": "Ačiū — patvirtinta.",
       "withdrawDeclaration": "Nebeatstovauti man",
-      "withdrawnDeclarationNote": "Už LabourMarket.ai ribų tau nebeatstovaujama.",
+      "withdrawnDeclarationNote": "Už LabourMarket.ai ribų jums nebeatstovaujama.",
       "needsMigration": "Šiuo metu nepasiekiama.",
       "errorGeneric": "Kažkas nepavyko. Niekas nepakeista.",
-      "errorUnknownIntent": "Pasirink savo dabartinę situaciją.",
-      "errorAvailableFromRequired": "Nurodyk datą, nuo kurios gali pradėti.",
-      "errorCountriesRequired": "Nurodyk bent vieną šalį, kurioje gali teisėtai dirbti.",
-      "errorNotIso2": "Naudok dviraidžius šalių kodus, pavyzdžiui LT, DE, NL.",
-      "errorMarketOutside": "Siūlyti tave galima tik ten, kur gali teisėtai dirbti. Pirmiausia pridėk tą šalį aukščiau.",
-      "errorValidity": "Pasirink 30, 60 arba 90 dienų."
+      "errorUnknownIntent": "Pasirinkite savo dabartinę situaciją.",
+      "errorAvailableFromRequired": "Nurodykite datą, nuo kurios galite pradėti.",
+      "errorCountriesRequired": "Nurodykite bent vieną šalį, kurioje galite teisėtai dirbti.",
+      "errorNotIso2": "Naudokite dviraidžius šalių kodus, pavyzdžiui LT, DE, NL.",
+      "errorMarketOutside": "Siūlyti jus galima tik ten, kur galite teisėtai dirbti. Pirmiausia pridėkite tą šalį aukščiau.",
+      "errorValidity": "Pasirinkite 30, 60 arba 90 dienų."
     },
     "employerVisibility": {
       "title": "Matomas darbdaviams",
@@ -11692,23 +11692,23 @@
         "unknown": "Nežinoma"
       },
       "hint": {
-        "on": "Įmonės gali rasti tavo profesinį profilį. Kontaktai ir CV — tik su atskiru tavo patvirtinimu. Išjungti gali bet kada.",
-        "off": "Įmonės tavo profilio neranda. Įjungti gali tik tu, kai perskaitysi sąlygas; atšaukti — vienu paspaudimu.",
-        "unknown": "Nepavyko patikrinti. Tai nereiškia, kad išjungta — atidaryk ir pažiūrėk."
+        "on": "Įmonės gali rasti jūsų profesinį profilį. Kontaktai ir CV — tik su atskiru jūsų patvirtinimu. Išjungti galite bet kada.",
+        "off": "Įmonės jūsų profilio neranda. Įjungti galite tik jūs, kai perskaitysite sąlygas; atšaukti — vienu paspaudimu.",
+        "unknown": "Nepavyko patikrinti. Tai nereiškia, kad išjungta — atidarykite ir pažiūrėkite."
       },
       "chat": {
-        "on": "Šiuo metu tavo profesinis profilis matomas įmonėms. Žemiau — ką jos mato ir kaip tai išjungti.",
-        "off": "Šiuo metu įmonės tavo profilio nemato ir neranda paieškoje. Jei nori, kad rastų, perskaityk sąlygas žemiau ir nuspręsk — atšaukti galėsi bet kada.",
-        "unknown": "Nepavyko patikrinti, ar įmonės mato tavo profilį. Tai nereiškia, kad matomumas išjungtas — atidaryk privatumo nustatymus.",
+        "on": "Šiuo metu jūsų profesinis profilis matomas įmonėms. Žemiau — ką jos mato ir kaip tai išjungti.",
+        "off": "Šiuo metu įmonės jūsų profilio nemato ir neranda paieškoje. Jei norite, kad rastų, perskaitykite sąlygas žemiau ir nuspręskite — atšaukti galėsite bet kada.",
+        "unknown": "Nepavyko patikrinti, ar įmonės mato jūsų profilį. Tai nereiškia, kad matomumas išjungtas — atidarykite privatumo nustatymus.",
         "noWorker": "Matomumas darbdaviams taikomas darbuotojo profiliui, o šioje paskyroje jo dar nėra."
       }
     },
     "switch": {
-      "privateLine": "Šis nustatymas niekada nerodo: tavo vardo, telefono numerio, el. pašto, Darbo žurnalo įrašų ir išorinių profilių nuorodų.",
+      "privateLine": "Šis nustatymas niekada nerodo: jūsų vardo, telefono numerio, el. pašto, Darbo žurnalo įrašų ir išorinių profilių nuorodų.",
       "turnOn": "Perskaityti sąlygas ir įjungti",
       "details": "Ką mato įmonės ir visos sąlygos",
-      "grantedNote": "Atlikta — įmonės dabar gali rasti tavo profesinį profilį su anonimine žyma.",
-      "withdrawnNote": "Atlikta — tavo profilis nebebus rodomas naujose įmonių paieškose."
+      "grantedNote": "Atlikta — įmonės dabar gali rasti jūsų profesinį profilį su anonimine žyma.",
+      "withdrawnNote": "Atlikta — jūsų profilis nebebus rodomas naujose įmonių paieškose."
     }
   },
   "planning": {

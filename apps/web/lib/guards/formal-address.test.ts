@@ -83,7 +83,10 @@ const PL_INFORMAL = [
  *  what an app may do "as you". They change only through their own owner-approved
  *  process (owner rule: legal texts are not edited), so the address rule does not
  *  judge them. */
-const FIXED_NAMESPACES: readonly string[] = ["consent", "privacyConsent", "legal", "oauthConsent"];
+// `privacyConsent` left this list by owner decision 2026-11-22: its strings
+// (around the versioned consent text, which is unchanged and hash-pinned in
+// lib/privacy/consent-definitions.ts) take the formal address like the rest.
+const FIXED_NAMESPACES: readonly string[] = ["consent", "legal", "oauthConsent"];
 /** The pricing copy of #3302 (owner-approved, merged 2026-11-16) is kept exactly as
  *  it landed on main; it is outside this register pass and changes only with the
  *  owner's approval of that copy. */

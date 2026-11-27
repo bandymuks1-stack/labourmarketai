@@ -207,7 +207,9 @@ describe("i18n completeness for the consent UI (test 23)", () => {
     expect(lt.actions.grant).toBe("Sutinku ir įjungiu matomumą");
     expect(lt.actions.decline).toBe("Dabar neįjungti");
     expect(lt.actions.review).toBe("Peržiūrėti matomumo nustatymus");
-    expect(lt.preview.title).toBe("Taip tavo profilį matys įmonės");
+    // Owner decision 2026-11-22: the respectful "jūs" in every consent string
+    // (wording-only legal PR; meaning, scope and processing terms unchanged).
+    expect(lt.preview.title).toBe("Taip jūsų profilį matys įmonės");
   });
 });
 
