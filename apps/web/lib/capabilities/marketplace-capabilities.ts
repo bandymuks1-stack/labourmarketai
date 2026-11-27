@@ -271,15 +271,30 @@ function makeShortlistPair(op: ShortlistOp): [CapabilityDescriptor, CapabilityDe
   const confirmId = `shortlist.${op}_confirm`;
   const confirmInput = fields.extend({ confirmationToken: z.string().min(10) });
 
-  /** What the write will be, in the core's vocabulary. */
+  /** What the write will be, in the core's vocabulary: an absent note KEEPS
+   *  the stored one, an explicit `null` CLEARS it — the chat's own rule
+   *  (`setShortlistCore`). MCP used to turn `null` into "keep", so a client
+   *  asking to clear a note kept it (AI-1 sweep, 2026-11-23). */
   const intended = (d: Record<string, unknown>): { status: ShortlistStatus; note: string | null | undefined } =>
     op === "add"
-      ? { status: ((d.status as ShortlistStatus | undefined) ?? "saved"), note: (d.note as string | null | undefined) ?? undefined }
+      ? {
+          status: ((d.status as ShortlistStatus | undefined) ?? "saved"),
+          note: d.note === null ? null : ((d.note as string | undefined) ?? undefined),
+        }
       : { status: "not_fit", note: d.reason as string };
 
+  /** The token binds "keep", "clear" and "set" as DIFFERENT drafts — the
+   *  operation is its own field, so no note text can stand in for "keep". */
   const normalized = (d: Record<string, unknown>) => {
     const i = intended(d);
-    return { requestId: d.requestId, workerId: d.workerId, status: i.status, note: i.note ?? null };
+    const noteChange: "keep" | "clear" | "set" = i.note === undefined ? "keep" : i.note === null ? "clear" : "set";
+    return {
+      requestId: d.requestId,
+      workerId: d.workerId,
+      status: i.status,
+      noteChange,
+      note: i.note ?? null,
+    };
   };
 
   /** Everything the draft checks, re-checked at confirm. */
@@ -347,7 +362,15 @@ function makeShortlistPair(op: ShortlistOp): [CapabilityDescriptor, CapabilityDe
       return {
         ok: true,
         data: {
-          preview: { actingFor: pre.employerName, need: pre.need, workerId: n.workerId, decision: n.status, note: n.note },
+          preview: {
+            actingFor: pre.employerName,
+            need: pre.need,
+            workerId: n.workerId,
+            decision: n.status,
+            // What happens to the stored note, in plain terms.
+            note: n.note,
+            noteChange: n.noteChange,
+          },
           confirmationToken: token,
           note: `Nothing was written. Confirming requires ${confirmId} with this exact input and token.`,
         },

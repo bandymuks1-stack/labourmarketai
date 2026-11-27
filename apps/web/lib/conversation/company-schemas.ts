@@ -2,6 +2,7 @@ import { z } from "zod";
 
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import { OVERRIDE_REASON_CODES } from "@/lib/projects/override-receipt-model";
+import { PROJECT_CITY_MAX, PROJECT_TITLE_MAX, PROJECT_TITLE_MIN } from "@/lib/projects/project-title-limits";
 
 /**
  * Zod input schemas for the executable EMPLOYER-side conversation actions
@@ -33,8 +34,8 @@ const isoDate = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/);
  */
 /** The demand fields WITHOUT the web-chat `mode` switch — exported so the
  *  capability layer can reuse the exact shape (its draft is a token preview,
- *  not a persisted `customer_requests` draft row; see registry). A refined
- *  schema cannot be `.extend()`ed, hence the split. */
+ *  not a persisted `customer_requests` draft row; see registry). Consumers
+ *  use `.safeExtend()` so the declared date-range check stays intact. */
 export const companyCreateDemandFields = z.object({
   intent: z.enum(["hire_workers", "partner"]).default("hire_workers"),
   description: z.string().trim().min(3).max(4000),
@@ -63,48 +64,35 @@ export const companyCreateDemandFields = z.object({
    *  cluster) — internship / apprenticeship / temporary assignment … Never
    *  inferred from the description; absent = the employer stated none. */
   opportunityType: z.enum(OPPORTUNITY_TYPES).nullable().optional(),
-});
+  /** Stated start day (ISO) → `structured_v2.time.start_earliest`. */
+  startDate: z.iso.date()
+    .nullable()
+    .optional(),
+  /** Stated end day (ISO) → `structured_v2.time.end_date`. */
+  endDate: z.iso.date()
+    .nullable()
+    .optional(),
+  /** Teams of a stated size → `structured_v2.team` (only while
+   *  `teamSize` = teamCount × perTeamSize; the canonical submit checks). */
+  teamCount: z.number().int().min(1).max(100).nullable().optional(),
+  perTeamSize: z.number().int().min(1).max(100).nullable().optional(),
+}).refine(
+  // Refuse before preview/confirm: the canonical sanitizer drops a reversed
+  // range, which would otherwise silently discard the confirmed facts.
+  ({ startDate, endDate }) => !startDate || !endDate || startDate <= endDate,
+  { path: ["endDate"] },
+);
 
-export const companyCreateDemandSchema = z
-  .object({
-    intent: z.enum(["hire_workers", "partner"]).default("hire_workers"),
+/**
+ * The web chat's demand input: THE SAME base fields (one schema, so the chat
+ * and MCP can no longer drift apart — duplication audit AI-2), plus the chat's
+ * `mode` switch. The chat forms send ISO codes, so its country stays exactly
+ * two letters; MCP and the phone also accept a country name, resolved later.
+ */
+export const companyCreateDemandSchema = companyCreateDemandFields
+  .safeExtend({
     mode: z.enum(["draft", "submit"]).default("submit"),
-    description: z.string().trim().min(3).max(4000),
-    role: z.string().trim().max(120).nullable().optional(),
-    location: z.string().trim().max(120).nullable().optional(),
-    skills: z.string().trim().max(4000).nullable().optional(),
-    urgency: z.enum(["flexible", "this_week", "urgent"]).nullable().optional(),
-    notes: z.string().trim().max(4000).nullable().optional(),
-    /** Work-type slug — validated against the shared taxonomy canonically. */
-    workType: z.string().trim().max(64).nullable().optional(),
     country: z.string().trim().length(2).nullable().optional(),
-    teamSize: z.number().int().min(1).max(100000).nullable().optional(),
-    accommodation: z
-      .enum(["provided_free", "provided_paid", "provided_deducted", "not_provided"])
-      .nullable()
-      .optional(),
-    transport: z
-      .enum(["provided", "compensated", "not_provided", "unknown"])
-      .nullable()
-      .optional(),
-    /** Same declared opportunity type as `companyCreateDemandFields`. */
-    opportunityType: z.enum(OPPORTUNITY_TYPES).nullable().optional(),
-    /** Stated start day (ISO) → `structured_v2.time.start_earliest`. */
-    startDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .nullable()
-      .optional(),
-    /** Stated end day (ISO) → `structured_v2.time.end_date`. */
-    endDate: z
-      .string()
-      .regex(/^\d{4}-\d{2}-\d{2}$/)
-      .nullable()
-      .optional(),
-    /** Teams of a stated size → `structured_v2.team` (only while
-     *  `teamSize` = teamCount × perTeamSize; the executor checks). */
-    teamCount: z.number().int().min(1).max(100).nullable().optional(),
-    perTeamSize: z.number().int().min(1).max(100).nullable().optional(),
   })
   .refine((v) => v.mode !== "draft" || v.intent === "hire_workers", {
     message: "drafts exist only for the hire_workers intent",
@@ -223,8 +211,9 @@ export const educationAssignLearnerSchema = z.object({
  *  `createProjectAction` → `insertProjectForCompany` validates the title and
  *  RLS `projects_insert` (owns_company) gates the row. */
 export const companyCreateProjectSchema = z.object({
-  title: z.string().trim().min(2).max(120),
-  city: z.string().trim().max(120).nullable().optional(),
+  // The SAME limits as the canonical core and MCP (AI-1 sweep).
+  title: z.string().trim().min(PROJECT_TITLE_MIN).max(PROJECT_TITLE_MAX),
+  city: z.string().trim().max(PROJECT_CITY_MAX).nullable().optional(),
 });
 
 /** CLIENT: the decision on an agency's candidate offer (canonical:

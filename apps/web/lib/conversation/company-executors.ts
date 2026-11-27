@@ -55,6 +55,7 @@ import {
   type ExecCtx,
   type ExecResult,
 } from "@/lib/conversation/executor-contract";
+import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
 
 /**
  * CAL-7 — the reservation verdict, carried from the canonical action to the
@@ -203,10 +204,6 @@ export const COMPANY_EXECUTORS: {
     // Teams of a stated size ride along; the canonical submit keeps them only
     // while they still explain the number of workers the person confirmed
     // (3 × 4 = 12) — an edited count drops them, server-side.
-    const team =
-      input.teamCount != null && input.perTeamSize != null
-        ? { count: input.teamCount, per_team: input.perTeamSize }
-        : null;
     const r = await submitDemandRequestAction(input.intent, {
       description: input.description,
       role: input.role ?? undefined,
@@ -222,21 +219,8 @@ export const COMPANY_EXECUTORS: {
       // Declared opportunity type → the structured cluster the worker board
       // and the Learning Compass read (`payload.structured_v2`). Absent when
       // the employer stated none — nothing is inferred.
-      structuredV2:
-        input.opportunityType || input.startDate || input.endDate || team
-          ? {
-              ...(input.opportunityType ? { opportunity_type: input.opportunityType } : {}),
-              ...(team ? { team } : {}),
-              ...(input.startDate || input.endDate
-                ? {
-                    time: {
-                      ...(input.startDate ? { start_earliest: input.startDate } : {}),
-                      ...(input.endDate ? { end_date: input.endDate } : {}),
-                    },
-                  }
-                : {}),
-            }
-          : undefined,
+      // The ONE mapper MCP uses too (lib/demand/structured-demand-v2.ts).
+      structuredV2: structuredV2FromDeclaredDemand(input),
     });
     // The REAL id + status come from the canonical action — never invented.
     if (r.ok) return { ok: true, data: { requestId: r.requestId, status: "submitted" } };
