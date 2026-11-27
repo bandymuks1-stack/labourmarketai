@@ -2,7 +2,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { FileSpreadsheet, ClipboardList } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
-import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { requireCompanyOrHistoryGrant } from "@/lib/organization-evidence/history-read-access";
 import { EvidenceImportSection } from "@/components/app/evidence-import-section";
 import { CompanyWorkHistory, CompanyPlaceHistory } from "@/components/app/organization/company-work-history";
 import { PerformingCompanyPanel } from "@/components/app/organization/performing-company-panel";
@@ -46,7 +46,7 @@ export default async function CompanyHistoryPage({
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
-  await requireRoleOrRedirect(locale, "company");
+  const access = await requireCompanyOrHistoryGrant(locale);
   const sp = (await searchParams) ?? {};
   const evidenceSession =
     typeof sp.evidenceSession === "string" && sp.evidenceSession.trim() !== ""
@@ -58,6 +58,27 @@ export default async function CompanyHistoryPage({
   const t = await getTranslations("organizationDoors.pages.history");
   const tQuality = await getTranslations("historyQuality");
   const tDup = await getTranslations("historyDuplicates");
+
+  // A history READ grant (20261124053000): the recorded history only. No
+  // quality fixes, duplicate decisions, performing-company panel, import,
+  // sessions, photo import or neighbour doors: those act or lead to pages the
+  // grant does not open.
+  if (access === "grant") {
+    return (
+      <div className="flex flex-col gap-6" data-testid="company-history" data-access="read-grant">
+        <header className="flex flex-col gap-1">
+          <PageTitle>{t("title")}</PageTitle>
+          <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+        </header>
+        <CompanyWorkHistory locale={locale} organizationId={org} />
+        {place ? (
+          <section id="company-place-detail" className="scroll-mt-20" data-testid="company-place-detail">
+            <CompanyPlaceHistory locale={locale} placeKey={place} organizationId={org} />
+          </section>
+        ) : null}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6" data-testid="company-history">

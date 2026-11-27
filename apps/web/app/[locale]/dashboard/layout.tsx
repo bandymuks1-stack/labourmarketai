@@ -25,6 +25,8 @@ import { readAdminUiHidden } from "@/lib/auth/admin-ui-pref";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { workspaceOpensCompanySpace } from "@/lib/company/organization-authority";
+import { isHistoryGrantPath } from "@/lib/organization-evidence/history-grant-paths";
+import { hasLiveHistoryReadGrant } from "@/lib/organization-evidence/history-read-access";
 import type { SwitchableOrganization } from "@/lib/company/organization-switch";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { StaleBuildRecovery } from "@/components/app/stale-build-recovery";
@@ -208,7 +210,14 @@ export default async function DashboardLayout({
   // switcher and the auth context below all read THIS binding.
   const workspace = await getWorkspaceContext();
 
-  if (companyMembershipArm && requirement && !workspaceOpensCompanySpace(workspace)) {
+  // THE HISTORY READ GRANT (20261124053000, owner-approved 2026-11-23): an
+  // owner-granted, time-boxed read of ONE organization's history opens
+  // exactly two pages (`isHistoryGrantPath`) and nothing else; those pages
+  // render read-only content for it (`requireCompanyOrHistoryGrant`). No live
+  // grant, or any other path: the refusal below is unchanged.
+  const historyGrantPage =
+    companyMembershipArm && isHistoryGrantPath(gatedPath) && (await hasLiveHistoryReadGrant());
+  if (companyMembershipArm && requirement && !workspaceOpensCompanySpace(workspace) && !historyGrantPage) {
     redirect(refusalDestination(locale, requirement));
   }
 

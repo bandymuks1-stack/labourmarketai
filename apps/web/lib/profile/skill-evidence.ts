@@ -84,3 +84,21 @@ export function skillEvidenceStatus(
   if (summary.supported >= summary.declared) return "all";
   return "some";
 }
+
+/**
+ * The same summary, read off the skills list a person actually sees
+ * (audit CV-16): `declared` is the visible item count and `supported` the
+ * items standing in the confirmed or evidence groups. `deriveSkillEvidence`
+ * counted raw rows plus raw claims, so a claim that IS a held skill, or two
+ * spellings of one claim, were counted twice and reported as unsupported.
+ */
+export function skillEvidenceOfPresentation(presentation: {
+  readonly visible: number;
+  readonly groups: ReadonlyArray<{ readonly tier: string; readonly items: readonly unknown[] }>;
+}): SkillEvidenceSummary {
+  const supported = presentation.groups
+    .filter((g) => g.tier === "confirmed" || g.tier === "evidence")
+    .reduce((n, g) => n + g.items.length, 0);
+  const declared = presentation.visible;
+  return { declared, supported, unsupported: Math.max(0, declared - supported) };
+}

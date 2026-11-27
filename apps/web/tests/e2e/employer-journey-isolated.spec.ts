@@ -13,6 +13,7 @@ import {
   setUpCompany,
   signUp,
   sql,
+  sqlExec,
   userId,
   verifyCompanyAsLocalAdmin,
 } from "./isolated-web-a-helpers";
@@ -33,6 +34,7 @@ import {
  *   E-7  agreeing terms: the worker sees the proposed start and the company's terms before deciding;
  *   E-8  choosing the worker: the worker accepts; the hire is stored as an active engagement;
  *   E-9  project: the company creates a project and puts the hired worker on it;
+ *   E-9b a work instruction reaches the hired worker, who is notified of the new message (MSG-3);
  *   E-10 journals: the hire is a work relationship (HIRE-5); the worker records a day on the project; the
  *        company confirms it; the hours show on the worker's Living CV and on the company's project.
  */
@@ -199,7 +201,7 @@ for (const w of WIDTHS) {
       await clickUntilVisible(vis.getByTestId("discoverability-open"), vis.getByTestId("discoverability-grant"));
       await vis.getByTestId("discoverability-grant").click();
       await expect(vis.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
-      await wk.page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+      await wk.page.goto(`${BASE}/en/dashboard/profile?tab=details#work-card-editor-section`);
       const editor = wk.page.getByRole("main").getByTestId("work-card-editor");
       await clickUntilVisible(wk.page.getByRole("main").getByTestId("work-card-editor-toggle"), editor);
       await editor.locator('select[name="availability_status"]').selectOption("available");
@@ -332,13 +334,16 @@ for (const w of WIDTHS) {
       await page.goto(`${BASE}/en/dashboard/company/projects/new`);
       const main = page.getByRole("main");
       await main.getByTestId("project-name-input").fill(PROJECT);
+      await main.locator('input[name="location"]').fill("Göteborg");
+      await main.getByTestId("project-country-select").selectOption("SE");
       await main.getByTestId("project-create-submit").click();
       const ok = main.getByTestId("project-context-created");
       const err = main.getByTestId("project-create-error");
       await expect(ok.or(err)).toBeVisible({ timeout: 30_000 });
       if (await err.isVisible()) throw new Error(`project not created: ${await err.getAttribute("data-code")}`);
-      const projects = sql<{ id: string }>(`select id from public.projects where title = ${lit(PROJECT)}`);
+      const projects = sql<{ id: string; country: string }>(`select id, country from public.projects where title = ${lit(PROJECT)}`);
       expect(projects, "the project is stored once").toHaveLength(1);
+      expect(projects[0]!.country).toBe("SE");
       s.projectId = projects[0]!.id;
       await page.goto(`${BASE}/en/dashboard/projects`);
       const assign = page.getByRole("main").getByTestId("project-assign");
@@ -362,6 +367,60 @@ for (const w of WIDTHS) {
       await fits(page, "the projects page");
       await done();
       expect(await rowsAs(STRANGER, `projects?id=eq.${s.projectId}&select=id`), "the stranger reads no project").toHaveLength(0);
+    });
+
+    test(`E-9b (${w.name}). a work instruction reaches the hired worker, who is told a message arrived`, async ({ browser }) => {
+      const INSTRUCTION = `Bring the tile cutter on Monday ${w.name} ${RUN}`;
+      // E-6 already messaged in this thread. Reset ONLY those disposable
+      // notification fixtures in this isolated database, so a prior burst
+      // cannot satisfy either instruction/clarification notification assertion.
+      expect(isolatedStack()).toBe(true);
+      sqlExec(`delete from public.notification_events
+        where recipient_profile_id in (${lit(s.workerProfileId)}, ${lit(s.companyId)})
+          and event_type = 'message_received' and metadata->>'conversationId' = ${lit(s.conversationId)}`);
+      const co = await open(browser, w, COMPANY);
+      await co.page.goto(`${BASE}/en/dashboard/instructions`);
+      const composer = co.page.getByRole("main").getByTestId("manager-instruction-composer");
+      await expect(composer, "the company can write a work instruction").toBeVisible({ timeout: 60_000 });
+      await composer.getByTestId("instruction-worker-select").selectOption(s.workerProfileId);
+      const scope = composer.getByTestId("instruction-project-scope");
+      if (await scope.count()) await scope.selectOption(s.projectId);
+      await composer.locator('textarea[name="body"]').fill(INSTRUCTION);
+      await composer.getByTestId("instruction-send").click();
+      await expect(composer.getByTestId("instruction-sent").or(composer.getByTestId("instruction-send-failed"))).toBeVisible({ timeout: 30_000 });
+      await expect(composer.getByTestId("instruction-send-failed"), "the instruction is not refused").toHaveCount(0);
+      await fits(co.page, "the instructions page");
+      await co.done();
+      const [msg] = sql<{ c: string }>(
+        `select conversation_id::text as c from public.conversation_messages where body = ${lit(INSTRUCTION)} and author_id = ${lit(s.companyId)}`,
+      );
+      expect(msg?.c, "the instruction is stored as a message").toMatch(/^[0-9a-f-]{36}$/);
+      // MSG-3: the worker gets the same "new message" notification as any other message.
+      await expect
+        .poll(
+          () =>
+            sql<{ n: string }>(
+              `select count(*)::text as n from public.notification_events
+                where recipient_profile_id = ${lit(s.workerProfileId)} and event_type = 'message_received'
+                  and metadata->>'conversationId' = ${lit(msg!.c)}`,
+            )[0]?.n,
+          { message: "the worker is told a new message arrived", timeout: 30_000 },
+        )
+        .not.toBe("0");
+      const wk = await open(browser, w, WORKER);
+      await wk.page.goto(`${BASE}/en/dashboard/communication/${msg!.c}`);
+      await expect(message(wk.page, INSTRUCTION), "the worker reads the instruction").toBeVisible({ timeout: 60_000 });
+      await wk.page.goto(`${BASE}/en/dashboard/instructions`);
+      const instruction = wk.page.getByTestId("worker-instruction-card").filter({ hasText: INSTRUCTION });
+      await instruction.getByTestId("instruction-clarify").click();
+      await expect(instruction.getByTestId("instruction-clarify-thread-link")).toBeVisible({ timeout: 30_000 });
+      await expect.poll(() => sql<{ n: string }>(
+        `select count(*)::text as n from public.notification_events
+          where recipient_profile_id = ${lit(s.companyId)} and event_type = 'message_received'
+            and metadata->>'conversationId' = ${lit(msg!.c)}`,
+      )[0]?.n, { message: "the manager is told the worker asked for clarification", timeout: 30_000 }).not.toBe("0");
+      await wk.done();
+      expect(await rowsAs(STRANGER, `conversation_messages?conversation_id=eq.${msg!.c}&select=id`), "the stranger reads nothing").toHaveLength(0);
     });
 
     test(`E-10 (${w.name}). journals: the hire is a work relationship; the day reaches the Living CV and the company's project`, async ({ browser }) => {

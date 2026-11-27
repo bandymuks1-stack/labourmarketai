@@ -180,7 +180,43 @@
       "actionPhone": "Call",
       "actionWebsite": "Open the company's website",
       "heroContact": "How to get in touch",
-      "provenance": "The company filled in this page itself."
+      "provenance": "The company filled in this page itself.",
+      "living": {
+        "activityTitle": "Work records by period",
+        "eyebrow": "Living CV",
+        "figures": {
+          "years": "period covered by records (years)",
+          "hours": "recorded hours",
+          "people": "{count, plural, one {person worked here} other {people worked here}}",
+          "projects": "{count, plural, one {project} other {projects}}",
+          "places": "{count, plural, one {work site} other {work sites}}",
+          "team": "{count, plural, one {team member} other {team members}}"
+        },
+        "doTitle": "Competencies",
+        "team": "{count, plural, one {# person on the team} other {# people on the team}}",
+        "experienceTitle": "Hours worked",
+        "confirmedLabel": "Confirmed",
+        "confirmedSource": "Recorded by the worker, approved by the organization",
+        "recordedLabel": "Own records",
+        "recordedSource": "The organization's records, not confirmed by another party",
+        "pending": "{hours} waiting for approval",
+        "hours": "{hours} h",
+        "running": "Ongoing",
+        "completed": "Completed",
+        "clients": "Work done for: {names}",
+        "tabs": {
+          "overview": "Overview",
+          "projects": "Projects",
+          "experience": "Experience",
+          "gallery": "Gallery",
+          "team": "Team"
+        },
+        "pendingLabel": "Waiting for approval",
+        "ringLabel": "{share}% of journal hours confirmed",
+        "open": "Open the Living CV",
+        "clientsMore": "Work done for: {names} and {count} more",
+        "currentTeamTitle": "Current team"
+      }
     }
   },
   "marketplaceListings": {
@@ -1152,6 +1188,7 @@
     "calendar": "Calendar",
     "addEntry": "Add entry",
     "details": "Personal details",
+    "background": "Languages & education",
     "improve": "What to improve",
     "capabilities": "Skills & work history",
     "fullRecordsInCv": "All work records",
@@ -1839,7 +1876,9 @@
       "errorName": "Enter a project name (at least 2 characters).",
       "errorNoCompany": "Only a company account can create project context.",
       "errorNotAuthorized": "Creating projects here is held by the organization's owner or admin. Ask them to create it, or to grant your role the right.",
-      "error": "Could not create. Please try again."
+      "error": "Could not create. Please try again.",
+      "countryLabel": "Country",
+      "errorCountry": "Choose the country of the project's place."
     },
     "needsTitle": "Inquiries",
     "needsBody": "Submit a structured inquiry and track its status.",
@@ -4392,7 +4431,7 @@
           },
           "education": {
             "title": "I represent an education provider",
-            "desc": "Invite learners, see their participation and connect them to internships and jobs."
+            "desc": "Invite learners, run programmes and follow their practice and results."
           }
         },
         "heading": "Are you starting as a person or a company?",
@@ -5084,7 +5123,15 @@
         "event_invitation_accepted": "Somebody accepted your invitation",
         "event_weekly_digest_profile_completion": "To see jobs that fit you, confirm what work you do",
         "event_weekly_digest_journal": "Your week’s work journal summary is ready",
-        "event_history_link_offered": "An organization offered to connect your recorded work history to your account"
+        "event_history_link_offered": "An organization offered to connect your recorded work history to your account",
+        "event_team_offer_received": "A team offered itself for your need",
+        "event_team_offer_answered": "Your team's offer was answered",
+        "event_team_offer_answered_accepted": "Your team's offer was accepted",
+        "event_team_offer_answered_declined": "Your team's offer was declined",
+        "event_candidate_offer_received": "An agency proposed a candidate for your need",
+        "event_candidate_offer_answered": "Your candidate proposal was answered",
+        "event_candidate_offer_answered_accepted": "Your candidate proposal was accepted",
+        "event_candidate_offer_answered_declined": "Your candidate proposal was declined"
       },
       "label": "My notifications",
       "emptyTitle": "Nothing needs your attention right now.",
@@ -5822,9 +5869,9 @@
       "confirmedTitle": "Deletion confirmed",
       "confirmedBody": "The system will delete the account within the next few minutes and send a confirmation to your account email. If anything needs review, we will tell you.",
       "inReview": "Automatic deletion is paused for review: the account holds data that may have to be kept by law or that concerns other people. You will receive the decision and its reasons by email within one month. Meanwhile your profile is not shown in search.",
-      "confirmLabelWaiting": "I understand that the account and its data are deleted irreversibly 30 days after confirmation, unless I cancel before then.",
-      "confirmStepBodyWaiting": "Your account deletion request is filed. Confirm it — the account is kept for 30 days, and you can cancel on this page during that time. After that the system deletes the account automatically and emails you a confirmation.",
-      "confirmedBodyWaiting": "The account will be deleted in 30 days. Until then you can cancel on this page. Once it is deleted, we will send a confirmation to your account email.",
+      "confirmLabelWaiting": "I understand that the account and its data are deleted irreversibly up to 30 days after confirmation, and no later than one month after my request, unless I cancel before then.",
+      "confirmStepBodyWaiting": "Your account deletion request is filed. Confirm it — the account is kept for up to 30 days (never beyond one month from your request), and you can cancel on this page during that time. After that the system deletes the account automatically and emails you a confirmation.",
+      "confirmedBodyWaiting": "The account will be deleted within 30 days, and no later than one month after your request. Until then you can cancel on this page. Once it is deleted, we will send a confirmation to your account email.",
       "status": {
         "pending": "Your account deletion request is filed.",
         "pendingConfirmed": "Account deletion is confirmed and scheduled.",
@@ -5832,7 +5879,7 @@
         "inProgress": "Account deletion is already running — it can no longer be cancelled.",
         "done": "The account has been deleted.",
         "submittedAt": "Filed: {date}",
-        "scheduledAt": "The account will be deleted on {date} (after a 30-day waiting period).",
+        "scheduledAt": "The account will be deleted on {date}.",
         "cancelUntil": "Until then you can cancel.",
         "loadError": "Could not load the account deletion status. Refresh the page and try again."
       },
@@ -6471,7 +6518,9 @@
       "cityLabel": "City (optional)",
       "cityPlaceholder": "e.g. Vilnius",
       "submit": "Create project",
-      "noCompany": "Create a company profile first."
+      "noCompany": "Create a company profile first.",
+      "countryLabel": "Country",
+      "errorCountry": "Choose the country of the project's place."
     },
     "assign": {
       "title": "Assign a worker to a project",
@@ -7165,7 +7214,9 @@
       "countryPlaceholder": "e.g. LT",
       "remoteLabel": "Can be done remotely",
       "rateLabel": "Rate (optional)",
-      "rateHint": "Free text only — for example an indicative hourly rate."
+      "rateHint": "Free text only — for example an indicative hourly rate.",
+      "publicLabel": "Show this personal service publicly",
+      "publicHint": "When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
     },
     "save": "Save",
     "saving": "Saving...",
@@ -7191,7 +7242,9 @@
     "linkToRequests": "See requests for your services",
     "errorHasRequests": "This offering has requests, so it can't be deleted — their history has to stay. You can pause it instead.",
     "removeQuestion": "Delete this service permanently? This cannot be undone. To only hide it from search, pause it instead.",
-    "removeYes": "Yes, delete"
+    "removeYes": "Yes, delete",
+    "publicAudience": "Public search selected",
+    "memberAudience": "Signed-in members selected"
   },
   "communication": {
     "origin": {
@@ -8836,13 +8889,32 @@
     "durationPendingUnnamed": "an organization",
     "durationPendingUndated": "dates not recorded",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Hours breakdown",
+        "states": {
+          "actual": "Recorded as actual",
+          "reported": "Reported by the organisation",
+          "estimated": "Estimated",
+          "confirmed": "Supported by another party's record"
+        },
+        "skillBasis": "Work-journal time attributed to individual skills.",
+        "workTitle": "Work and skills",
+        "attributedTime": "Attributed to this skill",
+        "confirmedTime": "Manager-confirmed: {hours}",
+        "activityLabel": "Record excerpt",
+        "contextLabel": "Work context",
+        "mapTitle": "Skills map",
+        "workNodes": "Work"
+      },
       "eyebrowFallback": "Living CV",
       "facts": {
         "recorded": "recorded in your work journal",
         "confirmed": "with a manager's record",
         "organization": "in organisation records",
         "experienceTotal": "professional experience in total",
-        "languages": "languages"
+        "languages": "languages",
+        "projects": "projects",
+        "span": "first and latest record"
       },
       "capEyebrow": "Capabilities",
       "capEyebrowHours": "{hours} h of recorded work",
@@ -8959,6 +9031,14 @@
         "none": "No next move to show yet. More recorded work gives this more to go on.",
         "unknown": "Could not be read right now."
       }
+    },
+    "blocks": {
+      "overview": "Overview",
+      "experience": "Experience",
+      "projects": "Projects",
+      "photos": "Photos",
+      "documents": "Documents",
+      "reviews": "Reviews"
     }
   },
   "todayScreen": {
@@ -11123,11 +11203,11 @@
   },
   "about": {
     "metaTitle": "What is LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai is an international platform for work, specialists and services. Real work becomes professional history, evidence and a living CV.",
+    "metaDescription": "LabourMarket.ai: patent-backed platform based on a unique idea to organise and manage work relationships in any sector, locally and internationally.",
     "navLabel": "About LabourMarket.ai",
     "eyebrow": "About the platform",
     "title": "What is LabourMarket.ai",
-    "lede": "LabourMarket.ai is an international platform for work, specialists and services. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — from the first conversation to the next opportunity.",
+    "lede": "LabourMarket.ai is a patent-based platform built on a unique idea for organizing and managing work relationships. It connects people, employers, agencies, teams, projects, training and labour-market services around real work — from the first conversation to the next opportunity.",
     "hero": {
       "lead": "A person's professional value should not disappear every time they change employer. Real work can become lasting professional history: what the person did, where, when, for how long, in what role, with which skills, and what evidence and confirmation supports it.",
       "leadOrg": "For organisations, the same real work builds the record of what the company has actually done: projects, teams, work performed, hours, competencies and evidence.",
@@ -12646,7 +12726,7 @@
       },
       "verify": {
         "title": "Verify your email to see invitations sent to it",
-        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox. Everything else in your account works as it is; this is only needed to see or accept these invitations.",
+        "body": "Invitations addressed to an email address are shown only to the person who can open that mailbox.",
         "send": "Send me a one-time link",
         "sending": "Sending…",
         "sent": "We sent a one-time link to {email}. Open it on this device to finish.",
@@ -12935,6 +13015,7 @@
     "available": "Available",
     "availableFrom": "From {date}",
     "experienceYears": "{n} yrs experience",
+    "recordedExperienceHours": "Accessible work records: {hours} h",
     "skillsTitle": "Skills",
     "skillsEmpty": "No skills you are permitted to see.",
     "skillVerified": "Confirmed by a manager's record",
@@ -14353,7 +14434,9 @@
         "supplyTeamSize": "How many people you have",
         "supplyLocation": "Where they can work",
         "demandCountry": "Country where the work is",
-        "demandCountryPlaceholder": "e.g. Sweden or SE"
+        "demandCountryPlaceholder": "e.g. Sweden or SE",
+        "projectCountry": "Country",
+        "projectCountryPlaceholder": "e.g. Sweden or SE"
       },
       "availability": {
         "available": "Available",
@@ -14389,7 +14472,8 @@
         "errorStale": "Something changed while you were reviewing (for example, the active workspace). Nothing was saved — start again.",
         "errorConflict": "This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "This organization's free plan allows 1 active position. Close one, or activate the Organization plan (€99/month) in your organization account.",
-        "errorOpenNeedLimitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us."
+        "errorOpenNeedLimitIndividual": "This organization has reached the active-position limit of its plan. Nothing was charged or changed. Contact us.",
+        "errorCountryRequired": "Add the country of the place (a name or a code, e.g. Sweden or SE)."
       },
       "urgency": {
         "flexible": "Flexible",
@@ -14454,7 +14538,7 @@
       "navCalendar": "Calendar",
       "navProfile": "Profile",
       "clarifyWorkLog": "Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
-      "calendarHint": "You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "calendarHint": "You'll find your plan in the “Calendar” tab.",
       "messagesHint": "Here are your messages — the link below opens them.",
       "reminderBlocked": "I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "switchContextPersonal": "personal space",
@@ -14710,6 +14794,34 @@
       "findWorkInCompanyContext": "A job search is your own act — I don't run it inside the company space. Switch to your personal space and ask again.",
       "findWorkInCompanyWhy": "A person looks for work, not a company — I answer from your personal space.",
       "personalOnlyInCompany": "That is a personal action — I do not run it in a company workspace. Switch to your personal space and continue there.",
+      "needsOrganization": "That is done for an organization, and none of your spaces can do it yet.",
+      "readFailed": "I could not read that just now — the fault is on our side. Nothing was changed. Try again in a moment.",
+      "taskStatusAsk": "Which state should the task have: started, done or blocked?",
+      "stageStatusAsk": "Which state should the stage have: started, done or blocked?",
+      "chipStatusStarted": "Started",
+      "chipStatusDone": "Done",
+      "chipStatusBlocked": "Blocked",
+      "professionAsk": "Which profession or trade do you mean?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Your CV is in your personal space, not in the organization.",
+          "journal": "Your own work journal is in your personal space.",
+          "profile": "Your profile is in your personal space.",
+          "calendar": "Your own calendar is in your personal space."
+        },
+        "open": {
+          "cv": "Switch and open my CV",
+          "journal": "Switch and open my journal",
+          "profile": "Switch and open my profile",
+          "calendar": "Switch and open my calendar"
+        },
+        "askWhoseCv": "Your own CV, or a candidate's?",
+        "organizationHistory": "The organization's record is its work history.",
+        "openOrganizationHistory": "Open the organization's history",
+        "organization": "This is done in the organization space: {name}.",
+        "switchTo": "Switch to {name} and continue",
+        "whichOrganization": "This is done in an organization space. Which one?"
+      },
       "newJobsIntro": "New postings that fit your preferences: {count}.",
       "newJobsAll": "All opportunities",
       "newJobsNone": "No new postings fitting your preferences appeared in the last few days. You will find every opportunity on the opportunities page.",
@@ -15969,8 +16081,7 @@
       "lasting": "Your experience and opportunities stay within reach — when you change job, project or country."
     },
     "v3": {
-      "lead": "For workers, employers and service providers in every profession and sector. Registration and basic request posting are free.",
-      "moreChoices": "More options",
+      "lead": "LabourMarket.ai is a patent-based platform built on a unique idea for organizing and managing work relationships. Registration and basic request posting are free.",
       "or": "or describe it in your own words",
       "needFree": "You can submit an enquiry without registering. Submission is free; service terms and price are agreed separately.",
       "market": {
@@ -16935,9 +17046,36 @@
       "not_authorized": "You are not allowed to do this.",
       "not_found": "Timesheet not found.",
       "limit_reached": "Too many open timesheets — submit or remove existing ones first.",
-      "error": "Something went wrong. Nothing was saved."
+      "error": "Something went wrong. Nothing was saved.",
+      "schedule_saved": "Timesheet schedule saved."
     },
-    "taskAmbiguous": "{count} tasks linked — hours not attributed to one"
+    "taskAmbiguous": "{count} tasks linked — hours not attributed to one",
+    "schedule": {
+      "title": "Automatic timesheets",
+      "consent": "Submit my recorded work for the preceding day, seven days or calendar month to the selected approval flow. No work is approved automatically.",
+      "enabled": "Enabled",
+      "frequency": "Frequency",
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "monthly": "Monthly · day 1",
+      "weekday": "Weekly delivery day",
+      "time": "Delivery time",
+      "zone": "Time zone",
+      "recipients": "Approval recipients",
+      "selectTemplate": "Select an approval template",
+      "save": "Save",
+      "next": "Next: {date} ({zone})",
+      "manageRecipients": "Manage approval recipients",
+      "outcome": {
+        "submitted": "Submitted for approval.",
+        "already_submitted": "This period was already submitted.",
+        "empty": "No recorded work in this period.",
+        "overlap": "Paused: this period overlaps an existing timesheet.",
+        "not_allowed": "Paused: organization access is no longer available.",
+        "no_template": "Paused: the approval template is unavailable.",
+        "error": "Submission failed; it will be retried."
+      }
+    }
   },
   "workObjects": {
     "title": "Objects & sites",
@@ -18912,7 +19050,8 @@
       "heading": "Organization invitations",
       "explainer": "Governance invitations addressed to you. Accepting makes the organization appear in your workspace switcher.",
       "accept": "Accept",
-      "decline": "Decline"
+      "decline": "Decline",
+      "invitedBy": "Invited by {name}"
     },
     "members": {
       "heading": "Organization members",
@@ -19373,7 +19512,11 @@
         "open": "Open {name} workspace",
         "opening": "Opening…",
         "error": "The workspace could not be opened."
-      }
+      },
+      "structure": "Earlier work was done under {names}.",
+      "structureLater": ", later ",
+      "structureForClient": "Earlier work under {names}, for client {client}.",
+      "structureAsSubcontractor": "Subcontractor: {names} → client {client}."
     },
     "projects": {
       "title": "Projects on the platform",
@@ -19391,7 +19534,21 @@
       "period": "Recorded",
       "basis": "From {entries} journal entries people recorded under this organization. Counted apart from the imported history above and never added to it.",
       "unavailable": "The journal work recorded under this organization could not be read just now."
-    }
+    },
+    "forClient": {
+      "title": "Work by your subcontractors",
+      "confirmed": "Records confirmed",
+      "unconfirmed": "Records not confirmed",
+      "periodHours": "{hours} h stated as period totals, not added to single days.",
+      "basis": "From {count, plural, one {# record} other {# records}} in your subcontractors' own books. Counted apart from your own work.",
+      "unreadable": "Work recorded in partners' books could not be read right now. That does not mean there is none."
+    },
+    "clients": {
+      "title": "Clients",
+      "unnamed": "Client organization",
+      "records": "{count, plural, one {# record} other {# records}}"
+    },
+    "descriptionNotInSource": "No work description in the source"
   },
   "workPlan": {
     "title": "Planned work",
@@ -19625,6 +19782,14 @@
     "noDemand": "There is no open demand to offer against right now.",
     "demandLabel": "Demand",
     "demandPlaceholder": "Choose a demand",
+    "need": {
+      "people": "People",
+      "start": "Start",
+      "duration": "Duration",
+      "language": "Language",
+      "skills": "Skills",
+      "tools": "Tools"
+    },
     "alreadyOffered": "already offered",
     "noteLabel": "Note to the company (optional)",
     "notePlaceholder": "For example: crew of 3, can start in two weeks",
@@ -19635,7 +19800,8 @@
       "heading": "Your offers",
       "none": "No offers yet.",
       "withdraw": "Withdraw",
-      "message": "Message the client"
+      "message": "Message the client",
+      "orgNext": "The client agreed in principle (not a contract). Starting the work from a company offer through the platform is not available yet: settle the details and the people who will work in the conversation."
     },
     "status": {
       "offered": "Waiting for an answer",
@@ -19736,7 +19902,7 @@
       "message": "Message the team",
       "messageCompany": "Message the company",
       "kindOrganization": "Company offer",
-      "orgNext": "Agreed in principle (not a contract). Settle the details and the people who will work in the conversation."
+      "orgNext": "Agreed in principle (not a contract). Starting the work from a company offer through the platform is not available yet: settle the details and the people who will work in the conversation."
     },
     "orgHeading": "Offer our company to an open need",
     "orgIntro": "Offer your company itself — your people, your service, or as a subcontractor — against one open need. No brigade to set up first.",
@@ -19872,7 +20038,7 @@
     },
     "noHours": "Records that state no hours: {count}. Unknown hours are not counted as zero.",
     "undated": "Records with no stated date: {count}. They stay in the history below.",
-    "periodApart": "{hours} h of the total are period totals, kept apart and never spread onto days or months.",
+    "periodApart": "Also: {hours} h stated as period totals — not included in the hours above, never spread onto days or months.",
     "noWorkObject": "Records tied to no project or place the platform knows: {count}. They stay in this history under their source label.",
     "places": {
       "title": "By project or place",
@@ -20732,7 +20898,8 @@
       "setUpAgency": "Set up your agency",
       "setUpInstitution": "For training institutions",
       "b2bEnquiry": "Business services enquiry (B2B)",
-      "projectEnquiry": "Individual project enquiry"
+      "projectEnquiry": "Individual project enquiry",
+      "findServices": "Find personal services"
     },
     "assistant": "Ask the assistant",
     "start": {
@@ -20752,5 +20919,36 @@
       "fullList": "Full list"
     },
     "more": "More"
+  },
+  "publicServices": {
+    "title": "Find personal services",
+    "lead": "Services published by individuals.",
+    "search": "Search",
+    "query": "Service or keyword",
+    "country": "Country",
+    "category": "Category",
+    "clear": "Clear filters",
+    "unavailable": "Service search is unavailable",
+    "unavailableHint": "Please try again later.",
+    "retry": "Try again",
+    "emptyFiltered": "No services match these filters",
+    "empty": "No personal services have been published publicly yet",
+    "results": "Services",
+    "remote": "Remote",
+    "pagination": "Search pages",
+    "previous": "Previous",
+    "next": "Next",
+    "page": "Page {page}",
+    "refine": "Narrow your search to see more relevant services.",
+    "back": "All services",
+    "delivery": "Delivery",
+    "rate": "Rate",
+    "personalService": "Personal service",
+    "signInToRequest": "Sign in to request",
+    "manage": "Manage this service",
+    "contactUnavailable": "The request action is unavailable. Please try again later.",
+    "notFound": "Service not found",
+    "notFoundHint": "This service is no longer publicly available.",
+    "allCountries": "All countries"
   }
 }

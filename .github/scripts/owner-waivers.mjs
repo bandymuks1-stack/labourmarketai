@@ -743,6 +743,9 @@ export const SCOPED_OWNER_WAIVERS = [
       // unchanged; `product-gate.mjs` is not touched.
       3448,
       3181,
+      // OWNER APPROVAL 2026-11-27: "Leidžiu įtraukti tik #3327".
+      // Only this PR binding is added; all other waiver constraints stay unchanged.
+      3327,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
@@ -1115,6 +1118,52 @@ export const SCOPED_OWNER_WAIVERS = [
     approvedAt: "2026-09-30",
     owner:
       "Owner decision 2026-09-30, in chat — selected 'Scoped owner waiver #2026 (Recommended)' for the Journal photo viewer modal (scope: #2026 / journal-photo-viewer.tsx only).",
+  },
+  {
+    id: "public-acquisition-route-services",
+    axioms: ["A-01"],
+    // Owner instruction 2026-11-25: public service search must return real
+    // results before mandatory registration; authentication is required for
+    // saving, publishing or contacting. Existing privacy permissions remain.
+    // This records that explicit product decision for its implementation PR;
+    // it does not inherit the /jobs waiver or approve SQL/anonymous grants.
+    // The declarations honestly retain the six pre-auth workspace answers as
+    // false. Product Gate measured exactly these 12 new A-01 findings after
+    // both declarations were added. Prospective object history is supplied
+    // by the existing private audit chain; no A-09 history finding is waived.
+    scope:
+      "Public personal-service search and detail before login, preserving explicit author opt-in and the existing authenticated request workflow",
+    pullRequests: [3818],
+    approvedHeadShas: [],
+    postMergeBranches: ["main"],
+    files: [
+      "/services",
+      "/services/[id]",
+      "apps/web/app/[locale]/(marketing)/services/page.tsx",
+      "apps/web/app/[locale]/(marketing)/services/search-form.tsx",
+      "apps/web/app/[locale]/(marketing)/services/[id]/page.tsx",
+      "apps/web/app/[locale]/(marketing)/services/[id]/not-found.tsx",
+    ],
+    expectedFindings: [
+      { code: "not_world_state_driven", file: "/services" },
+      { code: "not_reflected_on_map", file: "/services" },
+      { code: "not_ai_controlled", file: "/services" },
+      { code: "requires_leaving_workspace", file: "/services" },
+      { code: "requires_new_page", file: "/services" },
+      { code: "world_state_cannot_control_it", file: "/services" },
+      { code: "not_world_state_driven", file: "/services/[id]" },
+      { code: "not_reflected_on_map", file: "/services/[id]" },
+      { code: "not_ai_controlled", file: "/services/[id]" },
+      { code: "requires_leaving_workspace", file: "/services/[id]" },
+      { code: "requires_new_page", file: "/services/[id]" },
+      { code: "world_state_cannot_control_it", file: "/services/[id]" },
+    ],
+    reason:
+      "The owner explicitly requires useful public service results before registration. A visitor without an authenticated workspace has no World State, map or assistant; this record excuses only those six category-mismatch answers on the two public routes. SQL, anonymous-access and migration approval remain separate and pending.",
+    resolvedBy: "gate-learns-public-acquisition-route-category (owner constitution decision)",
+    approvedAt: "2026-11-25",
+    owner:
+      "Owner commercial-priority instruction 2026-11-25: real public service-search results before registration, with existing privacy and access permissions preserved (implementation: PR #3818).",
   },
 ];
 

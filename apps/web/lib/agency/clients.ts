@@ -1,5 +1,7 @@
 import "server-only";
 
+import { cache } from "react";
+import { demandsOfWorkspaceFilter } from "@/lib/demand/demand-org-scope";
 import { isLabourDemandRow } from "@/lib/demand/market-direction";
 
 import { createClient } from "@/lib/supabase/server";
@@ -78,8 +80,16 @@ export async function listAgencyClients(): Promise<AgencyClientsState> {
  * a missing-column error (42703) falls back to the columns that exist today
  * and reports `linkable: false` — an honest "not yet linkable" state, never
  * a fabricated link.
+ *
+ * Own rows only, on purpose: both writes this list feeds, linking a need to a
+ * client (`set_demand_agency_client_v1`) and sharing it with an agency
+ * (`share_request_with_agency_v1`), accept only the caller's own rows. Read
+ * once per render (duplication audit ORG-4): an agency that is also a client
+ * asked for the same rows twice on `/partners`.
  */
-export async function listAgencyDemands(): Promise<AgencyDemandsState> {
+export const listAgencyDemands = cache(readAgencyDemands);
+
+async function readAgencyDemands(): Promise<AgencyDemandsState> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -95,12 +105,16 @@ export async function listAgencyDemands(): Promise<AgencyDemandsState> {
   // kind + payload let the list drop help-desk and privacy requests to the
   // platform: they are never a need an agency may be shown (P0 2026-11-22).
   const base = "id, title, status, created_at, kind, payload";
+  // THE ACTIVE WORKSPACE'S rows, by the one filter every needs reader uses: a
+  // person running two companies never sees one company's needs in the other.
+  const workspace = demandsOfWorkspaceFilter(user.id, employer.organizationId);
   try {
     let linkable = true;
     let { data, error } = await asAny(supabase)
       .from("customer_requests")
       .select(`${base}, agency_client_id`)
       .eq("profile_id", user.id)
+      .or(workspace)
       .order("created_at", { ascending: false })
       .limit(50);
     if (error && (isMissingColumnCode(error.code) || isMissingTableCode(error.code))) {
@@ -109,6 +123,7 @@ export async function listAgencyDemands(): Promise<AgencyDemandsState> {
         .from("customer_requests")
         .select(base)
         .eq("profile_id", user.id)
+        .or(workspace)
         .order("created_at", { ascending: false })
         .limit(50));
     }

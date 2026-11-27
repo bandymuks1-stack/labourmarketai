@@ -63,6 +63,109 @@ const SKILLS: WorkIntelligenceSkillRow[] = [
   { skillId: "s-paint", slug: "painting", verified: false, source: "self_declared" },
 ];
 
+describe("linked skill work samples", () => {
+  it("omits source excerpts by default while preserving the aggregate reading", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      entries: [{
+        ...entry("private-default", TODAY, { hours: 4, linkedSkillIds: ["s-tiling"] }),
+        originalText: "A private source excerpt that must not enter aggregate readers.",
+      }],
+    });
+    const tiling = wi.skills.find((s) => s.slug === "tiling")!;
+    expect(tiling.attributedHours).toBe(4);
+    expect(tiling.samples).toBeUndefined();
+    expect(JSON.stringify(wi)).not.toContain("private source excerpt");
+  });
+
+  it("keeps the original entry with each skill's own fragment hours, never the whole entry", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY,
+      skills: SKILLS,
+      includeSkillSamples: true,
+      entries: [{
+        ...entry("mixed", TODAY, {
+          frags: [[6, "tiler", ["tiling"]], [2, "plasterer", ["plastering"]]],
+          linkedSkillIds: ["s-tiling", "s-plaster"],
+        }),
+        originalText: "Six hours laying tiles; two hours plastering.",
+      }],
+    });
+    const tiling = wi.skills.find((s) => s.slug === "tiling")!.samples!;
+    const plastering = wi.skills.find((s) => s.slug === "plastering")!.samples!;
+    expect(tiling).toEqual([{
+      entryId: "mixed", originalText: "Six hours laying tiles; two hours plastering.",
+      date: TODAY, attributedHours: 6, engagementContextId: "ctx-a", textTruncated: false,
+    }]);
+    expect(plastering).toEqual([{ ...tiling[0], attributedHours: 2 }]);
+    expect(wi.skills.find((s) => s.slug === "painting")!.samples).toEqual([]);
+    expect(wi.totalHours).toBe(8);
+  });
+
+  it("keeps shared and multi-activity examples without assigning their whole-session hours", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY, skills: SKILLS, includeSkillSamples: true,
+      entries: [
+        entry("shared", TODAY, { hours: 8, linkedSkillIds: ["s-tiling", "s-plaster"] }),
+        entry("multi", "2026-09-10", {
+          frags: [[6, "tiler", ["tiling"]], [2, "plasterer"]], linkedSkillIds: ["s-tiling"],
+        }),
+      ],
+    });
+    expect(wi.skills.find((s) => s.slug === "tiling")!.samples!.map((s) => [s.entryId, s.attributedHours]))
+      .toEqual([["shared", 0], ["multi", 6]]);
+    expect(wi.skills.find((s) => s.slug === "plastering")!.samples!.map((s) => [s.entryId, s.attributedHours]))
+      .toEqual([["shared", 0]]);
+  });
+
+  it("includes only linked in-scope entries and preserves the reader's partial coverage", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY, skills: SKILLS, focus: "week", includeSkillSamples: true,
+      coverage: { entriesRead: 4, truncated: true, linksTruncated: true },
+      entries: [
+        entry("inside", TODAY, { hours: 3, linkedSkillIds: ["s-tiling"] }),
+        entry("unlinked-same-context", TODAY, { hours: 9, linkedSkillIds: ["s-plaster"] }),
+        entry("outside", "2026-08-01", { hours: 8, linkedSkillIds: ["s-tiling"] }),
+        entry("future", "2026-09-12", { hours: 8, linkedSkillIds: ["s-tiling"] }),
+      ],
+    });
+    expect(wi.skills.find((s) => s.slug === "tiling")!.samples!.map((s) => s.entryId)).toEqual(["inside"]);
+    expect(wi.coverage).toEqual({ entriesRead: 4, truncated: true, linksTruncated: true });
+  });
+
+  it("caps unique newest samples at three and bounds original Unicode text without inventing a summary", () => {
+    const latest = { ...entry("newest", TODAY, { linkedSkillIds: ["s-tiling", "s-tiling"] }), originalText: "🧱".repeat(240) + "more" };
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY, skills: SKILLS, includeSkillSamples: true,
+      entries: [
+        entry("old", "2026-09-01", { linkedSkillIds: ["s-tiling"] }),
+        entry("middle", "2026-09-08", { linkedSkillIds: ["s-tiling"] }),
+        latest,
+        entry("recent", "2026-09-10", { linkedSkillIds: ["s-tiling"] }),
+        latest,
+        { ...entry("empty", TODAY, { linkedSkillIds: ["s-tiling"] }), originalText: "   " },
+      ],
+    });
+    const samples = wi.skills.find((s) => s.slug === "tiling")!.samples!;
+    expect(samples.map((s) => s.entryId)).toEqual(["newest", "recent", "middle"]);
+    expect(samples[0]!.originalText).toBe("🧱".repeat(240));
+    expect(samples[0]!.textTruncated).toBe(true);
+    expect(samples[1]!.textTruncated).toBe(false);
+  });
+
+  it("keeps an untimed personal record without pretending its save day is a stated work date", () => {
+    const wi = deriveWorkIntelligence({
+      todayIso: TODAY, skills: SKILLS, includeSkillSamples: true,
+      entries: [{ ...entry("undated", TODAY, { linkedSkillIds: ["s-tiling"], engagementContextId: null }), metrics: [] }],
+    });
+    expect(wi.skills.find((s) => s.slug === "tiling")!.samples).toEqual([{
+      entryId: "undated", originalText: "entry undated", date: null,
+      attributedHours: 0, engagementContextId: null, textTruncated: false,
+    }]);
+  });
+});
+
 describe("workPeriodBounds", () => {
   it("is inclusive UTC calendar days ending today", () => {
     expect(workPeriodBounds("today", TODAY)).toEqual({ startIso: TODAY, endIso: TODAY });

@@ -42,6 +42,8 @@ on:
           - calendar-planning
           # CAL-8 rota / shift-pattern walk (weekly + N-on/M-off, collision warns, UI cancel). Dispatch only.
           - rota-repeat
+          # Explicit owner-authorised scheduled-report proof; synthetic accounts only.
+          - timesheet-schedule
           - marketplace
           - agency-chain
           - learning-practice
@@ -93,6 +95,10 @@ on:
           # Numbers-only UX/UI measurements (worker/owner/agency x desktop/phone + active-locale sweep, ~115 page
           # loads, read-only) for the per-function UX audit. Prints [ux] lines; no screenshots. Dispatch only.
           - ux-metrics
+          # Coordinator order 2026-11-23 (owner-approved read-only grant): the owner's Living CV
+          # screens, de-identified before rendering, published ONLY encrypted to the coordinator's key.
+          # Read-only; needs the owner-created qa.livingcv+read1 account and its grant. Dispatch only.
+          - living-cv-screens
           # Owner decision 2026-10-26 §5: locale vs server load behind the slow non-LT pages. Dispatch only.
           - lcp-locale-probe
           # Owner-approved 2026-10-26: two synthetic sessions at once vs one (read-only). Dispatch only.
@@ -288,13 +294,20 @@ jobs:
     # `none`: the dated digest-check cron fired on another date — no walk (the walk job needs this one).
     if: needs.debounce.outputs.spec != 'none'
     runs-on: ubuntu-latest
-    timeout-minutes: 8
+    timeout-minutes: 25  # the deploy brake may wait up to 15 min
     permissions:
       actions: read
       contents: read
+      deployments: read # production-vps deploy records, including reruns
+    outputs:
+      brake: ${{ (steps.brake_a.outcome == 'success' && steps.brake_e.outcome == 'success' && steps.brake_b.outcome == 'success' && steps.brake_c.outcome == 'success') && 'clear' || 'refused' }}
     # AUTOMATIC BRAKES (owner order 2026-10-23, after one brigade walk made ~8,100 Supabase requests in
     # 6.5 min — run 39795574869). A walk starts only when ALL of these hold; each refusal prints `::error::`
-    # with its reason, before any install, session mint or production request. Thresholds live in ONE place,
+    # with its reason, before any install, session mint or production request.
+    # A REFUSAL IS NOT RUN, NEVER A FAILED WALK (owner P0 2026-11-24, run 45404386749): each brake step
+    # records its outcome instead of failing the job, the walk is not started, and the `not-run` job
+    # ends the run as CANCELLED with "BLOCKED / NOT RUN" in its summary. No journey ran, so nothing may
+    # read it as a failure (the status ledger skips cancelled runs; the schedulers dispatch the pair again). Thresholds live in ONE place,
     # `.github/scripts/walk-brakes.mjs` THRESHOLDS (unit-tested in apps/web/lib/guards/walk-brakes.test.ts):
     #   (a) health   3 x GET https://labourmarket.ai/api/health, 5 s apart: EVERY sample must be HTTP 200
     #                with ok=true, checks.db.ms <= 1500, checks.auth.ms <= 1500 and vacancyFreshness
@@ -330,20 +343,30 @@ jobs:
           sparse-checkout: .github/scripts
 
       - name: "Brake (a): production health (the override does not lift it)"
+        id: brake_a
+        continue-on-error: true
         run: node .github/scripts/walk-brakes.mjs health
 
       - name: "Brake (e): no production deploy running or just finished (the override does not lift it)"
+        id: brake_e
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node .github/scripts/walk-brakes.mjs deploy
+        # WAITS for production to be quiet (up to 15 min) instead of refusing at once: frequent
+        # deploys refused walk after walk (owner P0 2026-11-24). The rule itself is unchanged.
+        run: node .github/scripts/walk-brakes.mjs deploy --wait 15
 
       - name: "Brake (b): the last walks did not fail for infrastructure"
+        id: brake_b
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           OVERRIDE: ${{ inputs.budget_override }}
         run: node .github/scripts/walk-brakes.mjs errors
 
       - name: "Brake (c): Supabase edge 5xx / 429 (optional, needs SUPABASE_ACCESS_TOKEN)"
+        id: brake_c
+        continue-on-error: true
         env:
           OVERRIDE: ${{ inputs.budget_override }}
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
@@ -351,6 +374,8 @@ jobs:
         run: node .github/scripts/walk-brakes.mjs supabase
 
       - name: Count production walks in the last 24 h
+        # Only when every brake is clear: after a refusal no walk starts, so there is nothing to count.
+        if: steps.brake_a.outcome == 'success' && steps.brake_e.outcome == 'success' && steps.brake_b.outcome == 'success' && steps.brake_c.outcome == 'success'
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
@@ -382,16 +407,21 @@ jobs:
 
   walk:
     needs: [debounce, budget]
+    # A brake refusal in the budget job: no walk (the `not-run` job records it).
+    if: needs.budget.outputs.brake == 'clear'
     # One walk at a time against the shared synthetic cast (unchanged).
     concurrency:
       group: prod-qa-walk
       cancel-in-progress: false
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40  # the deploy brake may wait up to 10 min
     environment: production-qa
     permissions:
       contents: read
       actions: read # the gap brake reads the previous walk's end time
+      deployments: read # production-vps deploy records, including reruns
+    outputs:
+      brake: ${{ (steps.brake_d.outcome == 'success' && steps.brake_we.outcome == 'success' && steps.brake_wa.outcome == 'success') && 'clear' || 'refused' }}
     # NO service-role key at job level (owner decision 2026-11-14, R2 P3-1 on #3303): a job-level
     # value reaches every step — `pnpm install` and its install scripts, the browser walk and every
     # Playwright spec — although no spec reads it. It is set on exactly the steps whose script uses
@@ -412,6 +442,8 @@ jobs:
       # waits first; the deploy and health checks run last, right before the
       # session mint. None is lifted by budget_override.
       - name: "Brake (d): minimum gap after the previous walk (waits)"
+        id: brake_d
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: node .github/scripts/walk-brakes.mjs gap
@@ -425,15 +457,23 @@ jobs:
       - run: pnpm -C apps/web exec playwright install --with-deps chromium
 
       - name: "Brake (e): no production deploy running or just finished"
+        id: brake_we
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-        run: node .github/scripts/walk-brakes.mjs deploy
+        # A deploy that started during the concurrency wait: wait it out (up to 10 min), never walk into it.
+        run: node .github/scripts/walk-brakes.mjs deploy --wait 10
 
       - name: "Brake (a): production health, right before the walk"
+        id: brake_wa
+        continue-on-error: true
         run: node .github/scripts/walk-brakes.mjs health
 
+      # Nothing touches production unless all three brakes above were clear. The two steps
+      # below run only after this one succeeded; every later step is an always() clean-up.
       - name: Provision + mint the synthetic cast (allowlist only)
         id: mint
+        if: steps.brake_d.outcome == 'success' && steps.brake_we.outcome == 'success' && steps.brake_wa.outcome == 'success'
         shell: bash
         env:
           PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -473,6 +513,10 @@ jobs:
             mint_existing "qa.buyer+act1@labourmarket.ai" buyer \
               || echo "::warning::qa.buyer+act1 not mintable — the buyer role of ux-metrics is recorded BLOCKED"
           fi
+          if [ "${{ needs.debounce.outputs.spec }}" = "living-cv-screens" ]; then
+            # Owner-created, read-only, granted by the owner's side. Not mintable means no screens.
+            mint_existing "qa.livingcv+read1@labourmarket.ai" livingcv
+          fi
           if [ "${{ needs.debounce.outputs.spec }}" = "invited-worker" ] || [ "${{ needs.debounce.outputs.spec }}" = "alert-mail" ] || [ "${{ needs.debounce.outputs.spec }}" = "digest-setup" ] || [ "${{ needs.debounce.outputs.spec }}" = "digest-check" ]; then
             mint_existing "qa.invited@labourmarket.ai" invited
           fi
@@ -483,7 +527,7 @@ jobs:
       # address already exists (an owner-provisioned one belongs to another walk and must never be deleted here).
       - name: "Sign-up walk: no account with the synthetic address exists (else stop)"
         id: signup_precheck
-        if: needs.debounce.outputs.spec == 'signup-form'
+        if: steps.mint.outcome == 'success' && needs.debounce.outputs.spec == 'signup-form'
         shell: bash
         env:
           PROD_QA_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
@@ -494,6 +538,7 @@ jobs:
 
       - name: Walk
         id: walk
+        if: steps.mint.outcome == 'success'
         shell: bash
         env:
           # The addressed invitee of staff-review-notice: the second synthetic
@@ -514,6 +559,8 @@ jobs:
           # light unless a person dispatched the walk in the dark scheme (a choice input: no free text).
           PROD_QA_THEME: ${{ github.event_name == 'workflow_dispatch' && inputs.theme || 'light' }}
           SR1_READINGS_FILE: ${{ github.workspace }}/sr1-readings.jsonl
+          # living-cv-screens only: the plaintext screens, outside the repository, destroyed below.
+          PROD_QA_LCV_DIR: ${{ runner.temp }}/lcv
         run: |
           set -uo pipefail
           echo "device: ${PROD_QA_DEVICE}" >> "$GITHUB_STEP_SUMMARY"
@@ -527,6 +574,7 @@ jobs:
             journal-confirm) SPEC=tests/e2e/prod-journal-confirm.spec.ts ;;
             calendar-planning) SPEC=tests/e2e/prod-calendar-planning.spec.ts ;;
             rota-repeat) SPEC=tests/e2e/prod-rota-repeat.spec.ts ;;
+            timesheet-schedule) SPEC=tests/e2e/prod-timesheet-schedule.spec.ts ;;
             marketplace) SPEC=tests/e2e/prod-marketplace.spec.ts ;;
             agency-chain) SPEC=tests/e2e/prod-agency-chain.spec.ts ;;
             learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
@@ -567,6 +615,7 @@ jobs:
             utilisation-planned-actual) SPEC=tests/e2e/prod-utilisation-planned-actual.spec.ts ;;
             lmc-csrf) SPEC=tests/e2e/prod-lmc-csrf.spec.ts ;;
             ux-metrics) SPEC=tests/e2e/prod-ux-metrics.spec.ts ;;
+            living-cv-screens) SPEC=tests/e2e/prod-living-cv-screens.spec.ts ;;
             lcp-locale-probe) SPEC=tests/e2e/prod-lcp-locale-probe.spec.ts ;;
             concurrency-probe) SPEC=tests/e2e/prod-concurrency-probe.spec.ts ;;
             fresh-activation) SPEC=tests/e2e/prod-fresh-activation.spec.ts ;;
@@ -622,6 +671,66 @@ jobs:
             echo "::error::production walk failed (exit ${code}); see the prod-qa artefact"
           fi
           exit "${code}"
+
+      # living-cv-screens: the repository is public, so the screens are published ONLY encrypted.
+      # Owner 2026-11-23: every image passes its OWN privacy gate in the walk; one that fails is never
+      # written. The manifest lists all twelve screens with PASS or FAIL and the reason, and is
+      # encrypted with the images. A 375 px layout FAIL is still delivered, de-identified, and never
+      # blocks the others. Here: every PNG must be one the manifest lists as privacy PASS, else
+      # nothing is published. A random AES-256 key encrypts the zip; the coordinator's RSA public
+      # key encrypts that key. The plaintext is destroyed on the runner whatever happens.
+      # Guard: lib/guards/living-cv-screens.test.ts.
+      - name: "Living CV screens: encrypt, then destroy the plaintext"
+        id: lcv
+        if: always() && needs.debounce.outputs.spec == 'living-cv-screens'
+        shell: bash
+        env:
+          LCV_DIR: ${{ runner.temp }}/lcv
+          LCV_OUT: ${{ runner.temp }}/lcv-out
+          LCV_TMP: ${{ runner.temp }}/lcv-tmp
+          LCV_PUBKEY: apps/web/tests/e2e/prod-living-cv-screens.public-key.txt
+        run: |
+          set -euo pipefail
+          destroy() {
+            for d in "$LCV_DIR" "$LCV_TMP"; do
+              [ -d "$d" ] && find "$d" -type f -exec shred -u {} + 2>/dev/null || true
+              rm -rf "$d"
+            done
+          }
+          trap destroy EXIT
+          mkdir -p "$LCV_OUT" "$LCV_TMP"
+          if [ ! -f "$LCV_DIR/manifest.json" ]; then
+            echo "::error::no manifest (walk ${{ steps.walk.outcome }}); nothing is published"
+            exit 1
+          fi
+          # Every image on disk must be one the manifest lists as privacy PASS; the manifest must
+          # list twelve screens. Counts only.
+          node -e '
+            const fs = require("fs"), path = require("path"), dir = process.argv[1];
+            const m = JSON.parse(fs.readFileSync(path.join(dir, "manifest.json"), "utf8"));
+            const listed = new Set(m.screens.filter((s) => s.privacy === "PASS" && s.file).map((s) => s.file));
+            const pngs = fs.readdirSync(dir).filter((f) => f.endsWith(".png"));
+            const stray = pngs.filter((f) => !listed.has(f));
+            if (m.screens.length !== 12 || stray.length > 0) { console.error(`screens=${m.screens.length} stray=${stray.length}`); process.exit(1); }
+            const pass = m.screens.filter((s) => s.status === "PASS").length;
+            console.log(`images=${pngs.length} pass=${pass} fail=${m.screens.length - pass}`);
+          ' "$LCV_DIR" >> "$GITHUB_STEP_SUMMARY"
+          (cd "$LCV_DIR" && zip -q -X "$LCV_TMP/lcv.zip" manifest.json $(find . -maxdepth 1 -type f -name '*.png' -printf '%f\n'))
+          openssl rand -hex 32 > "$LCV_TMP/lcv.key"
+          openssl enc -aes-256-cbc -pbkdf2 -salt -in "$LCV_TMP/lcv.zip" -out "$LCV_OUT/lcv.zip.enc" -pass "file:$LCV_TMP/lcv.key"
+          openssl pkeyutl -encrypt -pubin -inkey "$LCV_PUBKEY" -in "$LCV_TMP/lcv.key" -out "$LCV_OUT/lcv.key.enc"
+          echo "encrypted=true" >> "$GITHUB_OUTPUT"
+
+      - name: "Living CV screens: upload the two encrypted files only"
+        if: always() && steps.lcv.outputs.encrypted == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: prod-qa-living-cv-screens-${{ github.run_id }}
+          retention-days: 7
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/lcv-out/lcv.zip.enc
+            ${{ runner.temp }}/lcv-out/lcv.key.enc
 
       # The repository is PUBLIC, so its artifacts are readable by any signed-in
       # GitHub user. Screenshots of production pages can show real companies'
@@ -803,3 +912,30 @@ jobs:
           retention-days: 1
           if-no-files-found: warn
           path: sr1-readings.jsonl
+
+  # BLOCKED / NOT RUN (owner P0 2026-11-24). A brake refused in the budget job or
+  # right before the walk: no journey ran. The run is CANCELLED, never failed and
+  # never passed — the status ledger skips cancelled runs, the error brake and the
+  # daily count only see walks that reached production, and the schedulers
+  # dispatch the pair again once production is stable. The one job with
+  # `actions: write`, and it only cancels this run.
+  not-run:
+    needs: [debounce, budget, walk]
+    if: always() && (needs.budget.outputs.brake == 'refused' || needs.walk.outputs.brake == 'refused')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: write # cancel this run
+    steps:
+      - name: "BLOCKED / NOT RUN: a brake refused, no journey ran"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          WHERE: ${{ needs.budget.outputs.brake == 'refused' && 'before the walk was queued (budget job)' || 'right before the session mint (walk job)' }}
+        run: |
+          echo "**BLOCKED / NOT RUN: a walk brake refused ${WHERE}. No journey ran; this is not a failed walk. The reason is in that job's brake step.**" >> "$GITHUB_STEP_SUMMARY"
+          echo "::notice::BLOCKED / NOT RUN: a walk brake refused ${WHERE}; the run is cancelled, not failed"
+          gh run cancel "$GITHUB_RUN_ID"
+          sleep 300
+          echo "::error::the run could not be cancelled: it stays red, but no journey ran"
+          exit 1

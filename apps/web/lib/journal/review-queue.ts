@@ -1,7 +1,7 @@
 import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
-import { readReviewableJournalEntryIds } from "@/lib/journal/reviewable-count";
+import { readReviewableJournalEntryIds, reviewableIdsOf } from "@/lib/journal/reviewable-count";
 import { recognizeEntryDepth } from "@/lib/structuring/recognize-entry";
 import { reviewerHoursOf, type ReviewerHours } from "@/lib/journal/reviewer-hours";
 import { resolveWorkDay, type WorkTimeMetricRow } from "@/lib/journal/work-time";
@@ -82,20 +82,16 @@ function organizationOf(embed: unknown): { id: string | null; name: string | nul
 export async function fetchQuickReviewQueue(): Promise<QuickQueueEntry[]> {
   const supabase = await createClient();
 
-  // Gated reviewable set — degrades to an empty queue until applied (honest).
-  // The ONE `reviewable_journal_entry_ids` read, shared with the decisions
-  // count in the same render (request-scoped, see reviewable-count.ts).
-  let reviewableIds: string[] = [];
-  const { data: idRows } = await readReviewableJournalEntryIds();
-  if (Array.isArray(idRows)) {
-    reviewableIds = idRows
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      .map((r: any) =>
-        typeof r === "string"
-          ? r
-          : (r?.reviewable_journal_entry_ids ?? r?.id ?? null),
-      )
-      .filter((v: unknown): v is string => typeof v === "string");
+  // Gated reviewable set: the ONE `reviewable_journal_entry_ids` read, shared
+  // with the decisions count in the same render (request-scoped, see
+  // reviewable-count.ts), parsed by the shared `reviewableIdsOf`. `[]`: none
+  // wait, or the RPC is not installed here (an honest empty queue). Null: the
+  // read FAILED — thrown like the entries read below, never returned as
+  // "nothing to review" (SEP-7; duplication audit ORG-7: this read used to drop
+  // its error and answer an empty queue while the inbox said "could not load").
+  const reviewableIds = reviewableIdsOf(await readReviewableJournalEntryIds());
+  if (reviewableIds === null) {
+    throw new Error("review_queue_unavailable:reviewable_ids");
   }
   if (reviewableIds.length === 0) return [];
 

@@ -3169,6 +3169,13 @@ const RULES: IntentRule[] = [
       p("\\baannemen\\b", 3), // nl "mensen aannemen"
       p("(zatrudni|rekrutacj|rekrutuj)", 3), // pl
       p("\\breikia\\s+žmoni", 3), // "reikia žmonių"
+      // "post a need" / "publish a vacancy" (2026-11-23, owner P0): the
+      // employer names the ACT, not the people. It measured `unknown`. The
+      // object is a need / vacancy / job ad — never "work" or "a job" alone,
+      // which is the person's own search (find-work).
+      // Explicit publication outranks the generic "new job" (15) and
+      // first-person "I want ... job" (10) search readings.
+      p("\\b(post|publish|create|add|place|submit)\\s+(?:(?:a|an|my|our|the|new)\\s+){0,2}(need|vacancy|job\\s+(?:ad|advert|posting|listing))\\b", 18),
       // SOMEBODY, WITHOUT NAMING A TRADE — in the other four locales. The
       // line above has covered Lithuanian since the demand path was built;
       // "we need people in rotterdam" measured `unknown` on 2026-09-08, as
@@ -3538,6 +3545,12 @@ const RULES: IntentRule[] = [
       // common German job-seek sentence; nl "ik zoek werk / een baan".
       p("(ich\\s+)?suche\\s+.{0,12}(arbeit\\b|job\\b|stelle\\b)", 3),
       p("\\bzoek\\s+.{0,12}(baan|werk)\\b", 3),
+      // VERB LAST (2026-11-23, owner P0 "the assistant answers real actions"):
+      // nl "werk zoeken", de "Arbeit finden" are how a person names the goal
+      // as a whole, the infinitive after the noun. Both measured `unknown`.
+      // The noun is WORK, never a person, so this cannot read an employer.
+      p("\\b(werk|een\\s+baan|baan)\\s+(zoeken|vinden)\\b", 3), // nl
+      p("\\b(arbeit|einen\\s+job|job|eine\\s+stelle|stelle)\\s+(finden|suchen)\\b", 3), // de
       p("\\bbaan\\b", 1), // nl job noun
       p("\\bstelle\\b", 1), // de job noun
       p("найди", 3),

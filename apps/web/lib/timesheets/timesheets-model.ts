@@ -443,6 +443,7 @@ export const TIMESHEET_NOTICES = [
   "no_instance",
   "no_template",
   "template_created",
+  "schedule_saved",
   "overlap",
   "invalid_period",
   "no_worker",

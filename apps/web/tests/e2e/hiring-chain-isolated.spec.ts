@@ -144,7 +144,7 @@ for (const w of WIDTHS) {
       await vis.getByTestId("discoverability-grant").click();
       await expect(vis.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
 
-      await page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+      await page.goto(`${BASE}/en/dashboard/profile?tab=details#work-card-editor-section`);
       const toggle = page.getByRole("main").getByTestId("work-card-editor-toggle");
       await expect(toggle).toBeVisible({ timeout: 60_000 });
       const editor = page.getByRole("main").getByTestId("work-card-editor");

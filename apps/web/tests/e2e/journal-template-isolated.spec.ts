@@ -121,7 +121,7 @@ test("T-1..T-3. the full composer offers an active template, it prefills the ent
 
 test("T-4. the saved entry reaches the person's Living CV as their own recorded work, not as confirmed work", async ({ page }) => {
   await signIn(page, BASE, W);
-  await page.goto(`${BASE}/en/cv`);
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   // Scoped to <main>: streaming can leave a hidden duplicate outside it.
   const main = page.getByRole("main");
   await expect(main.getByTestId("cv-skills"), "the CV renders").toBeAttached({ timeout: 60_000 });

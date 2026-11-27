@@ -5,6 +5,7 @@ import { readAllPages } from "./evidence-pagination";
 import { untypedClient } from "./evidence-store";
 import { isPeriodRecord } from "./company-work-history";
 import type { EvidenceRecordView } from "./import-core";
+import { recordProjectId } from "./professional-history-context";
 import { readEvidenceForWorkObject } from "./work-object-evidence-read";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
 
@@ -60,7 +61,7 @@ export function foldProjectDocumentedPeriods(
   >();
   for (const r of records) {
     if (r.withdrawn || r.superseded) continue;
-    const projectId = r.projectId ?? (r.workObjectId ? projectOfObject.get(r.workObjectId) : undefined);
+    const projectId = recordProjectId(r, projectOfObject);
     if (!projectId) continue;
     let a = acc.get(projectId);
     if (!a) {

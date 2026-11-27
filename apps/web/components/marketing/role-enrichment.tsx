@@ -1,4 +1,5 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { ChevronDown } from "lucide-react";
 import { ConstellationBg } from "@/components/decor/constellation-bg";
 import { CtaBand } from "@/components/marketing/cta-band";
 import { FAQAccordion } from "@/components/app/faq-accordion";
@@ -60,52 +61,68 @@ export async function RoleEnrichment({
     <div className="relative overflow-hidden">
       <ConstellationBg />
 
-      {/* (a) preview */}
-      <section className="relative mx-auto max-w-container px-6 pt-16 sm:px-12">
-        <Eyebrow>{t(`${previewKey}.eyebrow`)}</Eyebrow>
-        <h2 className="mt-5 font-display text-3xl font-bold leading-[1.08] tracking-tightest sm:text-4xl">
-          {t(`${previewKey}.headline.line1`)}{" "}
-          <span className="text-gradient-accent">
-            {t(`${previewKey}.headline.line2`)}
-          </span>
-        </h2>
-        <p className="mt-4 max-w-2xl text-base leading-relaxed text-text-secondary">
-          {t(`${previewKey}.subcopy`)}
-        </p>
-        <div className={preview ? "mt-10 grid items-center gap-10 lg:grid-cols-2" : "mt-10"}>
-          {/* min-w-0: a grid item defaults to its content's min width, so a
-              wide preview pushed the column past a phone screen (622 px in
-              375 px, prod 2026-09-29) and the card was clipped. */}
-          {preview ? <div className="flex min-w-0 justify-center">{preview}</div> : null}
-          <ul className="flex flex-col gap-4">
-            {bullets.map((b) => (
-              <li key={b} className="flex items-start gap-3 text-sm text-text-secondary">
-                <span
-                  aria-hidden
-                  className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-blue"
-                />
-                {b}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </section>
+      {/* The explanation (what the view holds, and the steps) sits behind
+          one fold (owner order 2026-11-24, decisions 0032 and 0034): the page
+          is the offer, the work chain, the questions and the action. Nothing
+          is removed; one tap opens it, and it is in the document for search
+          engines either way. */}
+      <details
+        className="group relative mx-auto mt-10 max-w-container px-6 sm:px-12"
+        data-testid="role-enrichment-more"
+      >
+        <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 rounded-2xl border border-ink-600 bg-surface-1/60 px-5 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue [&::-webkit-details-marker]:hidden">
+          <h2 className="font-display text-lg font-semibold text-text-primary">{t("journey.headline")}</h2>
+          <ChevronDown
+            aria-hidden
+            className="size-5 shrink-0 text-text-secondary transition-transform group-open:rotate-180 motion-reduce:transition-none"
+          />
+        </summary>
+        <div className="pb-4">
+          {/* (a) preview */}
+          <section className="relative pt-6">
+            <Eyebrow>{t(`${previewKey}.eyebrow`)}</Eyebrow>
+            <h3 className="mt-5 font-display text-2xl font-bold leading-[1.08] tracking-tightest sm:text-3xl">
+              {t(`${previewKey}.headline.line1`)}{" "}
+              <span className="text-gradient-accent">
+                {t(`${previewKey}.headline.line2`)}
+              </span>
+            </h3>
+            <p className="mt-4 max-w-2xl text-base leading-relaxed text-text-secondary">
+              {t(`${previewKey}.subcopy`)}
+            </p>
+            <div className={preview ? "mt-10 grid items-center gap-10 lg:grid-cols-2" : "mt-10"}>
+              {/* min-w-0: a grid item defaults to its content's min width, so a
+                  wide preview pushed the column past a phone screen (622 px in
+                  375 px, prod 2026-09-29) and the card was clipped. */}
+              {preview ? <div className="flex min-w-0 justify-center">{preview}</div> : null}
+              <ul className="flex flex-col gap-4">
+                {bullets.map((b) => (
+                  <li key={b} className="flex items-start gap-3 text-sm text-text-secondary">
+                    <span
+                      aria-hidden
+                      className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-brand-blue"
+                    />
+                    {b}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </section>
 
-      {afterPreview}
+          {afterPreview}
 
-      {/* (b) journey */}
-      <section className="relative mx-auto max-w-container px-6 pt-20 sm:px-12">
-        <Eyebrow>{t("journey.eyebrow")}</Eyebrow>
-        <h2 className="mt-5 font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
-          {t("journey.headline")}
-        </h2>
-        <div className="mt-10">
-          <JourneyTimeline steps={steps} />
+          {/* (b) journey */}
+          <section className="relative pt-12">
+            <Eyebrow>{t("journey.eyebrow")}</Eyebrow>
+            <div className="mt-10">
+              <JourneyTimeline steps={steps} />
+            </div>
+          </section>
         </div>
-      </section>
+      </details>
 
       {/* (d) FAQ */}
-      <section className="relative mx-auto max-w-3xl px-6 pt-20 sm:px-12">
+      <section className="relative mx-auto max-w-3xl px-6 pt-12 sm:px-12">
         <Eyebrow>{t("faq.eyebrow")}</Eyebrow>
         <h2 className="mt-5 font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
           {t("faq.headline")}
@@ -119,7 +136,7 @@ export async function RoleEnrichment({
       </section>
 
       {/* (e) strong CTA */}
-      <div className="relative pt-20">
+      <div className="relative pt-12">
         <CtaBand
           title={t("cta.headline.line1")}
           accent={t("cta.headline.line2")}

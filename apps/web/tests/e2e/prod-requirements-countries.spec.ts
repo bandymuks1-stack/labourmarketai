@@ -143,7 +143,7 @@ test("R-0 (2.11). the walked person: one whose own profile names a primary profe
 const CARD_COUNTRIES = 'input[name="preferred_countries"]';
 
 async function workCard(page: Page): Promise<Locator> {
-  await fresh(page, "/lt/dashboard/profile#cv-availability");
+  await fresh(page, "/lt/dashboard/profile?tab=details#cv-availability");
   await rendered(page, "profile");
   const main = inMain(page);
   await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 30_000 });

@@ -285,6 +285,14 @@
       "moreSection": {
         "title": "Detaljeret overblik",
         "hint": "Status, forespørgsler og ekstra kort"
+      },
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Registrér arbejde",
+            "desc": "Entries build your profile and CV"
+          }
+        }
       }
     },
     "errors": {
@@ -387,7 +395,15 @@
         "event_journal_review_decided_changes_requested": "Der er anmodet om ændringer i din journalpost",
         "event_weekly_digest_profile_completion": "For at vise dig passende job, bekræft hvilket arbejde du udfører",
         "event_weekly_digest_journal": "Ugens oversigt over din arbejdsjournal er klar",
-        "event_history_link_offered": "En organisation tilbyder at forbinde din registrerede arbejdshistorik med din konto"
+        "event_history_link_offered": "En organisation tilbyder at forbinde din registrerede arbejdshistorik med din konto",
+        "event_team_offer_received": "Et team har tilbudt sig til dit behov",
+        "event_team_offer_answered": "Dit teams tilbud er besvaret",
+        "event_team_offer_answered_accepted": "Dit teams tilbud er accepteret",
+        "event_team_offer_answered_declined": "Dit teams tilbud er afvist",
+        "event_candidate_offer_received": "Et bureau har foreslået en kandidat til dit behov",
+        "event_candidate_offer_answered": "Den kandidat, du foreslog, er besvaret",
+        "event_candidate_offer_answered_accepted": "Den kandidat, du foreslog, er accepteret",
+        "event_candidate_offer_answered_declined": "Den kandidat, du foreslog, er afvist"
       },
       "email": {
         "open": "Åbn i LabourMarket.ai:",
@@ -456,7 +472,7 @@
           },
           "education": {
             "title": "Jeg repræsenterer et uddannelsessted",
-            "desc": "Inviter elever, se deres deltagelse og forbind dem med praktik og job."
+            "desc": "Inviter elever, driv forløb og følg deres praktik og resultater."
           }
         },
         "agency": {
@@ -1792,7 +1808,67 @@
     "generatedAt": "Genereret",
     "verifyNote": "Bekræftelser kan kontrolleres på platformen.",
     "notWorker": "CV-eksport er tilgængelig for medarbejderprofiler — det opbygges af arbejdsjournalen og bekræftede færdigheder.",
-    "claimFromJournal": "[EN] from work journal"
+    "claimFromJournal": "[EN] from work journal",
+    "blocks": {
+      "overview": "Oversigt",
+      "experience": "Erfaring",
+      "projects": "Projekter",
+      "photos": "Billeder",
+      "documents": "Dokumenter",
+      "reviews": "Anbefalinger"
+    },
+    "premium": {
+      "analytics": {
+        "evidenceTitle": "Timernes fordeling",
+        "states": {
+          "actual": "Registreret som faktiske",
+          "reported": "Oplyst af organisationen",
+          "estimated": "Anslåede",
+          "confirmed": "Understøttet af en anden parts registrering"
+        },
+        "skillBasis": "Tid fra arbejdsjournalen knyttet til de enkelte færdigheder.",
+        "workTitle": "Arbejde og færdigheder",
+        "attributedTime": "Tildelt denne færdighed",
+        "confirmedTime": "Bekræftet af lederen: {hours}",
+        "activityLabel": "Uddrag af registreringen",
+        "contextLabel": "Arbejdskontekst",
+        "mapTitle": "Kompetencekort",
+        "workNodes": "Arbejde"
+      },
+      "eyebrowFallback": "Levende CV",
+      "facts": {
+        "recorded": "recorded in your work journal",
+        "confirmed": "med en leders registrering",
+        "organization": "in organisation records",
+        "experienceTotal": "faglig erfaring i alt",
+        "languages": "sprog",
+        "projects": "projekter",
+        "span": "første og seneste registrering"
+      },
+      "capEyebrow": "Capabilities",
+      "capEyebrowHours": "{hours} h of recorded work",
+      "capTitle": "What you *can do*",
+      "expEyebrow": "Experience",
+      "expTitle": "Where you have *worked*",
+      "evidence": {
+        "both": "{confirmed} h with a manager's record · {recorded} h recorded",
+        "recorded": "{hours} h recorded",
+        "shown": "Shown by your records",
+        "declared": "You say so; nothing shows it yet",
+        "involved": "Involved in {hours} h, not attributed to it alone"
+      },
+      "source": {
+        "own": "Your record",
+        "organization": "Organisation records"
+      },
+      "orgDayHours": "{hours} h on {count, plural, one {# record} other {# records}}",
+      "orgPeriodHours": "{hours} h stated as a period total",
+      "present": "now",
+      "more": "+ {count} more in the full register below",
+      "emptyCapabilities": "No skills on record yet. Skills you add — and the work that shows them — appear here.",
+      "emptyExperience": "No work history yet. Your journal and the records of organisations you worked for build this.",
+      "untitled": "Work without a name in the source"
+    }
   },
   "todayScreen": {
     "eyebrow": "I dag",
@@ -2006,6 +2082,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Land",
+      "errorCountry": "Vælg landet, hvor projektets sted ligger."
     }
   },
   "projectOps": {
@@ -2926,6 +3006,7 @@
     "available": "Tilgængelig",
     "availableFrom": "Fra {date}",
     "experienceYears": "{n} års erfaring",
+    "recordedExperienceHours": "Tilgængelige arbejdsregistreringer: {hours} t",
     "skillsTitle": "Kompetencer",
     "skillsEmpty": "Ingen kompetencer, du må se.",
     "skillVerified": "Bekræftet af en leders registrering",
@@ -3885,7 +3966,9 @@
         "supplyTeamSize": "Hvor mange folk I har",
         "supplyLocation": "Hvor de kan arbejde",
         "demandCountry": "Land, hvor arbejdet udføres",
-        "demandCountryPlaceholder": "f.eks. Sverige eller SE"
+        "demandCountryPlaceholder": "f.eks. Sverige eller SE",
+        "projectCountry": "Land",
+        "projectCountryPlaceholder": "f.eks. Sverige eller SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3915,7 +3998,8 @@
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "Denne organisations gratis plan tillader 1 aktiv stilling. Luk én, eller aktivér planen „Organisation“ (99 €/md.) i din organisationskonto.",
-        "errorOpenNeedLimitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os."
+        "errorOpenNeedLimitIndividual": "Denne organisation har nået grænsen for aktive stillinger i sin plan. Intet blev opkrævet eller ændret. Kontakt os.",
+        "errorCountryRequired": "Angiv stedets land (navn eller kode, f.eks. Sverige eller SE)."
       },
       "urgency": {
         "flexible": "Fleksibel",
@@ -3978,7 +4062,7 @@
       "navCalendar": "[EN] Calendar",
       "navProfile": "[EN] Profile",
       "clarifyWorkLog": "[EN] Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
-      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
@@ -4084,6 +4168,34 @@
       "findWorkInCompanyContext": "At søge job er din egen handling — i virksomhedsrummet kører jeg den ikke. Skift til dit personlige rum og spørg igen.",
       "findWorkInCompanyWhy": "En person søger job, ikke en virksomhed — jeg svarer fra dit personlige rum.",
       "personalOnlyInCompany": "Det er en personlig handling — i en virksomhedsplads udfører jeg den ikke. Skift til dit personlige rum, og fortsæt der.",
+      "needsOrganization": "Det gøres for en organisation, og ingen af dine områder kan gøre det endnu.",
+      "readFailed": "Jeg kunne ikke læse det lige nu — fejlen er hos os. Intet er ændret. Prøv igen om lidt.",
+      "taskStatusAsk": "Hvilken status skal opgaven have: startet, færdig eller blokeret?",
+      "stageStatusAsk": "Hvilken status skal etapen have: startet, færdig eller blokeret?",
+      "chipStatusStarted": "Startet",
+      "chipStatusDone": "Færdig",
+      "chipStatusBlocked": "Blokeret",
+      "professionAsk": "Hvilket fag eller håndværk mener du?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Dit CV ligger i dit personlige område, ikke i organisationen.",
+          "journal": "Din egen arbejdsdagbog ligger i dit personlige område.",
+          "profile": "Din profil ligger i dit personlige område.",
+          "calendar": "Din egen kalender ligger i dit personlige område."
+        },
+        "open": {
+          "cv": "Skift og åbn mit CV",
+          "journal": "Skift og åbn min dagbog",
+          "profile": "Skift og åbn min profil",
+          "calendar": "Skift og åbn min kalender"
+        },
+        "askWhoseCv": "Dit eget CV eller en kandidats?",
+        "organizationHistory": "Organisationens optegnelse er dens arbejdshistorik.",
+        "openOrganizationHistory": "Åbn organisationens historik",
+        "organization": "Det gøres i organisationens område: {name}.",
+        "switchTo": "Skift til {name} og fortsæt",
+        "whichOrganization": "Det gøres i en organisations område. Hvilket?"
+      },
       "newJobsIntro": "Nye opslag, der passer til dine ønsker: {count}.",
       "newJobsAll": "Alle muligheder",
       "newJobsNone": "Der er ikke kommet nye opslag, der passer til dine ønsker, de seneste dage. Alle muligheder finder du på siden med muligheder.",
@@ -4812,8 +4924,7 @@
       "lasting": "Din erfaring og dine muligheder forbliver tilgængelige — når du skifter job, projekt eller land."
     },
     "v3": {
-      "lead": "For medarbejdere, arbejdsgivere og tjenesteudbydere i alle fag og sektorer. Registrering og grundlæggende opslag af et behov er gratis.",
-      "moreChoices": "Flere muligheder",
+      "lead": "Registrering og grundlæggende opslag af et behov er gratis.",
       "or": "eller beskriv det med dine egne ord",
       "needFree": "Du kan sende en forespørgsel uden at registrere dig. Det er gratis at sende den; vilkår og pris for ydelserne aftales særskilt.",
       "market": {
@@ -5845,9 +5956,36 @@
       "not_authorized": "Det må du ikke.",
       "not_found": "Timeseddel ikke fundet.",
       "limit_reached": "For mange åbne timesedler — indsend eller ryd op i de eksisterende først.",
-      "error": "Noget gik galt. Intet blev gemt."
+      "error": "Noget gik galt. Intet blev gemt.",
+      "schedule_saved": "Tidsplanen er gemt."
     },
-    "taskAmbiguous": "{count} opgaver tilknyttet — timer ikke henført til én"
+    "taskAmbiguous": "{count} opgaver tilknyttet — timer ikke henført til én",
+    "schedule": {
+      "title": "Automatiske timesedler",
+      "consent": "Send mit registrerede arbejde fra den foregående dag, syv dage eller kalendermåned til det valgte godkendelsesforløb. Arbejde godkendes ikke automatisk.",
+      "enabled": "Aktiveret",
+      "frequency": "Hyppighed",
+      "daily": "Dagligt",
+      "weekly": "Ugentligt",
+      "monthly": "Månedligt · den 1.",
+      "weekday": "Ugentlig indsendelsesdag",
+      "time": "Indsendelsestid",
+      "zone": "Tidszone",
+      "recipients": "Godkendelsesmodtagere",
+      "selectTemplate": "Vælg godkendelsesskabelon",
+      "save": "Gem",
+      "next": "Næste indsendelse: {date} ({zone})",
+      "manageRecipients": "Administrer godkendelsesmodtagere",
+      "outcome": {
+        "submitted": "Indsendt til godkendelse.",
+        "already_submitted": "Denne periode er allerede indsendt.",
+        "empty": "Intet registreret arbejde i perioden.",
+        "overlap": "Sat på pause: perioden overlapper en eksisterende timeseddel.",
+        "not_allowed": "Sat på pause: adgangen til organisationen er ophørt.",
+        "no_template": "Sat på pause: godkendelsesskabelonen er utilgængelig.",
+        "error": "Indsendelsen mislykkedes; der forsøges igen."
+      }
+    }
   },
   "requests": {
     "title": "Anmodninger",
@@ -6986,7 +7124,8 @@
       "heading": "Invitationer fra organisationer",
       "explainer": "Ledelsesinvitationer stilet til dig. Når du accepterer, vises organisationen i din arbejdsområdevælger.",
       "accept": "Acceptér",
-      "decline": "Afvis"
+      "decline": "Afvis",
+      "invitedBy": "Inviteret af {name}"
     },
     "members": {
       "heading": "Organisationens medlemmer",
@@ -7081,7 +7220,8 @@
       "places": "Steder",
       "people": "Personer",
       "hours": "Registrerede timer",
-      "period": "Periode"
+      "period": "Periode",
+      "dayHours": "Timer på enkeltdage"
     },
     "place": "Sted",
     "noPlaceName": "Intet sted angivet",
@@ -7118,7 +7258,8 @@
       "progress": "{attributed} af {total} tilskrevet {name}",
       "done": "{count} poster tilskrevet; {skipped} var allerede tilskrevet.",
       "refused": "Dette kunne ikke gemmes. Intet er ændret.",
-      "person": "{hours} t, {count, plural, one {# post} other {# poster}}"
+      "person": "{hours} t, {count, plural, one {# post} other {# poster}}",
+      "personPeriod": "{hours} t periodesum (lægges ikke til enkeltdage)"
     },
     "truncated": "Der findes flere poster, end én visning læser. De {count} læste vises; summer dækker kun dem.",
     "projects": {
@@ -7137,7 +7278,87 @@
       "period": "Registreret",
       "basis": "Fra {entries} journalposter, som personer registrerede under denne organisation. Talt adskilt fra den importerede historik ovenfor og aldrig lagt til den.",
       "unavailable": "Arbejdet registreret i journalen under denne organisation kunne ikke læses lige nu."
-    }
+    },
+    "forClient": {
+      "title": "Arbejde udført af jeres underleverandører",
+      "confirmed": "Bekræftede poster",
+      "unconfirmed": "Ikke-bekræftede poster",
+      "periodHours": "{hours} t angivet som periodesum, ikke lagt til enkelte dage.",
+      "basis": "Fra {count, plural, one {# post} other {# poster}} i jeres underleverandørers egne registre. Talt adskilt fra jeres eget arbejde.",
+      "unreadable": "Arbejde i partneres registre kunne ikke læses lige nu. Det betyder ikke, at der ikke er noget."
+    },
+    "clients": {
+      "title": "Kunder",
+      "unnamed": "Kundeorganisation",
+      "records": "{count, plural, one {# post} other {# poster}}"
+    },
+    "periodShort": "{hours} t periodesum",
+    "business": {
+      "unavailable": "Virksomhedshistorikken kunne ikke læses lige nu. Intet er gået tabt – prøv igen senere.",
+      "eyebrow": "Virksomhedshistorik",
+      "title": "{name}: én sammenhængende historik",
+      "subtitle": "Hvert tal nedenfor tæller organisationens eget registrerede arbejde én gang. Perioderne viser, hvad der er angivet om tidligere juridiske enheder, og hvad oplysningen bygger på.",
+      "titleHeld": "{name}: arbejdsposter, organisationen har, pr. periode",
+      "subtitleHeld": "Arbejde udført under en tidligere juridisk enhed tilhører den enhed og de personer, der udførte det. {name} har disse poster som dokumenteret kontinuitet; de vises ikke som {name}s eget arbejde.",
+      "headerOwn": "{name}s egen periode",
+      "headerEarlier": "Tidligere juridisk enhed: {name}",
+      "headerUnstated": "Perioden »{label}« – juridisk enhed ikke angivet",
+      "headerNotPlaced": "Poster, som ingen angivet periode omfatter",
+      "continuityNotSuccession": "Kontinuitet dokumenteret; retlig succession påstås ikke.",
+      "totalsHeld": "Alle poster, {name} har, på tværs af alle perioder, hver talt én gang – ikke alt er {name}s eget arbejde.",
+      "figures": "{records} poster · {hours} t · {people} personer · {places} steder",
+      "totals": {
+        "records": "Poster",
+        "hours": "Timer",
+        "people": "Personer",
+        "places": "Steder",
+        "projects": "Projekter",
+        "span": "Tidsrum"
+      },
+      "spanUnknown": "datoer ikke registreret",
+      "periodsTitle": "Virksomhedens perioder",
+      "noPeriods": "Der er endnu ikke angivet nogen periode for denne virksomhed. Hvis arbejdet begyndte under en tidligere juridisk enhed, kan det registreres som en angivet periode – selve posterne forbliver, som de er.",
+      "bounds": "{from} – {to}",
+      "notDocumented": "ikke dokumenteret",
+      "boundsNotDocumented": "Datoer ikke dokumenteret",
+      "legalEntity": "Juridisk enhed på det tidspunkt: {name}",
+      "relation": {
+        "not_asserted": "Ikke angivet som samme juridiske enhed – én sammenhængende virksomhedshistorik.",
+        "same_entity": "Angivet som samme juridiske enhed.",
+        "renamed": "Angivet som samme juridiske enhed under et tidligere navn.",
+        "successor": "Angivet som retlig forgænger.",
+        "sold_and_continued_by_new_entity": "Den tidligere enhed blev solgt; virksomheden fortsatte gennem en ny enhed.",
+        "other": "En anden dokumenteret relation mellem enhederne."
+      },
+      "basis": {
+        "owner_statement": "Ejerens erklæring",
+        "registry_extract": "Registerudskrift",
+        "contract": "Aftale",
+        "other_document": "Dokument"
+      },
+      "periodNoRecords": "Der er endnu ikke placeret nogen poster i denne periode.",
+      "placedBy": "Placeret efter kildeetiketten {labels}: {byLabel} poster; efter dokumenterede datoer: {byDate}.",
+      "notPlaced": "Ikke placeret i en angivet periode (kilden har ingen periodeetiket): {figures} · {span}.",
+      "yearsTitle": "Arbejde pr. år",
+      "undated": "{count, plural, one {# post mangler} other {# poster mangler}} dato og {count, plural, one {tælles} other {tælles}} kun med i totalerne.",
+      "doorsLabel": "Åbn de samme poster",
+      "doors": {
+        "people": "Personer",
+        "projects": "Projekter",
+        "places": "Steder"
+      },
+      "workspace": {
+        "note": "Du åbnede historikken for {name} uden for dens arbejdsområde. Personer og projekter åbnes i det aktive arbejdsområde.",
+        "open": "Åbn arbejdsområdet {name}",
+        "opening": "Åbner …",
+        "error": "Arbejdsområdet kunne ikke åbnes."
+      },
+      "structure": "Tidligere arbejde blev udført gennem {names}.",
+      "structureLater": ", senere ",
+      "structureForClient": "Tidligere arbejde gennem {names} for ordregiveren {client}.",
+      "structureAsSubcontractor": "Underleverandør: {names} → ordregiver {client}."
+    },
+    "descriptionNotInSource": "Ingen arbejdsbeskrivelse i kilden"
   },
   "workLifecycle": {
     "pending": "Endnu ikke",
@@ -7339,7 +7560,7 @@
     },
     "noHours": "Poster uden angivne timer: {count}. Ukendte timer tælles ikke som nul.",
     "undated": "Poster uden angivet dato: {count}. De bliver i historikken nedenfor.",
-    "periodApart": "{hours} t af summen er periodesummer, holdt adskilt og aldrig fordelt på dage eller måneder.",
+    "periodApart": "Desuden: {hours} t angivet som periodesummer — ikke medregnet i timerne ovenfor og aldrig fordelt på dage eller måneder.",
     "noWorkObject": "Poster uden tilknytning til et projekt eller sted, platformen kender: {count}. De bliver i denne historik under deres kildebetegnelse.",
     "places": {
       "title": "Efter projekt eller sted",
@@ -8047,7 +8268,8 @@
       "setUpAgency": "Registrer dit bureau",
       "setUpInstitution": "For uddannelsesinstitutioner",
       "b2bEnquiry": "Forespørgsel om erhvervsydelser (B2B)",
-      "projectEnquiry": "Forespørgsel om individuelt projekt"
+      "projectEnquiry": "Forespørgsel om individuelt projekt",
+      "findServices": "Find personlige tjenester"
     },
     "assistant": "Spørg assistenten",
     "start": {
@@ -8117,6 +8339,59 @@
       "auth": "Log ind igen.",
       "not_authorized": "Du kan kun administrere dine egne poster.",
       "error": "Noget gik galt. Prøv igen."
+    }
+  },
+  "publicServices": {
+    "title": "[EN] Find personal services",
+    "lead": "[EN] Services published by individuals.",
+    "search": "[EN] Search",
+    "query": "[EN] Service or keyword",
+    "country": "Land",
+    "category": "[EN] Category",
+    "clear": "[EN] Clear filters",
+    "unavailable": "[EN] Service search is unavailable",
+    "unavailableHint": "[EN] Please try again later.",
+    "retry": "[EN] Try again",
+    "emptyFiltered": "[EN] No services match these filters",
+    "empty": "[EN] No personal services have been published publicly yet",
+    "results": "[EN] Services",
+    "remote": "[EN] Remote",
+    "pagination": "[EN] Search pages",
+    "previous": "[EN] Previous",
+    "next": "[EN] Next",
+    "page": "[EN] Page {page}",
+    "refine": "[EN] Narrow your search to see more relevant services.",
+    "back": "[EN] All services",
+    "delivery": "[EN] Delivery",
+    "rate": "[EN] Rate",
+    "personalService": "[EN] Personal service",
+    "signInToRequest": "[EN] Sign in to request",
+    "manage": "[EN] Manage this service",
+    "contactUnavailable": "[EN] The request action is unavailable. Please try again later.",
+    "notFound": "[EN] Service not found",
+    "notFoundHint": "[EN] This service is no longer publicly available.",
+    "allCountries": "Alle lande"
+  },
+  "serviceOfferings": {
+    "form": {
+      "publicLabel": "[EN] Show this personal service publicly",
+      "publicHint": "[EN] When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
+    },
+    "publicAudience": "[EN] Public search selected",
+    "memberAudience": "[EN] Signed-in members selected"
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Arbejdsregistreringer efter periode",
+        "currentTeamTitle": "Nuværende team"
+      }
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Land",
+      "errorCountry": "Vælg landet, hvor projektets sted ligger."
     }
   }
 }

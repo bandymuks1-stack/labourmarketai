@@ -26,6 +26,9 @@ vi.mock("@/lib/services/service-offerings", () => ({
   setServiceOfferingStatus: (...a: unknown[]) => setStatus(...a),
 }));
 
+const timesheetOverview = vi.fn<(...args: unknown[]) => Promise<unknown>>();
+vi.mock("@/lib/timesheets/timesheets", () => ({ getTimesheetsOverview: (...args: unknown[]) => timesheetOverview(...args) }));
+
 let activeWorkspace: string | Error = "org-1";
 const reportsView = vi.fn(async (..._a: unknown[]): Promise<unknown> => ({ kind: "worker", projects: { total: 2 } }));
 vi.mock("@/lib/reports/reports-hub", () => ({ getReportsView: (...a: unknown[]) => reportsView(...a) }));
@@ -193,5 +196,36 @@ describe("domain actions — execution", () => {
     offerings = { kind: "needs-migration" };
     const r = await inScope(() => runCapability("service_offering.list_own", bearer, {}));
     expect(r).toMatchObject({ ok: false, code: "needs_migration" });
+  });
+});
+
+
+describe("timesheets.overview.get preserves the web's approval context in JSON", () => {
+  it("keeps worker names, workflow steps and published templates across the transport", async () => {
+    const workflow = { instanceId: "request-1", instanceStatus: "approved", steps: [{ id: "step-1", status: "approved" }], slots: [], transitions: [] };
+    timesheetOverview.mockResolvedValueOnce({ status: "ok", mine: [], org: [{ id: "sheet-1", workerId: "worker-1" }],
+      workerNames: new Map([["worker-1", "Synthetic worker"]]),
+      workflows: new Map([["sheet-1", workflow]]), templates: new Map([["org-1", { definitionId: "definition-1", published: true }]]),
+      orgOptions: [], error: null });
+    const result = await inScope(() => runCapability("timesheets.overview.get", bearer, {}));
+    expect(JSON.parse(JSON.stringify(result))).toMatchObject({ ok: true, data: {
+      workerNames: { "worker-1": "Synthetic worker" }, workflows: { "sheet-1": workflow },
+      templates: { "org-1": { definitionId: "definition-1", published: true } },
+    } });
+    expect(timesheetOverview).toHaveBeenLastCalledWith({ syncDecisions: false });
+  });
+
+  it("does not report a failed source read as an empty successful report", async () => {
+    timesheetOverview.mockResolvedValueOnce({ status: "ok", mine: [], org: [],
+      workerNames: new Map(), workflows: new Map(), templates: new Map(), orgOptions: [], error: "private database detail" });
+    const result = await inScope(() => runCapability("timesheets.overview.get", bearer, {}));
+    expect(result).toMatchObject({ ok: false, code: "unavailable" });
+    expect(JSON.stringify(result)).not.toContain("private database detail");
+  });
+
+  it.each(["not-authed", "needs-migration"])("keeps the canonical %s refusal", async (status) => {
+    timesheetOverview.mockResolvedValueOnce({ status });
+    const result = await inScope(() => runCapability("timesheets.overview.get", bearer, {}));
+    expect(result).toMatchObject({ ok: false, code: status === "not-authed" ? "auth" : "needs_migration" });
   });
 });

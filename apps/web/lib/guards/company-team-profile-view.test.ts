@@ -180,7 +180,12 @@ describe.each(activeLocales)("%s: rendered copy", (locale) => {
     expect(Object.keys(copy).sort()).toEqual(
       Object.keys((catalog("en") as { businessProfile: { team: Record<string, string> } }).businessProfile.team).sort(),
     );
-    for (const value of Object.values(copy)) expect(value.trim().length).toBeGreaterThan(0);
+    // `living` is the member form's own catalogue, pinned key by key in
+    // organization-living-cv.test.ts; every other entry is one string.
+    for (const [key, value] of Object.entries(copy)) {
+      if (key === "living") expect(typeof value).toBe("object");
+      else expect((value as string).trim().length).toBeGreaterThan(0);
+    }
   });
 });
 

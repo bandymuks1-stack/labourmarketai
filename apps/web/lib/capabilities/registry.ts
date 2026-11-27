@@ -11,7 +11,6 @@ import {
 } from "@/lib/journal/journal-write-core";
 import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
-import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
 import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
@@ -73,6 +72,8 @@ import {
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
 import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
+import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
+import { logWorkFields } from "@/lib/journal/log-work-fields";
 import {
   activeOrganizationOf,
   orderContextsForChoice,
@@ -495,6 +496,7 @@ function normalizedDraftForHash(draft: {
   workDate: string;
   siteName?: string | null;
   projectId?: string | null;
+  voice?: { language: string; disclosureVersion: string } | null;
 }): Record<string, unknown> {
   return {
     engagementContextId: draft.engagementContextId,
@@ -504,6 +506,10 @@ function normalizedDraftForHash(draft: {
     // The project the hours belong to ("none" = deliberately not project
     // work) is part of what the human confirmed, so it is part of the hash.
     projectId: draft.projectId ?? null,
+    // Voice provenance is bound too, but only when stated: a typed draft's
+    // hash is unchanged, and a confirm cannot add a voice label the draft
+    // never carried (AI-3).
+    ...(draft.voice ? { voice: { language: draft.voice.language, disclosureVersion: draft.voice.disclosureVersion } } : {}),
   };
 }
 
@@ -791,6 +797,8 @@ const journalCreateDraft: CapabilityDescriptor = {
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
       projectId: draft.projectId ?? null,
+      // Dictated text keeps its provenance through confirm (AI-3).
+      ...(draft.voice ? { voice: draft.voice } : {}),
     };
     const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
@@ -807,6 +815,7 @@ const journalCreateDraft: CapabilityDescriptor = {
           notes: resolved.notes,
           engagementContextId: resolved.engagementContextId,
           projectId: resolved.projectId,
+          ...(draft.voice ? { inputOrigin: "voice" } : {}),
           // The RESOLVED context, named — the human must SEE which context
           // the entry will land in before confirming (preselect-and-show,
           // never silently assign).
@@ -829,17 +838,10 @@ function journalConfirmFields(
   locale: string,
   draft: z.infer<typeof workerLogWorkSchema>,
 ): Record<string, string> {
-  return {
-    locale,
-    engagement_context_id: draft.engagementContextId,
-    notes: draft.notes,
-    work_date: draft.workDate,
-    site_name: draft.siteName ?? "",
-    project_id: draft.projectId ?? "",
-    // The stated time becomes time on the record — the same derivation
-    // the conversation executor applies (issue #1689).
-    ...intakeWorkTimeFields(draft.notes, draft.workDate),
-  };
+  // THE ONE mapping the chat's worker.log-work sends too (AI-3): the stated
+  // time becomes time on the record (#1689) and a dictated entry keeps its
+  // voice provenance.
+  return logWorkFields(locale, draft);
 }
 
 /**
@@ -1467,7 +1469,9 @@ const workCardSaveDraft: CapabilityDescriptor = {
     "available-from date, salary range, location country, preferred " +
     "countries) and returns a preview of exactly what would change plus a " +
     "one-time confirmation token. NOTHING is saved. Omitted fields keep " +
-    "their current values; a field sent as null clears it. Confirming " +
+    "their current values, and so does a field sent as null (the canonical " +
+    "save keeps a null value). To empty the preferred countries send an " +
+    "empty list []. Confirming " +
     "requires work_card.save_confirm with this exact draft and token.",
   exposed: true,
   // Read-only is HONEST: the draft reads the current card and mints a token —
@@ -1646,6 +1650,12 @@ const DEMAND_FIELDS = [
   "accommodation",
   "transport",
   "opportunityType",
+  // Bound by the token too: a confirm cannot swap in other dates or another
+  // team split than the person saw in the draft.
+  "startDate",
+  "endDate",
+  "teamCount",
+  "perTeamSize",
 ] as const;
 
 /** null-vs-absent must not change the hash for optional fields — absent and
@@ -1681,7 +1691,9 @@ const demandCreateDraft: CapabilityDescriptor = {
     "the country where the work is; ASK the person when they have not said " +
     "it, never guess); role/location/skills/urgency/notes are optional " +
     "free text; workType/teamSize/accommodation/transport are structured " +
-    "facts a worker's board may later see. Without a country the draft " +
+    "facts a worker's board may later see. startDate/endDate (YYYY-MM-DD) and " +
+    "teamCount × perTeamSize (teams of a stated size, only when they multiply " +
+    "to teamSize) are kept only when the person stated them. Without a country the draft " +
     "returns missing: [\"country\"] and no token. Confirming requires " +
     "demand.create_confirm with this exact draft and token.",
   exposed: true,
@@ -1729,6 +1741,10 @@ const demandCreateDraft: CapabilityDescriptor = {
           country: draft.country ?? null,
           workType: draft.workType ?? null,
           urgency: draft.urgency ?? null,
+          startDate: draft.startDate ?? null,
+          endDate: draft.endDate ?? null,
+          teamCount: draft.teamCount ?? null,
+          perTeamSize: draft.perTeamSize ?? null,
         },
         confirmationToken: token,
         note: "Nothing was created. Confirming requires demand.create_confirm with this exact draft and token; the demand will be created for the named organization.",
@@ -1737,7 +1753,7 @@ const demandCreateDraft: CapabilityDescriptor = {
   },
 };
 
-const demandConfirmInput = companyCreateDemandFields.extend({
+const demandConfirmInput = companyCreateDemandFields.safeExtend({
   confirmationToken: z.string().min(10),
 });
 
@@ -1805,9 +1821,10 @@ const demandCreateConfirm: CapabilityDescriptor = {
         teamSize: draft.teamSize ?? undefined,
         accommodation: draft.accommodation ?? undefined,
         transport: draft.transport ?? undefined,
-        // Declared opportunity type → structured cluster (same as the web
-        // and chat legs); absent when not stated.
-        structuredV2: draft.opportunityType ? { opportunity_type: draft.opportunityType } : undefined,
+        // The ONE mapper the chat uses too: opportunity type, start and end
+        // day, team split. Absent when not stated; the canonical submit drops
+        // a team that no longer explains teamSize.
+        structuredV2: structuredV2FromDeclaredDemand(draft),
       },
     );
     if (!result.ok) {
