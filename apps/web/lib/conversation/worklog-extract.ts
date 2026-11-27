@@ -199,9 +199,9 @@ const SV_BREAK_HOURS_RE = new RegExp(
 // pl "8,5 godziny" / "8 godz." and de "8 Std." were not read (walk 2026-10-11:
 // a Polish entry saved with no duration). sv "8 timmar" / "8 tim" are read by
 // the Swedish twin below (2026-11-12).
-const EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L}))/iu;
+const EXPLICIT_HOURS_RE = /(?<![\p{L}\p{N}_])(?<!\d[.,])(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L}))/iu;
 // sv twin — used only for a sentence `looksSwedish` reads as Swedish.
-const SV_EXPLICIT_HOURS_RE = /(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L})|timm(?:e|es|ar|ars)(?!\p{L})|tim\.?(?!\p{L}))/iu;
+const SV_EXPLICIT_HOURS_RE = /(?<![\p{L}\p{N}_])(?<!\d[.,])(\d{1,2})(?:[:.,](\d{1,2}))?\s*(?:val\.?|valand\w*|hour\w*|hrs?|час\w*|uur|stunden?|godz\w*|std\.?(?!\p{L})|timm(?:e|es|ar|ars)(?!\p{L})|tim\.?(?!\p{L}))/iu;
 // site after "objekte X" / "statyboje X" / "site X" / "на объекте в X" —
 // the locative forms only: "Statyba" inside a company name is a NAME, not
 // a place word (the context rules below read it)
