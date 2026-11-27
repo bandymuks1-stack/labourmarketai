@@ -1,6 +1,6 @@
 "use client";
 
-import { countryOptionsForLocale } from "@/lib/location/country-options";
+import type { CountryOption } from "@/lib/location/country-options";
 import { useActionState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
@@ -17,7 +17,7 @@ import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-wo
  * name. Optional: location + client name (both backed by real columns). No
  * journal linking, no worker assignment — and the form says so explicitly.
  */
-export function ProjectContextCreateForm() {
+export function ProjectContextCreateForm({ countryOptions }: { countryOptions: readonly CountryOption[] }) {
   const t = useTranslations("companyOps.createProject");
   const locale = useLocale();
   const [state, action, pending] = useActionState<
@@ -102,7 +102,7 @@ export function ProjectContextCreateForm() {
           data-testid="project-country-select"
         >
           <option value="">—</option>
-          {countryOptionsForLocale(locale).map((o) => (
+          {countryOptions.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
             </option>

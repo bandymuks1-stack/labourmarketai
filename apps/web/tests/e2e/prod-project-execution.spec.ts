@@ -154,6 +154,60 @@ test("E-1 (3.2). Alfa has its two walk projects — created through the project 
   await ctx.close();
 });
 
+// Reuses the existing production project walk; one bounded synthetic fixture.
+test("E-1a. a project place requires a country and preserves the chosen ISO value", async ({ browser }) => {
+  const token = bearerOf("owner");
+  const identityResponse = await qaApi("/auth/v1/user", token);
+  expect(identityResponse.ok).toBe(true);
+  const identity = await identityResponse.json();
+  expect(identity.app_metadata?.qa_synthetic).toBe(true);
+  const orgResponse = await qaApi(
+    ("/rest/v1/organizations?select=id,display_name,legal_name&owner_profile_id=eq." + identity.id) as Parameters<typeof qaApi>[0], token,
+  );
+  expect(orgResponse.ok).toBe(true);
+  const organizations = (await orgResponse.json() as { id: string; display_name: string | null; legal_name: string | null }[])
+    .filter((row) => (row.display_name ?? row.legal_name ?? "").startsWith(ALFA));
+  expect(organizations).toHaveLength(1);
+  const title = "QA-SYNTHETIC project country SE";
+  const read = async () => {
+    const res = await qaApi(
+      ("/rest/v1/projects?select=id,country,city&organization_id=eq." + organizations[0].id + "&title=eq." + encodeURIComponent(title)) as Parameters<typeof qaApi>[0], token,
+    );
+    expect(res.ok).toBe(true);
+    return await res.json() as { id: string; country: string | null; city: string | null }[];
+  };
+  const { ctx, page } = await as(browser, "owner");
+  try {
+    await useWorkspace(page, ALFA);
+    await page.goto("/lt/dashboard/company/projects/new");
+    const main = inMain(page);
+    await expect(main.getByTestId("project-country-select")).toBeVisible();
+    const existing = await read();
+    expect(existing.length).toBeLessThanOrEqual(1);
+    if (!existing.length) {
+      await main.getByTestId("project-name-input").fill(title);
+      await main.locator('input[name="location"]').fill("Stockholm");
+      await main.getByTestId("project-create-submit").click();
+      await expect(main.getByTestId("project-create-error")).toHaveAttribute("data-code", "country_required");
+      expect(await read(), "the refused form saved nothing").toHaveLength(0);
+      await main.getByTestId("project-name-input").fill(title);
+      await main.locator('input[name="location"]').fill("Stockholm");
+      await main.getByTestId("project-country-select").selectOption("SE");
+      await main.getByTestId("project-create-submit").click();
+      await expect(main.getByTestId("project-context-created")).toBeVisible({ timeout: 30_000 });
+    }
+    const saved = await read();
+    expect(saved).toHaveLength(1);
+    expect(saved[0]).toMatchObject({ country: "SE", city: "Stockholm" });
+    const other = await qaApi(
+      ("/rest/v1/projects?select=id&id=eq." + saved[0].id) as Parameters<typeof qaApi>[0], bearerOf("manager"),
+    );
+    expect(other.ok).toBe(true);
+    expect(await other.json()).toEqual([]);
+    console.info("[project-country] createdNow=" + !existing.length + " storedCountry=SE crossOrgDenied=true");
+  } finally { await ctx.close(); }
+});
+
 // A run that stopped before E-14 and whose afterAll cleanup also failed
 // (project-execution 41359872373 during a deploy, then 41360971243) leaves
 // Vytas assigned to A and B with a kept clash and a walk stage on A. The next

@@ -77,7 +77,9 @@ describe("every create interface carries the country to the core", () => {
   it("both web forms offer the ISO list and say why a create was refused", () => {
     const form = read("components", "app", "project-context-create-form.tsx");
     expect(form).toContain('data-testid="project-country-select"');
-    expect(form).toContain("countryOptionsForLocale(locale)");
+    expect(form).toContain("countryOptions.map");
+    const page = read("app", "[locale]", "dashboard", "company", "projects", "new", "page.tsx");
+    expect(page).toContain("countryOptions={countryOptionsForLocale(locale)}");
     expect(form).toContain('t("errorCountry")');
     const inline = read("components", "app", "project-assignment-manager.tsx");
     expect(inline).toContain('data-testid="project-create-country"');
