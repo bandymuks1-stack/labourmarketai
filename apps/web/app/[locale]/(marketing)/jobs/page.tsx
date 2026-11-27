@@ -394,15 +394,15 @@ const LOCKED_FACTS: L = {
   sv: "Arbetsgivare och plats: efter inloggning",
 };
 
-/** Every bookmark the worker holds points at an ad that has closed since — a
- *  different fact from "you saved nothing", so it gets its own line. */
+/** Saved ads can expire or be withdrawn without removing their bookmarks. */
 const SAVED_ALL_CLOSED: L = {
-  en: "The jobs you saved are no longer open. Open a current job and use Save to keep it here.",
-  lt: "Tavo išsaugotos darbo vietos jau nebėra laisvos. Atidaryk dabartinį skelbimą ir paspausk „Išsaugoti“.",
-  ru: "Сохранённые вами вакансии больше не открыты. Откройте актуальную вакансию и нажмите «Сохранить».",
-  nl: "De vacatures die je bewaarde zijn niet meer open. Open een actuele vacature en gebruik Bewaren.",
-  de: "Die gemerkten Stellen sind nicht mehr offen. Öffnen Sie eine aktuelle Stelle und nutzen Sie Merken.",
-  pl: "Zapisane oferty nie są już aktualne. Otwórz bieżącą ofertę i użyj „Zapisz”.",
+  en: "The saved jobs are no longer available.",
+  lt: "Išsaugoti darbo skelbimai nebeprieinami.",
+  ru: "Сохранённые вакансии больше недоступны.",
+  nl: "De bewaarde vacatures zijn niet meer beschikbaar.",
+  de: "Die gemerkten Stellen sind nicht mehr verfügbar.",
+  pl: "Zapisane oferty nie są już dostępne.",
+  sv: "De sparade jobben är inte längre tillgängliga.",
 };
 
 const SAVED_BADGE: L = {
@@ -524,7 +524,7 @@ export default async function JobsPage({
   // The board's read needs nothing from the session, so a signed-in person does
   // not wait for their bookmarks before it starts (2026-11-04: on a first search
   // the two together took 1.1 s in sequence before the search's own 1.1 s). The
-  // saved view reads no board unless its bookmarks turn out to be unavailable.
+  // saved view never replaces a failed bookmark read with unrelated search results.
   const [member, earlyBoardSearch] = await Promise.all([
     (async () => {
       const u = supabase ? (await supabase.auth.getUser()).data.user : null;
@@ -533,11 +533,11 @@ export default async function JobsPage({
         supabase && id
           ? await listSavedPublicVacancyIds(supabase, id)
           : { vacancyIds: new Set<string>(), available: false };
-      return { user: u, mySaved: saved };
+      return { user: u, mySaved: saved, hasWorkerProfile: id !== null };
     })(),
     wantsSaved ? null : runBoardSearch(),
   ]);
-  const { user, mySaved } = member;
+  const { user, mySaved, hasWorkerProfile } = member;
 
   // Saved view: the worker's own ids, resolved to previews through the member
   // read path under their OWN client. Expired/withdrawn bookmarks drop out
@@ -545,16 +545,20 @@ export default async function JobsPage({
   let savedPreviews: readonly PublicVacancyPreview[] = [];
   // A failed resolve is NOT "you saved nothing": it renders the board's own
   // "did not answer" line instead of the empty-state copy.
-  let savedReadFailed = false;
-  const showSaved = wantsSaved && mySaved.available;
-  if (showSaved && supabase) {
-    const r = await listPublicVacancyPreviewsByIds(
-      supabase,
-      [...mySaved.vacancyIds],
-      new Date().toISOString(),
-    );
-    if (r.status === "ok") savedPreviews = r.previews;
-    else savedReadFailed = true;
+  const showSaved = wantsSaved && hasWorkerProfile;
+  let savedReadFailed = showSaved && !mySaved.available;
+  if (showSaved && mySaved.available && supabase) {
+    try {
+      const r = await listPublicVacancyPreviewsByIds(
+        supabase,
+        [...mySaved.vacancyIds],
+        new Date().toISOString(),
+      );
+      if (r.status === "ok") savedPreviews = r.previews;
+      else savedReadFailed = true;
+    } catch {
+      savedReadFailed = true;
+    }
   }
   // The tab counts what the saved view can actually show. Off that view the
   // raw bookmark count stands (resolving every bookmark on each board render
@@ -666,7 +670,7 @@ export default async function JobsPage({
         metadata={{
           surface: showSaved ? "public_jobs_saved" : profession ? "public_jobs_profession" : "public_jobs",
           role_context: user ? "member" : "anonymous",
-          success: result.status !== "unavailable",
+          success: !savedReadFailed && result.status !== "unavailable",
           candidate_count: showSaved ? savedPreviews.length : result.vacancies.length,
         }}
       />
@@ -730,10 +734,9 @@ export default async function JobsPage({
         </button>
       </form>
 
-      {/* The saved view exists only for a signed-in worker whose bookmark read
-          succeeded. Anonymous visitors and non-workers see no tab at all —
-          honest invisibility rather than a control that leads nowhere. */}
-      {mySaved.available && (
+      {/* Only the worker's own saved view. Keep its navigation on read failure
+          so the worker can return to all jobs; never show a false zero count. */}
+      {(mySaved.available || showSaved) && (
         <nav data-testid="public-jobs-tabs" className="mt-6 flex flex-wrap gap-2 text-sm">
           <Link
             href="/jobs"
@@ -755,7 +758,7 @@ export default async function JobsPage({
                 : "rounded-full border px-3 py-1 text-text-muted"
             }
           >
-            {SAVED_TAB[active]} ({savedTabCount})
+            {SAVED_TAB[active]}{!savedReadFailed && ` (${savedTabCount})`}
           </Link>
         </nav>
       )}
