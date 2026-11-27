@@ -2855,3 +2855,13 @@ versions never match file prefixes by construction, so a push would re-run every
 - The owner approved the exact SQL (SHA256 `DC4242E68182E0A2BAB9357EFC363E5632A444A58A469869B5C8E7C03CF13FAC`) and then explicitly authorized this one-time sequence: independent code checks, owner-channel apply, production read-back, unchanged live catalog gate, merge only after required checks pass. This supersedes the earlier merge-first header comment for this apply only; executable SQL is unchanged. The same catalog ordering constraint is documented above for PR #1190.
 - Immediate production read-back passed against the approved function bodies and contracts. Existing publication choices and table access were preserved. Detailed evidence remains in the owner's private artifacts.
 - Rollback: `supabase/rollbacks/20261125133404_public_personal_service_search_v1.down.sql` (tested before application). The paired rollback preserves offerings, stored publication choices and recorded history.
+
+## 2026-11-27 — CV concurrent-save protection (#3111)
+
+- Source: `supabase/migrations/20261106090000_cv_rows_one_statement_once.sql`; SHA256 `CDEBD4BCC699F5615292821EB45F9E6A4EEB40595670D8FFB990D56D55F0D404`.
+- Specific owner approval received 2026-11-27 for this SQL, manual merge, production application and synthetic verification. Required `quality` and `migration-safety` checks passed on reviewed head `108b6db5e26c5c57d537f38c10f4150b1a72d6cb`; manually merged as `9e2f2d0d2d5a711ff4d76d383be226866db5725f`.
+- APPLIED through Supabase MCP at 20:23 UTC. Production migration name `cv_rows_one_statement_once`, ledger version `20261127202311`. Applied bytes match the approved source and merged commit; do not reapply using the repository filename timestamp.
+- Immediate read-back: both unique partial indexes valid with the same cutover timestamp and NULLS NOT DISTINCT; the existing work-history RPC contains the per-person advisory lock; existing RLS and execute permissions remain. No new security advisory appeared.
+- Existing rows remain unchanged. The partial indexes exclude rows whose transaction timestamp precedes cutover; this is not whole-table historical deduplication.
+- Production verification: `cv-import-duplicates` run `46067486489` on build `9e2f2d0d`, real Chrome, PASS. Initial/repeated import, three two-tab races per record type and double-click each leave one education/certificate row after reload. Synthetic rows were removed and both UI/API cleanup checks passed. This verifies new imported education/certificate records; historical duplicates were not changed.
+- Rollback: `supabase/rollbacks/20261106090000_cv_rows_one_statement_once.down.sql` (reviewed and previously tested; restores the former RPC and drops only the new indexes).

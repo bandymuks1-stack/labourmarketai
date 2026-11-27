@@ -4,6 +4,7 @@ import { resolve } from "node:path";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 import { proveActionTiles } from "./action-tile-proof";
+import { answerNoProjectIfAsked } from "./worklog-context";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
 import { needLinks, requestIdOf, submitSyntheticNeed } from "./prod-need-post";
@@ -22,8 +23,9 @@ import { needLinks, requestIdOf, submitSyntheticNeed } from "./prod-need-post";
  *                    reload: Gama finds the booked person on its people page
  *                    and in its engagements; the worker, in Personal space,
  *                    sees the engagement with Gama; Alfa sees neither (O-9..O-11).
- *                    Gama↔Vytas has been active since the first run (no walk
- *                    ends it), so the step proves it EXISTS, not that it is new.
+ *                    HIRE-5: ends only this synthetic pair's former hire first, preserving
+ *                    its history; the new acceptance must create a new hire. Its work
+ *                    relationship then carries a journal entry, company confirmation and CV.
  *   6.9  Finance   — the owner records an expense for the workspace company,
  *                    finds it in the CSV export, then cancels it.
  *   6.7  Procurement — the owner files an inquiry for the ACTIVE workspace,
@@ -126,6 +128,10 @@ async function closeNeed(page: Page, requestId: string): Promise<"closed" | "alr
 }
 
 let workerId = "";
+let workerProfileId = "";
+let hiringCompanyId = "";
+let hiringOrganizationId = "";
+const priorRelationshipIds = new Set<string>();
 let requestId = "";
 let bookingId = "";
 
@@ -156,6 +162,52 @@ test("O-0. the worker's own worker id (own row, own token)", async () => {
   const rows = (await res.json()) as { id: string }[];
   expect(rows.length, "exactly one own worker row").toBe(1);
   workerId = rows[0].id;
+  workerProfileId = sub;
+});
+
+// A long-lived active booking would make record_booking_engagement return the old
+// row, so it could not exercise the newly installed hire trigger. The ordinary UI
+// ends only the allowlisted worker's QA-SYNTHETIC Gama hire. Nothing is erased.
+test("O-0a (HIRE-5). end this synthetic pair's former hire, keeping its history", async ({ browser }) => {
+  const response = await qaApi(
+    `/rest/v1/company_worker_engagements?select=id,companies(display_name,legal_name)&worker_id=eq.${workerId}&status=eq.active`,
+    bearerOf("manager"),
+  );
+  expect(response.status).toBe(200);
+  const rows = (await response.json()) as { id: string; companies: { display_name: string | null; legal_name: string | null } | null }[];
+  const own = rows.filter((r) => [r.companies?.display_name, r.companies?.legal_name].some((n) => (n ?? "").includes(GAMA)));
+  expect(own.length, "at most one active hire for the synthetic pair").toBeLessThanOrEqual(1);
+  const orgResponse = await qaApi(`/rest/v1/organizations?select=id,legacy_company_id,display_name&display_name=like.${encodeURIComponent(GAMA + "%")}`, bearerOf("manager"));
+  expect(orgResponse.status).toBe(200);
+  const orgs = (await orgResponse.json()) as { id: string; legacy_company_id: string; display_name: string }[];
+  expect(orgs).toHaveLength(1);
+  expect(orgs[0]!.display_name).toContain(GAMA);
+  hiringOrganizationId = orgs[0]!.id;
+  hiringCompanyId = orgs[0]!.legacy_company_id;
+  if (own.length > 0) {
+    const id = own[0]!.id;
+    expect(id).toMatch(/^[0-9a-f-]{36}$/);
+    const { ctx, page } = await as(browser, "manager");
+    try {
+      await useWorkspace(page, GAMA);
+      await page.goto("/lt/dashboard?result=engagements");
+      const card = page.getByTestId(`engagement-${id}`).filter({ visible: true }).first();
+      await expect(card).toBeVisible({ timeout: 60_000 });
+      await card.getByTestId(`engagement-end-${id}`).click();
+      await card.getByTestId(`engagement-end-confirm-${id}`).click();
+      await expect(card.getByTestId(`engagement-status-${id}`)).toHaveAttribute("data-status", "ended", { timeout: 30_000 });
+      const retained = await qaApi(`/rest/v1/company_worker_engagements?select=id,status&id=eq.${id}`, bearerOf("worker"));
+      expect(retained.status).toBe(200);
+      expect(await retained.json(), "the former hire remains history").toEqual([{ id, status: "ended" }]);
+    } finally { await ctx.close(); }
+  }
+  const before = await qaApi(`/rest/v1/engagement_contexts?select=id,status&profile_id=eq.${workerProfileId}&organization_id=eq.${hiringOrganizationId}`, bearerOf("worker"));
+  expect(before.status).toBe(200);
+  const relationships = (await before.json()) as { id: string; status: string }[];
+  // Never end an independently owned relationship to make a test pass.
+  // If another fixture added one, this creation proof must stop honestly.
+  expect(relationships.filter((r) => r.status === "active"), "no active relationship before the new acceptance").toHaveLength(0);
+  for (const row of relationships) priorRelationshipIds.add(row.id);
 });
 
 /**
@@ -392,14 +444,16 @@ test("O-9 (5.13). Gama finds the booked worker on its people page and in its eng
   // The accept (respond_booking_request_v4) makes or keeps ONE active engagement for the pair.
   // Read with the manager's own token: RLS lets the owning company read only its own rows.
   const res = await qaApi(
-    `/rest/v1/company_worker_engagements?select=id,status,companies(display_name,legal_name)&worker_id=eq.${encodeURIComponent(workerId)}&status=eq.active`,
+    `/rest/v1/company_worker_engagements?select=id,status,company_id,source_booking_id,companies(display_name,legal_name)&worker_id=eq.${encodeURIComponent(workerId)}&status=eq.active`,
     bearerOf("manager"),
   );
   expect(res.status, "the company's own engagements answered").toBe(200);
-  const rows = (await res.json()) as { id: string; companies: { display_name: string | null; legal_name: string | null } | null }[];
+  const rows = (await res.json()) as { id: string; company_id: string; source_booking_id: string; companies: { display_name: string | null; legal_name: string | null } | null }[];
   const gama = rows.filter((r) => [r.companies?.display_name, r.companies?.legal_name].some((n) => (n ?? "").includes(GAMA)));
   expect(gama.length, "exactly one active Gama engagement with the booked worker").toBe(1);
   engagementId = gama[0]!.id;
+  expect(gama[0]!.company_id).toBe(hiringCompanyId);
+  expect(gama[0]!.source_booking_id, "this acceptance created the hire, not an earlier run").toBe(bookingId);
 
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
@@ -414,6 +468,80 @@ test("O-9 (5.13). Gama finds the booked worker on its people page and in its eng
   expect(name.length, "the booked person is named").toBeGreaterThan(0);
   await engagementActive(page, "Gama", name);
   await ctx.close();
+});
+
+test("O-9a (HIRE-5). the new hire carries work to company confirmation and Living CV", async ({ browser }) => {
+  test.setTimeout(480_000);
+  const orgResponse = await qaApi(`/rest/v1/organizations?select=id,display_name&legacy_company_id=eq.${hiringCompanyId}`, bearerOf("manager"));
+  expect(orgResponse.status).toBe(200);
+  const orgs = (await orgResponse.json()) as { id: string; display_name: string }[];
+  expect(orgs).toHaveLength(1);
+  expect(orgs[0]!.display_name).toContain(GAMA);
+  const contexts = await qaApi(`/rest/v1/engagement_contexts?select=id,journal_review_enabled&profile_id=eq.${workerProfileId}&organization_id=eq.${orgs[0]!.id}&status=eq.active`, bearerOf("worker"));
+  expect(contexts.status).toBe(200);
+  const relationships = (await contexts.json()) as { id: string; journal_review_enabled: boolean }[];
+  expect(relationships, "the accepted hire is connected to one work relationship").toHaveLength(1);
+  const relationship = relationships[0]!;
+  expect(orgs[0]!.id).toBe(hiringOrganizationId);
+  expect(priorRelationshipIds.has(relationship.id), "the new acceptance opened a new interval").toBe(false);
+  const company = await as(browser, "manager");
+  const worker = await as(browser, "worker", true);
+  try {
+    await useWorkspace(company.page, GAMA);
+    if (!relationship.journal_review_enabled) {
+      const fold = company.page.getByRole("main").getByTestId("people-more").first();
+      await expect(fold).toBeAttached({ timeout: 60_000 });
+      if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
+      await company.page.getByRole("main").getByTestId(`toggle-review-${relationship.id}`).click();
+      await expect.poll(async () => {
+        const res = await qaApi(`/rest/v1/engagement_contexts?select=journal_review_enabled&id=eq.${relationship.id}`, bearerOf("worker"));
+        expect(res.status).toBe(200);
+        return ((await res.json()) as { journal_review_enabled: boolean }[])[0]?.journal_review_enabled;
+      }, { timeout: 30_000 }).toBe(true);
+    }
+    await worker.page.goto("/lt/cv");
+    await expect(worker.page.getByTestId("cv-skills").filter({ visible: true })).toBeVisible({ timeout: 60_000 });
+    const confirmed = worker.page.getByTestId("cv-confirmed-work").filter({ visible: true });
+    const beforeConfirmed = (await confirmed.count()) ? Number(await confirmed.getAttribute("data-entries")) : 0;
+    await worker.page.goto("/lt/dashboard/work-in-numbers");
+    const journal = worker.page.getByTestId("wi-experience-journal").filter({ visible: true });
+    await expect(journal).toBeVisible({ timeout: 60_000 });
+    const beforeHours = Number(await journal.getAttribute("data-hours"));
+    const entryText = `QA-SYNTHETIC ${RUN} HIRE: šiandien 2 valandas mūrijau blokelių sieną`;
+    await worker.page.goto("/lt/dashboard/journal");
+    const main = worker.page.getByRole("main");
+    await main.getByTestId("journal-quick-record-text").fill(entryText);
+    await main.getByTestId("journal-quick-record-understand").click();
+    await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 60_000 });
+    const context = main.getByTestId("worklog-context");
+    await expect(context, "the worker can select the hiring company").toBeVisible();
+    await context.selectOption(relationship.id);
+    await answerNoProjectIfAsked(worker.page);
+    await main.getByTestId("worklog-save").click();
+    await main.getByTestId("worklog-confirm").click();
+    await expect(main.getByTestId("worklog-done")).toBeVisible({ timeout: 30_000 });
+    const stored = await qaApi(`/rest/v1/journal_entries?select=id,engagement_context_id&worker_id=eq.${workerId}&original_text=eq.${encodeURIComponent(entryText)}`, bearerOf("worker"));
+    expect(stored.status).toBe(200);
+    const entries = (await stored.json()) as { id: string; engagement_context_id: string }[];
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.engagement_context_id).toBe(relationship.id);
+    const entryId = entries[0]!.id;
+    await company.page.goto("/lt/dashboard/inbox");
+    const inbox = company.page.getByRole("main");
+    await expect(inbox.getByTestId(`inbox-entry-${entryId}`)).toBeVisible({ timeout: 60_000 });
+    await inbox.getByTestId(`journal-approve-entry-${entryId}`).click();
+    await expect.poll(async () => {
+      const res = await qaApi(`/rest/v1/journal_entry_confirmations?select=confirmation_scope&entry_id=eq.${entryId}`, bearerOf("worker"));
+      expect(res.status).toBe(200);
+      return ((await res.json()) as { confirmation_scope: { decision?: string } }[]).map((r) => r.confirmation_scope.decision);
+    }, { timeout: 30_000 }).toEqual(["approved"]);
+    await worker.page.goto("/lt/cv");
+    await expect(confirmed).toHaveAttribute("data-entries", String(beforeConfirmed + 1), { timeout: 60_000 });
+    await expect(worker.page.getByRole("main").first().getByTestId("cv-history-node").filter({ hasText: GAMA }).getByTestId("cv-history-recorded").first()).toBeVisible();
+    await worker.page.goto("/lt/dashboard/work-in-numbers");
+    await expect(journal, "the confirmed work counts once").toHaveAttribute("data-hours", String(beforeHours + 2), { timeout: 60_000 });
+    // The synthetic confirmed entry and its attributable history are retained.
+  } finally { await worker.ctx.close(); await company.ctx.close(); }
 });
 
 test("O-10 (5.13). the worker, in Personal space on the phone, sees the engagement with Gama", async ({ browser }) => {
