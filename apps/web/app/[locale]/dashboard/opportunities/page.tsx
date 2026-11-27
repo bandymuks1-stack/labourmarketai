@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/Badge";
+import { LmLogo } from "@/components/ui/lm-logo";
+import { vacancyOriginLabels } from "@/components/marketing/public-vacancy-card-facts";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isAssessedFit } from "@/lib/opportunities/fit-band";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -1381,6 +1384,7 @@ export default async function OpportunitiesPage({
                           {section.rows.map((row) =>
                             row.kind === "external" ? (
                               <ExternalOpportunityRow
+                                locale={locale}
                                 key={row.key}
                                 card={row.card}
                                 band={row.band}
@@ -1481,6 +1485,14 @@ export default async function OpportunitiesPage({
                                           ) : null}
                                         </p>
                                         <FitBandChip band={row.band} label={bandChip(row.band)} />
+                                      </div>
+
+                                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-text-secondary" data-testid="job-origin" data-origin="platform">
+                                        <Badge tone="neutral" className="gap-1.5 font-sans normal-case tracking-normal">
+                                          <LmLogo className="h-4 w-4 shrink-0" title="" />
+                                          LabourMarket.ai
+                                        </Badge>
+                                        <span>{vacancyOriginLabels(locale).platform_internal}</span>
                                       </div>
 
                                       {/* Organization / source · place · start — ONE compact meta

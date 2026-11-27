@@ -313,6 +313,8 @@ export async function listPublicVacancyPreviewsByIds(
 /** What a MEMBER's board card adds to the anonymous projection: who
  *  publishes the ad and where the work is (owner P0-3, 2026-11-03). */
 export interface MemberVacancyFactsV1 {
+  readonly attributionCode: string | null;
+  readonly applicationUrl: string | null;
   readonly employerName: string | null;
   readonly city: string | null;
   readonly region: string | null;
@@ -336,7 +338,7 @@ export async function listMemberVacancyFactsByIds(
   if (wanted.length === 0) return new Map();
   const { data, error } = await client
     .from(VACANCY_TABLE)
-    .select("id,employer_name,city,region,country")
+    .select("id,employer_name,city,region,country,attribution_code,application_url")
     .in("id", wanted);
   if (error) return new Map();
   const str = (v: unknown): string | null =>
@@ -344,6 +346,8 @@ export async function listMemberVacancyFactsByIds(
   const out = new Map<string, MemberVacancyFactsV1>();
   for (const row of (data ?? []) as readonly Record<string, unknown>[]) {
     out.set(String(row.id ?? ""), {
+      attributionCode: str(row.attribution_code),
+      applicationUrl: str(row.application_url),
       employerName: str(row.employer_name),
       city: str(row.city),
       region: str(row.region),
