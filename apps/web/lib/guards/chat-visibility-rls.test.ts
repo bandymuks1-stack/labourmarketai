@@ -260,6 +260,11 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
     //    check. It calls exactly one RPC, reads and writes no table directly,
     //    touches no chat table, and sends nothing outbound — the projection it
     //    returns carries no name, email, phone or address by construction.
+    //  - lib/commercial/live-payments-flag.ts — the second owner act for LIVE
+    //    checkouts (#2441). Reads ONE row of lmc_settings (key
+    //    live_payments_enabled, column enabled) and returns only
+    //    enabled / disabled / unavailable; any read failure fails closed.
+    //    No user data, no chat table, no write, nothing outbound.
     //  - lib/commercial/handoff-dispatch.ts — the outgoing commercial-handoff
     //    dispatcher (worker → real vacancy → interest → Nonstop, 2026-09-17).
     //    A cron sweep with no user session. It calls exactly ONE RPC,
@@ -552,6 +557,7 @@ describe("chat visibility — no service-role bypass in user-facing chat paths",
       "lib/billing/reconcile.ts",
       "lib/billing/subscription-store.ts",
       "lib/commercial/handoff-dispatch.ts",
+      "lib/commercial/live-payments-flag.ts",
       "lib/communication/communication-core.ts",
       "lib/company/claim-public-intake.ts",
       "lib/email/send-ledger-store.ts",
