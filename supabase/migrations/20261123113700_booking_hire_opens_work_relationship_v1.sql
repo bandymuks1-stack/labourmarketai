@@ -3,6 +3,8 @@
 -- RED tier (needs-human-gate). NOT applied to any shared database. Production
 -- apply only via Supabase MCP apply_migration after the owner approves THIS
 -- migration by name.
+-- RED acknowledgement; this exact SQL still requires explicit owner approval.
+-- @human-gate-approved
 --
 -- WHY (owner addendum 2026-11-23, HIRE-5): a fact recorded once is used
 -- everywhere it relates. An accepted booking (a direct hire) is recorded only

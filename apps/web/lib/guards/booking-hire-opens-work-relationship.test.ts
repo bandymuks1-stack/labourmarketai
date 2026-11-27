@@ -41,10 +41,11 @@ describe("a direct hire opens the work relationship (HIRE-5)", () => {
     expect(UP).toMatch(/where o\.legacy_company_id = new\.company_id\) <> 1 then\s+v_org := null;/);
   });
 
-  it("no app role calls the trigger functions; RED with no approval marker; the rollback refuses once used", () => {
+  it("no app role calls the trigger functions; owner-approved RED marker; the rollback refuses once used", () => {
     expect(UP).toMatch(/revoke all on function public\.booking_hire_open_relationship_v1\(\) from public, anon, authenticated;/);
     expect(UP).toMatch(/revoke all on function public\.booking_hire_close_relationship_v1\(\) from public, anon, authenticated;/);
-    expect(RAW).not.toMatch(/@human-gate-approved/);
+    expect(RAW).toMatch(/@human-gate-approved/);
+    expect(DOWN.indexOf("lock table public.company_worker_engagements")).toBeLessThan(DOWN.indexOf("if exists (select 1 from public.audit_logs"));
     expect(DOWN).toMatch(/raise exception 'hires already opened work relationships/);
   });
 });
