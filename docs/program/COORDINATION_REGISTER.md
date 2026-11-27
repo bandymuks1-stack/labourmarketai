@@ -170,6 +170,9 @@ Supabase/browser checks and production application remain outstanding. Continue
 these PRs; their current bodies carry exact heads and subsequent run receipts.
 No new audit or competing implementation is needed.
 
+The 2026-11-25 table below is historical evidence, not the current deployment
+or unfinished-work status. Use the continuation above and the current PR bodies.
+
 Codex now holds coordination under the owner's current instruction. This supersedes
 older coordinator assignments, without deleting their work or history. The existing
 completion roadmap and #3265 remain the shared queue; no second register is created.
