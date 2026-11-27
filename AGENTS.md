@@ -4,6 +4,58 @@
 
 ---
 
+## Mandatory continuity between agents
+
+**Owner instruction, 2026-11-27. Binding on Codex, Claude Code and every other
+agent, including a new or resumed session.**
+
+Before starting work or changing a file:
+
+1. Read the latest execution receipt and relevant entries in the existing
+   `docs/program/COORDINATION_REGISTER.md`, function register and current PR
+   bodies. Establish what the previous executor completed, where it stopped,
+   which acceptance criteria remain and which approvals already apply. A new
+   chat does not reset the task or invalidate an existing approval.
+2. Verify the repository, branch and working-tree changes; inspect relevant
+   open/merged PRs, their current heads/checks, and pending migrations or
+   deployments. Reconcile them with the affected production build and existing
+   production evidence. A historic handover is context, not current truth.
+3. Continue the existing unfinished implementation before creating another
+   branch or solution for the same problem. Preserve useful uncommitted work,
+   history and proven functionality; do not overwrite another active claim.
+   Repeat successful checks only for a concrete change, regression or missing
+   acceptance criterion. Do not restart a full audit to regain context.
+4. Confirm that a named executor is actually active before assigning work or
+   waiting for it. A tool, model name, old assignment or local process alone is
+   not evidence of an active executor. When no other executor is active, carry
+   out the authorized work yourself under the existing claim/takeover rules;
+   do not leave tasks assigned to an inactive agent or require the owner to
+   relay routine progress. A genuine gate blocks its dependent action only:
+   continue independent authorized work while CI or an approval is pending.
+
+Before ending or handing over work, and before a context transition when possible,
+record a continuation receipt in the **existing PR and/or coordination entry**:
+
+- objective, repository/branch, current SHA and relevant PRs;
+- what changed, what is committed/pushed, and any remaining local changes with
+  their paths; never call an uncommitted change shared or available elsewhere;
+- validation and actual production state, with existing run/build references;
+  distinguish implemented, reviewed, merged, deployed and production-verified;
+- remaining acceptance criteria, the next concrete action, and each real
+  blocker with the exact required decision/input and its governing rule;
+- already granted approvals and their scope, so the next executor neither
+  asks again nor extends them to a different migration or action.
+
+The next executor must be able to continue from that receipt without rebuilding
+the prior analysis. A chat transcript alone is not a shared handover. Use the
+existing private evidence location for sensitive details and only permitted
+identifiers/statuses in public GitHub records. **Do not create another register,
+audit, orchestration process or handoff system.** This rule extends the existing
+`docs/CHATGPT_CLAUDE_EXECUTION_PROTOCOL.md` and coordination protocol; it does
+not replace their safety, ownership, review or production gates.
+
+---
+
 ## Naming — labourmarket.ai only
 
 Owner ruling 2026-08-23: **"LABMA" is not a name, alias, predecessor,
