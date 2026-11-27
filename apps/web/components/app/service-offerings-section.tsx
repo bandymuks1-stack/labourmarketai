@@ -1,5 +1,6 @@
 "use client";
 
+import { Button } from "@/components/ui/Button";
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
@@ -239,24 +240,27 @@ export function ServiceOfferingsSection({
         <>
           {mode.kind === "idle" ? (
             <div className="flex flex-wrap gap-2">
-              <button
+              <Button
                 type="button"
                 onClick={openCreate}
+                size="sm"
                 data-testid="service-offering-add"
-                className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-brand-blue bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-colors hover:bg-brand-champagne"
+                className="min-h-11 gap-1.5"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
                 {labels.addButton}
-              </button>
-              <button
+              </Button>
+              <Button
                 type="button"
                 onClick={openCreatePartnership}
+                variant="secondary"
+                size="sm"
                 data-testid="service-offering-add-partnership"
-                className="inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary transition-colors hover:border-brand-blue hover:text-brand-blue"
+                className="min-h-11 gap-1.5"
               >
                 <Plus className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
                 {labels.addPartnership}
-              </button>
+              </Button>
             </div>
           ) : (
             <div
@@ -353,22 +357,20 @@ export function ServiceOfferingsSection({
                 </p>
               )}
               <div className="flex items-center gap-2">
-                <button
+                <Button
                   type="button"
                   onClick={submit}
-                  disabled={pending}
+                  loading={pending}
+                  variant="secondary"
+                  size="sm"
                   data-testid="service-offering-save"
-                  className="min-h-11 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:border-brand-blue disabled:opacity-60"
+                  className="min-h-11"
                 >
                   {pending ? labels.saving : labels.save}
-                </button>
-                <button
-                  type="button"
-                  onClick={close}
-                  className="min-h-11 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-medium text-text-secondary hover:text-text-primary"
-                >
+                </Button>
+                <Button type="button" onClick={close} variant="ghost" size="sm" className="min-h-11 px-3">
                   {labels.cancel}
-                </button>
+                </Button>
               </div>
             </div>
           )}
