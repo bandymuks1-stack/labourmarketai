@@ -29,6 +29,7 @@ import {
 } from "@/lib/timesheets/timesheets";
 import { createUtcFormatter } from "@/lib/time/display";
 import { viewerWorkToday } from "@/lib/time/viewer-day";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
 
 /**
  * Timesheets area of the planning (calendar) page — the audit's MISSING
@@ -126,8 +127,15 @@ export async function TimesheetsSection({
     );
   }
 
-  const today = (await viewerWorkToday()).todayIso;
-  const defaultPeriod = currentMonthPeriod(today);
+  const [workDay, workspace] = await Promise.all([
+    viewerWorkToday(),
+    getWorkspaceContext(),
+  ]);
+  const defaultPeriod = currentMonthPeriod(workDay.todayIso);
+  // Prefer the displayed organization only if the existing reader allows it.
+  const defaultOrganizationId = overview.orgOptions.find(
+    (o) => o.organizationId === workspace.activeWorkspaceId,
+  )?.organizationId ?? overview.orgOptions[0]?.organizationId;
   const fmt = (d: string) => dateFmt(d) ?? d;
 
   function totalsLine(sheet: TimesheetRow): string {
@@ -240,7 +248,13 @@ export async function TimesheetsSection({
             <input type="hidden" name="locale" value={locale} />
             <div className="flex flex-col gap-1">
               <Label htmlFor="timesheet-org">{t("create.organization")}</Label>
-              <Select id="timesheet-org" name="organizationId" required>
+              <Select
+                key={workspace.activeWorkspaceId}
+                id="timesheet-org"
+                name="organizationId"
+                defaultValue={defaultOrganizationId}
+                required
+              >
                 {overview.orgOptions.map((o) => (
                   <option key={o.organizationId} value={o.organizationId}>
                     {o.name ?? t("create.unnamedOrganization")}
