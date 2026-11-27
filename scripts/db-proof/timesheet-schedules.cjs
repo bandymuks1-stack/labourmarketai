@@ -108,18 +108,21 @@ assert.equal(as('',`select count(*) from public.pending_timesheet_schedule_notif
 
 // Repeat bounded scheduling selectors on one connection across the generic-plan switch.
 // Uses the plan-cache-probe.sql method; synthetic data only, no production timing claim.
-const perf = json(`do $$ declare mode text; i integer; begin
+const perf = json(`do $$ declare mode text; i integer; started timestamptz; worst numeric := 0; begin
   foreach mode in array array['auto','force_generic_plan'] loop
     perform set_config('plan_cache_mode',mode,true);
     for i in 1..12 loop
+      started := clock_timestamp();
       perform id from public.timesheet_schedules ts where ts.enabled and ts.next_run_at<=now()
         and ts.pending_instance_id is null and (ts.retry_after is null or ts.retry_after<=now())
         order by ts.next_run_at,ts.id limit 20;
       perform id from public.timesheet_schedules ts where ts.pending_instance_id is not null
         and (ts.retry_after is null or ts.retry_after<=now()) order by ts.id limit 40;
+      worst := greatest(worst,extract(epoch from clock_timestamp()-started)*1000);
     end loop;
   end loop;
-end $$; select json_build_object('modes',2,'callsPerSelectorPerMode',12);`);
+  perform set_config('proof.schedule_worst_ms',worst::text,false);
+end $$; select json_build_object('modes',2,'callsPerSelectorPerMode',12,'worstPairMs',current_setting('proof.schedule_worst_ms')::numeric);`);
 // Existing privacy registry shape, one additive decision and a history-preserving rollback.
 const registrySource=file('supabase/migrations/20261019140000_privacy_erasure_executor_v3.sql');
 const ri=registrySource.indexOf('create table if not exists public.privacy_erasure_registry_v3 (');

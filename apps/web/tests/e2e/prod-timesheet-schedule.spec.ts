@@ -148,7 +148,7 @@ test("worker chooses a delivery time; the existing cron submits journal hours to
     try {
       const employerPage = await employer.newPage();
       await employerPage.goto("/lt/dashboard/planning#timesheets");
-      await expect(employerPage.getByRole("main").locator(`[data-testid="timesheet-${report[0].id}"]`)).toBeVisible({ timeout: 30_000 });
+      await expect(employerPage.getByRole("main").locator(`[data-testid="timesheet-org-${report[0].id}"]`)).toBeVisible({ timeout: 30_000 });
     } finally { await employer.close(); }
     console.info("[timesheet-schedule] journalHours=2 scheduledSubmission=true chosenQaApprover=true approvalPending=true crossOrgDenied=true");
   } finally {
