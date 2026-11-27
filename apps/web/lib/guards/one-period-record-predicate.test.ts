@@ -42,8 +42,12 @@ describe("one period-record predicate (CV-20)", () => {
     expect(PREDICATE.test(readFileSync(join(WEB, CANONICAL), "utf8")), "the canonical predicate is found").toBe(true);
   });
 
-  it("the person-history summary uses the shared predicate", () => {
-    const src = readFileSync(join(WEB, "lib/organization-evidence/person-history-summary.ts"), "utf8");
-    expect(src).toMatch(/import\s*\{[^}]*\bisPeriodRecord\b[^}]*\}\s*from\s*"\.\/company-work-history"/);
+  it("the person-history summary reaches the shared predicate through the canonical person-hours reader", () => {
+    const summary = readFileSync(join(WEB, "lib/organization-evidence/person-history-summary.ts"), "utf8");
+    const hours = readFileSync(join(WEB, "lib/organization-evidence/person-hours.ts"), "utf8");
+    expect(summary).toMatch(/import\s*\{[^}]*\bpersonHoursOf\b[^}]*\}\s*from\s*"\.\/person-hours"/);
+    expect(summary).toMatch(/\bpersonHoursOf\(live\)/);
+    expect(hours).toMatch(/import\s*\{[^}]*\bisPeriodRecord\b[^}]*\}\s*from\s*"\.\/company-work-history"/);
+    expect(hours).toMatch(/\bisPeriodRecord\(r\)/);
   });
 });
