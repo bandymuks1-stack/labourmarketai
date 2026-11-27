@@ -334,13 +334,16 @@ for (const w of WIDTHS) {
       await page.goto(`${BASE}/en/dashboard/company/projects/new`);
       const main = page.getByRole("main");
       await main.getByTestId("project-name-input").fill(PROJECT);
+      await main.locator('input[name="location"]').fill("Göteborg");
+      await main.getByTestId("project-country-select").selectOption("SE");
       await main.getByTestId("project-create-submit").click();
       const ok = main.getByTestId("project-context-created");
       const err = main.getByTestId("project-create-error");
       await expect(ok.or(err)).toBeVisible({ timeout: 30_000 });
       if (await err.isVisible()) throw new Error(`project not created: ${await err.getAttribute("data-code")}`);
-      const projects = sql<{ id: string }>(`select id from public.projects where title = ${lit(PROJECT)}`);
+      const projects = sql<{ id: string; country: string }>(`select id, country from public.projects where title = ${lit(PROJECT)}`);
       expect(projects, "the project is stored once").toHaveLength(1);
+      expect(projects[0]!.country).toBe("SE");
       s.projectId = projects[0]!.id;
       await page.goto(`${BASE}/en/dashboard/projects`);
       const assign = page.getByRole("main").getByTestId("project-assign");

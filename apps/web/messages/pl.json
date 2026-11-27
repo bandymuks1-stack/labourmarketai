@@ -1876,7 +1876,9 @@
       "errorName": "Proszę wprowadzić nazwę projektu (co najmniej 2 znaki).",
       "errorNoCompany": "Tylko konto firmowe może utworzyć kontekst projektu.",
       "errorNotAuthorized": "Tworzenie projektów jest tu zastrzeżone dla właściciela lub administratora organizacji. Można poprosić ich o utworzenie projektu albo o przyznanie Państwa roli tego prawa.",
-      "error": "Nie udało się utworzyć. Proszę spróbować ponownie."
+      "error": "Nie udało się utworzyć. Proszę spróbować ponownie.",
+      "countryLabel": "Kraj",
+      "errorCountry": "Wybierz kraj, w którym jest miejsce projektu."
     },
     "needsTitle": "Zapytania",
     "needsBody": "Złóż ustrukturyzowane zapytanie i śledź jego status.",
@@ -6516,7 +6518,9 @@
       "cityLabel": "Miasto (opcjonalnie)",
       "cityPlaceholder": "np. Wilno",
       "submit": "Utwórz projekt",
-      "noCompany": "Najpierw proszę utworzyć profil firmy."
+      "noCompany": "Najpierw proszę utworzyć profil firmy.",
+      "countryLabel": "Kraj",
+      "errorCountry": "Wybierz kraj, w którym jest miejsce projektu."
     },
     "assign": {
       "title": "Przypisz pracownika do projektu",
@@ -14430,7 +14434,9 @@
         "supplyTeamSize": "Ilu macie ludzi",
         "supplyLocation": "Gdzie mogą pracować",
         "demandCountry": "Kraj, w którym będzie praca",
-        "demandCountryPlaceholder": "np. Szwecja lub SE"
+        "demandCountryPlaceholder": "np. Szwecja lub SE",
+        "projectCountry": "Kraj",
+        "projectCountryPlaceholder": "np. Szwecja lub SE"
       },
       "availability": {
         "available": "Dostępny/a",
@@ -14466,7 +14472,8 @@
         "errorStale": "Podczas sprawdzania coś się zmieniło (na przykład aktywna przestrzeń robocza). Nic nie zostało zapisane — proszę zacząć od nowa.",
         "errorConflict": "Ta wartość jest już inna. Proszę otworzyć tryb zaawansowany, aby ją zastąpić.",
         "errorOpenNeedLimitUpgrade": "Plan bezpłatny tej organizacji pozwala na 1 aktywną pozycję. Proszę zamknąć jedną lub aktywować plan Organizacja (99 €/mies.) na koncie organizacji.",
-        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Proszę skontaktować się z nami."
+        "errorOpenNeedLimitIndividual": "Ta organizacja osiągnęła limit aktywnych pozycji swojego planu. Nic nie pobrano ani nie zmieniono. Proszę skontaktować się z nami.",
+        "errorCountryRequired": "Podaj kraj miejsca (nazwę lub kod, np. Szwecja lub SE)."
       },
       "urgency": {
         "flexible": "Elastycznie",

@@ -1876,7 +1876,9 @@
       "errorName": "Įveskite projekto pavadinimą (bent 2 simboliai).",
       "errorNoCompany": "Tik įmonės paskyra gali kurti projekto kontekstą.",
       "errorNotAuthorized": "Projektus čia kurti gali tik organizacijos savininkas arba administratorius. Paprašykite jų sukurti projektą arba suteikti jūsų rolei šią teisę.",
-      "error": "Nepavyko sukurti. Bandykite dar kartą."
+      "error": "Nepavyko sukurti. Bandykite dar kartą.",
+      "countryLabel": "Šalis",
+      "errorCountry": "Pasirinkite šalį, kurioje yra projekto vieta."
     },
     "needsTitle": "Užklausos",
     "needsBody": "Pateikite struktūruotą užklausą ir sekite jos būseną.",
@@ -6516,7 +6518,9 @@
       "cityLabel": "Miestas (neprivaloma)",
       "cityPlaceholder": "Pvz.: Vilnius",
       "submit": "Sukurti projektą",
-      "noCompany": "Pirma sukurkite įmonės profilį."
+      "noCompany": "Pirma sukurkite įmonės profilį.",
+      "countryLabel": "Šalis",
+      "errorCountry": "Pasirinkite šalį, kurioje yra projekto vieta."
     },
     "assign": {
       "title": "Priskirti darbuotoją projektui",
@@ -14430,7 +14434,9 @@
         "supplyTeamSize": "Kiek žmonių turite",
         "supplyLocation": "Kur jie gali dirbti",
         "demandCountry": "Šalis, kurioje bus dirbama",
-        "demandCountryPlaceholder": "Pvz., Švedija arba SE"
+        "demandCountryPlaceholder": "Pvz., Švedija arba SE",
+        "projectCountry": "Šalis",
+        "projectCountryPlaceholder": "Pvz., Švedija arba SE"
       },
       "availability": {
         "available": "Laisvas",
@@ -14466,7 +14472,8 @@
         "errorStale": "Kol peržiūrėjote, kažkas pasikeitė (pvz., aktyvi darbo erdvė). Niekas neišsaugota — pradėkite iš naujo.",
         "errorConflict": "Ši reikšmė jau skiriasi. Atidarykite išplėstinį režimą, kad pakeistumėte.",
         "errorOpenNeedLimitUpgrade": "Šios organizacijos nemokamas planas leidžia 1 aktyvią poziciją. Uždarykite vieną arba aktyvuokite planą „Organizacija“ (99 €/mėn.) organizacijos paskyroje.",
-        "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nenuskaičiuota ir nepakeista. Susisiekite su mumis."
+        "errorOpenNeedLimitIndividual": "Ši organizacija pasiekė savo plano aktyvių pozicijų ribą. Niekas nenuskaičiuota ir nepakeista. Susisiekite su mumis.",
+        "errorCountryRequired": "Nurodykite vietos šalį (pavadinimą arba kodą, pvz., Švedija arba SE)."
       },
       "urgency": {
         "flexible": "Lankstu",

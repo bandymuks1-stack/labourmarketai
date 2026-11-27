@@ -214,6 +214,10 @@ export const companyCreateProjectSchema = z.object({
   // The SAME limits as the canonical core and MCP (AI-1 sweep).
   title: z.string().trim().min(PROJECT_TITLE_MIN).max(PROJECT_TITLE_MAX),
   city: z.string().trim().max(PROJECT_CITY_MAX).nullable().optional(),
+  /** ISO-3166 alpha-2 (or a name the core resolves); the canonical core
+   *  requires it when a city is given and refuses a value that is not a
+   *  country, so it is not narrowed here. */
+  country: z.string().trim().min(1).max(80).nullable().optional(),
 });
 
 /** CLIENT: the decision on an agency's candidate offer (canonical:
