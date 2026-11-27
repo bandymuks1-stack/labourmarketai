@@ -176,6 +176,8 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "journal_entry_work_items", key: "worker_id" },
   { table: "journal_entry_photos", key: "profile_id" },
   { table: "timesheets", key: "worker_id" },
+  // Own delivery preferences, self-only RLS; no recipient identities or document content.
+  { table: "timesheet_schedules", key: "profile_id" },
   { table: "work_hour_allocations", key: "worker_id" },
   { table: "worker_documents", key: "worker_id" },
 

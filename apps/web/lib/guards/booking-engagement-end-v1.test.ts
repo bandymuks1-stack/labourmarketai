@@ -1849,6 +1849,11 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261125133404_public_personal_service_search_v1.sql",
       // 2026-11-27: exact source-label SQL approved by the owner; RED manual apply remains gated.
       "20261127120000_public_vacancy_source_labels_v1.sql",
+      // 2026-11-27: owner approved both exact #3837 SQL payloads and manual production apply.
+      // Scheduling: A5202D18C79DF732D956553BF6ED987FF36E340AA8AD25EDACF4A2C3A3E1B9EE.
+      // Erasure integration: 54F50FEC6C8284A5110A87C572E1BC0DECC12FF379971C8A4C05B3B5DDEF9165.
+      "20261127163000_timesheet_schedules_v1.sql",
+      "20261127180000_timesheet_schedule_privacy_v1.sql",
     ]);
   });
 

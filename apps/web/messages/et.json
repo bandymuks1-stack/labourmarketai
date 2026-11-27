@@ -5949,9 +5949,36 @@
       "not_authorized": "[EN] You are not allowed to do this.",
       "not_found": "[EN] Timesheet not found.",
       "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
-      "error": "[EN] Something went wrong. Nothing was saved."
+      "error": "[EN] Something went wrong. Nothing was saved.",
+      "schedule_saved": "Aruannete ajakava salvestatud."
     },
-    "taskAmbiguous": "seotud {count} ülesannet — tunde ei omistata ühele"
+    "taskAmbiguous": "seotud {count} ülesannet — tunde ei omistata ühele",
+    "schedule": {
+      "title": "Automaatsed tööajaaruanded",
+      "consent": "Esita minu eelmise päeva, seitsme päeva või kalendrikuu registreeritud töö valitud kinnitusringile. Tööd ei kinnitata automaatselt.",
+      "enabled": "Lubatud",
+      "frequency": "Sagedus",
+      "daily": "Iga päev",
+      "weekly": "Iga nädal",
+      "monthly": "Iga kuu · 1. kuupäeval",
+      "weekday": "Iganädalase esitamise päev",
+      "time": "Esitamise aeg",
+      "zone": "Ajavöönd",
+      "recipients": "Kinnitamise saajad",
+      "selectTemplate": "Vali kinnitamise mall",
+      "save": "Salvesta",
+      "next": "Järgmine esitamine: {date} ({zone})",
+      "manageRecipients": "Halda kinnitamise saajaid",
+      "outcome": {
+        "submitted": "Esitatud kinnitamiseks.",
+        "already_submitted": "See periood on juba esitatud.",
+        "empty": "Sellel perioodil puudub registreeritud töö.",
+        "overlap": "Peatatud: periood kattub olemasoleva aruandega.",
+        "not_allowed": "Peatatud: juurdepääs organisatsioonile on lõppenud.",
+        "no_template": "Peatatud: kinnitamise mall pole saadaval.",
+        "error": "Esitamine ebaõnnestus; proovitakse uuesti."
+      }
+    }
   },
   "requests": {
     "title": "Taotlused",

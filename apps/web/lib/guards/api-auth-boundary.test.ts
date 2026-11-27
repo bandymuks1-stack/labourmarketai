@@ -82,6 +82,10 @@ const CLASSIFICATION: Record<
     class: "cookie-only",
     why: "Billing safety v1: the superadmin's READ-ONLY reconciliation report (local billing tables vs the provider's view). Operator surface for a browser session; it takes no input, writes nothing and never charges — a non-browser caller has no product reason to read an anomaly report.",
   },
+  "cron/timesheet-reports/route.ts": {
+    class: "public",
+    why: "Machine transport only: existing VPS cron, CRON_SECRET authentication, nginx blocks external cron requests. Bounded self-opted-in schedules; stored actor only, existing approval and consent checks; counts only. No user bearer or cookie identity.",
+  },
   "cron/billing-recovery/route.ts": {
     class: "public",
     why: "Delivered by the VPS cron bundle (ops/vps/labourmarket.cron) once payments are on — absent from it while they are off; identity is the CRON_SECRET machine secret (lib/api/cron-auth.ts), not a user - 401 while unset, so never an open trigger. It only READS Stripe and applies through the canonical subscription-apply primitive; it never creates, changes, cancels or refunds a payment. Answers counts and a reason code only, no ids.",
