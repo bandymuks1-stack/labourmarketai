@@ -1,0 +1,9 @@
+role	width	path	screens	overflow	final_url	open_details
+worker	390	/dashboard/listings	1.87		/en/dashboard/listings	
+worker	390	/dashboard/listings?tab=mine	1.14		/en/dashboard/listings?tab=mine	
+worker	1440	/dashboard/listings	1.07		/en/dashboard/listings	
+worker	1440	/dashboard/listings?tab=mine	1.07		/en/dashboard/listings?tab=mine	
+institution	390	/dashboard/listings	1.88		/en/dashboard/listings	
+institution	390	/dashboard/listings?tab=mine	1.14		/en/dashboard/listings?tab=mine	
+institution	1440	/dashboard/listings	1.07		/en/dashboard/listings	
+institution	1440	/dashboard/listings?tab=mine	1.07		/en/dashboard/listings?tab=mine	

@@ -67,14 +67,21 @@ export interface SentTeamOffer {
   readonly assignmentId: string | null;
 }
 
-/** An open demand a team's manager may offer against (the worker-board whitelist). */
+/** An open demand a team's manager may offer against (the worker-board whitelist).
+ *  WHAT the need is, never WHOSE it is (owner decision 2026-11-22): there is
+ *  no client field, and a v1 row's company_name is not read. */
 export interface OfferableDemand {
   readonly requestId: string;
   readonly roleText: string | null;
   readonly country: string | null;
   readonly teamSize: number | null;
   readonly startPeriod: string | null;
-  readonly companyName: string | null;
+  readonly duration: string | null;
+  readonly languageRequirement: string | null;
+  /** Active catalogue skill slugs the need requires (v2; empty on v1). */
+  readonly needSkillSlugs: readonly string[];
+  /** Closed-list tool slugs (v2; empty on v1). */
+  readonly requiredTools: readonly string[];
   readonly openOfferId: string | null;
   readonly openOfferStatus: TeamOfferStatus | null;
 }
@@ -83,6 +90,8 @@ const STATUSES: readonly TeamOfferStatus[] = ["offered", "accepted", "declined",
 const isStatus = (v: unknown): v is TeamOfferStatus => STATUSES.includes(v as TeamOfferStatus);
 const str = (v: unknown): string | null => (typeof v === "string" && v !== "" ? v : null);
 const num = (v: unknown): number | null => (typeof v === "number" && Number.isFinite(v) ? v : null);
+const strs = (v: unknown): string[] =>
+  Array.isArray(v) ? v.filter((x): x is string => typeof x === "string" && x !== "") : [];
 
 type Row = Record<string, unknown>;
 const isRow = (v: unknown): v is Row => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -157,7 +166,10 @@ export function parseOfferableDemand(raw: unknown): OfferableDemand | null {
     country: str(raw.country),
     teamSize: num(raw.team_size),
     startPeriod: str(raw.start_period),
-    companyName: str(raw.company_name),
+    duration: str(raw.duration),
+    languageRequirement: str(raw.language_requirement),
+    needSkillSlugs: strs(raw.need_skill_slugs),
+    requiredTools: strs(raw.required_tools),
     openOfferId: str(raw.open_offer_id),
     openOfferStatus: isStatus(raw.open_offer_status) ? raw.open_offer_status : null,
   };

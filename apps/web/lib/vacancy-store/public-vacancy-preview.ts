@@ -81,10 +81,9 @@ export type PublicVacancyPreviewStatus = "ok" | "not_provisioned";
 /**
  * Exactly the fields an anonymous caller may receive. There is intentionally no
  * employerName, country, region, city, lat, lng, applicationUrl or description:
- * those are member-only and the SQL function never returns them. Since
- * 20260824120000_public_vacancy_anon_boundary_v2 the raw title and the named
- * source attribution are withheld too (both NULL): titles embed employer and
- * location wording, and the named source identifies the country.
+ * those are member-only and the SQL function never returns them. Raw titles
+ * remain withheld. Owner approval 2026-11-27 permits only the recorded NAV or
+ * Arbetsförmedlingen source label; this also identifies the source country.
  */
 export interface PublicVacancyPreview {
   readonly id: string;
@@ -103,10 +102,8 @@ export interface PublicVacancyPreview {
   readonly compensationMin: number | null;
   readonly compensationMax: number | null;
   readonly sourceLanguage: string | null;
-  /** ALWAYS NULL on the anonymous path since 2026-08-24: the named source is
-   *  a national employment service and therefore identifies the country. The
-   *  UI renders a generic source line anonymously; members receive the full
-   *  named attribution via their own read path. */
+  /** Owner-approved known source label only (2026-11-27). Unknown source
+   *  codes remain null; no source is inferred from language or location. */
   readonly attributionCode: string | null;
   readonly publishedAt: string | null;
 }
@@ -159,8 +156,8 @@ function toPreview(row: PreviewRow): PublicVacancyPreview {
     id: row.id,
     // Defense-in-depth for the anonymous boundary (owner directive
     // 2026-08-24): even if the SQL projection ever regressed and returned the
-    // raw title or the named attribution again, this module — the ONLY
-    // anonymous read path — drops them before they can reach a component,
+    // raw title again, this module — the ONLY anonymous read path — drops
+    // it before it can reach a component,
     // an RSC payload or generated metadata.
     title: null,
     professionSlug: row.profession_slug,
@@ -172,7 +169,9 @@ function toPreview(row: PreviewRow): PublicVacancyPreview {
     compensationMin: toNumber(row.compensation_min),
     compensationMax: toNumber(row.compensation_max),
     sourceLanguage: row.source_language,
-    attributionCode: null,
+    attributionCode: row.attribution_code === "vacancySources.attribution.nav" ||
+      row.attribution_code === "vacancySources.attribution.arbetsformedlingen"
+      ? row.attribution_code : null,
     publishedAt: row.published_at,
   };
 }
@@ -379,7 +378,19 @@ async function runSearch(
 export const getPublicVacancyPreview = cache(async function getPublicVacancyPreview(
   id: string,
 ): Promise<PublicVacancyPreview | null | "not_provisioned"> {
-  const supabase = await createClient();
+  return readPublicVacancyPreviewWith(await createClient(), id);
+});
+
+/**
+ * The same single-preview read over a SUPPLIED client — the capability door
+ * (`jobs.get`) hands in the bearer caller's own RLS-scoped client instead of
+ * the cookie one. Same RPC, same anonymous projection, same `toPreview`
+ * defence; not request-cached because the client is part of the call.
+ */
+export async function readPublicVacancyPreviewWith(
+  supabase: SupabaseClient,
+  id: string,
+): Promise<PublicVacancyPreview | null | "not_provisioned"> {
   const { data, error } = await asAny(supabase).rpc("get_public_vacancy_preview_v1", {
     p_id: id,
   });
@@ -394,7 +405,7 @@ export const getPublicVacancyPreview = cache(async function getPublicVacancyPrev
   const rows = (data ?? []) as PreviewRow[];
   const row = rows[0];
   return row ? toPreview(row) : null;
-});
+}
 
 /**
  * Live governed supply counts. Replaces the pinned landing constant: a number
@@ -457,17 +468,25 @@ export interface PublicVacancySitemapPage {
   readonly entries: readonly PublicVacancySitemapEntry[];
 }
 
-/** Rows per sitemap shard. Well under the sitemaps.org 50,000-per-file ceiling. */
-export const PUBLIC_VACANCY_SITEMAP_SHARD_SIZE = 5000;
+/**
+ * Rows per sitemap shard — PostgREST's own `max_rows` (supabase/config.toml:
+ * 1000). The server answers at most that many rows per RPC call and says
+ * nothing about the rest, so a larger shard is silently cut: at 5000 every
+ * shard returned 1000 rows and the index (ceil(count / 5000) shards) left
+ * four in five live job pages out of the sitemap (production, 2026-11-03:
+ * 11,000 of 53,095). One shard = one call = one full page.
+ */
+export const PUBLIC_VACANCY_SITEMAP_SHARD_SIZE = 1000;
 
-export async function listPublicVacancySitemapEntries(input: {
-  shard: number;
-}): Promise<PublicVacancySitemapPage> {
+export async function listPublicVacancySitemapEntries(
+  input: { shard: number },
+  suppliedClient?: SupabaseClient,
+): Promise<PublicVacancySitemapPage> {
   const shard = Math.max(0, Math.floor(input.shard));
   const limit = PUBLIC_VACANCY_SITEMAP_SHARD_SIZE;
   const offset = shard * limit;
 
-  const supabase = await createClient();
+  const supabase = suppliedClient ?? (await createClient());
   const { data, error } = await asAny(supabase).rpc(
     "list_public_vacancy_sitemap_v1",
     { p_limit: limit, p_offset: offset },

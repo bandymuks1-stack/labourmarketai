@@ -57,6 +57,10 @@ export interface ProjectManagerLabels {
   createNameLabel: string;
   createNamePlaceholder: string;
   createCityLabel: string;
+  /** The country select on the inline create (ISO list, page locale). */
+  createCountryLabel: string;
+  createCountryOptions: ReadonlyArray<{ readonly value: string; readonly label: string }>;
+  countryRequired: string;
   createCityPlaceholder: string;
   createSubmit: string;
   noCompany: string;
@@ -148,10 +152,13 @@ type ProjectWithAssignments = ManagedProject & {
   assignments: ProjectAssignment[];
 };
 
+// Form submits sit BELOW the page's one primary action (the action deck's
+// "New project"), so they are outlined gold, not a gold fill (owner design
+// pass 2026-10-26: one primary per screen).
 const primary =
-  "inline-flex w-fit items-center gap-2 rounded-md bg-gradient-cta px-4 py-2 text-sm font-semibold text-text-on-brand transition-transform hover:-translate-y-0.5";
+  "inline-flex min-h-11 w-fit items-center gap-2 rounded-md border border-brand-blue/60 px-4 py-2 text-sm font-semibold text-brand-blue transition-colors hover:bg-brand-blue/10 disabled:opacity-60";
 const field =
-  "rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary";
+  "rounded-md border border-ink-500 bg-ink-900 px-3 py-2 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base";
 
 function resultError(
   r: ProjectActionResult | null,
@@ -166,7 +173,9 @@ function resultError(
         ? l.needsMigration
         : r.code === "no_company"
           ? l.noCompany
-          : l.errorMsg;
+          : r.code === "country_required"
+            ? l.countryRequired
+            : l.errorMsg;
   return (
     <span className="text-xs text-state-danger" role="status">
       {msg}
@@ -491,6 +500,17 @@ export function ProjectAssignmentManager({
           <span className="font-mono uppercase tracking-label text-text-muted">{labels.createCityLabel}</span>
           <input name="city" placeholder={labels.createCityPlaceholder} className={field} data-testid="project-create-city" />
         </label>
+        <label className="flex flex-col gap-1 text-xs">
+          <span className="font-mono uppercase tracking-label text-text-muted">{labels.createCountryLabel}</span>
+          <select name="country" defaultValue="" className={field} data-testid="project-create-country">
+            <option value="">—</option>
+            {labels.createCountryOptions.map((o) => (
+              <option key={o.value} value={o.value}>
+                {o.label}
+              </option>
+            ))}
+          </select>
+        </label>
         <div className="flex flex-wrap items-center gap-3">
           <button type="submit" disabled={creating} className={primary} data-testid="project-create-inline-submit">
             {creating ? labels.sending : labels.createSubmit}
@@ -640,7 +660,9 @@ export function ProjectAssignmentManager({
             {assignState?.ok && !decided && (
               <span className="text-xs text-state-success" role="status" data-testid="assign-worker-done">{labels.assigned}</span>
             )}
-            {resultError(assignState, labels)}
+            {assignState && !assignState.ok ? (
+              <span data-testid="assign-worker-failed">{resultError(assignState, labels)}</span>
+            ) : null}
           </div>
           {decided ? (
             <p className="text-xs text-state-success" role="status" data-testid="assign-reservation-decided">

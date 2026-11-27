@@ -45,6 +45,11 @@ export type TodayNext =
       readonly whyKey: string;
       /** Whether the card is stale (a calm "does this still hold?"). */
       readonly stale: boolean;
+      /** The dimension the engine's evidence-first rule displaced (e.g. the
+       *  profession), with a real route — offered as a QUIET text link beside
+       *  the one gold action so nothing becomes unreachable. Absent when the
+       *  engine displaced nothing. Never a second primary. */
+      readonly secondary?: { readonly dim: WorkDim; readonly href: string };
     }
   | { readonly kind: "unknown" };
 
@@ -82,6 +87,10 @@ export type TodayAttention = {
   readonly offers: number | null;
   /** Pending invitations addressed to the person (both invitation systems). */
   readonly invitations: number | null;
+  /** The invitations count is not a fault but waits on the person proving
+   *  their mailbox (UX gap W-1): the home offers the existing proof prompt
+   *  instead of "could not be read". Never a zero: `invitations` stays null. */
+  readonly invitationsNeedMailboxProof?: boolean;
   /** Unread conversations; `onlyId` when exactly one, so the door opens it. */
   readonly unread: { readonly count: number; readonly onlyId: string | null } | null;
 };
@@ -183,6 +192,14 @@ export function deriveTodayNext(card: WorkCardDerived | null): TodayNext {
     href: card.next.href ?? WORK_CARD_EDITOR_HREF,
     whyKey: card.next.whyKey,
     stale: card.state === "stale",
+    ...(card.secondary
+      ? {
+          secondary: {
+            dim: card.secondary.dim,
+            href: card.secondary.href ?? WORK_CARD_EDITOR_HREF,
+          },
+        }
+      : {}),
   };
 }
 
@@ -236,7 +253,7 @@ export function unknownTodayDoors(attention: TodayAttention | null): TodayDoorKi
   if (!attention) return ["offers", "invitations", "unread"];
   const out: TodayDoorKind[] = [];
   if (attention.offers === null) out.push("offers");
-  if (attention.invitations === null) out.push("invitations");
+  if (attention.invitations === null && attention.invitationsNeedMailboxProof !== true) out.push("invitations");
   if (attention.unread === null) out.push("unread");
   return out;
 }

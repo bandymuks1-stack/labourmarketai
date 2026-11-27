@@ -8,6 +8,7 @@ import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { LmLogo } from "@/components/ui/lm-logo";
 import { OnboardingWizard } from "@/components/app/onboarding-wizard";
 import { SessionTelemetry } from "@/components/app/session-telemetry";
+import { FirstTouchAccountCopy } from "@/components/app/first-touch-account-copy";
 import { Link } from "@/lib/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
@@ -16,7 +17,10 @@ import { listMyPendingWorkerInvitations } from "@/lib/worker/invitations";
 import {
   inviteTokenFromNextPath,
   invitationImpliesWorkerContext,
+  invitationJoinsExistingOrganization,
 } from "@/lib/invitations/model";
+import { resolveInvitedWorkerContext } from "@/lib/onboarding/invited-worker-context";
+import { readMyInvitationDecision } from "@/lib/invitations/my-decision";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
 import { EDUCATION_TYPE_SLUGS } from "@/lib/worker/worker-education-model";
@@ -69,13 +73,26 @@ export default async function OnboardingPage({
   // above that button (owner decision 1).
   let invitationReviewNotice: string | null = null;
   if (inviteToken) {
-    const preview = await readPublicInvitationPreview(inviteToken, { emitOpened: false });
+    const [preview, myDecision] = await Promise.all([
+      readPublicInvitationPreview(inviteToken, { emitOpened: false }),
+      readMyInvitationDecision(inviteToken),
+    ]);
+    // The SAME rule completeOnboarding enforces (resolveInvitedWorkerContext):
+    // a person joining an existing organization sets up no organization of
+    // their own here (owner P0 2026-11-22).
     impliedWorker =
       preview.kind === "ok" &&
-      invitationImpliesWorkerContext({
+      (invitationImpliesWorkerContext({
         invitationType: preview.preview.invitationType,
         externalSourceSlug: preview.preview.externalSourceSlug,
-      });
+      }) ||
+        invitationJoinsExistingOrganization({
+          invitationType: preview.preview.invitationType,
+          organizationName: preview.preview.organizationName,
+          status: preview.preview.status,
+          expiresAt: preview.preview.expiresAt,
+          myDecision,
+        }));
     if (
       preview.kind === "ok" &&
       preview.preview.status === "pending" &&
@@ -88,6 +105,19 @@ export default async function OnboardingPage({
       const tInvite = await getTranslations({ locale, namespace: "network.invitePage" });
       invitationReviewNotice = tInvite("reviewNotice", { organization: preview.preview.organizationName ?? "" });
     }
+  }
+
+  // NO TOKEN, STILL INVITED (2026-10-27). A person who registered without the
+  // invitation link in `?next=` — mail opened in one browser, registration in
+  // another, or a later visit — is still the addressee: the pending
+  // `join_platform` invitation for their verified e-mail is found here, so
+  // onboarding uses it exactly as it uses a token (worker implied only for a
+  // partner referral; accepted when the person finishes).
+  if (!inviteToken) {
+    // The role question is skipped from the same server decision that
+    // completeOnboarding enforces (and that accepts the invitation there).
+    const invited = await resolveInvitedWorkerContext(null);
+    impliedWorker = invited.workerImplied;
   }
 
   const supabase = await createClient();
@@ -129,7 +159,7 @@ export default async function OnboardingPage({
   const visibility = await loadEmployerVisibilityForChat();
   const employerVisibility =
     visibility.kind === "state" && visibility.consent ? (
-      <DiscoverabilityConsent locale={locale} source="onboarding" {...visibility.consent} />
+      <DiscoverabilityConsent compact locale={locale} source="onboarding" {...visibility.consent} />
     ) : null;
   const tOnboard = await getTranslations("auth.onboarding");
   // Student step (universal first-run router): the education-type registry
@@ -165,6 +195,7 @@ export default async function OnboardingPage({
           `signup_completed` from the pending marker — every genuinely new
           account passes through here first. */}
       <SessionTelemetry surface="onboarding" />
+      <FirstTouchAccountCopy />
       <AmbientGlow />
       {/* V8 W4-B: language stays switchable DURING onboarding — the wizard
           writes profiles.locale from the URL locale at completion, so the
@@ -174,7 +205,7 @@ export default async function OnboardingPage({
       <header className="relative z-10 mx-auto flex max-w-container items-center justify-between gap-3 px-6 py-6 sm:px-12">
         <Link
           href="/"
-          className="flex items-center gap-2 font-display text-lg font-bold tracking-tightest text-text-primary"
+          className="flex min-h-11 items-center gap-2 font-display text-lg font-bold tracking-tightest text-text-primary"
         >
           <LmLogo title="" className="h-7 w-auto shrink-0" />
           <span>

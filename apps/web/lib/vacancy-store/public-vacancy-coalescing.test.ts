@@ -3,6 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   __resetPublicVacancyCache,
   searchPublicVacancyPreviews,
+  readPublicVacancyPreviewWith,
 } from "./public-vacancy-preview";
 
 /**
@@ -216,5 +217,27 @@ describe("NEGATIVE CONTROL — nothing caller-specific can enter the shared cach
     const a = await searchPublicVacancyPreviews({}, client as never);
     const b = await searchPublicVacancyPreviews({}, client as never);
     expect(JSON.stringify(a)).toBe(JSON.stringify(b));
+  });
+});
+
+describe("owner-approved anonymous source labels remain a narrow projection", () => {
+  it.each([
+    ["vacancySources.attribution.nav", "vacancySources.attribution.nav"],
+    ["vacancySources.attribution.arbetsformedlingen", "vacancySources.attribution.arbetsformedlingen"],
+    ["CANARY_UNAPPROVED_SOURCE", null],
+    [null, null],
+  ])("both readers retain only the approved source %s", async (source, expected) => {
+    const { client } = makeClient({ rows: [{ ...ROW, attribution_code: source,
+      title_raw: "CANARY_PRIVATE_TITLE", employer_name: "CANARY_EMPLOYER",
+      city: "CANARY_CITY", application_url: "https://canary.invalid/apply",
+      description_raw: "CANARY_DESCRIPTION", contact_email: "canary@example.invalid",
+    }] });
+    const search = await searchPublicVacancyPreviews({}, client as never);
+    const detail = await readPublicVacancyPreviewWith(client as never, ROW.id);
+    for (const result of [search.vacancies[0], detail]) {
+      expect(result).toMatchObject({ title: null, attributionCode: expected });
+      expect(JSON.stringify(result)).not.toContain("CANARY_");
+      expect(JSON.stringify(result)).not.toContain("canary");
+    }
   });
 });

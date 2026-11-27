@@ -10,9 +10,11 @@ import {
   User,
   Users,
 } from "lucide-react";
-import type { LucideIcon } from "lucide-react";
+import type { ComponentType } from "react";
 
 import type { NavIconKey } from "@/lib/config/navigation";
+import { WORK_AREA_ICONS } from "@/components/app/work-area-icons";
+import { AssistantNavIcon } from "@/components/app/conversation/chat/assistant-identity";
 
 /**
  * ONE ICON PER DESTINATION, for every nav surface that renders the catalogue.
@@ -28,8 +30,16 @@ import type { NavIconKey } from "@/lib/config/navigation";
  * — the same icons the MyZone action grid uses, so the nav and the grid speak
  * one visual language. FileText stays reserved for documents.
  */
-export const NAV_ICONS: Record<NavIconKey, LucideIcon> = {
+/** A lucide icon, or the assistant's mark (which takes the same props). */
+export type NavIcon = ComponentType<{ className?: string; strokeWidth?: number }>;
+
+export const NAV_ICONS: Record<NavIconKey, NavIcon> = {
+  // An organization area promoted into the header keeps its area-switcher
+  // icon; the catalogue's own icons below win where the keys coincide.
+  ...WORK_AREA_ICONS,
   home: Home,
+  // "My space" — the conversation home — wears the assistant's mark (N3).
+  assistant: AssistantNavIcon,
   store: Store,
   map: MapPin,
   idCard: IdCard,

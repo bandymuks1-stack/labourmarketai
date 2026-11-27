@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
+import { ToggleChip } from "@/components/ui/Chip";
+import { Textarea } from "@/components/ui/Textarea";
 import { setShortlistAction } from "@/lib/scouting/scouting-actions";
 import type { ShortlistStatus } from "@/lib/scouting/scouting";
 import { SHORTLIST_NOTE_MAX } from "@/lib/scouting/shortlist-note";
@@ -95,25 +97,21 @@ export function ScoutingShortlistButtons({
 
   return (
     <div className="flex flex-col gap-1.5" data-testid={`scout-shortlist-${workerId}`}>
-      <div className="flex flex-wrap gap-1.5">
+      <div className="flex flex-wrap gap-2">
         {order.map((s) => {
           const active = status === s;
+          // The shared toggle chip: 44 px, aria-pressed, a check mark on the
+          // chosen status. Pressing any status (the chosen one too) asks the
+          // server for that status, as before.
           return (
-            <button
+            <ToggleChip
               key={s}
-              type="button"
+              pressed={active}
               disabled={pending}
-              onClick={() => choose(s)}
-              aria-pressed={active}
-              className={cn(
-                "rounded-md border px-2.5 py-1 text-meta font-medium transition-colors disabled:opacity-50",
-                active
-                  ? "border-brand-blue bg-brand-blue/15 text-text-primary"
-                  : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary",
-              )}
+              onPressedChange={() => choose(s)}
             >
               {labels.statuses[s]}
-            </button>
+            </ToggleChip>
           );
         })}
       </div>
@@ -135,19 +133,21 @@ export function ScoutingShortlistButtons({
       ) : null}
 
       {!editorOpen ? (
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           disabled={pending}
           onClick={() => {
             setEditor("note");
             setDraft(note ?? "");
             setError(null);
           }}
-          className="w-fit text-meta font-medium text-brand-blue hover:text-brand-champagne disabled:opacity-50"
+          className="min-h-11 w-fit sm:min-h-0"
           data-testid={`scout-shortlist-note-toggle-${workerId}`}
         >
           {note === null ? labels.note.add : labels.note.edit}
-        </button>
+        </Button>
       ) : (
         <div
           className="flex flex-col gap-1.5 rounded-md border border-ink-500 bg-ink-800/60 p-2.5"
@@ -158,42 +158,44 @@ export function ScoutingShortlistButtons({
             {reasonMode ? labels.note.reasonTitle : labels.note.label} ·{" "}
             {labels.note.internalHint}
           </span>
-          <textarea
+          <Textarea
             value={draft}
             onChange={(e) => setDraft(e.target.value)}
             aria-label={reasonMode ? labels.note.reasonTitle : labels.note.label}
             maxLength={SHORTLIST_NOTE_MAX}
             rows={3}
             placeholder={reasonMode ? labels.note.reasonPlaceholder : labels.note.placeholder}
-            className="w-full rounded-md border border-ink-500 bg-ink-900 px-2 py-1.5 text-xs text-text-primary placeholder:text-text-muted focus:border-brand-blue focus:outline-none"
             data-testid={`scout-shortlist-note-input-${workerId}`}
           />
           <div className="flex flex-wrap items-center gap-2">
-            <button
+            <Button
               type="button"
+              size="sm"
               disabled={pending || (reasonMode && draft.trim() === "")}
               onClick={() =>
                 reasonMode
                   ? submit("not_fit", draft)
                   : submit(status ?? "saved", draft.trim() === "" ? null : draft)
               }
-              className="rounded-md bg-brand-blue px-3 py-1.5 text-xs font-semibold text-text-on-brand hover:bg-brand-blue/80 disabled:opacity-50"
+              className="min-h-11 sm:min-h-0"
               data-testid={`scout-shortlist-note-save-${workerId}`}
             >
               {labels.note.save}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
               disabled={pending}
               onClick={() => {
                 setEditor(null);
                 setDraft("");
                 setError(null);
               }}
-              className="rounded-md border border-ink-500 px-3 py-1.5 text-xs text-text-secondary hover:border-brand-blue hover:text-text-primary disabled:opacity-50"
+              className="min-h-11 sm:min-h-0"
             >
               {labels.note.cancel}
-            </button>
+            </Button>
             {reasonMode && draft.trim() === "" ? (
               <span className="text-meta text-state-amber">
                 {labels.note.reasonRequired}

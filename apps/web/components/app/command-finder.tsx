@@ -69,7 +69,7 @@ const RECENT_COMMANDS_MAX = 5;
 const OBJECT_SEARCH_DEBOUNCE_MS = 300;
 const OBJECT_SEARCH_TIMEOUT_MS = 8000;
 
-type ObjectSearchState = "idle" | "loading" | "ok" | "error";
+type ObjectSearchState = "idle" | "loading" | "ok" | "error" | "rate-limited";
 
 /* ── Voice adapter (unified-text-navigation v1, Phase 3 rules) ──────────
  * Browser-native Web Speech API only — no LabourMarket AI service, no separate
@@ -132,6 +132,7 @@ const SPEECH_LANG: Record<ActiveLocale, string> = {
   nl: "nl-NL",
   de: "de-DE",
   pl: "pl-PL",
+  sv: "sv-SE",
 };
 
 /** Parse the stored recent-command ids — ids only, anything else discarded. */
@@ -150,6 +151,8 @@ function parseRecentIds(rawJson: string | null): string[] {
 
 export function CommandFinder() {
   const t = useTranslations("commandFinder");
+  const tAuthErrors = useTranslations("auth.errors");
+  const tErrorBoundary = useTranslations("errorBoundary");
   const router = useRouter();
   const rawLocale = useLocale();
   const locale: ActiveLocale = (activeLocales as readonly string[]).includes(
@@ -164,6 +167,7 @@ export function CommandFinder() {
     readonly DashboardSearchGroup[]
   >([]);
   const [objectState, setObjectState] = useState<ObjectSearchState>("idle");
+  const [objectRetry, setObjectRetry] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   // Voice adapter state — capability-gated; the button renders ONLY when the
   // browser really supports the Web Speech API (client effect, SSR-safe).
@@ -326,6 +330,10 @@ export function CommandFinder() {
         { signal: controller.signal },
       )
         .then(async (res) => {
+          if (res.status === 429) {
+            if (!cancelled) setObjectState("rate-limited");
+            return;
+          }
           if (!res.ok) throw new Error("search-failed");
           const data = (await res.json()) as {
             ok: boolean;
@@ -348,7 +356,7 @@ export function CommandFinder() {
       clearTimeout(debounce);
       controller.abort();
     };
-  }, [query]);
+  }, [query, objectRetry]);
 
   const recentEntries = useMemo(() => {
     if (query.trim().length > 0) return [];
@@ -659,14 +667,30 @@ export function CommandFinder() {
           {t("objectsLoading")}
         </p>
       )}
-      {objectState === "error" && (
-        <p
-          data-testid="command-finder-objects-error"
-          className="text-xs leading-relaxed text-text-muted"
-          aria-live="polite"
-        >
-          {t("objectsError")}
-        </p>
+      {(objectState === "error" || objectState === "rate-limited") && (
+        <div className="flex flex-col items-start gap-1">
+          <p
+            data-testid="command-finder-objects-error"
+            data-rate-limited={objectState === "rate-limited" || undefined}
+            className="text-xs leading-relaxed text-text-muted"
+            aria-live="polite"
+          >
+            {objectState === "rate-limited"
+              ? tAuthErrors("rateLimited")
+              : t("objectsError")}
+          </p>
+          <button
+            type="button"
+            data-testid="command-finder-objects-retry"
+            onClick={() => {
+              setObjectRetry((attempt) => attempt + 1);
+              inputRef.current?.focus();
+            }}
+            className="inline-flex min-h-11 items-center text-support font-medium text-text-primary underline underline-offset-4 hover:text-text-secondary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+          >
+            {tErrorBoundary("retry")}
+          </button>
+        </div>
       )}
       {objectState === "ok" && objectResultCount > 0 && (
         <nav

@@ -331,6 +331,7 @@ describe("external public-source ads cross the boundary with their provenance", 
         // here rendered verbatim in production on 2026-08-10 — the client
         // bundle has no vacancySources namespace.
         attributionText: "vacancySources.attribution.arbetsformedlingen",
+        sourceName: "Arbetsförmedlingen",
         // A card with NO engine verdict (this double carries `match: {}`) is
         // NOT ASSESSED — never guessed into a band (#1689, defect H).
         fitStatus: "insufficient_data",

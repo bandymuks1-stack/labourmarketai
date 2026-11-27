@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useEffect, useRef } from "react";
 import {
   submitWorkerIntakeAction,
   type WorkerIntakeFormState,
 } from "@/lib/staffing/worker-intake-form-actions";
 import type { WorkCategoryOptionGroup } from "@/lib/taxonomy/work-categories";
+import { keepWorkerIntakeDraftField, readWorkerIntakeDraftFields } from "@/lib/staffing/worker-intake-draft";
 
 /**
  * Worker intake form (Staffing Operating Model v1, PR10 UI). Posts the intake
@@ -86,9 +87,74 @@ export function WorkerIntakeForm({
     FormData
   >(submitWorkerIntakeAction, null);
 
+  // What the person types is kept in this browser (owner P0 2026-11-15, F2):
+  // sign-up carries the profile builder as `next`, and the builder places
+  // this text in its composer for the person to read and send. Only fields
+  // they filled or changed are kept; an untouched default is not their word.
+  // Kept PER FIELD: only the field that changed is written, so the form's
+  // reset after its answer (or a reload, or going back) never wipes what was
+  // typed before; the kept fields are put back into the form. Emptying a
+  // field removes it.
+  const fieldLabel: Readonly<Record<string, string>> = {
+    full_name: labels.fullName,
+    profession: labels.profession,
+    target_countries: labels.targetCountries,
+    available_from: labels.availableFrom,
+    accommodation: labels.accommodation,
+    transport: labels.transport,
+    engagement_type: labels.engagement,
+    languages: labels.languages,
+    business_name: labels.businessName,
+    vat_number: labels.vatNumber,
+    team_size: labels.teamSize,
+    insurance: labels.insurance,
+    team_professions: labels.teamProfessions,
+    tools: labels.tools,
+    invoice_ready: labels.invoiceReady,
+    comment: labels.comment,
+  };
+  const fieldOrder = Object.keys(fieldLabel);
+  const keepDraft = (el: EventTarget) => {
+    if (el instanceof HTMLSelectElement) {
+      if (!(el.name in fieldLabel)) return;
+      const opt = el.selectedOptions[0];
+      const chosen = opt && !opt.defaultSelected && opt.value ? opt.text : "";
+      keepWorkerIntakeDraftField(el.name, { label: fieldLabel[el.name], value: chosen, raw: el.value }, fieldOrder);
+    } else if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+      if (!(el.name in fieldLabel)) return;
+      const typed = el.value !== el.defaultValue ? el.value : "";
+      keepWorkerIntakeDraftField(el.name, { label: fieldLabel[el.name], value: typed, raw: el.value }, fieldOrder);
+    }
+  };
+  // Put the kept fields back: on arrival (reload, back) and after each
+  // answer, when the form has been reset (the `reset` event fires before the
+  // values are cleared, so the refill waits a microtask).
+  const formRef = useRef<HTMLFormElement>(null);
+  const refill = () => {
+    const form = formRef.current;
+    if (!form) return;
+    for (const [name, field] of Object.entries(readWorkerIntakeDraftFields())) {
+      const el = form.elements.namedItem(name);
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement) {
+        el.value = field.raw;
+      }
+    }
+  };
+  useEffect(() => {
+    refill();
+  }, [state]);
+
   return (
     <div className="flex flex-col gap-6">
-      <form action={formAction} className="flex flex-col gap-4" data-testid="worker-intake-form">
+      <form
+        ref={formRef}
+        action={formAction}
+        onInput={(e) => keepDraft(e.target)}
+        onChange={(e) => keepDraft(e.target)}
+        onReset={() => queueMicrotask(refill)}
+        className="flex flex-col gap-4"
+        data-testid="worker-intake-form"
+      >
         <header className="flex flex-col gap-1">
           {/* The page's one title (2026-10-18 design pass): same scale as every public page title. */}
           <h1 className="font-display text-3xl font-semibold tracking-tight text-text-primary sm:text-4xl">

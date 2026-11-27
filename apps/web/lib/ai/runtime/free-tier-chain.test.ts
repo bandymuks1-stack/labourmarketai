@@ -17,6 +17,7 @@ import {
 } from "./provider-chain";
 import { observeProviderStates } from "./provider-health";
 import { ProviderCooldown } from "./provider-cooldown";
+import { ProviderCounters } from "./provider-counters";
 import { resolveTaskRoute, type AiTaskType } from "./task-routing";
 import { AI_EGRESS_GRANTS, egressPermitted, maxPermittedSensitivity } from "./data-egress";
 import { sensitivityForTask } from "./data-sensitivity";
@@ -25,6 +26,8 @@ import { isSelectable, MODEL_REGISTRY } from "./model-registry";
 import { estimateCostUsd } from "./model-pricing";
 import type { AiCompletionRequest } from "./types";
 import { geminiCompletionProvider } from "./providers/gemini";
+import { createOpenAiCompatibleProvider } from "./providers/openai";
+import { CLOUDFLARE_GEMMA_NO_THINKING, CLOUDFLARE_LLM_BINDING } from "./providers/free-tier";
 
 type Behaviour = "ok" | "429" | "500" | "timeout" | "garbage";
 
@@ -178,6 +181,54 @@ describe("routing: free quota first, in a stated order", () => {
     expect(calls[0].body.model).toBe("mistral-large-latest");
     expect(calls[0].body.response_format).toEqual({ type: "json_object" });
     expect(calls[0].body).toHaveProperty("max_tokens");
+    expect(calls[0].body).not.toHaveProperty("chat_template_kwargs");
+  });
+});
+
+describe("Cloudflare Gemma 4: thinking off, so the answer fits the token cap (production 2026-11-22)", () => {
+  // Gemma 4's Workers AI schema: chat_template_kwargs.enable_thinking, default
+  // TRUE. With it on, a 200-token intent proposal spent every token on
+  // reasoning and returned no content (finish_reason "length").
+  it("the Gemma tier sends enable_thinking=false and keeps model, cap and messages", async () => {
+    expect(AI_MODEL_CANDIDATES.cloudflare.haiku).toMatch(/^@cf\/google\/gemma-4/);
+    const r = await dispatchAiCompletion(
+      { ...marketRequest(), maxOutputTokens: 200 },
+      cfg(),
+      chainFor("explain_market_demand"),
+    );
+    expect(r.status === "ok" && r.provider).toBe("cloudflare");
+    expect(calls[0].body.chat_template_kwargs).toEqual({ enable_thinking: false });
+    expect(calls[0].body.model).toBe(AI_MODEL_CANDIDATES.cloudflare.haiku);
+    expect(calls[0].body.max_tokens).toBe(200);
+    expect(Array.isArray(calls[0].body.messages)).toBe(true);
+  });
+
+  it("other Cloudflare models do not get a field their schema does not document", async () => {
+    const r = await dispatchAiCompletion(
+      { ...marketRequest(), modelAlias: "sonnet" },
+      cfg(),
+      chainFor("explain_market_demand"),
+    );
+    expect(r.status === "ok" && r.provider).toBe("cloudflare");
+    expect(calls[0].body.model).toBe(AI_MODEL_CANDIDATES.cloudflare.sonnet);
+    expect(calls[0].body.model).not.toMatch(/gemma/);
+    expect(calls[0].body).not.toHaveProperty("chat_template_kwargs");
+  });
+
+  it("model-specific fields can never replace the model, the token cap or the messages", async () => {
+    const hostile = createOpenAiCompatibleProvider({
+      ...CLOUDFLARE_LLM_BINDING,
+      modelRequestFields: () => ({ model: "@cf/other/model", max_tokens: 99_999, messages: [] }),
+    });
+    const r = await hostile.complete({ ...marketRequest(), maxOutputTokens: 200 }, cfg());
+    expect(r.status).toBe("ok");
+    expect(calls[0].body.model).toBe(AI_MODEL_CANDIDATES.cloudflare.haiku);
+    expect(calls[0].body.max_tokens).toBe(200);
+    expect((calls[0].body.messages as unknown[]).length).toBe(2);
+  });
+
+  it("the shared constant is exactly the documented switch", () => {
+    expect(CLOUDFLARE_GEMMA_NO_THINKING).toEqual({ chat_template_kwargs: { enable_thinking: false } });
   });
 });
 
@@ -217,6 +268,65 @@ describe("failover: 429 / 5xx / timeout advance, bounded", () => {
     behaviour = { cloudflare: "429", mistral: "429", groq: "429" };
     const r = await dispatchAiCompletion(marketRequest(), cfg(), chainFor("explain_market_demand"));
     expect(r.status === "error" && r.message).toMatch(/http 429 .*\(retry-after 7s\)$/);
+  });
+});
+
+describe("counters: every attempt is counted per provider, nothing else is", () => {
+  it("429 → 5xx → ok: one request each, a rate limit, an error class, a success", async () => {
+    behaviour = { cloudflare: "429", mistral: "500", groq: "ok" };
+    const counters = new ProviderCounters();
+    let t = 1_000;
+    const r = await dispatchAiCompletion(
+      marketRequest(),
+      cfg(),
+      chainFor("explain_market_demand", ALL_FREE_READY, { counters, now: () => (t += 25) }),
+    );
+    expect(r.status === "ok" && r.provider).toBe("groq");
+    const rows = Object.fromEntries(counters.snapshot().map((row) => [row.provider, row]));
+    expect(rows.cloudflare).toMatchObject({ requests: 1, ok: 0, rateLimited: 1, errorTotal: 0 });
+    expect(rows.mistral).toMatchObject({ requests: 1, ok: 0, rateLimited: 0, errorTotal: 1 });
+    expect(rows.mistral.errors).toEqual({ UNAVAILABLE: 1 });
+    expect(rows.groq).toMatchObject({ requests: 1, ok: 1, rateLimited: 0, errorTotal: 0 });
+    // Latency comes from the injected clock: 25 ms per attempt.
+    for (const row of Object.values(rows)) {
+      expect(row.latencyMsMean).toBe(25);
+      expect(row.latencyMsMax).toBe(25);
+    }
+  });
+
+  it("malformed output and a timeout are counted under their own classes", async () => {
+    behaviour = { cloudflare: "timeout", mistral: "garbage", groq: "garbage" };
+    const counters = new ProviderCounters();
+    await dispatchAiCompletion(marketRequest(), cfg(), chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    const byId = Object.fromEntries(counters.snapshot().map((row) => [row.provider, row.errors]));
+    expect(byId.cloudflare).toEqual({ TIMEOUT: 1 });
+    expect(byId.mistral).toEqual({ INVALID_OUTPUT: 1 });
+  });
+
+  it("a snapshot carries ids, classes and numbers only — never the payload or the answer", async () => {
+    const counters = new ProviderCounters();
+    await dispatchAiCompletion(marketRequest(), cfg(), chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    const text = JSON.stringify(counters.snapshot());
+    expect(text).not.toContain("welder");
+    expect(text).not.toContain("from cloudflare");
+    expect(text).not.toContain("presence-only");
+  });
+
+  it("a disabled runtime and a refused (ungranted) payload count no request at all", async () => {
+    const counters = new ProviderCounters();
+    const disabled = resolveAiRuntimeConfig({
+      mode: "disabled",
+      provider: "cloudflare",
+      apiKey: undefined,
+      model: undefined,
+      timeoutMs: undefined,
+      maxRetries: undefined,
+      maxOutputTokens: undefined,
+      dailyRunBudget: undefined,
+    });
+    await dispatchAiCompletion(marketRequest(), disabled, chainFor("explain_market_demand", ALL_FREE_READY, { counters }));
+    expect(counters.snapshot()).toEqual([]);
+    expect(calls).toHaveLength(0);
   });
 });
 
@@ -264,7 +374,6 @@ describe("egress: free tiers receive PUBLIC payloads only", () => {
     // key in the request is only a label here.
     { task: "draft_follow_up", agentKey: "draft_follow_up" },
     { task: "translate_message", agentKey: "translation_copy" },
-    { task: "propose_conversation_intent", agentKey: "conversation_intent" },
     { task: "translate_vacancy", agentKey: "vacancy_translation" },
     // LOW_RISK company data is refused too: no grant names a free tier.
     { task: "structure_future_work", agentKey: "company_need" },
@@ -282,11 +391,29 @@ describe("egress: free tiers receive PUBLIC payloads only", () => {
     expect(fetch).not.toHaveBeenCalled();
   });
 
-  it("the free-tier ceiling caps any grant at LOW_RISK_PROJECT_DATA, and no shipped grant names a free tier", () => {
+  it("propose_conversation_intent reaches Cloudflare ONLY (owner decision 2026-11-22), never Mistral or Groq", () => {
+    const task = "propose_conversation_intent";
+    const p = (id: string) => AI_PROVIDER_PROFILES.find((x) => x.id === id)!;
+    expect(egressPermitted(p("cloudflare"), "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, task).permitted).toBe(true);
+    expect(egressPermitted(p("mistral"), "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, task).permitted).toBe(false);
+    expect(egressPermitted(p("groq"), "SENSITIVE_FREE_TEXT", AI_EGRESS_GRANTS, task).permitted).toBe(false);
+    // The grant is by task: every other private task stays refused for Cloudflare.
+    for (const other of ["extract_cv", "normalize_work_scope", "translate_message", "explain_match", "draft_follow_up"]) {
+      expect(egressPermitted(p("cloudflare"), "PERSONAL", AI_EGRESS_GRANTS, other).permitted, other).toBe(false);
+    }
+    // Revocable: without the row the free-tier cap applies again.
+    const revoked = AI_EGRESS_GRANTS.filter((g) => g.provider !== "cloudflare");
+    expect(egressPermitted(p("cloudflare"), "SENSITIVE_FREE_TEXT", revoked, task).permitted).toBe(false);
+  });
+
+  it("the free-tier ceiling caps any grant at LOW_RISK_PROJECT_DATA, and no shipped grant names a free tier beyond the one intent row", () => {
     for (const id of ["cloudflare", "mistral", "groq"]) {
       const p = AI_PROVIDER_PROFILES.find((x) => x.id === id)!;
       expect(maxPermittedSensitivity(p), id).toBe("PUBLIC");
-      expect(AI_EGRESS_GRANTS.some((g) => g.provider === id), id).toBe(false);
+      expect(
+        AI_EGRESS_GRANTS.filter((g) => g.provider === id).map((g) => g.tasks),
+        id,
+      ).toEqual(id === "cloudflare" ? [["propose_conversation_intent"]] : []);
       const generous = [{ provider: id, maxSensitivity: "SENSITIVE_FREE_TEXT" as const, basis: "t", grantedOn: "2026-10-25" }];
       // Free-tier cap LOW_RISK; Mistral's free mode trains by default, so its
       // own terms cap it lower still (provider-catalogue.ts).

@@ -3,16 +3,23 @@
 import { useEffect, useRef, useState } from "react";
 import { ArrowLeft, ChevronDown, ChevronRight, LayoutGrid, MoreHorizontal } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/lib/i18n/navigation";
+import { Link, usePathname, useRouter } from "@/lib/i18n/navigation";
 import {
   getCoreNavItems,
   getHeaderOverflowNavItems,
   type NavItem,
 } from "@/lib/config/navigation";
+import { customerHeaderDoors, organizationHeaderAreas, personalHeaderDoors } from "@/lib/navigation/work-areas";
+import { isEducationInstitution } from "@/lib/organizations/capabilities";
+import { isEducationFirstWorkspace } from "@/lib/conversation/education-home";
+import { actingRoleForWorkspace } from "@/lib/company/organization-switch";
 import { activeNavItem, headerPlaceLabelKey } from "@/lib/navigation/header-place";
 import { NAV_ICONS } from "@/components/app/nav-icons";
 import { NavLinkPending } from "@/components/app/nav-link-pending";
 import { cn } from "@/lib/utils";
+import { journalDayHref } from "@/lib/journal/day-choice";
+import { GOAL_ACROSS_PAGES_KEY, keptAssistantJournalDay } from "@/lib/journal/assistant-day";
+import { personCalendarDay } from "@/lib/time/person-calendar-day";
 import { useAuthOptional } from "@/lib/auth/context";
 import { HeaderSearch } from "@/components/app/header-search";
 import { NotificationPanel } from "@/components/app/notification-panel";
@@ -70,11 +77,15 @@ export function ConversationHeader({
   title,
   nav,
   mobile = false,
+  journalDay,
 }: {
   title: string;
   nav: ConversationNavLabels;
   /** Force the phone layout (used by the mobile design preview). */
   mobile?: boolean;
+  /** The chat's live answer to "which work day did the person name?" (the
+   *  conversation passes it; other pages read the goal the chat kept). */
+  journalDay?: () => string | null;
 }) {
   const auth = useAuthOptional();
   const pathname = usePathname();
@@ -88,7 +99,32 @@ export function ConversationHeader({
   // console joins "More" only for an admin who has not hidden admin chrome.
   const isAdmin = Boolean(auth?.isAdmin && !auth?.adminUiHidden);
   const primary = getCoreNavItems();
-  const overflow = getHeaderOverflowNavItems({ isAdmin });
+  // P0-2 (2026-11-03): the ACTIVE workspace's acting role decides what "More"
+  // opens with — the organization's own doors for the person who runs it
+  // (company / agency), nothing extra otherwise. The primary row above is the
+  // A-03 core loop for everyone.
+  const activeWorkspace =
+    auth?.workspaces?.find((w) => w.id === auth.activeWorkspaceId) ?? auth?.workspaces?.[0] ?? null;
+  const actingRole = actingRoleForWorkspace(activeWorkspace, auth?.roles ?? []);
+  // An education institution's learning home joins them, by the organization
+  // doors' own gate over the active organization's capabilities (UX_GAPS I-1).
+  // It leads only for an organization that is first of all an institution.
+  const capabilities = { roleSlugs: auth?.activeOrganizationCapabilities };
+  const education = isEducationInstitution(capabilities);
+  const educationFirst = isEducationFirstWorkspace(capabilities);
+  const organizationAreas =
+    actingRole === "company" || actingRole === "agency"
+      ? organizationHeaderAreas(actingRole, { education, educationFirst })
+      : [];
+  // The customer's own door leads "More" for a person who HOLDS the customer
+  // role outside an organization workspace — the /dashboard/buyer gate's own
+  // rule (client-side; no new read).
+  const customerDoors = customerHeaderDoors(auth?.roles ?? [], activeWorkspace);
+  // Job search and offers lead "More" / the sheet for a worker in their own
+  // workspace (coordinator 2026-11-22): they were in no header surface.
+  const personalDoors =
+    actingRole === "company" || actingRole === "agency" ? [] : personalHeaderDoors(auth?.roles ?? [], activeWorkspace);
+  const overflow = [...personalDoors, ...organizationAreas, ...customerDoors, ...getHeaderOverflowNavItems({ isAdmin })];
   const allItems = [...primary, ...overflow];
   const active = activeNavItem(pathname, allItems);
   const activeOverflow = active && overflow.some((i) => i.id === active.id) ? active : null;
@@ -96,17 +132,25 @@ export function ConversationHeader({
   const place = placeKey ? t(placeKey) : null;
   const badges = auth?.badges ?? {};
   const badgeOf = (item: NavItem) => (item.id === "admin" ? 0 : (badges[item.id] ?? 0));
+  const openJournal = useJournalTap(journalDay, `${auth?.user?.id ?? ""}:${auth?.activeWorkspaceId ?? ""}`);
+  // ONE-TAP JOURNAL (owner P1 2026-11-22): in the person's own workspace the
+  // work journal is one tap from the phone's top row too (from `md` it is
+  // already one tap in the core loop below). An organization workspace keeps
+  // its own doors; the area sheet keeps the journal for everyone.
+  const journalItem = primary.find((i) => i.iconKey === "journal") ?? null;
+  const showPhoneJournal = Boolean(auth && journalItem && actingRole !== "company" && actingRole !== "agency");
 
   return (
     <header
       data-testid="app-header"
       className={cn(
-        "flex flex-none flex-wrap items-center gap-x-2 gap-y-2 border-b border-ink-600 bg-ink-900/80 px-4 py-2.5 backdrop-blur",
+        "flex flex-none flex-wrap items-center gap-x-2 gap-y-2 border-b border-ink-600 bg-ink-900/80 px-4 py-2 backdrop-blur",
+        !mobile && "md:py-2.5",
         !mobile && "md:flex-nowrap md:gap-x-3",
       )}
     >
       {/* IDENTITY — never shrinks, so the logo is never cut ("Labour…"). */}
-      <span className={cn("order-1 flex flex-none items-center gap-2", !mobile && "md:order-none")}>
+      <span className={cn("order-1 flex flex-none items-center gap-1 md:gap-2", !mobile && "md:order-none")}>
         {isProjection && (
           <Link
             href="/dashboard"
@@ -128,7 +172,7 @@ export function ConversationHeader({
           href="/dashboard"
           data-testid="shell-logo-home"
           aria-label={title}
-          className="flex flex-none items-center gap-2 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
+          className="flex flex-none items-center justify-center gap-2 min-h-11 min-w-11 rounded-sm outline-none ring-brand-blue focus-visible:ring-2"
         >
           {/* The canonical mark (owner §19) — never a letter standing in for
               it. Decorative: the Link's aria-label already names the product. */}
@@ -145,7 +189,11 @@ export function ConversationHeader({
       {auth && (
         <span
           className={cn(
-            "order-4 flex min-w-0 flex-1 items-center gap-1.5",
+            // max-md:min-w-[8rem]: the chip keeps room for its longest word
+            // beside the area button at 320px — "пространство" is 83px in
+            // Inter and 87px in DejaVu Sans, the fallback a phone or the CI
+            // runner draws Cyrillic with (Inter loads Latin subsets only).
+            "order-4 flex min-w-0 flex-1 items-center gap-1.5 max-md:min-w-[8rem]",
             !mobile && "md:order-none md:flex-initial",
           )}
         >
@@ -192,6 +240,7 @@ export function ConversationHeader({
               active={active?.id === item.id}
               badge={badgeOf(item)}
               testId={`header-core-nav-${item.id}`}
+              onClick={item === journalItem ? openJournal : undefined}
             />
           ))}
           {overflow.length > 0 && (
@@ -210,10 +259,18 @@ export function ConversationHeader({
       <span aria-hidden className={cn("order-3 h-0 basis-full", !mobile && "md:hidden")} />
 
       {/* Phone: ONE area button — names where the person is, opens every
-          destination they may reach in a bottom sheet. */}
+          destination they may reach in a bottom sheet. It SHARES the row with
+          the workspace chip (owner phone report 2026-11-20): as `flex-none`
+          with a one-line label it took the whole row ("Смотреть возможности"
+          at 320px) and squeezed the chip to a dot. Both now start from zero
+          width (so neither wraps to a third header row) and share the row
+          1 : 1.4, the chip keeping its 8rem minimum; both labels may wrap to
+          a second line inside 44px. Sized for the wider fallback font a
+          phone draws Cyrillic with: "возможности" needs 99px in DejaVu Sans,
+          and the button leaves 107px for it at 320px. */}
       {auth && (
         <HeaderAreaSheet
-          className={cn("order-5 flex-none", !mobile && "md:hidden")}
+          className={cn("order-5 min-w-0 flex-[1.4_1_0%]", !mobile && "md:hidden")}
           items={allItems}
           activeItem={active}
           place={place}
@@ -227,7 +284,18 @@ export function ConversationHeader({
       )}
 
       {/* UTILITY — a shrink-0 anchor of 44px controls. */}
-      <div className={cn("order-2 ml-auto flex flex-none items-center gap-1", !mobile && "md:order-none md:ml-0")}>
+      {/* Phone gaps are 2px (4px from `md`): back + logo + journal + search +
+          bell + avatar = 282px, inside the 288px a 320px screen leaves (#3565). */}
+      <div className={cn("order-2 ml-auto flex flex-none items-center gap-0.5 md:gap-1", !mobile && "md:order-none md:ml-0")}>
+        {showPhoneJournal && journalItem && (
+          <JournalShortcut
+            item={journalItem}
+            label={t(journalItem.tabLabelKey)}
+            active={active?.id === journalItem.id}
+            onClick={openJournal}
+            className={mobile ? undefined : "md:hidden"}
+          />
+        )}
         {auth && (
           <HeaderSearch
             testId="chat-command-search"
@@ -258,6 +326,13 @@ const CORE_LABEL = "hidden xl:inline";
  *  label (`lg`); below that its filled pill is the "you are here" mark and the
  *  page title right under the bar names it. */
 const ACTIVE_LABEL = "hidden lg:inline";
+/** "More" carrying the active page names it from `2xl`. The core loop already
+ *  names itself from `xl`, so between 1280 and 1535 px a named More was the
+ *  item that pushed the row past the screen: the nav ran into the workspace
+ *  chip (prod mobile-surfaces M-6 on the projects page, run 44977749659), or
+ *  the chip shrank to a dot in Russian. Below `2xl` the filled pill with the
+ *  page's icon is the "you are here" mark, and the page title names it. */
+const OVERFLOW_ACTIVE_LABEL = "hidden 2xl:inline";
 
 function NavBadge({ id, count }: { id: string; count: number }) {
   if (count <= 0) return null;
@@ -287,17 +362,20 @@ function HeaderNavLink({
   active,
   badge,
   testId,
+  onClick,
 }: {
   item: NavItem;
   label: string;
   active: boolean;
   badge: number;
   testId: string;
+  onClick?: (e: React.MouseEvent<HTMLAnchorElement>) => void;
 }) {
   const Icon = NAV_ICONS[item.iconKey];
   return (
     <Link
       href={item.href as "/dashboard"}
+      onClick={onClick}
       aria-current={active ? "page" : undefined}
       aria-label={label}
       title={label}
@@ -311,6 +389,67 @@ function HeaderNavLink({
       {/* The ACTIVE destination always names itself — that is "where am I". */}
       <span className={active ? ACTIVE_LABEL : CORE_LABEL}>{label}</span>
       <NavLinkPending />
+    </Link>
+  );
+}
+
+/**
+ * The journal tap: opens the work day the person already named to the
+ * assistant (live goal in the chat, the kept goal elsewhere), else the
+ * journal's own default. A modified click (new tab, etc.) keeps the plain link.
+ */
+function useJournalTap(
+  journalDay: (() => string | null) | undefined,
+  owner: string,
+): (e: React.MouseEvent<HTMLAnchorElement>) => void {
+  const router = useRouter();
+  return (e) => {
+    if (e.defaultPrevented || e.button !== 0 || e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+    const today = personCalendarDay();
+    let day: string | null = null;
+    try {
+      day = journalDay ? journalDay() : keptAssistantJournalDay(window.sessionStorage.getItem(GOAL_ACROSS_PAGES_KEY), owner, today);
+    } catch {
+      day = null;
+    }
+    if (!day) return;
+    e.preventDefault();
+    router.push(journalDayHref(day, false) as "/dashboard");
+  };
+}
+
+/** Phone: the work journal as one 44px control in the top row. */
+function JournalShortcut({
+  item,
+  label,
+  active,
+  onClick,
+  className,
+}: {
+  item: NavItem;
+  label: string;
+  active: boolean;
+  onClick: (e: React.MouseEvent<HTMLAnchorElement>) => void;
+  className?: string;
+}) {
+  const Icon = NAV_ICONS[item.iconKey];
+  return (
+    <Link
+      href={item.href as "/dashboard"}
+      onClick={onClick}
+      aria-label={label}
+      title={label}
+      aria-current={active ? "page" : undefined}
+      data-testid="header-journal-shortcut"
+      className={cn(
+        "inline-flex size-11 flex-none items-center justify-center rounded-full border transition-colors",
+        active
+          ? "border-brand-blue bg-brand-blue/10 text-text-primary"
+          : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary",
+        className,
+      )}
+    >
+      <Icon {...iconControl()} aria-hidden />
     </Link>
   );
 }
@@ -379,7 +518,7 @@ function HeaderMoreMenu({
           <TriggerIcon {...iconControl()} aria-hidden />
           {!activeItem && <NavBadge id="more" count={total} />}
         </span>
-        <span className={activeItem ? ACTIVE_LABEL : WIDE_LABEL}>{triggerLabel}</span>
+        <span className={activeItem ? OVERFLOW_ACTIVE_LABEL : WIDE_LABEL}>{triggerLabel}</span>
         <ChevronDown
           {...iconControl(cn("hidden transition-transform duration-150 motion-reduce:transition-none lg:block", open && "rotate-180"))}
           aria-hidden
@@ -485,13 +624,16 @@ function HeaderAreaSheet({
         aria-label={current ? `${current} · ${menuLabel}` : menuLabel}
         onClick={() => setOpen(true)}
         className={cn(
-          "relative flex min-h-11 items-center gap-1.5 whitespace-nowrap rounded-full border border-ink-500 px-3 text-support font-medium text-text-primary transition-colors hover:border-brand-blue",
+          "relative flex min-h-11 items-center gap-1 rounded-full border border-ink-500 px-2.5 text-support font-medium text-text-primary transition-colors hover:border-brand-blue sm:gap-1.5 sm:px-3",
           className,
         )}
       >
-        <Icon {...iconControl("text-brand-blue")} aria-hidden />
-        <span>{current ?? menuLabel}</span>
-        <ChevronDown {...iconControl("text-text-muted")} aria-hidden />
+        {/* On a phone the label needs the icon's width: "Смотреть возможности"
+            at 320px and "Моё пространство" at 360px were cut beside it. The
+            sheet itself shows every area with its icon. */}
+        <Icon {...iconControl("flex-none text-brand-blue max-sm:hidden")} aria-hidden />
+        <span className="line-clamp-2 min-w-0 flex-1 break-words text-left leading-tight">{current ?? menuLabel}</span>
+        <ChevronDown {...iconControl("flex-none text-text-muted")} aria-hidden />
         <NavBadge id="sheet" count={total} />
       </button>
       <MobileSheet open={open} onClose={() => setOpen(false)} title={sheetTitle} closeLabel={closeLabel}>

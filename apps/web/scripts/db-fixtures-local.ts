@@ -119,9 +119,13 @@ export const EXPECTED_FIXTURE_COUNTS: Record<string, number> = {
   "public.customer_requests where id::text like '3c%' and country = 'DE' and location = 'Hamburg'":
     1,
   // ── base identities ────────────────────────────────────────────────────
-  "auth.users": 3,
-  "public.profiles": 3,
-  "public.workers": 3,
+  // The three seeded people only. Migration 20261019140000 also creates the
+  // privacy-erasure SENTINEL ("erased person", no login) in every database, so
+  // a bare table count is 4 on a clean reset and the script refused to report
+  // success. The sentinel is excluded by its own fixed address domain.
+  "auth.users where email like '%@local.test'": 3,
+  "public.profiles where id in (select id from auth.users where email like '%@local.test')": 3,
+  "public.workers where profile_id in (select id from auth.users where email like '%@local.test')": 3,
   "public.companies": 1,
 };
 

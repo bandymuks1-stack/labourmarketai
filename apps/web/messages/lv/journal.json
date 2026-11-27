@@ -30,6 +30,13 @@
   "engagement": "[EN] Context",
   "engagementChoose": "Izvēlieties iesaisti…",
   "engagementAmbiguous": "Šis darbs var piederēt vairāk nekā vienai iesaistei. Pirms saglabāšanas izvēlieties, kurai.",
+  "unnamedOrganization": {
+    "company": "Uzņēmums bez nosaukuma",
+    "agency": "Aģentūra bez nosaukuma",
+    "other": "Organizācija bez nosaukuma",
+    "ended": "Agrākā organizācija bez nosaukuma"
+  },
+  "activeWorkspaceNoRelationship": "Jūs darbojaties {org} vārdā, bet darba attiecības ar {org} nav reģistrētas, tāpēc tās šeit netiek piedāvātas. Izvēlieties kontekstu, kuram šis darbs patiešām pieder.",
   "project": "Projekts",
   "projectChoose": "Izvēlieties projektu…",
   "projectNone": "Nav projekta darbs",
@@ -93,7 +100,16 @@
       "outcomeBlocked": "[EN] not confirmed ({code})",
       "receipt": "Apstiprināts: {title}",
       "receiptSkills": "{count, plural, zero {# prasmju} one {# prasme} other {# prasmes}}",
-      "skillsUnavailable": "Prasmju sarakstu neizdevās nolasīt — pieskāriens apstiprinās tikai pašu ierakstu."
+      "skillsUnavailable": "Prasmju sarakstu neizdevās nolasīt — pieskāriens apstiprinās tikai pašu ierakstu.",
+      "projectFilterLabel": "Projekts",
+      "projectAll": "Visi projekti ({n})",
+      "projectNone": "Bez projekta ({n})",
+      "projectUnnamed": "Projekts, nosaukums nav redzams",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Rādīt",
+      "projectResult": "Rāda {shown} no {total} ierakstiem",
+      "projectOnCard": "Projekts: {name}",
+      "noProjectOnCard": "Bez projekta"
     },
     "result": {
       "entrySuperseded": "Ieraksts jau ir aizstāts ar jaunāku versiju — kartīte vairs nav aktuāla un tiks noņemta no saraksta.",
@@ -306,5 +322,12 @@
     "metricsInsertFailed": "Ieraksts netika saglabāts pilnībā: {reason}. Ieraksts tika noraidīts — mēģiniet vēlreiz.",
     "moduleFieldInvalid": "Šie lauki neatbilst šāda veida iesaistei: {fields}. Nekas netika saglabāts — noņemiet tos un mēģiniet vēlreiz."
   },
-  "contextEnded": "beidzies"
+  "contextEnded": "beidzies",
+  "dayChoice": {
+    "today": "Šodien",
+    "yesterday": "Vakar",
+    "weekAgo": "Pirms nedēļas",
+    "calendar": "Kalendārs",
+    "earlier": "Iepriekšējie ieraksti"
+  }
 }

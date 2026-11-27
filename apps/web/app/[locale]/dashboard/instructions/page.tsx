@@ -4,9 +4,12 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
 import { createClient } from "@/lib/supabase/server";
 import { resolveViewerTexts } from "@/lib/communication/translation-read";
+import { readCommunicationLocale, viewerLocaleFor } from "@/lib/i18n/communication-locale";
 import {
   listWorkerInstructions,
   listManagedWorkers,
+  listProjectAssignedWorkers,
+  mergeInstructionRecipients,
 } from "@/lib/instructions/instructions";
 import { listManagedProjects } from "@/lib/projects/projects";
 import { loadOwnProjectAsks } from "@/lib/projects/worker-project-access";
@@ -90,10 +93,15 @@ export default async function InstructionsPage({
   );
 
   if (isManager) {
-    const [workers, projects] = await Promise.all([
+    const [roster, projects] = await Promise.all([
       listManagedWorkers(),
       listManagedProjects(),
     ]);
+    // A direct hire is on a project, not on the roster: reachable there only.
+    const workers = mergeInstructionRecipients(
+      roster,
+      await listProjectAssignedWorkers(projects.map((p) => p.id)),
+    );
     const labels: ComposerLabels = {
       workerLabel: t("manager.workerLabel"),
       workerPlaceholder: t("manager.workerPlaceholder"),
@@ -131,12 +139,16 @@ export default async function InstructionsPage({
   // language is rendered in THIS worker's language through the egress-gated
   // AI runtime; the original stays on the card. Without an owner grant the
   // status stays 'unavailable' and the original shows — honestly.
+  // COMM-1: "this worker's language" is the one they chose to READ messages
+  // in (profiles.communication_locale), else the page's UI locale as before.
+  const communicationLocale = await readCommunicationLocale(supabase, user.id);
+  const viewerLocale = viewerLocaleFor(communicationLocale, locale);
   const read: typeof listed =
     listed.kind === "ok"
       ? await (async () => {
           const texts = await resolveViewerTexts(
             listed.instructions.map((i) => ({ id: i.id, body: i.originalText, original_language: i.originalLanguage })),
-            locale,
+            viewerLocale,
             user.id,
           );
           return {

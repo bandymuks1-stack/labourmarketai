@@ -42,6 +42,7 @@ export function TeamOffersReceived({
   const t = useTranslations("teamDemandOffer");
   const locale = useLocale();
   const tSkill = useTranslations("skillNames");
+  const tCriterion = useTranslations("opportunities.discovery.criterion");
   const router = useRouter();
   const uid = useId();
   const [pending, startTransition] = useTransition();
@@ -49,6 +50,14 @@ export function TeamOffersReceived({
   const [msg, setMsg] = useState<Record<string, { ok: boolean; text: string }>>({});
 
   const skillLabel = (slug: string) => (tSkill.has(slug) ? tSkill(slug) : slug);
+  // A criterion or missing-data code is never printed raw: a code without a
+  // label is left out of the sentence rather than shown to the company.
+  const criterionLabels = (codes: readonly string[]) =>
+    codes.filter((c) => tCriterion.has(c)).map((c) => tCriterion(c));
+  const missingLabels = (missing: readonly string[], missingData: readonly string[]) => [
+    ...criterionLabels(missing),
+    ...missingData.filter((c) => t.has(`received.missingData.${c}`)).map((c) => t(`received.missingData.${c}`)),
+  ];
   const refusalText = (s: TeamOfferRefusal) => t(`refusal.${s}`);
   const note = (offerId: string, ok: boolean, text: string) => setMsg((m) => ({ ...m, [offerId]: { ok, text } }));
 
@@ -108,7 +117,9 @@ export function TeamOffersReceived({
                     {t("received.kindOrganization")}
                   </span>
                 ) : null}
-                <span className="text-xs text-text-secondary">{t("received.members", { count: offer.memberCount })}</span>
+                {offer.offerKind === "team" ? (
+                  <span className="text-xs text-text-secondary">{t("received.members", { count: offer.memberCount })}</span>
+                ) : null}
                 {size ? <span className="text-xs text-text-secondary">{size}</span> : null}
               </div>
 
@@ -137,6 +148,7 @@ export function TeamOffersReceived({
                     </dd>
                   </div>
                 ) : null}
+                {offer.offerKind === "team" ? (
                 <div className="flex flex-col gap-0.5 sm:col-span-2">
                   <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
                     {t("received.skills")}
@@ -159,6 +171,7 @@ export function TeamOffersReceived({
                     )}
                   </dd>
                 </div>
+                ) : null}
                 {offer.languages.length > 0 ? (
                   <div className="flex flex-col gap-0.5 sm:col-span-2">
                     <dt className="font-mono text-meta uppercase tracking-label text-text-muted">
@@ -173,7 +186,7 @@ export function TeamOffersReceived({
                 ) : null}
               </dl>
 
-              {match ? (
+              {offer.offerKind === "organization" ? null : match ? (
                 <div className="flex flex-col gap-1 rounded-md border border-ink-600 bg-ink-800/40 p-2" data-testid={`team-offer-match-${offer.offerId}`}>
                   <span className="text-xs text-text-primary">
                     {t("received.fit")}: {t(`received.matchStatus.${match.status}`)}
@@ -184,14 +197,14 @@ export function TeamOffersReceived({
                   <span className="text-meta text-text-muted">
                     {t(`received.basis.${match.basis === "member_results" ? "members" : "aggregate"}`)}
                   </span>
-                  {match.blockers.length > 0 ? (
+                  {criterionLabels(match.blockers).length > 0 ? (
                     <span className="text-meta text-state-danger">
-                      {t("received.blockers", { list: match.blockers.join(", ") })}
+                      {t("received.blockers", { list: criterionLabels(match.blockers).join(", ") })}
                     </span>
                   ) : null}
-                  {match.missing.length > 0 || match.missingData.length > 0 ? (
+                  {missingLabels(match.missing, match.missingData).length > 0 ? (
                     <span className="text-meta text-text-muted">
-                      {t("received.missing", { list: [...match.missing, ...match.missingData].join(", ") })}
+                      {t("received.missing", { list: missingLabels(match.missing, match.missingData).join(", ") })}
                     </span>
                   ) : null}
                 </div>
@@ -201,7 +214,10 @@ export function TeamOffersReceived({
 
               {offer.note ? (
                 <p className="text-xs text-text-secondary">
-                  <span className="text-text-muted">{t("received.note")}:</span> {offer.note}
+                  <span className="text-text-muted">
+                    {offer.offerKind === "organization" ? t("received.noteCompany") : t("received.note")}:
+                  </span>{" "}
+                  {offer.note}
                 </p>
               ) : null}
 
@@ -218,7 +234,8 @@ export function TeamOffersReceived({
                     data-testid={`team-offer-message-${offer.offerId}`}
                     className="inline-flex min-h-11 items-center gap-1 rounded-md border border-brand-blue/50 bg-brand-blue/10 px-3 text-xs font-semibold text-brand-blue transition-colors hover:border-brand-blue"
                   >
-                    <MessageSquare className="h-3.5 w-3.5" aria-hidden /> {t("received.message")}
+                    <MessageSquare className="h-3.5 w-3.5" aria-hidden />{" "}
+                    {offer.offerKind === "organization" ? t("received.messageCompany") : t("received.message")}
                   </button>
                 </form>
               ) : null}

@@ -1495,6 +1495,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20260928181000_booking_reopen_lifecycle_edges_v1.sql",
       // owner-approved RED 2026-09-28: agency drafts client need / share-scoped read / placement lifecycle.
       "20260928190000_agency_delegated_demand_and_placement_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20260928190100_agency_drafted_needs_output_column_v1.sql",
       // walk 2026-09-28: a re-accepted booking restores the engagement it minted.
       "20260928200000_booking_reaccept_restores_engagement_v1.sql",
       // walk 2026-09-28: an agency placement booking carries the need's role.
@@ -1606,6 +1608,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261007140000_work_plan_scope_roster_engagement_v1.sql",
       // 2026-10-07 (E6, owner decision): a team/brigade offered against one demand (new table + SECURITY DEFINER doors + GRANT) - marker is the human-gate acknowledgement; owner-approved 2026-10-08 (separate hand-off RPC).
       "20261007150000_team_demand_offer_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261007155339_20261006100100_conversation_participants_service_role_insert_grant_v1.sql",
       // 2026-10-07: private evidence-media bucket + storage.objects policies (RED storage policy) - marker is the human-gate acknowledgement; owner-approved in chat 2026-10-08 (PR #2189).
       "20261007180000_evidence_media_bucket_v1.sql",
       // 2026-10-08 (#2195, owner-approved RED, narrower audience: subject + CURRENT engagement only): company-side recognitions read (SECURITY DEFINER + GRANT) - marker is the human-gate acknowledgement.
@@ -1643,6 +1647,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261014090100_historical_consolidation_package_v1.sql",
       // 2026-10-14 (RED, needs-human-gate, NOT applied): brigade disband v1.
       "20261014190000_team_disband_v1.sql",
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261015193211_20261015120000_esco_label_search_v1.sql",
       // 2026-10-18: the worker identity split (RED RLS policy + SECURITY DEFINER + GRANT). The
       // annotation acknowledges the RED class so CI can run; the PR stays a draft with
       // needs-human-gate and is applied only on the owner's explicit approval.
@@ -1721,7 +1727,134 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-23: owner approved #2719 in chat (apply before deploy, then merge). Runtime
       // stall sampler evidence table — numbers only, service_role only, 14-day retention.
       "20261023190000_ops_runtime_samples_v1.sql",
-]);
+      // #2913: restored byte-exact, production-applied, human-gated as historical SQL (owner option 2, 2026-11-01).
+      "20261025045152_project_forecasts_v1.sql",
+      // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
+      // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
+      // 20261027193124.
+      "20261027120000_reissue_external_referral_v1.sql",
+      // 2026-10-28: owner approved #2843 in chat (apply + merge). Read-only service_role
+      // candidate list that flags already-mailed addresses; ledger 20261028044705.
+      "20261027210000_external_referral_reprocess_candidates_v2.sql",
+      // 2026-10-28: owner approved #2846 in chat (apply + merge). The caller-scoped
+      // invitations read carries the partner source; ledger 20261028034356.
+      "20261027231000_list_invitations_for_me_source_slug_v1.sql",
+      // 2026-10-28: owner approved #2855 in chat (apply + merge, at 35e749fc3).
+      // Address lock + send reservation for partner referral sends; ledger 20261028081810.
+      "20261028070000_referral_send_address_guard_v1.sql",
+      // 2026-10-28: owner approved #2858 in chat (apply + merge, at d0159eb).
+      // Recovery counts only this reservation's ledger row; ledger 20261028091725.
+      "20261028090000_resolve_reservation_exact_window_v1.sql",
+      // 2026-10-28: owner approved #2876 in chat (conditional apply, at a3a10eb7d).
+      // Synthetic QA needs out of the three cross-org demand readers.
+      "20261028123000_synthetic_demand_cross_org_readers_v1.sql",
+      // 2026-10-29: owner approved #2887 in chat (production apply, at dbd1363ef).
+      // The worker reader projects the need's required skills as catalogue slugs.
+      "20261029190000_worker_board_need_skill_slugs_v1.sql",
+      // 2026-11-02: J-12 learner join requests (#2959) — RED draft, the marker is the
+      // human-gate acknowledgement, NOT applied until the owner approves.
+      "20261102160000_education_cohort_join_requests_v1.sql",
+      // 2026-11-03: J-12 follow-up — the member command refuses request rows. RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103090000_education_cohort_member_request_guard_v1.sql",
+      // 2026-11-03: work-plan scope predicate made internal only (client EXECUTE revoked). RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103170942.
+      "20261103120000_work_plan_worker_in_scope_internal_only_v1.sql",
+      // 2026-11-03: agency docs readiness reads the live agency roster. RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103171024.
+      "20261103130000_agency_pool_docs_readiness_live_roster_v1.sql",
+      // 2026-11-03: agency client records follow owns_company. RED, owner-approved, the marker is the
+      // human-gate acknowledgement; APPLIED ledger 20261103171134.
+      "20261103140000_agency_clients_company_authority_v1.sql",
+      // 2026-11-03: pg_trgm for the job search trigram index (create-extension). RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261103171000_pg_trgm_extension_v1.sql",
+      // 2026-11-03: production rollback record of the trigram index (drop index). RED, APPLIED ledger 20261103194208.
+      "20261103171300_public_vacancies_occupation_trgm_idx_rollback_v1.sql",
+      // 2026-11-04: one scan for the free-text job search (SECURITY DEFINER replace). RED draft,
+      // the marker is the human-gate acknowledgement, NOT applied until the owner approves.
+      "20261104160100_search_public_vacancy_previews_live_scan_v5.sql",
+      // 2026-11-05: narrow search table for the free-text job search. RED draft, NOT applied.
+      "20261105100000_public_vacancy_search_table_v1.sql",
+      "20261105100100_search_public_vacancy_previews_narrow_v6.sql",
+      // 2026-11-09: the holder cancels their own account-deletion request; 30-day grace (owner decision); row lock
+      // in the erasure runner and executor. RED draft #3172, the marker is the human-gate acknowledgement, NOT applied.
+      "20261109120000_privacy_cancel_account_deletion.sql",
+      // 2026-11-10: the company-need intake keeps the visitor's locale (SECURITY DEFINER replace, one line).
+      // RED draft #3195, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110140000_company_need_intake_keep_locale_v1.sql",
+      // 2026-11-10: partner registration Slice 1, company takeover invitation + two-operator decision + link.
+      // RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261110190000_organization_claim_invitation_v1.sql",
+      // 2026-11-12: team_offer_counterpart_v1, the gated recipient of a team offer's notification
+      // (SECURITY DEFINER + EXECUTE to authenticated). RED draft #3231, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261112213100_team_offer_counterpart_v1.sql",
+      // 2026-11-13: owner P0 invitation delivery reliability, codes-only send diagnostics +
+      // retry / dead-letter / bounce fields. RED draft #3318, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261113190000_invitation_delivery_attempts_v1.sql",
+      // 2026-11-14 owner-chosen RED: a closed need refuses a new proposal or a first accept (draft, needs-human-gate, NOT applied).
+      "20261114100000_booking_refuses_closed_need_v1.sql",
+      // 2026-11-14: owner decision, NEW/ACTIVE counts for five platform groups, aggregate only.
+      // RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
+      "20261114120000_lm_registrations_daily_v1.sql",
+      // 2026-11-14: owner decision, invitation 862a91f4 KNOWN_HISTORICAL_UNKNOWN_OUTCOME — one integer count,
+      // service_role only. RED draft (SECURITY DEFINER + GRANT), the marker is the human-gate acknowledgement, NOT applied.
+      "20261114150000_invitation_known_historical_unknown_v1.sql",
+      // 2026-11-15: owner decision, an organization reads a learner's journal only while the learning link
+      // is active and review is on (one RLS policy replaced). RED draft, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261115120000_journal_learning_access_follows_link_v1.sql",
+      // 2026-09-20 — COMM-1: nullable profiles.communication_locale (CHECK = the 13 communication languages; NULL = follow the UI locale). RED by owner classification, DRAFT needs-human-gate, NOT applied.
+      "20261118100100_profiles_communication_locale_v1.sql",
+      // 2026-11-20: owner decision (coordinator relay) approves the 11.8 training migration at R2's reviewed
+      // version; the marker is its first line, the body is pinned by md5 in
+      // training-assignment-engaged-groups-v1.test.ts. NOT applied by this repository.
+      "20261118143000_training_assignment_engaged_groups_v1.sql",
+      // 2026-11-17: owner decision, a former employer keeps limited access (retained journal up to the end
+      // date, nothing new, no more writes). RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261118164500_former_employer_limited_access_v1.sql",
+      // 2026-11-20: owner approval, the two #3474 chain fixes (direct corrections only move into an ended
+      // context; cycle-safe chain root). RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261120190000_former_employer_chain_fixes_v1.sql",
+      // 2026-11-21: owner P0 security directive (sign-up role allow-list, admin grant guard, manager grant
+      // consent; journal lineage and manager-labelled metrics). RED draft, the marker is the human-gate
+      // acknowledgement, NOT applied.
+      "20261121100000_signup_role_admin_guard_manager_consent_v1.sql",
+      "20261121100100_journal_lineage_and_metrics_authorship_v1.sql",
+      // 2026-11-21: owner P0 security (B): access arms follow ended governance membership; the inviter is
+      // shown on a membership invitation. RED draft, the marker is the human-gate acknowledgement, NOT applied.
+      "20261121100200_former_member_access_arms_v1.sql",
+      "20261121100300_membership_invitation_inviter_v1.sql",
+      // 2026-11-22: owner decision, a demoted owner loses owner rights at once. RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261122140000_demoted_owner_loses_owner_authority_v1.sql",
+      // 2026-11-22: owner decision (open agency board, no client identity). RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261122170000_open_need_board_no_client_identity_v1.sql",
+      // 2026-11-22: owner order, privacy requests never shared with an agency. RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261122180000_share_refuses_privacy_requests_v1.sql",
+      // 2026-11-22: owner request, erasure within one month of receipt. Owner-approved 2026-11-24,
+      // APPLIED ledger 20261124052729.
+      "20261122190500_privacy_deletion_within_one_month_v1.sql",
+      // 2026-11-23: owner P0 #3679, three bypassed v1 doors revoked. RED draft, the marker is the
+      // human-gate acknowledgement, NOT owner approval of the SQL; NOT applied.
+      "20261123060000_revoke_bypassed_v1_doors_v1.sql",
+      // 2026-11-24: time-boxed read-only history grant (owner request 2026-11-23; RED draft, needs-human-gate, NOT applied).
+      "20261124053000_history_read_grant_v1.sql",
+      // 2026-11-26: owner approved the exact public personal-service SQL in PR #3818.
+      // RED; manual owner-channel apply after merge and required checks.
+      "20261125133404_public_personal_service_search_v1.sql",
+      // 2026-11-27: exact source-label SQL approved by the owner; RED manual apply remains gated.
+      "20261127120000_public_vacancy_source_labels_v1.sql",
+      // 2026-11-27: owner approved both exact #3837 SQL payloads and manual production apply.
+      // Scheduling: A5202D18C79DF732D956553BF6ED987FF36E340AA8AD25EDACF4A2C3A3E1B9EE.
+      // Erasure integration: 54F50FEC6C8284A5110A87C572E1BC0DECC12FF379971C8A4C05B3B5DDEF9165.
+      "20261127163000_timesheet_schedules_v1.sql",
+      "20261127180000_timesheet_schedule_privacy_v1.sql",
+    ]);
   });
 
   it("the ROLLBACK carries no marker — there is nothing to approve in undoing", () => {

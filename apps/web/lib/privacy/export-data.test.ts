@@ -426,3 +426,17 @@ describe("PER-12 storage manifest", () => {
     expect(m[0].signedUrl).toBeNull();
   });
 });
+
+describe("report schedule preferences", () => {
+  it("exports the person's settings under their own profile key", async () => {
+    const row = { id: "own-schedule", profile_id: "user-1", frequency: "weekly", local_time: "09:00", time_zone: "Europe/Vilnius", enabled: true };
+    tables.set("timesheet_schedules", ok([row]));
+    const b = await bundle();
+    expect(b.data.timesheet_schedules).toEqual([row]);
+    expect(calls).toContainEqual({ table: "timesheet_schedules", column: "profile_id", ids: ["user-1"] });
+  });
+  it("names a failed schedule read instead of claiming there are no preferences", async () => {
+    tables.set("timesheet_schedules", fails());
+    expect((await bundle()).unavailable).toContain("timesheet_schedules");
+  });
+});

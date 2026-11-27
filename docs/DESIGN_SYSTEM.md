@@ -12,7 +12,8 @@
 | Tokens: colour (black + gold), type, radii, shadows, motion | `docs/DESIGN_TOKENS.md`, `apps/web/tokens/*`, `app/globals.css`, `tailwind-preset.ts` |
 | Agent-readable summary | root `DESIGN.md` |
 | Anti-slop checklist | `docs/design/final/ANTI-SLOP-REVIEW-CHECKLIST.md` |
-| Research verdicts (graph, motion, visual QA) | `docs/design/design-intelligence-2026-10.md` |
+| Research verdicts (graph, motion, visual QA) + design-technology register (§7) | `docs/design/design-intelligence-2026-10.md` |
+| UX/UI system proposal: three directions, mockups, staged plan (PROPOSAL, awaiting owner choice) | `docs/design/ux-system-2026-11/UX_UI_SYSTEM_PROPOSAL_2026-11-03.md` |
 | Work primitives (WorkSpine, PersonPresence, EvidenceDot) | `apps/web/components/app/work-world/primitives.tsx` |
 
 ## Layer added 2026-10 (rules, not new tokens)
@@ -35,7 +36,6 @@ Playwright (`apps/web/playwright.config.ts`) at 375 / 768 / 1280 / 1920; add `to
 | `PersonIdentityCard` | the persistent person at list depth (compact / full + disclosure layers) | `components/app/identity/person-identity-card.tsx` |
 | `EvidenceChain` | how far a record has got: recorded → photo → manager's record → in your history; state by ring shape + glyph + word | `components/app/work-world/evidence-chain.tsx`, `lib/evidence/evidence-chain.ts` |
 | `WorkContextMap` (L2) | the authenticated person's work life as one flow path, derived from the one `WorkerPlayerCard` | `components/app/work-world/work-context-map.tsx`, `lib/player-card/work-context.ts` |
-| `LivingCvStory` | professional history that emerges from work (screen view on `/cv`) | `components/app/cv/living-cv-story.tsx` |
 | Truthful fixtures | `SampleCardState` (confirmed / recorded / empty) with a guard that fixtures agree with the data model | `lib/player-card/sample-card.ts` |
 
 See `docs/design/live-work-graph-and-org-model.md` (levels, org model, data gaps, calendar verdict) and

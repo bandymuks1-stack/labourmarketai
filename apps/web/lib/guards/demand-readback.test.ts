@@ -38,7 +38,9 @@ describe("Guard: the company page wires the canonical demand read-back (W3 7/8/2
 
   it("scopes the read to the employer demand kinds (buyer rows stay in the buyer room)", () => {
     expect(page).toMatch(/listOwnCustomerRequests\(EMPLOYER_DEMAND_KINDS\)/);
-    expect(page).toMatch(/"company_request",\s*"agency_offer"/);
+    // The one kind list lives beside the reader (duplication audit ORG-4).
+    expect(page).toMatch(/import \{ EMPLOYER_DEMAND_KINDS, listOwnCustomerRequests \} from "@\/lib\/buyer\/customer-requests"/);
+    expect(read("lib/buyer/customer-requests.ts")).toMatch(/EMPLOYER_DEMAND_KINDS = \["company_request", "agency_offer"\]/);
   });
 });
 

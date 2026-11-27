@@ -134,7 +134,7 @@ describe("fact rows → forecast facts, through the canonical rules", () => {
 
 /**
  * THE CONTRACT WITH THE DATABASE DOOR. This is the literal output of
- * `forecast_project_facts_v1` (migration 20261024130000) over synthetic rows,
+ * `forecast_project_facts_v1` (migration 20261025045152) over synthetic rows,
  * captured on a throwaway PostgreSQL 16 cluster on 2026-10-24 — so the shape
  * the app reads is the shape the SQL writes. Keys are md5 of synthetic ids.
  * Note what is NOT in it: no entry text, no free-text metric, no review note.

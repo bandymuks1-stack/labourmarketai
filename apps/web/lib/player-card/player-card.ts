@@ -3,9 +3,12 @@ import { readCorrectedOriginalIds } from "@/lib/journal/corrected-originals-read
 import { withStandingConfirmation } from "@/lib/evidence/skill-confirmation-standing";
 import { readOwnStandingConfirmedSkillIds } from "@/lib/evidence/skill-confirmation-standing-read";
 
-import { EMPLOYER_BASIS_OR_FILTER } from "@/lib/journal/review-status";
+import { countConfirmedEntries, type ConfirmableEntryRow } from "@/lib/journal/review-status";
 import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { cache } from "react";
+import { getTranslations } from "next-intl/server";
+import { countDeclaredSkills } from "@/lib/cv-export/skill-presentation";
+import { mapClaimLabelsToCatalogSlugs } from "@/lib/profile/claim-catalog-promotion";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { getSessionProfile } from "@/lib/auth/session-profile";
@@ -295,28 +298,45 @@ async function declaredSkillsUnionCount(
   profileId: string,
   skillRows: readonly WorkerSkillRow[],
 ): Promise<{ count: number; status: "ok" | "unavailable" }> {
-  const norm = (s: string): string =>
-    s.toLowerCase().replace(/\s+/g, " ").trim();
-  const labels = new Set<string>();
+  // ONE counting rule (audit CV-16): the number is the items the skills list
+  // shows, by `presentSkills`. This used to dedup claim labels against
+  // catalogue SLUGS, so a claim in the person's own language never met the
+  // skill it names and was counted a second time.
+  const labels: string[] = [];
   let status: "ok" | "unavailable" = "ok";
   try {
     const { data: claims, error } = await asAny(supabase)
       .from("profile_skill_claims")
-      .select("normalized_label")
+      .select("label")
       .eq("profile_id", profileId);
     if (error) status = "unavailable";
-    for (const c of (claims ?? []) as { normalized_label: string | null }[]) {
-      if (c.normalized_label) labels.add(norm(c.normalized_label));
+    for (const c of (claims ?? []) as { label: string | null }[]) {
+      if (c.label) labels.push(c.label);
     }
   } catch {
     // Keep whatever we have, but say the total is not known.
     status = "unavailable";
   }
-  for (const r of skillRows) {
-    const label = r.skills?.slug ?? r.skill_id;
-    if (label) labels.add(norm(String(label)));
+  let nameOf = (slug: string): string => slug;
+  try {
+    const tSkill = await getTranslations("skillNames");
+    nameOf = (slug) => (tSkill.has(slug) ? tSkill(slug) : slug);
+  } catch {
+    // No request locale (a job, a test): slugs still count once each.
   }
-  return { count: labels.size, status };
+  const mapped = mapClaimLabelsToCatalogSlugs(labels);
+  const count = countDeclaredSkills({
+    slugs: skillRows
+      .map((r) => r.skills?.slug ?? r.skill_id)
+      .filter((x): x is string => typeof x === "string" && x !== ""),
+    claims: labels.map((label) => ({
+      label,
+      origin: "profile" as const,
+      mappedSlugs: mapped.get(label.trim()) ?? [],
+    })),
+    nameOf,
+  });
+  return { count, status };
 }
 
 /**
@@ -383,10 +403,14 @@ async function ownNewestConfirmations(
   }
 }
 
-/** Manager confirmations on the worker's own entries. 0 on any error. */
+/**
+ * Entries of the worker's that someone else confirmed: employer decisions only (decision
+ * 0018), never the person's own (EVID-2). 0 on any error.
+ */
 async function ownConfirmationsCount(
   supabase: SupabaseClient,
   workerId: string,
+  subjectProfileId: string,
 ): Promise<number> {
   try {
     // LIVE ONLY — a confirmation on a retracted or superseded entry is not a
@@ -394,18 +418,12 @@ async function ownConfirmationsCount(
     // adjacent read four lines down had already been filtering `deleted_at`:
     // one file, two answers to the same question.
     const { data: entryRows } = await liveJournalEntriesOnly(
-      asAny(supabase).from("journal_entries").select("id").eq("worker_id", workerId),
-    );
-    const ids = ((entryRows ?? []) as { id: string }[]).map((e) => e.id);
-    if (ids.length === 0) return 0;
-    return await safeCount(
       asAny(supabase)
-        .from("journal_entry_confirmations")
-        .select("id", { count: "exact", head: true })
-        .in("entry_id", ids)
-        // Manager confirmations only (decision 0018).
-        .or(EMPLOYER_BASIS_OR_FILTER),
+        .from("journal_entries")
+        .select("id, correction_of, journal_entry_confirmations(confirmation_scope, created_at, confirmer_id)")
+        .eq("worker_id", workerId),
     );
+    return countConfirmedEntries((entryRows ?? []) as ConfirmableEntryRow[], subjectProfileId);
   } catch {
     return 0;
   }
@@ -566,7 +584,7 @@ export const getWorkerPlayerCard = cache(async (): Promise<WorkerPlayerCard | nu
       ? verifiedSkillBadges(supabase, workerId)
       : Promise.resolve<VerifiedSkillsRead>({ status: "ok", badges: [] }),
     workerId
-      ? ownConfirmationsCount(supabase, workerId)
+      ? ownConfirmationsCount(supabase, workerId, user.id)
       : Promise.resolve(0),
     // Primary profession from the ONE cached profession read (was its own
     // `is_primary = true` select — one of 4 identical ones per navigation).

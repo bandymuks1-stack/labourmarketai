@@ -86,9 +86,6 @@ import {
  *  `lib/config/navigation.ts` (pure, beside the canonical admin nav item, so
  *  the admin route has ONE source and the guards read the same predicate). */
 
-/** The one map route — it carries no partner credit line. */
-const MARKET_MAP_PATH = "/dashboard/market-map";
-
 /**
  * HYDRATION BOUNDARY for server-authored slots (React #418, 2026-10-09).
  *
@@ -115,12 +112,10 @@ export function DashboardChrome({
   children,
   headerTitle,
   nav,
-  rexora,
 }: {
   children: React.ReactNode;
   headerTitle: string;
   nav: ConversationNavLabels;
-  rexora: React.ReactNode;
 }) {
   const pathname = usePathname();
   const mode = dashboardChromeMode(pathname);
@@ -151,17 +146,9 @@ export function DashboardChrome({
     return (
       <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="simple" data-surface={mode}>
         <ConversationHeader title={headerTitle} nav={nav} />
-        <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+        <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 pt-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 sm:pt-6 md:pb-8">
           <SlotBoundary>
             {children}
-            {/* The Rexora product credit (owner directive 2026-07-14, pinned by
-                legal-entity-truth.test.ts) used to hang off the FULL chrome. Now
-                that full serves only the admin console it would have vanished
-                from every user-facing surface, so it hangs here instead — the
-                same one-line credit, in the shell the product actually uses. */}
-            {/* The map is the product's own working surface: no partner credit
-                line under it (owner direction — one clean map). */}
-            {pathname === MARKET_MAP_PATH ? null : rexora}
           </SlotBoundary>
         </main>
       </div>
@@ -178,10 +165,9 @@ export function DashboardChrome({
   return (
     <div className="flex min-h-[100dvh] flex-col bg-ink-900" data-chrome="full" data-surface={mode}>
       <ConversationHeader title={headerTitle} nav={nav} />
-      <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 py-6 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 md:pb-8">
+      <main className="relative z-10 mx-auto w-full max-w-container flex-1 px-4 pt-4 pb-[calc(2.5rem+env(safe-area-inset-bottom))] sm:px-12 sm:pt-6 md:pb-8">
         <SlotBoundary>
           {children}
-          {rexora}
         </SlotBoundary>
       </main>
     </div>

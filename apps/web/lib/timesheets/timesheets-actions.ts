@@ -179,12 +179,13 @@ export async function submitTimesheetAction(formData: FormData): Promise<void> {
   // honest-degradation seam. No template → no submit, clearly said.
   const defRes = await asAny(supabase)
     .from("workflow_definitions")
-    .select("id, workflow_definition_versions(id, published_at)")
+    .select("id, workflow_definition_versions!inner(id, published_at)")
     .eq("organization_id", sheet.organization_id)
     .eq("context_entity_type", "timesheet")
     .eq("is_active", true)
     .order("created_at", { ascending: false })
-    .limit(5);
+    .not("workflow_definition_versions.published_at", "is", null)
+    .limit(1);
   if (defRes.error) {
     finish(
       ctx,
@@ -341,12 +342,13 @@ export async function installTimesheetApprovalPackAction(
   // answer honestly.
   const defRes = await asAny(supabase)
     .from("workflow_definitions")
-    .select("id, workflow_definition_versions(id, published_at)")
+    .select("id, workflow_definition_versions!inner(id, published_at)")
     .eq("organization_id", organizationId)
     .eq("context_entity_type", "timesheet")
     .eq("is_active", true)
     .order("created_at", { ascending: false })
-    .limit(5);
+    .not("workflow_definition_versions.published_at", "is", null)
+    .limit(1);
   if (defRes.error) finish(ctx, noticeForRpcError(defRes.error));
   type DefRow = {
     workflow_definition_versions: { published_at: string | null }[] | null;

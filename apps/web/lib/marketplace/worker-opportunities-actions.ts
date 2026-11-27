@@ -3,19 +3,12 @@
 import {
   MARKETPLACE_SURFACES,
   OPPORTUNITIES_RESULT_LIMIT,
-  OPPORTUNITIES_RESULT_EXTERNAL_LIMIT,
   type MarketplaceSurface,
   type MarkShownOutcome,
   type OpportunitiesResultView,
 } from "./worker-opportunities-contract";
-import { getTranslations } from "next-intl/server";
-
-import { deriveFitBand } from "@/lib/opportunities/fit-band";
-import { resolveInterestLabels } from "@/lib/opportunities/interest-labels";
-import {
-  loadWorkerOpportunityMatches,
-  markOpportunitiesShown,
-} from "./worker-opportunities";
+import { loadOpportunitiesResult } from "./opportunities-result";
+import { markOpportunitiesShown } from "./worker-opportunities";
 
 /**
  * The ONE server action every marketplace surface uses to report what it put
@@ -73,86 +66,7 @@ export async function markOpportunitiesShownAction(
  * it renders the reason instead.
  */
 export async function loadOpportunitiesResultAction(): Promise<OpportunitiesResultView> {
-  const view = await loadWorkerOpportunityMatches({
-    // The conversation window — the surface tag this result actually is.
-    surface: "conversation",
-    limit: OPPORTUNITIES_RESULT_LIMIT,
-  });
-  if (view.kind !== "ready") return { kind: "no-worker" };
-  if (!view.capabilities.boardAvailable) return { kind: "unavailable" };
-
-  return {
-    kind: "ready",
-    // Projected field by field: the recommendation model may grow without
-    // widening what crosses this boundary.
-    matches: view.matches.map((m) => ({
-      requestId: m.requestId,
-      roleSlug: m.roleSlug,
-      country: m.country,
-      locationLabel: m.locationLabel,
-      startPeriod: m.startPeriod,
-      basis: {
-        matchedTotal: m.basis.matchedTotal,
-        needTotal: m.basis.needTotal,
-        matchedConfirmed: m.basis.matchedConfirmed,
-      },
-      salary: m.salary,
-      missingSkillSlugs: m.missingSkillSlugs,
-      isNew: m.isNew,
-      companyName: m.companyName,
-      fitStatus: m.status,
-      // The worker's own signal, from the same view — never guessed, and
-      // absent-key means "no signal", not "not interested".
-      interestStatus: view.interestStatusByRequestId[m.requestId] ?? null,
-    })),
-    totalRecommendable: view.totalRecommendable,
-    newCount: view.newCount,
-    seenDegraded: view.capabilities.seenReadDegraded,
-    // ONE resolver for this copy, server-side, shared with the job context.
-    // Absent table ⇒ null ⇒ the panel renders read-only rows instead of a
-    // button that cannot write.
-    interestLabels: view.capabilities.interestAvailable
-      ? await resolveInterestLabels()
-      : null,
-    // External public-source ads — the SAME rows the board section renders,
-    // projected to the compact row contract. Provenance travels with every
-    // row; the original ad is the only action. Attribution is resolved HERE,
-    // server-side: the client bundle has no `vacancySources` namespace, so a
-    // code crossing this boundary renders raw (observed in production
-    // 2026-08-10).
-    external: await (async () => {
-      const cards = view.externalCards.slice(
-        0,
-        OPPORTUNITIES_RESULT_EXTERNAL_LIMIT,
-      );
-      if (cards.length === 0) return [];
-      const tRoot = await getTranslations();
-      return cards.map((c) => {
-        // The engine's verdict travels WITH the row (#1689, defect H). It used
-        // to be dropped here, so the panel could only render every external
-        // ad as a plain row under a heading that called it suitable — an
-        // `insufficient_data` "Senior AI Engineer" included. The band is a
-        // pure derivation of that verdict, never a second judgement.
-        const fit = deriveFitBand(c.match);
-        return {
-          key: c.key,
-          title: c.view.title,
-          employerName: c.view.employerName,
-          city: c.view.city,
-          country: c.view.country,
-          publishedAt: c.view.publishedAt.slice(0, 10),
-          originalUrl:
-            c.view.provenance.applicationRoute === "source_original"
-              ? c.view.provenance.applicationUrl
-              : null,
-          attributionText: tRoot(c.view.provenance.attributionCode as never),
-          fitStatus: fit.status,
-          band: fit.band,
-          gapCodes: fit.why.gapCodes,
-          missingDataCodes: fit.why.missingDataCodes,
-        };
-      });
-    })(),
-    totalExternal: view.totalExternal,
-  };
+  // The projection lives in a plain server module so the capability door
+  // (`work.find` over MCP) reads the SAME rows; this action stays argument-free.
+  return loadOpportunitiesResult({ limit: OPPORTUNITIES_RESULT_LIMIT });
 }

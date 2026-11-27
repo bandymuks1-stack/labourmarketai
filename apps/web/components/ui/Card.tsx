@@ -86,22 +86,30 @@ export function Card({
   compact = false,
   className,
   children,
+  ...dataAttributes
 }: {
   label?: string;
   live?: boolean;
   variant?: CardVariant;
-  /** Dense listing contexts: p-4 instead of the default p-6. */
+  /** Dense listing contexts: p-4 instead of the default p-6 (which is p-4 on
+   *  phones as well — owner phone report 2026-11-20: 24px of inner padding
+   *  on a 320–390px screen made every card taller and its text wrap more). */
   compact?: boolean;
   className?: string;
   children: React.ReactNode;
+  /** TypeScript never checks hyphenated JSX props, so a caller's `data-testid` used to
+   *  compile and vanish here. Production 2026-11-07: the approvals card on the
+   *  organization's first screen had no test id, and its walk could not find it. */
+  [dataAttribute: `data-${string}`]: string | number | boolean | undefined;
 }) {
   const { surface, content } = splitCardClassName(className);
   return (
     <div
+      {...dataAttributes}
       data-variant={variant === "standard" ? undefined : variant}
       className={cn(
         "card-border",
-        compact ? "p-4" : "p-6",
+        compact ? "p-4" : "p-4 sm:p-6",
         variants[variant],
         // A content layout makes the card a column so the inner wrapper can
         // fill it (justify-center on a stretched card keeps working).

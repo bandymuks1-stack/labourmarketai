@@ -4,6 +4,7 @@ import { cache } from "react";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { isEducationInstitution } from "@/lib/organizations/capabilities";
 import { actsAsAgency } from "@/lib/company/agency-capability";
 import { listMyClientBridgeConnections } from "@/lib/agency/bridge-read";
 
@@ -53,7 +54,11 @@ export const ORGANIZATION_DOOR_ROUTES: Readonly<
   work: "/dashboard/projects",
   needs: "/dashboard/company/needs",
   market: "/dashboard/service-requests",
-  calendar: "/dashboard/company/planning",
+  // The ONE calendar (owner calendar parity 2026-09-30;
+  // lib/guards/context-parity-one-calendar.test.ts). `/dashboard/company/planning`
+  // is the workforce CAPACITY zone, reached as its own area (Pajėgumai), never
+  // under the calendar's name (route drift fix 2026-11-03).
+  calendar: "/dashboard/planning",
   partners: "/dashboard/company/partners",
   education: "/dashboard/company/education",
   history: "/dashboard/company/history",
@@ -106,7 +111,9 @@ export const loadOrganizationDoors = cache(
     // The ONE agency rule (lib/company/agency-capability): type OR declared role.
     const isStaffingAgency = actsAsAgency(companyType, capabilities);
     const invites = isStaffingAgency ? null : await listMyClientBridgeConnections(ctx.companyId);
-    const hasEducation = capabilities.includes("training_provider");
+    // The ONE education gate — the header (I-1) and the company home (I-2) ask
+    // the same predicate over the same capability read.
+    const hasEducation = isEducationInstitution({ roleSlugs: capabilities });
     const hasPartners =
       isStaffingAgency ||
       (invites !== null && invites.kind === "ok" && invites.rows.length > 0);

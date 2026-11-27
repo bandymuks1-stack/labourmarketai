@@ -1,3 +1,6 @@
+import { Badge } from "@/components/ui/Badge";
+import { LmLogo } from "@/components/ui/lm-logo";
+import { vacancyOriginLabels } from "@/components/marketing/public-vacancy-card-facts";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { isAssessedFit } from "@/lib/opportunities/fit-band";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -518,13 +521,23 @@ export default async function OpportunitiesPage({
     patch: Partial<Record<keyof DiscoveryFilterState, string | null>> & {
       sort?: DiscoverySort;
     },
-  ) => `${boardHref}${buildDiscoveryQuery(filters, sort, patch)}`;
+  ) => `${boardHref}${buildDiscoveryQuery(filters, sort, patch, view)}`;
+  // Clearing filters keeps the person on the board they chose: the whole
+  // market stays the whole market, the default view stays the default view.
+  const resetHref = view === "all" ? `${boardHref}?view=all` : boardHref;
   const chipClass = (isActive: boolean) =>
     `inline-flex min-h-11 items-center rounded-md border px-2.5 text-support transition-colors ${
       isActive
         ? "border-brand-blue bg-brand-blue/10 text-text-primary"
         : "border-ink-500 text-text-secondary hover:border-brand-blue hover:text-text-primary"
     }`;
+  // The opportunity-type heading lives with its values in the need form's
+  // catalogue (structuredDemand), present in every locale; the discovery
+  // namespace never had that key, so reading it there printed a raw key.
+  const filterDimLabel = (dim: keyof DiscoveryFilterState): string =>
+    dim === "opportunityType"
+      ? sd("opportunityTypeLabel")
+      : t(`discovery.filters.${dim}` as never);
   const filterValueLabel = (dim: keyof DiscoveryFilterState, value: string): string => {
     switch (dim) {
       case "profession":
@@ -1088,10 +1101,22 @@ export default async function OpportunitiesPage({
                   filters.country,
                 ),
               },
+              // Internship / apprenticeship / employment … — the type the
+              // employer stated on the need. The filter was already parsed
+              // and applied from the URL but had no control and no heading,
+              // so a student could narrow the board to internships only by
+              // typing the address. The active value stays listed so it can
+              // always be switched off.
+              {
+                dim: "opportunityType",
+                values: withValues(facets.opportunityTypes, [], filters.opportunityType),
+              },
               { dim: "start", values: facets.starts },
               { dim: "accommodation", values: facets.accommodations },
               { dim: "transport", values: facets.transports },
               { dim: "tool", values: facets.tools },
+              // opportunityType is listed ONCE, above (#3334 and #3338 each added it,
+              // so the type chips rendered twice with duplicate keys and testids).
             ];
             const showFilterControls =
               active.length > 0 || facetGroups.some((g) => g.values.length > 0);
@@ -1146,7 +1171,7 @@ export default async function OpportunitiesPage({
                         {active.length > 0 ? (
                           <div className="flex flex-wrap items-center justify-end gap-2">
                             <Link
-                              href={boardHref}
+                              href={resetHref}
                               data-testid="opportunities-filters-reset"
                               className="inline-flex min-h-11 items-center text-support font-medium text-brand-blue hover:text-brand-champagne"
                             >
@@ -1159,7 +1184,7 @@ export default async function OpportunitiesPage({
                           .map((g) => (
                             <div key={g.dim} className="flex flex-wrap items-center gap-1.5">
                               <span className="min-w-[7rem] font-mono text-meta uppercase tracking-label text-text-muted">
-                                {t(`discovery.filters.${g.dim}` as never)}
+                                {filterDimLabel(g.dim)}
                               </span>
                               {g.values.map((v) => {
                                 const isActive = filters[g.dim] === v;
@@ -1228,13 +1253,13 @@ export default async function OpportunitiesPage({
                         filters: active
                           .map(
                             ([dim, v]) =>
-                              `${t(`discovery.filters.${dim}` as never)}: ${filterValueLabel(dim, v)}`,
+                              `${filterDimLabel(dim)}: ${filterValueLabel(dim, v)}`,
                           )
                           .join(" · "),
                       })}
                     </p>
                     <Link
-                      href={boardHref}
+                      href={resetHref}
                       className={`mt-3 ${buttonLinkClassName("secondary", "sm")}`}
                       data-testid="opportunities-filtered-empty-reset"
                     >
@@ -1359,6 +1384,7 @@ export default async function OpportunitiesPage({
                           {section.rows.map((row) =>
                             row.kind === "external" ? (
                               <ExternalOpportunityRow
+                                locale={locale}
                                 key={row.key}
                                 card={row.card}
                                 band={row.band}
@@ -1418,7 +1444,7 @@ export default async function OpportunitiesPage({
                               />
                             ) : (
                               (() => {
-                                const { need, fit, match, nextAction, interestStatus, structured, saved } = row.card;
+                                const { need, fit, match, nextAction, interestStatus, structured, saved, formalRequirements } = row.card;
                                 const rankIndex = row.rankIndex;
                                 const whyLines = whyCodesFor(row)
                                   .map(whyText)
@@ -1459,6 +1485,14 @@ export default async function OpportunitiesPage({
                                           ) : null}
                                         </p>
                                         <FitBandChip band={row.band} label={bandChip(row.band)} />
+                                      </div>
+
+                                      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-text-secondary" data-testid="job-origin" data-origin="platform">
+                                        <Badge tone="neutral" className="gap-1.5 font-sans normal-case tracking-normal">
+                                          <LmLogo className="h-4 w-4 shrink-0" title="" />
+                                          LabourMarket.ai
+                                        </Badge>
+                                        <span>{vacancyOriginLabels(locale).platform_internal}</span>
                                       </div>
 
                                       {/* Organization / source · place · start — ONE compact meta
@@ -1786,6 +1820,34 @@ export default async function OpportunitiesPage({
                                           labels={tierLabels}
                                           testId="opportunity-match-tiers"
                                         />
+
+                                        {/* FORMAL REQUIREMENTS — apart from skill fit (owner
+                                            decision 2026-10-29, SEP-6): a licence or a regulated
+                                            qualification is never satisfied by recorded work. */}
+                                        {formalRequirements && formalRequirements.length > 0 ? (
+                                          <div className="flex flex-col gap-1" data-testid="opportunity-formal-requirements">
+                                            <span className="font-mono text-meta uppercase tracking-label text-text-muted">
+                                              {t("skillMatch.formalTitle")}
+                                            </span>
+                                            <ul className="flex flex-col gap-1">
+                                              {formalRequirements.map((f) => (
+                                                <li
+                                                  key={f.kind}
+                                                  className={`text-basis ${f.standing === "missing_requirement" ? "text-state-amber" : "text-text-secondary"}`}
+                                                  data-testid="opportunity-formal-requirement"
+                                                  data-formal-kind={f.kind}
+                                                  data-standing={f.standing}
+                                                >
+                                                  {f.kind === "driving_licence"
+                                                    ? t(f.standing === "stated_held" ? "skillMatch.formalLicenceHeld" : "skillMatch.formalLicence", {
+                                                        categories: f.categories.join(", "),
+                                                      })
+                                                    : t("skillMatch.formalQualification")}
+                                                </li>
+                                              ))}
+                                            </ul>
+                                          </div>
+                                        ) : null}
 
                                         <div className="flex flex-wrap items-center gap-3">
                                           <Link

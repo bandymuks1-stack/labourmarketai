@@ -13,7 +13,9 @@ import { useLocale } from "../i18n/locale-context";
 import type { MessageKey } from "../i18n/messages";
 import { Body, Button, Divider, Field, NotAvailable } from "../ui/primitives";
 import { theme } from "../ui/theme";
+import { traceTestId, useRequestTrace } from "../request-trace";
 import { CapabilityFailureNotice } from "./capability-failure";
+import { useKeptDraft } from "../use-kept-draft";
 
 /**
  * WRITING A WORK JOURNAL ENTRY FROM THE PHONE.
@@ -103,10 +105,16 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
   const { t } = useLocale();
   const { locale } = useLocale();
   const { accessToken } = useAuth();
+  const trace = useRequestTrace();
 
   const [workDate, setWorkDate] = useState(() => deviceDay(0));
   const [notes, setNotes] = useState("");
   const [siteName, setSiteName] = useState("");
+  // UNSENT WORDS SURVIVE A SIGN-IN AGAIN (owner P0 2026-11-22).
+  const kept = useKeptDraft("journal-composer", { notes, siteName }, (d) => {
+    setNotes((now) => (now.trim() === "" ? d.notes ?? "" : now));
+    setSiteName((now) => (now.trim() === "" ? d.siteName ?? "" : now));
+  });
   const [state, setState] = useState<ComposerState>({
     kind: "writing",
     localError: null,
@@ -128,6 +136,14 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
       const trimmedSite = siteName.trim();
       if (!WORK_DATE_PATTERN.test(workDate.trim())) {
         setState({ kind: "writing", localError: "journal.compose.invalidDate" });
+        return;
+      }
+      // A journal entry is a FACT (SEP-1; web parity with #2432): a day that
+      // has not happened in the device's own calendar is refused before any
+      // round trip. The server refuses it too; this only spares the trip and
+      // says why in the person's language. Same-day evening shifts stay valid.
+      if (workDate.trim() > deviceDay(0)) {
+        setState({ kind: "writing", localError: "journal.compose.futureDate" });
         return;
       }
       if (trimmedNotes.length < MIN_NOTES) {
@@ -195,6 +211,7 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         setState({ kind: "save_failed", preview, token, failure: result.failure });
         return;
       }
+      kept.clear();
       setState({ kind: "saved", preview, result: result.data });
     },
     [accessToken, locale],
@@ -246,12 +263,14 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
     const busy = state.kind === "saving";
     return (
       <View style={styles.stack} testID="journal-compose-preview">
-        <NotAvailable
-          title={t("journal.compose.previewTitle")}
-          body={t("journal.compose.previewNothingSaved")}
-        >
-          <PreviewFacts preview={state.preview} />
-        </NotAvailable>
+        <View testID={traceTestId(trace, "journal.confirm")}>
+          <NotAvailable
+            title={t("journal.compose.previewTitle")}
+            body={t("journal.compose.previewNothingSaved")}
+          >
+            <PreviewFacts preview={state.preview} />
+          </NotAvailable>
+        </View>
 
         {state.kind === "save_failed" ? (
           state.failure.kind === "unreachable" ? (
@@ -301,10 +320,11 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
           title={t("journal.compose.chooseContext")}
           body={t("journal.compose.chooseContextBody")}
         />
-        {state.options.map((option) => (
+        {state.options.map((option, index) => (
           <Button
             key={option.id}
             variant="quiet"
+            testID={`journal-compose-option-${index}`}
             label={option.label}
             onPress={() => void draft(option.id)}
           />
@@ -321,8 +341,17 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
 
   // ── writing / drafting / draft failure ──────────────────────────────────
   return (
-    <View style={styles.stack}>
-      <Body muted>{t("journal.compose.intro")}</Body>
+    <View
+      style={styles.stack}
+      testID={`journal-compose-form-${state.kind}${
+        state.kind === "draft_failed" ? `-${state.failure.kind}` : ""
+      }`}
+    >
+      <View testID={traceTestId(trace, "journal.create_draft")}>
+        <View testID={traceTestId(trace, "journal.list")}>
+          <Body muted>{t("journal.compose.intro")}</Body>
+        </View>
+      </View>
 
       <Field
         testID="journal-compose-date"
@@ -372,6 +401,10 @@ export function JournalComposer({ onDone }: { onDone: () => void }) {
         value={siteName}
         onChangeText={setSiteName}
         maxLength={200}
+        // The last one-line box before Review: its Return key says "Done" and
+        // puts the keyboard away, so Review is never left under it.
+        returnKeyType="done"
+        submitBehavior="blurAndSubmit"
       />
 
       {state.kind === "writing" && state.localError !== null ? (

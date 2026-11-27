@@ -70,7 +70,8 @@ describe("mobile store-release config — the generated native project is only a
     // is the very false declaration this pin exists to prevent. Each type is
     // named, because each answers for something the client demonstrably
     // handles: the account it signs in with, the name and user id on the
-    // profile it reads, and the journal content it writes.
+    // profile it reads, the journal content it writes, and the in-app
+    // message replies it sends (message.send_confirm, #2928).
     const declared = new Set(
       collected.map((t: Record<string, unknown>) => t.NSPrivacyCollectedDataType as string),
     );
@@ -79,6 +80,7 @@ describe("mobile store-release config — the generated native project is only a
       "NSPrivacyCollectedDataTypeName",
       "NSPrivacyCollectedDataTypeUserID",
       "NSPrivacyCollectedDataTypeOtherUserContent",
+      "NSPrivacyCollectedDataTypeEmailsOrTextMessages",
     ]) {
       expect(
         declared.has(required),
@@ -306,5 +308,47 @@ describe("iOS CI proves a DEVICE archive, not only a simulator build", () => {
     expect(wf).toContain("Print :ITSAppUsesNonExemptEncryption");
     expect(wf).toContain("Print :UIDeviceFamily");
     expect(wf).toContain("IOS_DEVICE_ARCHIVE_BUILT");
+  });
+});
+
+describe("store builds are owner-started, skip without secrets and never upload", () => {
+  // The route is docs/launch/RELEASE_SUBMISSION_PACK_2026-10-14.md §0: EAS
+  // holds signing and store keys in the owner's Expo account. The repository
+  // is public, so the workflow may read ONE secret and must run without it.
+  const wf = readFileSync(resolve(REPO, ".github/workflows/eas-release.yml"), "utf8");
+
+  it("only the owner can start it: workflow_dispatch alone, inside the store-release environment", () => {
+    const triggers = wf.slice(wf.indexOf("\non:"), wf.indexOf("\npermissions:"));
+    expect(triggers).toContain("workflow_dispatch:");
+    expect(triggers).not.toMatch(/^\s{2}(push|pull_request|pull_request_target|schedule|workflow_run):/m);
+    expect(wf).toContain("environment: store-release");
+  });
+
+  it("reads no secret but EXPO_TOKEN and skips with a summary, not a failure, when prerequisites are missing", () => {
+    const secrets = [...wf.matchAll(/secrets\.([A-Z_]+)/g)].map((m) => m[1]);
+    expect(new Set(secrets)).toEqual(new Set(["EXPO_TOKEN"]));
+    expect(wf).toContain("extra?.eas?.projectId");
+    expect(wf).toContain("ready=false");
+    expect(wf).toContain("EAS release build skipped");
+    // Every step after the check is gated on it, so a skip builds nothing.
+    const afterCheck = wf.slice(wf.indexOf("- name: Set up pnpm"));
+    const steps = afterCheck.split("\n      - name:").length;
+    const gated = (afterCheck.match(/if: steps\.pre\.outputs\.ready == 'true'/g) ?? []).length;
+    expect(gated).toBe(steps);
+  });
+
+  it("builds only: no upload input, no auto-submit, no EAS Submit, no store app id (owner condition 2)", () => {
+    // Putting a build into TestFlight or the Play Console is a manual step in
+    // each store's console; nothing in this workflow may hand a build over.
+    expect(wf).not.toMatch(/^\s+submit:/m);
+    expect(wf).not.toContain("--auto-submit");
+    expect(wf).not.toMatch(/eas submit/i);
+    expect(wf).not.toContain("ASC_APP_ID");
+    expect(eas.submit).toEqual({ production: {} });
+    expect(eas.build.production.environment).toBe("production");
+  });
+
+  it("refuses a run dispatched from any branch but main", () => {
+    expect(wf).toContain("environment: store-release\n    if: github.ref == 'refs/heads/main'");
   });
 });

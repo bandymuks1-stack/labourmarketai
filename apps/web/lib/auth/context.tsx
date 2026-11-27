@@ -6,6 +6,7 @@ import {
   useContext,
   useMemo,
   useState,
+  useSyncExternalStore,
   useTransition,
   type ReactNode,
 } from "react";
@@ -92,6 +93,12 @@ type AuthState = {
   organizations?: SwitchableOrganization[];
   activeOrganizationId?: string | null;
   /**
+   * Display-only: the capabilities the ACTIVE organization declared
+   * (`organization_roles`, read under the caller's RLS). The header uses it
+   * only to name the education area (UX_GAPS I-1); every page re-checks.
+   */
+  activeOrganizationCapabilities?: readonly string[];
+  /**
    * Workspace context (real-user workflow rebuild W1): the ACTIVE WORK CONTEXT
    * for EVERY identity — the personal space plus every organization the person
    * owns, manages or works for (server-resolved from the canonical
@@ -136,7 +143,61 @@ type AuthContextValue = AuthState & {
   ) => void;
 };
 
-const AuthContext = createContext<AuthContextValue | null>(null);
+type Badges = Partial<Record<string, number>>;
+type SpineSnapshot = { notifications: Notification[]; badges: Badges };
+
+/**
+ * THE SPINE LIVES IN A STORE, NOT IN THE CONTEXT VALUE (#3539).
+ *
+ * The bell and the nav badges stream in after first paint, usually before a
+ * slow page. React 19.2 holds a streamed page segment back for up to ~300 ms
+ * before revealing it (`$RC` queues it, the boundary reads `$~`), and while it
+ * waits the client treats that boundary as still pending. A context change
+ * that reaches a pending boundary makes React client-render it from the RSC
+ * payload — even inside a transition — so for that window the page exists
+ * twice: the client copy in <main> and the queued server copy in a hidden
+ * `div#S:n` (the ST-1 strict-mode duplicate; role-journeys J-DEC, #3487).
+ *
+ * A store read through `useSyncExternalStore` schedules work only on the
+ * mounted components that read it, so a spine update never touches a boundary
+ * that has not hydrated. The context value below holds the store, which never
+ * changes, and no spine data.
+ */
+type SpineStore = {
+  get: () => SpineSnapshot;
+  /** What the server rendered: hydration reads this, then React re-renders
+   *  the reader with `get()` if the spine has arrived in between. */
+  getInitial: () => SpineSnapshot;
+  set: (update: (cur: SpineSnapshot) => SpineSnapshot) => void;
+  subscribe: (onChange: () => void) => () => void;
+};
+
+function createSpineStore(initial: SpineSnapshot): SpineStore {
+  let snapshot = initial;
+  const listeners = new Set<() => void>();
+  return {
+    get: () => snapshot,
+    getInitial: () => initial,
+    set: (update) => {
+      const next = update(snapshot);
+      if (next === snapshot) return;
+      snapshot = next;
+      for (const l of listeners) l();
+    },
+    subscribe: (onChange) => {
+      listeners.add(onChange);
+      return () => {
+        listeners.delete(onChange);
+      };
+    },
+  };
+}
+
+type AuthContextBase = Omit<AuthContextValue, "notifications" | "badges"> & {
+  spine: SpineStore;
+};
+
+const AuthContext = createContext<AuthContextBase | null>(null);
 
 export function AuthProvider({
   initial,
@@ -153,12 +214,9 @@ export function AuthProvider({
   children: ReactNode;
 }) {
   const router = useRouter();
-  const [notifications, setNotifications] = useState<Notification[]>(
-    initial.notifications ?? [],
+  const [spine] = useState(() =>
+    createSpineStore({ notifications: initial.notifications ?? [], badges: {} }),
   );
-  const [badges, setBadges] = useState<
-    Partial<Record<string, number>>
-  >({});
 
   const switchRole = useCallback(
     async (role: Role) => {
@@ -205,12 +263,13 @@ export function AuthProvider({
     const before = typeof window === "undefined" ? null : window.location;
     const strippedSearch = before ? withoutWorkspaceScopedDepth(before.search) : null;
     const restore = before ? before.pathname + before.search + before.hash : null;
+    // `null`, never `window.history.state`: Next marks its own entries with
+    // `__NA`, and its patched replaceState skips the router sync for any state
+    // carrying that mark. Passing it on left the router holding the old URL,
+    // and the revalidated render then wrote `?demand=` straight back. With
+    // `null`, Next copies its internals itself and syncs `useSearchParams`.
     if (before && strippedSearch !== null) {
-      window.history.replaceState(
-        window.history.state,
-        "",
-        before.pathname + strippedSearch + before.hash,
-      );
+      window.history.replaceState(null, "", before.pathname + strippedSearch + before.hash);
     }
     setRequestedWorkspaceId(workspaceId);
     return new Promise<boolean>((resolve) => {
@@ -222,7 +281,7 @@ export function AuthProvider({
           accepted = false;
         }
         if (!accepted && strippedSearch !== null && restore) {
-          window.history.replaceState(window.history.state, "", restore);
+          window.history.replaceState(null, "", restore);
         }
         resolve(accepted);
       });
@@ -247,17 +306,18 @@ export function AuthProvider({
       // their surface and get the optimistic client state only (persisting
       // them is impossible — they are counts, not rows). Fire-and-forget:
       // the action is idempotent and an unapplied store is an honest no-op.
-      const target = notifications.find((n) => n.id === id);
+      const target = spine.get().notifications.find((n) => n.id === id);
       if (target?.durable && !target.read_at) {
         void markNotificationEventReadAction(id).catch(() => {});
       }
-      setNotifications((cur) =>
-        cur.map((n) =>
+      spine.set((cur) => ({
+        ...cur,
+        notifications: cur.notifications.map((n) =>
           n.id === id ? { ...n, read_at: new Date().toISOString() } : n,
         ),
-      );
+      }));
     },
-    [notifications],
+    [spine],
   );
 
   const markAllRead = useCallback(() => {
@@ -267,15 +327,18 @@ export function AuthProvider({
     // while the people waiting were still waiting, until the next hydration
     // switched it back on — the "lie the next page-load reverts" the panel
     // promises never to tell.
-    setNotifications((cur) =>
-      cur.map((n) => (n.durable && !n.read_at ? { ...n, read_at: now } : n)),
-    );
+    spine.set((cur) => ({
+      ...cur,
+      notifications: cur.notifications.map((n) =>
+        n.durable && !n.read_at ? { ...n, read_at: now } : n,
+      ),
+    }));
     // PERSIST for durable events (notification_events store). Fire-and-forget:
     // the optimistic state above is correct either way, and while the
     // owner-gated store is unapplied the action is an honest no-op — exactly
     // the client-only behaviour this control had before.
     void markAllNotificationEventsReadAction().catch(() => {});
-  }, []);
+  }, [spine]);
 
   /** Streamed-spine hydration (P0 perf): the SpineStream server component
    *  resolves the derived signals AFTER first paint and pushes them here —
@@ -284,13 +347,12 @@ export function AuthProvider({
    *  blocking read). */
   const applySpine = useCallback(
     (next: Notification[], nextBadges: Partial<Record<string, number>>) => {
-      setNotifications(next);
-      setBadges(nextBadges);
+      spine.set(() => ({ notifications: next, badges: nextBadges }));
     },
-    [],
+    [spine],
   );
 
-  const value = useMemo<AuthContextValue>(
+  const value = useMemo<AuthContextBase>(
     () => ({
       user: initial.user,
       profile: initial.profile,
@@ -301,11 +363,11 @@ export function AuthProvider({
       activeOrgName: initial.activeOrgName ?? null,
       organizations: initial.organizations ?? [],
       activeOrganizationId: initial.activeOrganizationId ?? null,
+      activeOrganizationCapabilities: initial.activeOrganizationCapabilities ?? [],
       workspaces: initial.workspaces ?? [],
       activeWorkspaceId: initial.activeWorkspaceId ?? null,
       workspacePointerAvailable: initial.workspacePointerAvailable ?? false,
-      notifications,
-      badges,
+      spine,
       switchRole,
       addRole,
       switchOrganization,
@@ -325,11 +387,11 @@ export function AuthProvider({
       initial.activeOrgName,
       initial.organizations,
       initial.activeOrganizationId,
+      initial.activeOrganizationCapabilities,
       initial.workspaces,
       initial.activeWorkspaceId,
       initial.workspacePointerAvailable,
-      notifications,
-      badges,
+      spine,
       switchRole,
       addRole,
       switchOrganization,
@@ -345,8 +407,23 @@ export function AuthProvider({
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+const NO_SPINE: SpineStore = createSpineStore({ notifications: [], badges: {} });
+
+/** The context plus the spine, read from the store so that only components
+ *  that are already mounted re-render when the bell or the badges change. */
+function useWithSpine(base: AuthContextBase | null): AuthContextValue | null {
+  const store = base?.spine ?? NO_SPINE;
+  const snap = useSyncExternalStore(store.subscribe, store.get, store.getInitial);
+  return useMemo(() => {
+    if (!base) return null;
+    const { spine: _store, ...rest } = base;
+    void _store;
+    return { ...rest, notifications: snap.notifications, badges: snap.badges };
+  }, [base, snap]);
+}
+
 export function useAuth(): AuthContextValue {
-  const v = useContext(AuthContext);
+  const v = useWithSpine(useContext(AuthContext));
   if (!v) throw new Error("useAuth must be used inside <AuthProvider>");
   return v;
 }
@@ -359,5 +436,5 @@ export function useAuth(): AuthContextValue {
  * capture screenshots without a Supabase session.
  */
 export function useAuthOptional(): AuthContextValue | null {
-  return useContext(AuthContext);
+  return useWithSpine(useContext(AuthContext));
 }

@@ -12,6 +12,8 @@ import {
   type OfferTermsData,
 } from "@/lib/company/team-offer-actions";
 import { answerableTerms, type OfferTermsVersion, type TeamOfferRefusal } from "@/lib/market/team-offer-model";
+import { Input } from "@/components/ui/Input";
+import { Textarea } from "@/components/ui/Textarea";
 
 /**
  * The NEGOTIATION of one offer (20261011200000): every version of the terms
@@ -87,8 +89,8 @@ export function TeamOfferTerms({
 
   const versions: readonly OfferTermsVersion[] = data?.status === "ok" ? data.versions : [];
   const answerable = answerableTerms(versions);
-  const input =
-    "min-h-11 sm:min-h-9 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary";
+  // The shared Input/Textarea carry the field look; this only adds the phone floor.
+  const input = "min-h-11 max-sm:text-base";
 
   return (
     <details
@@ -144,7 +146,7 @@ export function TeamOfferTerms({
               <div className="flex flex-col gap-1">
                 <p className="text-meta text-text-muted">{t("agreeNote")}</p>
                 <div>
-                  <Button type="button" size="sm" disabled={pending} onClick={agree} data-testid={`team-offer-terms-agree-${offerId}`}>
+                  <Button className="min-h-11" type="button" size="sm" disabled={pending} onClick={agree} data-testid={`team-offer-terms-agree-${offerId}`}>
                     {t("agree", { version: answerable.version })}
                   </Button>
                 </div>
@@ -159,37 +161,37 @@ export function TeamOfferTerms({
                 <div className="grid gap-2 sm:grid-cols-2">
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-cap`}>
                     {t("capacity")}
-                    <input id={`${uid}-cap`} type="number" min={1} max={500} inputMode="numeric" value={form.capacity}
+                    <Input id={`${uid}-cap`} type="number" min={1} max={500} inputMode="numeric" value={form.capacity}
                       onChange={(e) => setForm((f) => ({ ...f, capacity: e.target.value }))} className={input} />
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-rate`}>
                     {t("rate")}
-                    <input id={`${uid}-rate`} type="text" maxLength={200} value={form.rateText} placeholder={t("ratePlaceholder")}
+                    <Input id={`${uid}-rate`} type="text" maxLength={200} value={form.rateText}
                       onChange={(e) => setForm((f) => ({ ...f, rateText: e.target.value }))} className={input} />
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-start`}>
                     {t("start")}
-                    <input id={`${uid}-start`} type="date" value={form.startDate}
+                    <Input id={`${uid}-start`} type="date" value={form.startDate}
                       onChange={(e) => setForm((f) => ({ ...f, startDate: e.target.value }))} className={input} />
                   </label>
                   <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-end`}>
                     {t("end")}
-                    <input id={`${uid}-end`} type="date" value={form.endDate}
+                    <Input id={`${uid}-end`} type="date" value={form.endDate}
                       onChange={(e) => setForm((f) => ({ ...f, endDate: e.target.value }))} className={input} />
                   </label>
                 </div>
                 <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-scope`}>
                   {t("scope")}
-                  <textarea id={`${uid}-scope`} rows={2} maxLength={2000} value={form.scopeText}
+                  <Textarea id={`${uid}-scope`} rows={2} maxLength={2000} value={form.scopeText}
                     onChange={(e) => setForm((f) => ({ ...f, scopeText: e.target.value }))} className={input} />
                 </label>
                 <label className="flex flex-col gap-1 text-meta text-text-muted" htmlFor={`${uid}-cond`}>
                   {t("conditions")}
-                  <textarea id={`${uid}-cond`} rows={2} maxLength={2000} value={form.conditionsText}
+                  <Textarea id={`${uid}-cond`} rows={2} maxLength={2000} value={form.conditionsText}
                     onChange={(e) => setForm((f) => ({ ...f, conditionsText: e.target.value }))} className={input} />
                 </label>
                 <div>
-                  <Button type="button" size="sm" variant="ghost" disabled={pending} onClick={propose}
+                  <Button className="min-h-11" type="button" size="sm" variant="ghost" disabled={pending} onClick={propose}
                     data-testid={`team-offer-terms-propose-${offerId}`}>
                     {t("propose")}
                   </Button>

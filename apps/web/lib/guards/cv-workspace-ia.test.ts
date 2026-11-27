@@ -133,7 +133,8 @@ describe("Guard: the journal page carries an always-reachable /cv link", () => {
 
 describe("Guard: waiting-for-review copy explains who reviews + interim state", () => {
   const PINNED: Record<(typeof LOCS)[number], string> = {
-    lt: "Laukia žmogaus peržiūros — peržiūrėti gali tavo organizacijos vadovas ar savininkas; iki tol tai lieka tavo nurodytas įrašas",
+    // Formal address since the owner decision of 2026-11-15.
+    lt: "Laukia žmogaus peržiūros — peržiūrėti gali jūsų organizacijos vadovas ar savininkas; iki tol tai lieka jūsų nurodytas įrašas",
     en: "Waiting for a human to review it — your organisation's manager or owner can review it; until then it stays the record you entered",
     ru: "Ожидает просмотра человеком — просмотреть её может руководитель или владелец вашей организации; до этого она остаётся записью, которую указали вы",
   };

@@ -43,7 +43,39 @@ export type HistoryPeriodStatement = {
   readonly basisReference: string | null;
   readonly statement: string | null;
   readonly createdAt: string;
+  /** How precisely each bound is known (migration 20261025050302); absent /
+   *  null = as stated, to the day. */
+  readonly periodStartPrecision?: PeriodBoundPrecision | null;
+  readonly periodEndPrecision?: PeriodBoundPrecision | null;
 };
+
+import { overlappingPeriodRecordIds } from "./hours-counted-once";
+
+export type PeriodBoundPrecision = "day" | "month" | "year";
+
+/**
+ * The bound of a stated period that work can CERTAINLY be inside of, given
+ * the precision the bound is known to: for the start the latest plausible
+ * day, for the end the earliest plausible one (the INNER span). "January
+ * 2026" as an end certainly covers work only up to 2026-01-01. Pure, no
+ * clock — the ONE rule, shared by the company view and the person's
+ * professional history.
+ */
+export function innerPeriodBound(
+  iso: string,
+  precision: PeriodBoundPrecision | null | undefined,
+  side: "start" | "end",
+): string {
+  if (!precision || precision === "day") return iso;
+  const y = iso.slice(0, 4);
+  if (precision === "year") return side === "start" ? `${y}-12-31` : `${y}-01-01`;
+  const m = Number(iso.slice(5, 7));
+  const yn = Number(y);
+  const leap = (yn % 4 === 0 && yn % 100 !== 0) || yn % 400 === 0;
+  const last = m === 2 ? (leap ? 29 : 28) : [4, 6, 9, 11].includes(m) ? 30 : 31;
+  const mm = String(m).padStart(2, "0");
+  return side === "start" ? `${y}-${mm}-${String(last).padStart(2, "0")}` : `${y}-${mm}-01`;
+}
 
 export type BusinessHistoryRecord = {
   readonly id: string;
@@ -56,6 +88,10 @@ export type BusinessHistoryRecord = {
   readonly hours: number | null;
   /** Verbatim sheet / dataset label from the source, when the source had one. */
   readonly sourceLabel: string | null;
+  /** The place as the place list groups it (`placeKeyOf`: object, else the
+   *  stated label); absent = the work object alone. One meaning of "place" on
+   *  every block of the history page (owner P0 2026-11-24). */
+  readonly placeKey?: string | null;
 };
 
 export type HistoryBucketTotals = {
@@ -71,8 +107,16 @@ export type HistoryBucketTotals = {
 
 export type BusinessHistory = {
   readonly totals: HistoryBucketTotals;
+  /** ONE entry per legal entity (or, without one, per period label): two
+   *  statements about the same entity are one period on the page, never two
+   *  cards (owner P0 2026-11-24). `statement` is the earliest statement, its
+   *  bounds widened to the documented bounds of the whole group. */
   readonly periods: readonly {
     readonly statement: HistoryPeriodStatement;
+    /** Every live statement folded into this period. */
+    readonly statementIds: readonly string[];
+    /** What the statements rest on, distinct, in statement order. */
+    readonly bases: readonly HistoryPeriodStatement["basis"][];
     readonly totals: HistoryBucketTotals;
     /** How the records got here: by source label, by documented date. */
     readonly placedByLabel: number;
@@ -82,6 +126,11 @@ export type BusinessHistory = {
   readonly years: readonly ({ readonly year: number } & HistoryBucketTotals)[];
   /** Records with no usable date (counted in totals, in no year). */
   readonly undated: number;
+  /** Period records whose span holds a day record of the same person in this
+   *  organization: they may summarise those days, so they are counted as
+   *  records but their hours are NOT added (decision 0025, every hour once;
+   *  the rule of lib/journal/organization-all-time.ts). */
+  readonly overlapping: { readonly records: number; readonly hours: number };
 };
 
 const norm = (s: string) => s.trim().toLowerCase();
@@ -102,11 +151,12 @@ class Acc {
   projects = new Set<string>();
   from: string | null = null;
   to: string | null = null;
-  add(r: BusinessHistoryRecord) {
+  add(r: BusinessHistoryRecord, countHours = true) {
     this.records += 1;
-    if (r.hours !== null && Number.isFinite(r.hours) && r.hours > 0) this.hours += r.hours;
+    if (countHours && r.hours !== null && Number.isFinite(r.hours) && r.hours > 0) this.hours += r.hours;
     if (r.personId) this.people.add(r.personId);
-    if (r.workObjectId) this.places.add(r.workObjectId);
+    const place = r.placeKey === undefined ? (r.workObjectId ? `o:${r.workObjectId}` : null) : r.placeKey;
+    if (place && place !== "none") this.places.add(place);
     if (r.projectId) this.projects.add(r.projectId);
     const a = dayOf(r);
     const b = lastDayOf(r);
@@ -140,35 +190,63 @@ export function buildBusinessHistory(
 ): BusinessHistory {
   const total = new Acc();
   const notPlaced = new Acc();
-  const perPeriod = periods.map(() => ({ acc: new Acc(), byLabel: 0, byDate: 0 }));
+  // One group per legal entity (else per period label); statements keep their
+  // own source labels and bounds for placing, the group holds the figures.
+  const groupKeys: string[] = [];
+  const groupOf = periods.map((p) => {
+    // A statement that says "same entity" never folds with one that does not
+    // (R2 P3-a): a folded period is never part own, part earlier.
+    const sameEntity = p.legalEntityRelation === "same_entity" || p.legalEntityRelation === "renamed";
+    const key = `${sameEntity ? "s" : "x"}:${norm(p.legalEntityLabel ?? p.periodLabel)}`;
+    let g = groupKeys.indexOf(key);
+    if (g < 0) g = groupKeys.push(key) - 1;
+    return g;
+  });
+  const perPeriod = groupKeys.map(() => ({ acc: new Acc(), byLabel: 0, byDate: 0 }));
   const labelIndex = new Map<string, number>();
   periods.forEach((p, i) => {
-    for (const l of p.sourceLabels) if (!labelIndex.has(norm(l))) labelIndex.set(norm(l), i);
+    for (const l of p.sourceLabels) if (!labelIndex.has(norm(l))) labelIndex.set(norm(l), groupOf[i]!);
   });
   const years = new Map<number, Acc>();
   let undated = 0;
 
+  // EVERY HOUR ONCE (decision 0025): a period record whose span holds a day
+  // record of the same person may summarise those days - listed, not added.
+  const overlappingIds = overlappingPeriodRecordIds(records);
+  let overlapRecords = 0;
+  let overlapHours = 0;
+
   for (const r of records) {
-    total.add(r);
+    const countHours = !overlappingIds.has(r.id);
+    if (!countHours) {
+      overlapRecords += 1;
+      if (r.hours !== null && Number.isFinite(r.hours) && r.hours > 0) overlapHours += r.hours;
+    }
+    total.add(r, countHours);
     // 1. by source label
     const byLabel = r.sourceLabel ? labelIndex.get(norm(r.sourceLabel)) : undefined;
     if (byLabel !== undefined) {
-      perPeriod[byLabel].acc.add(r);
+      perPeriod[byLabel].acc.add(r, countHours);
       perPeriod[byLabel].byLabel += 1;
     } else {
-      // 2. by DOCUMENTED bounds (both ends known)
+      // 2. by DOCUMENTED bounds (both ends known), only work CERTAINLY
+      //    inside them (a bound known to the month covers its inner span).
       const d = dayOf(r);
       const e = lastDayOf(r);
       const i = d
         ? periods.findIndex(
-            (p) => p.periodStart !== null && p.periodEnd !== null && d >= p.periodStart && (e ?? d) <= p.periodEnd,
+            (p) =>
+              p.periodStart !== null &&
+              p.periodEnd !== null &&
+              d >= innerPeriodBound(p.periodStart, p.periodStartPrecision, "start") &&
+              (e ?? d) <= innerPeriodBound(p.periodEnd, p.periodEndPrecision, "end"),
           )
         : -1;
       if (i >= 0) {
-        perPeriod[i].acc.add(r);
-        perPeriod[i].byDate += 1;
+        perPeriod[groupOf[i]!].acc.add(r, countHours);
+        perPeriod[groupOf[i]!].byDate += 1;
       } else {
-        notPlaced.add(r);
+        notPlaced.add(r, countHours);
       }
     }
     const d = dayOf(r);
@@ -183,21 +261,37 @@ export function buildBusinessHistory(
     }
     let acc = years.get(y);
     if (!acc) years.set(y, (acc = new Acc()));
-    acc.add(r);
+    acc.add(r, countHours);
   }
 
   return {
     totals: total.totals(),
-    periods: periods.map((statement, i) => ({
-      statement,
-      totals: perPeriod[i].acc.totals(),
-      placedByLabel: perPeriod[i].byLabel,
-      placedByDate: perPeriod[i].byDate,
-    })),
+    periods: groupKeys.map((_, g) => {
+      const members = periods.filter((_, i) => groupOf[i] === g);
+      const starts = members.map((m) => m.periodStart).filter((d): d is string => !!d).sort();
+      const ends = members.map((m) => m.periodEnd).filter((d): d is string => !!d).sort();
+      const first = members[0]!;
+      return {
+        statement: {
+          ...first,
+          periodStart: starts[0] ?? null,
+          periodEnd: ends[ends.length - 1] ?? null,
+          periodStartPrecision: starts.length ? (members.find((m) => m.periodStart === starts[0])?.periodStartPrecision ?? null) : null,
+          periodEndPrecision: ends.length ? (members.find((m) => m.periodEnd === ends[ends.length - 1])?.periodEndPrecision ?? null) : null,
+          sourceLabels: [...new Set(members.flatMap((m) => m.sourceLabels))],
+        },
+        statementIds: members.map((m) => m.id),
+        bases: [...new Set(members.map((m) => m.basis))],
+        totals: perPeriod[g].acc.totals(),
+        placedByLabel: perPeriod[g].byLabel,
+        placedByDate: perPeriod[g].byDate,
+      };
+    }),
     notPlaced: notPlaced.totals(),
     years: [...years.entries()]
       .sort((a, b) => a[0] - b[0])
       .map(([year, acc]) => ({ year, ...acc.totals() })),
     undated,
+    overlapping: { records: overlapRecords, hours: Math.round(overlapHours * 100) / 100 },
   };
 }

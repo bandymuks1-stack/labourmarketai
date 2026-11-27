@@ -75,6 +75,15 @@ registry, production evidence, capability graph, strategy and security analysis
 Internal Brain, namespaced per project. Ask the owner for access; do not
 reconstruct it from guesses, and do not copy it back into this repo.
 
+**Owner-approved exception (2026-10-28):** the per-function STATUS register
+[`docs/program/FUNCTION_REGISTER.md`](docs/program/FUNCTION_REGISTER.md) lives
+in this repository so every session and agent reads the same status. It holds
+only function, status, date, PR / commit / run id, whether it runs in
+production, and a one-line remaining issue. Production volumes, money amounts,
+infrastructure measurements, personal or partner names and any security or
+permission detail stay in the private Internal Brain; a security row says only
+that an item is open.
+
 **Living CV (binding, decision 0023):** any change to classifiers, skill
 taxonomy, evidence, CV display, review or matching must keep direct AND
 indirect/potential capability discovery and keep evidence states apart —
@@ -94,6 +103,11 @@ Before you modify or create a material product capability:
 8. identify the regression guards that already protect it;
 9. classify the change: `CONNECT` · `FIX` · `EXTEND` · `REPLACE` · `NEW`;
 10. **search for an existing implementation before creating a new one.**
+
+    The concrete, reviewable form of this step (register lookup, similar
+    implementations, open PRs, decisions, extend-vs-new proof, one owner per
+    capability) is [`docs/AGENT_CHANGE_RULES.md`](docs/AGENT_CHANGE_RULES.md);
+    the PR template's "Reuse check" section records it.
 
 Hard rules:
 
@@ -206,6 +220,50 @@ PR/repository identity without this evidence.
 
 If identity does not match → **STOP** for this repository.
 
+**An existing worktree may be reused (owner decision 2026-11-24).** A clean
+existing worktree or clone whose `git remote` names `bandymuks1-stack/labourmarketai`
+and whose checked-out branch is the PR's head branch may be used for that PR,
+even when its directory differs from the default path for new worktrees. The
+directory name or location is never a reason to stop, and never a reason to
+create another copy. Stop only for a real risk: a remote that does not match,
+uncommitted changes whose content is not yours, or a branch that is not the PR's.
+
+### Project knowledge graph (Graphify) — query before you read
+
+The owner approved Graphify (Apache-2.0, `graphifyy`, pinned **0.9.118**) on
+2026-11-24 as a local development aid, so that every agent works from the same
+checkable map of the code. It runs locally, uses no paid cloud, and changes no
+product or production setting.
+
+```bash
+python3 -m venv .graphify-venv && .graphify-venv/bin/pip install "graphifyy[sql,mcp]==0.9.118"
+.graphify-venv/bin/graphify update .                  # AST only, no LLM; 1–3 min on this repo
+.graphify-venv/bin/graphify explain "professional-experience.ts"   # a module and its importers, with file:line
+.graphify-venv/bin/graphify path "A" "B" --undirected # how two things connect
+.graphify-venv/bin/graphify query "<question>"        # keyword BFS: broad, check the hits
+```
+
+Rules:
+- **Facts versus inferences.** An edge tagged `EXTRACTED` was read from the
+  source at the cited file:line, and counts as a fact *about that checkout*. An
+  edge tagged `INFERRED`, a community label or a `query` answer is an inference:
+  confirm it in the code before you rely on it.
+- **The graph describes one commit, not production.** It is built from the
+  checkout you ran it on. Rebuild after `git pull`, because a graph older than
+  your `HEAD` is stale and is never the current state. Production state (what is
+  deployed, applied or walked) comes only from `/api/health`, the migration
+  ledger and production walks.
+- **Known gap.** Supabase table names used as strings (`.from("table")`) are
+  not edges, so the graph does not link app code to database tables. Use
+  `git grep` for those.
+- **Not memory.** `graphify-out/` (gitignored) is a per-checkout cache.
+  Decisions and history stay in `docs/DECISIONS/`, `docs/program/FUNCTION_REGISTER.md`,
+  `docs/program/COORDINATION_REGISTER.md` and git (decision 0024: no second
+  memory). `graphify save-result` and `reflect` output is not a record.
+- **No hooks in the repository.** Do not commit `graphify install` /
+  `hook install` output or a PreToolUse guard: agents without Graphify would be
+  blocked. Install it per user or per session only.
+
 ### Repository mission
 
 Build an AI-native European labour/work platform connecting workers, employers,
@@ -268,6 +326,31 @@ into a fact.
     tree that contains only your slice.
 
 ---
+
+## No interface noise (binding, decision 0032, owner rule 2026-11-15)
+
+No primitive, redundant, self-evident or patronising text in the user interface, in any locale. That
+includes „Paskyros nereikia" / "No account needed", instructions for obvious actions, repeated
+explanations, demonstration captions and other informational noise. The bar is professional,
+minimal, Apple/macOS-level design: short clear function names, only what the user needs, no new
+helper text without a real need. Legal, consent, security and essential action-consequence texts
+stay. Reviews apply this as a criterion (`.claude/skills/code-review/SKILL.md`). Full text:
+`docs/DECISIONS/0032-no-interface-noise.md`.
+
+## Direct counterparty and responsibility chain (binding, decision 0033, owner rule 2026-11-19)
+
+This applies to every party: employers, workers, agencies, contractors, subcontractors, suppliers,
+service providers and other partners.
+- A client works only with its direct partner.
+- Each party sees only the data its own relationships and functions need.
+- Each party answers to its direct client for its own obligations and for the partners it brings in.
+- Other chain participants' identity and commercial terms are not disclosed, unless the law requires
+  it.
+- The whole chain is kept for internal audit, under access rights.
+
+The rule applies to LabourMarket.ai, Agentai OS and related projects. It is not a mandate to build or
+rework anything without a concrete need and the owner's permission. Full text:
+`docs/DECISIONS/0033-direct-counterparty-and-responsibility-chain.md`.
 
 ## Auto-commit policy
 
@@ -404,6 +487,19 @@ filename convention; no reuse of an existing migration version (re-run hazard).
 repo setting *Allow auto-merge* must be ON, and branch protection on `main` must
 require both `quality` and `migration-safety` status checks. Until those are set,
 auto-merge is inert and Claude Code falls back to waiting for CI then merging.
+
+## Deploy freeze emergency — the owner only, in person (binding, owner P0 2026-11-24)
+
+`deploy-vps.yml` refuses every deploy while an issue labelled `deploy-freeze` is
+open (a post-deploy check genuinely failed). Its `emergency=true` dispatch goes
+through the freeze. The workflow can only check that the actor is the
+repository owner's GitHub ACCOUNT — and every agent session acts through that
+same account, so the check cannot tell an agent from the owner.
+
+Therefore: **agents never dispatch `deploy-vps.yml` with `emergency=true`, and
+never remove the `deploy-freeze` label or close a freeze issue to get a deploy
+through.** Only the owner does, in person. An agent that needs a deploy during a
+freeze reports the blocker and the fix PR to the owner and waits.
 
 ## Branch strategy
 

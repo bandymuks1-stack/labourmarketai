@@ -1,6 +1,7 @@
 "use client";
 
 import { useActionState } from "react";
+import { Link } from "@/lib/i18n/navigation";
 
 import { resolveDemandTitle } from "@/lib/demand/sanitize-demand-title";
 
@@ -179,11 +180,23 @@ export function BuyerRequestsSection({
   listResult,
   attachmentsResult,
   labels,
+  countryOptions,
+  view = "all",
 }: {
   readonly listResult: ListState;
   readonly attachmentsResult: AttachmentsState;
   readonly labels: BuyerRequestsSectionLabels;
+  /** Every ISO country, active markets first, named in the page's locale. */
+  readonly countryOptions: ReadonlyArray<{ readonly value: string; readonly label: string }>;
+  /**
+   * Decision 0034 (one screen per block): `list` is the requests block,
+   * `form` is the new-request block (each on its own `?tab=` address);
+   * `all` draws both, as before.
+   */
+  readonly view?: "all" | "list" | "form";
 }) {
+  const showList = view !== "form";
+  const showForm = view !== "list";
   const [state, formAction, isPending] = useActionState<
     BuyerRequestFormState | null,
     FormData
@@ -227,7 +240,7 @@ export function BuyerRequestsSection({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {labels.heading}
         </h2>
-        <p className="text-sm text-text-secondary">{labels.subheading}</p>
+        {showForm ? <p className="text-sm text-text-secondary">{labels.subheading}</p> : null}
       </header>
 
       <p
@@ -237,6 +250,8 @@ export function BuyerRequestsSection({
         {labels.manualReviewBanner}
       </p>
 
+      {showForm ? (
+        <>
       {/* Lightweight workflow stepper — explains the flow; the future
           structured helper is visibly marked as not enabled. */}
       <div className="flex flex-col gap-1" data-testid="buyer-requests-workflow">
@@ -278,6 +293,9 @@ export function BuyerRequestsSection({
         </ol>
       </div>
 
+        </>
+      ) : null}
+
       {migrationNeeded ? (
         <div
           className="rounded-md border border-state-warning bg-state-warning/10 p-3"
@@ -292,6 +310,7 @@ export function BuyerRequestsSection({
         </div>
       ) : null}
 
+      {showList ? (
       <section
         className="flex flex-col gap-2"
         data-testid="buyer-requests-list"
@@ -304,10 +323,24 @@ export function BuyerRequestsSection({
             className="rounded-md border border-dashed border-ink-500 p-3"
             data-testid="buyer-requests-empty"
           >
-            <p className="text-xs font-semibold text-text-primary">
-              {labels.emptyStateHeading}
-            </p>
-            <p className="text-xs text-text-secondary">{labels.emptyStateBody}</p>
+            {view === "list" ? (
+              // The form is its own block now (decision 0034): the empty
+              // list opens it instead of pointing "below".
+              <Link
+                href={"/dashboard/buyer?tab=new" as "/dashboard"}
+                className="inline-flex min-h-11 items-center text-sm font-semibold text-brand-blue hover:underline"
+                data-testid="buyer-requests-empty-new"
+              >
+                {labels.emptyStateHeading} →
+              </Link>
+            ) : (
+              <>
+                <p className="text-xs font-semibold text-text-primary">
+                  {labels.emptyStateHeading}
+                </p>
+                <p className="text-xs text-text-secondary">{labels.emptyStateBody}</p>
+              </>
+            )}
           </div>
         ) : (
           <ul className="flex flex-col gap-2">
@@ -517,7 +550,9 @@ export function BuyerRequestsSection({
           </ul>
         )}
       </section>
+      ) : null}
 
+      {showForm ? (
       <form
         action={formAction}
         className="flex flex-col gap-3"
@@ -564,14 +599,26 @@ export function BuyerRequestsSection({
         <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-text-secondary">{labels.fieldCountry}</span>
-            <input
-              type="text"
+            {/* An ISO country, chosen: free text ("Sweden", "Švedija") stored
+                a name no country filter could match, and an empty field
+                stored none at all (Swedish employer audit CL-3). */}
+            <select
               name="country"
-              maxLength={100}
-              placeholder={labels.fieldCountryPlaceholder}
+              required
+              defaultValue=""
+              aria-label={labels.fieldCountry}
               className="rounded-md border border-border-default bg-surface-1 px-3 py-2 text-sm text-text-primary outline-none focus:border-brand-blue"
               data-testid="buyer-requests-field-country"
-            />
+            >
+              <option value="" disabled>
+                {labels.fieldCountryPlaceholder}
+              </option>
+              {countryOptions.map((o) => (
+                <option key={o.value} value={o.value}>
+                  {o.label}
+                </option>
+              ))}
+            </select>
           </label>
           <label className="flex flex-col gap-1 text-xs">
             <span className="text-text-secondary">{labels.fieldLocation}</span>
@@ -701,6 +748,7 @@ export function BuyerRequestsSection({
           </p>
         ) : null}
       </form>
+      ) : null}
     </section>
   );
 }

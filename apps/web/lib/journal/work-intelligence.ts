@@ -208,6 +208,23 @@ export type WorkIntelligenceOrganizationRecord = {
   readonly context?: HistoryContext;
 };
 
+/** One record the organization holds about the person whose DURATION IS NOT
+ *  STATED (`hours` null at the source). The work happened and was recorded;
+ *  its length is unknown. UNKNOWN is never zero (SEP-7): carried beside the
+ *  other ledgers so the Living CV can show the day or span with "duration to
+ *  be confirmed" — never an hour in any period, total, skill or activity. */
+export type WorkIntelligenceOrganizationPendingRecord = {
+  readonly id: string;
+  readonly organizationId: string;
+  /** ISO day of a day record, or null. */
+  readonly workDate: string | null;
+  /** ISO span of a period record, or null. */
+  readonly periodStart: string | null;
+  readonly periodEnd: string | null;
+  readonly source: string;
+  readonly context?: HistoryContext;
+};
+
 /** One PERIOD record the organization holds about the person: a total over
  *  a span with NO source days ("800 h, 2025-06-01 → 2025-11-30", from an
  *  imported document). Carried BESIDE the day records (IA §2), never summed
@@ -262,6 +279,8 @@ export type WorkIntelligenceCoverage = {
 export type WorkIntelligenceInput = {
   readonly entries: readonly WorkIntelligenceEntry[];
   readonly skills: readonly WorkIntelligenceSkillRow[];
+  /** Include bounded source excerpts only for an explicitly opted-in own-CV projection. */
+  readonly includeSkillSamples?: boolean;
   /** UTC calendar day the periods end on (inclusive). */
   readonly todayIso: string;
   /** Last work day that is NOT future (`lib/time/local-day.ts`). A work day
@@ -290,6 +309,9 @@ export type WorkIntelligenceInput = {
    *  read. Ignored when `organizationRecords` is null — a half-read ledger
    *  would pose as a smaller one. */
   readonly organizationPeriodRecords?: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's records with NO stated duration. Passed through,
+   *  summed into nothing; ignored when `organizationRecords` is null. */
+  readonly organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
 };
 
 /** Inclusive UTC calendar-day windows ending today (W12 doctrine: dates are
@@ -329,6 +351,32 @@ export type WorkPeriodTotals = {
 
 export type SkillTimeBasis = "attributed" | "shared" | "multi_activity" | "none";
 
+/** A bounded excerpt of an existing linked entry, never a generated work summary. */
+export type SkillWorkSample = {
+  readonly entryId: string;
+  readonly originalText: string;
+  /** The stated work day; a save-date fallback is not presented as a work date. */
+  readonly date: string | null;
+  /** Only this skill's attributed part; shared involvement is not its duration. */
+  readonly attributedHours: number;
+  readonly engagementContextId: string | null;
+  readonly textTruncated: boolean;
+};
+
+const SKILL_SAMPLE_LIMIT = 3;
+const SKILL_SAMPLE_TEXT_LIMIT = 240;
+
+function skillSampleText(text: string): Pick<SkillWorkSample, "originalText" | "textTruncated"> {
+  let originalText = "";
+  let length = 0;
+  for (const character of text) {
+    if (length === SKILL_SAMPLE_TEXT_LIMIT) return { originalText, textTruncated: true };
+    originalText += character;
+    length += 1;
+  }
+  return { originalText, textTruncated: false };
+}
+
 /** One skill and what the person's own recorded work says about it. */
 export type SkillWorkTime = {
   readonly skillId: string;
@@ -355,6 +403,8 @@ export type SkillWorkTime = {
   /** The distinct engagement context ids those entries belong to, sorted;
    *  the null (personal) context is excluded — it names nothing. */
   readonly contextIds: readonly string[];
+  /** Up to three newest linked-entry examples within this reading's scope. */
+  readonly samples?: readonly SkillWorkSample[];
   /** The earliest day a linked entry was worked, or null. */
   readonly firstWorkedDay: string | null;
   /** The most recent day a linked entry was worked, or null. */
@@ -516,6 +566,11 @@ export type WorkIntelligence = {
    *  their own beside `organizationRecords`, in no period's `hours`, on no
    *  day. `null` exactly when `organizationRecords` is null (UNKNOWN). */
   readonly organizationPeriodRecords: readonly WorkIntelligenceOrganizationPeriodRecord[] | null;
+  /** The organization's records with NO stated duration (SEP-7: unknown,
+   *  never zero) — shown as "duration to be confirmed", in no sum. `null`
+   *  exactly when `organizationRecords` is null (UNKNOWN). Optional so
+   *  hand-built models in callers stay valid; absent = none. */
+  readonly organizationPendingRecords?: readonly WorkIntelligenceOrganizationPendingRecord[] | null;
   /** The organization's DAY records that carry a professional-history context
    *  (imported evidence), as read - handed through untouched so the Living CV can
    *  name the work behind the hours. A pass-through, never a sum: no figure in
@@ -911,6 +966,7 @@ export function deriveWorkIntelligence(
     entries: Set<string>;
     days: Set<string>;
     contexts: Set<string>;
+    samples: { sample: SkillWorkSample; sortDay: string }[];
     first: string | null;
     last: string | null;
     recent: number;
@@ -931,6 +987,7 @@ export function deriveWorkIntelligence(
         entries: new Set(),
         days: new Set(),
         contexts: new Set(),
+        samples: [],
         first: null,
         last: null,
         recent: 0,
@@ -951,9 +1008,27 @@ export function deriveWorkIntelligence(
 
   for (const d of scoped) {
     const ids = [...new Set(d.entry.linkedSkillIds)];
+    const text = input.includeSkillSamples ? d.entry.originalText?.trim() : null;
+    const sampleText = text ? skillSampleText(text) : null;
     for (const id of ids) {
       const a = accFor(id);
       a.entries.add(d.entry.entryId);
+      if (sampleText && d.entry.entryId && !a.samples.some(({ sample }) => sample.entryId === d.entry.entryId)) {
+        a.samples.push({
+          sortDay: d.time.day,
+          sample: {
+            entryId: d.entry.entryId,
+            ...sampleText,
+            date: d.time.dayBasis === "stated" && DAY_RX.test(d.time.day) ? d.time.day : null,
+            attributedHours: round2(d.attribution.bySkill.get(id) ?? 0),
+            engagementContextId: d.entry.engagementContextId,
+          },
+        });
+        a.samples.sort((left, right) =>
+          right.sortDay.localeCompare(left.sortDay) || left.sample.entryId.localeCompare(right.sample.entryId),
+        );
+        a.samples.length = Math.min(a.samples.length, SKILL_SAMPLE_LIMIT);
+      }
       // a personal entry names no context — it is not a context of its own
       if (d.entry.engagementContextId) a.contexts.add(d.entry.engagementContextId);
       if (DAY_RX.test(d.time.day)) {
@@ -1013,6 +1088,7 @@ export function deriveWorkIntelligence(
       days: a?.days.size ?? 0,
       contexts: a?.contexts.size ?? 0,
       contextIds: [...(a?.contexts ?? [])].sort(),
+      ...(input.includeSkillSamples ? { samples: a?.samples.map(({ sample }) => sample) ?? [] } : {}),
       firstWorkedDay: a?.first ?? null,
       lastWorkedDay: a?.last ?? null,
       share: attributedHours > 0 ? round2(attributed / attributedHours) : 0,
@@ -1341,6 +1417,7 @@ export function deriveWorkIntelligence(
     periods,
     organizationRecords,
     organizationPeriodRecords,
+    organizationPendingRecords: orgRows === null ? null : [...(input.organizationPendingRecords ?? [])],
     organizationContextRecords:
       orgRows === null
         ? null

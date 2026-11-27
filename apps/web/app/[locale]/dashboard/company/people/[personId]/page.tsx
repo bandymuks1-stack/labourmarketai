@@ -4,7 +4,7 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import { ArrowLeft } from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
-import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { requireCompanyOrHistoryGrant } from "@/lib/organization-evidence/history-read-access";
 import { Card } from "@/components/ui/Card";
 import { SemanticIcon } from "@/components/app/semantic-icon";
 import { PersonImportedHistory } from "@/components/app/people/person-imported-history";
@@ -45,23 +45,35 @@ export const dynamic = "force-dynamic";
  */
 export default async function CompanyPersonHistoryPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string; personId: string }>;
+  searchParams?: Promise<Record<string, string | string[] | undefined>>;
 }) {
   const { locale, personId } = await params;
   setRequestLocale(locale);
-  await requireRoleOrRedirect(locale, "company");
+  const access = await requireCompanyOrHistoryGrant(locale);
+  const sp = (await searchParams) ?? {};
+  const org = typeof sp.org === "string" && sp.org.trim() !== "" ? sp.org.trim() : null;
+  // A history READ grant (20261124053000) sees the recorded history only: no
+  // link to the person's own profile, no photos, no documents, and the way
+  // back is the company history, the one other page the grant opens.
+  const readGrant = access === "grant";
 
   const t = await getTranslations("companyPerson");
   const tRel = await getTranslations("evidenceImport.relationship");
   const tLinked = await getTranslations("linkedDocuments");
 
-  const load = await loadCompanyPerson(locale, personId);
+  const load = await loadCompanyPerson(locale, personId, org);
   if (load.kind === "hidden" || load.kind === "not-found") notFound();
 
   const back = (
     <Link
-      href={"/dashboard/company/people" as "/dashboard"}
+      href={
+        (readGrant
+          ? `/dashboard/company/history${org ? `?org=${encodeURIComponent(org)}` : ""}`
+          : "/dashboard/company/people") as "/dashboard"
+      }
       className="inline-flex w-fit items-center gap-1.5 text-sm text-text-secondary hover:text-text-primary"
       data-testid="company-person-back"
     >
@@ -84,6 +96,14 @@ export default async function CompanyPersonHistoryPage({
   }
 
   const { person, organizationName } = load;
+  // What the card may SAY about the account link: "linked" only on the person's
+  // own confirmation (the open-profile link has the same rule). An older row
+  // marked linked without it reads as a link that still awaits the person.
+  const claimState = person.linkedWorkerId
+    ? "linked"
+    : person.linkState === "linked"
+      ? "link_proposed"
+      : person.linkState;
   const relationship = person.relationshipKind
     ? tRel.has(person.relationshipKind)
       ? tRel(person.relationshipKind)
@@ -114,9 +134,9 @@ export default async function CompanyPersonHistoryPage({
           <span>{t("provenance", { name: organizationName })}</span>
         </p>
         {/* THE CLAIM STATUS — information, never a gate on the history. */}
-        <p className="text-sm text-text-secondary" data-testid="company-person-claim" data-link-state={person.linkState}>
-          {t(`claim.${person.linkState}` as never)}
-          {person.linkedWorkerId ? (
+        <p className="text-sm text-text-secondary" data-testid="company-person-claim" data-link-state={claimState}>
+          {t(`claim.${claimState}` as never)}
+          {person.linkedWorkerId && !readGrant ? (
             <>
               {" "}
               <Link
@@ -165,11 +185,13 @@ export default async function CompanyPersonHistoryPage({
       />
 
       {/* Photos the organization supplied for this person, by their stated anchor. */}
-      <EvidenceMediaStrip locale={locale} anchor={{ kind: "person", organizationPersonId: person.id }} />
+      {readGrant ? null : (
+        <EvidenceMediaStrip locale={locale} anchor={{ kind: "person", organizationPersonId: person.id }} />
+      )}
 
       {/* Register documents linked to the person's WORKER record. Documents attach to a worker,
           so this exists only once the roster record is linked - said, not hidden. */}
-      {person.linkedWorkerId ? (
+      {readGrant ? null : person.linkedWorkerId ? (
         <LinkedDocuments
           organizationId={load.organizationId}
           scope={{ kind: "worker", workerId: person.linkedWorkerId }}

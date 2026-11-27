@@ -73,4 +73,8 @@ describe("the members panel reaches learners", () => {
     expect(MEMBERSHIP_SLUGS).toContain("student");
     expect(MEMBERSHIP_SLUGS).toContain("employee");
   });
+
+  it("intern is listed too: the practice host signs off through the same toggle (20261012170000)", () => {
+    expect(MEMBERSHIP_SLUGS).toContain("intern");
+  });
 });

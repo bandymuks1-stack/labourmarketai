@@ -80,7 +80,7 @@ describe("no technical enum and no invented figure reaches a screen", () => {
 });
 
 describe("the copy exists, in every served locale, as real sentences", () => {
-  const LOCALES = ["en", "lt", "ru", "nl", "de", "pl"] as const;
+  const LOCALES = ["en", "lt", "ru", "nl", "de", "pl", "sv"] as const;
   const KEYS = [
     "translate",
     "translating",

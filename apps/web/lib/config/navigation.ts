@@ -19,11 +19,14 @@ import {
   type FeatureConfig,
   type FeatureKey,
 } from "./feature-availability";
+import type { WorkAreaIconKey } from "@/lib/navigation/work-areas";
 
 /** Icon ids — concrete icon imports live in `components/app/nav-icons.ts`
  *  (read by the one header), so this config stays framework-agnostic. */
 export type NavIconKey =
   | "home"
+  // The assistant's mark: "My space" leads to the conversation (N3).
+  | "assistant"
   | "store"
   | "map"
   | "idCard"
@@ -32,7 +35,10 @@ export type NavIconKey =
   | "calendar"
   | "network"
   | "user"
-  | "shield";
+  | "shield"
+  // An organization work area listed under the header's "More" keeps the
+  // icon its area switcher shows (`lib/navigation/work-areas.ts`).
+  | WorkAreaIconKey;
 
 type TabMeta = {
   /** i18n key for the SHORT tab label (e.g. "Apžvalga" vs the feature's
@@ -50,7 +56,9 @@ type TabMeta = {
 const TAB_META: Partial<Record<FeatureKey, TabMeta>> = {
   overview: {
     tabLabelKey: "auth.dashboard.tabs.overview",
-    iconKey: "home",
+    // The conversation home IS the assistant: it wears the assistant's mark
+    // (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC OD-2 (a), N3).
+    iconKey: "assistant",
   },
   // Žemėlapis — the map is its own PRIMARY product surface (map-first
   // correction). The tab goes directly to the real map at /dashboard/market-map
@@ -90,7 +98,8 @@ export type NavItem = {
   /** The feature key the tab is sourced from, or "admin" for the
    *  permission-gated admin item (not a catalogue feature). Useful for
    *  tests + telemetry + React keys. */
-  id: FeatureKey | "admin";
+  /** …or `area:<id>` for an organization work area (`work-areas.ts`). */
+  id: FeatureKey | "admin" | `area:${string}`;
   /** Locale-prefixed app route. */
   href: string;
   tabLabelKey: string;

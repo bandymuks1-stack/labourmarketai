@@ -474,6 +474,109 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
     newRelationshipIsEnough: true,
     worldStateCanControlIt: false,
   },
+  // Public personal-service entry points extend the existing service/request
+  // model. These declarations record product intent, not migration approval
+  // or production proof. The pre-auth workspace answers remain honestly false.
+  {
+    id: "/services",
+    kind: "screen",
+    originAxiom: "A-04",
+    purpose:
+      "Let an anonymous visitor search and filter personal service offerings whose authors explicitly selected public search, using only the bounded public projection.",
+    whyNotChat:
+      "The owner requires real results before registration. A direct, addressable search with URL filters serves a visitor before they enter the authenticated conversation; it does not replace that conversation or its service capabilities.",
+    whyNotExistingComponent:
+      "The existing service-request discovery lives inside the authenticated dashboard and serves its member audience. This public entry reuses the same offerings and shared UI primitives with a separate explicit-public reader; opening the member page would require registration before any result.",
+    owner:
+      "Product / service discovery — owner request 2026-11-25: real search results before mandatory registration.",
+    ownsAction: null,
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "It extends the existing job entity: entity-model.ts already maps job to job_demands, marketplace_listings and service_offerings. It adds a public doorway, not another entity type or service store.",
+    chatIntegration:
+      "The authenticated assistant keeps the existing service_offering.discover and service_request capabilities. Public browsing dispatches no AI action; a result links to its exact service page, whose request action preserves that destination through login.",
+    avatarEffect:
+      "None from browsing: the public reader changes no profile, availability, skills or avatar state.",
+    mapEffect:
+      "None from this page: it does not render or update the World Map, so reflectedOnMap remains false.",
+    journalRelation:
+      "A service offering is declared supply, not evidence of completed work. Public search creates no journal entry and changes no professional history.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true, // existing offering creation/update times and expiry
+    hasHistory: true, // prospective audit_logs facts after the draft migration; no reconstructed past
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true, // the existing service entity, not this public page
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
+  {
+    id: "/services/[id]",
+    kind: "screen",
+    originAxiom: "A-04",
+    purpose:
+      "Give one explicitly public personal service its own address, show the same public facts to every visitor, and require login only when the visitor requests the service.",
+    whyNotChat:
+      "A shared service URL must open the actual offering before registration. Requiring a conversation first would lose the exact object the visitor came to inspect.",
+    whyNotExistingComponent:
+      "The existing member service-request page is a discovery and inbox surface, not a public per-offering address. This page reuses the public reader, shared presentation and PersonServiceRequestButton instead of duplicating the request workflow.",
+    owner:
+      "Product / service discovery — owner request 2026-11-25: real search results before mandatory registration.",
+    ownsAction: null, // requestServiceOffering remains the one request owner
+
+    worldElement: "market_world_map",
+    whyNotExistingElement:
+      "It addresses one service_offerings row of the existing job entity already used by /services; no organization, provider-identity or second service model is introduced.",
+    chatIntegration:
+      "Login returns to this exact service URL. The authenticated action reuses requestServiceOffering and the existing request inbox; the assistant's canonical service capabilities remain unchanged.",
+    avatarEffect:
+      "The detail read changes no avatar. Any subsequent request belongs to the existing authenticated service-request workflow, not to a new public state store.",
+    mapEffect:
+      "None: the public detail is not a World Map selection or rendering and does not claim to be one.",
+    journalRelation:
+      "The offer remains declared supply. Reading it or requesting it does not manufacture completed-work evidence or a journal entry.",
+
+    pillar: "world_map",
+    objectType: "job",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true, // atomic create/change/delete history after apply, not old content versions
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: false,
+    usableWithoutLeavingWorkspace: false,
+    needsNoNewPage: false,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+  },
   {
     id: "components/marketing/public-vacancy-card.tsx",
     kind: "persistent_card",
@@ -1760,6 +1863,74 @@ export const PRODUCT_SURFACES: readonly SurfaceDeclaration[] = [
       ],
       ownerRuling:
         "Owner decision 0018 (docs/DECISIONS/0018-counterparty-review-authority.md, owner-approved 2026-10-04): counterparty review authority derives from the real transaction / project relationship and the authorized counterparty representative, never implicitly from employer status; client acceptance is its own provenance-bearing signal.",
+    },
+  },
+
+  // OWNER APPROVAL 2026-11-03, verbatim (given to the coordinator in its own
+  // session): "Patvirtinu #2828 komponento `premium-action-card` registravimą
+  // kaip atskiro veiksmų pasirinkimo paviršiaus pagal A-09 taisyklę. Tai nėra
+  // leidimas kurti papildomų dubliuojančių kortelių sistemų."
+  {
+    id: "components/ui/premium-action-card.tsx",
+    kind: "persistent_card",
+    originAxiom: "A-09",
+    purpose:
+      "The one action-choice tile: on a page where a person chooses what to do next (projects, bookings, service requests) each tile is a link to a real destination, with one primary action per screen.",
+    whyNotChat:
+      "Choosing among a page's next steps is a glance at a few labelled doors; a chat reply cannot hold a stable, tappable set of destinations with one marked primary and the current one marked, and the conversation remains available beside it for anything typed.",
+    whyNotExistingComponent:
+      "It REPLACES the audit-PR8 ActionCard (deleted in #2828; bookings and service-requests moved onto this tile's list layout), so there is exactly one action-choice primitive. It never replaces PersonIdentityCard, the Player Card, the vacancy card or the capability card — those present an entity's state, this only chooses an action — and the guard premium-action-card.test.ts forbids any second ActionCard / ActionTile / ActionDeck export.",
+    owner: "Product owner - design direction A (2026-11-03), owner approval of #2828 the same day",
+    ownsAction: null,
+
+    worldElement: "work_journal",
+    whyNotExistingElement:
+      "No new world element: every tile links to an existing surface (a project, the journal, bookings, service requests) that already owns its action; the tile holds no data and decides nothing.",
+    chatIntegration:
+      "Every destination a tile links to is reachable from the conversation through the command registry / MCP capabilities; the tile is a shortcut to the same doors, not a separate path.",
+    avatarEffect: "None - recorded honestly; a navigation choice changes no state of the person.",
+    mapEffect: "None - recorded as reflectedOnMap: false rather than invented.",
+    journalRelation:
+      "Indirect: some tiles lead to the Work Journal or its project context; the tile itself reads and writes nothing.",
+
+    pillar: "work_journal",
+    objectType: "worker",
+    registeredInObjectModel: true,
+    hasTimeline: true,
+    hasHistory: true,
+    addableWithoutMapChange: true,
+
+    changesWorldState: false,
+    reflectedOnMap: false,
+    aiControlled: true,
+    usableWithoutLeavingWorkspace: true,
+    needsNoNewPage: true,
+
+    usesEntity: true,
+    needsNewEntityType: false,
+    registrationIsEnough: true,
+    createsNewRole: false,
+    createsNewRelationship: false,
+    aiCanWorkWithIt: true,
+
+    newBehaviorIsEnough: true,
+    newRelationshipIsEnough: true,
+    worldStateCanControlIt: false,
+
+    distinctSurface: {
+      userJob:
+        "A person on a work page (their projects, bookings or service requests) picks the next thing to do from a small set of labelled destinations, with the one main action made obvious.",
+      graphEdge:
+        "PERSON - next ACTION on an existing node (project, journal, booking, service request); a presentation of doors the graph already has, not a new edge and not an entity view.",
+      whyReuseDamages:
+        "Reusing an entity card (identity, Player Card, vacancy, capability) for navigation would make a door look like a record and blur 'this is a person / job' with 'go here'; keeping two action-card families (the old ActionCard beside this tile) would give the same job two looks, which the owner's ruling forbids.",
+      evidence: [
+        "apps/web/components/ui/premium-action-card.tsx: link-only tile, one emphasis=\"primary\" per screen, aria-current for the current place, 44 px targets, no motion under prefers-reduced-motion",
+        "apps/web/lib/guards/premium-action-card.test.ts: no other component may export an ActionCard / ActionTile / ActionDeck (the audit-PR8 ActionCard is deleted, no exception)",
+        "#2828 comments 6604167149 and 6609654286: current vs proposed at 390 and 1440 px, light and dark, tilt removed (hover is a 1 px lift), bookings and service-requests on the list layout",
+      ],
+      ownerRuling:
+        "Owner approval 2026-11-03 (coordinator session): register `premium-action-card` as a distinct action-choice surface under A-09; explicitly not a licence for additional duplicate card systems; design direction A, one primary action per screen, no 3D tilt, accessibility kept.",
     },
   },
 

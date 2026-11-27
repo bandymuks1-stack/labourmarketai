@@ -73,6 +73,15 @@ const RECOGNIZED_NEED_LIMIT = 8;
 /** Detect a canonical profession from demand text via the SAME profession
  *  lexicon the journal recognisers use (folded substring; longest needle
  *  wins so "call centre agent" beats a shorter accidental hit). */
+/** True when `text` names an occupation the catalogue positively knows is NOT
+ *  one of its professions (a row's `notWhen` compound matched, e.g.
+ *  "Systemadministratör"). Callers use it to stop guessing from other text. */
+export function namesOccupationOutsideCatalogue(text: string): boolean {
+  const folded = foldText(text);
+  if (!folded.trim()) return false;
+  return PROFESSION_HINTS_LT.some((row) => row.notWhen?.some((x) => folded.includes(foldText(x))));
+}
+
 export function detectNeedProfession(text: string): string | null {
   const folded = foldText(text);
   if (!folded.trim()) return null;

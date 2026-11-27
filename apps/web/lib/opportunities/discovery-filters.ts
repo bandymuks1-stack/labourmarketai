@@ -263,6 +263,12 @@ export function buildDiscoveryQuery(
   patch: Partial<Record<keyof DiscoveryFilterState, string | null>> & {
     sort?: DiscoverySort;
   } = {},
+  /**
+   * The view the person is on. Someone who asked for the whole board
+   * (?view=all) stays on it while they filter, sort, or clear filters;
+   * the other views are never written to the address.
+   */
+  view: DiscoveryView = "top",
 ): string {
   const next: DiscoveryFilterState = {
     profession: "profession" in patch ? (patch.profession ?? null) : f.profession,
@@ -278,6 +284,7 @@ export function buildDiscoveryQuery(
   const q = new URLSearchParams();
   for (const [k, v] of activeFilterEntries(next)) q.set(k, v);
   if (nextSort !== "relevance") q.set("sort", nextSort);
+  if (view === "all") q.set("view", "all");
   const qs = q.toString();
   return qs ? `?${qs}` : "";
 }

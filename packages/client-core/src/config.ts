@@ -142,6 +142,14 @@ export function looksPrivileged(key: string): boolean {
  * "this build is misconfigured" screen instead of a white crash — the same
  * degradation rule the web app follows.
  */
+/**
+ * The one plaintext exception: a Supabase stack on THIS machine — loopback, or
+ * the Android emulator's alias for its host (10.0.2.2). Such an address cannot
+ * reach a remote server, so no journal text or CV crosses a network in clear;
+ * it is what the isolated CI journey (android-need-isolated.yml) talks to.
+ */
+const LOCAL_STACK_ORIGIN = /^http:\/\/(?:127\.0\.0\.1|localhost|10\.0\.2\.2)(?::\d{1,5})?$/;
+
 export function readClientConfig(source: {
   supabaseUrl?: string | null;
   supabaseAnonKey?: string | null;
@@ -151,7 +159,7 @@ export function readClientConfig(source: {
 
   const url = present(source.supabaseUrl);
   if (url === null) problems.push({ kind: "missing", key: "supabaseUrl" });
-  else if (!/^https:\/\/[^\s]+$/.test(url)) {
+  else if (!/^https:\/\/[^\s]+$/.test(url) && !LOCAL_STACK_ORIGIN.test(url)) {
     problems.push({
       kind: "malformed",
       key: "supabaseUrl",

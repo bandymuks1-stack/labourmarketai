@@ -144,6 +144,43 @@ test("4. the worker's own calendar shows the leave, the plan and the conflict", 
   await close();
 });
 
+test("4b. the month and year views carry the same day, and the year says what it counts", async ({ browser }) => {
+  const { page, close } = await as(browser, "worker");
+  await page.goto(`/lt/dashboard/planning?view=month&date=${DAY}`);
+  await expect(page.getByTestId("planning-month")).toBeVisible({ timeout: 30_000 });
+  await expect(page.getByTestId(`planning-month-cell-${DAY}`)).toBeVisible();
+
+  await page.goto(`/lt/dashboard/planning?view=year&date=${DAY}`);
+  await expect(page.getByTestId("planning-year-hint")).toBeVisible({ timeout: 30_000 });
+  const tile = page.getByTestId(`planning-year-${DAY.slice(0, 7)}`);
+  // This month holds the leave and the plan from the steps above.
+  await expect(tile).toBeVisible();
+  await expect(tile).not.toContainText("nėra įrašų");
+  test.setTimeout(360_000);
+  const yearCount = Number(/\d+/.exec(await tile.innerText())?.[0] ?? "NaN");
+  await tile.click();
+  await expect(page.getByTestId(`planning-month-cell-${DAY}`)).toBeVisible({ timeout: 30_000 });
+
+  // The year tile and the day view are counted by different code. Every dated item seen
+  // on any day of the month, counted once, is what the tile must say.
+  const [y, m] = DAY.split("-").map(Number);
+  const days = new Date(Date.UTC(y, m, 0)).getUTCDate();
+  const seen = new Set<string>();
+  for (let d = 1; d <= days; d++) {
+    const day = `${DAY.slice(0, 7)}-${String(d).padStart(2, "0")}`;
+    await page.goto(`/lt/dashboard/planning?view=day&date=${day}`);
+    await expect(page.getByTestId("planning-page")).toBeVisible({ timeout: 30_000 });
+    for (const id of await page.locator('[data-testid^="planning-item-"]').evaluateAll((els) => els.map((e) => e.getAttribute("data-testid") ?? ""))) {
+      seen.add(id);
+    }
+  }
+  console.info(`[calendar-count] month=${DAY.slice(0, 7)} year_tile=${yearCount} distinct_items_on_days=${seen.size}`);
+  expect(yearCount, "the year tile counts each dated item of the month once").toBe(seen.size);
+  // At least this walk's own leave and plan are in that month.
+  expect(yearCount).toBeGreaterThanOrEqual(2);
+  await close();
+});
+
 test("5. another organization's owner sees neither the plan nor the leave", async ({ browser }) => {
   test.skip(!existsSync(state("manager")), "no manager session");
   const { page, close } = await as(browser, "manager");

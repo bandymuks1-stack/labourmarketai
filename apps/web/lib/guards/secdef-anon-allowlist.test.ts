@@ -3,7 +3,6 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import {
   ANON_SECDEF_ALLOWLIST,
-  ANON_SECDEF_ALLOWED_SIGNATURES,
   signatureOf,
 } from "../security/anon-secdef-allowlist";
 import {
@@ -308,6 +307,46 @@ describe("revoke migration 20260722160000", () => {
   });
 });
 
+// PostgreSQL GRANT accepts argument names optionally. Compare both exact
+// spellings of a REVIEWED identity, never names alone or a newly inferred
+// overload. The live allowlist retains pg_get_function_identity_arguments.
+// https://www.postgresql.org/docs/17/sql-grant.html
+function grantMatchesContract(
+  raw: string,
+  contract: { name: string; identityArgs: string },
+): boolean {
+  const normalize = (value: string) =>
+    normalizeSignature(value).replace(/\s*([(),])\s*/g, "$1");
+  if (normalize(raw) === normalize(signatureOf(contract))) return true;
+  const args = contract.identityArgs.trim() === ""
+    ? []
+    : contract.identityArgs.split(",").map((arg) =>
+        arg.trim().match(/^[a-z_][a-z0-9_]*\s+(.+)$/i)?.[1] ?? null,
+      );
+  if (args.some((arg) => arg === null)) return false;
+  return normalize(raw) === normalize(contract.name + "(" + args.join(",") + ")");
+}
+
+describe("anonymous GRANT identity formatting", () => {
+  const contract = { name: "example_read_v1", identityArgs: "p_id uuid, p_mode text" };
+  it.each([
+    "example_read_v1(p_id uuid, p_mode text)",
+    "example_read_v1(uuid, text)",
+    "example_read_v1 ( uuid , text )",
+  ])("accepts the exact reviewed identity: %s", (raw) => {
+    expect(grantMatchesContract(raw, contract)).toBe(true);
+  });
+  it.each([
+    "other_read_v1(uuid, text)",
+    "example_read_v1(uuid)",
+    "example_read_v1(text, uuid)",
+    "example_read_v1(uuid, text, boolean)",
+    "example_read_v1(uuid[], text)",
+  ])("rejects another function or overload: %s", (raw) => {
+    expect(grantMatchesContract(raw, contract)).toBe(false);
+  });
+});
+
 describe("no new migration may re-open anonymous reachability", () => {
   it("grants EXECUTE to anon/PUBLIC only for allowlisted signatures", () => {
     const offences: string[] = [];
@@ -338,9 +377,8 @@ describe("no new migration may re-open anonymous reachability", () => {
         // `get_public_business_profile_v1(p_slug text, p_debug boolean)` — and
         // sail through the guard. `foo(uuid)` and `foo(uuid, text)` are
         // different grants with different blast radii.
-        const signature = normalizeSignature(rawSignature);
-        const allowlisted = [...ANON_SECDEF_ALLOWED_SIGNATURES].some(
-          (sig) => normalizeSignature(sig) === signature,
+        const allowlisted = ANON_SECDEF_ALLOWLIST.some(
+          (contract) => grantMatchesContract(rawSignature, contract),
         );
         if (!allowlisted) {
           offences.push(

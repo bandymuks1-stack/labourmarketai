@@ -254,11 +254,42 @@ describe("the band owns no vacancy logic of its own", () => {
     expect("landing-open-jobs-band.tsx").not.toMatch(/-card\.tsx$/);
   });
 
-  it("the page mounts it between the market and the starting contexts", () => {
+  it("the page mounts it inside the market block, compact, from the one snapshot", () => {
+    // Landing V3 (owner, 2026-11-13): two or three real adverts sit directly
+    // under the market sentence; with no live sample the block shows the link
+    // to the search instead — never a placeholder advert. Since the owner
+    // decision of 2026-11-15 the rows are picked from the one snapshot per
+    // visitor, the visitor's language first.
     const focus = readFileSync(join(WEB, "app/[locale]/focus-landing/focus-landing.tsx"), "utf8");
-    const i = (c: string) => focus.search(new RegExp(`<${c}[\\s/>]`));
-    expect(i("LandingOpenJobsBand")).toBeGreaterThan(focus.indexOf("</PublicMarketMapBand>"));
-    expect(i("LandingOpenJobsBand")).toBeLessThan(i("StartingContextsBand"));
-    expect(focus).toMatch(/<LandingOpenJobsBand sample=\{market\.sample\}/);
+    expect(focus).toMatch(/<LandingMarketFacts[\s\S]*?adverts=\{[\s\S]*?<LandingOpenJobsBand sample=\{\{ basis: "live", vacancies: adverts \}\} locale=\{activeLocale\} compact \/>/);
+    expect(focus).toMatch(/market\.sample\.basis === "live" \? pickLandingVacancySample\(market\.sample\.vacancies, activeLocale\) : \[\]/);
+    expect(focus).toMatch(/const hasAdverts = adverts\.length > 0;/);
+    const band = readFileSync(join(WEB, "components/marketing/landing-open-jobs-band.tsx"), "utf8");
+    expect(band).toMatch(/sample\.vacancies\.slice\(0, 3\)/);
+  });
+});
+
+describe("job origin is recorded provenance, not a language guess", () => {
+  it("an anonymous preview shows its approved source without promising an application URL", () => {
+    const html = renderToStaticMarkup(createElement(PublicVacancyCard, {
+      vacancy: vacancy(1, { attributionCode: "vacancySources.attribution.nav", sourceLanguage: "sv" }), locale: "en",
+    }));
+    expect(html).toContain(">NAV<");
+    expect(html).toContain("No on-platform application");
+    expect(html).not.toContain("Apply on an external website");
+    expect(html).not.toContain("Arbetsförmedlingen");
+  });
+  it.each([
+    ["vacancySources.attribution.nav", "NAV"],
+    ["vacancySources.attribution.arbetsformedlingen", "Arbetsförmedlingen"],
+    ["vacancySources.attribution.unknown", "External source"],
+  ])("a member sees the recorded source %s", (attributionCode, name) => {
+    const html = renderToStaticMarkup(createElement(PublicVacancyCard, {
+      vacancy: vacancy(2), locale: "en",
+      memberFacts: { employer: null, place: null, attributionCode, hasApplicationUrl: false },
+    }));
+    expect(html).toContain(name);
+    expect(html).toContain("Application link not provided");
+    expect(html).not.toContain("Apply on this platform");
   });
 });

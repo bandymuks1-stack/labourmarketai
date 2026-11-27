@@ -18,7 +18,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { activeLocales } from "@/lib/i18n/config";
 import type { NotificationEventRow } from "@/lib/notifications/events";
-import { deriveTodayModel } from "@/lib/today/today-model";
+import { deriveTodayModel, deriveTodayNext } from "@/lib/today/today-model";
+import { deriveWorkCardState } from "@/lib/worker/work-card-state";
 
 import { composeHomeState, deriveBecause, deriveOutside, deriveRunning, deriveWaiting } from "./home-state";
 
@@ -57,6 +58,11 @@ function scoped(loc: string, ns: string) {
 }
 
 vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: () => {} }) }));
+// The proof prompt is the network page's own client component (its own words);
+// here only its placement on the home is under test.
+vi.mock("@/components/app/verify-email-prompt", () => ({
+  VerifyEmailPrompt: () => null,
+}));
 vi.mock("next-intl/server", () => ({
   getTranslations: vi.fn(async (ns: string) => scoped(state.locale, ns)),
 }));
@@ -156,6 +162,35 @@ describe("UNKNOWN is never ZERO — every region names a failed read", () => {
     expect(w).toContain('data-testid="today-next-cta"');
     expect(w).toContain('data-testid="today-open-unknown"');
     expect(w).not.toContain('data-testid="home-waiting-clear"');
+  });
+});
+
+describe("W-1: invitations that wait on a mailbox proof are not a read failure", () => {
+  it("offers the existing proof prompt instead of 'could not be read', and never claims nothing is waiting", async () => {
+    const w = html(
+      await HomeWaitingView({
+        locale: "en",
+        region: deriveWaiting(NEXT, { kind: "known", items: [] }),
+        unknownDoors: [],
+        mailboxProof: true,
+      }),
+    );
+    expect(w).toContain('data-testid="home-mailbox-proof"');
+    expect(w).not.toContain('data-testid="today-open-unknown"');
+    expect(w).not.toContain('data-testid="home-waiting-clear"');
+  });
+
+  it("a real failure is still named, beside the prompt", async () => {
+    const w = html(
+      await HomeWaitingView({
+        locale: "en",
+        region: deriveWaiting(NEXT, { kind: "known", items: [] }),
+        unknownDoors: ["offers"],
+        mailboxProof: true,
+      }),
+    );
+    expect(w).toContain('data-testid="today-open-unknown"');
+    expect(w).toContain('data-testid="home-mailbox-proof"');
   });
 });
 
@@ -289,11 +324,21 @@ describe("restraint: plain titles, real copy in every active locale", () => {
 });
 
 describe("one reading order on every screen", () => {
-  it("opportunities are 03 and recent events 04 — the DOM order, so the phone needs no renumbering", async () => {
+  it("regions are numbered by their place among the regions drawn — DOM order, no hard-coded figure, no gap", async () => {
     const outside = html(await HomeOutsideView({ outside: ALL_UNKNOWN.outside }));
     const because = html(await HomeBecauseView({ locale: "en", because: ALL_UNKNOWN.because }));
-    expect(outside).toMatch(/>04</);
-    expect(because).toMatch(/>05</);
+    // Each numbered region counts itself; the number is drawn by CSS from
+    // the one counter the regions container resets. A region left out
+    // ("Tuščia = tvarkinga") therefore leaves no gap: the home read
+    // 01, 02, 03, 05 when "Your opportunities" had nothing to show
+    // (design audit 2026-11-22).
+    for (const h of [outside, because]) {
+      expect(h).toContain("[counter-increment:home-region]");
+      expect(h).toContain("before:content-[counter(home-region,decimal-leading-zero)]");
+      expect(h).not.toMatch(/>0[1-5]</);
+    }
+    const screen = readFileSync(join(__dirname, "..", "..", "components/app/today/today-screen.tsx"), "utf8");
+    expect(screen).toMatch(/data-testid="today-regions" className="[^"]*\[counter-reset:home-region\]/);
     // A failed read always offers a way to read again.
     expect(outside).toContain('data-testid="home-opportunity-unknown-retry"');
     expect(because).toContain('data-testid="home-because-unknown-retry"');
@@ -351,5 +396,64 @@ describe("personal record line — self-only, quiet, never shown without a recor
       const h = html(await HomeRunningView({ locale: "en", running: RUNNING, record }));
       expect(h).not.toContain("home-personal-record");
     }
+  });
+});
+
+describe("evidence first — a new worker's ONE gold action is the first work entry (activation audit #4)", () => {
+  // The onboarded worker as production has them: a profession, no skills,
+  // no entries. Built with the REAL engine, not a literal.
+  const FIRST = deriveTodayNext(
+    deriveWorkCardState(
+      {
+        hasProfession: true,
+        skillsCount: 0,
+        availabilitySet: false,
+        locationSet: false,
+        paySet: false,
+        evidenceCount: 0,
+        confirmedAtMs: null,
+      },
+      0,
+    ),
+  );
+
+  it("the gold action opens the journal; the profession stays reachable as a quiet link — every active locale", async () => {
+    for (const loc of activeLocales) {
+      state.locale = loc;
+      const w = html(
+        await HomeWaitingView({ locale: loc, region: deriveWaiting(FIRST, { kind: "known", items: [] }), unknownDoors: [] }),
+      );
+      expect(w, loc).not.toContain("MISSING:");
+      // ONE gold action, and it leads to the journal.
+      expect(w.match(/bg-gradient-cta/g), loc).toHaveLength(1);
+      expect(w, loc).toMatch(/<a href="\/dashboard\/journal"[^>]*data-testid="today-next-cta"/);
+      // No explanatory line under the action (decisions 0032 and 0034).
+      expect(w, loc).not.toContain(lookup(loc, "auth.dashboard.workCard.why.evidenceFirst") as string);
+      // Nothing hidden: the profile step is a plain text link, not a button.
+      expect(w, loc).toMatch(/<a href="\/dashboard\/profile#profile-edit"[^>]*data-testid="today-next-secondary"[^>]*data-dim="work"/);
+      const secondary = w.match(/<a [^>]*data-testid="today-next-secondary"[^>]*>/)?.[0] ?? "";
+      expect(secondary, loc).not.toMatch(/bg-gradient-cta|rounded-control|border-/);
+      expect(w, loc).toContain(lookup(loc, "auth.dashboard.workCard.next.work") as string);
+    }
+  });
+
+  it("after the first entry nothing is displaced — no secondary link", async () => {
+    const after = deriveTodayNext(
+      deriveWorkCardState(
+        {
+          hasProfession: true,
+          skillsCount: 0,
+          availabilitySet: false,
+          locationSet: false,
+          paySet: false,
+          evidenceCount: 1,
+          confirmedAtMs: null,
+        },
+        0,
+      ),
+    );
+    const w = html(await HomeWaitingView({ locale: "en", region: deriveWaiting(after, { kind: "known", items: [] }), unknownDoors: [] }));
+    expect(w).toContain('data-testid="today-next-cta"');
+    expect(w).not.toContain('data-testid="today-next-secondary"');
   });
 });

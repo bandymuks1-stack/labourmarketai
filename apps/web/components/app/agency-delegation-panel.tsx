@@ -2,6 +2,7 @@
 
 import { JourneyStrip } from "@/components/app/journey-strip";
 import { useActionState } from "react";
+import type { CountryOption } from "@/lib/location/country-options";
 
 import {
   draftClientNeedAction,
@@ -13,7 +14,10 @@ import type {
   ReadState,
 } from "@/lib/agency/delegation-read";
 import { DisplayedWorkspaceField } from "@/components/app/workspace/displayed-workspace-field";
+import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 export interface AgencyDelegationLabels {
   readonly title: string;
@@ -53,6 +57,7 @@ export function AgencyDelegationPanel({
   requestTitles,
   labels,
   locale,
+  countryOptions,
 }: {
   connections: readonly { id: string; label: string }[];
   drafts: ReadState<DraftedNeedRow>;
@@ -61,10 +66,19 @@ export function AgencyDelegationPanel({
   requestTitles: Readonly<Record<string, string>>;
   labels: AgencyDelegationLabels;
   locale: string;
+  /** Built on the SERVER (as every other country picker is): Intl country
+   *  names and their order differ between Node's and the browser's ICU, so a
+   *  list computed during a client render did not match the server HTML and
+   *  React threw #418 on /partners (UX gaps 2026-11-18, A-5). */
+  countryOptions: readonly CountryOption[];
 }) {
   const [state, action, pending] = useActionState(draftClientNeedAction, IDLE);
+  // `w-full min-w-0`: a <select> is as wide as its longest option, and the
+  // country list carries 54-character names in Lithuanian ("Ypatingasis
+  // Administracinis Kinijos Regionas Honkongas"), which pushed a 390 px phone
+  // sideways (production ux-metrics walk, /lt partners as an agency).
   const input =
-    "min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-sm text-text-primary";
+    "min-h-11 w-full min-w-0 rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-sm text-text-primary outline-none transition-colors focus:border-brand-blue";
 
   return (
     <Card>
@@ -79,15 +93,15 @@ export function AgencyDelegationPanel({
         {connections.length > 0 ? (
           <form
             action={action}
-            className="grid gap-2 sm:grid-cols-2"
+            className="grid grid-cols-1 gap-2 sm:grid-cols-2"
             data-testid="agency-draft-need-form"
           >
             <DisplayedWorkspaceField />
             <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
               {labels.clientLabel}
-              <select
+              <Select
                 name="connectionId"
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-connection"
                 defaultValue={connections[0].id}
               >
@@ -96,54 +110,64 @@ export function AgencyDelegationPanel({
                     {c.label}
                   </option>
                 ))}
-              </select>
+              </Select>
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
               {labels.needTitle}
-              <input
+              <Input
                 name="title"
                 required
                 maxLength={200}
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-title"
               />
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.role}
-              <input
+              <Input
                 name="role"
                 maxLength={120}
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-role"
               />
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.teamSize}
-              <input
+              <Input
                 name="teamSize"
                 type="number"
                 min={1}
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-team-size"
               />
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.location}
-              <input
+              <Input
                 name="location"
                 maxLength={120}
-                className={input}
+                className="min-w-0"
                 data-testid="agency-draft-location"
               />
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted">
               {labels.country}
-              <input
+              <Select
                 name="country"
-                maxLength={2}
-                className={input}
+                required
+                defaultValue=""
+                className="min-w-0"
                 data-testid="agency-draft-country"
-              />
+              >
+                <option value="" disabled>
+                  —
+                </option>
+                {countryOptions.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </Select>
             </label>
             <label className="flex flex-col gap-1 text-meta text-text-muted sm:col-span-2">
               {labels.summary}
@@ -156,14 +180,16 @@ export function AgencyDelegationPanel({
               />
             </label>
             <div className="flex items-center gap-3 sm:col-span-2">
-              <button
+              <Button
                 type="submit"
+                variant="primary"
+                size="sm"
+                className="min-h-11"
                 disabled={pending}
-                className="rounded-md bg-brand-blue px-3 py-2 text-sm font-semibold text-text-primary disabled:opacity-50"
                 data-testid="agency-draft-submit"
               >
                 {labels.draftSubmit}
-              </button>
+              </Button>
               {state.status === "ok" ? (
                 <span
                   className="text-meta text-state-success"

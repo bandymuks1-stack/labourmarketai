@@ -10,7 +10,14 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { extractWorkLog, type WorkLogParse } from "@/lib/conversation/worklog-extract";
+import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
+import { trackFunnel } from "@/lib/telemetry/task";
 import { personCalendarDay } from "@/lib/time/person-calendar-day";
+import {
+  clearQuickRecordDraft,
+  readQuickRecordDraft,
+  writeQuickRecordDraft,
+} from "@/lib/journal/quick-record-draft";
 
 /**
  * MANO DARBAS — the default recording path on the journal page (target
@@ -36,6 +43,7 @@ export function JournalQuickRecord({
   labels,
   selectedDay = null,
   selectedDayLabel = null,
+  draftOwner,
   otherDoors,
 }: {
   locale: string;
@@ -47,6 +55,9 @@ export function JournalQuickRecord({
   /** The same day, formatted by the page for display — passed only when it
    *  is not today, so the question can name it. */
   selectedDayLabel?: string | null;
+  /** Who the kept draft belongs to (`quickRecordDraftOwner`): the signed-in
+   *  person in the workspace they act for. A draft of anyone else is dropped. */
+  draftOwner: string;
   /** The other ways to record (conversation, voice, the full form) — text
    *  links the page composes, rendered under the recorder so every existing
    *  door stays one tap away without competing with the one primary action. */
@@ -58,13 +69,30 @@ export function JournalQuickRecord({
   const [text, setText] = useState("");
   const [draft, setDraft] = useState<WorkLogParse | null>(null);
   const textRef = useRef<HTMLTextAreaElement>(null);
+  /** `journal_entry_started` fires ONCE per recorder, like the composer's. */
+  const startedRef = useRef(false);
   // A sentence typed while the page was still loading lives only in the
   // field: the page's state starts empty, so the button stayed disabled and
   // the next re-render dropped the words (production walk 2026-10-21). Take
   // whatever the field already holds once the recorder is live.
+  // The started entry survives a day change, another page and the readback
+  // (owner note 2026-11-22): the words — and whether the readback was open —
+  // come back from this tab's draft, read again for the day now chosen.
   useEffect(() => {
     const early = textRef.current?.value ?? "";
-    if (early) setText((current) => current || early);
+    if (early) {
+      setText((current) => current || early);
+      return;
+    }
+    const kept = readQuickRecordDraft(draftOwner);
+    if (!kept) return;
+    setText(kept.text);
+    if (kept.understood) {
+      const today = personCalendarDay();
+      setDraft(extractWorkLog(kept.text, today, selectedDay ?? today));
+    }
+    // Once, on mount: the recorder is remounted for a new day.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   const canUnderstand = text.trim().length >= 3;
   // A picked PAST day is named in the question itself ("Ką dirbai rugsėjo
@@ -98,7 +126,10 @@ export function JournalQuickRecord({
             id={`${id}-text`}
             rows={3}
             value={text}
-            onChange={(e) => setText(e.target.value)}
+            onChange={(e) => {
+              setText(e.target.value);
+              writeQuickRecordDraft(draftOwner, { text: e.target.value, understood: false });
+            }}
             placeholder={t("placeholder")}
             data-testid="journal-quick-record-text"
             className="w-full rounded-md border border-ink-500 bg-ink-700 px-4 py-3 text-body text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-brand-blue"
@@ -111,6 +142,13 @@ export function JournalQuickRecord({
               data-testid="journal-quick-record-understand"
               onClick={() => {
                 const today = personCalendarDay();
+                // The journal funnel's middle step (activation audit fix #7):
+                // viewed → STARTED → saved, all labelled "journal".
+                if (!startedRef.current) {
+                  startedRef.current = true;
+                  trackFunnel(FUNNEL_EVENTS.journalEntryStarted, { surface: "journal" });
+                }
+                writeQuickRecordDraft(draftOwner, { text, understood: true });
                 setDraft(extractWorkLog(text, today, selectedDay ?? today));
               }}
             >
@@ -125,11 +163,18 @@ export function JournalQuickRecord({
             draft={draft}
             locale={locale}
             labels={labels}
+            // Saves made here are JOURNAL-page saves, not conversation ones
+            // (activation audit fix #7) — same flow, honest funnel label.
+            surface="journal"
+            onSaved={() => clearQuickRecordDraft()}
             onClose={() => setDraft(null)}
           />
           <button
             type="button"
-            onClick={() => setDraft(null)}
+            onClick={() => {
+              writeQuickRecordDraft(draftOwner, { text, understood: false });
+              setDraft(null);
+            }}
             className="inline-flex min-h-11 items-center self-start text-support font-medium text-text-secondary underline-offset-2 hover:text-text-primary hover:underline"
             data-testid="journal-quick-record-restart"
           >

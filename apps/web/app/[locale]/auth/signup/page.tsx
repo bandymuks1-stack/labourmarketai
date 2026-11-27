@@ -4,7 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SignupForm } from "@/components/app/signup-form";
 import { getEnabledProviders } from "@/lib/auth/enabled-providers";
 import { isSafeReturnPath } from "@/lib/auth/redirect";
-import { inviteTokenFromNextPath, maskEmail } from "@/lib/invitations/model";
+import { invitationJoinsExistingOrganization, inviteTokenFromNextPath, maskEmail } from "@/lib/invitations/model";
 import { readInvitationSignupContext } from "@/lib/invitations/signup-bridge";
 import { readPublicInvitationPreview } from "@/lib/invitations/public-preview";
 import { showsStaffReviewNotice } from "@/lib/operations/auto-review-model";
@@ -54,10 +54,39 @@ export default async function SignupPage({
   // organization and the relationship; a failed read shows no sentence and the
   // acceptance then carries no notice (review stays manual).
   let reviewNoticeText: string | null = null;
+  // WHO INVITED, TO WHAT, AND WHAT HAPPENS NEXT (owner P0 2026-11-22): any
+  // invitation that brings the person into a named organization says so on
+  // the form, from the same server-only preview; nothing else is added.
+  let inviteLines: string[] | undefined;
+  const pub = inviteToken ? await readPublicInvitationPreview(inviteToken, { emitOpened: false }) : null;
+  if (
+    pub?.kind === "ok" &&
+    invitationJoinsExistingOrganization({
+      invitationType: pub.preview.invitationType,
+      organizationName: pub.preview.organizationName,
+      status: pub.preview.status,
+      expiresAt: pub.preview.expiresAt,
+    })
+  ) {
+    const tSignup = await getTranslations({ locale, namespace: "auth.signup" });
+    const tPage = await getTranslations({ locale, namespace: "network.invitePage" });
+    const tRelationships = await getTranslations({ locale, namespace: "relationshipTypes" });
+    const organization = pub.preview.organizationName ?? "";
+    inviteLines = [
+      pub.preview.inviterName
+        ? tSignup("inviteFrom", { inviter: pub.preview.inviterName, organization })
+        : tSignup("inviteTo", { organization }),
+      ...(pub.preview.relationshipSlug
+        ? [tPage("capacity", { capacity: tRelationships(pub.preview.relationshipSlug) })]
+        : []),
+      // Both an addressed invitation and an open link are accepted when the
+      // person finishes signing up (onboarding-wizard: acceptInvitationAfterSignup).
+      tSignup("inviteNext", { organization }),
+    ];
+  }
   if (invite.kind === "addressed" && inviteToken) {
-    const pub = await readPublicInvitationPreview(inviteToken, { emitOpened: false });
     if (
-      pub.kind === "ok" &&
+      pub?.kind === "ok" &&
       showsStaffReviewNotice({
         invitationType: pub.preview.invitationType,
         relationshipSlug: pub.preview.relationshipSlug,
@@ -69,10 +98,13 @@ export default async function SignupPage({
     }
   }
   return (
-    <Suspense fallback={null}>
+    // The form reads the URL on the client, so it renders after hydration; a
+    // slow phone sees the form's outline meanwhile, never an empty page.
+    <Suspense fallback={<SignupFormSkeleton />}>
       <SignupForm
         linkedinEnabled={providers.linkedin_oidc}
         facebookEnabled={providers.facebook}
+        inviteLines={inviteLines}
         invitation={
           invite.kind === "addressed" && inviteToken
             ? { token: inviteToken, maskedEmail: maskEmail(invite.email) ?? "", reviewNoticeText }
@@ -80,5 +112,16 @@ export default async function SignupPage({
         }
       />
     </Suspense>
+  );
+}
+
+function SignupFormSkeleton() {
+  return (
+    <div className="flex flex-col gap-4" aria-busy="true" data-testid="signup-form-skeleton">
+      <div className="h-8 w-2/3 animate-pulse rounded-md bg-ink-700/40" />
+      <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+      <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/30" />
+      <div className="h-11 w-full animate-pulse rounded-md bg-ink-700/50" />
+    </div>
   );
 }

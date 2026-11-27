@@ -2,14 +2,15 @@ import "server-only";
 
 import { withoutCounterpartyRows } from "@/lib/journal/review-status";
 import { z } from "zod";
+import { isIsoCountry, resolveCountryCode } from "@/lib/location/country-model";
 import { getTranslations } from "next-intl/server";
 
 import {
   createJournalEntryCore,
   projectsToChooseFrom,
 } from "@/lib/journal/journal-write-core";
+import { alreadyRecordedJournalEntry } from "@/lib/journal/confirmed-draft-replay";
 import { journalChainFingerprint } from "@/lib/journal/journal-chain-fingerprint";
-import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
 import { fd } from "@/lib/conversation/executor-contract";
 import { readProfileRow } from "@/lib/auth/session-profile";
 import { readHeldProfileRoles } from "@/lib/auth/profile-roles";
@@ -32,21 +33,26 @@ import {
 import { safeApprovedCompanyName } from "@/lib/opportunities/opportunity-fit";
 
 import {
+  capabilityTokenIssuedAt,
   mintCapabilityConfirmation,
   verifyCapabilityConfirmation,
 } from "./confirmable";
 import { demandContextRefusal } from "./employer-context-refusal";
 import { EMPLOYER_OPERATIONS_CAPABILITIES } from "./employer-operations-capabilities";
 import { COUNTERPARTY_REVIEW_CAPABILITIES } from "./counterparty-review-capabilities";
+import { JOURNAL_CORRECTION_CAPABILITIES } from "./journal-correction-capabilities";
 import { MARKETPLACE_CAPABILITIES } from "./marketplace-capabilities";
 import { TEAM_ASSIGNMENT_CAPABILITIES } from "./team-assignment-capabilities";
 import { MESSAGING_CAPABILITIES } from "./messaging-capabilities";
 import { COMPANY_INGEST_CAPABILITIES } from "./company-ingest-capabilities";
+import { COMPANY_CLAIM_CAPABILITIES } from "./company-claim-capabilities";
 import { EVIDENCE_IMPORT_CAPABILITIES } from "./evidence-import-capabilities";
 import { PEOPLE_INGEST_CAPABILITIES } from "./people-ingest-capabilities";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES } from "./conversation-action-bridge";
 import { WORKSPACE_READ_CAPABILITIES } from "./workspace-read-capabilities";
 import { DOMAIN_ACTION_CAPABILITIES } from "./domain-action-capabilities";
+import { PUBLIC_JOBS_CAPABILITIES } from "./public-jobs-capabilities";
+import { FORECAST_CAPABILITIES } from "./forecast-capabilities";
 import {
   workerExpressInterestSchema,
   workerLogWorkSchema,
@@ -66,10 +72,18 @@ import {
 import { requireEmployerCompanyForCaller } from "@/lib/company/employer-company-context";
 import { whoIsAvailableCore } from "@/lib/conversation/capacity-core";
 import { companyCreateDemandFields } from "@/lib/conversation/company-schemas";
+import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
+import { logWorkFields } from "@/lib/journal/log-work-fields";
 import {
+  activeOrganizationOf,
+  orderContextsForChoice,
   resolveEngagementContext,
   type EngagementCandidate,
 } from "@/lib/journal/engagement-context-selection";
+import {
+  composeDistinctEngagementLabels,
+  unnamedOrganizationKind,
+} from "@/lib/journal/engagement-label";
 import { PROFESSIONAL_HISTORY_RELATIONSHIPS } from "@/lib/player-card/work-history-model";
 import { orgDisplayName } from "@/lib/company/org-display";
 import type { ExecResult } from "@/lib/conversation/executor-contract";
@@ -97,10 +111,11 @@ const profileGet: CapabilityDescriptor = {
   kind: "read",
   title: "My LabourMarket profile",
   description:
-    "The caller's own profile record: name, locale, country, onboarding " +
-    "state, whether a worker profile exists, and the roles the account " +
-    "actually holds. Facts as recorded — no derived scores, and a read that " +
-    "failed is reported as unavailable rather than as an absence.",
+    "The caller's own profile record: account id, name, email address, " +
+    "locale, country, onboarding state, active role, whether a worker " +
+    "profile exists (and its id), and the roles the account actually " +
+    "holds. Facts as recorded — no derived scores, and a read that failed " +
+    "is reported as unavailable rather than as an absence.",
   exposed: true,
   annotations: {
     readOnlyHint: true,
@@ -188,7 +203,18 @@ const livingCvSkillsGet: CapabilityDescriptor = {
   title: "My Living CV skills",
   description:
     "The caller's own declared and journal-backed skills with their " +
-    "verification state and source — the same rows the web Living CV reads.",
+    "verification state and source — the same rows the web Living CV reads — " +
+    "and, per skill, what the caller's own Work Journal records for it " +
+    "(`practice`, the same figures the Living CV chip shows): the skill's OWN " +
+    "hours (`attributedHours`, of which `confirmedHours` a manager confirmed), " +
+    "`involvedUnattributedHours` — time of entries the skill took part in " +
+    "that could not be attributed to it (shared with other skills, or split " +
+    "between kinds of work without saying where; its own part is unknown — " +
+    "never split, never a total, never added to attributed hours) — entries, " +
+    "days, first and last worked day, " +
+    "the evidence tier of the skill row and how the links came to be. " +
+    "`practiceStatus` is `unavailable` when the journal could not be read " +
+    "(unknown, never zero).",
   exposed: true,
   annotations: {
     readOnlyHint: true,
@@ -219,17 +245,54 @@ const livingCvSkillsGet: CapabilityDescriptor = {
       return { ok: false, code: "unavailable", message: "Skills read failed." };
     }
 
+    // P0-B parity: the Living CV chip's figures come from the ONE work
+    // intelligence reader; MCP reads the same model, so a skill's hours are
+    // the same number on the web, in the app and to an assistant. A failed
+    // read is UNKNOWN (`practiceStatus: unavailable`), never zero (SEP-7).
+    const wi = await loadWorkIntelligence(caller, worker.id).catch(() => null);
+    const practiceBySlug = new Map((wi?.skills ?? []).map((sk) => [sk.slug, sk] as const));
+
     return {
       ok: true,
       data: {
         workerId: worker.id,
-        skills: skillsRead.value.map((r) => ({
-          skillId: r.skill_id,
-          slug: r.skills?.slug ?? null,
-          verified: r.verified,
-          source: r.source,
-          verifiedAt: r.verified_at,
-        })),
+        practiceStatus: wi ? ("known" as const) : ("unavailable" as const),
+        skills: skillsRead.value.map((r) => {
+          const slug = r.skills?.slug ?? null;
+          const sk = wi && slug ? (practiceBySlug.get(slug) ?? null) : null;
+          return {
+            skillId: r.skill_id,
+            slug,
+            verified: r.verified,
+            source: r.source,
+            verifiedAt: r.verified_at,
+            practice: !wi
+              ? null
+              : sk
+                ? {
+                    attributedHours: sk.attributedHours,
+                    confirmedHours: sk.confirmedHours,
+                    involvedUnattributedHours: sk.sharedHours,
+                    entries: sk.entries,
+                    days: sk.days,
+                    firstWorkedDay: sk.firstWorkedDay,
+                    lastWorkedDay: sk.lastWorkedDay,
+                    tier: sk.tier,
+                    linkProvenance: sk.provenance,
+                  }
+                : {
+                    attributedHours: 0,
+                    confirmedHours: 0,
+                    involvedUnattributedHours: 0,
+                    entries: 0,
+                    days: 0,
+                    firstWorkedDay: null,
+                    lastWorkedDay: null,
+                    tier: null,
+                    linkProvenance: null,
+                  },
+          };
+        }),
       },
     };
   },
@@ -386,6 +449,11 @@ const journalWorkIntelligenceGet: CapabilityDescriptor = {
           firstWorkedDay: sk.firstWorkedDay,
           lastWorkedDay: sk.lastWorkedDay,
           trend: sk.trend,
+          // P0-B parity with the Living CV: the evidence tier of the skill
+          // row and how its links came to be (recognized / manual /
+          // confirmed / unrecorded) — counts, never a person score.
+          tier: sk.tier,
+          linkProvenance: sk.provenance,
         })),
         activities: wi.activities.map((a) => ({
           key: a.key,
@@ -428,6 +496,7 @@ function normalizedDraftForHash(draft: {
   workDate: string;
   siteName?: string | null;
   projectId?: string | null;
+  voice?: { language: string; disclosureVersion: string } | null;
 }): Record<string, unknown> {
   return {
     engagementContextId: draft.engagementContextId,
@@ -437,6 +506,10 @@ function normalizedDraftForHash(draft: {
     // The project the hours belong to ("none" = deliberately not project
     // work) is part of what the human confirmed, so it is part of the hash.
     projectId: draft.projectId ?? null,
+    // Voice provenance is bound too, but only when stated: a typed draft's
+    // hash is unchanged, and a confirm cannot add a voice label the draft
+    // never carried (AI-3).
+    ...(draft.voice ? { voice: { language: draft.voice.language, disclosureVersion: draft.voice.disclosureVersion } } : {}),
   };
 }
 
@@ -447,7 +520,9 @@ function normalizedDraftForHash(draft: {
  * `engagementContextId` is an internal id no external client can discover, so
  * the draft capability resolves it the SAME way the web work-log flow does:
  * the caller's own active professional contexts under their own RLS, decided
- * by the canonical rule hierarchy (`resolveEngagementContext`, rules B/C/D).
+ * by the canonical rule hierarchy (`resolveEngagementContext`, rules W/B/C/D)
+ * — with the SAME active-workspace signal the web surfaces pass (rule W, owner
+ * P0 2026-10-29), resolved by the one transport-neutral workspace core.
  * On real ambiguity (rule C) it returns the labeled options and mints NO
  * token — the client must ask the human, exactly like the web flow. A
  * requested id that is NOT one of the caller's own contexts gets the same
@@ -455,11 +530,12 @@ function normalizedDraftForHash(draft: {
  * draft anyway, and a token for an unconfirmable draft is a lie in waiting.
  */
 type DraftEngagementOutcome =
-  | { kind: "selected"; id: string; label: string | null }
+  | { kind: "selected"; id: string; label: string | null; activeWorkspaceNotice?: string | null }
   | {
       kind: "choice";
       reason: "ambiguous" | "unknown_requested_id";
       options: { id: string; label: string }[];
+      activeWorkspaceNotice?: string | null;
     }
   | { kind: "refused"; result: ExecResult };
 
@@ -471,7 +547,7 @@ async function resolveDraftEngagementContext(
   const { data: rows, error } = await caller.supabase
     .from("engagement_contexts")
     .select(
-      "id, relationship_slug, title, is_primary, organization_id, status, started_at, ended_at, organizations(display_name, legal_name)",
+      "id, relationship_slug, title, is_primary, organization_id, status, started_at, ended_at, organizations(display_name, legal_name, organization_type)",
     )
     .eq("profile_id", caller.userId)
     .eq("status", "active")
@@ -490,6 +566,7 @@ async function resolveDraftEngagementContext(
   });
   const relationshipLabel = (slug: string): string =>
     tRelationships.has(slug) ? tRelationships(slug) : slug;
+  const tJournal = await getTranslations({ locale: caller.locale, namespace: "journal" });
 
   type Row = {
     id: string;
@@ -500,35 +577,57 @@ async function resolveDraftEngagementContext(
     status: string | null;
     started_at: string | null;
     ended_at: string | null;
-    organizations: { display_name: string | null; legal_name: string | null } | null;
+    organizations: {
+      display_name: string | null;
+      legal_name: string | null;
+      organization_type?: string | null;
+    } | null;
   };
-  const contexts = (rows ?? []) as unknown as Row[];
 
-  // Same qualification rule as the web work-log selector
-  // (lib/conversation/worklog-engagements.ts): a base label that occurs more
-  // than once is qualified by its relationship, a unique one is left as-is.
-  // Without it, two contexts at the same organization (or two org-less ones
-  // sharing a relationship) render as the identical word and the choice the
-  // options exist to offer cannot actually be made.
-  const withBase = contexts.map((row) => ({
-    row,
-    base:
-      orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name) ??
-      row.title ??
-      relationshipLabel(row.relationship_slug),
-  }));
-  const baseCounts = new Map<string, number>();
-  for (const { base } of withBase) {
-    baseCounts.set(base, (baseCounts.get(base) ?? 0) + 1);
+  // The ACTIVE WORKSPACE, from the one transport-neutral core (the same one
+  // `context.list` reads). `identity: null` — a bearer token carries no
+  // person/company signal, so an unset pointer stays personal and no
+  // organization is inferred. A failed read is no signal: the rules then run
+  // exactly as before.
+  let activeOrganizationId: string | null = null;
+  let actingWorkspace: { name: string; organizationType?: string } | null = null;
+  try {
+    const workspace = await resolveActiveWorkspaceForCaller(caller, null);
+    activeOrganizationId = activeOrganizationOf(workspace);
+    actingWorkspace = workspace.workspaces.find((w) => w.id === activeOrganizationId) ?? null;
+  } catch {
+    activeOrganizationId = null;
   }
-  const labelById = new Map<string, string>();
-  for (const { row, base } of withBase) {
-    const duplicated = (baseCounts.get(base) ?? 0) > 1;
-    labelById.set(
-      row.id,
-      duplicated ? `${base} — ${relationshipLabel(row.relationship_slug)}` : base,
-    );
-  }
+
+  // The ONE choice order (owner P0 2026-10-29): the active workspace's
+  // organization first, other organizations next, personal last.
+  const contexts = orderContextsForChoice(
+    (rows ?? []) as unknown as Row[],
+    activeOrganizationId,
+    (r) => r.organization_id,
+  );
+
+  // THE ONE LABEL COMPOSER (lib/journal/engagement-label.ts) — the same one
+  // the journal composer and the web work-log selector use, so an MCP client
+  // reads a context by the very name the person sees on the web. An
+  // organization without a name says so ("Agency without a name · Owner"),
+  // never its bare type or relationship alone — that read like a real choice.
+  const labels = composeDistinctEngagementLabels(
+    contexts.map((row) => ({
+      orgName: orgDisplayName(row.organizations?.display_name, row.organizations?.legal_name),
+      orgTypeLabel: row.organizations
+        ? tJournal(
+            `unnamedOrganization.${unnamedOrganizationKind(row.organizations.organization_type)}`,
+          )
+        : null,
+      title: row.title,
+      relationshipLabel: relationshipLabel(row.relationship_slug),
+      personalEntryLabel: tJournal("personalEntry"),
+      isPersonal: !row.organizations,
+      startedAt: row.started_at,
+    })),
+  );
+  const labelById = new Map<string, string>(contexts.map((row, i) => [row.id, labels[i]]));
 
   // An explicitly named context must be one of the caller's OWN — the real
   // ChatGPT write E2E (2026-08-30) showed a model fabricating a nil-UUID id,
@@ -571,12 +670,28 @@ async function resolveDraftEngagementContext(
     endedAt: r.ended_at,
     isPrimary: r.is_primary === true,
   }));
-  const resolution = resolveEngagementContext({ candidates, workDay: workDate });
+  const resolution = resolveEngagementContext({
+    candidates,
+    workDay: workDate,
+    activeOrganizationId,
+  });
+  // Acting for an organization with no recorded work relationship: said
+  // plainly to the client (and so to the human), never silently omitted.
+  const activeWorkspaceNotice = resolution.activeWorkspaceWithoutContext
+    ? tJournal("activeWorkspaceNoRelationship", {
+        org:
+          actingWorkspace?.name ||
+          tJournal(
+            `unnamedOrganization.${unnamedOrganizationKind(actingWorkspace?.organizationType)}`,
+          ),
+      })
+    : null;
   if (resolution.selectedId) {
     return {
       kind: "selected",
       id: resolution.selectedId,
       label: labelById.get(resolution.selectedId) ?? null,
+      activeWorkspaceNotice,
     };
   }
   if (resolution.rule === "C") {
@@ -587,6 +702,7 @@ async function resolveDraftEngagementContext(
       options: contexts
         .filter((r) => applicable.has(r.id))
         .map((r) => ({ id: r.id, label: labelById.get(r.id)! })),
+      activeWorkspaceNotice,
     };
   }
   return {
@@ -648,6 +764,9 @@ const journalCreateDraft: CapabilityDescriptor = {
         data: {
           status: "engagement_choice_required",
           options: engagement.options,
+          ...(engagement.activeWorkspaceNotice
+            ? { activeWorkspaceNotice: engagement.activeWorkspaceNotice }
+            : {}),
           note:
             engagement.reason === "unknown_requested_id"
               ? "The given engagementContextId is not one of this account's active work contexts — nothing was drafted. Ask the user to choose one of these options, then draft again with the chosen engagementContextId."
@@ -678,6 +797,8 @@ const journalCreateDraft: CapabilityDescriptor = {
       workDate: draft.workDate,
       siteName: draft.siteName ?? null,
       projectId: draft.projectId ?? null,
+      // Dictated text keeps its provenance through confirm (AI-3).
+      ...(draft.voice ? { voice: draft.voice } : {}),
     };
     const token = mintCapabilityConfirmation({
       actionId: "journal.confirm",
@@ -694,17 +815,76 @@ const journalCreateDraft: CapabilityDescriptor = {
           notes: resolved.notes,
           engagementContextId: resolved.engagementContextId,
           projectId: resolved.projectId,
+          ...(draft.voice ? { inputOrigin: "voice" } : {}),
           // The RESOLVED context, named — the human must SEE which context
           // the entry will land in before confirming (preselect-and-show,
           // never silently assign).
           engagementLabel: engagement.label,
         },
         confirmationToken: token,
+        ...(engagement.activeWorkspaceNotice
+          ? { activeWorkspaceNotice: engagement.activeWorkspaceNotice }
+          : {}),
         note: "Nothing was saved. Confirming requires journal.confirm with this exact draft and token.",
       },
     };
   },
 };
+
+/** THE FormData mapping journal.confirm sends to the write core — one
+ *  function, so the "already recorded" lookup compares exactly what the
+ *  confirm writes (every signed field). */
+function journalConfirmFields(
+  locale: string,
+  draft: z.infer<typeof workerLogWorkSchema>,
+): Record<string, string> {
+  // THE ONE mapping the chat's worker.log-work sends too (AI-3): the stated
+  // time becomes time on the record (#1689) and a dictated entry keeps its
+  // voice provenance.
+  return logWorkFields(locale, draft);
+}
+
+/**
+ * The entry a refused confirm's draft ALREADY became, as a confirm result —
+ * or null. Only for a GENUINE token of this caller for this exact draft
+ * (signature, input, user, TTL all verified; only the state moved or the
+ * token was spent), and only when a live entry with the draft's exact
+ * engagement, words, day and project was recorded after the token was
+ * issued (`findConfirmedDraftEntry`). Writes no entry: the skill pipeline it
+ * re-reads is idempotent (the create core's duplicate path does the same).
+ */
+async function alreadyRecordedEntry(
+  caller: CapabilityCaller,
+  draft: z.infer<typeof workerLogWorkSchema>,
+  confirmationToken: string,
+): Promise<ExecResult | null> {
+  const issuedAtMs = capabilityTokenIssuedAt({
+    actionId: "journal.confirm",
+    token: confirmationToken,
+    input: normalizedDraftForHash(draft),
+    userId: caller.userId,
+  });
+  if (issuedAtMs === null) return null;
+  const found = await alreadyRecordedJournalEntry(caller, journalConfirmFields(caller.locale, draft), issuedAtMs);
+  if (!found) return null;
+  const { entryId, skills } = found;
+  return {
+    ok: true,
+    data: {
+      entryId,
+      // This confirm wrote nothing: the entry was recorded by the first call.
+      alreadyRecorded: true,
+      skills: {
+        status: skills.status,
+        added: skills.added,
+        strengthened: skills.strengthened,
+        reviewNeeded: skills.reviewNeeded,
+        claimsSaved: skills.claimsSaved,
+        cvUpdated: skills.cvUpdated,
+      },
+    },
+  };
+}
 
 const journalConfirmInput = workerLogWorkSchema.extend({
   confirmationToken: z.string().min(10),
@@ -748,6 +928,15 @@ const journalConfirm: CapabilityDescriptor = {
       currentStateFingerprint: state.fingerprint,
     });
     if (!verdict.ok) {
+      // A retry after a lost response (mobile network drop, client timeout):
+      // the single-use token was spent by the FIRST call, which did write.
+      // Answer with that entry instead of "not saved — draft again", which
+      // invited a second copy of the same day (P0-A 2026-10-30).
+      const replay =
+        verdict.reason === "stale_state"
+          ? await alreadyRecordedEntry(caller, draft, confirmationToken)
+          : null;
+      if (replay) return replay;
       return {
         ok: false,
         code: "confirmation_rejected",
@@ -761,17 +950,7 @@ const journalConfirm: CapabilityDescriptor = {
     });
     const result = await createJournalEntryCore(
       { supabase: caller.supabase, userId: caller.userId, t },
-      fd({
-        locale: caller.locale,
-        engagement_context_id: draft.engagementContextId,
-        notes: draft.notes,
-        work_date: draft.workDate,
-        site_name: draft.siteName ?? "",
-        project_id: draft.projectId ?? "",
-        // The stated time becomes time on the record — the same derivation
-        // the conversation executor applies (issue #1689).
-        ...intakeWorkTimeFields(draft.notes, draft.workDate),
-      }),
+      fd(journalConfirmFields(caller.locale, draft)),
     );
     if (!result.ok) {
       if (result.code === "project_required" && result.projects) {
@@ -1290,7 +1469,9 @@ const workCardSaveDraft: CapabilityDescriptor = {
     "available-from date, salary range, location country, preferred " +
     "countries) and returns a preview of exactly what would change plus a " +
     "one-time confirmation token. NOTHING is saved. Omitted fields keep " +
-    "their current values; a field sent as null clears it. Confirming " +
+    "their current values, and so does a field sent as null (the canonical " +
+    "save keeps a null value). To empty the preferred countries send an " +
+    "empty list []. Confirming " +
     "requires work_card.save_confirm with this exact draft and token.",
   exposed: true,
   // Read-only is HONEST: the draft reads the current card and mints a token —
@@ -1469,10 +1650,26 @@ const DEMAND_FIELDS = [
   "accommodation",
   "transport",
   "opportunityType",
+  // Bound by the token too: a confirm cannot swap in other dates or another
+  // team split than the person saw in the draft.
+  "startDate",
+  "endDate",
+  "teamCount",
+  "perTeamSize",
 ] as const;
 
 /** null-vs-absent must not change the hash for optional fields — absent and
  *  null both mean "not stated" to the canonical submit. */
+/** The country as the person typed it — a code or a name in any supported
+ *  language — resolved to ISO by the ONE canonical resolver, in the draft AND
+ *  the confirm, so the token binds the resolved code both times. A name the
+ *  resolver does not know stays as typed and is refused as `country_required`
+ *  below: never a guessed market. */
+function withResolvedCountry(draft: DemandDraftInput): DemandDraftInput {
+  if (!draft.country) return draft;
+  return { ...draft, country: resolveCountryCode(draft.country) ?? draft.country };
+}
+
 function normalizedDemandForHash(draft: DemandDraftInput): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const f of DEMAND_FIELDS) out[f] = draft[f] ?? null;
@@ -1489,9 +1686,15 @@ const demandCreateDraft: CapabilityDescriptor = {
     "ACTING FOR (their active workspace), and returns a human-readable " +
     "preview naming that organization plus a one-time confirmation token. " +
     "NOTHING is created or sent. `description` is the need in the caller's " +
-    "own words (required); role/location/skills/urgency/notes are optional " +
-    "free text; workType/country/teamSize/accommodation/transport are " +
-    "structured facts a worker's board may later see. Confirming requires " +
+    "own words (required) and `country` (required: ISO-3166 alpha-2 code, or " +
+    "the country's name in any supported language, which is resolved to the code, of " +
+    "the country where the work is; ASK the person when they have not said " +
+    "it, never guess); role/location/skills/urgency/notes are optional " +
+    "free text; workType/teamSize/accommodation/transport are structured " +
+    "facts a worker's board may later see. startDate/endDate (YYYY-MM-DD) and " +
+    "teamCount × perTeamSize (teams of a stated size, only when they multiply " +
+    "to teamSize) are kept only when the person stated them. Without a country the draft " +
+    "returns missing: [\"country\"] and no token. Confirming requires " +
     "demand.create_confirm with this exact draft and token.",
   exposed: true,
   annotations: {
@@ -1502,10 +1705,22 @@ const demandCreateDraft: CapabilityDescriptor = {
   },
   inputSchema: companyCreateDemandFields,
   run: async (caller, input): Promise<ExecResult> => {
-    const draft = companyCreateDemandFields.parse(input);
+    const draft = withResolvedCountry(companyCreateDemandFields.parse(input));
     // THE employer-workspace gate — same chain as the web (wagon 3 core).
     const employer = await requireEmployerCompanyForCaller(caller);
     if (!employer.ok) return demandContextRefusal(employer.reason);
+    // No country, no token: the canonical submit refuses a need without one
+    // (`country_required`), so the draft says what to ask before anything
+    // could be confirmed. Never a guessed market.
+    if (!draft.country || !isIsoCountry(draft.country.toUpperCase())) {
+      return {
+        ok: false,
+        code: "country_required",
+        missing: ["country"],
+        message:
+          "Ask the person which country the work is in and pass its ISO-3166 alpha-2 code as `country`. Nothing was drafted.",
+      };
+    }
 
     const fingerprint = await demandStateFingerprint(caller);
     const token = mintCapabilityConfirmation({
@@ -1526,6 +1741,10 @@ const demandCreateDraft: CapabilityDescriptor = {
           country: draft.country ?? null,
           workType: draft.workType ?? null,
           urgency: draft.urgency ?? null,
+          startDate: draft.startDate ?? null,
+          endDate: draft.endDate ?? null,
+          teamCount: draft.teamCount ?? null,
+          perTeamSize: draft.perTeamSize ?? null,
         },
         confirmationToken: token,
         note: "Nothing was created. Confirming requires demand.create_confirm with this exact draft and token; the demand will be created for the named organization.",
@@ -1534,7 +1753,7 @@ const demandCreateDraft: CapabilityDescriptor = {
   },
 };
 
-const demandConfirmInput = companyCreateDemandFields.extend({
+const demandConfirmInput = companyCreateDemandFields.safeExtend({
   confirmationToken: z.string().min(10),
 });
 
@@ -1561,7 +1780,8 @@ const demandCreateConfirm: CapabilityDescriptor = {
   inputSchema: demandConfirmInput,
   run: async (caller, input): Promise<ExecResult> => {
     const parsed = demandConfirmInput.parse(input);
-    const { confirmationToken, ...draft } = parsed;
+    const { confirmationToken, ...typed } = parsed;
+    const draft = withResolvedCountry(typed);
     const fingerprint = await demandStateFingerprint(caller);
     const verdict = await verifyCapabilityConfirmation({
       actionId: "demand.create_confirm",
@@ -1601,9 +1821,10 @@ const demandCreateConfirm: CapabilityDescriptor = {
         teamSize: draft.teamSize ?? undefined,
         accommodation: draft.accommodation ?? undefined,
         transport: draft.transport ?? undefined,
-        // Declared opportunity type → structured cluster (same as the web
-        // and chat legs); absent when not stated.
-        structuredV2: draft.opportunityType ? { opportunity_type: draft.opportunityType } : undefined,
+        // The ONE mapper the chat uses too: opportunity type, start and end
+        // day, team split. Absent when not stated; the canonical submit drops
+        // a team that no longer explains teamSize.
+        structuredV2: structuredV2FromDeclaredDemand(draft),
       },
     );
     if (!result.ok) {
@@ -1611,7 +1832,9 @@ const demandCreateConfirm: CapabilityDescriptor = {
         ok: false,
         code: result.code,
         message:
-          result.code === "needs_migration"
+          result.code === "country_required"
+            ? "The demand needs the country where the work is (ISO-3166 alpha-2 `country`). Nothing was created."
+            : result.code === "needs_migration"
             ? "The demand intake is not enabled on this environment."
             : result.code === "no_company_context"
               ? "No employer company resolves for this caller."
@@ -1739,6 +1962,9 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   journalWorkIntelligenceGet,
   journalCreateDraft,
   journalConfirm,
+  // A worker corrects their OWN entry through the web journal's own
+  // supersede (`journal-correction-capabilities.ts`, P0-A parity).
+  ...JOURNAL_CORRECTION_CAPABILITIES,
   interestExpressDraft,
   interestExpressConfirm,
   workCardSaveDraft,
@@ -1770,6 +1996,7 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // Real market companies in as DISCOVERED organizations (owner NULL) —
   // the marketplace_company_ingest capability only; import is never a claim.
   ...COMPANY_INGEST_CAPABILITIES,
+  ...COMPANY_CLAIM_CAPABILITIES,
   // Organization evidence import — the FIFTEEN capabilities (thirteen steps;
   // attest and withdraw are each a draft→confirm pair) that give an
   // authorized assistant the same historical-import flow the web UI performs,
@@ -1797,6 +2024,15 @@ const CAPABILITIES: readonly CapabilityDescriptor[] = [
   // organization legal data, marketplace, commercial, bookings, notifications,
   // leave, hours review and reports. See domain-action-capabilities.ts.
   ...DOMAIN_ACTION_CAPABILITIES,
+  // The PUBLIC vacancy board for a bearer client (the phone's Jobs screen,
+  // 2026-10-16): the same read the website's /jobs page performs, in the same
+  // anonymous projection. See public-jobs-capabilities.ts.
+  ...PUBLIC_JOBS_CAPABILITIES,
+  // Project FORECASTS (Stage 7, owner order 2026-10-24): the latest forecast
+  // and its history for a managed project, and the organization's recompute
+  // cadence (draft → confirm, administrators only, audited). See
+  // forecast-capabilities.ts.
+  ...FORECAST_CAPABILITIES,
 ];
 
 export function listCapabilities(): readonly CapabilityDescriptor[] {

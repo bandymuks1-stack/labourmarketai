@@ -3,6 +3,8 @@
  * server actions, the UI and the guard tests. No IO.
  */
 
+import { findExternalReferralSource } from "@/lib/invitations/external-sources";
+
 export const INVITATION_TYPES = [
   "join_platform",
   "join_organization",
@@ -459,4 +461,90 @@ export function invitationImpliesWorkerContext(input: {
 }): boolean {
   if (input.invitationType === "join_as_employee") return true;
   return input.invitationType === "join_platform" && Boolean(input.externalSourceSlug);
+}
+
+/**
+ * Does this invitation bring the person INTO an existing, named organization
+ * (owner P0 2026-11-22: a person who should join an organization must not set
+ * up a second one by accident)? Then onboarding asks no "what did you come
+ * for" question and never creates a company for them; they join the inviting
+ * organization as the person they are. A partner, client-company, platform or
+ * demand invitation is not this: those people may run their own organization.
+ */
+export const JOINS_EXISTING_ORGANIZATION_TYPES: readonly InvitationType[] = [
+  "join_organization",
+  "join_team",
+  "join_as_employee",
+  "join_project",
+];
+export function invitationJoinsExistingOrganization(input: {
+  invitationType: string | null | undefined;
+  organizationName: string | null | undefined;
+  /** Only a PENDING invitation still brings anyone in (R3 on #3586): a
+   *  revoked, accepted or expired link promises nothing and fixes no role. */
+  status: string | null | undefined;
+  expiresAt: string | null | undefined;
+  /** The SIGNED-IN caller's own answer to this invitation (get_invitation_preview_v2
+   *  `my_decision`). The caller who already accepted it — at sign-up, or by the
+   *  wizard before onboarding finishes — is joining, whatever the link's status
+   *  is now (Codex on #3586). Someone else opening a used link is not. */
+  myDecision?: string | null;
+  now?: number;
+}): boolean {
+  if (!input.organizationName || !input.organizationName.trim()) return false;
+  if (!(JOINS_EXISTING_ORGANIZATION_TYPES as readonly string[]).includes(input.invitationType ?? "")) return false;
+  if (input.myDecision === "accepted") return true;
+  if (input.status !== "pending") return false;
+  if (input.expiresAt) {
+    const at = Date.parse(input.expiresAt);
+    if (!Number.isFinite(at) || at <= (input.now ?? Date.now())) return false;
+  }
+  return true;
+}
+
+/**
+ * May onboarding skip the role question for an invitation found WITHOUT its
+ * link? Stricter than `invitationImpliesWorkerContext` (the token path, which
+ * stays as it is): only a `join_platform` referral from a REGISTERED partner
+ * whose consent notice is about the person's own job search
+ * (`referredPersonIsWorker`, today Nonstop Group). A missing, unknown or other
+ * partner's source keeps the question.
+ */
+export function addressedReferralImpliesWorker(item: {
+  invitationType: string;
+  externalSourceSlug?: string | null;
+}): boolean {
+  if (item.invitationType !== "join_platform") return false;
+  return findExternalReferralSource(item.externalSourceSlug ?? null)?.referredPersonIsWorker === true;
+}
+
+/**
+ * THE PARTNER REFERRAL ADDRESSED TO ME, found WITHOUT its link (2026-10-27).
+ *
+ * The first real invited person registered through Google and finished
+ * onboarding, yet the invitation stayed pending: onboarding only knew about it
+ * when the token travelled the whole way in `?next=/invite/<token>`, and a
+ * person who opens the mail in one browser and registers in another — or comes
+ * back to the site later — arrives without it.
+ *
+ * `listInvitationsForMe` (the caller's pending invitations for their VERIFIED
+ * e-mail) already returns these rows. Only `join_platform` is picked: its
+ * acceptance creates no employment, staff or project relationship — the person
+ * registering IS what it asked for — so finishing onboarding may accept it.
+ * Every other kind names an actor (a company, a team, a project) the person
+ * must see on its own page first, so it is never accepted from here.
+ *
+ * Whether it also lets onboarding skip the role question is a separate,
+ * stricter fact: only a PARTNER referral of a worker implies one
+ * (`invitationImpliesWorkerContext`), and that needs the source slug — a
+ * missing inviter name proves nothing (an inviter may simply have no name).
+ */
+export function pickAddressedJoinPlatform<
+  T extends { id: string; invitationType: string; externalSourceSlug?: string | null },
+>(items: readonly T[]): T | null {
+  // EXACTLY ONE. Two or more pending join_platform invitations for the same
+  // person are ambiguous (which inviter? which partner?) — the platform does
+  // not pick one on the person's behalf; each stays on its own page.
+  const candidates = items.filter((i) => i.invitationType === "join_platform");
+  return candidates.length === 1 ? candidates[0] : null;
 }

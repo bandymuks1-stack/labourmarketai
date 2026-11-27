@@ -3,7 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/lib/i18n/navigation";
 import { resolveActiveLocale } from "@/lib/seo/metadata";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
-import { publishedCategories } from "@/lib/answer-engine/publishing";
+import { localesPublishingAnyAnswer, publishedCategories } from "@/lib/answer-engine/publishing";
 import { buildStaticQuestionsMetadata, breadcrumbJsonLd } from "@/lib/answer-engine/answer-seo";
 import { CHROME, CATEGORY_LABELS, pickL } from "@/lib/answer-engine/chrome";
 import { jsonLdScript } from "@/lib/seo/json-ld";
@@ -15,7 +15,13 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const l = resolveActiveLocale(locale);
-  return buildStaticQuestionsMetadata(l, "/questions", pickL(CHROME.hubTitle, l), pickL(CHROME.hubIntro, l));
+  return buildStaticQuestionsMetadata(
+    l,
+    "/questions",
+    pickL(CHROME.hubTitle, l),
+    pickL(CHROME.hubIntro, l),
+    localesPublishingAnyAnswer(),
+  );
 }
 
 export default async function QuestionsHub({
@@ -56,12 +62,12 @@ export default async function QuestionsHub({
           {pickL(CHROME.hubEmpty, l)}
         </p>
       ) : (
-        <ul className="flex flex-col gap-2">
+        <ul className="flex flex-col">
           {categories.map((c) => (
             <li key={c}>
               <Link
                 href={`/questions/category/${c}`}
-                className="text-base font-medium text-brand-blue hover:underline"
+                className="inline-flex min-h-11 items-center text-base font-medium text-brand-blue hover:underline"
               >
                 {pickL(CATEGORY_LABELS[c], l)}
               </Link>

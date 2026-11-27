@@ -270,7 +270,7 @@ test("M-5. hydration claims the server HTML once: no #418, no hidden S:n copy", 
     ...(await coldLoads(browser, ["/lt/jobs", "/ru/jobs", "/nl/jobs", "/de/jobs"], 5)),
     ...(await coldLoads(browser, ["/en/for-workers", "/pl/pricing"], 3)),
     ...(await coldLoads(browser, ["/lt/dashboard", "/lt/dashboard/journal", "/lt/cv"], 2, "worker")),
-    ...(await coldLoads(browser, ["/lt/dashboard/hours", "/lt/dashboard/projects", "/lt/dashboard/company/planning"], 2, "owner")),
+    ...(await coldLoads(browser, ["/lt/dashboard/hours", "/lt/dashboard/projects", "/lt/dashboard/company/planning", "/lt/dashboard/bookings"], 2, "owner")),
   ];
   expect(failures, `hydration failed:\n${failures.join("\n")}`).toEqual([]);
 });
@@ -281,6 +281,13 @@ test("M-5. hydration claims the server HTML once: no #418, no hidden S:n copy", 
 // the header or the page that SCROLLS SIDEWAYS as a navigation strip, no
 // overlapping header controls, the core nav labels visible from 1280 px, and
 // the area switcher's cards are real links.
+//
+// ONE approved exception (owner orders 2026-11-21/22, coordinator decision
+// 2026-11-22 item 1, #3613): on a PHONE the organisation doors are one
+// horizontal row with the next door peeking. That strip is checked
+// positively (one row, next door peeks, 44 px targets, keyboard-reachable
+// links, no page-level sideways scroll). Every OTHER sideways strip still
+// fails, and the doors strip fails too from 640 px up, where it wraps.
 async function navReading(page: Page, where: string): Promise<{ strips: string[]; overlaps: number; labels: string[] }> {
   const r = await page.evaluate(() => {
     const strips = [...document.querySelectorAll("header *, main *")]
@@ -310,6 +317,26 @@ async function navReading(page: Page, where: string): Promise<{ strips: string[]
   return r;
 }
 
+const DOORS_STRIP = "organization-doors";
+
+/** The approved doors row on a phone, measured: one row, the next door
+ *  peeking past the edge, 44 px targets, focusable links, and the page itself
+ *  not wider than the phone. */
+async function doorsRow(page: Page): Promise<{ rows: number; peeks: boolean; minTarget: number; keyboard: boolean; pageScrollsSideways: boolean }> {
+  return page.getByTestId(DOORS_STRIP).first().evaluate((nav) => {
+    const doors = [...nav.querySelectorAll<HTMLElement>('[data-testid^="organization-door-"]')];
+    const box = nav.getBoundingClientRect();
+    const rects = doors.map((d) => d.getBoundingClientRect());
+    return {
+      rows: new Set(rects.map((r) => Math.round(r.top))).size,
+      peeks: rects.some((r) => r.left < box.right - 8 && r.right > box.right + 2),
+      minTarget: Math.min(...rects.map((r) => Math.min(r.height, r.width))),
+      keyboard: doors.length > 0 && doors.every((d) => d.tagName === "A" && d.hasAttribute("href") && d.tabIndex >= 0),
+      pageScrollsSideways: document.documentElement.scrollWidth > document.documentElement.clientWidth + 1,
+    };
+  });
+}
+
 test("M-6. one navigation system: no sideways strips, no header overlap, labels at 1280, the area switcher links", async ({ browser }) => {
   test.setTimeout(300_000);
   for (const [slot, paths] of [
@@ -328,7 +355,17 @@ test("M-6. one navigation system: no sideways strips, no header overlap, labels 
         await page.goto(path);
         await settle(page);
         const r = await navReading(page, `${slot} ${path} @${vp.width}`);
-        expect(r.strips, `${path} @${vp.width}: no sideways-scrolling navigation strip`).toEqual([]);
+        const phone = vp.width < 640;
+        const others = phone ? r.strips.filter((s) => s !== DOORS_STRIP) : r.strips;
+        expect(others, `${path} @${vp.width}: no sideways-scrolling navigation strip`).toEqual([]);
+        if (phone && r.strips.includes(DOORS_STRIP)) {
+          const d = await doorsRow(page);
+          expect(d.rows, `${path} @${vp.width}: the doors are one row`).toBe(1);
+          expect(d.peeks, `${path} @${vp.width}: the next door visibly peeks at the edge`).toBe(true);
+          expect(d.minTarget, `${path} @${vp.width}: every door is at least 44 px`).toBeGreaterThanOrEqual(43.5);
+          expect(d.keyboard, `${path} @${vp.width}: every door is a focusable link`).toBe(true);
+          expect(d.pageScrollsSideways, `${path} @${vp.width}: the page itself does not scroll sideways`).toBe(false);
+        }
         expect(r.overlaps, `${path} @${vp.width}: no overlapping header controls`).toBe(0);
         if (vp.width >= 1280) expect(r.labels.length, `${path} @1280: the core nav items carry visible names`).toBeGreaterThanOrEqual(4);
       }

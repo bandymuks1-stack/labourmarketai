@@ -176,6 +176,8 @@ export const EXPORTED_RELATIONS: readonly ExportedRelation[] = [
   { table: "journal_entry_work_items", key: "worker_id" },
   { table: "journal_entry_photos", key: "profile_id" },
   { table: "timesheets", key: "worker_id" },
+  // Own delivery preferences, self-only RLS; no recipient identities or document content.
+  { table: "timesheet_schedules", key: "profile_id" },
   { table: "work_hour_allocations", key: "worker_id" },
   { table: "worker_documents", key: "worker_id" },
 
@@ -568,6 +570,11 @@ export type WithheldRelation = {
  */
 export const WITHHELD_RELATIONS: readonly WithheldRelation[] = [
   {
+    table: "organization_history_read_grants_v1",
+    reason:
+      "a time-boxed permission an organization's owner gave you to read that organization's work history (20261124053000) — the row names the owner who granted it; ask us and we will tell you which organizations and when",
+  },
+  {
     table: "privacy_erasure_confirmations_v1",
     reason:
       "your confirmation of an account-deletion request (how and when you confirmed it) — held server-side as evidence that the deletion was yours to ask for; the request and its status are shown to you on the privacy page",
@@ -785,6 +792,11 @@ export type ReviewedChild = {
   readonly reason: string;
 };
 export const CHILD_TABLES_NOT_EXPORTED: readonly ReviewedChild[] = [
+  {
+    table: "invitation_delivery_attempts_v1",
+    reason:
+      "transport diagnostics of an invitation send (reason and SMTP status codes, timing, our Message-ID) — no address, no reply text, no content; the invitation itself, with its delivery status, is exported to the inviter",
+  },
   {
     table: "decision_document_links",
     reason:

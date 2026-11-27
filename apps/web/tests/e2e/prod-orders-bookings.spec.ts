@@ -2,8 +2,11 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
+import { proveActionTiles } from "./action-tile-proof";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { needLinks, requestIdOf, submitSyntheticNeed } from "./prod-need-post";
 
 /**
  * PRODUCTION ORDERS, BOOKINGS, EXECUTION — owner area 12 (registry rows 5.13,
@@ -15,6 +18,12 @@ import { bearerOf, qaApi } from "./prod-qa-api";
  *                    worker accepts on the phone; both see it accepted, the
  *                    company opens the conversation, the worker sees it in the
  *                    plan. The need is closed at the end.
+ *   5.13 Hire      — the accept's engagement is visible to both sides after a
+ *                    reload: Gama finds the booked person on its people page
+ *                    and in its engagements; the worker, in Personal space,
+ *                    sees the engagement with Gama; Alfa sees neither (O-9..O-11).
+ *                    Gama↔Vytas has been active since the first run (no walk
+ *                    ends it), so the step proves it EXISTS, not that it is new.
  *   6.9  Finance   — the owner records an expense for the workspace company,
  *                    finds it in the CSV export, then cancels it.
  *   6.7  Procurement — the owner files an inquiry for the ACTIVE workspace,
@@ -79,15 +88,6 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
 /** ISO day `days` from today (UTC) — booking and trip dates in the future. */
 function dayFromToday(days: number): string {
   return new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
-}
-
-/** The scouting need links of the active workspace, by visible title. */
-function needLinks(page: Page, text: string): Locator {
-  return page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: text });
-}
-
-function requestIdOf(href: string | null): string {
-  return /request=([0-9a-f-]{36})/.exec(href ?? "")?.[1] ?? "";
 }
 
 /** One booking row on /dashboard/bookings, found by this run's note. */
@@ -158,22 +158,33 @@ test("O-0. the worker's own worker id (own row, own token)", async () => {
   workerId = rows[0].id;
 });
 
+/**
+ * The first day, at least `from` days out, on which the worker has NO accepted
+ * booking. Every run's accepted booking stays history (O-8), and an
+ * open-ended booking occupies its start day, so fixed offsets clashed when the
+ * walk ran twice in a day (run 40216243755 met the overlap constraint on the
+ * second run of 10-25). Read with the worker's own token (own rows only).
+ */
+async function firstFreeDay(from: number): Promise<string> {
+  const res = await qaApi(
+    `/rest/v1/booking_requests?select=start_date,expected_end_date&status=eq.accepted&worker_id=eq.${encodeURIComponent(workerId)}`,
+    bearerOf("worker"),
+  );
+  expect(res.status, "the worker's own accepted bookings answered").toBe(200);
+  const taken = (await res.json()) as { start_date: string; expected_end_date: string | null }[];
+  const busy = (day: string) => taken.some((b) => day >= b.start_date && day <= (b.expected_end_date ?? b.start_date));
+  for (let d = from; d < from + 365; d += 1) {
+    const day = dayFromToday(d);
+    if (!busy(day)) return day;
+  }
+  throw new Error("no free day in a year of accepted bookings");
+}
+
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
-  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
-  await page.getByTestId("demand-role").fill(NEED_ROLE);
   // Name a trade: a need nothing can be recognised in is "not structured" on
   // scouting (lib/scouting/scouting.ts runScoutingCore), which renders no
   // candidates at all — not even the hand-raiser O-3 looks for.
-  await page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production booking walk, 1 mūrininkas.`);
-  await page.getByTestId("demand-next").click();
-  const size = page.getByTestId("demand-team-size");
-  if (await size.isVisible().catch(() => false)) await size.fill("1");
-  await page.getByTestId("demand-next").click();
-  await page.getByTestId("demand-create").click();
-  const done = page.getByTestId("demand-done");
-  const limit = page.getByTestId("demand-open-need-limit");
-  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
-  return (await limit.isVisible()) ? "limit" : "done";
+  return submitSyntheticNeed(page, NEED_ROLE, `${NOTE}: synthetic need for the production booking walk, 1 mūrininkas.`);
 }
 
 test("O-1 (5.13). Gama posts this run's need through the demand intake", async ({ browser }) => {
@@ -213,7 +224,7 @@ test("O-1 (5.13). Gama posts this run's need through the demand intake", async (
 test("O-2 (5.13). the worker raises a hand on that need", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByRole("main").getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
   const card = page.locator(`li[id="opp-${requestId}"]`);
   await expect(card, "the new need is on the worker's board").toBeVisible({ timeout: 60_000 });
   await card.getByTestId("interest-express").click();
@@ -248,10 +259,16 @@ test("O-3 (5.13). Gama proposes dates to the hand-raiser from its candidate list
   const open = candidate.getByTestId("propose-booking-open");
   await expect(open, "the candidate card offers a booking proposal").toBeVisible({ timeout: 30_000 });
   await open.click();
-  const outcome = await propose(candidate, dayFromToday(21));
+  const outcome = await propose(candidate, await firstFreeDay(21));
   expect(outcome, "the proposal was sent").toBe("sent");
   await ctx.close();
 });
+
+/** The booking's row in the page's main region. While a reloaded page is
+ *  still streaming, React briefly holds a second, hidden copy of the list
+ *  outside <main>; a page-wide locator then matches both. A copy that never
+ *  goes away is a hydration failure, which mobile-surfaces M-5 measures. */
+const bookingById = (page: Page, id: string) => page.getByRole("main").getByTestId(`booking-${id}`);
 
 test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
@@ -267,15 +284,16 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
   await row.getByTestId("booking-withdraw-form").getByTestId("booking-withdraw-confirm").click();
   await expect(row.getByTestId("booking-withdrawn")).toBeVisible({ timeout: 30_000 });
   await page.reload();
-  const withdrawn = page.getByTestId(`booking-${bookingId}`);
+  const withdrawn = bookingById(page, bookingId);
   await expect(withdrawn).toHaveAttribute("data-status", "withdrawn", { timeout: 30_000 });
 
   // The company's own withdrawal may be undone with new dates (repeat actions).
   await withdrawn.getByTestId("propose-again-open").click();
-  const outcome = await propose(withdrawn, dayFromToday(28));
+  // A free day for the proposal the worker will accept in O-5.
+  const outcome = await propose(withdrawn, await firstFreeDay(28));
   expect(outcome, "the second proposal was sent").toBe("sent");
   await page.reload();
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "proposed", {
+  await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "proposed", {
     timeout: 30_000,
   });
   await ctx.close();
@@ -284,7 +302,7 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
 test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker", true);
   await page.goto("/lt/dashboard/bookings");
-  const row = page.getByTestId(`booking-${bookingId}`);
+  const row = bookingById(page, bookingId);
   await expect(row, "the proposal reached the worker").toBeVisible({ timeout: 30_000 });
   await expect(row).toHaveAttribute("data-direction", "incoming");
   await expect(row).toHaveAttribute("data-status", "proposed");
@@ -339,7 +357,7 @@ test("O-6 (5.13). Gama sees the acceptance and opens the conversation with the w
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   await page.goto("/lt/dashboard/bookings");
-  const row = page.getByTestId(`booking-${bookingId}`);
+  const row = bookingById(page, bookingId);
   await expect(row).toHaveAttribute("data-status", "accepted", { timeout: 30_000 });
   await expect(row.getByTestId("booking-accepted-planning-link")).toBeVisible();
   await row.getByTestId("booking-outgoing-message-cta").click();
@@ -356,12 +374,92 @@ test("O-7 (5.13). the accepted booking is in the worker's plan on its date", asy
   await ctx.close();
 });
 
+let engagementId = "";
+
+/** The engagements result, opened by its address: this engagement, active, after a reload. */
+async function engagementActive(page: Page, who: string, counterparty: string): Promise<void> {
+  await page.goto("/lt/dashboard?result=engagements");
+  for (const pass of ["first load", "reload"]) {
+    if (pass === "reload") await page.reload();
+    const status = page.getByTestId(`engagement-status-${engagementId}`).filter({ visible: true }).first();
+    await expect(status, `${who}, ${pass}: the engagement is listed`).toBeVisible({ timeout: 60_000 });
+    await expect(status).toHaveAttribute("data-status", "active");
+    await expect(page.getByTestId(`engagement-${engagementId}`).filter({ visible: true }).first()).toContainText(counterparty);
+  }
+}
+
+test("O-9 (5.13). Gama finds the booked worker on its people page and in its engagements", async ({ browser }) => {
+  // The accept (respond_booking_request_v4) makes or keeps ONE active engagement for the pair.
+  // Read with the manager's own token: RLS lets the owning company read only its own rows.
+  const res = await qaApi(
+    `/rest/v1/company_worker_engagements?select=id,status,companies(display_name,legal_name)&worker_id=eq.${encodeURIComponent(workerId)}&status=eq.active`,
+    bearerOf("manager"),
+  );
+  expect(res.status, "the company's own engagements answered").toBe(200);
+  const rows = (await res.json()) as { id: string; companies: { display_name: string | null; legal_name: string | null } | null }[];
+  const gama = rows.filter((r) => [r.companies?.display_name, r.companies?.legal_name].some((n) => (n ?? "").includes(GAMA)));
+  expect(gama.length, "exactly one active Gama engagement with the booked worker").toBe(1);
+  engagementId = gama[0]!.id;
+
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  for (const pass of ["first load", "reload"]) {
+    if (pass === "reload") await page.reload();
+    const row = page.getByRole("main").getByTestId(`booked-person-${engagementId}`);
+    await expect(row, `${pass}: the booked worker is on Gama's people page`).toBeVisible({ timeout: 60_000 });
+  }
+  const name = (
+    await page.getByRole("main").getByTestId(`booked-person-${engagementId}`).getByTestId("identity-card-name").first().innerText()
+  ).trim();
+  expect(name.length, "the booked person is named").toBeGreaterThan(0);
+  await engagementActive(page, "Gama", name);
+  await ctx.close();
+});
+
+test("O-10 (5.13). the worker, in Personal space on the phone, sees the engagement with Gama", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker", true);
+  // "Who do I work for" is read in Personal space: in an organization workspace the result is
+  // that organization's engagements (lib/engagements/engagements-result.ts).
+  await page.goto("/lt/dashboard");
+  const chip = page.getByTestId("workspace-chip").first();
+  if (await chip.isVisible({ timeout: 15_000 }).catch(() => false)) {
+    const personal = page.getByTestId("workspace-option-personal");
+    await chip.getByRole("button").first().click();
+    if ((await personal.getAttribute("aria-current")) !== "true") {
+      await personal.click();
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+    } else {
+      await page.keyboard.press("Escape");
+    }
+  }
+  await engagementActive(page, "the worker", GAMA);
+  await ctx.close();
+});
+
+test("O-11 (5.13). Alfa sees neither the booked person nor the engagement", async ({ browser }) => {
+  const own = await qaApi(`/rest/v1/company_worker_engagements?select=id&id=eq.${encodeURIComponent(engagementId)}`, bearerOf("owner"));
+  expect(own.status, "Alfa's own read answered").toBe(200);
+  expect(await own.json(), "Alfa's own session reads no row of Gama's engagement").toEqual([]);
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.reload();
+  await expect(page.getByRole("main").getByRole("heading").first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId(`booked-person-${engagementId}`), "Alfa's people page").toHaveCount(0);
+  await page.goto("/lt/dashboard?result=engagements");
+  await expect(
+    page.getByTestId("engagements-empty").or(page.getByTestId("engagements-list")).filter({ visible: true }).first(),
+    "Alfa's engagements answer",
+  ).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId(`engagement-${engagementId}`), "Alfa's engagements").toHaveCount(0);
+  await ctx.close();
+});
+
 test("O-8 (5.13). Gama closes this run's need (cleanup, the booking stays history)", async ({ browser }) => {
   const { ctx, page } = await as(browser, "manager");
   await useWorkspace(page, GAMA);
   expect(await closeNeed(page, requestId)).toBe("closed");
   await page.goto("/lt/dashboard/bookings");
-  await expect(page.getByTestId(`booking-${bookingId}`)).toHaveAttribute("data-status", "accepted", {
+  await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "accepted", {
     timeout: 30_000,
   });
   await ctx.close();
@@ -564,11 +662,15 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
   test.skip(slot === null, "no synthetic identity holds the customer role (owner decision: provision one)");
 
   const { ctx, page } = await as(browser, slot!);
-  await page.goto("/lt/dashboard/buyer");
+  // The new-request form is its own block (decision 0034, `?tab=new`).
+  await page.goto("/lt/dashboard/buyer?tab=new");
   const form = page.getByTestId("buyer-requests-form");
   await expect(form, "the customer setup is complete enough to file requests").toBeVisible({ timeout: 30_000 });
   await page.getByTestId("buyer-requests-field-title").fill(`${NOTE} užsakymas`);
   await page.getByTestId("buyer-requests-field-need-summary").fill(`${NOTE}: plytelių klojimas vonios kambaryje`);
+  // The country is a required ISO choice since #3234; an unchosen select
+  // stops the submit in the browser and no result is ever shown.
+  await page.getByTestId("buyer-requests-field-country").selectOption("LT");
   await page.getByTestId("buyer-requests-status-draft").check();
   await page.getByTestId("buyer-requests-submit").click();
   await expect(page.getByTestId("buyer-requests-result")).toBeVisible({ timeout: 30_000 });
@@ -577,4 +679,26 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
     timeout: 30_000,
   });
   await ctx.close();
+});
+
+// ── T (#2828, owner A-09 ruling 2026-11-03): the bookings page's related-door
+// grid is the ONE action tile. Read-only: real links, no gold primary (these
+// are related doors), no destination twice, at 1280 and 390.
+test("T-1 (#2828). the bookings related-door grid renders as action tiles", async ({ browser }) => {
+  await proveActionTiles(
+    async (mobile) => {
+      const { ctx, page } = await as(browser, "manager", mobile);
+      return { page, close: () => ctx.close() };
+    },
+    "/lt/dashboard/bookings",
+    { scopeTestId: "bookings-connections", primaries: 0, prepare: (page) => useWorkspace(page, GAMA) },
+  );
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("orders-bookings");
 });

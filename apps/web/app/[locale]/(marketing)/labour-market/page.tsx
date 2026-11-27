@@ -13,6 +13,7 @@ export async function generateMetadata({
   return buildPageMetadataFor("labourMarket", locale, "/labour-market");
 }
 import {
+  MARKETS_WITH_PUBLIC_JOB_ADS,
   PRIORITY_MARKETS,
   isSupportedCountry,
 } from "@/lib/labour-market/country-evidence";
@@ -63,6 +64,17 @@ export default async function CountryIndexPage({
                       </span>
                       <span className="font-mono text-meta uppercase tracking-label text-brand-blue">
                         {t("countryView")} →
+                      </span>
+                    </Card>
+                  </Link>
+                ) : MARKETS_WITH_PUBLIC_JOB_ADS.includes(code) ? (
+                  <Link href="/jobs" className="block" data-testid={`country-jobs-link-${code}`}>
+                    <Card className="flex items-center justify-between gap-3 transition-colors hover:border-brand-blue">
+                      <span className="font-display text-lg font-semibold text-text-primary">
+                        {name}
+                      </span>
+                      <span className="font-mono text-meta uppercase tracking-label text-brand-blue">
+                        {t("countryJobAds")} →
                       </span>
                     </Card>
                   </Link>

@@ -25,24 +25,26 @@ const read = (rel: string): string => readFileSync(join(ROOT, rel), "utf8");
 const stripComments = (src: string): string =>
   src.replace(/\/\*[\s\S]*?\*\//g, " ").replace(/(^|[^:])\/\/[^\n]*/g, "$1");
 
-describe("ActionCard is the single navigation-card pattern", () => {
-  const card = read("components/app/action-card.tsx");
+// RE-ANCHORED 2026-11-03: the audit-PR8 ActionCard folded into the ONE
+// action-choice tile (owner decision 2026-11-03 on #2828: "Tai nėra leidimas
+// kurti papildomų dubliuojančių kortelių sistemų"). The contract is the same —
+// a real link, a 44 px+ target, a visible focus ring — carried by one component.
+describe("the action tile is the single navigation-card pattern", () => {
+  const card = read("components/ui/premium-action-card.tsx");
 
-  it("encodes the contract: real link, 44px min, focus ring, token surfaces", () => {
-    expect(card).toMatch(/min-h-11/);
+  it("encodes the contract: real link, ≥ 44 px target, focus ring", () => {
+    expect(card).toMatch(/min-h-1[1-9]/);
     expect(card).toMatch(/focus-visible:ring-2/);
-    expect(card).toMatch(/border-border-subtle bg-surface-1/);
     expect(card).toMatch(/from "@\/lib\/i18n\/navigation"/);
   });
 
   it("is adopted by the navigation-card call sites", () => {
-    // The registry-driven DashboardModuleGrid died with the second dashboard
-    // (W3 Package 4); the surviving call sites keep the pattern adopted.
     for (const rel of [
       "app/[locale]/dashboard/service-requests/page.tsx",
       "app/[locale]/dashboard/bookings/page.tsx",
+      "app/[locale]/dashboard/projects/page.tsx",
     ]) {
-      expect(read(rel), `${rel} must use ActionCard`).toMatch(/<ActionCard/);
+      expect(read(rel), `${rel} must use the action tile`).toMatch(/<PremiumActionDeck/);
     }
   });
 });
@@ -77,8 +79,8 @@ describe("EmptyState is the shared empty treatment in the marketplace loop", () 
 });
 
 describe("44px touch targets on decision controls", () => {
-  it("page quick-nav chips", () => {
-    expect(read("components/app/page-quick-nav.tsx")).toMatch(/min-h-11/);
+  it("CV block tabs (the quick-nav chips they replaced, decision 0034)", () => {
+    expect(read("components/app/cv/cv-block-tabs.tsx")).toMatch(/min-h-11/);
   });
   it("booking accept/decline buttons", () => {
     const src = read("components/app/booking-respond-buttons.tsx");

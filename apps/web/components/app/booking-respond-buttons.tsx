@@ -3,6 +3,10 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
+
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import { respondBookingAction } from "@/lib/booking/booking-actions";
 import { DECLINE_REASON_KINDS, REASON_NOTE_MAX } from "@/lib/booking/booking-state";
 import { trackFunnel } from "@/lib/telemetry/task";
@@ -61,6 +65,7 @@ export function BookingRespondButtons({
      *  record the overlapping accept. Terminal for accepting: the
      *  acknowledgement button is NOT shown again, so it cannot loop. */
     | { kind: "overlap-not-recordable" }
+    | { kind: "need-closed" }
     | { kind: "unavailable" }
     | { kind: "error" }
   >({ kind: "idle" });
@@ -113,6 +118,13 @@ export function BookingRespondButtons({
         // change its dates; the booking itself is still `proposed`.
         setDeclineOpen(false);
         setState({ kind: "overlap-not-recordable" });
+      } else if (res.kind === "need-closed") {
+        // The employer closed the need before the answer arrived; the database
+        // refused the accept. Say so, keep decline, and offer no accept again:
+        // it can only be refused the same way.
+        setAcceptOpen(false);
+        setState({ kind: "need-closed" });
+        router.refresh();
       } else if (res.kind === "needs-migration") {
         setState({ kind: "unavailable" });
       } else {
@@ -132,11 +144,11 @@ export function BookingRespondButtons({
       >
         <label className="flex flex-col gap-1 text-meta text-text-muted">
           {t("reason.optionalTitle")}
-          <select
+          <Select
             value={reasonKind}
             onChange={(e) => setReasonKind(e.target.value)}
             data-testid="booking-decline-reason"
-            className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+            className="max-sm:text-base"
           >
             <option value="">{t("reason.none")}</option>
             {DECLINE_REASON_KINDS.map((kind) => (
@@ -144,35 +156,39 @@ export function BookingRespondButtons({
                 {t(`reason.decline.${kind}`)}
               </option>
             ))}
-          </select>
+          </Select>
         </label>
         <label className="flex flex-col gap-1 text-meta text-text-muted">
           {t("reason.noteLabel")}
-          <input
+          <Input
             type="text"
             maxLength={REASON_NOTE_MAX}
             value={reasonNote}
             onChange={(e) => setReasonNote(e.target.value)}
-            className="min-h-11 rounded-md border border-ink-500 bg-ink-900 px-2 py-1 text-xs text-text-primary"
+            className="max-sm:text-base"
           />
         </label>
         <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-          <button
+          <Button
             type="button"
             disabled={pending}
             onClick={() => respond("declined")}
             data-testid="booking-decline-confirm"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto"
           >
             {t("reason.confirmDecline")}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
             onClick={() => setDeclineOpen(false)}
-            className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
+            variant="ghost"
+            size="sm"
+            className="min-h-11"
           >
             {t("reason.cancel")}
-          </button>
+          </Button>
         </div>
       </div>
     );
@@ -225,15 +241,42 @@ export function BookingRespondButtons({
         {declineOpen ? (
           declineForm()
         ) : (
-          <button
+          <Button
             type="button"
             disabled={pending}
             onClick={() => setDeclineOpen(true)}
             data-testid="booking-overlap-decline-open"
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto"
           >
             {labels.decline}
-          </button>
+          </Button>
+        )}
+      </div>
+    );
+  }
+
+  if (state.kind === "need-closed") {
+    return (
+      <div className="flex flex-col gap-1.5" data-testid="booking-need-closed-decision">
+        <span className="text-meta text-state-warning" role="status" data-testid="booking-need-closed">
+          {t("actions.needClosed")}
+        </span>
+        {declineOpen ? (
+          declineForm()
+        ) : (
+          <Button
+            type="button"
+            disabled={pending}
+            onClick={() => setDeclineOpen(true)}
+            data-testid="booking-need-closed-decline-open"
+            variant="secondary"
+            size="sm"
+            className="min-h-11 w-full sm:w-auto"
+          >
+            {labels.decline}
+          </Button>
         )}
       </div>
     );
@@ -254,15 +297,17 @@ export function BookingRespondButtons({
           {labels.conflict}
         </span>
         <span className="text-meta text-text-muted">{t("clash.stillStands")}</span>
-        <button
+        <Button
           type="button"
           disabled={pending}
           onClick={() => respond("accepted", true)}
-          className="min-h-11 w-full rounded-md border border-state-amber/50 bg-state-amber/10 px-3 py-2 text-xs font-semibold text-state-amber disabled:opacity-50 sm:w-auto"
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
           data-testid="booking-accept-anyway"
         >
           {t("clash.acceptAnyway")}
-        </button>
+        </Button>
       </div>
     );
   }
@@ -279,7 +324,7 @@ export function BookingRespondButtons({
             the profile card while the engagement is active — BEFORE the
             predicate widens. The conversation surface has said this since
             #1097; a second accept door that stayed silent was the gap. */}
-        <button
+        <Button
           type="button"
           disabled={pending}
           onClick={() => {
@@ -287,11 +332,13 @@ export function BookingRespondButtons({
             setDeclineOpen(false);
           }}
           data-testid="booking-accept-open"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success hover:bg-state-success/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+          variant="primary"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
         >
           {labels.accept}
-        </button>
-        <button
+        </Button>
+        <Button
           type="button"
           disabled={pending}
           onClick={() => {
@@ -299,10 +346,12 @@ export function BookingRespondButtons({
             setAcceptOpen(false);
           }}
           data-testid="booking-decline-open"
-          className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-ink-500 px-3 text-xs font-medium text-text-secondary hover:bg-ink-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+          variant="secondary"
+          size="sm"
+          className="min-h-11 w-full sm:w-auto"
         >
           {labels.decline}
-        </button>
+        </Button>
       </div>
       {acceptOpen ? (
         <div
@@ -316,22 +365,26 @@ export function BookingRespondButtons({
             {tBooking("confirmAcceptDisclosure")}
           </p>
           <div className="flex w-full flex-col gap-2 sm:flex-row sm:items-center">
-            <button
+            <Button
               type="button"
               disabled={pending}
               onClick={() => respond("accepted")}
               data-testid="booking-accept-confirm"
-              className="inline-flex min-h-11 w-full items-center justify-center rounded-md border border-state-success/50 bg-state-success/10 px-3 text-xs font-semibold text-state-success hover:bg-state-success/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue disabled:opacity-50 sm:w-auto"
+              variant="primary"
+              size="sm"
+              className="min-h-11 w-full sm:w-auto"
             >
               {labels.accept}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
               onClick={() => setAcceptOpen(false)}
-              className="min-h-11 text-meta text-text-muted hover:text-text-secondary sm:min-h-0"
+              variant="ghost"
+              size="sm"
+              className="min-h-11"
             >
               {t("reason.cancel")}
-            </button>
+            </Button>
           </div>
         </div>
       ) : null}

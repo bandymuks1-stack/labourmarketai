@@ -11,11 +11,11 @@ import {
   parseWorkerLanguageLevel,
   classifyLanguagesError,
 } from "@/lib/worker/worker-languages-model";
+import { saveWorkerEducationAction } from "@/lib/worker/worker-education-actions";
 import {
-  validateEducationInput,
-  classifyEducationError,
-} from "@/lib/worker/worker-education-model";
-import {
+  ACHIEVEMENT_COLUMNS,
+  achievementEntryFromRow,
+  findSameAchievement,
   validateAchievementInput,
   classifyAchievementsError,
 } from "@/lib/worker/worker-achievements-model";
@@ -56,10 +56,14 @@ import {
  * `code: "conflict"` with the existing value when it differs — the UI shows
  * BOTH values and only an explicit "replace" re-call (allowReplace=true)
  * writes. Doctrine §7.1.
+ *
+ * `refreshLater`: the caller re-renders the page itself once its last row settled.
+ * `revalidatePath` makes the action answer with the whole page tree, so a review of many
+ * rows asked for many whole-page renders at once and overloaded the database.
  */
 
 export type CvImportConfirmResult =
-  | { ok: true }
+  | { ok: true; id?: string; startedAt?: string | null; endedAt?: string | null }
   | {
       ok: false;
       code:
@@ -67,10 +71,14 @@ export type CvImportConfirmResult =
         | "unauthenticated"
         | "invalid"
         | "conflict"
+        | "limit"
         | "error";
       /** Human-renderable existing value for conflict display. */
       existing?: string;
     };
+
+/** Postgres unique_violation: another request stored the same row first. */
+const UNIQUE_VIOLATION = "23505";
 
 /** Shape check only — authority is the RPC (a well-formed id the caller does
  *  not own answers `not_found`, never an existence oracle). */
@@ -110,6 +118,7 @@ export async function confirmCvWorkHistoryAction(input: {
    *  person said "practice" / "volunteering") passes it, so a placement is
    *  never recorded as employment. Validated here AND by the RPC. */
   relationship?: string | null;
+  refreshLater?: boolean;
 }): Promise<CvImportConfirmResult> {
   const ctx = await requireUser();
   if (!ctx) return { ok: false, code: "unauthenticated" };
@@ -131,7 +140,7 @@ export async function confirmCvWorkHistoryAction(input: {
   const startedAt = periodStartIso(startPart);
   const endedAt = input.isCurrent ? null : periodEndIso(endPart);
 
-  const { error } = await asAny(ctx.supabase).rpc(
+  const { data: savedId, error } = await asAny(ctx.supabase).rpc(
     "save_self_declared_work_history_v1",
     {
       p_title: title,
@@ -158,8 +167,13 @@ export async function confirmCvWorkHistoryAction(input: {
     console.error("[cv-import] work-history save failed:", error.code, error.message);
     return { ok: false, code: "error" };
   }
-  revalidatePath("/", "layout");
-  return { ok: true };
+  if (!input.refreshLater) revalidatePath("/", "layout");
+  return {
+    ok: true,
+    id: typeof savedId === "string" ? savedId : undefined,
+    startedAt,
+    endedAt,
+  };
 }
 
 /**
@@ -218,42 +232,21 @@ export async function confirmCvEducationAction(input: {
   educationTypeSlug: string;
   startYear: number | null;
   endYear: number | null;
+  refreshLater?: boolean;
 }): Promise<CvImportConfirmResult> {
-  const ctx = await requireUser();
-  if (!ctx) return { ok: false, code: "unauthenticated" };
-
-  const validated = validateEducationInput({
-    institutionName: input.institution,
-    programOrField: input.program,
-    educationTypeSlug: input.educationTypeSlug,
-    startYear: input.startYear,
-    endYear: input.endYear,
-    isCurrent: false,
-    note: null,
+  // Import confirmation uses the same authenticated save as manual entry:
+  // validation, duplicate recovery and the existing education limit stay together.
+  const form = new FormData();
+  form.set("institution_name", input.institution ?? "");
+  form.set("program_or_field", input.program ?? "");
+  form.set("education_type_slug", input.educationTypeSlug ?? "");
+  form.set("start_year", input.startYear == null ? "" : String(input.startYear));
+  form.set("end_year", input.endYear == null ? "" : String(input.endYear));
+  form.set("is_current", "false");
+  const result = await saveWorkerEducationAction(null, form, {
+    refreshLater: input.refreshLater,
   });
-  if (!validated) return { ok: false, code: "invalid" };
-
-  const { error } = await asAny(ctx.supabase).from("worker_education").insert({
-    profile_id: ctx.userId,
-    institution_name: validated.institutionName,
-    program_or_field: validated.programOrField,
-    education_type_slug: validated.educationTypeSlug,
-    start_year: validated.startYear,
-    end_year: validated.endYear,
-    is_current: false,
-    note: null,
-  });
-  if (error) {
-    const mapped = classifyEducationError(error.code);
-    if (mapped !== "error") return { ok: false, code: mapped };
-    if (["23514", "23503"].includes(error.code ?? "")) {
-      return { ok: false, code: "invalid" };
-    }
-    console.error("[cv-import] education save failed:", error.code, error.message);
-    return { ok: false, code: "error" };
-  }
-  revalidatePath("/", "layout");
-  return { ok: true };
+  return result.ok ? { ok: true } : result;
 }
 
 // ── Language (conflict-aware upsert) ─────────────────────────────────────────
@@ -262,6 +255,7 @@ export async function confirmCvLanguageAction(input: {
   lang: string;
   level: string;
   allowReplace?: boolean;
+  refreshLater?: boolean;
 }): Promise<CvImportConfirmResult> {
   const ctx = await requireUser();
   if (!ctx) return { ok: false, code: "unauthenticated" };
@@ -306,7 +300,7 @@ export async function confirmCvLanguageAction(input: {
     console.error("[cv-import] language save failed:", error.code, error.message);
     return { ok: false, code: "error" };
   }
-  revalidatePath("/", "layout");
+  if (!input.refreshLater) revalidatePath("/", "layout");
   return { ok: true };
 }
 
@@ -314,7 +308,7 @@ export async function confirmCvLanguageAction(input: {
 
 async function insertAchievement(
   kindSlug: "declared_certificate" | "achievement",
-  input: { title: string; year: number | null },
+  input: { title: string; year: number | null; refreshLater?: boolean },
 ): Promise<CvImportConfirmResult> {
   const ctx = await requireUser();
   if (!ctx) return { ok: false, code: "unauthenticated" };
@@ -330,6 +324,18 @@ async function insertAchievement(
   });
   if (!validated) return { ok: false, code: "invalid" };
 
+  // The same CV imported again: see the education rule above.
+  const { data: own, error: ownError } = await asAny(ctx.supabase)
+    .from("worker_achievements")
+    .select(ACHIEVEMENT_COLUMNS)
+    .eq("profile_id", ctx.userId);
+  if (ownError) {
+    const mapped = classifyAchievementsError(ownError.code);
+    return { ok: false, code: mapped };
+  }
+  const entries = ((own ?? []) as Parameters<typeof achievementEntryFromRow>[0][]).map(achievementEntryFromRow);
+  if (findSameAchievement(entries, validated)) return { ok: true };
+
   const { error } = await asAny(ctx.supabase).from("worker_achievements").insert({
     profile_id: ctx.userId,
     title: validated.title,
@@ -338,6 +344,7 @@ async function insertAchievement(
     achievement_type_slug: validated.achievementTypeSlug,
   });
   if (error) {
+    if (error.code === UNIQUE_VIOLATION) return { ok: true };
     const mapped = classifyAchievementsError(error.code);
     if (mapped !== "error") return { ok: false, code: mapped };
     if (["23514", "23503"].includes(error.code ?? "")) {
@@ -346,21 +353,23 @@ async function insertAchievement(
     console.error(`[cv-import] ${kindSlug} save failed:`, error.code, error.message);
     return { ok: false, code: "error" };
   }
-  revalidatePath("/", "layout");
+  if (!input.refreshLater) revalidatePath("/", "layout");
   return { ok: true };
 }
 
 export async function confirmCvCertificateAction(input: {
   title: string;
   year: number | null;
+  refreshLater?: boolean;
 }): Promise<CvImportConfirmResult> {
   return insertAchievement("declared_certificate", input);
 }
 
 export async function confirmCvAchievementAction(input: {
   title: string;
+  refreshLater?: boolean;
 }): Promise<CvImportConfirmResult> {
-  return insertAchievement("achievement", { title: input.title, year: null });
+  return insertAchievement("achievement", { title: input.title, year: null, refreshLater: input.refreshLater });
 }
 
 // ── Salary expectation (conflict-aware partial save) ─────────────────────────
@@ -369,6 +378,7 @@ export async function confirmCvSalaryAction(input: {
   minEur: number | null;
   maxEur: number | null;
   allowReplace?: boolean;
+  refreshLater?: boolean;
 }): Promise<CvImportConfirmResult> {
   const ctx = await requireUser();
   if (!ctx) return { ok: false, code: "unauthenticated" };
@@ -424,7 +434,7 @@ export async function confirmCvSalaryAction(input: {
     console.error("[cv-import] salary save failed:", error.code, error.message);
     return { ok: false, code: "error" };
   }
-  revalidatePath("/", "layout");
+  if (!input.refreshLater) revalidatePath("/", "layout");
   return { ok: true };
 }
 
@@ -433,6 +443,7 @@ export async function confirmCvSalaryAction(input: {
 export async function confirmCvAvailabilityAction(input: {
   key: CvAvailabilityHintKey;
   allowReplace?: boolean;
+  refreshLater?: boolean;
 }): Promise<CvImportConfirmResult> {
   const ctx = await requireUser();
   if (!ctx) return { ok: false, code: "unauthenticated" };
@@ -521,6 +532,6 @@ export async function confirmCvAvailabilityAction(input: {
       return { ok: false, code: "error" };
     }
   }
-  revalidatePath("/", "layout");
+  if (!input.refreshLater) revalidatePath("/", "layout");
   return { ok: true };
 }

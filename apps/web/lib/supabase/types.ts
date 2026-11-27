@@ -11954,6 +11954,7 @@ export type Database = {
         Args: { p_organization_id: string }
         Returns: Json
       }
+      invitation_known_historical_unknown_v1: { Args: { p_ids: string[] }; Returns: number }
       invitation_org_authority_v1: {
         Args: { p_organization_id: string }
         Returns: boolean
@@ -12105,6 +12106,8 @@ export type Database = {
           created_at: string
           id: string
           location_label: string
+          need_skill_slugs: string[]
+          need_skill_source: string
           required_tools: string[]
           role_text: string
           route_status: string
@@ -12135,6 +12138,7 @@ export type Database = {
         }[]
       }
       list_team_enquiries_for_my_teams_v1: { Args: never; Returns: Json }
+      lm_registrations_daily_v1: { Args: { p_day: string }; Returns: Json }
       lmc_admin_grant_existing_v1: {
         Args: {
           p_actor: string

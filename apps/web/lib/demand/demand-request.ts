@@ -36,6 +36,7 @@ import { buildEstimatePayload } from "@/lib/estimate/estimate-payload";
 import { isWorkTypeSlug } from "@/lib/taxonomy/work-categories";
 import { isIsoCountry } from "@/lib/location/country-model";
 import type { DomainCaller } from "@/lib/domain/caller";
+import { NEED_SKILLS_PAYLOAD_KEY, needSkillsForPayload } from "@/lib/market/need-skills-payload";
 import {
   readStructuredDemandV2,
   sanitizeStructuredDemandV2,
@@ -157,7 +158,11 @@ export type DemandRequestResult =
         // server resolves now (the workspace was switched in another tab).
         // Nothing is written — a need is never posted into a company the
         // person did not see on screen.
-        | "workspace_changed";
+        | "workspace_changed"
+        // No resolvable ISO country. A need without one is invisible to every
+        // country filter (worker board, agency offers, search), so no surface
+        // (web, chat, MCP) may create one; the market is never guessed.
+        | "country_required";
       limit?: number;
       used?: number;
       next?: "upgrade" | "individual_plan";
@@ -282,6 +287,9 @@ export async function submitDemandRequestCore(
     typeof fields?.country === "string" && isIsoCountry(fields.country.toUpperCase())
       ? fields.country.toUpperCase()
       : null;
+  // Before any write: every surface reaches this core, so this is the one
+  // place the rule holds for the web wizard, the chat form and the MCP tools.
+  if (!country) return { ok: false, code: "country_required" };
   const teamSize =
     typeof fields?.teamSize === "number" &&
     Number.isInteger(fields.teamSize) &&
@@ -343,6 +351,22 @@ export async function submitDemandRequestCore(
       ? sanitizeStructuredDemandV2({ ...sanitizedV2, team: undefined })
       : sanitizedV2;
   if (structuredV2) payload.structured_v2 = structuredV2;
+
+  // THE NEED'S REQUIRED SKILLS (owner decision 2026-10-29). The ONE offline
+  // derivation scouting runs, over the same words (title, description, the
+  // skills text, notes), stored as catalogue slugs only — so the worker
+  // board can judge this need by what it asks for without ever seeing the
+  // employer's text. Nothing derivable → nothing stored (honest unassessed).
+  const needSkills = needSkillsForPayload({
+    // The user's own role words only — never the intent fallback label.
+    title: role || null,
+    // The closed-set work type, slug separators as spaces (the same folding
+    // needFromRoleText applies) so it recognises through the same lexicon.
+    roleOrWorkType: workType ? workType.replace(/[_-]+/g, " ") : null,
+    needSummary: description,
+    notes: [payload.skills, payload.notes].filter((s): s is string => typeof s === "string").join("\n") || null,
+  });
+  if (needSkills) payload[NEED_SKILLS_PAYLOAD_KEY] = needSkills;
 
   // Optional preliminary estimate. Only persisted when the user actually filled
   // it in; if engaged but invalid (negatives / impossible %), block — an invalid
@@ -550,6 +574,51 @@ export type DemandPrefill =
       };
       structuredV2: StructuredDemandV2 | null;
     };
+
+/**
+ * WAS IT SAVED? (owner order 2026-11-23, production run 45241051644.) When the
+ * submit's answer does not reach the browser (a proxy error, a server swap, a
+ * dropped connection), the need may already be saved: telling the person
+ * "could not send" then invites a second, duplicate need. The form asks this
+ * first. Own rows only (RLS `profile_id`), the same workspace gate as the
+ * prefill, an OPEN need of this kind with exactly the title and description
+ * just sent, created since the send (2 minutes allowed for clock skew).
+ * Returns the id only — nothing is echoed back.
+ */
+export async function findOwnJustSubmittedDemand(
+  intent: DemandIntent,
+  sent: { readonly role?: string; readonly description?: string },
+  sentAtIso: string,
+): Promise<string | null> {
+  const description = clamp(sent.description, MAX_TEXT);
+  const sentAt = Date.parse(sentAtIso);
+  if (!description || !Number.isFinite(sentAt)) return null;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return null;
+  const role = clamp(sent.role, MAX_TITLE);
+  const title = role || (intent === "partner" ? "Agency partnership — offer" : "Hiring workers — demand");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from("customer_requests")
+    .select("id")
+    .eq("profile_id", user.id)
+    .eq("organization_id", employer.organizationId)
+    .eq("kind", INTENT_KIND[intent])
+    .eq("status", "submitted")
+    .eq("title", title.slice(0, MAX_TITLE))
+    .eq("need_summary", description)
+    .gte("created_at", new Date(sentAt - 120_000).toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data || typeof data.id !== "string") return null;
+  return data.id;
+}
 
 export async function getOwnLastDemandPrefill(
   intent: DemandIntent,

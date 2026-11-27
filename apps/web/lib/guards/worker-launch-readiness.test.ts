@@ -28,7 +28,7 @@ const read = (rel: string): string => readFileSync(join(APP_ROOT, rel), "utf-8")
 const msg = (loc: string): Record<string, unknown> =>
   JSON.parse(read(join("messages", `${loc}.json`)));
 
-const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const ACTIVE = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 function deep(obj: unknown, path: string): unknown {
   return path.split(".").reduce<unknown>((acc, k) => {
@@ -46,10 +46,21 @@ describe("worker launch — manual work-experience entry (no CV required)", () =
     // Supports an ongoing/current role (no forced end date).
     expect(src).toContain("expCurrent");
   });
+  it("the form says what the engagement was, so a placement is not stored as employment", () => {
+    // The save function defaults a missing kind to `employee`; the form sent
+    // none, so study practice or volunteering typed here became a job claim.
+    expect(src).toMatch(/isCurrent: expCurrent,\s+relationship: expKind,/);
+    expect(src).toContain('data-testid="add-experience-kind"');
+    expect(src).toContain("SELF_DECLARED_RELATIONSHIPS.map((slug) => (");
+    // The row shown before the page reloads carries the chosen kind too.
+    expect(src).not.toMatch(/orgName: title,\s+relationship: "employee",/);
+  });
+
   it("every active locale defines the add-experience keys with parity", () => {
     const keys = [
       "addExperienceTitle",
       "expTitleLabel",
+      "expKindLabel",
       "expTitlePlaceholder",
       "expStartLabel",
       "expEndLabel",
@@ -89,10 +100,18 @@ describe("worker launch — cross-sector example placeholders", () => {
       }
     }
   });
-  it("salary inputs carry numeric example placeholders", () => {
+  // Decision 0032 (lane A report 2026-11-22): "1500" / "2500" in the salary
+  // fields read as real values, so the fields carry no example figures — the
+  // labels ("Salary from (€)") say what goes there.
+  it("salary inputs carry no example figures that read as real pay", () => {
     const src = read("components/app/work-card-editor.tsx");
-    expect(src).toContain('placeholder="1500"');
-    expect(src).toContain('placeholder="2500"');
+    expect(src).not.toMatch(/placeholder="\d/);
+    expect(read("lib/conversation/worker-forms.ts")).not.toMatch(/salaryM(in|ax)Placeholder/);
+    for (const loc of ACTIVE) {
+      const f = deep(msg(loc), "conversation.forms.fields") as Record<string, unknown>;
+      expect(f?.salaryMinPlaceholder, `${loc} salaryMinPlaceholder`).toBeUndefined();
+      expect(f?.salaryMaxPlaceholder, `${loc} salaryMaxPlaceholder`).toBeUndefined();
+    }
   });
 });
 

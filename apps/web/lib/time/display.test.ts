@@ -1,6 +1,7 @@
 import { describe, expect, it, afterAll } from "vitest";
 import {
   DISPLAY_TIME_ZONE,
+  formatScheduledDelivery,
   createUtcFormatter,
   formatUtcDate,
   formatUtcDateRange,
@@ -51,7 +52,7 @@ const DATE_ONLY = "2026-08-07";
 
 // Active locales (lib/i18n/config.ts `activeLocales`), so the proof covers what
 // users can actually select rather than an arbitrary pair.
-const LOCALES = ["lt", "en", "ru", "nl", "de", "pl"] as const;
+const LOCALES = ["lt", "en", "ru", "nl", "de", "pl", "sv"] as const;
 
 /**
  * The NUMBER a single-field rendering denotes. Locales legitimately differ on
@@ -258,5 +259,19 @@ describe("createUtcFormatter", () => {
     } as Intl.DateTimeFormatOptions);
     expect(num(f(LATE))).toBe(7);
     expect(DISPLAY_TIME_ZONE).toBe("UTC");
+  });
+});
+
+describe("explicit scheduled delivery zone", () => {
+  it("keeps the selected instant and zone across ambient zones and DST", () => {
+    for (const ambient of ZONES) withTz(ambient, () => {
+      expect(formatScheduledDelivery("2026-11-27T07:15:00Z", "en-GB", "Europe/Vilnius")).toBe("27 Nov 2026, 09:15");
+      expect(formatScheduledDelivery("2026-03-29T01:30:00Z", "en-GB", "Europe/Vilnius")).toBe("29 Mar 2026, 04:30");
+      expect(formatUtcDateTime("2026-11-27T07:15:00Z", "en-GB")).toContain("07:15");
+    });
+  });
+  it("never falls back to the server zone for invalid input", () => {
+    for (const zone of ["", "Invalid/Zone"]) expect(formatScheduledDelivery("2026-11-27T07:15:00Z", "en-GB", zone)).toBeNull();
+    expect(formatScheduledDelivery("invalid", "en-GB", "UTC")).toBeNull();
   });
 });
