@@ -28,6 +28,7 @@ import {
   discoverabilityConsentLabels,
   discoverabilityPreviewFields,
   toConsentLocale,
+  consentLegalLanguageNote,
 } from "@/lib/privacy/discoverability-view";
 import { getMyPartnerSupplyState } from "@/lib/privacy/partner-supply-actions";
 import {
@@ -123,9 +124,10 @@ export default async function PrivacyPage({
   // applied the read is `unavailable` and the section renders exactly as
   // before — `deletionSectionMode` keeps the old rule for that case.
   const deletionMode = deletionSectionMode(deletionStatus, openDeletion?.status ?? null);
-  // The scheduled date is the RPC's `scheduled_erasure_at` (deletion_confirmed_at + the
-  // owner's 30-day waiting period, computed in the database) — never derived
-  // here, so there is one source of truth.
+  // The scheduled date is the RPC's `scheduled_erasure_at`
+  // (privacy_account_deletion_due_at: the owner's 30-day waiting period after
+  // confirmation, capped at one month from the request, computed in the
+  // database) — never derived here, so there is one source of truth.
   const deletionDate = (value: string | null) =>
     formatUtcDateTime(value, locale, {
       year: "numeric",
@@ -215,7 +217,7 @@ export default async function PrivacyPage({
             state={state}
             legal={legal}
             preview={previewFields}
-            labels={discoverabilityConsentLabels(tc)}
+            labels={discoverabilityConsentLabels(tc, locale)}
           />
         </div>
       </section>
@@ -236,6 +238,7 @@ export default async function PrivacyPage({
             state={partnerSupplyState}
             legal={partnerLegal}
             labels={{
+              legalLanguageNote: consentLegalLanguageNote(tc, locale),
               sectionIntro: tps("sectionIntro"),
               noWorkerProfile: tps("noWorkerProfile"),
               statusNotRepresented: tps("statusNotRepresented"),
@@ -329,6 +332,7 @@ export default async function PrivacyPage({
             locale={locale}
             requests={contactRequestCards}
             labels={{
+              legalLanguageNote: consentLegalLanguageNote(tc, locale),
               empty: tc("contactRequests.empty"),
               requestedFields: tc("contactRequests.requestedFields"),
               acceptNote: tc("contactRequests.acceptNote"),

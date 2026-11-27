@@ -87,6 +87,10 @@ export type TodayAttention = {
   readonly offers: number | null;
   /** Pending invitations addressed to the person (both invitation systems). */
   readonly invitations: number | null;
+  /** The invitations count is not a fault but waits on the person proving
+   *  their mailbox (UX gap W-1): the home offers the existing proof prompt
+   *  instead of "could not be read". Never a zero: `invitations` stays null. */
+  readonly invitationsNeedMailboxProof?: boolean;
   /** Unread conversations; `onlyId` when exactly one, so the door opens it. */
   readonly unread: { readonly count: number; readonly onlyId: string | null } | null;
 };
@@ -249,7 +253,7 @@ export function unknownTodayDoors(attention: TodayAttention | null): TodayDoorKi
   if (!attention) return ["offers", "invitations", "unread"];
   const out: TodayDoorKind[] = [];
   if (attention.offers === null) out.push("offers");
-  if (attention.invitations === null) out.push("invitations");
+  if (attention.invitations === null && attention.invitationsNeedMailboxProof !== true) out.push("invitations");
   if (attention.unread === null) out.push("unread");
   return out;
 }

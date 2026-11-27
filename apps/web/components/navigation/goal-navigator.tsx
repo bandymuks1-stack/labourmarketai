@@ -7,6 +7,7 @@ import { Link } from "@/lib/i18n/navigation";
 import {
   GOAL_FRAGMENT_PREFIX,
   MORE_GOAL_ID,
+  canonicalGoalId,
   goalIdFromFragment,
 } from "@/lib/navigation/public-intents";
 import { CardRail, type RailCard } from "@/components/navigation/card-rail";
@@ -24,7 +25,6 @@ export type NavigatorProfession = RailCard & { readonly sector: string };
 
 export type NavigatorLabels = {
   readonly heading: string;
-  readonly swipe: string;
   readonly previous: string;
   readonly next: string;
   readonly close: string;
@@ -69,8 +69,14 @@ const STARTUP_CHECKS_MS = [0, 100, 250, 500, 800, 1200, 1800, 2500, 3500, 5000] 
  *  page), what was asked there is forgotten, so coming back opens nothing. */
 let mountedNavigators = 0;
 if (typeof window !== "undefined") {
-  const note = () => {
-    const now = window.location.hash;
+  const note = (event: Event) => {
+    // A real fragment navigation says where it went (`newURL`). Read that,
+    // not the address bar: the router can rewrite the address between the
+    // navigation and this event (measured 2026-11-13: about 1 visit in 40
+    // lost the goal that way). Our own announcements carry no `newURL`, and
+    // Back / Forward arrive as popstate — for those the address is the truth.
+    const went = "newURL" in event && typeof event.newURL === "string" ? event.newURL : "";
+    const now = went ? new URL(went).hash : window.location.hash;
     askedFragment = goalIdFromFragment(now) ? now : "";
   };
   window.addEventListener("hashchange", note);
@@ -117,6 +123,7 @@ export function GoalNavigator({
   labels,
   locale,
   headingLevel = "h2",
+  lead,
 }: {
   goals: readonly NavigatorGoal[];
   /**
@@ -132,6 +139,9 @@ export function GoalNavigator({
   labels: NavigatorLabels;
   locale: string;
   headingLevel?: "h1" | "h2";
+  /** One supporting line directly under the heading: who it is for and what
+   *  is free. Above the goals, so it is read before the choice. */
+  lead?: string;
 }) {
   const fragment = useSyncExternalStore(subscribeToFragment, readFragment, readServerFragment);
   const goals = useMemo<readonly NavigatorGoal[]>(
@@ -139,7 +149,8 @@ export function GoalNavigator({
     [ownGoals, more],
   );
   // The fragment names a card of THIS navigator, or nothing is open.
-  const active = goals.find((g) => g.id === goalIdFromFragment(fragment)) ?? null;
+  const active =
+    goals.find((g) => g.id === canonicalGoalId(goalIdFromFragment(fragment))) ?? null;
   const activeId = active?.id ?? null;
   // A GOAL CHOSEN WHILE THE PAGE IS STARTING IS NOT LOST. The goal cards are
   // real links, so a tap before the scripts attach sets the fragment
@@ -151,6 +162,12 @@ export function GoalNavigator({
   // if it disappears without anyone having closed the panel.
   const [bootFragment] = useState(() =>
     typeof window === "undefined" ? "" : window.location.hash,
+  );
+  // …and only on the page it was asked on: while the router is moving to
+  // another page the address already names that page for a moment before
+  // this component is taken down, and a goal must never be written onto it.
+  const [bootPath] = useState(() =>
+    typeof window === "undefined" ? "" : window.location.pathname,
   );
   // THE FIRST TAP DOES NOT WAIT FOR THE SCRIPTS. On a slow phone connection
   // this component comes alive seconds after the page is painted (measured
@@ -171,6 +188,19 @@ export function GoalNavigator({
       // What the person last asked for; before any announcement, the address
       // this component first saw.
       const wanted = askedFragment ?? (goalIdFromFragment(bootFragment) ? bootFragment : "");
+      if (window.location.pathname !== bootPath) return;
+      // The other way round: the person closed the goal while the page was
+      // still starting, and the router then wrote its remembered address
+      // (with the goal) back. What was asked last wins — no goal.
+      if (askedFragment === "" && goalIdFromFragment(window.location.hash)) {
+        window.history.replaceState(
+          window.history.state,
+          "",
+          window.location.pathname + window.location.search,
+        );
+        window.dispatchEvent(new HashChangeEvent("hashchange"));
+        return;
+      }
       if (!wanted || window.location.hash !== "") return;
       window.history.replaceState(
         window.history.state,
@@ -191,7 +221,7 @@ export function GoalNavigator({
         if (mountedNavigators === 0) askedFragment = null;
       }, 0);
     };
-  }, [bootFragment]);
+  }, [bootFragment, bootPath]);
 
   const [tab, setTab] = useState<"functions" | "professions">("functions");
   const [sector, setSector] = useState<string | null>(null);
@@ -263,6 +293,14 @@ export function GoalNavigator({
       <Heading className="font-display text-xl font-bold tracking-tightest text-text-primary sm:text-2xl">
         {labels.heading}
       </Heading>
+      {lead && (
+        <p
+          data-testid="goal-lead"
+          className="-mt-2 max-w-3xl text-sm leading-snug text-text-secondary sm:text-base"
+        >
+          {lead}
+        </p>
+      )}
 
       <CardRail
         label={labels.heading}
@@ -271,7 +309,6 @@ export function GoalNavigator({
         cards={goals}
         activeId={activeId}
         onSelect={select}
-        swipeHint={labels.swipe}
         prevLabel={labels.previous}
         nextLabel={labels.next}
       />
@@ -329,7 +366,6 @@ export function GoalNavigator({
                 label={labels.functions}
                 testId="function-rail-early"
                 cards={goal.functions}
-                swipeHint={labels.swipe}
                 prevLabel={labels.previous}
                 nextLabel={labels.next}
               />
@@ -376,7 +412,6 @@ export function GoalNavigator({
               label={labels.functions}
               testId="function-rail"
               cards={active.functions}
-              swipeHint={labels.swipe}
               prevLabel={labels.previous}
               nextLabel={labels.next}
             />
@@ -405,7 +440,10 @@ export function GoalNavigator({
                 </button>
               </form>
 
-              <div className="flex gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" data-testid="sector-chips">
+              <div
+                className="flex gap-2 overflow-x-auto py-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+                data-testid="sector-chips"
+              >
                 <button
                   type="button"
                   aria-pressed={sector === null}
@@ -433,13 +471,15 @@ export function GoalNavigator({
                   label={labels.professions}
                   testId="profession-rail"
                   cards={shown}
-                  swipeHint={labels.swipe}
                   prevLabel={labels.previous}
                   nextLabel={labels.next}
                 />
               )}
               {fullList && (
-                <ul data-testid="profession-list" className="grid grid-cols-2 gap-x-4 sm:grid-cols-3 lg:grid-cols-4">
+                <ul
+                  data-testid="profession-list"
+                  className="grid grid-cols-2 gap-x-4 sm:grid-cols-3 lg:grid-cols-4"
+                >
                   {shown.map((p) => (
                     <li key={p.id}>
                       <Link

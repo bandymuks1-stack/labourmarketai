@@ -1,3 +1,4 @@
+import { workDescription } from "./import-placeholder-text";
 import type { EvidenceRecordView } from "./import-core";
 
 /**
@@ -90,7 +91,7 @@ export function placeKeyOf(r: Pick<EvidenceRecordView, "workObjectId" | "context
   return label ? `l:${label}` : "none";
 }
 
-export const isPeriodRecord = (r: EvidenceRecordView) =>
+export const isPeriodRecord = (r: Pick<EvidenceRecordView, "activityDate" | "periodStart" | "periodEnd">) =>
   r.activityDate === null && r.periodStart !== null && r.periodEnd !== null;
 
 function minMax(dates: readonly (string | null)[]): [string | null, string | null] {
@@ -110,7 +111,8 @@ export function topWorkDescriptions(
 ): { readonly text: string; readonly records: number }[] {
   const by = new Map<string, { text: string; records: number }>();
   for (const r of records) {
-    const text = (r.text ?? "").replace(/\s+/g, " ").trim();
+    // An importer placeholder is not what was done (import-placeholder-text.ts).
+    const text = (workDescription(r.text) ?? "").replace(/\s+/g, " ").trim();
     if (!text) continue;
     const key = text.toLocaleLowerCase();
     const e = by.get(key);
@@ -174,7 +176,9 @@ export function buildCompanyWorkHistory(
   records: readonly EvidenceRecordView[],
   objects: readonly PlaceObjectFacts[],
 ): CompanyWorkHistory {
-  const live = records.filter((r) => !r.withdrawn);
+  // Effective records only (decision 0025): a corrected original is replaced by
+  // its correction, never counted beside it.
+  const live = records.filter((r) => !r.withdrawn && !r.superseded);
   const objById = new Map(objects.map((o) => [o.id, o]));
   const buckets = new Map<string, EvidenceRecordView[]>();
   for (const r of live) {

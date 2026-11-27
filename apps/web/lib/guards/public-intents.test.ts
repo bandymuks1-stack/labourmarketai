@@ -5,10 +5,15 @@ import { existsSync, readFileSync, readdirSync } from "node:fs";
 import { join, resolve } from "node:path";
 
 import {
+  ASSISTANT_GUEST_HREF,
   ASSISTANT_HREF,
   PUBLIC_INTENTS,
   PUBLIC_INTENT_IDS,
+  GOAL_ID_ALIASES,
+  canonicalGoalId,
+  goalFromFragment,
 } from "@/lib/navigation/public-intents";
+import { requestDoorFromFragment } from "@/lib/staffing/request-door-link";
 import { CANONICAL_HOME } from "@/lib/config/navigation";
 import { routeRequirement } from "@/lib/auth/role-gated-routes";
 
@@ -55,10 +60,41 @@ describe("the six intents", () => {
       "work",
       "workers",
       "services",
-      "orders",
+      // Owner decision D1, variant A (2026-11-13): the fourth goal is the
+      // BUYER's — someone who needs a service or a contractor. The old fourth
+      // goal ("orders") was the provider's; its two areas moved into
+      // "services", and its id still resolves there (see below).
+      "contractors",
       "partners",
       "agencies",
     ]);
+  });
+
+  it("the provider's order-finding areas live in \"services\"; the buyer's goal opens the request forms", () => {
+    const links = (id: string) => PUBLIC_INTENTS.find((i) => i.id === id)!.links.map((l) => [l.id, l.href, l.account]);
+    expect(links("services")).toEqual([
+      ["myServices", "/dashboard/services", true],
+      ["serviceRequests", "/dashboard/service-requests", true],
+      ["marketListings", "/dashboard/listings", true],
+      ["commercial", "/dashboard/commercial", true],
+    ]);
+    expect(links("contractors")).toEqual([
+      ["findServices", "/services", false],
+      ["b2bEnquiry", "/#request=b2b", false],
+      ["projectEnquiry", "/#request=project", false],
+    ]);
+  });
+
+  it("an old link to the retired goal opens the goal that now holds its areas", () => {
+    expect(GOAL_ID_ALIASES).toEqual({ orders: "services" });
+    expect(canonicalGoalId("orders")).toBe("services");
+    expect(canonicalGoalId("work")).toBe("work");
+    expect(canonicalGoalId(null)).toBeNull();
+    expect(goalFromFragment("#goal=orders")).toBe("services");
+    expect(requestDoorFromFragment("#request=b2b")).toBe("b2b");
+    expect(requestDoorFromFragment("#request=project")).toBe("project");
+    expect(requestDoorFromFragment("#request=nope")).toBeNull();
+    expect(requestDoorFromFragment("#goal=work")).toBeNull();
   });
 
   it("each intent has at least one destination and unique link ids", () => {
@@ -140,16 +176,42 @@ describe("desktop and mobile render ONE list", () => {
 
   it("ONE navigation: the older links sit behind the bar's More, not in a second row", () => {
     expect(nav).not.toMatch(/<nav className="hidden[^"]*:flex/);
-    expect(nav).toMatch(/more=\{\{\s*label: tIntent\("more"\),\s*links: links\.map\(/);
+    expect(nav).toMatch(/more=\{\{\s*label: tIntent\("more"\),\s*links: moreLinks,/);
+    expect(nav).toMatch(/const moreLinks = \[\s*\.\.\.links\.map\(/);
+    // Education institutions have a door behind More — the landing's own
+    // sign-up door into the institution setup, with the account note; not a
+    // seventh goal (lib/guards/institution-nav-door.test.ts).
+    expect(nav).toMatch(/\{ key: "education", href: INSTITUTION_DOOR, label: tIntent\("education"\), account: true, accountNote: tIntent\("signUp"\) \}/);
+    expect(PUBLIC_INTENT_IDS).toHaveLength(6);
     expect(mega).toMatch(/data-testid="intent-toggle-more"/);
     expect(mega).toMatch(/data-testid="intent-more-links"/);
   });
 
   it("the assistant entry is the existing conversation home, on both menus", () => {
-    expect(nav).toMatch(/href: ASSISTANT_HREF, label: tIntent\("assistant"\)/);
+    expect(nav).toMatch(/const assistant = \{ href: ASSISTANT_HREF,/);
     expect(ASSISTANT_HREF).toBe(CANONICAL_HOME);
     expect(routeRequirement(ASSISTANT_HREF)).toBeNull();
     expect(nav.match(/assistant=\{assistant\}/g)).toHaveLength(2);
+ 
+  });
+
+  it("a signed-out visitor's desktop assistant entry opens the landing's question box, not sign-in (F8)", () => {
+    expect(nav).toMatch(/href: ASSISTANT_HREF, guestHref: ASSISTANT_GUEST_HREF, label: tIntent\("assistant"\)/);
+    // The box needs no account and is a real anchor on the landing.
+    expect(ASSISTANT_GUEST_HREF).toBe("/#find");
+    expect(read("app/[locale]/focus-landing/focus-landing.tsx")).toMatch(/id="find"[^>]*>\s*(\{[^}]*\}\s*)*<PublicEntry/);
+    // The bar picks the destination from the same signed-in hint as the header's auth slot.
+    expect(mega).toMatch(/useSignedInHint\(\)/);
+    expect(mega).toMatch(/href=\{signedIn \? assistant\.href : assistant\.guestHref\}/);
+  });
+
+  it("the phone menu's assistant entry does the same, with no sign-in note (N1)", () => {
+    const mobile = read("components/layouts/mobile-nav-menu.tsx");
+    expect(mobile).toMatch(/useSignedInHint\(\)/);
+    const entry = mobile.slice(mobile.indexOf("{assistant && ("), mobile.indexOf('data-testid="mobile-nav-assistant"') + 400);
+    expect(entry).toMatch(/href=\{signedIn \? assistant\.href : assistant\.guestHref\}/);
+    const link = mobile.slice(mobile.indexOf('data-testid="mobile-nav-assistant"'), mobile.indexOf("</Link>", mobile.indexOf('data-testid="mobile-nav-assistant"')));
+    expect(link).not.toMatch(/accountLabel/);
   });
 
   it("the landing shows the goals once: its bar drops them, inner pages keep them", () => {

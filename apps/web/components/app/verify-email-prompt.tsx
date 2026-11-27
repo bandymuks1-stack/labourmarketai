@@ -89,7 +89,7 @@ export function VerifyEmailPrompt({
           onClick={send}
           disabled={pending}
           data-testid="verify-email-send"
-          className="inline-flex min-h-9 w-fit items-center rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
+          className="inline-flex min-h-11 w-fit items-center rounded-md border border-brand-blue/50 px-3 py-1.5 text-xs font-semibold text-brand-blue hover:bg-brand-blue/10 disabled:opacity-50"
         >
           {pending ? t("sending") : t("send")}
         </button>

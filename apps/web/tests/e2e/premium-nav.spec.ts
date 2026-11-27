@@ -17,7 +17,7 @@ import { join } from "node:path";
 
 const expect = baseExpect.configure({ timeout: 15_000 });
 const MIN_TOUCH_PX = 43.5;
-const INTENTS = ["work", "workers", "services", "orders", "partners", "agencies"] as const;
+const INTENTS = ["work", "workers", "services", "contractors", "partners", "agencies"] as const;
 
 async function headerOverflow(page: Page): Promise<string[]> {
   return page.evaluate(() => {
@@ -102,6 +102,17 @@ for (const width of [1024, 1280, 1440] as const) {
     test("More holds the older links: pricing and about are two actions away", async ({ page }) => {
       await page.goto("/en");
       const more = page.getByTestId("intent-toggle-more");
+      // The key is pressed once the menu's script is attached: a key pressed
+      // in the moment between the page loading and that is not taken (seen
+      // on a production build, about one run in nine).
+      await more.evaluate(
+        (el) =>
+          new Promise<void>((done) => {
+            const alive = () => Object.keys(el).some((k) => k.startsWith("__reactProps$"));
+            const wait = () => (alive() ? done() : requestAnimationFrame(wait));
+            wait();
+          }),
+      );
       await more.focus();
       await page.keyboard.press("Enter");
       const links = page.getByTestId("intent-more-links");
@@ -112,10 +123,40 @@ for (const width of [1024, 1280, 1440] as const) {
       await expect(more).toBeFocused();
     });
 
-    test("the assistant entry is in the bar and points at the conversation home", async ({ page }) => {
+    test("the assistant entry is in the bar; signed out it opens the landing's question box", async ({ page }) => {
+      // Signed out, the entry is the landing's question box (`/#find`, owner
+      // P0 2026-11-15 F8); signed in it is the conversation home.
       await page.goto("/en/pricing");
-      await expect(page.getByTestId("intent-bar-assistant")).toHaveAttribute("href", /\/en\/dashboard$/);
+      await expect(page.getByTestId("intent-bar-assistant")).toHaveAttribute("href", /\/en#find$/);
+      await expect(page.getByTestId("header-assistant")).toBeHidden();
     });
+  });
+}
+
+// Between md and lg the intent bar is hidden: the assistant is an icon in the
+// header row instead (owner P0 2026-11-23, CAROUSEL_NAVIGATION_SPEC N2).
+for (const width of [768, 1023] as const) {
+  test.describe(`assistant in the header @${width}px`, () => {
+    test.use({ viewport: { width, height: 800 } });
+    // English and German: the narrowest and the widest header row measured.
+    for (const locale of ["en", "de"] as const) {
+      test(`${locale}: visible, 44px, opens the question box; the row does not overflow`, async ({ page }) => {
+        await page.goto(`/${locale}/pricing`);
+        const entry = page.getByTestId("header-assistant");
+        await expect(entry).toBeVisible();
+        await expect(entry).toHaveAttribute("href", new RegExp(`/${locale}#find$`));
+        const box = (await entry.boundingBox())!;
+        expect(box.width).toBeGreaterThanOrEqual(44);
+        expect(box.height).toBeGreaterThanOrEqual(44);
+        const brand = (await page.locator("header a").first().boundingBox())!;
+        expect(box.x, "the entry does not sit on the brand").toBeGreaterThanOrEqual(brand.x + brand.width);
+        expect(box.x + box.width).toBeLessThanOrEqual(width);
+        // Nothing in the row is pushed off the screen by it.
+        const menu = (await page.getByTestId("mobile-nav-toggle").boundingBox())!;
+        expect(menu.x + menu.width, "the menu button stays on screen").toBeLessThanOrEqual(width);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth)).toBeLessThanOrEqual(1);
+      });
+    }
   });
 }
 
@@ -210,9 +251,11 @@ test.describe("phone header", () => {
         await expect(page.getByTestId("header-auth").locator("a[href*='/auth/login']")).toBeVisible();
         await expect(page.getByTestId("header-auth").locator("a[href*='/auth/signup']")).toBeHidden();
         await expect(page.getByTestId("mobile-nav-toggle")).toBeVisible();
-        // The goals start within the first ~300px of the screen.
+        // The goals start in the upper half of the screen. Since V3
+        // (2026-11-13) the approved lead sits between the question and the
+        // goals, under the first-visit cookie notice.
         const rail = (await page.getByTestId("goal-rail").boundingBox())!;
-        expect(rail.y, "goal rail top").toBeLessThan(300);
+        expect(rail.y, "goal rail top").toBeLessThan(340);
         // Sign up and the theme toggle are the first row of the menu.
         await page.getByTestId("mobile-nav-toggle").tap();
         const auth = page.getByTestId("mobile-nav-auth");

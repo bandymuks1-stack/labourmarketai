@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { join } from "node:path";
 
+import { FORBIDDEN_PRODUCT_COPY } from "./product-copy-forbidden-terms";
+
 /**
  * Product-copy forbidden terms (full-product-overview plan, §17 + doctrine §18).
  * The word "demo" is banned from ALL user-facing copy — every screen is a real,
@@ -30,37 +32,17 @@ const TAXONOMY_FILES = readdirSync(messages)
   );
 const FILES = [...BASE_FILES, ...TAXONOMY_FILES];
 
-// Unicode lookarounds instead of \b — \b silently fails next to LT diacritics
-// (ą ę ė į š ų ū ž), so "demo" beside them would slip through a \b guard.
-// "demokratija" stays allowed (no "demonstr" stem); "demonstracija" and its
-// cognates do NOT — that whitelist let the landing ship a "Demonstration"
-// badge over the exact framing the ban exists for. Same class, same rule.
-const FORBIDDEN: Array<{ re: RegExp; why: string }> = [
-  {
-    re: /(?<![\p{L}\p{N}_])demos?(?![\p{L}\p{N}_])/iu,
-    why: 'word "demo" is banned in product copy — use "preview" / "concept" / "not live yet"',
-  },
-  {
-    re: /(?<![\p{L}\p{N}_])demonstr\p{L}*(?![\p{L}\p{N}_])/iu,
-    why: '"demonstration" framing (EN/LT/NL/DE demonstr-*) is the same banned class as "demo" — use "preview" / "concept"',
-  },
-  {
-    re: /демонстр\p{L}*/iu,
-    why: 'RU "демонстрация" framing is the same banned class as "demo" — use "предпросмотр" / "концепция"',
-  },
-  {
-    re: /trial\s+access/i,
-    why: "§18: no trial-access layer over real features",
-  },
-  {
-    re: /bandom[a-zą-ž]*\s+(prieig|versij|režim)/iu,
-    why: "§18: no LT trial-version/access framing over real features",
-  },
-  {
-    re: /demo\s*[-_]?\s*(mode|data|account|rež[a-zą-ž]*|duomen[a-zą-ž]*|paskyr[a-zą-ž]*)/iu,
-    why: "no demo-mode/demo-data framing in any locale",
-  },
-];
+// The list lives in ONE module, shared with the production UX measurement.
+const FORBIDDEN = FORBIDDEN_PRODUCT_COPY;
+
+describe("the forbidden-term list is the shared one and still bans the core terms", () => {
+  it("keeps all six rules", () => {
+    expect(FORBIDDEN).toHaveLength(6);
+    expect(FORBIDDEN.some(({ re }) => re.test("Demo"))).toBe(true);
+    expect(FORBIDDEN.some(({ re }) => re.test("Demonstracija"))).toBe(true);
+    expect(FORBIDDEN.some(({ re }) => re.test("demokratija"))).toBe(false);
+  });
+});
 
 describe("product copy contains no forbidden demo/trial terms", () => {
   it("scans at least the 10 doctrine locales", () => {

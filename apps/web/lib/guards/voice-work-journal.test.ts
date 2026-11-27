@@ -250,7 +250,10 @@ describe("provenance - voice-derived entries say so (self-declared label, never 
     // only the worker_input source; never an AI/verified source
     expect(core).toMatch(/input_origin", value_text: "voice", source: "worker_input"/);
     // and still exactly one writer: no new journal insert from the voice slice
-    expect(read("lib/conversation/worker-executors.ts")).toMatch(/input_origin: "voice"/);
+    // THE one log-work mapping (AI-3) carries it, for the chat AND MCP.
+    expect(read("lib/journal/log-work-fields.ts")).toMatch(/input_origin: "voice"/);
+    expect(read("lib/conversation/worker-executors.ts")).toMatch(/export \{ logWorkFields \};/);
+    expect(read("lib/capabilities/registry.ts")).toMatch(/return logWorkFields\(locale, draft\);/);
     expect(read("lib/conversation/worker-schemas.ts")).toMatch(/voice: z/);
   });
   it("the chat carries provenance through the existing work-log flow (no direct write)", () => {
@@ -270,7 +273,7 @@ describe("vendor (browser) dictation in the command finder is disclosed before i
     expect(src).not.toMatch(/no external AI service/);
   });
   it("every active locale carries the disclosure copy", () => {
-    for (const loc of ["de", "en", "lt", "nl", "pl", "ru"]) {
+    for (const loc of ["de", "en", "lt", "nl", "pl", "ru", "sv"]) {
       const d = JSON.parse(readFileSync(join(WEB, "messages", `${loc}.json`), "utf8")) as {
         commandFinder?: Record<string, string>;
       };

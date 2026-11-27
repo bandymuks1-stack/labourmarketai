@@ -39,8 +39,8 @@ describe("market direction — the company room's kind scope is fully classified
    * here rather than disappearing from a real employer's screen.
    */
   it("every kind the company room reads has a direction", () => {
-    const src = read("app/[locale]/dashboard/company/page.tsx");
-    const decl = /const EMPLOYER_DEMAND_KINDS = \[([^\]]*)\]/.exec(src);
+    const src = read("lib/buyer/customer-requests.ts");
+    const decl = /export const EMPLOYER_DEMAND_KINDS = \[([^\]]*)\]/.exec(src);
     expect(decl, "EMPLOYER_DEMAND_KINDS declaration not found").not.toBeNull();
     const kinds = [...decl![1].matchAll(/"([a-z_]+)"/g)].map((m) => m[1]);
     expect(kinds.length).toBeGreaterThan(0);
@@ -52,8 +52,8 @@ describe("market direction — the company room's kind scope is fully classified
   });
 
   it("the room reads BOTH directions — the supply section has rows to render", () => {
-    const src = read("app/[locale]/dashboard/company/page.tsx");
-    const decl = /const EMPLOYER_DEMAND_KINDS = \[([^\]]*)\]/.exec(src);
+    const src = read("lib/buyer/customer-requests.ts");
+    const decl = /export const EMPLOYER_DEMAND_KINDS = \[([^\]]*)\]/.exec(src);
     const kinds = [...decl![1].matchAll(/"([a-z_]+)"/g)].map((m) => m[1]);
     expect(kinds.some((k) => marketDirection(k) === "demand")).toBe(true);
     expect(kinds.some((k) => marketDirection(k) === "supply")).toBe(true);

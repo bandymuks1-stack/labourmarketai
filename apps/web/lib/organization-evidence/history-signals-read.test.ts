@@ -36,7 +36,14 @@ const rec = (id: string, personId: string, events: unknown[] = []) => ({
   organization_people: { linked_profile_id: "u1" },
   organization_evidence_events: events,
 });
-const sig = (record_id: string, skill_slug: string | null) => ({ record_id, skill_slug });
+// A real term per skill: every read re-checks a stored signal against the
+// recognizer (storedSignalStillSupported), so a fixture names what produced it.
+const TERM_FOR: Record<string, string> = { tiling: "plytelės", "floor-screeding": "išlyginamasis" };
+const sig = (record_id: string, skill_slug: string | null) => ({
+  record_id,
+  skill_slug,
+  term: skill_slug ? TERM_FOR[skill_slug] ?? skill_slug : null,
+});
 
 describe("readSignalsForWorkers", () => {
   it("reads LINKED roster rows only", async () => {
@@ -53,7 +60,7 @@ describe("readSignalsForWorkers", () => {
       organization_people: { data: [person("p1", "w1"), person("p2", "w2")] },
       organization_evidence_records: { data: [rec("r1", "p1"), rec("r2", "p1"), rec("r3", "p2")] },
       organization_evidence_competency_signals: {
-        data: [sig("r1", "tiling"), sig("r1", "tiling"), sig("r2", "tiling"), sig("r2", "screed"), sig("r3", "tiling")],
+        data: [sig("r1", "tiling"), sig("r1", "tiling"), sig("r2", "tiling"), sig("r2", "floor-screeding"), sig("r3", "tiling")],
       },
     });
     const out = await readSignalsForWorkers(client, ["w1", "w2"]);
@@ -61,7 +68,7 @@ describe("readSignalsForWorkers", () => {
     if (out.kind !== "ok") return;
     expect(out.byWorker.get("w1")).toEqual([
       { slug: "tiling", records: 2, provenance: "organization_provided" },
-      { slug: "screed", records: 1, provenance: "organization_provided" },
+      { slug: "floor-screeding", records: 1, provenance: "organization_provided" },
     ]);
     expect(out.byWorker.get("w2")).toEqual([
       { slug: "tiling", records: 1, provenance: "organization_provided" },
@@ -79,11 +86,11 @@ describe("readSignalsForWorkers", () => {
           rec("r2", "p1"),
         ],
       },
-      organization_evidence_competency_signals: { data: [sig("r1", "tiling"), sig("r2", "screed")] },
+      organization_evidence_competency_signals: { data: [sig("r1", "tiling"), sig("r2", "floor-screeding")] },
     });
     const out = await readSignalsForWorkers(client, ["w1"]);
     expect(out.kind === "ok" && out.byWorker.get("w1")).toEqual([
-      { slug: "screed", records: 1, provenance: "organization_provided" },
+      { slug: "floor-screeding", records: 1, provenance: "organization_provided" },
     ]);
   });
 

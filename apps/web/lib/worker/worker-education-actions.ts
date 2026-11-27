@@ -66,6 +66,7 @@ function readInput(formData: FormData) {
 export async function saveWorkerEducationAction(
   _prev: WorkerEducationActionResult | null,
   formData: FormData,
+  options: { refreshLater?: boolean } = {},
 ): Promise<WorkerEducationActionResult> {
   const supabase = await createClient();
   const {
@@ -118,7 +119,8 @@ export async function saveWorkerEducationAction(
       }
       return mapped;
     }
-    revalidatePath("/", "layout");
+    // The CV review refreshes once its last explicitly confirmed row settles.
+    if (!options.refreshLater) revalidatePath("/", "layout");
     const entry = educationEntryFromRow(data as Parameters<typeof educationEntryFromRow>[0]);
     return { ok: true, id: entry.id, entry };
   }

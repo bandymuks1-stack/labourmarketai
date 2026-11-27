@@ -19,7 +19,8 @@ describe("every projection has a door to the surface that owns its facts", () =>
   it("card: WORK → calendar week, RECORDS → journal, HISTORY → Living CV, NEXT → opportunities", () => {
     expect(CARD).toContain('door("/dashboard/planning?view=week", "player-card-work-calendar"');
     expect(CARD).toContain('door("/dashboard/journal#journal-entries", "player-card-records-journal"');
-    expect(CARD).toContain('door("/cv#cv-work-history", "player-card-history-cv"');
+    // The history lives in the CV's Experience block (decision 0034).
+    expect(CARD).toContain('door("/cv?tab=experience#cv-work-history", "player-card-history-cv"');
     expect(CARD).toContain("player-card-next-opportunities");
     // the public sample card never leads into /dashboard
     expect(CARD).toMatch(/const door = \(href: string, testid: string, text: string\) =>\s*sample \? null/);

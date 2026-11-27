@@ -14,6 +14,7 @@ import { Link } from "@/lib/i18n/navigation";
 // (lighter landing first screen, 2026-11-12).
 import {
   entryDoorHref,
+  entryRequestRoute,
   PUBLIC_ENTRY_MAX_CHARS,
   type EntryDoor,
 } from "@/lib/marketing/public-entry-carry";
@@ -163,7 +164,30 @@ export function LandingCtaCapture({
   );
 }
 
-export function PublicEntry({ supply }: { readonly supply: EntrySupply | null }) {
+/** The two chips of the short variant: one for each side of the market. */
+export const SHORT_EXAMPLE_KEYS = ["hire", "work"] as const satisfies readonly EntryExampleKey[];
+
+export function PublicEntry({
+  supply,
+  examples: exampleSet = "standard",
+  requestLabel,
+  quietLabel = false,
+}: {
+  readonly supply: EntrySupply | null;
+  /** The request block's own title ("Submit a request"), from the server so the
+   *  landing's client messages stay `landing.entry` only. Without it the entry
+   *  offers no request route. */
+  readonly requestLabel?: string;
+  /** The field's label stays for assistive tech and is not printed
+   *  (decision 0032): the placeholder already says what to type. */
+  readonly quietLabel?: boolean;
+  /**
+   * `short` (the landing since 2026-11-13, owner: less noise on the first
+   * screen): two example chips and no "more examples". `standard`: the four
+   * defaults with the rest one tap away.
+   */
+  readonly examples?: "standard" | "short" | "none";
+}) {
   const t = useTranslations("landing.entry");
   const locale = useLocale();
   const inputId = useId();
@@ -259,6 +283,17 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     return null;
   })();
 
+  /** A request this page can take WITHOUT an account (employer path P0
+   *  2026-11-15). The page promises it, and both forms below work signed out,
+   *  yet a sentence about needing workers or a job done got only sign-up and
+   *  sign-in. Workers: the public need form, written with the sentence. A job
+   *  for someone to do: the project request on this page. Sign-up stays, second. */
+  const requestRoute = !requestLabel ? null : entryRequestRoute(
+    reading?.kind === "recognised" ? reading.intent : null,
+    chosen,
+    sentence,
+  );
+
   const numbers = new Intl.NumberFormat(locale);
   const refreshedAt = supply?.refreshedAt
     ? new Intl.DateTimeFormat(locale, { dateStyle: "medium", timeZone: "UTC" }).format(
@@ -277,7 +312,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
       <AuthCtaLink
         relPath={entryDoorHref(locale, kind, sentence)}
         className={cn(
-          buttonLinkClassName(kind === "signup" ? "primary" : "secondary"),
+          buttonLinkClassName(kind === "signup" && !requestRoute ? "primary" : "secondary"),
           "gap-1.5 rounded-full",
         )}
       >
@@ -287,7 +322,10 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
     </LandingCtaCapture>
   );
 
-  const examples = visibleExampleKeys(showAllExamples);
+  const short = exampleSet === "short";
+  const examples: readonly EntryExampleKey[] = short
+    ? SHORT_EXAMPLE_KEYS
+    : visibleExampleKeys(showAllExamples);
   const firstMoreKey = visibleExampleKeys(true)[DEFAULT_EXAMPLE_KEYS.length];
 
   return (
@@ -318,11 +356,11 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
         >
           <label
             htmlFor={inputId}
-            className="font-mono text-meta uppercase tracking-label text-text-muted"
+            className={quietLabel ? "sr-only" : "font-mono text-meta uppercase tracking-label text-text-muted"}
           >
             {t("label")}
           </label>
-          <div className="flex gap-2">
+          <div className="flex flex-col gap-2 sm:flex-row">
             <input
               ref={inputRef}
               id={inputId}
@@ -339,7 +377,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
               // viewport (measured 2026-08-09; proven by
               // tests/e2e/landing-mobile-overflow.spec.ts). `flex-1` still
               // grows the field to fill the row.
-              className="min-h-11 w-0 min-w-0 flex-1 rounded-full border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted focus:border-brand-blue"
+              className="min-h-11 w-full min-w-0 rounded-full sm:w-0 sm:flex-1 border border-ink-500 bg-ink-900/60 px-4 text-basis text-text-primary placeholder:text-text-muted max-sm:placeholder:text-sm focus:border-brand-blue"
             />
             <button
               type="submit"
@@ -390,6 +428,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
 
                The labels are ordinary speech, never the product's vocabulary:
                no SUPPLY, no DEMAND, no "capacity", no "evidence" (§18). */}
+        {exampleSet === "none" ? null : (
         <div id={examplesId} className="flex flex-wrap items-center gap-1.5">
           <span className="text-meta text-text-muted">{t("examplesLabel")}</span>
           {examples.map((key) => {
@@ -445,7 +484,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
           })}
           {/* The rest of the graph, one tap away. Quieter than a chip on
               purpose: it is a way to see more, not a fifth thing to choose. */}
-          {showAllExamples ? null : (
+          {showAllExamples || short ? null : (
             <button
               type="button"
               data-testid="entry-more-examples"
@@ -458,6 +497,7 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             </button>
           )}
         </div>
+        )}
 
         {/* ── What was understood ──────────────────────────────────────── */}
         {understanding ? (
@@ -475,10 +515,43 @@ export function PublicEntry({ supply }: { readonly supply: EntrySupply | null })
             <p className="mt-2 font-display text-card-title font-semibold text-text-primary">
               {understanding}
             </p>
-            <p className="mt-3 border-t border-ink-600 pt-2.5 text-basis text-text-secondary">
-              {t("nextHint")}
-            </p>
+            {/* "Sign in to save your request" is not true when the request can be
+                sent right here, so it is said only when it is. */}
+            {requestRoute ? null : (
+              <p className="mt-3 border-t border-ink-600 pt-2.5 text-basis text-text-secondary">
+                {t("nextHint")}
+              </p>
+            )}
             <div className="mt-3 flex flex-wrap gap-2">
+              {requestRoute ? (
+                <LandingCtaCapture
+                  testId="entry-request"
+                  surface="landing_entry"
+                  ctaId={requestRoute.kind === "need-form" ? "entry_need_form" : "entry_request_project"}
+                  intent={family ?? undefined}
+                >
+                  {requestRoute.kind === "need-form" ? (
+                    <Link
+                      href={requestRoute.href}
+                      className={cn(buttonLinkClassName("primary"), "gap-1.5 rounded-full")}
+                    >
+                      {requestLabel}
+                      <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                    </Link>
+                  ) : (
+                    // The project request is on this page: a plain fragment link,
+                    // so the browser announces the change the request block
+                    // listens for.
+                    <a
+                      href={requestRoute.href.slice(1)}
+                      className={cn(buttonLinkClassName("primary"), "gap-1.5 rounded-full")}
+                    >
+                      {requestLabel}
+                      <ArrowRight className="size-3.5 shrink-0" aria-hidden />
+                    </a>
+                  )}
+                </LandingCtaCapture>
+              ) : null}
               {door("signup")}
               {door("login")}
               {/* A person looking for WORK can look at real open jobs right

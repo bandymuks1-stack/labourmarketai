@@ -38,10 +38,12 @@ export const dynamic = "force-dynamic";
  */
 export default async function ListingsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  searchParams?: Promise<{ tab?: string | string[]; focus?: string | string[] }>;
 }) {
-  const { locale } = await params;
+  const [{ locale }, query] = await Promise.all([params, searchParams]);
   setRequestLocale(locale);
 
   const supabase = await createClient();
@@ -73,13 +75,43 @@ export default async function ListingsPage({
   const myRows = mine.kind === "ok" ? mine.rows : [];
   const discoveryRows = discovery.kind === "ok" ? discovery.rows : [];
   const unavailable = discovery.kind === "ok" ? (discovery.unavailable ?? []) : [];
+  // One block per screen (decision 0034): browse, or my listings — each with
+  // its own address. `?focus=<id>` names one of MY listings (the only rows
+  // that carry that anchor), so it opens on that block.
+  const focus = typeof query?.focus === "string" ? query.focus : null;
+  const tab: "browse" | "mine" =
+    query?.tab === "mine" || (focus !== null && myRows.some((r) => r.id === focus))
+      ? "mine"
+      : "browse";
 
   return (
     <div className="flex flex-col gap-4" data-testid="listings-page">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("pageTitle")}</PageTitle>
-        <p className="text-sm leading-relaxed text-text-secondary">{t("pageIntro")}</p>
       </header>
+
+      <nav aria-label={t("pageTitle")} data-testid="listings-tabs" className="flex gap-2 overflow-x-auto [scrollbar-width:none]">
+        {(
+          [
+            ["browse", t("browseTitle")],
+            ["mine", t("myTitle")],
+          ] as const
+        ).map(([id, label]) => (
+          <Link
+            key={id}
+            href={(id === "browse" ? "/dashboard/listings" : `/dashboard/listings?tab=${id}`) as "/dashboard"}
+            aria-current={tab === id ? "page" : undefined}
+            data-testid={`listings-tab-${id}`}
+            className={
+              tab === id
+                ? "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-brand-blue bg-ink-800 px-4 text-sm font-semibold text-text-primary"
+                : "inline-flex min-h-11 shrink-0 items-center whitespace-nowrap rounded-full border border-ink-600 bg-ink-800/50 px-4 text-sm font-medium text-text-secondary hover:border-ink-500 hover:text-text-primary"
+            }
+          >
+            {label}
+          </Link>
+        ))}
+      </nav>
 
       <MarketplaceListingsSection
         myRows={myRows}
@@ -90,6 +122,7 @@ export default async function ListingsPage({
         unavailable={unavailable}
         publisher={publisher}
         locale={locale}
+        view={tab}
       />
 
       {/* Cross-link to the professional-services half of the marketplace —

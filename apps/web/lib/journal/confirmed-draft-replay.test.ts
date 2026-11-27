@@ -213,9 +213,18 @@ describe("GUARD: every field a confirm sends is compared or named as not a metri
     for (const k of Object.keys(intakeWorkTimeFields(n, "2026-10-29"))) intakeKeys.add(k);
   }
 
+  // ONE mapping now (AI-3): both doors call `logWorkFields`, so the guard
+  // reads that function once and pins that neither door has its own copy.
+  it("the chat executor and the MCP confirm both send THE one mapping", () => {
+    const registry = readFileSync(join(root, "lib/capabilities/registry.ts"), "utf8");
+    expect(registry).toMatch(/return logWorkFields\(locale, draft\);/);
+    const executors = readFileSync(join(root, "lib/conversation/worker-executors.ts"), "utf8");
+    expect(executors).toMatch(/export \{ logWorkFields \};/);
+    expect(executors).not.toMatch(/function logWorkFields\(/);
+  });
+
   it.each([
-    ["lib/capabilities/registry.ts", "journalConfirmFields"],
-    ["lib/conversation/worker-executors.ts", "logWorkFields"],
+    ["lib/journal/log-work-fields.ts", "logWorkFields"],
   ])("%s %s", (file, fn) => {
     const keys = [...mappingKeys(file, fn), ...intakeKeys];
     expect(keys).toContain("work_date");

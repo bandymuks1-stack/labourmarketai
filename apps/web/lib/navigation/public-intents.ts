@@ -26,13 +26,15 @@
  * the day its route works, not before.
  */
 
-import { AGENCY_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { AGENCY_DOOR_NEXT, INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { WORKER_PROFILE_DOOR_HREF, WORKER_PROFILE_DOOR_NEXT } from "@/lib/marketing/worker-profile-door";
+import { requestDoorHref } from "@/lib/staffing/request-door-link";
 
 export const PUBLIC_INTENT_IDS = [
   "work",
   "workers",
   "services",
-  "orders",
+  "contractors",
   "partners",
   "agencies",
 ] as const;
@@ -53,6 +55,12 @@ export type PublicIntentLink = {
   readonly href: string;
   /** True when the page is inside the signed-in product. */
   readonly account: boolean;
+  /**
+   * An account link's door for a signed-out visitor, when sign-in is the
+   * wrong first step for them: the sign-up that returns to `href`. Signed in,
+   * the link is `href` itself (owner P0 2026-11-16, N3).
+   */
+  readonly guestHref?: string;
 };
 
 export type PublicIntent = {
@@ -68,7 +76,7 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
     links: [
       { id: "jobs", href: "/jobs", account: false },
       { id: "workOpportunities", href: "/work-opportunities", account: false },
-      { id: "createCv", href: "/create-cv", account: false },
+      { id: "createCv", href: WORKER_PROFILE_DOOR_NEXT, account: true, guestHref: WORKER_PROFILE_DOOR_HREF },
       { id: "workAbroad", href: "/work-abroad", account: false },
       { id: "forWorkers", href: "/for-workers", account: false },
     ],
@@ -84,19 +92,28 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
     ],
   },
   {
+    // The PROVIDER's goal. Since V3 (owner decision D1, variant A, 2026-11-13)
+    // it also carries the two order-finding areas that used to be the goal
+    // "orders": both belong to the same person, the one who offers services.
     id: "services",
     iconKey: "wrench",
     links: [
       { id: "myServices", href: "/dashboard/services", account: true },
       { id: "serviceRequests", href: "/dashboard/service-requests", account: true },
+      { id: "marketListings", href: "/dashboard/listings", account: true },
+      { id: "commercial", href: "/dashboard/commercial", account: true },
     ],
   },
   {
-    id: "orders",
+    // The BUYER's goal (D1, variant A): someone who needs a service or a
+    // contractor. Public personal services reuse the existing offering loop;
+    // both structured enquiry doors remain reachable.
+    id: "contractors",
     iconKey: "fileSignature",
     links: [
-      { id: "marketListings", href: "/dashboard/listings", account: true },
-      { id: "commercial", href: "/dashboard/commercial", account: true },
+      { id: "findServices", href: "/services", account: false },
+      { id: "b2bEnquiry", href: requestDoorHref("b2b"), account: false },
+      { id: "projectEnquiry", href: requestDoorHref("project"), account: false },
     ],
   },
   {
@@ -107,7 +124,17 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
       // The partner enquiry door — the same destination the landing's
       // PARTNER_DOOR uses (a commercial relationship with the company behind
       // the product, not a workspace).
-      { id: "partnerWithUs", href: "/about", account: false },
+      { id: "partnerWithUs", href: requestDoorHref("partner"), account: false },
+      // THE EDUCATION INSTITUTION'S DOOR (owner 2026-11-19, UX gap I-6): the
+      // landing had no way in for a school or training provider. Inside this
+      // goal, not a seventh one: the organisation setup with the
+      // training_provider capability, through sign-up when signed out.
+      {
+        id: "setUpInstitution",
+        href: INSTITUTION_DOOR_NEXT,
+        account: true,
+        guestHref: `/auth/signup?next=${encodeURIComponent(INSTITUTION_DOOR_NEXT)}`,
+      },
     ],
   },
   {
@@ -133,6 +160,26 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
 export const ASSISTANT_HREF = "/dashboard";
 
 /**
+ * The same entry for a signed-out visitor (owner P0 2026-11-15, F8): the
+ * landing's question box (`#find`), which needs no account. A sentence typed
+ * there rides through sign-up into the conversation as `?say=`. Without this
+ * the desktop entry dropped a visitor on the sign-in page with no word of why.
+ */
+export const ASSISTANT_GUEST_HREF = "/#find";
+
+/**
+ * Goal ids that no longer exist, and the goal that now holds what they held.
+ * A link someone saved to `#goal=orders` opens "Offer services", where the
+ * order-finding areas moved — never nothing.
+ */
+export const GOAL_ID_ALIASES: Readonly<Record<string, PublicIntentId>> = { orders: "services" };
+
+/** The current id for a goal id that may be an old one. */
+export function canonicalGoalId(id: string | null): string | null {
+  return id === null ? null : (GOAL_ID_ALIASES[id] ?? id);
+}
+
+/**
  * THE ADDRESS OF A GOAL — a fragment of the page the navigator is on
  * (`#goal=work`), never a page of its own. A fragment keeps everything a URL
  * state needs (browser Back closes the panel, a shared link opens it, the
@@ -148,7 +195,7 @@ export function goalHref(id: PublicIntentId | typeof MORE_GOAL_ID): string {
 /** `#goal=work` → `work`; anything else → null. */
 export function goalFromFragment(hash: string): PublicIntentId | null {
   if (!hash.startsWith(GOAL_FRAGMENT_PREFIX)) return null;
-  const id = hash.slice(GOAL_FRAGMENT_PREFIX.length);
+  const id = canonicalGoalId(hash.slice(GOAL_FRAGMENT_PREFIX.length)) ?? "";
   return isPublicIntentId(id) ? id : null;
 }
 

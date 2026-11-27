@@ -51,6 +51,13 @@ describe("teamCompositionFor — only while count × per_team = the number of wo
 });
 
 describe("both write paths carry the composition", () => {
+  it("chat refuses invalid or reversed dates before the canonical submit can drop the team", () => {
+    const input = { description: "Install the windows", country: "LT", teamSize: 6, teamCount: 2, perTeamSize: 3 };
+    expect(companyCreateDemandSchema.safeParse({ ...input, startDate: "2026-12-10", endDate: "2026-12-01" }).success).toBe(false);
+    expect(companyCreateDemandSchema.safeParse({ ...input, startDate: "2026-02-30" }).success).toBe(false);
+    expect(companyCreateDemandSchema.safeParse({ ...input, startDate: "2028-02-29", endDate: "2028-02-29" }).success).toBe(true);
+    expect(companyCreateDemandSchema.safeParse({ ...input, endDate: "2026-12-01" }).success).toBe(true);
+  });
   it("the chat form passes the derived teams to the create-demand action", () => {
     const form = getCompanyForm("company.create-demand");
     const built = form?.build({ description: "Reikia 3 brigadų po 4 žmones", teamSize: "12", teamCount: "3", perTeamSize: "4" });
@@ -60,9 +67,15 @@ describe("both write paths carry the composition", () => {
 
   it("the chat executor sends it as structured_v2.team; the server keeps it only when it explains team_size", () => {
     const WEB = join(__dirname, "..", "..");
+    // Both the chat executor and the MCP confirm build it through the ONE
+    // mapper (F7 / AI-2), so the composition cannot be dropped on one door.
     const executor = readFileSync(join(WEB, "lib", "conversation", "company-executors.ts"), "utf8");
-    expect(executor).toMatch(/\{ count: input\.teamCount, per_team: input\.perTeamSize \}/);
-    expect(executor).toMatch(/\.\.\.\(team \? \{ team \} : \{\}\)/);
+    expect(executor).toMatch(/structuredV2: structuredV2FromDeclaredDemand\(input\)/);
+    const mcp = readFileSync(join(WEB, "lib", "capabilities", "registry.ts"), "utf8");
+    expect(mcp).toMatch(/structuredV2: structuredV2FromDeclaredDemand\(draft\)/);
+    const mapper = readFileSync(join(WEB, "lib", "demand", "structured-demand-v2.ts"), "utf8");
+    expect(mapper).toMatch(/\{ count: input\.teamCount, per_team: input\.perTeamSize \}/);
+    expect(mapper).toMatch(/\.\.\.\(team \? \{ team \} : \{\}\)/);
     const submit = readFileSync(join(WEB, "lib", "demand", "demand-request.ts"), "utf8");
     expect(submit).toMatch(/teamCompositionFor\(teamSize, sanitizedV2\.team\.count, sanitizedV2\.team\.per_team\)/);
   });

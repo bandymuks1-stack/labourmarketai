@@ -1,13 +1,15 @@
 import "server-only";
 
-import { withHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import { cache } from "react";
 import type { SupabaseClient } from "@supabase/supabase-js";
 
+import { readOwnExperienceRelationships } from "@/lib/journal/professional-experience-read";
 import { createClient } from "@/lib/supabase/server";
 import {
   deriveWorkHistory,
   PROFESSIONAL_HISTORY_RELATIONSHIPS,
+  WORK_HISTORY_LIMIT,
+  workHistoryFromExperience,
   type WorkHistoryEntry,
   type WorkHistorySourceRow,
 } from "./work-history-model";
@@ -39,14 +41,28 @@ function asAny(c: SupabaseClient): any {
   return c;
 }
 
-/** How many engagements the profile card carries. Bounded: the card is an
- *  identity summary, not an employment archive. */
-export const WORK_HISTORY_LIMIT = 20;
+/** The card's DISPLAY bound (declared once in the pure model). The own read
+ *  below is not cut by it; the person-page read of someone else still is. */
+export { WORK_HISTORY_LIMIT };
 
 export type WorkHistoryRead =
   | { readonly status: "ok"; readonly entries: readonly WorkHistoryEntry[] }
   | { readonly status: "unavailable" };
 
+/**
+ * THE CALLER'S OWN HISTORY = THE ONE PROFESSIONAL-EXPERIENCE READING
+ * (decision 0025, CV-15 / G-7). This used to be a second `engagement_contexts`
+ * query of its own — limit 20, `manager` left out, led organizations and
+ * confirmed roster rows absent — so a director, or anyone with more than 20
+ * engagements, had one history on the card and another in Work in Numbers.
+ * It now derives from `readOwnExperienceRelationships`, the reader the CV,
+ * the profile, the journal and Work in Numbers use: same rows, same
+ * own-data scope (`profile_id = user.id` under the person's RLS), same
+ * historical organization names. The card's display bound is applied where
+ * the rows are rendered (`shownWorkHistory`), never to the model.
+ *
+ * `null` from the reader is a failed read -> `unavailable` (SEP-7), never [].
+ */
 export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryRead> => {
   const supabase = await createClient();
   const {
@@ -56,31 +72,9 @@ export const getOwnWorkHistory = cache(async (): Promise<WorkHistoryRead> => {
   if (!user) return { status: "ok", entries: [] };
 
   try {
-    const res = await asAny(supabase)
-      .from("engagement_contexts")
-      .select(
-        "id, title, relationship_slug, started_at, ended_at, status, country_code, organization_id, organizations(display_name, legal_name)",
-      )
-      .eq("profile_id", user.id)
-      // The SAME relationship filter the CV and profile use — without it the
-      // card timeline showed `manager` rows the other two surfaces omit (W4
-      // audit A15: the same person had two histories). Placements
-      // (student/volunteer) ARE in this list on all three surfaces; each
-      // renders them under their own heading, never as employment.
-      .in("relationship_slug", [...PROFESSIONAL_HISTORY_RELATIONSHIPS])
-      .order("started_at", { ascending: false, nullsFirst: false })
-      .limit(WORK_HISTORY_LIMIT);
-    if (res.error) return { status: "unavailable" };
-    // An ENDED relationship still names its organization in the person's own
-    // history (owner 2026-09-29) — names only, via the historical read.
-    const rows = await withHistoricalOrgNames(
-      supabase,
-      (res.data ?? []) as (WorkHistorySourceRow & { organization_id?: string | null })[],
-    );
-    return {
-      status: "ok",
-      entries: deriveWorkHistory(rows as WorkHistorySourceRow[]),
-    };
+    const relationships = await readOwnExperienceRelationships(supabase, user.id);
+    if (relationships === null) return { status: "unavailable" };
+    return { status: "ok", entries: workHistoryFromExperience(relationships) };
   } catch {
     return { status: "unavailable" };
   }

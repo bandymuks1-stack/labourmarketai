@@ -60,6 +60,7 @@ import {
 } from "@/lib/auth/dashboard-role-decision";
 import { TodayScreen } from "@/components/app/today/today-screen";
 import { CompanyModelScreen } from "@/components/app/organization/company-model-screen";
+import { isEducationInstitution } from "@/lib/organizations/capabilities";
 import { PilotPassInvite } from "@/components/app/pilot-pass-invite";
 import { conversationOpeningContext } from "@/lib/today/today-route";
 import { AccessRefusalNotice } from "@/components/app/access-refusal-notice";
@@ -389,14 +390,14 @@ export default async function DashboardHomePage({
         other: tChat("workspaceRelationshipMember"),
       })
     : null;
+  // The first screen NAMES the context and lists nothing (owner order
+  // 2026-11-24, decision 0034): "Here I can help with …" was helper text.
   const workspaceContextLine = !workspaceLabel
     ? null
-    : identity === "company" && workspace.organizationName && phraseKeys.length > 0
-      ? tChat("workspaceIntro", { company: workspaceLabel, list: capabilityList })
-      : tChat("workspaceActingAs", {
-          workspace: workspaceLabel,
-          relationship: relationshipLabel ?? tChat("workspaceRelationshipMember"),
-        });
+    : tChat("workspaceActingAs", {
+        workspace: workspaceLabel,
+        relationship: relationshipLabel ?? tChat("workspaceRelationshipMember"),
+      });
   // THE CONVERSATION'S IDENTITY IS THE ACTIVE WORKSPACE. A switch re-renders
   // this page with new props, but React keeps a client component's state
   // across `router.refresh` — the thread, the opening brief, the pins, the
@@ -409,7 +410,16 @@ export default async function DashboardHomePage({
   // re-sends them.
   // The company workspace opens on the company model (existing doors).
   const companyModel =
-    activeOrgWorkspace && identity === "company" ? <CompanyModelScreen /> : null;
+    activeOrgWorkspace && identity === "company" ? (
+      <CompanyModelScreen
+        learnerInviteOrganizationId={
+          isEducationInstitution({ roleSlugs: workspace.signals.capabilities })
+            ? workspace.organizationId
+            : null
+        }
+        agency={agencyWorkspace}
+      />
+    ) : null;
   // The pilot pass pointer leads it — the employer home is where an owner
   // looks first, and it renders nothing unless the pass is theirs to start.
   const companyOpeningContext = companyModel ? (

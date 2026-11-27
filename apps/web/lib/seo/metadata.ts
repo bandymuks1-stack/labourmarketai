@@ -13,7 +13,7 @@
  * host (see lib/domain/canonical.ts); every public canonical URL, hreflang
  * alternate and OpenGraph URL points there.
  *
- * Copy lives here as a pure per-locale map (lt / en / ru / nl / de — the
+ * Copy lives here as a pure per-locale map (lt / en / ru / nl / de / pl / sv — the
  * active locales) rather than in messages/*.json so the SEO layer has no
  * i18n-debt / 11-file-parity coupling. RU is included because the
  * worker audience operates in Russian.
@@ -51,37 +51,43 @@ export const BRAND_SEO: Readonly<Record<ActiveLocale, BrandCopy>> = {
     title:
       "LabourMarket.ai — International platform for work and services",
     description:
-      "LabourMarket.ai: platform for work, specialists and services, locally and internationally. Any sector: jobs, workers, clients, services and project partners.",
+      "LabourMarket.ai: patent-backed platform based on a unique idea to organise and manage work relationships in any sector, locally and internationally.",
   },
   lt: {
     title:
       "LabourMarket.ai — tarptautinė darbo ir paslaugų platforma",
     description:
-      "LabourMarket.ai – tarptautinė darbo, specialistų ir paslaugų platforma. Bet kuriame sektoriuje rask darbą, darbuotojus, užsakovus, paslaugas ir projektų partnerius.",
+      "LabourMarket.ai – patentu paremta platforma, sukurta remiantis unikalia darbo santykių organizavimo ir valdymo idėja. Visiems sektoriams.",
   },
   ru: {
     title:
       "LabourMarket.ai — международная платформа работы и услуг",
     description:
-      "LabourMarket.ai — международная платформа работы, специалистов и услуг. В любом секторе найдите работу, работников, заказчиков, услуги и партнёров по проектам.",
+      "LabourMarket.ai — платформа, основанная на патенте и уникальной идее организации и управления трудовыми отношениями. В любом секторе.",
   },
   nl: {
     title:
       "LabourMarket.ai — Internationaal platform voor werk en diensten",
     description:
-      "LabourMarket.ai: internationaal platform voor werk, specialisten en diensten. Vind in elke sector werk, werknemers, opdrachtgevers, diensten en projectpartners.",
+      "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. In elke sector.",
   },
   de: {
     title:
       "LabourMarket.ai — Plattform für Arbeit und Dienstleistungen in Europa",
     description:
-      "LabourMarket.ai: internationale Plattform für Arbeit, Fachkräfte und Dienstleistungen. In jeder Branche Arbeit, Personal, Auftraggeber und Projektpartner finden.",
+      "LabourMarket.ai: patentbasierte Plattform auf Basis einer einzigartigen Idee zur Organisation und Verwaltung von Arbeitsbeziehungen. Für alle Branchen.",
   },
   pl: {
     title:
       "LabourMarket.ai — międzynarodowa platforma pracy i usług",
     description:
-      "LabourMarket.ai: międzynarodowa platforma pracy, specjalistów i usług. W każdej branży znajdź pracę, pracowników, zleceniodawców, usługi i partnerów do projektów.",
+      "LabourMarket.ai to platforma oparta na patencie i unikalnej idei organizacji i zarządzania relacjami zawodowymi. W każdej branży.",
+  },
+  sv: {
+    title:
+      "LabourMarket.ai — internationell plattform för arbete och tjänster",
+    description:
+      "LabourMarket.ai är en patentbaserad plattform, byggd på en unik idé för att organisera och hantera arbetsrelationer. För alla branscher.",
   },
 };
 
@@ -101,6 +107,7 @@ const OG_LOCALE: Readonly<Record<ActiveLocale, string>> = {
   nl: "nl_NL",
   de: "de_DE",
   pl: "pl_PL",
+  sv: "sv_SE",
 };
 
 function isActiveLocale(locale: string): locale is ActiveLocale {
@@ -173,7 +180,7 @@ export const PAGE_SEO: Readonly<
     lt: {
       title: "Darbuotojams — susikurk profilį ir CV",
       description:
-        "Bet kurio sektoriaus darbuotojams: susikurk profilį ir CV LabourMarket.ai, parodyk įgūdžius ir prieinamumą ir būk matomas darbdaviams Europoje.",
+        "Bet kurio sektoriaus darbuotojams: susikurkite profilį ir CV LabourMarket.ai, parodykite įgūdžius ir prieinamumą, kad jus matytų darbdaviai Europoje.",
     },
     ru: {
       title: "Работникам — создайте профиль и CV",
@@ -183,7 +190,7 @@ export const PAGE_SEO: Readonly<
     nl: {
       title: "Voor werknemers — Bouw je profiel en cv",
       description:
-        "Werknemers in elke sector: maak een profiel en cv op LabourMarket.ai, laat je vaardigheden en beschikbaarheid zien en wees zichtbaar voor werkgevers.",
+        "Werknemers in elke sector: maak een profiel en cv op LabourMarket.ai, laat uw vaardigheden en beschikbaarheid zien en wees zichtbaar voor werkgevers.",
     },
     de: {
       title: "Für Arbeitskräfte — Profil und Lebenslauf",
@@ -194,6 +201,11 @@ export const PAGE_SEO: Readonly<
       title: "Dla pracowników — zbuduj swój profil i CV",
       description:
         "Pracownicy z każdej branży: załóż profil i CV na LabourMarket.ai, pokaż umiejętności i dostępność i bądź widoczny dla pracodawców w Europie.",
+    },
+    sv: {
+      title: "För arbetstagare — skapa din profil och ditt CV",
+      description:
+        "Arbetstagare i alla branscher: skapa profil och CV på LabourMarket.ai, visa dina färdigheter och din tillgänglighet och bli synlig för arbetsgivare i Europa.",
     },
   },
   companies: {
@@ -209,7 +221,7 @@ export const PAGE_SEO: Readonly<
     lt: {
       title: "Darbdaviams — pateik darbo jėgos užklausą",
       description:
-        "Darbdaviai ir rangovai: aprašyk reikalingus darbuotojus, brigadas ir įgūdžius. LabourMarket.ai struktūruoja užklausą ir padeda planuoti atranką Europoje.",
+        "Darbdaviai ir rangovai: aprašykite reikalingus darbuotojus, brigadas ir įgūdžius. LabourMarket.ai struktūruoja užklausą ir padeda planuoti atranką Europoje.",
     },
     ru: {
       title: "Работодателям — подайте запрос на работников",
@@ -219,7 +231,7 @@ export const PAGE_SEO: Readonly<
     nl: {
       title: "Voor werkgevers — Dien je personeelsaanvraag in",
       description:
-        "Werkgevers en aannemers: beschrijf de werknemers, ploegen en vaardigheden die je zoekt. LabourMarket.ai structureert je aanvraag en de selectie in Europa.",
+        "Werkgevers en aannemers: beschrijf de werknemers, ploegen en vaardigheden die u zoekt. LabourMarket.ai structureert uw aanvraag en de selectie in Europa.",
     },
     de: {
       title: "Für Arbeitgeber — Stellen Sie Ihre Personalanfrage",
@@ -230,6 +242,11 @@ export const PAGE_SEO: Readonly<
       title: "Dla pracodawców — złóż zapytanie o pracowników",
       description:
         "Pracodawcy i wykonawcy: opisz potrzebnych pracowników, zespoły i umiejętności. LabourMarket.ai porządkuje zapytanie i pomaga w dopasowaniu w Europie.",
+    },
+    sv: {
+      title: "För arbetsgivare — skicka en förfrågan om personal",
+      description:
+        "Arbetsgivare och entreprenörer: beskriv vilka arbetstagare, team och färdigheter ni behöver. LabourMarket.ai strukturerar förfrågan och nästa steg i Europa.",
     },
   },
   agencies: {
@@ -263,6 +280,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Agencje pracy: koordynuj pracowników, zespoły i zapotrzebowanie pracodawców w jednym miejscu. LabourMarket.ai porządkuje zgłoszenia i zakwaterowanie.",
     },
+    sv: {
+      title: "För bemanningsföretag — samordna personal och team",
+      description:
+        "Bemanningsföretag: samordna arbetstagare, team och arbetsgivares behov på ett ställe. LabourMarket.ai strukturerar registrering, urval och boende i Europa.",
+    },
   },
   workAbroad: {
     en: {
@@ -283,7 +305,7 @@ export const PAGE_SEO: Readonly<
     nl: {
       title: "Werken in het buitenland — Alle sectoren in Europa",
       description:
-        "Denk je aan werken in het buitenland? Ontdek hoe LabourMarket.ai vaardigheden, selectie, documenten en huisvesting structureert voor je volgende stap.",
+        "Denkt u aan werken in het buitenland? Ontdek hoe LabourMarket.ai vaardigheden, selectie, documenten en huisvesting structureert voor uw volgende stap.",
     },
     de: {
       title: "Arbeiten im Ausland — Alle Branchen in Europa",
@@ -295,6 +317,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Rozważasz pracę za granicą? Zobacz, jak LabourMarket.ai porządkuje umiejętności, dopasowanie, dokumenty i zakwaterowanie, aby zaplanować kolejne kroki.",
     },
+    sv: {
+      title: "Arbeta utomlands — jobb i alla branscher i Europa",
+      description:
+        "Funderar du på att arbeta utomlands? Se hur LabourMarket.ai strukturerar färdigheter, urval, dokument och boende så att du kan planera nästa steg i Europa.",
+    },
   },
   companyNeed: {
     en: {
@@ -303,9 +330,9 @@ export const PAGE_SEO: Readonly<
         "Tell LabourMarket.ai what your project needs: professions, skills, team size, place, start. You review the draft; nothing is published automatically.",
     },
     lt: {
-      title: "Darbuotojų užklausa — aprašyk reikalingą darbo jėgą",
+      title: "Darbuotojų užklausa — aprašykite reikiamą darbo jėgą",
       description:
-        "Pasakyk LabourMarket.ai, ko reikia projektui: profesijos, įgūdžiai, komanda, vieta, pradžia. Peržiūri juodraštį — niekas nepublikuojama automatiškai.",
+        "Pasakykite LabourMarket.ai, ko reikia projektui: profesijos, įgūdžiai, komanda, vieta, pradžia. Juodraštį peržiūrite jūs — niekas nepublikuojama automatiškai.",
     },
     ru: {
       title: "Запрос на работников — опишите нужную рабочую силу",
@@ -315,7 +342,7 @@ export const PAGE_SEO: Readonly<
     nl: {
       title: "Personeelsaanvraag — Beschrijf wie je nodig hebt",
       description:
-        "Vertel LabourMarket.ai wat je project nodig heeft: beroepen, vaardigheden, team, locatie, start. Jij beoordeelt het concept; niets gaat automatisch online.",
+        "Vertel LabourMarket.ai wat uw project nodig heeft: beroepen, vaardigheden, team, locatie, start. U beoordeelt het concept; niets gaat automatisch online.",
     },
     de: {
       title: "Personalanfrage — Beschreiben Sie Ihren Bedarf",
@@ -327,6 +354,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Powiedz LabourMarket.ai, czego potrzebuje projekt: zawody, umiejętności, zespół, miejsce, start. Sprawdzasz szkic — nic nie jest publikowane automatycznie.",
     },
+    sv: {
+      title: "Förfrågan om personal — beskriv vilka ni behöver",
+      description:
+        "Berätta för LabourMarket.ai vad projektet behöver: yrken, färdigheter, team, plats och start. Du granskar utkastet – inget publiceras automatiskt.",
+    },
   },
   workerIntake: {
     en: {
@@ -337,7 +369,7 @@ export const PAGE_SEO: Readonly<
     lt: {
       title: "Darbuotojo anketa — susikurk profilį ir CV",
       description:
-        "Pradėk LabourMarket.ai darbuotojo profilį: profesijos, įgūdžiai, patirtis ir prieinamumas. Struktūruota anketa sukuria CV ir paruošia tave darbdavių atrankai.",
+        "Pradėkite LabourMarket.ai darbuotojo profilį: profesijos, įgūdžiai, patirtis ir prieinamumas. Struktūruota anketa sukuria CV ir paruošia jus darbdavių atrankai.",
     },
     ru: {
       title: "Анкета работника — создайте профиль и CV",
@@ -347,7 +379,7 @@ export const PAGE_SEO: Readonly<
     nl: {
       title: "Werknemersintake — Maak je profiel en cv",
       description:
-        "Start je LabourMarket.ai-werknemersprofiel: beroepen, vaardigheden, ervaring en beschikbaarheid. Een intake bouwt je cv op voor beoordeling door werkgevers.",
+        "Start uw LabourMarket.ai-werknemersprofiel: beroepen, vaardigheden, ervaring en beschikbaarheid. Een intake bouwt uw cv op voor beoordeling door werkgevers.",
     },
     de: {
       title: "Anmeldung für Arbeitskräfte — Profil und Lebenslauf",
@@ -358,6 +390,11 @@ export const PAGE_SEO: Readonly<
       title: "Zgłoszenie pracownika — utwórz profil i CV",
       description:
         "Zacznij profil pracownika na LabourMarket.ai: zawody, umiejętności, doświadczenie, dostępność. Zgłoszenie tworzy Twoje CV do oceny przez pracodawców.",
+    },
+    sv: {
+      title: "Registrering för arbetstagare — profil och CV",
+      description:
+        "Starta din profil på LabourMarket.ai: yrken, färdigheter, erfarenhet och tillgänglighet. Registreringen bygger ditt CV för arbetsgivares granskning.",
     },
   },
   labourMarket: {
@@ -391,6 +428,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Poparte źródłami sygnały rynku pracy w Europie: popyt, umiejętności, mobilność. LabourMarket.ai korzysta z dowodów jakościowych — bez wymyślonych liczb.",
     },
+    sv: {
+      title: "Arbetsmarknad — underlag och signaler i Europa",
+      description:
+        "Källbaserade arbetsmarknadssignaler för Europa: efterfrågan, färdigheter och rörlighet. LabourMarket.ai använder kvalitativa underlag – inga påhittade siffror.",
+    },
   },
   pricing: {
     en: {
@@ -423,6 +465,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Jak działa cennik LabourMarket.ai we wczesnym dostępie: jasno i uczciwie dla pracowników, pracodawców i agencji, bez ukrytych opłat.",
     },
+    sv: {
+      title: "Priser — en ärlig modell för tidig åtkomst",
+      description:
+        "Så fungerar priserna på LabourMarket.ai under tidig åtkomst: tydligt och ärligt för arbetstagare, arbetsgivare och bemanningsföretag, utan dolda avgifter.",
+    },
   },
   workOpportunities: {
     en: {
@@ -431,7 +478,7 @@ export const PAGE_SEO: Readonly<
         "Looking for work in Europe? LabourMarket.ai helps workers in every sector build a profile and CV and reach real employer needs.",
     },
     lt: {
-      title: "Darbo galimybės — rask darbą įvairiuose sektoriuose",
+      title: "Darbo galimybės — raskite darbą įvairiose srityse",
       description:
         "Ieškai darbo Europoje? LabourMarket.ai padeda bet kurio sektoriaus darbuotojams susikurti profilį ir CV ir pasiekti realius darbdavių poreikius.",
     },
@@ -455,6 +502,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Szukasz pracy w Europie? LabourMarket.ai pomaga pracownikom z każdej branży zbudować profil i CV oraz dotrzeć do realnego zapotrzebowania pracodawców.",
     },
+    sv: {
+      title: "Jobbmöjligheter — hitta arbete i alla branscher",
+      description:
+        "Söker du arbete i Europa? LabourMarket.ai hjälper arbetstagare i alla branscher att bygga profil och CV och nå arbetsgivares verkliga behov.",
+    },
   },
   skills: {
     en: {
@@ -465,7 +517,7 @@ export const PAGE_SEO: Readonly<
     lt: {
       title: "Įgūdžiai — patvirtinti ir savideklaruoti atskirai",
       description:
-        "Parodyk ir patikrink realius įgūdžius LabourMarket.ai. Jie žymimi kaip patvirtinti arba savideklaruoti, kad darbdaviai matytų realią patirtį.",
+        "Parodykite ir patikrinkite realius įgūdžius LabourMarket.ai. Jie žymimi kaip patvirtinti arba savideklaruoti, kad darbdaviai matytų realią patirtį.",
     },
     ru: {
       title: "Навыки — подтверждённые и самозаявленные отдельно",
@@ -487,6 +539,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Pokazuj i sprawdzaj realne umiejętności na LabourMarket.ai. Są oznaczone jako zweryfikowane lub zadeklarowane, aby pracodawcy widzieli doświadczenie.",
     },
+    sv: {
+      title: "Färdigheter — verifierade eller egenangivna",
+      description:
+        "Visa och kontrollera verkliga färdigheter på LabourMarket.ai. De märks som verifierade eller egenangivna, så att arbetsgivare ser verklig erfarenhet.",
+    },
   },
   // Titles carry NO brand: buildPageMetadata appends " · LabourMarket.ai"
   // once. Embedding it here rendered "Open jobs — LabourMarket.ai ·
@@ -500,7 +557,7 @@ export const PAGE_SEO: Readonly<
     lt: {
       title: "Laisvos darbo vietos",
       description:
-        "Gyvos darbo vietos iš oficialių viešų užimtumo šaltinių. Pareigos, kategorija ir darbo laikas matomi visiems; prisijunk nemokamai — matysi darbdavį ir vietovę.",
+        "Gyvos darbo vietos iš oficialių viešų šaltinių. Pareigos, kategorija ir darbo laikas matomi visiems; prisijunkite nemokamai — matysite darbdavį ir vietovę.",
     },
     ru: {
       title: "Открытые вакансии",
@@ -521,6 +578,11 @@ export const PAGE_SEO: Readonly<
       title: "Otwarte oferty pracy",
       description:
         "Aktualne oferty z oficjalnych publicznych źródeł. Stanowisko, kategoria, umowa i czas pracy są jawne; zaloguj się za darmo, by zobaczyć pracodawcę i miejsce.",
+    },
+    sv: {
+      title: "Lediga jobb",
+      description:
+        "Aktuella platsannonser från officiella offentliga källor. Titel, kategori, anställningsform och arbetstid är öppna; logga in gratis för arbetsgivare och ort.",
     },
   },
   professions: {
@@ -554,6 +616,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Od magazynu, produkcji, sprzątania, hotelarstwa i opieki po budownictwo, spawanie i transport: zawody i branże, które obejmuje LabourMarket.ai.",
     },
+    sv: {
+      title: "Yrken och branscher — för vem LabourMarket.ai är",
+      description:
+        "Från lager, produktion, städ, hotell och restaurang och vård till bygg, svetsning och transport: de yrken och branscher som LabourMarket.ai omfattar.",
+    },
   },
   projectCostCalculator: {
     en: {
@@ -564,7 +631,7 @@ export const PAGE_SEO: Readonly<
     lt: {
       title: "Darbų ir projekto skaičiuoklė — apskaičiuok kainą",
       description:
-        "Nemokama darbų ir projekto kainos skaičiuoklė: įvesk darbuotojus, valandas, įkainius ir medžiagas — gauk skaidrią preliminarią sąmatą. Be paskyros.",
+        "Nemokama darbų ir projekto kainos skaičiuoklė: įveskite darbuotojus, valandas, įkainius ir medžiagas — gaukite skaidrią preliminarią sąmatą. Be paskyros.",
     },
     ru: {
       title: "Калькулятор проекта — оцените стоимость работ",
@@ -586,6 +653,11 @@ export const PAGE_SEO: Readonly<
       description:
         "Darmowy kalkulator kosztów prac: wpisz pracowników, godziny, stawki i materiały, by dostać przejrzysty wstępny kosztorys. Bez zakładania konta.",
     },
+    sv: {
+      title: "Projektkalkylator — räkna på arbete och projekt",
+      description:
+        "Gratis kalkylator för arbets- och projektkostnader: ange egna arbetstagare, timmar, priser och material för en tydlig preliminär kalkyl. Inget konto.",
+    },
   },
   createCv: {
     en: {
@@ -596,7 +668,7 @@ export const PAGE_SEO: Readonly<
     lt: {
       title: "Nemokamas CV kūrimas — profesionalus CV internetu",
       description:
-        "Susikurk profesionalų CV nemokamai: importuok PDF ar DOCX arba pradėk nuo nulio, patikrink kiekvieną faktą, pasirink šabloną ir atsisiųsk PDF.",
+        "Susikurkite profesionalų CV nemokamai: importuokite PDF ar DOCX arba pradėkite nuo nulio, patikrinkite kiekvieną faktą, pasirinkite šabloną ir atsisiųskite PDF.",
     },
     ru: {
       title: "Бесплатный конструктор CV — резюме онлайн",
@@ -617,6 +689,11 @@ export const PAGE_SEO: Readonly<
       title: "Darmowy kreator CV — stwórz profesjonalne CV online",
       description:
         "Stwórz profesjonalne CV za darmo: zaimportuj PDF lub DOCX albo zacznij od zera, sprawdź każdy fakt, wybierz szablon i pobierz PDF.",
+    },
+    sv: {
+      title: "Gratis CV-verktyg — skapa ett proffsigt CV online",
+      description:
+        "Skapa ett professionellt CV gratis: importera PDF eller DOCX eller börja från noll, kontrollera varje uppgift, välj en mall och ladda ned som PDF.",
     },
   },
 };

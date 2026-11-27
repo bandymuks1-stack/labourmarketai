@@ -1,0 +1,182 @@
+== throwaway cluster: postgres (PostgreSQL) 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on localhost:55441 ==
+
+== harness (stubs documented in the prelude) ==
+  seeded: 2 organizations, 33 profiles, 5 programmes
+
+== 1. BASELINE — the production body and policy (loaded from the rollback file) ==
+  PASS  baseline md5(prosrc) = production's                                            74795f98243e2ce340c424cf3c0ee0a5
+  PASS  baseline proacl = production's                                                 {postgres=X/postgres,authenticated=X/postgres}
+  PASS  governance member (role member) of the same org                                assigned
+  PASS  G1 member: ACTIVE employee engagement                                          invalid_assignee
+  PASS  G1 member: employee, e-mail in other case + spaces                             invalid_assignee
+  PASS  G1 member: a manager (governance) assigns an active employee                   invalid_assignee
+  PASS  G1 member: 'manager' engagement without governance membership                  invalid_assignee
+  PASS  G2 intern: ACTIVE intern engagement                                            invalid_assignee
+  PASS  G3 learner: ACTIVE student engagement                                          invalid_assignee
+  PASS  G4 external: ACTIVE collaborator engagement                                    invalid_assignee
+  PASS  G4 external: ACTIVE consultant engagement                                      invalid_assignee
+  PASS  G4 external: ACTIVE freelancer engagement                                      invalid_assignee
+  PASS  picker: profile id of an active intern                                         invalid_assignee
+  PASS  picker: profile id in upper case                                               invalid_assignee
+  PASS  duplicate (same programme, same person)                                        invalid_assignee
+  PASS  picker: profile id of ANOTHER org's learner                                    invalid_assignee
+  PASS  picker: profile id of an ENDED intern                                          invalid_assignee
+  PASS  picker: unknown profile id                                                     invalid_assignee
+  PASS  picker: profile id of a self-declared (org NULL) row                           invalid_assignee
+  PASS  employee of ANOTHER organization                                               invalid_assignee
+  PASS  learner of ANOTHER organization                                                invalid_assignee
+  PASS  ex-employee of this org, now employee of another                               invalid_assignee
+  PASS  ended employment (status ended)                                                invalid_assignee
+  PASS  ended intern link (status ended)                                               invalid_assignee
+  PASS  P3-1 paused employee (not ended)                                               invalid_assignee
+  PASS  P3-1 paused collaborator (not ended)                                           invalid_assignee
+  PASS  P3-1 paused intern (learning link must be active)                              invalid_assignee
+  PASS  P3-1 paused intern by profile id                                               invalid_assignee
+  PASS  P3-1 paused student (learning link must be active)                             invalid_assignee
+  PASS  P3-1 paused employee whose ended_at has passed                                 invalid_assignee
+  PASS  status active but end date passed (ended_at = yesterday)                       invalid_assignee
+  PASS  status active, end date = today (end_roster_link stamp)                        invalid_assignee
+  PASS  link not started yet (started_at = tomorrow)                                   invalid_assignee
+  PASS  invited, not accepted (membership invited + pending invitation)                invalid_assignee
+  PASS  revoked governance membership                                                  invalid_assignee
+  PASS  volunteer relation (not one of the four groups)                                invalid_assignee
+  PASS  viewer relation (not one of the four groups)                                   invalid_assignee
+  PASS  self-declared / personal employee row (organization NULL)                      invalid_assignee
+  PASS  unknown e-mail (no account)                                                    invalid_assignee
+  PASS  UNVERIFIED e-mail of an active employee                                        invalid_assignee
+  PASS  ambiguous e-mail (two verified profiles, same address)                         invalid_assignee
+  PASS  other org's owner -> Org A programme (no demand access)                        not_found
+  PASS  other org's owner -> own programme, Org A's intern by id                       invalid_assignee
+  PASS  an EMPLOYEE (no governance) tries to assign                                    not_found
+  PASS  an INTERN tries to assign                                                      not_found
+  PASS  governance role 'member' tries to assign (not a demand role)                   not_found
+  PASS  retired programme                                                              inactive_program
+  PASS  anon has no EXECUTE                                                            DENIED:permission denied for function assign_training_v1
+  PASS  authenticated without a uid -> Not authenticated                               DENIED:Not authenticated
+
+== 2. FIXED — the migration applied verbatim ==
+  PASS  signature / definer / search_path / owner / acl / result unchanged             assign_training_v1(text,text,text)|true|search_path=public|postgres|{postgres=X/postgres,authenticated=X/postgres}|text|p_program_id text, p_assignee_email text, p_required_by text DEFAULT NULL::text
+  PASS  the body changed (md5 differs)                                                 changed
+  PASS  the programme policy changed                                                   changed
+  PASS  exactly one assign_training_v1 overload                                        1
+  PASS  governance member (role member) of the same org                                assigned
+  PASS  G1 member: ACTIVE employee engagement                                          assigned
+  PASS  G1 member: employee, e-mail in other case + spaces                             assigned
+  PASS  G1 member: a manager (governance) assigns an active employee                   assigned
+  PASS  G1 member: 'manager' engagement without governance membership                  assigned
+  PASS  G2 intern: ACTIVE intern engagement                                            assigned
+  PASS  G3 learner: ACTIVE student engagement                                          assigned
+  PASS  G4 external: ACTIVE collaborator engagement                                    assigned
+  PASS  G4 external: ACTIVE consultant engagement                                      assigned
+  PASS  G4 external: ACTIVE freelancer engagement                                      assigned
+  PASS  picker: profile id of an active intern                                         assigned
+  PASS  picker: profile id in upper case                                               assigned
+  PASS  duplicate (same programme, same person)                                        already_assigned
+  PASS  picker: profile id of ANOTHER org's learner                                    invalid_assignee
+  PASS  picker: profile id of an ENDED intern                                          invalid_assignee
+  PASS  picker: unknown profile id                                                     invalid_assignee
+  PASS  picker: profile id of a self-declared (org NULL) row                           invalid_assignee
+  PASS  employee of ANOTHER organization                                               invalid_assignee
+  PASS  learner of ANOTHER organization                                                invalid_assignee
+  PASS  ex-employee of this org, now employee of another                               invalid_assignee
+  PASS  ended employment (status ended)                                                invalid_assignee
+  PASS  ended intern link (status ended)                                               invalid_assignee
+  PASS  P3-1 paused employee (not ended)                                               assigned
+  PASS  P3-1 paused collaborator (not ended)                                           assigned
+  PASS  P3-1 paused intern (learning link must be active)                              invalid_assignee
+  PASS  P3-1 paused intern by profile id                                               invalid_assignee
+  PASS  P3-1 paused student (learning link must be active)                             invalid_assignee
+  PASS  P3-1 paused employee whose ended_at has passed                                 invalid_assignee
+  PASS  status active but end date passed (ended_at = yesterday)                       invalid_assignee
+  PASS  status active, end date = today (end_roster_link stamp)                        invalid_assignee
+  PASS  link not started yet (started_at = tomorrow)                                   invalid_assignee
+  PASS  invited, not accepted (membership invited + pending invitation)                invalid_assignee
+  PASS  revoked governance membership                                                  invalid_assignee
+  PASS  volunteer relation (not one of the four groups)                                invalid_assignee
+  PASS  viewer relation (not one of the four groups)                                   invalid_assignee
+  PASS  self-declared / personal employee row (organization NULL)                      invalid_assignee
+  PASS  unknown e-mail (no account)                                                    invalid_assignee
+  PASS  UNVERIFIED e-mail of an active employee                                        invalid_assignee
+  PASS  ambiguous e-mail (two verified profiles, same address)                         invalid_assignee
+  PASS  other org's owner -> Org A programme (no demand access)                        not_found
+  PASS  other org's owner -> own programme, Org A's intern by id                       invalid_assignee
+  PASS  an EMPLOYEE (no governance) tries to assign                                    not_found
+  PASS  an INTERN tries to assign                                                      not_found
+  PASS  governance role 'member' tries to assign (not a demand role)                   not_found
+  PASS  retired programme                                                              inactive_program
+  PASS  anon has no EXECUTE                                                            DENIED:permission denied for function assign_training_v1
+  PASS  authenticated without a uid -> Not authenticated                               DENIED:Not authenticated
+
+== 3. CHAIN — each group receives, sees and completes; the organization reads it ==
+  PASS  G1-member assignment row: org A, by the owner, due 2026-12-01                  00000000-0000-4000-8000-000000009001|00000000-0000-4000-8000-000000001001|2026-12-01|assigned
+  PASS  G1-member RECEIVES it (RLS read of own assignment)                             1
+  PASS  G1-member SEES the course title                                                QA kursas A1
+  PASS  G1-member the owner cannot complete it on their behalf                         not_found
+  PASS  G1-member COMPLETES it                                                         completed
+  PASS  G1-member the organization READS it completed                                  completed
+  PASS  G2-intern assignment row: org A, by the owner, due 2026-12-01                  00000000-0000-4000-8000-000000009001|00000000-0000-4000-8000-000000001001|2026-12-01|assigned
+  PASS  G2-intern RECEIVES it (RLS read of own assignment)                             1
+  PASS  G2-intern SEES the course title                                                QA kursas A1
+  PASS  G2-intern the owner cannot complete it on their behalf                         not_found
+  PASS  G2-intern COMPLETES it                                                         completed
+  PASS  G2-intern the organization READS it completed                                  completed
+  PASS  G3-learner assignment row: org A, by the owner, due 2026-12-01                 00000000-0000-4000-8000-000000009001|00000000-0000-4000-8000-000000001001|2026-12-01|assigned
+  PASS  G3-learner RECEIVES it (RLS read of own assignment)                            1
+  PASS  G3-learner SEES the course title                                               QA kursas A1
+  PASS  G3-learner the owner cannot complete it on their behalf                        not_found
+  PASS  G3-learner COMPLETES it                                                        completed
+  PASS  G3-learner the organization READS it completed                                 completed
+  PASS  G4-external assignment row: org A, by the owner, due 2026-12-01                00000000-0000-4000-8000-000000009001|00000000-0000-4000-8000-000000001001|2026-12-01|assigned
+  PASS  G4-external RECEIVES it (RLS read of own assignment)                           1
+  PASS  G4-external SEES the course title                                              QA kursas A1
+  PASS  G4-external the owner cannot complete it on their behalf                       not_found
+  PASS  G4-external COMPLETES it                                                       completed
+  PASS  G4-external the organization READS it completed                                completed
+  PASS  another org's learner sees none of Org A's training                            0
+  PASS  another org's owner reads nothing of Org A                                     0
+  PASS  another org's learner cannot complete Org A's assignment                       not_found
+  PASS  the organization reads only the training rows it created for the intern        2
+
+== 3b. PAUSED reads no more than ACTIVE — the pause opens nothing beyond the assignment ==
+  PASS  paused employee holds the assignment (PROG_A1)                                 1
+  PASS  active employee holds the assignment (PROG_A1)                                 1
+  PASS  training_assignments: paused reads the same as active                          1
+  PASS  training_assignment_events: paused reads the same as active                    DENIED:permission denied for table training_assignment_events
+  PASS  engagement_contexts: paused reads the same as active                           DENIED:permission denied for table engagement_contexts
+  PASS  company_memberships: paused reads the same as active                           DENIED:permission denied for table company_memberships
+  PASS  organizations: paused reads the same as active                                 DENIED:permission denied for table organizations
+  PASS  profiles: paused reads the same as active                                      DENIED:permission denied for table profiles
+  PASS  email_verifications_v1: paused reads the same as active                        DENIED:permission denied for table email_verifications_v1
+  PASS  company_worker_invitations: paused reads the same as active                    DENIED:permission denied for table company_worker_invitations
+  PASS  training_programs: paused reads no more than active (active=4)                 yes
+  PASS  training_programs: paused reads ONLY the programme assigned to them            00000000-0000-4000-8000-000000008001
+  PASS  training_assignments: paused reads ONLY their own assignment                   1
+  PASS  paused employee cannot assign (no demand access)                               not_found
+  PASS  paused employee cannot complete another person's assignment                    not_found
+
+== 4. ENDED LINK — no new assignment; the history stays with the organization and the person ==
+  PASS  ended intern: a NEW programme cannot be assigned (by e-mail)                   invalid_assignee
+  PASS  ended intern: a NEW programme cannot be assigned (by id)                       invalid_assignee
+  PASS  the organization still READS the historical assignment                         completed
+  PASS  the person still reads their own record                                        completed
+  PASS  the person still reads the course title of their own record                    QA kursas A1
+  PASS  the person reads no programme they were never assigned                         0
+  PASS  no row was deleted by ending the link                                          1
+
+== 5. ROLLBACK — the production body and policy return, byte for byte ==
+  PASS  md5(prosrc) after rollback = production's                                      74795f98243e2ce340c424cf3c0ee0a5
+  PASS  catalog after rollback = baseline                                              assign_training_v1(text,text,text)|true|search_path=public|postgres|{postgres=X/postgres,authenticated=X/postgres}|text|p_program_id text, p_assignee_email text, p_required_by text DEFAULT NULL::text
+  PASS  policy after rollback = baseline                                               (belongs_to_organization(organization_id) OR is_admin())
+  PASS  existing assignments survive the rollback (history)                            completed
+  PASS  after rollback a NEW consultant assignment is refused again                    invalid_assignee
+  PASS  after rollback the ended intern loses the course title again (the old gap)     NOROWS
+
+== 6. RE-APPLY — idempotent ==
+  PASS  md5(prosrc) after re-apply = first apply                                       58a5decbbba812394268da4886fa5be5
+  PASS  catalog after re-apply = baseline                                              assign_training_v1(text,text,text)|true|search_path=public|postgres|{postgres=X/postgres,authenticated=X/postgres}|text|p_program_id text, p_assignee_email text, p_required_by text DEFAULT NULL::text
+  PASS  policy after re-apply = first apply                                            (belongs_to_organization(organization_id) OR is_admin() OR (EXISTS ( SELECT 1
+   FROM training_assignments a
+  WHERE ((a.program_id = training_programs.id) AND (a.assignee_profile_id = auth.uid())))))
+  PASS  active employee assignable again after re-apply                                assigned
+
+== RESULT: 160 passed, 0 failed ==

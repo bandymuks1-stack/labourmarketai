@@ -62,6 +62,14 @@ export type AddressedSignupResult =
   | { status: "unavailable" }
   | { status: "error"; code: string | null; message: string; httpStatus: number | null };
 
+/** The form's metadata without `role` (and never a prototype key). */
+const DROPPED_METADATA_KEYS = new Set(["role", "__proto__", "constructor", "prototype"]);
+function withoutRole(metadata: Record<string, string> | undefined): Record<string, string> {
+  return Object.fromEntries(
+    Object.entries(metadata ?? {}).filter(([k]) => !DROPPED_METADATA_KEYS.has(k)),
+  );
+}
+
 export async function signUpAddressedInviteAction(input: {
   token: string;
   password: string;
@@ -80,7 +88,9 @@ export async function signUpAddressedInviteAction(input: {
     password: String(input.password ?? ""),
     options: {
       emailRedirectTo: input.emailRedirectTo,
-      data: { locale: input.locale, ...(input.metadata ?? {}) },
+      // Roles are never taken from the form: the role column is decided in
+      // onboarding and by the database's own allow-list, so `role` is dropped.
+      data: { locale: input.locale, ...withoutRole(input.metadata) },
     },
   });
   if (error) {

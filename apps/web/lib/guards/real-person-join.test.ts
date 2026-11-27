@@ -78,11 +78,11 @@ describe("3./4. signup copy for a private person, in every served locale", () =>
   for (const locale of activeLocales) {
     const m = messages(locale);
     it(`${locale}: e-mail is not a "work" e-mail and the placeholder is not a company`, () => {
-      expect(m.auth.signup.email_label).not.toMatch(/darbo|work|рабоч|zakelijk|geschäftlich/i);
-      expect(m.auth.signup.email_placeholder).not.toMatch(/imone|company|kompaniya|bedrijf/i);
+      expect(m.auth.signup.email_label).not.toMatch(/darbo|work|рабоч|zakelijk|geschäftlich|arbets|jobb/i);
+      expect(m.auth.signup.email_placeholder).not.toMatch(/imone|company|kompaniya|bedrijf|företag/i);
     });
     it(`${locale}: the check-your-e-mail body says what to do when nothing arrives`, () => {
-      expect(m.auth.signup.check_email_body).toMatch(/šlamšt|spam|спам/i);
+      expect(m.auth.signup.check_email_body).toMatch(/šlamšt|spam|спам|skräppost/i);
       expect(m.auth.signup.resend_label).toBeTruthy();
     });
     it(`${locale}: the onboarding "you wrote" keys exist`, () => {
@@ -124,23 +124,26 @@ describe("5. a fresh worker lands in the conversation; other identities keep the
   });
 });
 
-describe("6. signup: one legal notice, the pilot line under the action", () => {
+describe("6. signup: one legal notice and no pilot-feedback line", () => {
   const signup = read("components/app/signup-form.tsx");
   it("the legal notice renders exactly once", () => {
     expect(signup.match(/<AuthLegalNotice variant="signup"/g)).toHaveLength(1);
   });
-  it("the pilot-feedback line sits after the submit row, as one quiet line", () => {
-    const submit = signup.indexOf('type="submit"');
-    const pilot = signup.indexOf('data-testid="signup-pilot-line"');
-    expect(submit).toBeGreaterThan(-1);
-    expect(pilot).toBeGreaterThan(submit);
-    expect(signup).not.toMatch(/border-state-warning[^\n]*\n\s*\{t\("disclaimer"\)\}/);
+  // The pilot-feedback line ("Your feedback shapes the product") was noise, not
+  // a legal text: removed in every locale (decision 0032; coordinator decision
+  // 2026-11-22 13:05 UTC on the owner's orders of 2026-11-21/22, decision 0022).
+  it("the pilot-feedback line is gone from the form and from every catalog", () => {
+    expect(signup).not.toMatch(/signup-pilot-line/);
+    expect(signup).not.toMatch(/t\("disclaimer"\)/);
+    for (const locale of activeLocales) {
+      expect(messages(locale).auth.signup, locale).not.toHaveProperty("disclaimer");
+    }
   });
   for (const locale of activeLocales) {
     it(`${locale}: the subcopy no longer promises a "role" step`, () => {
       const sub = messages(locale).auth.signup.subcopy;
-      expect(sub).not.toMatch(/vaidmen|your role|роль|je rol|Ihre Rolle/i);
-      expect(sub).toMatch(/kitame žingsnyje|next step|следующем шаге|volgende stap|nächsten Schritt|następnym kroku/i);
+      expect(sub).not.toMatch(/vaidmen|your role|роль|je rol|Ihre Rolle|din roll/i);
+      expect(sub).toMatch(/kitame žingsnyje|next step|следующем шаге|volgende stap|nächsten Schritt|następnym kroku|nästa steg/i);
     });
   }
 });
@@ -155,7 +158,7 @@ describe("7. the onboarding country field is labelled by what it writes (residen
     expect(rpc).toMatch(/current_location_country/);
   });
   const RESIDENCE: Record<string, RegExp> = {
-    lt: /gyveni/i,
+    lt: /gyvenate/i, // formal since the owner decision of 2026-11-15
     en: /live/i,
     ru: /живёте|живете/i,
     nl: /woon/i,

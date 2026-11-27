@@ -1,6 +1,9 @@
 "use client";
 
 import { useActionState } from "react";
+import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 
 import type { EvidenceImportActionState } from "@/lib/organization-evidence/import-actions";
 
@@ -41,9 +44,9 @@ export function PerformingCompanyForm({
       <input type="hidden" name="person_id" value={personId} />
       <label className="flex min-w-44 flex-col gap-1">
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.performedBy}</span>
-        <select
+        <Select
           name="performing_organization_id"
-          className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary"
+          className="max-sm:min-h-11 max-sm:text-base"
           defaultValue={options[0]?.id}
         >
           {options.map((o) => (
@@ -51,23 +54,19 @@ export function PerformingCompanyForm({
               {o.name}
             </option>
           ))}
-        </select>
+        </Select>
       </label>
       <label className="flex min-w-48 flex-1 flex-col gap-1">
         <span className="font-mono text-meta uppercase tracking-label text-text-muted">{labels.note}</span>
-        <input
+        <Input
           name="note"
           maxLength={200}
-          className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1.5 text-sm text-text-primary"
+          className="max-sm:min-h-11 max-sm:text-base"
         />
       </label>
-      <button
-        type="submit"
-        disabled={pending}
-        className="rounded-md border border-ink-500 px-3 py-1.5 text-sm font-semibold text-text-primary hover:border-brand-blue disabled:opacity-60"
-      >
+      <Button type="submit" variant="secondary" size="sm" disabled={pending} className="min-h-11">
         {labels.button}
-      </button>
+      </Button>
       {m ? (
         <p className="basis-full text-meta text-text-secondary" role="status" data-testid="performing-company-done">
           {labels.done.replace("{count}", m[1]!).replace("{skipped}", m[2]!)}

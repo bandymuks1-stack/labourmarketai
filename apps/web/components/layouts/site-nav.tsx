@@ -1,16 +1,25 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { MessageCircle } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { HeaderAuthCtaLink } from "@/components/layouts/header-auth-cta-link";
 import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
 import type { RenderedIntent } from "@/components/layouts/intent-icons";
-import { ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import { ASSISTANT_GUEST_HREF, ASSISTANT_HREF, PUBLIC_INTENTS } from "@/lib/navigation/public-intents";
+import { STARTING_CONTEXTS } from "@/lib/marketing/public-doors";
 import { LocaleSwitcher } from "@/components/marketing/locale-switcher";
 import { ThemeToggleIcon } from "@/components/ui/theme-toggle-icon";
 import { LmLogo } from "@/components/ui/lm-logo";
 import { isVisionPublic } from "@/lib/config/vision-publication";
+
+/** The landing's own institution door — sign-up, with the institution setup
+ *  as its return path (lib/marketing/public-doors.ts). Read, never retyped, so
+ *  the header can never point a visitor at the signed-in setup itself. */
+const INSTITUTION_DOOR: string =
+  STARTING_CONTEXTS.find((c) => c.key === "institution")?.href ?? "/auth/signup";
 
 // `/vision` is gated by `lib/config/vision-publication.ts`. While the
 // flag is `false`, the route stays reachable by direct URL (so the
@@ -111,11 +120,27 @@ export async function SiteNav({
       href: link.href,
       label: tIntent(`links.${link.id}`),
       account: link.account,
+      guestHref: link.guestHref,
     })),
   }));
   // "Ask the assistant" — the existing conversation home (`/dashboard` IS the
-  // chat). A signed-out visitor is sent to login and lands back in it.
-  const assistant = { href: ASSISTANT_HREF, label: tIntent("assistant") };
+  // chat). A signed-out visitor is sent to the landing's question box instead
+  // (`guestHref`, desktop bar); the phone menu marks it as a signed-in entry.
+  const assistant = { href: ASSISTANT_HREF, guestHref: ASSISTANT_GUEST_HREF, label: tIntent("assistant") };
+  // The same entry as one icon, for the header between `md` and `lg` (N2).
+  // The conversation home is behind sign-in: never prefetched from here.
+  const assistantIcon = (href: string) => (
+    <Link
+      href={href as "/"}
+      prefetch={false}
+      aria-label={assistant.label}
+      title={assistant.label}
+      data-testid="header-assistant"
+      className="inline-flex size-11 items-center justify-center rounded-full border border-ink-500 text-text-primary transition-colors hover:border-brand-blue hover:text-brand-blue motion-reduce:transition-none"
+    >
+      <MessageCircle aria-hidden className="size-5 text-brand-blue" />
+    </Link>
+  );
 
   // ONE definition, rendered in exactly one place at any given width: in the
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
@@ -125,23 +150,25 @@ export async function SiteNav({
   //   from `sm`    — Sign up beside it;
   //   below `sm`   — Sign up is the first thing in the menu.
   // Owner fix list 2026-11-12: on a phone neither was visible in the header.
+  // On the worker intake only, both carry the profile builder as `next`
+  // (HeaderAuthCtaLink), so what was typed there reaches the composer.
   const loginCta = (
-    <AuthCtaLink
+    <HeaderAuthCtaLink
       relPath={`/${locale}/auth/login`}
       className="flex min-h-11 items-center whitespace-nowrap rounded-control px-1 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue sm:px-0 sm:font-normal sm:text-text-secondary sm:hover:text-text-primary"
     >
       {t("login")}
-    </AuthCtaLink>
+    </HeaderAuthCtaLink>
   );
   const signupCta = (
-    <AuthCtaLink
+    <HeaderAuthCtaLink
       relPath={`/${locale}/auth/signup`}
       className={buttonLinkClassName("primary", "sm")}
     >
       {/* Named for what it does (owner 2026-11-12): "Start now" did not say
           that it creates an account. */}
       {tIntent("signUp")}
-    </AuthCtaLink>
+    </HeaderAuthCtaLink>
   );
   const memberCta = (
     <AuthCtaLink
@@ -151,6 +178,19 @@ export async function SiteNav({
       {tSpace("overview")}
     </AuthCtaLink>
   );
+  // Behind "More" and in the phone menu: the older links, then the one door
+  // for schools, colleges and universities (owner P0 2026-11-13: they can
+  // register but had no entry). It is the landing's own institution door —
+  // sign-UP, then the existing institution setup — and carries the same
+  // account note as every goal link that needs an account (owner P0
+  // 2026-11-15, F9: it used to send a new institution to sign-in). It is not
+  // a seventh goal.
+  const moreLinks = [
+    ...links.map((l) => ({ key: l.key as string, href: l.href, label: t(l.key) })),
+    // It opens SIGN-UP, so its note is the existing "Sign up", not "For
+    // signed-in users".
+    { key: "education", href: INSTITUTION_DOOR, label: tIntent("education"), account: true, accountNote: tIntent("signUp") },
+  ];
   // ONE goal bar element, placed by the page: the header's second row on
   // inner pages; on the landing (no goals in it) it sits in the first row.
   const megaMenu = (
@@ -160,10 +200,11 @@ export async function SiteNav({
       goalsOnPage={goalsOnPage}
       navLabel={tIntent("trigger")}
       accountLabel={tIntent("account")}
+      signUpLabel={tIntent("signUp")}
       assistant={assistant}
       more={{
         label: tIntent("more"),
-        links: links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) })),
+        links: moreLinks,
       }}
     />
   );
@@ -185,7 +226,7 @@ export async function SiteNav({
       <div className="mx-auto flex max-w-container items-center gap-2 px-3 py-3 sm:gap-6 sm:px-12 sm:py-4">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
+          className="flex min-h-11 shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
         >
           {/* The mark is decorative here — the wordmark beside it already
               names the product, so announcing both would read it twice. */}
@@ -230,7 +271,17 @@ export async function SiteNav({
           <span className="hidden sm:inline-flex">
             <ThemeToggleIcon labels={themeLabels} />
           </span>
-          <LocaleSwitcher className="flex" compactBelowSm />
+          {/* THE ASSISTANT, VISIBLE BELOW lg (owner P0 2026-11-23: "AI asistentas
+              aiškiai matomas ir pasiekiamas"; CAROUSEL_NAVIGATION_SPEC N2).
+              From lg the intent bar carries it; between md and lg it sits here,
+              in the room the language code frees (measured: below md the row
+              has no room for it in German without pushing the menu off). Same destinations as the
+              bar: the conversation home signed in, the landing's question box
+              (`/#find`) signed out. */}
+          <span className="hidden md:inline-flex lg:hidden">
+            <NavAuthCtas guest={assistantIcon(ASSISTANT_GUEST_HREF)} member={assistantIcon(ASSISTANT_HREF)} />
+          </span>
+          <LocaleSwitcher className="flex" compactBelowSm compactBelowLg />
           {/* Beta foundation audit M1: below lg the primary links above are
               display:none, which used to leave a phone visitor with NO path to
               any marketing page from the header. The disclosure menu carries
@@ -238,11 +289,12 @@ export async function SiteNav({
               here so this server component stays the single source of truth. */}
           <MobileNavMenu
             className="lg:hidden"
-            items={links.map((l) => ({ key: l.key, href: l.href, label: t(l.key) }))}
+            items={moreLinks}
             openLabel={t("menuOpen")}
             closeLabel={t("menuClose")}
             intents={intents}
             accountLabel={tIntent("account")}
+            signUpLabel={tIntent("signUp")}
             assistant={assistant}
             // Below `sm` the panel also carries the auth CTAs the header row
             // cannot fit; from `sm` up the whole section is display:none and

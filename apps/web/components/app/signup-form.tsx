@@ -7,6 +7,7 @@ import { useSearchParams } from "next/navigation";
 import { AuthCarriedIntent } from "@/components/app/auth-carried-intent";
 import { Button } from "@/components/ui/Button";
 import { AuthLegalNotice } from "@/components/app/auth-legal-notice";
+import { InAppBrowserNotice } from "@/components/app/in-app-browser-notice";
 import {
   FacebookButton,
   GoogleButton,
@@ -21,6 +22,8 @@ import {
 } from "@/lib/invitations/signup-accept-action";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { bindWorkerIntakeDraft } from "@/lib/staffing/worker-intake-draft";
+import { isWorkerProfileDoorNext } from "@/lib/marketing/worker-profile-door";
 import { getSafeReturnPath } from "@/lib/auth/redirect";
 import {
   RESEND_COOLDOWN_SECONDS,
@@ -69,6 +72,7 @@ export function SignupForm({
   linkedinEnabled = false,
   facebookEnabled = false,
   invitation,
+  inviteLines,
 }: {
   linkedinEnabled?: boolean;
   facebookEnabled?: boolean;
@@ -77,6 +81,10 @@ export function SignupForm({
    *  browser. A server action signs up with it (the e-mail binding still
    *  compares the session to exactly that address), no confirm-password field
    *  is asked, and the canonical acceptance continues once the session exists. */
+  /** Who invited the person, to which organization, and what happens next —
+   *  already localized on the server from the invitation's own preview. Shown
+   *  in place of the generic sub-copy (owner P0 2026-11-22). */
+  inviteLines?: readonly string[];
   invitation?: {
     token: string;
     maskedEmail: string;
@@ -225,6 +233,9 @@ export function SignupForm({
       fieldError("confirm", t("error_password_mismatch"));
       return;
     }
+    // The intake draft, if this tab has one, is bound to this email only
+    // (decision 0024; lib/staffing/worker-intake-draft.ts).
+    if (!invitation && nextParam && isWorkerProfileDoorNext(nextPath)) bindWorkerIntakeDraft(email);
     setStatus("signing");
     // Registration-started conversion signal (Pre-Advertising Launch
     // Readiness v1) with first-touch campaign attribution. Fires only after
@@ -382,7 +393,7 @@ export function SignupForm({
               ? `/auth/login?next=${encodeURIComponent(nextPath)}`
               : "/auth/login"
           }
-          className="text-sm text-brand-blue hover:text-brand-champagne"
+          className="inline-flex min-h-11 items-center text-sm text-brand-blue hover:text-brand-champagne"
         >
           {t("login_link")} →
         </Link>
@@ -398,9 +409,17 @@ export function SignupForm({
         <h1 className="font-display text-2xl font-bold tracking-tightest text-text-primary sm:text-3xl">
           {t("headline")}
         </h1>
-        <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:mt-3">
-          {t("subcopy")}
-        </p>
+        {inviteLines && inviteLines.length > 0 ? (
+          <div className="mt-2 flex flex-col gap-1 text-sm leading-relaxed text-text-secondary sm:mt-3" data-testid="signup-invite-context">
+            {inviteLines.map((line) => (
+              <p key={line}>{line}</p>
+            ))}
+          </div>
+        ) : (
+          <p className="mt-2 text-sm leading-relaxed text-text-secondary sm:mt-3">
+            {t("subcopy")}
+          </p>
+        )}
       </header>
 
       {/* Owner window 11 §21 — the sentence the visitor typed on the
@@ -419,6 +438,7 @@ export function SignupForm({
             second copy above the submit used to render — a real person read the
             same paragraph twice on one short form (window 6 walk, 2026-09-06). */}
         <AuthLegalNotice variant="signup" />
+        <InAppBrowserNotice text={tSocial("inAppBrowser")} />
 
         {/* ONE provider row on a phone (P0-1b, 360×740): Google keeps its
             words and the room; LinkedIn and Facebook are 48 px logo squares
@@ -611,11 +631,6 @@ export function SignupForm({
         </span>
       </div>
 
-      {/* Pilot-feedback line: one quiet sentence under the action, not a
-          warning box between the fields and the button. */}
-      <p className="text-xs leading-relaxed text-text-muted" data-testid="signup-pilot-line">
-        {t("disclaimer")}
-      </p>
     </form>
   );
 }

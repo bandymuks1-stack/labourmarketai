@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Select } from "@/components/ui/Select";
 import {
   addStageAction,
   updateStageStatusAction,
@@ -158,9 +160,9 @@ export function ResponsibleControl({
         >
           {t("responsible.label")}
         </label>
-        <select
+        <Select
           id={`stage-responsible-${stage.id}`}
-          className="min-h-11 min-w-0 max-w-full rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+          className="w-auto min-h-11 min-w-0 max-w-full max-sm:text-base"
           value={value}
           disabled={pending || blocked}
           onChange={(e) => save(e.target.value)}
@@ -173,7 +175,7 @@ export function ResponsibleControl({
               {o.name}
             </option>
           ))}
-        </select>
+        </Select>
       </div>
       {list.length === 0 ? (
         <p className="break-words text-meta text-text-muted" data-testid="project-stage-responsible-empty">
@@ -268,9 +270,9 @@ function StageRow({
         <label className="text-meta text-text-secondary" htmlFor={`stage-status-${stage.id}`}>
           {t("statusLabel")}
         </label>
-        <select
+        <Select
           id={`stage-status-${stage.id}`}
-          className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+          className="w-auto max-sm:min-h-11 max-sm:text-base"
           value={status}
           disabled={pending}
           onChange={(e) => applyStatus(e.target.value as StageStatus)}
@@ -281,21 +283,23 @@ function StageRow({
               {t(`statuses.${s}`)}
             </option>
           ))}
-        </select>
+        </Select>
         {(stage.plannedStart || stage.plannedEnd) && (
           <span className="font-mono text-meta uppercase tracking-label text-text-muted">
             {t("plannedLabel")}: {stage.plannedStart ?? "—"} → {stage.plannedEnd ?? "—"}
           </span>
         )}
-        <button
+        <Button
           type="button"
+          variant="secondary"
+          size="sm"
           onClick={remove}
           disabled={pending}
-          className="ml-auto rounded-md border border-ink-500 px-2 py-1 text-meta text-text-muted transition-colors hover:border-state-danger hover:text-state-danger"
+          className="ml-auto min-h-11 text-text-muted hover:border-state-danger hover:text-state-danger"
           data-testid="project-stage-delete"
         >
           {t("delete")}
-        </button>
+        </Button>
       </div>
 
       <ResponsibleControl
@@ -307,16 +311,17 @@ function StageRow({
 
       {status === "blocked" && (
         <div className="flex flex-wrap items-center gap-2">
-          <input
+          <Input
             aria-label={t("blockedReasonLabel")}
             value={blockedReason}
             maxLength={500}
             onChange={(e) => setBlockedReason(e.target.value)}
             placeholder={t("blockedReasonPlaceholder")}
-            className="flex-1 rounded-md border border-state-warning/40 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+            className="w-auto flex-1 border-state-warning/40 max-sm:min-h-11 max-sm:text-base"
             data-testid="project-stage-blocked-reason"
           />
           <Button
+            className="min-h-11"
             type="button"
             size="sm"
             disabled={pending || !blockedReason.trim()}
@@ -457,29 +462,29 @@ export function ProjectStagesPanel({
               {t("addHeading")}
             </span>
             <div className="flex flex-wrap items-center gap-2">
-              <input
+              <Input
                 aria-label={t("nameLabel")}
                 value={name}
                 maxLength={160}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("namePlaceholder")}
-                className="min-w-40 flex-1 rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary"
+                className="w-auto min-w-40 flex-1 max-sm:min-h-11 max-sm:text-base"
                 data-testid="project-stage-name"
               />
-              <input
+              <Input
                 type="date"
                 aria-label={t("plannedStartLabel")}
                 value={plannedStart}
                 onChange={(e) => setPlannedStart(e.target.value)}
-                className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+                className="w-auto max-sm:min-h-11 max-sm:text-base"
                 data-testid="project-stage-planned-start"
               />
-              <input
+              <Input
                 type="date"
                 aria-label={t("plannedEndLabel")}
                 value={plannedEnd}
                 onChange={(e) => setPlannedEnd(e.target.value)}
-                className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+                className="w-auto max-sm:min-h-11 max-sm:text-base"
                 data-testid="project-stage-planned-end"
               />
               {suggestion ? (
@@ -494,17 +499,20 @@ export function ProjectStagesPanel({
                       date: suggestion.endDate,
                     })}
                   </span>
-                  <button
+                  <Button
                     type="button"
+                    variant="secondary"
+                    size="sm"
                     onClick={() => setPlannedEnd(suggestion.endDate)}
                     data-testid="project-stage-duration-suggestion-apply"
-                    className="rounded-md border border-ink-500 px-2 py-0.5 text-meta text-text-secondary hover:border-brand-blue hover:text-brand-blue"
+                    className="min-h-11"
                   >
                     {t("learned.suggestApply")}
-                  </button>
+                  </Button>
                 </div>
               ) : null}
               <Button
+                className="min-h-11"
                 type="button"
                 size="sm"
                 disabled={pending || name.trim().length === 0}

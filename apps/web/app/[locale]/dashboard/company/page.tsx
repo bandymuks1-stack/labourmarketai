@@ -18,7 +18,7 @@ import {
   governedActiveOrganizationId,
 } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
-import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import { EMPLOYER_DEMAND_KINDS, listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { listMyConnectionInvites } from "@/lib/agency/bridge-read";
 import { listAgencyClients } from "@/lib/agency/clients";
@@ -44,9 +44,6 @@ import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 export const generateMetadata = dashboardPageMetadata("/dashboard/company", "roleDashboards.company.title");
 
 
-// The employer demand kinds the home field's "what we are missing" reads —
-// a dual-role user's buyer service requests stay in the buyer room.
-const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
 
 /**
  * DABAR — the organization's first screen (owner IA correction 2026-09-16,
@@ -257,7 +254,7 @@ export default async function CompanyDashboardPage({
     },
     {
       key: "invite",
-      href: "/dashboard/network?type=join_as_employee",
+      href: "/dashboard/network?invite=1&type=join_as_employee",
       label: tDoors("invite"),
       icon: <UserPlus className="h-4 w-4" aria-hidden />,
     },
