@@ -2,7 +2,10 @@ import "server-only";
 
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
-import { CONVERSATION_ATTACHMENT_BUCKET } from "@/lib/communication/attachment-model";
+import {
+  CONVERSATION_ATTACHMENT_BUCKET,
+  CONVERSATION_ATTACHMENT_SIGNED_URL_TTL_SECONDS,
+} from "@/lib/communication/attachment-model";
 
 /**
  * Conversation message attachments — server read layer (user-journey
@@ -81,7 +84,7 @@ export async function listConversationAttachments(
     // re-checks participant access; a revoked participant gets nothing.
     const { data: signed } = await supabase.storage
       .from(CONVERSATION_ATTACHMENT_BUCKET)
-      .createSignedUrl(row.storage_path, 300);
+      .createSignedUrl(row.storage_path, CONVERSATION_ATTACHMENT_SIGNED_URL_TTL_SECONDS);
     const item: ConversationMessageAttachment = {
       id: row.id,
       conversationId: row.conversation_id,
