@@ -618,6 +618,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       3448,
       3181,
       3327,
+      2642,
     ]);
     // #3448 + #3181 (2026-11-16) on the owner's verbatim approval, each added in its own PR: "I approve adding ONLY PRs 3181 and 3448 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #3255 (2026-11-12) on the owner's approval given to the coordinator in its own session; only the number is added.

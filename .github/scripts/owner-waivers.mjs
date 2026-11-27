@@ -746,6 +746,8 @@ export const SCOPED_OWNER_WAIVERS = [
       // OWNER APPROVAL 2026-11-27: "Leidžiu įtraukti tik #3327".
       // Only this PR binding is added; all other waiver constraints stay unchanged.
       3327,
+      // Owner 2026-11-27: "Leidžiu įtraukti tik #2642". All other scope stays unchanged.
+      2642,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
