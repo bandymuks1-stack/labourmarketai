@@ -188,7 +188,7 @@ describe("the market panel no longer requires a declared profession", () => {
   });
 
   it("carries the derived-provenance sentence in every active locale", () => {
-    for (const loc of ["lt", "en", "ru", "nl", "de", "pl"]) {
+    for (const loc of ["lt", "en", "ru", "nl", "de", "pl", "sv"]) {
       const messages = JSON.parse(read(`messages/${loc}.json`));
       const value = messages.marketExplanation?.derivedFromWork;
       expect(typeof value, `${loc} is missing marketExplanation.derivedFromWork`).toBe(

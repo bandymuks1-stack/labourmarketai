@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 
 import type { WorkerPlayerCard as WorkerPlayerCardData } from "@/lib/player-card/player-card";
+import { statedIsoText } from "@/lib/cv/period-dates";
 import { CountUp } from "@/components/app/today/count-up";
 import { SkillIcon } from "@/components/app/today/skill-icon";
 import { ReadinessRing } from "@/components/app/readiness-ring";
@@ -22,6 +23,7 @@ import {
   type HistoryTimelineLabels,
 } from "@/components/app/player-card/work-history-timeline";
 import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
+import { shownWorkHistory } from "@/lib/player-card/work-history-model";
 import {
   deriveWorkerReadiness,
   missingReadinessPillars,
@@ -313,7 +315,10 @@ export function WorkerPlayerCard({
    * name where the work happened carries no information, so it is dropped;
    * the section disappears entirely when none of them can.
    */
-  const namedHistory = card.workHistory.filter(
+  // The card's display bound, applied here at render time: the model holds
+  // the whole history (decision 0025), the card shows its newest rows.
+  const shownHistory = shownWorkHistory(card.workHistory);
+  const namedHistory = shownHistory.filter(
     (h) => (h.organizationName ?? h.title ?? "").trim().length > 0,
   );
   /**
@@ -321,7 +326,7 @@ export function WorkerPlayerCard({
    * SAME rows the text list uses, so the picture and the list can never
    * disagree; the deriver is pure and unit-tested.
    */
-  const historyTimeline = deriveWorkHistoryTimeline(card.workHistory, new Date());
+  const historyTimeline = deriveWorkHistoryTimeline(shownHistory, new Date());
   /**
    * Premium self-check (owner post-deploy review): the card used to print the
    * work history twice — once as a text list and, after this stage, once as a
@@ -534,8 +539,12 @@ export function WorkerPlayerCard({
                   </span>
                   {h.startedAt ? (
                     <span className="font-mono text-meta uppercase tracking-label text-text-muted">
-                      {h.startedAt}
-                      {h.current ? ` — ${labels.workHistoryCurrent}` : h.endedAt ? ` — ${h.endedAt}` : ""}
+                      {h.organizationName ? h.startedAt : statedIsoText(h.startedAt, "start")}
+                      {h.current
+                        ? ` — ${labels.workHistoryCurrent}`
+                        : h.endedAt
+                          ? ` — ${h.organizationName ? h.endedAt : statedIsoText(h.endedAt, "end")}`
+                          : ""}
                     </span>
                   ) : null}
                   {labels.visuals.history.hoursById?.[h.id] ? (
@@ -713,7 +722,7 @@ export function WorkerPlayerCard({
     );
   const secWorkDoor = door("/dashboard/planning?view=week", "player-card-work-calendar", labels.modes.doorCalendar);
   const secRecordsDoor = door("/dashboard/journal#journal-entries", "player-card-records-journal", labels.modes.doorJournal);
-  const secHistoryDoor = door("/cv#cv-work-history", "player-card-history-cv", labels.modes.doorCv);
+  const secHistoryDoor = door("/cv?tab=experience#cv-work-history", "player-card-history-cv", labels.modes.doorCv);
   const secNextDoor = sample ? null : (
     <Link
       href={"/dashboard/opportunities" as "/dashboard"}

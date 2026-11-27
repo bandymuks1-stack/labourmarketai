@@ -1,7 +1,9 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { TrendingUp } from "lucide-react";
 import { toActiveLocale } from "@/lib/i18n/config";
 
 import { Card } from "@/components/ui/Card";
+import { SectionHead } from "@/components/app/premium/section-head";
 import { Link } from "@/lib/i18n/navigation";
 import {
   readPublicVacancySupplyCounts,
@@ -50,14 +52,7 @@ export async function PublicDemandSection({
   return (
     <Card compact>
       <section className="flex flex-col gap-3" data-testid={`public-demand-${audience}`} aria-labelledby="public-demand-title">
-        <header className="flex flex-col gap-1">
-          <h2 id="public-demand-title" className="font-display text-base font-semibold text-text-primary">
-            {t("title")}
-          </h2>
-          <p className="text-xs leading-relaxed text-text-secondary">
-            {audience === "agency" ? t("subtitleAgency") : t("subtitleInstitution")}
-          </p>
-        </header>
+        <SectionHead id="public-demand-title" icon={TrendingUp} title={t("title")} />
 
         {!ok ? (
           <p className="text-xs text-text-muted" data-testid="public-demand-unavailable">{t("unavailable")}</p>
@@ -81,8 +76,8 @@ export async function PublicDemandSection({
             ) : (
               <ul className="flex flex-col divide-y divide-ink-600" data-testid="public-demand-list">
                 {previews.vacancies.slice(0, 5).map((v) => (
-                  <li key={v.id} className="flex items-center gap-3 py-1.5 text-xs">
-                    <Link href={`/jobs/${v.id}`} className="min-w-0 truncate text-text-primary hover:underline">
+                  <li key={v.id} className="flex items-center gap-3 text-xs">
+                    <Link href={`/jobs/${v.id}`} className="block min-w-0 truncate py-3.5 leading-4 text-text-primary hover:underline">
                       {professionLabel(v.professionSlug) ?? v.occupation ?? "—"}
                       {v.positions && v.positions > 1 ? ` · ×${v.positions}` : ""}
                     </Link>
@@ -94,7 +89,7 @@ export async function PublicDemandSection({
               </ul>
             )}
             <p className="text-meta leading-relaxed text-text-muted">{t("provenance")}</p>
-            <Link href="/jobs" className="text-xs text-brand-blue hover:underline" data-testid="public-demand-open-board">
+            <Link href="/jobs" className="inline-flex min-h-11 w-fit items-center text-xs text-brand-blue hover:underline" data-testid="public-demand-open-board">
               {t("openBoard")} →
             </Link>
           </>

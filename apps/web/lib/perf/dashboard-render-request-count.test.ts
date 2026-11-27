@@ -329,7 +329,7 @@ async function renderServerTree(node: unknown, depth = 0): Promise<void> {
 }
 
 const params = () => Promise.resolve({ locale: "lt" });
-const searchParams = () => Promise.resolve({});
+const searchParams = (path = "") => Promise.resolve(Object.fromEntries(new URLSearchParams(path.split("?")[1] ?? "")));
 
 type PageModule = { default: (p: unknown) => Promise<ReactNode> };
 type LayoutModule = { default: (p: unknown) => Promise<ReactNode> };
@@ -345,6 +345,7 @@ const PAGES = {
   "/dashboard/communication": async () =>
     (await import("@/app/[locale]/dashboard/communication/page")) as PageModule,
   "/dashboard/company": async () => (await import("@/app/[locale]/dashboard/company/page")) as PageModule,
+  "/dashboard/company?view=today": async () => (await import("@/app/[locale]/dashboard/company/page")) as PageModule,
   "/dashboard/company/people": async () =>
     (await import("@/app/[locale]/dashboard/company/people/page")) as PageModule,
 } as const;
@@ -360,7 +361,7 @@ async function renderNestedLayouts(path: PagePath): Promise<void> {
 
 async function renderPageOnly(path: PagePath): Promise<void> {
   const { default: Page } = await PAGES[path]();
-  await renderServerTree(await Page({ params: params(), searchParams: searchParams() }));
+  await renderServerTree(await Page({ params: params(), searchParams: searchParams(path) }));
 }
 
 /** ONE request: the dashboard layout, the nested layouts and the page render
@@ -440,8 +441,29 @@ describe("the session facts every dashboard request shares are ONE read each", (
     // The caller's own profile row — the durable workspace pointer rides it,
     // and the bell's absence-review role check reads it from the session.
     expect(count("profiles")).toBe(1);
-    // The archive state rides the membership reads; no separate id-in read.
-    expect(count("organizations", '"archived_at","is",null')).toBe(0);
+    // Membership archive state rides the joined rows, never a separate id-in
+    // read. The owner-scoped disbanded-team query is a different question.
+    expect(
+      log.filter(
+        (c) =>
+          c.kind === "from" &&
+          c.name === "organizations" &&
+          c.ops.some((op) => op.startsWith('in(["id",')) &&
+          c.ops.some((op) => /^(?:is|not|filter)\(\["archived_at",/.test(op)),
+      ),
+    ).toHaveLength(0);
+    if (path.startsWith("/dashboard/company")) {
+      const teamReads = log.filter(
+        (c) => c.kind === "from" && c.name === "organizations" && c.ops.includes('eq(["organization_type","team"])'),
+      );
+      expect(teamReads).toHaveLength(2);
+      expect(teamReads.filter((c) => c.ops.includes('is(["archived_at",null])'))).toHaveLength(1);
+      expect(teamReads.filter((c) => c.ops.includes('not(["archived_at","is",null])'))).toHaveLength(1);
+      for (const read of teamReads) {
+        expect(read.ops).toContain(`eq(["owner_profile_id","${USER}"])`);
+        expect(read.ops).toContain("limit([20])");
+      }
+    }
     // The employer chain reads its bound company inside the org row read.
     expect(count("companies")).toBe(0);
     // The own worker id is the session workers row, not an id-only query.
@@ -476,9 +498,17 @@ describe.each(Object.keys(PAGES) as PagePath[])("one %s request (layout + page)"
 //   /dashboard/company/people   55 / 18 ->  47 / 7
 const BOUNDS: Record<"layout" | PagePath, { calls: number; waves: number }> = {
   layout: { calls: 23, waves: 6 },
-  "/dashboard": { calls: 29, waves: 6 },
+  // +1 (2026-11-07): the organization's active engagements, for why nothing waits to be
+  // approved on the first screen. It shares a wave, so the waves stay at 6.
+  "/dashboard": { calls: 30, waves: 6 },
   "/dashboard/journal": { calls: 25, waves: 5 },
   "/dashboard/communication": { calls: 25, waves: 6 },
-  "/dashboard/company": { calls: 50, waves: 7 },
-  "/dashboard/company/people": { calls: 47, waves: 7 },
+  // +1 on company routes: disbanded brigades remain readable with no active
+  // brigade. The separate, bounded history read shares the active-list wave.
+  "/dashboard/company": { calls: 51, waves: 7 },
+  // The prototype view (2026-11-07), measured with no reviewable entries in the fixture:
+  // its queue, skills, links, metrics and exception reads run only when something waits.
+  // It skips the default page's reads, so it costs less than the page it lives on.
+  "/dashboard/company?view=today": { calls: 40, waves: 5 },
+  "/dashboard/company/people": { calls: 48, waves: 7 },
 };

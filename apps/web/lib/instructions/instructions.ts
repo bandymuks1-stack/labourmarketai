@@ -1,8 +1,11 @@
 import "server-only";
 
+import { cache } from "react";
+
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { readCounterpartIdentities } from "@/lib/communication/contact-permission";
+import { readActiveAssignmentRowsForProjects } from "@/lib/projects/operations";
 
 /**
  * Work-instructions read service (slice work-instructions-v1).
@@ -53,7 +56,19 @@ function migMissing(code?: string): boolean {
   );
 }
 
-/** Instructions addressed to the current worker (RLS-scoped to their threads). */
+// The full list and its attention summary use the same caller-membership read.
+// Request-local caching keeps that scope check from adding a second query when
+// both surfaces render. Database visibility remains the final authority.
+const readInstructionParticipants = cache(async (profileId: string) => {
+  const supabase = await createClient();
+  return asAny(supabase)
+    .from("conversation_participants")
+    .select("conversation_id, last_read_at")
+    .eq("profile_id", profileId)
+    .is("revoked_at", null);
+});
+
+/** Instructions addressed to the current worker, within their own threads. */
 export async function listWorkerInstructions(): Promise<InstructionRead> {
   const supabase = await createClient();
   const {
@@ -61,12 +76,26 @@ export async function listWorkerInstructions(): Promise<InstructionRead> {
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", instructions: [] };
 
+  // Broader database visibility is not a personal instruction inbox. Apply
+  // the same membership scope as the attention summary BEFORE the row limit,
+  // so another conversation cannot displace the caller's own older instruction.
+  const parts = await readInstructionParticipants(user.id);
+  if (parts.error) {
+    if (migMissing(parts.error.code)) return { kind: "needs-migration" };
+    throw new Error("instruction_participants_unavailable");
+  }
+  const conversationIds = [...new Set(
+    ((parts.data ?? []) as { conversation_id: string }[]).map(p => p.conversation_id),
+  )];
+  if (conversationIds.length === 0) return { kind: "ok", instructions: [] };
+
   const res = await asAny(supabase)
     .from("conversation_messages")
     .select(
       "id, conversation_id, project_id, body, original_language, translated_text, translation_status, created_at, author_id, author:profiles!conversation_messages_author_id_fkey(full_name)",
     )
     .eq("is_instruction", true)
+    .in("conversation_id", conversationIds)
     .neq("author_id", user.id) // instructions TO the worker, not ones they sent
     .order("created_at", { ascending: false })
     .limit(100);
@@ -129,10 +158,7 @@ export async function listAttentionInstructions(): Promise<WorkerInstruction[]> 
   } = await supabase.auth.getUser();
   if (!user) return [];
 
-  const parts = await asAny(supabase)
-    .from("conversation_participants")
-    .select("conversation_id, last_read_at")
-    .eq("profile_id", user.id);
+  const parts = await readInstructionParticipants(user.id);
   if (parts.error) return [];
 
   const lastRead = new Map<string, string | null>();
@@ -155,6 +181,10 @@ export async function listAttentionInstructions(): Promise<WorkerInstruction[]> 
 export interface ManagedWorker {
   profileId: string;
   name: string;
+  /** Set when the worker is reachable ONLY through an active assignment on these
+   *  projects (a direct hire, a placement): the database admits a project-scoped
+   *  instruction there and nothing team-level (send_work_instruction_to_project). */
+  projectIds?: string[];
 }
 
 /** Workers the caller manages (active roster link to a company/agency they own).
@@ -198,6 +228,47 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
   };
   if (!cw.error) collect(cw.data);
   return [...out.values()].sort((a, b) => a.name.localeCompare(b.name));
+}
+
+/**
+ * Workers ACTIVELY assigned to the given projects (the caller's managed
+ * projects), through the same batched, RLS-scoped read the company home uses.
+ * A direct hire is on a project, not on the roster, so the instructions picker
+ * reads both (the project-scoped RPC admits exactly this pair). A failed read
+ * reaches the existing page error boundary; it never looks like no workers.
+ */
+export async function listProjectAssignedWorkers(projectIds: readonly string[]): Promise<ManagedWorker[]> {
+  if (projectIds.length === 0) return [];
+  const supabase = await createClient();
+  const rows = await readActiveAssignmentRowsForProjects(supabase, projectIds);
+  const out = new Map<string, ManagedWorker>();
+  for (const [projectId, res] of rows) {
+    if (res.error) throw new Error("instruction_recipients_unavailable");
+    for (const r of (res.data ?? []) as Array<{
+      worker?: { profile_id?: string | null; display_name?: string | null; profiles?: { full_name?: string | null } | null } | null;
+    }>) {
+      const w = r.worker;
+      if (!w?.profile_id) continue;
+      const prev = out.get(w.profile_id);
+      if (prev) {
+        if (!prev.projectIds!.includes(projectId)) prev.projectIds!.push(projectId);
+        continue;
+      }
+      out.set(w.profile_id, {
+        profileId: w.profile_id,
+        name: w.profiles?.full_name ?? w.display_name ?? w.profile_id.slice(0, 8),
+        projectIds: [projectId],
+      });
+    }
+  }
+  return [...out.values()];
+}
+
+/** The picker: the roster (team-level and project-level), then anyone reachable
+ *  only through a project assignment (project-level only). One row per person. */
+export function mergeInstructionRecipients(roster: ManagedWorker[], assigned: ManagedWorker[]): ManagedWorker[] {
+  const seen = new Set(roster.map((w) => w.profileId));
+  return [...roster, ...assigned.filter((w) => !seen.has(w.profileId))].sort((a, b) => a.name.localeCompare(b.name));
 }
 
 /**

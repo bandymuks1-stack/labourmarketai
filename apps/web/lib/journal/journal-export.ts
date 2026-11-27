@@ -1,4 +1,4 @@
-import { csvCell } from "@/lib/projects/operations-report";
+import { csvExportCell } from "@/lib/projects/operations-report";
 
 /**
  * Work-journal CSV export builder (quality-train PR I) — PURE, DB-free.
@@ -28,7 +28,7 @@ export const JOURNAL_CSV_HEADER = [
 ] as const;
 
 function csvRow(cells: string[]): string {
-  return cells.map(csvCell).join(",");
+  return cells.map(csvExportCell).join(",");
 }
 
 /** Build the full CSV string for a work-journal export. */

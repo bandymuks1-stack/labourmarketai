@@ -1,11 +1,22 @@
+import { OrganizationDoorsServer } from "@/components/app/organization/organization-doors-server";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  Briefcase,
+  CalendarDays,
+  ClipboardList,
+  MapPin,
+  NotebookPen,
+  Package,
+  ShoppingBag,
+  UserSearch,
+} from "lucide-react";
 
 import { Link } from "@/lib/i18n/navigation";
-import { ActionCard } from "@/components/app/action-card";
+import { PremiumActionDeck } from "@/components/ui/premium-action-card";
 import { createClient } from "@/lib/supabase/server";
 import {
   listDiscoverableOfferings,
@@ -70,6 +81,7 @@ export default async function ServiceRequestsPage({
   const category = normalizeDiscoveryCategory(sp.category);
 
   const t = await getTranslations("marketplace");
+  const tDoors = await getTranslations("organizationDoors");
   // The caller's OWN offerings are read alongside the loop (RLS-scoped, own
   // rows only) so the provider inbox's empty state can tell the truth: no
   // active service → no request can arrive; N active → nobody asked yet.
@@ -94,6 +106,10 @@ export default async function ServiceRequestsPage({
     category: category ?? "",
     active: country !== null || category !== null,
   };
+  // ONE "manage the services you offer" link on the page (owner P0 2026-11-24,
+  // decision 0032): the empty discover list carries it when it shows; else the
+  // empty incoming list when you have no active service; else the quiet line.
+  const discoverCarriesServicesLink = discoverable.length === 0 && !filter.active;
 
   const labels: MarketplaceLabels = {
     notAvailable: t("notAvailable"),
@@ -121,7 +137,7 @@ export default async function ServiceRequestsPage({
       ownActive === 0
         ? t("incomingEmptyNoActive")
         : t("incomingEmptyHasActive", { count: ownActive }),
-    incomingEmptyCta: ownActive === 0 ? t("linkToServices") : null,
+    incomingEmptyCta: ownActive === 0 && !discoverCarriesServicesLink ? t("linkToServices") : null,
     filterCountry: t("filterCountry"),
     filterCategory: t("filterCategory"),
     filterApply: t("filterApply"),
@@ -155,6 +171,10 @@ export default async function ServiceRequestsPage({
 
   return (
     <div className="flex flex-col gap-4" data-testid="service-requests-page">
+      {/* The marketplace is one of the organization's doors: the strip stays
+          in view here too (carousel spec N7a). Nothing renders outside an
+          organization context. */}
+      <OrganizationDoorsServer ariaLabel={tDoors("label")} />
       <TelemetryView
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
         metadata={{ surface: "service_requests" }}
@@ -183,14 +203,16 @@ export default async function ServiceRequestsPage({
       />
       {/* Cross-link to the other half of the loop — manage / activate the
           services that make you discoverable here. Quiet, secondary affordance. */}
-      <Link
-        href={"/dashboard/services" as "/dashboard"}
-        data-testid="requests-to-services-link"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
-      >
-        {t("linkToServices")}
-        <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-      </Link>
+      {!discoverCarriesServicesLink && ownActive > 0 ? (
+        <Link
+          href={"/dashboard/services" as "/dashboard"}
+          data-testid="requests-to-services-link"
+          className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
+        >
+          {t("linkToServices")}
+          <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+        </Link>
+      ) : null}
 
       {/* Marketplace connections (§8.4): a request is not a dead end — it links
           onward to matching (find the right people), planning (bookings live
@@ -221,30 +243,35 @@ function MarketplaceConnections({
     isCompany
       ? {
           key: "matching",
+          icon: UserSearch,
           href: "/dashboard/company/scouting",
           label: t("connections.scouting"),
           note: t("connections.scoutingNote"),
         }
       : {
           key: "matching",
+          icon: Briefcase,
           href: "/dashboard/opportunities",
           label: t("connections.matching"),
           note: t("connections.matchingNote"),
         },
     {
       key: "listings",
+      icon: Package,
       href: "/dashboard/listings",
       label: t("connections.listings"),
       note: t("connections.listingsNote"),
     },
     {
       key: "calendar",
+      icon: CalendarDays,
       href: "/dashboard/bookings",
       label: t("connections.calendar"),
       note: t("connections.calendarNote"),
     },
     {
       key: "map",
+      icon: MapPin,
       href: "/dashboard/market-map",
       label: t("connections.map"),
       note: t("connections.mapNote"),
@@ -252,12 +279,14 @@ function MarketplaceConnections({
     isCompany
       ? {
           key: "needs",
+          icon: ClipboardList,
           href: "/dashboard/company/needs",
           label: t("connections.needs"),
           note: t("connections.needsNote"),
         }
       : {
           key: "diary",
+          icon: NotebookPen,
           href: "/dashboard/journal",
           label: t("connections.diary"),
           note: t("connections.diaryNote"),
@@ -270,6 +299,7 @@ function MarketplaceConnections({
       : [
           {
             key: "buyer",
+            icon: ShoppingBag,
             href: "/dashboard/start/buyer",
             label: t("connections.buyer"),
             note: t("connections.buyerNote"),
@@ -285,19 +315,20 @@ function MarketplaceConnections({
         {t("connections.title")}
       </span>
       <p className="text-xs text-text-secondary">{t("connections.intro")}</p>
-      {/* Shared ActionCard pattern (audit PR8) — one visual grammar for
-          navigation cards across the app. */}
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
-        {links.map((l) => (
-          <ActionCard
-            key={l.key}
-            href={l.href}
-            testid={`marketplace-connection-${l.key}`}
-            title={l.label}
-            description={l.note}
-          />
-        ))}
-      </div>
+      {/* The ONE action-choice tile (owner 2026-11-03: no second card system). */}
+      <PremiumActionDeck
+        ariaLabel={t("connections.title")}
+        layout="list"
+        items={links.map((l) => ({
+          key: l.key,
+          href: l.href,
+          icon: l.icon,
+          label: l.label,
+          hint: l.note,
+          hintAlways: true,
+          testId: `marketplace-connection-${l.key}`,
+        }))}
+      />
     </section>
   );
 }

@@ -4,6 +4,8 @@ import { resolve } from "node:path";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
+import { needLinks, requestIdOf, submitSyntheticNeed } from "./prod-need-post";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 
 /**
  * PRODUCTION IN-APP NOTIFICATIONS — owner area 10 (registry rows 5.6, 5.10).
@@ -39,6 +41,8 @@ const SUPA = process.env.PROD_QA_SUPABASE_URL ?? "";
 const ANON = process.env.PROD_QA_ANON_KEY ?? "";
 const GAMA = "QA-SYNTHETIC Gama";
 const MSG = `QA-SYNTHETIC ${RUN} notification walk`;
+/** This run's own need. The role names a trade, so scouting can list the hand-raiser. */
+const NEED_ROLE = `QA-SYNTHETIC pranešimai ${RUN}`;
 const ORG_SIDE = [
   "event_demand_interest_expressed",
   "event_booking_accepted",
@@ -116,18 +120,35 @@ test("N-0. the worker's own worker id (own row, own token)", async () => {
   workerId = own[0].id;
 });
 
+/**
+ * N-0b. THIS RUN'S OWN NEED. The walk used to raise a hand on a standing Gama
+ * need, but since #3619 the sweep after every production walk closes every open
+ * QA-SYNTHETIC need, so there was none left to find (run 45523390092: N-1 saw
+ * no Gama card). Gama posts one now; the free plan allows one open need, so the
+ * leftovers of a walk that did not reach its own sweep are closed first, through
+ * the same product close RPC the sweep uses.
+ */
+test("N-0b. Gama posts this run's need through the demand intake", async ({ browser }) => {
+  test.setTimeout(240_000);
+  await closeOpenSyntheticNeedsOrFail("notifications-inapp start");
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  const outcome = await submitSyntheticNeed(page, NEED_ROLE, `${MSG}: synthetic need for the notification walk, 1 mūrininkas.`);
+  expect(outcome, "the open-need limit refused this run's need").toBe("done");
+  await page.goto("/lt/dashboard/company/scouting");
+  const link = needLinks(page, RUN).first();
+  await expect(link, "this run's need is listed among Gama's needs").toBeVisible({ timeout: 30_000 });
+  requestId = requestIdOf(await link.getAttribute("href"));
+  expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
+  await ctx.close();
+});
+
 test("N-1. the worker raises a hand on Gama's need", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
   await page.goto("/lt/dashboard/opportunities?view=all");
-  await expect(page.getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
-  const cards = page
-    .locator('li[id^="opp-"]')
-    .filter({ has: page.getByTestId("opportunity-company").filter({ hasText: GAMA }) })
-    .filter({ has: page.locator('[data-testid^="interest-"]') });
-  await expect.poll(() => cards.count(), { timeout: 60_000 }).toBeGreaterThan(0);
-  const card = cards.first();
-  requestId = ((await card.getAttribute("id")) ?? "").replace(/^opp-/, "");
-  expect(requestId).toMatch(/^[0-9a-f-]{36}$/);
+  await expect(page.getByRole("main").getByTestId("opportunities-list")).toBeVisible({ timeout: 60_000 });
+  const card = page.locator(`li[id="opp-${requestId}"]`);
+  await expect(card, "this run's need is on the worker's board").toBeVisible({ timeout: 60_000 });
   const withdraw = card.getByTestId("interest-withdraw");
   if (await withdraw.isVisible().catch(() => false)) {
     await withdraw.click();
@@ -242,4 +263,9 @@ test("N-7. Gama working as the company is never asked to switch to worker on an 
   }
   console.info(`N-7: organization-side stored rows checked=${orgSide}`);
   await ctx.close();
+});
+
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("notifications-inapp");
 });

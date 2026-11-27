@@ -1,5 +1,7 @@
 import type { FormState, WorkerFormSpec } from "@/lib/conversation/worker-forms";
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
+import { resolveCountryCode } from "@/lib/location/country-model";
+import { PROJECT_CITY_MAX, PROJECT_TITLE_MAX } from "@/lib/projects/project-title-limits";
 
 /**
  * Declarative inline-form specs for the EMPLOYER-side conversation actions
@@ -52,6 +54,19 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
         labelKey: "conversation.forms.fields.demandLocation",
         placeholderKey: "conversation.forms.fields.demandLocationPlaceholder",
         maxLength: 120,
+      },
+      {
+        // WHERE the work is, as a country: visible and required. It used to
+        // ride hidden state from the sentence only, so a sentence naming no
+        // known place created a need no country filter could find. A code or
+        // a name ("SE", "Sweden") — resolved to ISO in `build`; the
+        // structurer still prefills it.
+        name: "country",
+        kind: "text",
+        labelKey: "conversation.forms.fields.demandCountry",
+        placeholderKey: "conversation.forms.fields.demandCountryPlaceholder",
+        required: true,
+        maxLength: 80,
       },
       {
         name: "teamSize",
@@ -123,7 +138,7 @@ export const COMPANY_FORMS: readonly WorkerFormSpec[] = [
       // state so the canonical columns (`role_or_work_type`, `country`) are
       // set — before this the chat intake stored only the free-text label.
       workType: s(st.workType) || null,
-      country: s(st.country) || null,
+      country: resolveCountryCode(s(st.country)) ?? null,
       // Teams of a stated size ("3 brigados po 4"), derived the same way and
       // never typed: they reach `structured_v2.team` beside the total.
       teamCount: numOrNull(st.teamCount),
@@ -282,14 +297,14 @@ export const AGENCY_FORMS: readonly WorkerFormSpec[] = [
         labelKey: "conversation.forms.fields.projectTitle",
         placeholderKey: "conversation.forms.fields.projectTitlePlaceholder",
         required: true,
-        maxLength: 120,
+        maxLength: PROJECT_TITLE_MAX,
       },
       {
         name: "city",
         kind: "text",
         labelKey: "conversation.forms.fields.projectCity",
         placeholderKey: "conversation.forms.fields.projectCityPlaceholder",
-        maxLength: 120,
+        maxLength: PROJECT_CITY_MAX,
       },
     ],
     build: (st: FormState) => ({ title: s(st.title), city: s(st.city) || null }),

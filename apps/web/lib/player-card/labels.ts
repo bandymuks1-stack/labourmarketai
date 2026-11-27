@@ -2,10 +2,12 @@ import "server-only";
 
 import { getLocale, getTranslations } from "next-intl/server";
 
+import { statedDateLabel } from "@/lib/cv/period-dates";
 import type { WorkerPlayerCard } from "@/lib/player-card/player-card";
 import { EVIDENCE_TIMELINE_MONTHS } from "@/lib/player-card/player-card";
 import type { PlayerCardLabels } from "@/components/app/worker-player-card";
 import { deriveWorkHistoryTimeline } from "@/lib/player-card/evidence-visuals";
+import { isCurrentWork, shownWorkHistory } from "@/lib/player-card/work-history-model";
 import { contextHoursById } from "@/lib/player-card/context-hours";
 import { EVIDENCE_SCALE_MAX } from "@/components/app/player-card/skill-evidence-chart";
 import { provenanceTextKey, provenanceTextParams } from "@/lib/evidence/provenance";
@@ -91,8 +93,9 @@ export async function buildPlayerCardLabels(
     dateStyle: "medium",
     timeZone: "UTC",
   });
-  // The history band is derived from the SAME rows the card's text list uses.
-  const history = deriveWorkHistoryTimeline(card.workHistory, new Date());
+  // The history band is derived from the SAME rows the card's text list uses
+  // (its display bound, `shownWorkHistory`, as the card renders them).
+  const history = deriveWorkHistoryTimeline(shownWorkHistory(card.workHistory), new Date());
   // Hours per engagement — the journal's own per-context figures joined on
   // `engagement_contexts.id`; org-reported minutes never enter these numbers
   // (they stay beside, on the journal's own checks).
@@ -126,7 +129,7 @@ export async function buildPlayerCardLabels(
   const currentWork = [
     ...new Set(
       card.workHistory
-        .filter((h) => h.current)
+        .filter(isCurrentWork)
         .map((h) => (h.organizationName ?? "").trim())
         .filter((n) => n.length > 0),
     ),
@@ -342,13 +345,19 @@ export async function buildPlayerCardLabels(
         // readable without a second history list underneath the card.
         laneDetails: history.lanes.map((lane) => {
           const entry = card.workHistory.find((h) => h.id === lane.id);
+          // No organization: only what the person stated, never a padded day.
+          const own = entry !== undefined && entry.organizationName === null;
           const from = entry?.startedAt
-            ? dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
+            ? own
+              ? statedDateLabel(entry.startedAt, "start", locale)
+              : dateFmt.format(new Date(`${entry.startedAt}T00:00:00Z`))
             : null;
           const to = entry?.current
             ? t("workHistoryCurrent")
             : entry?.endedAt
-              ? dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
+              ? own
+                ? statedDateLabel(entry.endedAt, "end", locale)
+                : dateFmt.format(new Date(`${entry.endedAt}T00:00:00Z`))
               : null;
           return from && to ? `${from} — ${to}` : (from ?? "");
         }),

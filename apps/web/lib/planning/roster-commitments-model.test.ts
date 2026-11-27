@@ -114,7 +114,7 @@ describe("the surface: rendered on company planning, labelled in every routed lo
       }
       for (const k of ["project", "booking", "trip"]) expect(typeof c.kind[k], `${loc}.kind.${k}`).toBe("string");
       // The "nothing on record" line must never say "free" as a fact.
-      expect(String(c.withoutCommitment).toLowerCase()).toMatch(/not the same as free|nereiškia, kad laisvas|не значит «свободен»|niet hetzelfde als vrij|nicht dasselbe wie frei|to nie to samo, co wolny/);
+      expect(String(c.withoutCommitment).toLowerCase()).toMatch(/not the same as free|nereiškia, kad laisvas|не значит «свободен»|niet hetzelfde als vrij|nicht dasselbe wie frei|to nie to samo, co wolny|inte detsamma som ledig/);
     });
   }
 });
@@ -124,6 +124,7 @@ describe("agency bridge: the client's accept / decline are 44 px targets", () =>
     const src = readFileSync(join(WEB, "components", "app", "client-agency-bridge-section.tsx"), "utf8");
     expect(src).not.toMatch(/inline-flex h-8 /);
     expect(src).toMatch(/data-testid=\{`client-bridge-accept-\$\{c\.id\}`\}[\s\S]{0,200}min-h-11/);
-    expect(src).toMatch(/min-h-11 min-w-11 items-center justify-center/);
+    // The icon-only decline is a square 44 px target on the shared Button.
+    expect(src).toMatch(/title=\{labels\.declineButton\}[^>]*className="min-h-11 min-w-11/);
   });
 });

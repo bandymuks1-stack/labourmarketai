@@ -33,7 +33,8 @@
   "unnamedOrganization": {
     "company": "Virksomhet uten navn",
     "agency": "Byrå uten navn",
-    "other": "Organisasjon uten navn"
+    "other": "Organisasjon uten navn",
+    "ended": "Tidligere organisasjon uten navn"
   },
   "activeWorkspaceNoRelationship": "Du handler på vegne av {org}, men det er ikke registrert noe arbeidsforhold med {org}, så det tilbys ikke her. Velg konteksten arbeidet egentlig hører til.",
   "project": "Prosjekt",
@@ -99,7 +100,16 @@
       "outcomeBlocked": "[EN] not confirmed ({code})",
       "receipt": "Bekreftet: {title}",
       "receiptSkills": "{count, plural, one {# ferdighet} other {# ferdigheter}}",
-      "skillsUnavailable": "Ferdighetslisten kunne ikke leses — trykket bekrefter bare selve oppføringen."
+      "skillsUnavailable": "Ferdighetslisten kunne ikke leses — trykket bekrefter bare selve oppføringen.",
+      "projectFilterLabel": "Prosjekt",
+      "projectAll": "Alle prosjekter ({n})",
+      "projectNone": "Uten prosjekt ({n})",
+      "projectUnnamed": "Prosjekt, navnet vises ikke",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Vis",
+      "projectResult": "Viser {shown} av {total} oppføringer",
+      "projectOnCard": "Prosjekt: {name}",
+      "noProjectOnCard": "Uten prosjekt"
     },
     "result": {
       "entrySuperseded": "Oppføringen er allerede erstattet av en nyere versjon — kortet er ikke lenger aktuelt og fjernes fra listen.",
@@ -312,5 +322,12 @@
     "metricsInsertFailed": "Oppføringen ble ikke lagret fullstendig: {reason}. Oppføringen ble forkastet — prøv igjen.",
     "moduleFieldInvalid": "Disse opplysningene hører ikke til denne typen engasjement: {fields}. Ingenting ble lagret — fjern dem og prøv igjen."
   },
-  "contextEnded": "avsluttet"
+  "contextEnded": "avsluttet",
+  "dayChoice": {
+    "today": "I dag",
+    "yesterday": "I går",
+    "weekAgo": "For en uke siden",
+    "calendar": "Kalender",
+    "earlier": "Tidligere oppføringer"
+  }
 }

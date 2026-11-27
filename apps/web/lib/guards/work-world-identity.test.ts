@@ -17,13 +17,14 @@ describe("Guard: PLAYER IDENTITY wears the work-world grammar (PLAYER_IDENTITY_R
   it("work history is ONE WorkSpine — a node per real engagement, no standing claimed", () => {
     expect(HUB).toContain('from "@/components/app/work-world/primitives"');
     expect(HUB).toMatch(/data-testid="live-profile-history"[\s\S]{0,80}<WorkSpine>/);
-    expect(HUB).toMatch(/playerCard\.workHistory\.map\(\(e\) => \(\s*<WorkSpineNode key=\{e\.id\}>/);
+    // The card's display bound is applied at render time (CV-15 / G-7).
+    expect(HUB).toMatch(/shownWorkHistory\(playerCard\.workHistory\)\.map\(\(e\) => \(\s*<WorkSpineNode key=\{e\.id\}>/);
     // the row carries no provenance, so the node states none (no state=/solid)
     expect(HUB).not.toMatch(/<WorkSpineNode key=\{e\.id\} (state|solid)=/);
   });
 
   it("dates are a mono stamp; the only place the row knows is the dashed country chip", () => {
-    expect(HUB).toMatch(/<PlaceTimeStamp>\s*\{e\.startedAt \?\? tLive\("dateUnknown"\)\}/);
+    expect(HUB).toMatch(/<PlaceTimeStamp>\s*\{\(e\.organizationName \? e\.startedAt : statedIsoText\(e\.startedAt, "start"\)\) \?\?\s*tLive\("dateUnknown"\)\}/);
     expect(HUB).toMatch(/e\.countryCode \? \(\s*<PlacePrecision kind="country" label=\{e\.countryCode\} \/>/);
     expect(HUB).not.toMatch(/PlacePrecision kind="(city|address)"/);
   });

@@ -12,6 +12,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const persistPublicCompanyNeed = vi.fn();
 const draftVacancyFromNeed = vi.fn();
+const sendCompanyNeedOwnerAlert = vi.fn();
 
 vi.mock("next-intl/server", () => ({ getLocale: async () => "en" }));
 vi.mock("./company-need-public-intake", () => ({
@@ -22,7 +23,7 @@ vi.mock("./company-need-actions", () => ({
 }));
 vi.mock("../security/ai-action-throttle", () => ({ aiActionRateLimited: async () => false }));
 vi.mock("../notifications/telegram-owner-alerts", () => ({
-  sendCompanyNeedOwnerAlert: async () => undefined,
+  sendCompanyNeedOwnerAlert: (...a: unknown[]) => sendCompanyNeedOwnerAlert(...a),
 }));
 
 import { submitCompanyNeedAction } from "./company-need-form-actions";
@@ -35,14 +36,42 @@ function syntheticForm(): FormData {
   f.set("profession", "tiler");
   f.set("number_of_workers", "2");
   f.set("description", "Synthetic need for an AI-failure test.");
+  f.set("started", String(Date.now() - 10_000));
   return f;
 }
 
 const okNeed = { ok: true, need: {} };
 
 beforeEach(() => {
-  persistPublicCompanyNeed.mockReset().mockResolvedValue({ ok: true });
+  persistPublicCompanyNeed.mockReset().mockResolvedValue({ ok: true, advertising: false });
   draftVacancyFromNeed.mockReset();
+  sendCompanyNeedOwnerAlert.mockReset();
+});
+
+describe("who is alerted about a stored need", () => {
+  beforeEach(() => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+  });
+
+  it("a genuine need alerts", async () => {
+    const state = await submitCompanyNeedAction(null, syntheticForm());
+    expect(state).toMatchObject({ ok: true, persisted: true });
+    expect(sendCompanyNeedOwnerAlert).toHaveBeenCalledTimes(1);
+  });
+
+  it("an advert is stored and answered the same, and alerts no one", async () => {
+    persistPublicCompanyNeed.mockResolvedValue({ ok: true, advertising: true });
+    const state = await submitCompanyNeedAction(null, syntheticForm());
+    expect(state).toMatchObject({ ok: true, persisted: true });
+    expect(persistPublicCompanyNeed).toHaveBeenCalledTimes(1);
+    expect(sendCompanyNeedOwnerAlert).not.toHaveBeenCalled();
+  });
+
+  it("a need that was not stored alerts no one", async () => {
+    persistPublicCompanyNeed.mockResolvedValue({ ok: false, code: "error" });
+    await submitCompanyNeedAction(null, syntheticForm());
+    expect(sendCompanyNeedOwnerAlert).not.toHaveBeenCalled();
+  });
 });
 
 describe("a stored need stays a success whatever the AI does", () => {
@@ -105,5 +134,100 @@ describe("a stored need stays a success whatever the AI does", () => {
     });
     const state = await submitCompanyNeedAction(null, syntheticForm());
     expect(state).toMatchObject({ ok: true, persisted: true, draftStatus: "suggestion", role: "Tiler" });
+  });
+});
+
+describe("spam guard: one generic answer, nothing stored, no AI, no alert (owner order 2026-11-09)", () => {
+  const formWith = (change: Record<string, string>) => {
+    const f = syntheticForm();
+    for (const [k, v] of Object.entries(change)) f.set(k, v);
+    return f;
+  };
+
+  it("honeypot, too fast, a forged fill time, a refused store and a rate limit all answer identically", async () => {
+    const answers = [
+      await submitCompanyNeedAction(null, formWith({ website: "https://spam.example" })),
+      await submitCompanyNeedAction(null, formWith({ started: String(Date.now()) })),
+      await submitCompanyNeedAction(null, formWith({ started: "soon" })),
+      await submitCompanyNeedAction(null, formWith({ started: String(Date.now() + 60 * 60 * 1000) })),
+      await submitCompanyNeedAction(null, formWith({ website: "x", started: "" })),
+    ];
+    expect(persistPublicCompanyNeed).not.toHaveBeenCalled();
+    persistPublicCompanyNeed.mockResolvedValueOnce({ ok: false, code: "rejected" });
+    answers.push(await submitCompanyNeedAction(null, syntheticForm()));
+    persistPublicCompanyNeed.mockResolvedValueOnce({ ok: false, code: "rate_limited" });
+    answers.push(await submitCompanyNeedAction(null, syntheticForm()));
+
+    for (const a of answers) expect(a).toEqual(answers[0]);
+    expect(answers[0]).toEqual({ ok: true, persisted: false, isConstruction: true, draftStatus: "disabled" });
+    expect(draftVacancyFromNeed).not.toHaveBeenCalled();
+    expect(sendCompanyNeedOwnerAlert).not.toHaveBeenCalled();
+  });
+
+  it("no fill time (no JavaScript) and a clean need: stored, marked for review in source_path", async () => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+    const state = await submitCompanyNeedAction(null, formWith({ started: "" }));
+    expect(state).toMatchObject({ ok: true, persisted: true });
+    expect(persistPublicCompanyNeed).toHaveBeenCalledTimes(1);
+    expect(persistPublicCompanyNeed.mock.calls[0][0].sourcePath).toBe("/en/company-need?review=no-js");
+    // The rate and content checks still run inside the store: a refusal there is the generic answer.
+    persistPublicCompanyNeed.mockResolvedValueOnce({ ok: false, code: "rejected" });
+    expect(await submitCompanyNeedAction(null, formWith({ started: "" }))).toMatchObject({ persisted: false, draftStatus: "disabled" });
+  });
+
+  it("a send with a fill time is not marked", async () => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+    await submitCompanyNeedAction(null, syntheticForm());
+    expect(persistPublicCompanyNeed.mock.calls[0][0].sourcePath).toBe("/en/company-need");
+  });
+
+  it("the button that opened the form rides on source_path; anything else is dropped", async () => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+    await submitCompanyNeedAction(null, formWith({ from: "companies_market_lu" }));
+    expect(persistPublicCompanyNeed.mock.calls[0][0].sourcePath).toBe("/en/company-need?from=companies_market_lu");
+    await submitCompanyNeedAction(null, formWith({ started: "", from: "companies_hero" }));
+    expect(persistPublicCompanyNeed.mock.calls[1][0].sourcePath).toBe("/en/company-need?review=no-js&from=companies_hero");
+    await submitCompanyNeedAction(null, formWith({ from: "x?utm_source=evil&y" }));
+    expect(persistPublicCompanyNeed.mock.calls[2][0].sourcePath).toBe("/en/company-need");
+  });
+
+  it("the refusal log carries the surface and reason only, never what was typed", async () => {
+    const info = vi.spyOn(console, "info").mockImplementation(() => undefined);
+    await submitCompanyNeedAction(null, formWith({ website: "https://spam.example" }));
+    const logged = JSON.stringify(info.mock.calls);
+    expect(logged).toContain("honeypot");
+    for (const secret of ["Synthetic Builders QA", "need-qa@example.test", "spam.example", "AI-failure"]) {
+      expect(logged).not.toContain(secret);
+    }
+    info.mockRestore();
+  });
+});
+
+describe("our test requests never reach the AI layer (owner order 2026-11-14)", () => {
+  beforeEach(() => {
+    draftVacancyFromNeed.mockResolvedValue({ ...okNeed, draft: { status: "disabled", reason: "ai_disabled" } });
+  });
+
+  const walkForm = (over: Record<string, string>): FormData => {
+    const f = syntheticForm();
+    for (const [k, v] of Object.entries(over)) f.set(k, v);
+    return f;
+  };
+
+  it.each([
+    ["the walk (marker + example.invalid)", { company_name: "QA-SYNTHETIC need walk 1.1 (not a real company)", contact_email: "qa.synthetic.need.1.1@example.invalid", description: "QA-SYNTHETIC need-intake walk" }],
+    ["marker only", { company_name: "QA-SYNTHETIC probe" }],
+    ["example.invalid only", { contact_email: "someone@example.invalid" }],
+  ])("%s: stored and alerted as agreed, no model call, honest 'no draft'", async (_label, over) => {
+    const state = await submitCompanyNeedAction(null, walkForm(over));
+    expect(state).toMatchObject({ ok: true, persisted: true, draftStatus: "disabled" });
+    expect(persistPublicCompanyNeed).toHaveBeenCalledTimes(1);
+    expect(sendCompanyNeedOwnerAlert).toHaveBeenCalledTimes(1);
+    expect(draftVacancyFromNeed).not.toHaveBeenCalled();
+  });
+
+  it("a real employer's need still gets the AI draft call, unchanged", async () => {
+    await submitCompanyNeedAction(null, walkForm({ company_name: "Test Building Ltd", contact_email: "jonas@testas.lt" }));
+    expect(draftVacancyFromNeed).toHaveBeenCalledTimes(1);
   });
 });

@@ -591,7 +591,7 @@ const ORGANIZATION: readonly CapabilityRow[] = [
     anchors: ["lib/candidates", "lib/scouting"],
     coreModule: "lib/candidates/candidate-drafts.ts",
     surfaces: ["app/[locale]/dashboard/candidates"],
-    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link anywhere — it was named as this row's surface until the navigation guard proved nothing leads there.",
+    note: "The surface a person actually reaches is `/dashboard/candidates`, linked from the planning zone, the operations board and the setup choice. `/dashboard/talent` is a superadmin sample preview with NO inbound link — the public /for-companies lifecycle step linked there until 2026-11-03 and now opens `/dashboard/company/scouting`; the preview-surface guard covers that component too.",
   },
   {
     id: "ORG-8",
@@ -1228,7 +1228,7 @@ const MARKETPLACE: readonly CapabilityRow[] = [
     anchors: ["lib/services"],
     coreModule: "lib/services/service-offerings-shared.ts",
     surfaces: ["app/[locale]/dashboard/service-requests"],
-    note: "CORRECTED 2026-09-07: the note this row carried — \"no navigation leads to it, a human reaches it only by typing the URL\" — was false. Bookings, the market map, the opportunities board, the services page, the marketplace loop section, the spine signals and the planning zone all link to it. The claim came from the reconciliation\'s prose and was never checked; the navigation guard added with this correction is what would have caught it. What is actually true: the loop is complete and reachable, and the 2026-09-07 snapshot records no service offerings in production, so nothing has been through it. PROD WALK 2026-10-12 (automated real-browser walk on production, synthetic cast, prod-qa-walk.yml): service offered → found from the market → requested → accepted → conversation opened by both sides (run 38249533050). Not a human walk.",
+    note: "CORRECTED 2026-09-07: the note this row carried — \"no navigation leads to it, a human reaches it only by typing the URL\" — was false. Bookings, the market map, the opportunities board, the services page, the marketplace loop section, the spine signals and the planning zone all link to it. The claim came from the reconciliation\'s prose and was never checked; the navigation guard added with this correction is what would have caught it. What is actually true: the loop is complete and reachable, and the 2026-09-07 snapshot records no service offerings in production, so nothing has been through it. PROD WALK 2026-10-12 (automated real-browser walk on production, synthetic cast, prod-qa-walk.yml): service offered → found from the market → requested → accepted → conversation opened by both sides (run 38249533050). Not a human walk. PUBLIC SEARCH ADDITION (2026-11-26): PR #3818 reuses the existing offering/request loop for explicitly published personal services, with a separate author choice that defaults off. Existing member-only offers remain private. Deployment and public publisher-path evidence are tracked in docs/program/FUNCTION_REGISTER.md, SC-13. Organization/subcontractor discovery and indexing remain unfinished. This addition does not raise this capability's status or evidence tier.",
   },
   {
     id: "MKT-2",

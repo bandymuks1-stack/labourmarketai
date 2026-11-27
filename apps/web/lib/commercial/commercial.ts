@@ -61,10 +61,10 @@ export async function getMyCommercial(): Promise<CommercialData> {
 
   const cRes = await asAny(supabase)
     .from("contracts")
-    .select("id, number, title, parties, value_cents, status, signed_document_ref, start_date, end_date")
+    .select("id, number, title, proposal_id, parties, value_cents, status, signed_document_ref, start_date, end_date")
     .order("created_at", { ascending: false })
     .limit(200);
-  type CRow = { id: string; number: string | null; title: string; parties: string | null; value_cents: number | string; status: string; signed_document_ref: string | null; start_date: string | null; end_date: string | null };
+  type CRow = { id: string; number: string | null; title: string; proposal_id: string | null; parties: string | null; value_cents: number | string; status: string; signed_document_ref: string | null; start_date: string | null; end_date: string | null };
   const contracts: Contract[] = cRes.error
     ? []
     : ((cRes.data ?? []) as CRow[])
@@ -73,6 +73,7 @@ export async function getMyCommercial(): Promise<CommercialData> {
           id: r.id,
           number: r.number,
           title: r.title,
+          proposalId: r.proposal_id,
           parties: r.parties,
           valueCents: Number(r.value_cents) || 0,
           status: r.status as Contract["status"],
@@ -81,5 +82,21 @@ export async function getMyCommercial(): Promise<CommercialData> {
           endDate: r.end_date,
         }));
 
-  return { applied: true, proposals, contracts };
+  // Which ACCEPTED proposals already have a contract, read for those proposals
+  // only — never inferred from the contract list above, which stops at 200 and
+  // would let an older contract fall off and the "create contract" step
+  // reappear for a proposal that already has one.
+  const acceptedIds = proposals.filter((p) => p.status === "accepted").map((p) => p.id);
+  let contractedProposalIds: string[] | null = [];
+  if (acceptedIds.length > 0) {
+    const linked = await asAny(supabase)
+      .from("contracts")
+      .select("proposal_id")
+      .in("proposal_id", acceptedIds)
+      .limit(acceptedIds.length * 50);
+    contractedProposalIds = linked.error
+      ? null
+      : [...new Set(((linked.data ?? []) as { proposal_id: string | null }[]).map((r) => r.proposal_id).filter((x): x is string => !!x))];
+  }
+  return { applied: true, proposals, contracts, contractedProposalIds };
 }

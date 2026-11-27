@@ -388,7 +388,9 @@ function withUnknownTotalWhenUnattributed(
   return relationships == null ? { ...pe, hours: null } : pe;
 }
 
-export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
+export async function buildVerifiedCv(
+  options: { readonly includeSkillSamples?: boolean } = {},
+): Promise<VerifiedCvResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -461,7 +463,10 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       // Recorded hours per skill — the journal's own derivation, read through
       // the canonical journal-list core under the worker's RLS. Best-effort:
       // an unreadable journal yields `null`, never invented zeros.
-      loadWorkIntelligence({ supabase, userId: user.id }, workerId).catch(
+      // Long source excerpts are opt-in because this builder also serves
+      // aggregate-only report and capability callers. The page opts in only
+      // for this authenticated person's own CV.
+      loadWorkIntelligence({ supabase, userId: user.id }, workerId, { includeSkillSamples: options.includeSkillSamples === true }).catch(
         (): WorkIntelligence | null => null,
       ),
       // Which recorded skill confirmations still STAND (a later rejection,
@@ -545,12 +550,15 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
   ];
   const projectNamesRes =
     contextProjectIds.length > 0
-      ? await tolerant<{ id: string; name: string | null }[]>(
-          sb.from("projects").select("id, name").in("id", contextProjectIds),
+      ? // `projects` names a project in `title`; there is no `name` column.
+        // Asking for `name` failed, the tolerant wrapper turned the failure
+        // into "no rows", and no job on the CV ever showed its project.
+        await tolerant<{ id: string; title: string | null }[]>(
+          sb.from("projects").select("id, title").in("id", contextProjectIds),
         )
       : { data: null };
   const projectNameById = new Map(
-    (projectNamesRes.data ?? []).map((p) => [p.id, p.name?.trim() || null] as const),
+    (projectNamesRes.data ?? []).map((p) => [p.id, p.title?.trim() || null] as const),
   );
   // The journal's per-context figures (canonical reader; null = unreadable).
   // Real work a manager independently confirmed, as facts (entries + distinct
@@ -630,9 +638,10 @@ export async function buildVerifiedCv(): Promise<VerifiedCvResult> {
       }),
     );
 
-  const personName =
-    profileRes.data?.full_name ??
-    (profileRes.data?.email ? profileRes.data.email.split("@")[0] : "—");
+  // No saved name is "—": the page then says the name is not provided. The
+  // part of the e-mail address before "@" is not a name, and this document is
+  // handed to an employer, so it is never printed in its place.
+  const personName = profileRes.data?.full_name?.trim() || "—";
 
   const professionalSummary =
     (

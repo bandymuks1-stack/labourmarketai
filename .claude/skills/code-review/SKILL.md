@@ -33,7 +33,18 @@ against the diff:
    user-facing strings.
 5. **Guards** — `pnpm -F web test` green; if the change fixes a recurring
    violation class, a new `lib/guards/*.test.ts` ships in the same PR.
-6. **Verification evidence** — for user-visible changes, the PR description
+6. **No interface noise (decision 0032)**: in every locale, the diff adds no primitive,
+   redundant or self-evident UI text: no „Paskyros nereikia" / "No account needed" badges, no
+   instructions for obvious actions, no repeated explanations, no demonstration captions, no new
+   helper text without a real need. Function names are short and clear. Legal, consent, security
+   and essential action-consequence texts stay. Added noise is a should-fix; noise that misleads
+   (promises one thing and requires another) is a blocker.
+6a. **Direct counterparty and responsibility chain (decision 0033)**: when a change touches a
+   relationship between two or more parties, check what each party sees and who answers to whom.
+   The chain must be kept for audit. No other participant's identity or commercial terms may leak
+   to a party that does not need them, whether through the UI, an API, a notification, an e-mail,
+   an export, or a chat or MCP answer. A leak is a blocker.
+7. **Verification evidence** — for user-visible changes, the PR description
    states what was exercised in a real browser (webapp-testing pass,
    light + dark). "Typecheck passed" is not verification of visible behavior.
 

@@ -65,7 +65,12 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile --filter=!mobile
 
+      # tsc needs about 2.7 GB on this codebase; Node's default heap on the runner
+      # is about 2 GB, so without this the step dies now and then with
+      # "JavaScript heap out of memory" (runs 41585471700, 41790091398).
       - name: Typecheck
+        env:
+          NODE_OPTIONS: --max-old-space-size=4096
         run: pnpm -F web typecheck
 
       - name: Lint
@@ -162,6 +167,12 @@ jobs:
       # This is the cheap half, and it is also the agent bootstrap command:
       # `node .github/scripts/product-truth.mjs` prints what the product is,
       # what it must never be narrowed into, and which journeys are broken.
+      - name: Backup watchdog (synthetic test, no real backups, no mail)
+        run: sh ops/vps/lm-backup-watchdog.test.sh
+
+      - name: SEO watch (synthetic test, no network, no mail)
+        run: sh ops/vps/lm-seo-watch.test.sh
+
       - name: Product truth (capability register halves agree)
         run: node .github/scripts/product-truth.mjs --check
 
@@ -219,4 +230,7 @@ jobs:
           pnpm check:migration-parity
 
       - name: Build (env-independent)
+        env:
+          # Same heap as deploy-vps.yml: the default of about 2 GB fails now and then.
+          NODE_OPTIONS: --max-old-space-size=6144
         run: pnpm -F web build

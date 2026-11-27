@@ -131,7 +131,17 @@ export type NotificationEventType =
   // work history (a roster person) to the recipient's account. Only the
   // recipient can accept or refuse; the offer otherwise waited, unseen, on
   // their profile page. Carries no name, no hours — only that an offer waits.
-  | "history_link_offered";
+  | "history_link_offered"
+  // v12 (20261111230000): B2B offers. A team (brigade) offered itself to a
+  // company need, or an agency proposed a candidate: the DEMAND OWNER hears
+  // it. The answer goes back to the person who offered. Both directions were
+  // silent — the company found offers only by opening the page, and the
+  // supplier never learned the answer. metadata.decision (accepted /
+  // declined) names the answer; the note never leaves the offer row.
+  | "team_offer_received"
+  | "team_offer_answered"
+  | "candidate_offer_received"
+  | "candidate_offer_answered";
 
 export type NotificationEntityType =
   | "booking_request"
@@ -168,7 +178,14 @@ export type NotificationEntityType =
   // v10: the reviewed journal entry — resolves to the worker's journal.
   | "journal_entry"
   // v11: one roster person an organization offered to link to the recipient.
-  | "organization_person";
+  | "organization_person"
+  // v12: one offer, seen from the demand owner's side (received) and from the
+  // supplier's side (the answer) — two entity types because the destination
+  // differs, the demand_interest_signal / _response precedent.
+  | "team_demand_offer"
+  | "team_demand_offer_response"
+  | "agency_candidate_offer"
+  | "agency_candidate_offer_response";
 
 /**
  * The canonical RUNTIME list of the code-side event types — the union above,
@@ -205,6 +222,10 @@ export const NOTIFICATION_EVENT_TYPES = [
   "message_received",
   "journal_review_decided",
   "history_link_offered",
+  "team_offer_received",
+  "team_offer_answered",
+  "candidate_offer_received",
+  "candidate_offer_answered",
 ] as const satisfies readonly NotificationEventType[];
 
 /** Compile-time exhaustiveness: a union member missing from the runtime list
@@ -289,6 +310,15 @@ export const NOTIFICATION_ENTITY_HREF: Record<NotificationEntityType, string> = 
   // v11: the profile page renders every pending roster-link offer at its TOP
   // (RosterLinkOffers), with accept / refuse — the decision the row is about.
   organization_person: "/dashboard/profile",
+  // v12: scouting renders both the team offers received on a need
+  // (TeamOffersReceived) and the agency candidates waiting for a decision.
+  team_demand_offer: "/dashboard/company/scouting",
+  agency_candidate_offer: "/dashboard/company/scouting",
+  // v12: the team's own offers and their state live on the people page
+  // (TeamDemandOfferForm); an agency's candidate offers on partners
+  // (AgencyBridgeSection).
+  team_demand_offer_response: "/dashboard/company/people",
+  agency_candidate_offer_response: "/dashboard/company/partners",
 };
 
 const VACANCY_ID_RE =
@@ -331,6 +361,15 @@ export function notificationEventHref(
   ) {
     return `/dashboard/communication/${metadata.conversationId}`;
   }
+  // v12: an offer received opens scouting ON THE NEED it is for, where the
+  // employer answers it (the page's default selection may be another need).
+  if (
+    (entityType === "team_demand_offer" || entityType === "agency_candidate_offer") &&
+    typeof metadata?.requestId === "string" &&
+    VACANCY_ID_RE.test(metadata.requestId)
+  ) {
+    return `/dashboard/company/scouting?request=${metadata.requestId}`;
+  }
   return NOTIFICATION_ENTITY_HREF[entityType as NotificationEntityType];
 }
 
@@ -349,6 +388,13 @@ export function notificationRenderedType(
     (JOURNAL_REVIEW_DECISIONS as readonly string[]).includes(metadata.decision)
   ) {
     return `event_journal_review_decided_${metadata.decision}`;
+  }
+  if (
+    (eventType === "team_offer_answered" || eventType === "candidate_offer_answered") &&
+    metadata?.decision &&
+    (OFFER_DECISIONS as readonly string[]).includes(metadata.decision)
+  ) {
+    return `event_${eventType}_${metadata.decision}`;
   }
   if (
     eventType === "weekly_digest" &&
@@ -375,6 +421,9 @@ const SAFE_METADATA_KEYS = [
   // v10 message: the thread's own (opaque uuid) id — a link target, never
   // content. Validated as a uuid again when the href is built.
   "conversationId",
+  // v12 offer received: the (opaque uuid) id of the need the offer is for,
+  // a link target only. Validated as a uuid again when the href is built.
+  "requestId",
   // v10 journal review: one of JOURNAL_REVIEW_DECISIONS — which outcome the
   // worker is being told about. Never the reviewer's note.
   "decision",
@@ -382,6 +431,10 @@ const SAFE_METADATA_KEYS = [
 
 /** The three outcomes a journal review can record (the review RPC's own
  *  vocabulary — lib/journal/review-status REVIEW_DECISIONS). */
+/** v12: the two answers an offer can get — rendered as
+ *  `event_<team|candidate>_offer_answered_<decision>`. */
+export const OFFER_DECISIONS = ["accepted", "declined"] as const;
+
 export const JOURNAL_REVIEW_DECISIONS = [
   "approved",
   "rejected",
@@ -571,51 +624,140 @@ const FEED_LIMIT = 20;
  *  list) — a page is not an export; larger reads stay a deliberate API. */
 const FEED_LIMIT_MAX = 200;
 
+/** The thread a conversation-entity row points at, or null. */
+function rowConversationId(row: {
+  readonly entityType: string;
+  readonly metadata: NotificationEventMetadata;
+}): string | null {
+  if (row.entityType !== "conversation") return null;
+  const id = row.metadata?.conversationId;
+  return typeof id === "string" && id.length > 0 ? id : null;
+}
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+/** Upper bound on the threads one person was removed from that the filter
+ *  carries (it travels in the request URL). Beyond it the oldest removals
+ *  simply stay visible as before — never a wrong hide. */
+const LOST_THREADS_MAX = 200;
+
+/**
+ * The threads the READER was removed from (P0 chat privacy, owner
+ * 2026-11-11): their OWN participant rows with `revoked_at` set, read under
+ * their own session (`conversation_participants_select` always shows a
+ * person their own row). Exact and small — one row per removal, never the
+ * co-participants of live threads, so no API row cap can truncate it into a
+ * wrong answer. Null when it cannot be read: the caller then hides nothing
+ * (the thread itself stays closed by RLS). Exported for tests.
+ */
+export async function lostConversationIds(
+  client: DbClient,
+  readerProfileId: string,
+): Promise<readonly string[] | null> {
+  try {
+    const { data, error } = await client
+      .from("conversation_participants")
+      .select("conversation_id")
+      .eq("profile_id", readerProfileId)
+      .not("revoked_at", "is", null)
+      .limit(LOST_THREADS_MAX);
+    if (error) return null;
+    return ((data ?? []) as { conversation_id?: string | null }[])
+      .map((r) => r.conversation_id)
+      .filter((id): id is string => typeof id === "string" && UUID_RE.test(id));
+  } catch {
+    return null;
+  }
+}
+
+/** The PostgREST filter that keeps every row except a lost thread's chat
+ *  rows. Applied IN the query, so the page limit and the unread count are
+ *  both computed over what the reader may still see. Ids are uuid-checked
+ *  before they reach the filter string. */
+export function lostThreadsFilter(lost: readonly string[]): string | null {
+  const ids = lost.filter((id) => UUID_RE.test(id));
+  if (ids.length === 0) return null;
+  return `entity_type.neq.conversation,metadata->>conversationId.is.null,metadata->>conversationId.not.in.(${ids.join(",")})`;
+}
+
+type RawFeedRow = Record<string, unknown>;
+
+function toEventRow(row: RawFeedRow): NotificationEventRow {
+  return {
+    id: String(row.id),
+    eventType: row.event_type as NotificationEventType,
+    entityType: row.entity_type as NotificationEntityType,
+    entityId: String(row.entity_id),
+    createdAt: String(row.created_at),
+    readAt: (row.read_at as string | null) ?? null,
+    metadata: (row.metadata as NotificationEventMetadata) ?? {},
+  };
+}
+
 /** The recipient's own feed, newest first, with the true unread count.
  *  `limit` defaults to the bell's 20; the activity page passes a higher
  *  value (clamped to FEED_LIMIT_MAX) so stored facts older than the bell
- *  window stay reachable. */
+ *  window stay reachable.
+ *
+ *  A thread the reader was REMOVED from keeps its rows (audit facts, never
+ *  deleted or re-marked) but they leave the feed and the unread total. The
+ *  removal check runs only when it can matter — the page holds a chat row,
+ *  or more unread rows exist than the page shows — so an ordinary feed costs
+ *  no extra request; when it finds a removal, the feed and the count are
+ *  read again with those threads excluded IN the query (a full page, an
+ *  exact count). */
 export async function readMyNotificationEvents(
   client: DbClient,
   limit: number = FEED_LIMIT,
 ): Promise<NotificationFeedResult> {
   const rowLimit = Math.max(1, Math.min(Math.floor(limit), FEED_LIMIT_MAX));
-  try {
-    const [{ data, error }, unreadRes] = await Promise.all([
-      client
-        .from("notification_events")
-        .select("id, event_type, entity_type, entity_id, created_at, read_at, metadata")
-        .order("created_at", { ascending: false })
-        .limit(rowLimit),
-      // The unread TOTAL is its own count query: counting unread rows inside
-      // the loaded window capped it at the window (20 by default) and let the
-      // "unread" number disagree with the real backlog.
-      client
-        .from("notification_events")
-        .select("id", { count: "exact", head: true })
-        .is("read_at", null),
+  const read = (filter: string | null) => {
+    const feed = client
+      .from("notification_events")
+      .select("id, recipient_profile_id, event_type, entity_type, entity_id, created_at, read_at, metadata");
+    // The unread TOTAL is its own count query: counting unread rows inside
+    // the loaded window capped it at the window (20 by default) and let the
+    // "unread" number disagree with the real backlog.
+    const count = client
+      .from("notification_events")
+      .select("id", { count: "exact", head: true });
+    return Promise.all([
+      (filter ? feed.or(filter) : feed).order("created_at", { ascending: false }).limit(rowLimit),
+      (filter ? count.or(filter) : count).is("read_at", null),
     ]);
+  };
+  try {
+    const [{ data, error }, unreadRes] = await read(null);
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
         return { kind: "feature_unavailable" };
       }
       return { kind: "unexpected_error", code: error.code ?? "unknown" };
     }
-    const events = (data ?? []).map((row) => {
-      const r = row as Record<string, unknown>;
-      return {
-        id: String(r.id),
-        eventType: r.event_type as NotificationEventType,
-        entityType: r.entity_type as NotificationEntityType,
-        entityId: String(r.entity_id),
-        createdAt: String(r.created_at),
-        readAt: (r.read_at as string | null) ?? null,
-        metadata: (r.metadata as NotificationEventMetadata) ?? {},
-      };
-    });
-    const windowUnread = events.filter((e) => e.readAt === null).length;
-    const exact =
+    const firstRaw = (data ?? []) as RawFeedRow[];
+    let rows = firstRaw.map(toEventRow);
+    let exact =
       !unreadRes.error && typeof unreadRes.count === "number" ? unreadRes.count : null;
+
+    // Every row is the reader's own (RLS), so any row names the reader.
+    const owner = firstRaw.find((r) => typeof r.recipient_profile_id === "string");
+    const reader = owner ? String(owner.recipient_profile_id) : null;
+    const loadedUnread = rows.filter((r) => r.readAt === null).length;
+    const mayHoldChat =
+      rows.some((r) => rowConversationId(r) !== null) || (exact !== null && exact > loadedUnread);
+    if (reader && mayHoldChat) {
+      const filter = lostThreadsFilter((await lostConversationIds(client, reader)) ?? []);
+      if (filter) {
+        const [again, againUnread] = await read(filter);
+        if (!again.error) {
+          rows = ((again.data ?? []) as RawFeedRow[]).map(toEventRow);
+          exact =
+            !againUnread.error && typeof againUnread.count === "number" ? againUnread.count : null;
+        }
+      }
+    }
+
+    const events: NotificationEventRow[] = rows;
+    const windowUnread = events.filter((e) => e.readAt === null).length;
     return {
       kind: "ready",
       events,
@@ -645,6 +787,41 @@ export async function markAllNotificationEventsRead(
     const { error } = await client
       .from("notification_events")
       .update({ read_at: nowIso } as never)
+      .is("read_at", null);
+    if (error) {
+      if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {
+        return { kind: "feature_unavailable" };
+      }
+      return { kind: "unexpected_error", code: error.code ?? "unknown" };
+    }
+    return { kind: "persisted" };
+  } catch {
+    return { kind: "unexpected_error", code: "thrown" };
+  }
+}
+
+/**
+ * Mark the caller's unread new-message rows of ONE thread read — opening the
+ * thread is reading what those bell rows point at (chat audit 2026-11-11,
+ * defect 7: the thread's own read marker moved, the bell stayed unread).
+ * Same authority as the two mark-read helpers around it: RLS and the
+ * column-level `update (read_at)` grant mean only the caller's own markers
+ * can change. A non-uuid id matches nothing and changes nothing.
+ */
+export async function markConversationNotificationsRead(
+  client: DbClient,
+  conversationId: string,
+  nowIso: string,
+): Promise<MarkReadOutcome> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(conversationId)) {
+    return { kind: "persisted" };
+  }
+  try {
+    const { error } = await client
+      .from("notification_events")
+      .update({ read_at: nowIso } as never)
+      .eq("event_type", "message_received")
+      .eq("metadata->>conversationId", conversationId)
       .is("read_at", null);
     if (error) {
       if (error.code && FEATURE_ABSENT_CODES.has(error.code)) {

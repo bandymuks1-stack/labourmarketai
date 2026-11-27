@@ -235,7 +235,8 @@ function confirmed<S extends z.ZodObject>(spec: {
       title: `Confirm: ${spec.title}`,
       description: `Carries out "${spec.title}" after its prepare step: verifies the token against the caller, the exact input and the CURRENT state, then runs the same canonical action the web runs, once.`,
       exposed: true,
-      annotations: { readOnlyHint: false, destructiveHint: !!spec.destructive, idempotentHint: true, openWorldHint: false },
+      // A confirm spends a single-use token: a repeat is refused, never a no-op.
+      annotations: { readOnlyHint: false, destructiveHint: !!spec.destructive, idempotentHint: false, openWorldHint: false },
       inputSchema: confirmInput,
       run: (caller, raw) =>
         guarded(caller, async () => {

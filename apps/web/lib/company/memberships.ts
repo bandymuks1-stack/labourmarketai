@@ -120,6 +120,9 @@ export type MyMembershipInvitation = {
   readonly organizationId: string;
   readonly organizationName: string;
   readonly role: MembershipRole;
+  /** Who invited the person (v2 read); null while v2 is not applied or unknown. */
+  readonly inviterName: string | null;
+  readonly invitedAt: string | null;
 };
 
 export type MyInvitationsResult =
@@ -139,9 +142,11 @@ export async function listMyMembershipInvitations(): Promise<MyInvitationsResult
   } = await supabase.auth.getUser();
   if (!user) return { kind: "ok", invitations: [] };
 
-  const { data, error } = await asAny(supabase).rpc(
-    "membership_my_invitations_v1",
-  );
+  // v2 adds who invited and when (owner P0 security 2026-11-21); v1 until applied.
+  let { data, error } = await asAny(supabase).rpc("membership_my_invitations_v2");
+  if (error && error.code === RPC_NOT_FOUND_CODE) {
+    ({ data, error } = await asAny(supabase).rpc("membership_my_invitations_v1"));
+  }
   if (error) {
     if (error.code === RPC_NOT_FOUND_CODE) return { kind: "needs-migration" };
     return { kind: "error", message: error.message };
@@ -156,6 +161,8 @@ export async function listMyMembershipInvitations(): Promise<MyInvitationsResult
       organizationId: r.organization_id as string,
       organizationName: ((r.organization_name as string | null) ?? "").trim(),
       role: r.member_role as MembershipRole,
+      inviterName: typeof r.inviter_name === "string" && r.inviter_name.trim() ? r.inviter_name.trim() : null,
+      invitedAt: typeof r.invited_at === "string" ? r.invited_at : null,
     })),
   };
 }

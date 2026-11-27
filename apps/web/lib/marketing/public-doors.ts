@@ -1,4 +1,5 @@
 import { nextPathForIntents } from "@/lib/onboarding/first-run-intent";
+import { requestDoorHref } from "@/lib/staffing/request-door-link";
 
 /**
  * THE PUBLIC DOORS — the final CTA band's registry, PURE (no React, no IO),
@@ -25,7 +26,8 @@ import { nextPathForIntents } from "@/lib/onboarding/first-run-intent";
  *                 `training_provider` capability; the door names it so a
  *                 lecturer no longer has to guess that "I am an employer"
  *                 is theirs.
- *   partner     → /about           (real about/contact page)
+ *   partner     → /#request=partner (the landing's partner request form; owner P0
+ *                 2026-11-15: /about held no partner form or contact)
  * No dead links, no "coming soon" pages.
  */
 
@@ -69,8 +71,10 @@ export type FinalDoorKey = "worker" | "employer" | "agency" | "institution" | "p
  * Each opens an account and a workspace in the product.
  *
  * "Noriu tapti partneriu" answers a different question — a commercial
- * relationship with the company behind the product — and it opens `/about`,
- * not a workspace. Sitting it in the same grid put a business-development
+ * relationship with the company behind the product — and it opens the
+ * landing's partner request form (`/#request=partner`; until 2026-11-15
+ * `/about`, which held no form), not a workspace. Sitting it in the same grid
+ * put a business-development
  * enquiry at the same conceptual level as a welder starting work, which is
  * exactly what §20 asked to be reconsidered.
  *
@@ -104,7 +108,7 @@ export const STARTING_CONTEXTS: ReadonlyArray<{
 ];
 
 /** The partner enquiry — a real door, at its own level. */
-export const PARTNER_DOOR = { key: "partner" as const, href: "/about" };
+export const PARTNER_DOOR = { key: "partner" as const, href: requestDoorHref("partner") };
 
 /**
  * The full door list, unchanged in membership so every existing consumer

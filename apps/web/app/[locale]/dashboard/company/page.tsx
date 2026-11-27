@@ -18,7 +18,7 @@ import {
   governedActiveOrganizationId,
 } from "@/lib/company/active-organization";
 import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
-import { listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
+import { EMPLOYER_DEMAND_KINDS, listOwnCustomerRequests } from "@/lib/buyer/customer-requests";
 import { listClaimablePublicIntakes } from "@/lib/company/claim-public-intake";
 import { listMyConnectionInvites } from "@/lib/agency/bridge-read";
 import { listAgencyClients } from "@/lib/agency/clients";
@@ -34,6 +34,7 @@ import { countRosterConflicts } from "@/lib/planning/roster-conflicts";
 import { loadCompanyHomeField } from "@/lib/company/company-home-field";
 import { homeReadbackRows } from "@/lib/company/company-home-field-model";
 import { CompanyHomeFieldSection } from "@/components/app/company-home-field-section";
+import { OrganizationTodayView } from "@/components/app/organization/organization-today-view";
 import { CompanyNoProfileGuide } from "@/components/app/company-next-actions";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import { PageTitle } from "@/components/app/premium/page-title";
@@ -43,9 +44,6 @@ import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 export const generateMetadata = dashboardPageMetadata("/dashboard/company", "roleDashboards.company.title");
 
 
-// The employer demand kinds the home field's "what we are missing" reads —
-// a dual-role user's buyer service requests stay in the buyer room.
-const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
 
 /**
  * DABAR — the organization's first screen (owner IA correction 2026-09-16,
@@ -73,9 +71,8 @@ const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
  */
 export default async function CompanyDashboardPage({
   params,
-}: {
-  params: Promise<{ locale: string }>;
-}) {
+  searchParams,
+}: { params: Promise<{ locale: string }>; searchParams?: Promise<{ view?: string | string[] }> }) {
   const { locale } = await params;
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
@@ -150,6 +147,9 @@ export default async function CompanyDashboardPage({
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow?.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
     governedActiveOrganizationId(orgContext);
+  if ((await searchParams)?.view === "today") {
+    return <OrganizationTodayView organizationId={capabilityOrgId} company={companyRow} context={employerCtx} />;
+  }
   const declaredCapabilities = capabilityOrgId
     ? await readOrganizationCapabilities(capabilityOrgId)
     : [];
@@ -208,7 +208,8 @@ export default async function CompanyDashboardPage({
     // Never summed with the employer count above: its own number and label.
     {
       key: "clientReview",
-      count: clientToDecide ?? 0,
+      // null = the count could not be read (SEP-7) — kept, never 0.
+      count: clientToDecide,
       href: `/${locale}/dashboard/inbox/counterparty`,
     },
     // Recorded work nobody can confirm yet (review switched off). Unknown (a
@@ -253,7 +254,7 @@ export default async function CompanyDashboardPage({
     },
     {
       key: "invite",
-      href: "/dashboard/network?type=join_as_employee",
+      href: "/dashboard/network?invite=1&type=join_as_employee",
       label: tDoors("invite"),
       icon: <UserPlus className="h-4 w-4" aria-hidden />,
     },

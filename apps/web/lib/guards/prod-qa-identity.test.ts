@@ -61,18 +61,23 @@ const FORBIDDEN_PROVISIONING_SQL: readonly RegExp[] = [
 ];
 
 describe("exactly the synthetic cast is allowlisted", () => {
-  it("the allowlist is exactly these nine, each unmistakably synthetic", () => {
+  it("the allowlist is exactly these twelve, each unmistakably synthetic", () => {
     // Widening is a reviewed code change (owner decision 2026-09-28 added the
     // three +multiw identities beside the worker; owner decision 2026-10-26
     // added the two fresh-activation identities; owner decision 2026-10-28 the
-    // one invited worker). Pinned exactly.
+    // one invited worker; owner decision 2026-11-10 the act2 fresh pair, act1
+    // being onboarded; coordinator order 2026-11-23, owner-approved, the one
+    // read-only Living CV screens account). Pinned exactly.
     expect([...PROD_QA_IDENTITIES].sort()).toEqual(
       [
         "qa.agency+multiw@labourmarket.ai",
         "qa.buyer+act1@labourmarket.ai",
         "qa.freshcompany+act1@labourmarket.ai",
+        "qa.freshcompany+act2@labourmarket.ai",
         "qa.freshworker+act1@labourmarket.ai",
+        "qa.freshworker+act2@labourmarket.ai",
         "qa.invited@labourmarket.ai",
+        "qa.livingcv+read1@labourmarket.ai",
         "qa.manager+multiw@labourmarket.ai",
         "qa.owner+multiw@labourmarket.ai",
         "qa.worker+goal3@labourmarket.ai",
@@ -91,8 +96,11 @@ describe("exactly the synthetic cast is allowlisted", () => {
     expect([...PROD_QA_FRESH_IDENTITIES].sort()).toEqual([
       "qa.buyer+act1@labourmarket.ai",
       "qa.freshcompany+act1@labourmarket.ai",
+      "qa.freshcompany+act2@labourmarket.ai",
       "qa.freshworker+act1@labourmarket.ai",
+      "qa.freshworker+act2@labourmarket.ai",
       "qa.invited@labourmarket.ai",
+      "qa.livingcv+read1@labourmarket.ai",
     ]);
     // The mint looks the account up and refuses before any magic link exists.
     const mint = read(MINT);
@@ -103,8 +111,8 @@ describe("exactly the synthetic cast is allowlisted", () => {
     // The walk mints the fresh pair WITHOUT the provision step.
     const walk = readFileSync(join(WEB, "..", "..", ".github", "workflows", "prod-qa-walk.yml"), "utf8");
     const fresh = walk.slice(walk.indexOf("mint_existing()"), walk.indexOf("- name: Walk"));
-    expect(fresh).toMatch(/mint_existing "qa\.freshworker\+act1@labourmarket\.ai"/);
-    expect(fresh).toMatch(/mint_existing "qa\.freshcompany\+act1@labourmarket\.ai"/);
+    expect(fresh).toMatch(/mint_existing "qa\.freshworker\+act2@labourmarket\.ai"\s+freshworker/);
+    expect(fresh).toMatch(/mint_existing "qa\.freshcompany\+act2@labourmarket\.ai"\s+freshcompany/);
     const body = fresh.slice(0, fresh.indexOf("}"));
     expect(body).not.toMatch(/prod-qa-provision/);
     // A fresh account starts like a real one: no role in its metadata; the
@@ -113,6 +121,7 @@ describe("exactly the synthetic cast is allowlisted", () => {
     expect(read(PROVISION)).toMatch(/PROD_QA_BUYER_EMAIL\s*\? \{ role: "customer" \}/);
     expect(read(PROVISION)).not.toMatch(/role: "admin"/);
     expect(walk).toMatch(/mint_existing "qa\.buyer\+act1@labourmarket\.ai"\s+buyer/);
+    expect(walk).toMatch(/mint_existing "qa\.livingcv\+read1@labourmarket\.ai"\s+livingcv/);
   });
 
   it("accepts the allowlisted identity against production", () => {
@@ -348,6 +357,9 @@ describe("the production path is a SCRIPT, never a reachable surface", () => {
       // one-run password script to the allowlisted owner (#2871). Reads the
       // guard as text, imports nothing from it.
       "lib/guards/mobile-qa-credential.test.ts",
+      // Another guard TEST (never shipped): keeps the service-role key off the
+      // browser walk (R2 P3-1 on #3303). Names the key-reading scripts as text.
+      "lib/guards/prod-walk-service-key-scope.test.ts",
     ]);
     const offenders: string[] = [];
     for (const dir of ["app", "components", "lib"]) {

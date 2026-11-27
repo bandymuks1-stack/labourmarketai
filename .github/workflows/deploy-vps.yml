@@ -21,8 +21,34 @@ name: Deploy to VPS
 #     Deploys queue (cancel-in-progress: false); a newer pending deploy supersedes an
 #     older pending one, never a running one. The ordering applies to this automatic
 #     path only; workflow_dispatch below still rolls back or redeploys any main sha.
+#     It ships nothing when everything since the build production serves is under docs/.
 #   - workflow_dispatch: manual deploy / redeploy of a sha on main (rollback path).
 # It never deploys a tree whose Quality Gates did not pass (checked below for both).
+#
+# ONE DEPLOY QUEUE (owner P0 2026-11-24). A deploy and its production checks are
+# ONE run, so ONE sequential process in the `deploy-vps` concurrency group:
+#   gate -> build -> deploy -> checks (post-deploy-smoke.yml, called with
+#   `workflow_call`: public smoke, signed-in smoke, regression report).
+# The next deploy cannot start until this deploy's checks have finished, so a
+# check never measures another deploy. cancel-in-progress is false: a started
+# deploy and its checks always finish. GitHub keeps at most ONE pending run per
+# group, so a newer pending deploy supersedes an older pending one — intended:
+# main's newest head deploys and gets checked. This is the ONLY workflow that
+# ships or rolls back production (guard: lib/guards/deploy-queue.test.ts).
+#
+# REGRESSION FREEZE. A check that genuinely FAILS opens the regression issue with
+# the `deploy-freeze` label (.github/scripts/post-deploy-regression-issue.sh).
+# While such an issue is open, `gate` refuses every deploy, automatic or manual,
+# as BLOCKED with the issue link. Closing the issue lifts the freeze; the next
+# deploy and its checks must pass. A check that did NOT run (BLOCKED) never
+# freezes anything. While frozen, no normal deploy can ship a fix: the owner
+# closes the issue once the fix is merged, or dispatches an emergency.
+#   Emergency security fix: workflow_dispatch with `emergency=true` and a
+#   `reason`. The gate checks only that the actor is the repository owner's
+#   ACCOUNT, which agent sessions also use, so it cannot tell an agent from the
+#   owner. Binding policy (AGENTS.md, CLAUDE.md "Deploy freeze emergency"):
+#   agents never dispatch it; only the owner does, in person. It bypasses the
+#   freeze, still runs every check, and is logged on the freeze issue.
 #
 # Secrets (owner-created, names only):
 #   VPS_DEPLOY_SSH_KEY     private key whose public half is in the VPS
@@ -52,6 +78,14 @@ on:
         description: "Owner only: deploy even if no successful Quality Gates run exists for the sha"
         type: boolean
         default: false
+      emergency:
+        description: "Deploy through an open deploy-freeze (emergency security fix); the checks still run. Policy: the owner in person only, never an agent (agents use the owner's account; the workflow cannot tell them apart)"
+        type: boolean
+        default: false
+      reason:
+        description: "Required with emergency: why this deploy cannot wait for the freeze to lift"
+        required: false
+        default: ""
 
 concurrency:
   group: deploy-vps
@@ -62,11 +96,37 @@ permissions:
   actions: read
 
 jobs:
-  build:
-    # Automatic path: only a SUCCESSFUL Quality Gates run that came from a push to main.
+  # The freeze check, before anything is built or shipped. BLOCKED (red, with the
+  # issue link) while an open freeze issue exists, unless this is an emergency
+  # dispatch from the owner's account with a reason, which is then logged on
+  # that issue. The account check is not an identity check (agents use the same
+  # account); "owner in person only" is a binding policy, not something enforced here.
+  gate:
     if: >-
       github.event_name == 'workflow_dispatch' ||
       (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      issues: write # read the freeze, log an emergency on it
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: .github/scripts
+      - name: "Deploy freeze: refuse while a deploy-freeze issue is open (owner emergency excepted)"
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          EMERGENCY: ${{ github.event_name == 'workflow_dispatch' && inputs.emergency || false }}
+          REASON: ${{ inputs.reason }}
+          ACTOR: ${{ github.actor }}
+          OWNER: ${{ github.repository_owner }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: bash .github/scripts/deploy-freeze-gate.sh
+
+  build:
+    needs: gate
     runs-on: ubuntu-latest
     timeout-minutes: 40
     outputs:
@@ -74,6 +134,12 @@ jobs:
       sha: ${{ steps.resolve.outputs.sha }}
       sha256: ${{ steps.pack.outputs.sha256 }}
     steps:
+      # Into its own folder, so it can't affect the checkout of the commit below. On workflow_run this is main's script.
+      - uses: actions/checkout@v4
+        if: github.event_name == 'workflow_run'
+        with:
+          path: .deploy-check
+          sparse-checkout: .github/scripts
       - name: Resolve sha
         id: resolve
         env:
@@ -90,11 +156,19 @@ jobs:
           else
             sha="${INPUT_SHA:-$head}"
           fi
-          echo "skip=false" >> "$GITHUB_OUTPUT"
           [[ "$sha" =~ ^[0-9a-f]{40}$ ]] || { echo "::error::sha must be a full 40-hex commit"; exit 1; }
           gh api "repos/${GITHUB_REPOSITORY}/compare/main...${sha}" --jq '.status' | grep -qE '^(identical|behind)$' \
             || { echo "::error::${sha} is not on main (only main is deployed to production)"; exit 1; }
           echo "sha=$sha" >> "$GITHUB_OUTPUT"
+          # Automatic path only: everything since the build production serves is under docs/, so there is nothing to ship.
+          # A manual dispatch always ships. Any doubt deploys.
+          skip=false
+          if [ "$EVENT" = "workflow_run" ]; then
+            verdict=$(node .deploy-check/.github/scripts/deploy-docs-only.mjs "$sha") || verdict="skip=false check did not run"
+            echo "docs-only check: $verdict" | tee -a "$GITHUB_STEP_SUMMARY"
+            [ "${verdict%% *}" = "skip=true" ] && skip=true
+          fi
+          echo "skip=$skip" >> "$GITHUB_OUTPUT"
       - name: Require a successful Quality Gates run for this sha
         if: ${{ steps.resolve.outputs.skip != 'true' && !inputs.skip_quality_check }}
         env:
@@ -182,6 +256,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     environment: production-vps
+    outputs:
+      # true only when this run shipped a build (never-backwards may skip it).
+      shipped: ${{ steps.order.outputs.go }}
     env:
       SHA: ${{ needs.build.outputs.sha }}
       SHA256: ${{ needs.build.outputs.sha256 }}
@@ -232,7 +309,24 @@ jobs:
           f="labourmarket-web-standalone-${SHA}.tgz"
           echo "${SHA256}  ${f}" | sha256sum -c -
           # The receiver reads the tarball from stdin and prints only names, sizes, http codes and the outcome.
-          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "lmdeploy@${HOST}" "deploy ${SHA} ${SHA256}" < "$f" | tee deploy.log
+          # CONNECTION RETRY (run 45406594897: "ssh: connect to host … port 22: Connection timed out"):
+          # up to 3 tries, 60 s then 120 s apart, ONLY while the receiver has not started — it prints
+          # `previous=` first, so an empty log with ssh exit 255 means nothing ran on the VPS. Once the
+          # receiver has started, its own result stands (it rolls back by itself); nothing is re-sent.
+          for try in 1 2 3; do
+            code=0
+            # ConnectTimeout bounds only the connection; a started deploy session is never cut short.
+            ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes -o ConnectTimeout=30 \
+              "lmdeploy@${HOST}" "deploy ${SHA} ${SHA256}" < "$f" > deploy.log 2> ssh.err || code=$?
+            cat deploy.log; cat ssh.err >&2
+            if [ "$code" -eq 255 ] && ! grep -q '^previous=' deploy.log; then
+              echo "try ${try}/3: no SSH connection to the VPS (exit 255, the receiver did not start)"
+              if [ "$try" -lt 3 ]; then sleep $((try * 60)); continue; fi
+              echo "::error::VPS NETWORK: three SSH connections to the VPS on port 22 failed over about 4 minutes (connection refused or timed out before the receiver started). Nothing was deployed and production keeps its build. Check the VPS is up and that port 22 accepts GitHub Actions runners (provider firewall / panel), then re-run this deploy."
+              exit 1
+            fi
+            break
+          done
           grep -q '^DEPLOY_OK ' deploy.log || { echo "::error::receiver did not report DEPLOY_OK (see log; it rolls back by itself)"; exit 1; }
           rm -f ~/.ssh/deploy_key
       - name: Public verification through Cloudflare
@@ -245,3 +339,18 @@ jobs:
             sleep 10
           done
           echo "::error::public /api/health does not serve build ${SHA:0:8} yet"; exit 1
+
+  # The production checks of THIS deploy, inside this run and so inside the
+  # `deploy-vps` group: post-deploy-smoke.yml reused, never copied.
+  checks:
+    needs: [build, deploy]
+    if: needs.deploy.result == 'success' && needs.deploy.outputs.shipped == 'true'
+    permissions:
+      contents: read
+      actions: read # the deploy brake and the last green run
+      deployments: read # permission ceiling for the reusable smoke workflow
+      issues: write # the one regression issue (deploy-freeze)
+    uses: ./.github/workflows/post-deploy-smoke.yml
+    with:
+      deploy_sha: ${{ needs.build.outputs.sha }}
+    secrets: inherit

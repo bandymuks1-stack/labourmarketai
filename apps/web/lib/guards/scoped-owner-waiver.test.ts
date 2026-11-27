@@ -308,7 +308,7 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // "no" answers and refused to waive itself; the waiver record arrived
     // WITH the owner approval, in the same commit that carries the
     // @human-gate-approved annotation on the RED migration.
-    expect(SCOPED_OWNER_WAIVERS).toHaveLength(7);
+    expect(SCOPED_OWNER_WAIVERS).toHaveLength(8);
     expect(SCOPED_OWNER_WAIVERS.map((r) => r.id)).toEqual([
       "public-acquisition-route-create-cv",
       "public-acquisition-route-jobs",
@@ -317,13 +317,14 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
       "oauth-consent-auth-infrastructure",
       "work-hours-allocation-surface",
       "journal-photo-viewer-modal",
+      "public-acquisition-route-services",
     ]);
 
     // The 2026-08-31 boundary, executable rather than trusted: three codes,
     // one route (plus its page path for diff matching), one PR, A-01 only.
     const hours = SCOPED_OWNER_WAIVERS[5];
     expect(hours.axioms).toEqual(["A-01"]);
-    expect(hours.pullRequests).toEqual([1344, 2101, 2159, 2234, 2526]);
+    expect(hours.pullRequests).toEqual([1344, 2101, 2159, 2234, 2526, 3140]);
     expect(hours.files).toEqual([
       "/dashboard/hours",
       "apps/web/app/[locale]/dashboard/hours/page.tsx",
@@ -607,9 +608,25 @@ describe("scoped waiver — W5 and everything new can NEVER inherit it", () => {
     // the job-page hreflang fix." Bounded — not general authority.
     expect(jobs.pullRequests).toEqual([
       1184, 1193, 1203, 1208, 1255, 1649, 1786, 1809, 1810, 1838, 1837, 1890,
-      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467, 2771, 2984, 2991,
+      1892, 1991, 1993, 2045, 2101, 2211, 2253, 2388, 2467, 2771, 2984, 2991, 3087,
+      3149,
+      3154,
+      3171,
+      3123,
+      3255,
+      3261,
+      3448,
+      3181,
     ]);
+    // #3448 + #3181 (2026-11-16) on the owner's verbatim approval, each added in its own PR: "I approve adding ONLY PRs 3181 and 3448 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3255 (2026-11-12) on the owner's approval given to the coordinator in its own session; only the number is added.
+    // #3261 (2026-11-12) on the owner's approval given to the coordinator in its own session; only the number is added.
+    // #3123 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3123 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3171 (2026-11-09) on the owner's verbatim approval: "I approve adding ONLY PR 3171 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3154 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3154 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3149 (2026-11-08) on the owner's verbatim approval: "I approve adding ONLY PR 3149 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #2984 + #2991 (2026-11-03) on the owner's verbatim approval: "I approve adding ONLY PR 2991 and PR 2984 to the existing public-acquisition-route-jobs waiver pullRequests list."
+    // #3087 (2026-11-04) on the owner's verbatim approval: "I approve adding ONLY PR 3087 to the existing public-acquisition-route-jobs waiver pullRequests list."
     // #2771 (2026-10-25) on the owner's verbatim approval: "Patvirtinu PR #2771 įtraukimą į `public-acquisition-route-jobs` išimties `pullRequests` sąrašą. Pridėk tik `#2771`, nekeisk kitų išimties sąlygų ir nesilpnink saugiklių."
     // Markup only — the two /jobs page wrappers become <div> (one <main>).
     // #2467 (2026-10-18) on the owner's verbatim scoped approval: "Patvirtinu
@@ -847,5 +864,51 @@ describe("scoped waiver — the run context", () => {
 
   it("is not a PR when nothing says so", () => {
     expect(waiverContextFromEnv({}, new Date("2026-08-01T00:00:00Z")).pullRequest).toBeNull();
+  });
+});
+
+describe("public service surface — existing owner mandate stays bounded", () => {
+  const record = SCOPED_OWNER_WAIVERS.find((w) => w.id === "public-acquisition-route-services")!;
+  const findings = record.expectedFindings.map((f) => ({ code: f.code, axiom: "A-01", what: f.file }));
+  const context = { pullRequest: 3818, headSha: null, today: "2026-11-25", changedFiles: record.files };
+
+  it("covers only the mandated pre-auth category for the two service routes", () => {
+    expect(record.pullRequests).toEqual([3818]);
+    expect(record.axioms).toEqual(["A-01"]);
+    expect(record.postMergeBranches).toEqual(["main"]);
+    expect(record.expectedFindings).toHaveLength(12);
+    expect([...new Set(findings.map((f) => f.what))].sort()).toEqual(["/services", "/services/[id]"]);
+    expect([...new Set(findings.map((f) => f.code))].sort()).toEqual([
+      "not_ai_controlled", "not_reflected_on_map", "not_world_state_driven",
+      "requires_leaving_workspace", "requires_new_page", "world_state_cannot_control_it",
+    ]);
+    expect(record.reason).toContain("migration approval remain separate and pending");
+    expect(evaluateFindings(findings, context, [record]).pass).toBe(true);
+  });
+
+  it("blocks a different PR touching any service implementation file", () => {
+    const implementationPaths = [
+      "apps/web/app/[locale]/(marketing)/services/page.tsx",
+      "apps/web/app/[locale]/(marketing)/services/search-form.tsx",
+      "apps/web/app/[locale]/(marketing)/services/[id]/page.tsx",
+      "apps/web/app/[locale]/(marketing)/services/[id]/not-found.tsx",
+    ];
+    for (const path of implementationPaths) {
+      const result = evaluateFindings(findings, { ...context, pullRequest: 9999, changedFiles: [path] }, [record]);
+      expect(result.pass, path).toBe(false);
+      expect(result.blockingFindings[0].decision.rejection, path).toBe("pr-not-covered");
+    }
+  });
+
+  it("cannot excuse a different axiom, route or an additional finding", () => {
+    for (const extra of [
+      { ...findings[0], axiom: "A-09" },
+      { ...findings[0], what: "/workers" },
+      { ...findings[0], code: "duplicate_action" },
+    ]) {
+      const result = evaluateFindings([...findings, extra], context, [record]);
+      expect(result.pass).toBe(false);
+      expect(result.blockingFindings).toHaveLength(1);
+    }
   });
 });

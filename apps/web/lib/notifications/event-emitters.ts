@@ -86,6 +86,8 @@ import {
   isNotificationStoreWriteBlocked,
   type NotificationEventInput,
   type JournalReviewDecision,
+  type NotificationEntityType,
+  type NotificationEventMetadata,
   type NotificationEventType,
 } from "./events";
 import {
@@ -116,6 +118,38 @@ import { getWorkerJobRecommendations } from "@/lib/opportunities/recommendations
 import { getWeeklyPersonalIntelligence } from "../worker/weekly-intelligence";
 
 type AdminClient = ReturnType<typeof createAdminClient>;
+
+/**
+ * The OTHER party of a team offer, as the recipient of its notification: for
+ * the team that offered or withdrew, the owner of the need; for the company
+ * answering, the person who made the offer. Neither side can read the other
+ * under its own RLS, so it comes from the gated SECURITY DEFINER
+ * `team_offer_counterpart_v1` (20261112213100, RED, owner-gated).
+ *
+ * Decision 0033: that identity must never reach the other party. The function
+ * is executable by service_role ONLY, so it is called here with the admin
+ * client, passing the caller id the calling server action verified from the
+ * session (never browser input) and the event being notified. It answers only
+ * when the offer's current state matches the event and the caller is on the
+ * side that caused it. The id addresses one notification row and is never
+ * returned to the browser, MCP or chat. Until the migration is applied, or on
+ * any error, this is null and the notification names an unresolved recipient
+ * instead of guessing.
+ */
+export async function resolveTeamOfferCounterpart(
+  offerId: string,
+  callerId: string,
+  event: "offered" | "withdrawn" | "accepted" | "declined",
+): Promise<string | null> {
+  try {
+    const { data, error } = await (createAdminClient() as unknown as {
+      rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
+    }).rpc("team_offer_counterpart_v1", { p_offer_id: offerId, p_caller: callerId, p_event: event });
+    return !error && typeof data === "string" ? data : null;
+  } catch {
+    return null;
+  }
+}
 
 /**
  * ONE greppable marker for "the domain write happened and the recipient was
@@ -168,7 +202,10 @@ type DeliverOutcome =
   | "write_blocked"
   | "unexpected_error"
   /** The recipient stored an explicit in-app opt-out for this type. */
-  | "suppressed_preference";
+  | "suppressed_preference"
+  /** The send-time re-check said the recipient may no longer be told (a
+   *  participant removed between the read and the delivery). */
+  | "recipient_ineligible";
 
 /**
  * Why a write-path emitter did not deliver. The LOGGED reasons are real
@@ -192,6 +229,9 @@ export type NotificationUndeliveredReason =
   | "self_action"
   /** Approved silence: the recipient stored an in-app opt-out. */
   | "suppressed_preference"
+  /** Approved silence: the send-time re-check found the recipient no longer
+   *  eligible (removed from the thread) — no channel ran after that. */
+  | "recipient_ineligible"
   /** Approved silence: this event type does not carry this status. */
   | "not_applicable"
   /** Named degradation: the store is not applied here. */
@@ -354,6 +394,11 @@ function reportEmailOutcome(
 async function deliverDetailed(
   admin: AdminClient,
   input: NotificationEventInput,
+  opts?: {
+    /** Asked right before EACH channel (bell, e-mail, push); false stops
+     *  that channel and every later one. */
+    readonly isEligible?: () => Promise<boolean>;
+  },
 ): Promise<{
   readonly outcome: DeliverOutcome;
   readonly email: NotificationEmailDispatchOutcome | null;
@@ -368,6 +413,15 @@ async function deliverDetailed(
     // APPROVED silence: the recipient turned this type off themselves.
     return { outcome: "suppressed_preference", email: null };
   }
+  const eligible = async (): Promise<boolean> => {
+    if (!opts?.isEligible) return true;
+    try {
+      return (await opts.isEligible()) === true;
+    } catch {
+      return false;
+    }
+  };
+  if (!(await eligible())) return { outcome: "recipient_ineligible", email: null };
   const outcome = await emitNotificationEvent(admin, input);
   if (outcome.kind === "unexpected_error") {
     // `duplicate` and `feature_unavailable` are approved outcomes and stay
@@ -377,11 +431,15 @@ async function deliverDetailed(
   }
   let email: NotificationEmailDispatchOutcome | null = null;
   if (outcome.kind === "written") {
+    // Re-checked again: the bell insert above took a round trip, and a
+    // removal in that window must not reach the person's inbox or device.
+    if (!(await eligible())) return { outcome: outcome.kind, email: null };
     email = await maybeDispatchNotificationEmail(admin, input, prefRows);
     reportEmailOutcome(input.eventType, email);
     // COM-3 push hop: the same event, the same recipient, the same copy as
     // the bell. Inert until the owner switches the channel on (flag + VAPID
     // keys) AND the person opted in on a device; never fails the insert.
+    if (!(await eligible())) return { outcome: outcome.kind, email };
     const push = await maybeDispatchWebPush(admin, input, prefRows);
     if (push.kind === "send_failed") {
       console.warn("[notifications/push] not delivered", { eventType: input.eventType, reason: push.reason });
@@ -1762,6 +1820,13 @@ export interface MessageReceivedNotificationFacts {
   /** All participant profile ids as read under the sender's session (the
    *  sender may be included; it is filtered here). */
   readonly participantProfileIds: readonly string[];
+  /** SEND-TIME eligibility (P0 chat privacy, owner 2026-11-11): asked again
+   *  right before EACH channel (bell insert, e-mail, push) for each
+   *  recipient, so a removal that lands between the participant read and the
+   *  delivery stops the remaining channels. Read by the send path under the
+   *  author's session (service_role holds no grant on the participant table).
+   *  Must answer false when it cannot tell. Absent = no re-check. */
+  readonly isStillParticipant?: (profileId: string) => Promise<boolean>;
   /** Clock seam - epoch ms; defaults to now. */
   readonly nowMs?: number;
 }
@@ -1790,13 +1855,18 @@ export async function emitMessageReceivedNotifications(
     );
     const results: NotificationEmitResult[] = [];
     for (const recipient of recipients) {
-      const d = await deliverDetailed(admin, {
-        recipientProfileId: recipient,
-        eventType: "message_received",
-        entityType: "conversation",
-        entityId,
-        metadata: { conversationId: facts.conversationId },
-      });
+      const recheck = facts.isStillParticipant;
+      const d = await deliverDetailed(
+        admin,
+        {
+          recipientProfileId: recipient,
+          eventType: "message_received",
+          entityType: "conversation",
+          entityId,
+          metadata: { conversationId: facts.conversationId },
+        },
+        recheck ? { isEligible: () => recheck(recipient) } : undefined,
+      );
       results.push(resultFromOutcome(d.outcome, d.email?.kind ?? null));
     }
     return combineResults(results, "message_received");
@@ -2135,4 +2205,103 @@ export async function emitJobAlertNotificationsForCron(): Promise<JobAlertCronRe
   } catch {
     return { kind: "unavailable", reason: "thrown" };
   }
+}
+
+/* ═════════════════════════════════════════════════════════════════════════
+ * B2B OFFERS (v12, 20261111230000) - a team (brigade) offered itself to a
+ * company need, or an agency proposed a candidate for it. Both directions
+ * were silent: the demand owner found offers only by opening scouting, and
+ * the supplier never learned the answer (Swedish employer audit, N-1/N-2).
+ *
+ * THE RECIPIENT IS A FACT THE WRITE PATH HANDS IN, resolved under the
+ * CALLER's own session from the offer's own rows - never from request input,
+ * never with the admin client. service_role holds no grant on
+ * customer_requests, team_demand_offers or agency_candidate_offers (the
+ * 2026-09-17 demand-interest lesson), and none is added:
+ *   - candidate offer received: the agency reads its offer row's request and
+ *     that request's owner through the share policy it already holds
+ *     (customer_requests_select_agency_share);
+ *   - candidate offer answered: the client reads the offer's `created_by`
+ *     (agency_candidate_offers_select admits the client company);
+ *   - team offer, both directions: the counterpart comes from the gated
+ *     SECURITY DEFINER `team_offer_counterpart_v1`, a separate owner-gated
+ *     migration. Until it exists the recipient is unresolved and nothing is
+ *     sent - named, never guessed.
+ *
+ * ONE recipient, the person the offer is addressed to or came from - never an
+ * organization-wide fan-out. Idempotent: the entity is the OFFER, so a retried
+ * write re-emits the same (type, offer) key and the store's UNIQUE
+ * (recipient, dedupe_key) turns it into a no-op. The row carries no name, no
+ * contact, no CV field: the received event carries only the need's opaque
+ * id (its link target), the answer only `decision`.
+ *
+ * Inert until the v12 constraint is applied: the insert fails its CHECK and
+ * the result says so, the v2..v11 precedent.
+ * ═════════════════════════════════════════════════════════════════════════ */
+export type OfferNotificationKind = "team" | "candidate";
+
+const OFFER_RECEIVED = {
+  team: { eventType: "team_offer_received", entityType: "team_demand_offer" },
+  candidate: { eventType: "candidate_offer_received", entityType: "agency_candidate_offer" },
+} as const;
+const OFFER_ANSWERED = {
+  team: { eventType: "team_offer_answered", entityType: "team_demand_offer_response" },
+  candidate: { eventType: "candidate_offer_answered", entityType: "agency_candidate_offer_response" },
+} as const;
+
+export interface OfferNotificationFacts {
+  readonly kind: OfferNotificationKind;
+  /** The offer row's id - the entity, and so the dedupe key. */
+  readonly offerId: string;
+  /** Resolved by the write path under the caller's session (see above).
+   *  Null = unresolved: nothing is sent and the miss is named. */
+  readonly recipientProfileId: string | null;
+  /** auth.uid() of the person who made the offer or answered it. */
+  readonly actorProfileId: string;
+}
+
+export interface OfferAnsweredFacts extends OfferNotificationFacts {
+  readonly decision: "accepted" | "declined";
+}
+
+async function deliverOfferEvent(
+  eventType: NotificationEventType,
+  entityType: NotificationEntityType,
+  facts: OfferNotificationFacts,
+  metadata?: NotificationEventMetadata,
+): Promise<NotificationEmitResult> {
+  if (!facts.recipientProfileId) return undeliveredResult(eventType, "recipient_unresolved");
+  if (facts.recipientProfileId === facts.actorProfileId) return { delivered: false, reason: "self_action" };
+  try {
+    const admin = createAdminClient();
+    return resultFromOutcome(
+      await deliver(admin, {
+        recipientProfileId: facts.recipientProfileId,
+        eventType,
+        entityType,
+        entityId: facts.offerId,
+        ...(metadata ? { metadata } : {}),
+      }),
+    );
+  } catch (err) {
+    return undeliveredResult(eventType, "threw", err instanceof Error ? err.message.slice(0, 200) : undefined);
+  }
+}
+
+/** A NEW offer reached the demand owner. The only metadata is the need's id,
+ *  so the bell opens scouting on that need; the offer itself is read there,
+ *  under the owner's own RLS. */
+export async function emitOfferReceivedNotification(
+  facts: OfferNotificationFacts & { readonly requestId: string | null },
+): Promise<NotificationEmitResult> {
+  const { eventType, entityType } = OFFER_RECEIVED[facts.kind];
+  return deliverOfferEvent(eventType, entityType, facts, facts.requestId ? { requestId: facts.requestId } : undefined);
+}
+
+/** The company answered; the one who offered hears which answer. */
+export async function emitOfferAnsweredNotification(
+  facts: OfferAnsweredFacts,
+): Promise<NotificationEmitResult> {
+  const { eventType, entityType } = OFFER_ANSWERED[facts.kind];
+  return deliverOfferEvent(eventType, entityType, facts, { decision: facts.decision });
 }

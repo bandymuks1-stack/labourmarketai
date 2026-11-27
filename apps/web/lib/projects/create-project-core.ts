@@ -18,8 +18,9 @@ import { resolveOrganizationIdForCompany } from "@/lib/company/resolve-organizat
  * tenancy underneath — this layer never widens anything.
  */
 
-export const PROJECT_TITLE_MIN = 2;
-export const PROJECT_TITLE_MAX = 200;
+import { PROJECT_TITLE_MAX, PROJECT_TITLE_MIN } from "./project-title-limits";
+
+export { PROJECT_TITLE_MAX, PROJECT_TITLE_MIN };
 
 export type CreateProjectCoreResult =
   | { ok: true; id: string }

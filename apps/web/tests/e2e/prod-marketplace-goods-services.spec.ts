@@ -90,7 +90,7 @@ async function publishListing(
   l: string,
   f: { domain: string; kind: string; category: string; title: string; asOrganization?: boolean },
 ): Promise<string> {
-  await page.goto(`/${l}/dashboard/listings`);
+  await page.goto(`/${l}/dashboard/listings?tab=mine`);
   // Scoped to <main>: see `findInMarket`.
   const main = page.getByRole("main");
   await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
@@ -165,6 +165,11 @@ async function findInMarket(page: Page, l: string, group: string, title: string)
   await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
   await main.getByTestId(`market-group-${group}`).click().catch(() => undefined);
   const card = main.getByTestId("market-browse-row").filter({ hasText: title }).first();
+  // The list folds after its first rows (decision 0034): open the fold when the row is below it.
+  await page.waitForLoadState("networkidle").catch(() => undefined);
+  if (!(await card.isVisible().catch(() => false))) {
+    await main.getByTestId("market-browse-more").locator("summary").click().catch(() => undefined);
+  }
   await expect(card, `"${group}" shows the row`).toBeVisible({ timeout: 30_000 });
   return card;
 }
@@ -285,12 +290,16 @@ test("S-1. the provider offers a service and makes it discoverable", async ({ br
   await expect(row).toBeVisible({ timeout: 30_000 });
   serviceId = (await row.getAttribute("data-testid"))!.replace("service-offering-row-", "");
   const status = inMain(page).getByTestId(`service-offering-status-${serviceId}`);
-  if (!/aktyv|active/i.test(await status.innerText())) {
-    await inMain(page).getByTestId(`service-offering-toggle-${serviceId}`).click();
-  }
   // The discoverability line renders for draft and paused rows too: wait for
-  // the row itself to say ACTIVE before the next actor looks for it.
-  await expect(status).toHaveText(/aktyv|active/i, { timeout: 30_000 });
+  // the row itself to say ACTIVE before the next actor looks for it; the
+  // publish can queue behind the save's refresh (prod-marketplace run
+  // 41721656743), so keep the page open and re-click if it never lands.
+  await expect(async () => {
+    if (!/aktyv|active/i.test(await status.innerText())) {
+      await inMain(page).getByTestId(`service-offering-toggle-${serviceId}`).click();
+    }
+    await expect(status).toHaveText(/aktyv|active/i, { timeout: 10_000 });
+  }).toPass({ timeout: 45_000 });
   await expect(inMain(page).getByTestId(`service-offering-discoverability-${serviceId}`)).toBeVisible({ timeout: 30_000 });
   await ctx.close();
 });
@@ -378,7 +387,7 @@ test("S-5. the provider receives it and answers; the requester receives the answ
 // cleaned on its own and a failure is logged, never thrown over the result.
 
 async function closeListing(page: Page, l: string, id: string): Promise<void> {
-  await page.goto(`/${l}/dashboard/listings`);
+  await page.goto(`/${l}/dashboard/listings?tab=mine`);
   // Scoped to <main> (hidden streaming copy, see `findInMarket`; run
   // 40054092916 left the rental listing open on exactly this line).
   const main = page.getByRole("main");
@@ -398,7 +407,7 @@ async function closeListing(page: Page, l: string, id: string): Promise<void> {
  * close control. Returns how many it closed.
  */
 async function closeEarlierListings(page: Page, l: string): Promise<number> {
-  await page.goto(`/${l}/dashboard/listings`);
+  await page.goto(`/${l}/dashboard/listings?tab=mine`);
   const main = page.getByRole("main");
   await expect(main.getByTestId("listings-page")).toBeVisible({ timeout: 30_000 });
   const open = main
