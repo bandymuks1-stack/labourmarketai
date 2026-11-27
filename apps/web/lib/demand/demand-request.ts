@@ -575,6 +575,51 @@ export type DemandPrefill =
       structuredV2: StructuredDemandV2 | null;
     };
 
+/**
+ * WAS IT SAVED? (owner order 2026-11-23, production run 45241051644.) When the
+ * submit's answer does not reach the browser (a proxy error, a server swap, a
+ * dropped connection), the need may already be saved: telling the person
+ * "could not send" then invites a second, duplicate need. The form asks this
+ * first. Own rows only (RLS `profile_id`), the same workspace gate as the
+ * prefill, an OPEN need of this kind with exactly the title and description
+ * just sent, created since the send (2 minutes allowed for clock skew).
+ * Returns the id only — nothing is echoed back.
+ */
+export async function findOwnJustSubmittedDemand(
+  intent: DemandIntent,
+  sent: { readonly role?: string; readonly description?: string },
+  sentAtIso: string,
+): Promise<string | null> {
+  const description = clamp(sent.description, MAX_TEXT);
+  const sentAt = Date.parse(sentAtIso);
+  if (!description || !Number.isFinite(sentAt)) return null;
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return null;
+  const employer = await requireEmployerCompany();
+  if (!employer.ok) return null;
+  const role = clamp(sent.role, MAX_TITLE);
+  const title = role || (intent === "partner" ? "Agency partnership — offer" : "Hiring workers — demand");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data, error } = await (supabase as any)
+    .from("customer_requests")
+    .select("id")
+    .eq("profile_id", user.id)
+    .eq("organization_id", employer.organizationId)
+    .eq("kind", INTENT_KIND[intent])
+    .eq("status", "submitted")
+    .eq("title", title.slice(0, MAX_TITLE))
+    .eq("need_summary", description)
+    .gte("created_at", new Date(sentAt - 120_000).toISOString())
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (error || !data || typeof data.id !== "string") return null;
+  return data.id;
+}
+
 export async function getOwnLastDemandPrefill(
   intent: DemandIntent,
 ): Promise<DemandPrefill> {

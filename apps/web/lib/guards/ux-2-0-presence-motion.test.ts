@@ -160,7 +160,10 @@ describe("the assistant has one consistent identity", () => {
     // The size ladder and the hook the visual evidence spec waits on survive.
     expect(markCode).toMatch(/sm:\s*"size-5/);
     expect(markCode).toMatch(/md:\s*"size-7/);
-    expect(markCode).toMatch(/data-testid="assistant-mark"/);
+    // The stream's hook stays the default id; the header's "My space" (N3)
+    // passes its own, so the turns stay countable.
+    expect(markCode).toMatch(/testId = "assistant-mark"/);
+    expect(markCode).toMatch(/data-testid=\{testId\}/);
   });
 
   it("negative control: the retired letter mark would fail", () => {

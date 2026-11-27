@@ -137,12 +137,15 @@ function mapRow(
   };
 }
 
-/** The demand kinds that belong to the EMPLOYER spine. A list scoped to any
- *  of these is an employer read and must pass the Stage A workspace gate. */
-const EMPLOYER_REQUEST_KINDS: ReadonlySet<string> = new Set([
-  "company_request",
-  "agency_offer",
-]);
+/** The demand kinds that belong to the EMPLOYER spine, both directions: the
+ *  company's needs and an agency's offers. The company room and its needs door
+ *  read exactly these, so a dual-role user's buyer service requests stay in
+ *  the buyer room. ONE list (duplication audit ORG-4): the pages import it. */
+export const EMPLOYER_DEMAND_KINDS = ["company_request", "agency_offer"] as const;
+
+/** A list scoped to any of these is an employer read and must pass the Stage A
+ *  workspace gate. */
+const EMPLOYER_REQUEST_KINDS: ReadonlySet<string> = new Set(EMPLOYER_DEMAND_KINDS);
 
 export async function listOwnCustomerRequests(
   /** Optional room scoping (W3 rows 7/8/25): the company room reads ONLY the

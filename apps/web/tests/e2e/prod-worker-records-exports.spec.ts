@@ -255,7 +255,10 @@ test("E-2 (2.34). the week's hours file from the journal downloads with a header
 /** Open the saved-search strip (it is a <details> that opens itself only when something is saved). */
 async function openStrip(page: Page): Promise<Locator | null> {
   const strip = inMain(page).getByTestId("saved-searches");
-  if (!(await strip.isVisible().catch(() => false))) return null;
+  // The dashboard streams after navigation; an immediate visibility read can
+  // report absence before the saved searches arrive (S-2, run 45522721334).
+  const visible = await strip.waitFor({ state: "visible", timeout: 30_000 }).then(() => true, () => false);
+  if (!visible) return null;
   if ((await strip.getAttribute("open")) === null) await strip.locator("summary").click();
   return strip;
 }

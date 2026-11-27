@@ -5,6 +5,7 @@ vi.mock("server-only", () => ({}));
 import {
   buildHistoryContext,
   deriveHistoryProof,
+  recordProjectId,
   type HistoryContextInput,
 } from "./professional-history-context";
 import { readEvidenceRecordsForWorker } from "./worker-evidence-read";
@@ -414,5 +415,82 @@ describe("readEvidenceRecordsForWorker - context travels with the same rows", ()
     const p = out.rows[0].context.proof;
     expect(p.concepts).toEqual(["EVIDENCE_SUPPORTED"]);
     expect(p.attestedByRole).toBe("agency");
+  });
+});
+
+// ── the project link THROUGH the work object (owner addendum 2026-11-23) ────
+//
+// Production fact (aggregate): in one organization every evidence record has
+// `project_id = NULL`, most have a `work_object_id`, and every one of those
+// work objects has a `project_id`. The link exists through the work object;
+// every reader resolves `record.project_id ?? work_object.project_id`.
+
+describe("recordProjectId — the record's own project, else its work object's", () => {
+  const objects = new Map<string, string | null>([
+    ["w1", "pr1"],
+    ["w2", null],
+  ]);
+
+  it("the record's own link wins", () => {
+    expect(recordProjectId({ projectId: "pr9", workObjectId: "w1" }, objects)).toBe("pr9");
+  });
+
+  it("an empty record link resolves through the work object", () => {
+    expect(recordProjectId({ projectId: null, workObjectId: "w1" }, objects)).toBe("pr1");
+  });
+
+  it("a work object without a project, an unknown one, or none at all leaves no project (never guessed)", () => {
+    expect(recordProjectId({ projectId: null, workObjectId: "w2" }, objects)).toBeNull();
+    expect(recordProjectId({ projectId: null, workObjectId: "w-unknown" }, objects)).toBeNull();
+    expect(recordProjectId({ projectId: null, workObjectId: null }, objects)).toBeNull();
+  });
+});
+
+describe("readEvidenceRecordsForWorker — the project reaches the context through the work object", () => {
+  it("project_id NULL + a work object with a project → the record's context names that project", async () => {
+    const out = await readEvidenceRecordsForWorker(
+      fakeClient({
+        organization_people: linked,
+        organization_evidence_records: {
+          data: [
+            rec({ id: "d1", work_object_id: "w1", project_id: null }),
+            rec({
+              id: "pe1",
+              work_object_id: "w1",
+              project_id: null,
+              activity_date: null,
+              period_start: "2025-06-01",
+              period_end: "2025-11-30",
+              hours: 400,
+              derived: { timeSemantics: { classification: "period_total" } },
+            }),
+          ],
+        },
+        work_objects: { data: [{ id: "w1", name: "Hoofdgracht 3", project_id: "pr1" }] },
+        projects: { data: [{ id: "pr1", title: "Canal renovation" }] },
+      }),
+      "w1",
+    );
+    expect(out.kind).toBe("ok");
+    if (out.kind !== "ok") return;
+    expect(out.rows[0].context.project).toEqual({ id: "pr1", name: "Canal renovation" });
+    expect(out.rows[0].context.place?.name).toBe("Hoofdgracht 3");
+    expect(out.periodRows[0].context.project).toEqual({ id: "pr1", name: "Canal renovation" });
+    // The hours are the record's own — the fallback adds a link, never a figure.
+    expect(out.rows[0].hours).toBe(8);
+    expect(out.periodRows[0].hours).toBe(400);
+  });
+
+  it("a work object WITHOUT a project leaves the record without one", async () => {
+    const out = await readEvidenceRecordsForWorker(
+      fakeClient({
+        organization_people: linked,
+        organization_evidence_records: { data: [rec({ work_object_id: "w1", project_id: null })] },
+        work_objects: { data: [{ id: "w1", name: "Hoofdgracht 3", project_id: null }] },
+        projects: { data: [{ id: "pr1", title: "Canal renovation" }] },
+      }),
+      "w1",
+    );
+    expect(out.kind === "ok" && out.rows[0].context.project).toBeNull();
   });
 });

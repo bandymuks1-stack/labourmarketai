@@ -41,6 +41,27 @@ describe("history context is one reading, not a second store", () => {
     }
   });
 
+  it("every reader resolves a record's project through ONE rule: its own link, else its work object's", () => {
+    // Owner addendum 2026-11-23: an organization's records can all carry
+    // project_id NULL while their work objects carry the project. The context
+    // (work model → Living CV, person page profile), the company history and
+    // the project documented period read the link the same way; nothing is
+    // back-filled.
+    expect(pure).toMatch(/export function recordProjectId\(/);
+    expect(reader).toMatch(/\.select\("id, name, project_id"\)/);
+    expect(reader).toMatch(/recordProjectId\(raw, lookups\.workObjectProjects\)/);
+    const companyRead = read("lib/organization-evidence/company-work-history-read.ts");
+    const documented = read("lib/organization-evidence/project-documented-period.ts");
+    const personRead = read("lib/organization-evidence/company-person-read.ts");
+    expect(companyRead).toMatch(/recordProjectId\(r, projectOfObject\)/);
+    expect(documented).toMatch(/recordProjectId\(r, projectOfObject\)/);
+    expect(personRead).toMatch(/lookups\.workObjectProjects/);
+    // No hand-rolled second copy of the fallback.
+    for (const src of [companyRead, documented, reader]) {
+      expect(src).not.toMatch(/\.projectId \?\? \(r\.workObjectId/);
+    }
+  });
+
   it("the importer is never an input to the proof derivation", () => {
     const code = pure.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
     expect(code).not.toMatch(/imported_?by/i);

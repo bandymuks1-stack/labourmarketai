@@ -13,6 +13,7 @@ import {
   setUpCompany,
   signUp,
   sql,
+  sqlExec,
   userId,
   verifyCompanyAsLocalAdmin,
 } from "./isolated-web-a-helpers";
@@ -200,7 +201,7 @@ for (const w of WIDTHS) {
       await clickUntilVisible(vis.getByTestId("discoverability-open"), vis.getByTestId("discoverability-grant"));
       await vis.getByTestId("discoverability-grant").click();
       await expect(vis.getByTestId("discoverability-granted")).toBeVisible({ timeout: 30_000 });
-      await wk.page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+      await wk.page.goto(`${BASE}/en/dashboard/profile?tab=details#work-card-editor-section`);
       const editor = wk.page.getByRole("main").getByTestId("work-card-editor");
       await clickUntilVisible(wk.page.getByRole("main").getByTestId("work-card-editor-toggle"), editor);
       await editor.locator('select[name="availability_status"]').selectOption("available");
@@ -367,6 +368,13 @@ for (const w of WIDTHS) {
 
     test(`E-9b (${w.name}). a work instruction reaches the hired worker, who is told a message arrived`, async ({ browser }) => {
       const INSTRUCTION = `Bring the tile cutter on Monday ${w.name} ${RUN}`;
+      // E-6 already messaged in this thread. Reset ONLY those disposable
+      // notification fixtures in this isolated database, so a prior burst
+      // cannot satisfy either instruction/clarification notification assertion.
+      expect(isolatedStack()).toBe(true);
+      sqlExec(`delete from public.notification_events
+        where recipient_profile_id in (${lit(s.workerProfileId)}, ${lit(s.companyId)})
+          and event_type = 'message_received' and metadata->>'conversationId' = ${lit(s.conversationId)}`);
       const co = await open(browser, w, COMPANY);
       await co.page.goto(`${BASE}/en/dashboard/instructions`);
       const composer = co.page.getByRole("main").getByTestId("manager-instruction-composer");
@@ -399,6 +407,15 @@ for (const w of WIDTHS) {
       const wk = await open(browser, w, WORKER);
       await wk.page.goto(`${BASE}/en/dashboard/communication/${msg!.c}`);
       await expect(message(wk.page, INSTRUCTION), "the worker reads the instruction").toBeVisible({ timeout: 60_000 });
+      await wk.page.goto(`${BASE}/en/dashboard/instructions`);
+      const instruction = wk.page.getByTestId("worker-instruction-card").filter({ hasText: INSTRUCTION });
+      await instruction.getByTestId("instruction-clarify").click();
+      await expect(instruction.getByTestId("instruction-clarify-thread-link")).toBeVisible({ timeout: 30_000 });
+      await expect.poll(() => sql<{ n: string }>(
+        `select count(*)::text as n from public.notification_events
+          where recipient_profile_id = ${lit(s.companyId)} and event_type = 'message_received'
+            and metadata->>'conversationId' = ${lit(msg!.c)}`,
+      )[0]?.n, { message: "the manager is told the worker asked for clarification", timeout: 30_000 }).not.toBe("0");
       await wk.done();
       expect(await rowsAs(STRANGER, `conversation_messages?conversation_id=eq.${msg!.c}&select=id`), "the stranger reads nothing").toHaveLength(0);
     });

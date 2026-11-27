@@ -139,3 +139,24 @@ describe("W3 render proof — the panel is part of the workspace", () => {
     expect(html).not.toContain("regionLabel");
   });
 });
+
+describe("W3 render proof — a requested result is open from the first render", () => {
+  // Production P-15 (375 px): the sheet opened one effect after mount, so the
+  // first render said "collapsed" and a tap in that window toggled the sheet
+  // shut again. Static markup is exactly that first render.
+  it("a result renders its sheet open: the chevron says expanded, the body is displayed", () => {
+    const html = render({ result: "calendar", resultNavigation: {} as never });
+    const toggle = html.match(/<button[^>]*data-testid="context-panel-toggle"[^>]*>/)?.[0] ?? "";
+    expect(toggle, "the sheet's chevron is rendered").not.toBe("");
+    expect(toggle).toContain('aria-expanded="true"');
+    const body = html.match(/<div[^>]*id="context-panel-body"[^>]*>/)?.[0] ?? "";
+    expect(body, "the sheet's body is rendered").not.toBe("");
+    expect(body).not.toMatch(/class="[^"]*(?<![\w:-])hidden(?![\w-])/);
+  });
+
+  it("the first state comes from whether a result is shown, not from a constant", () => {
+    const src = readFileSync(join(CWD, "components/app/world-state/context-panel.tsx"), "utf8");
+    expect(src).toMatch(/const \[expanded, setExpanded\] = useState\(\(\) => showsResult \|\| isFull\);/);
+  });
+});
+

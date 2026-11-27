@@ -58,7 +58,8 @@ export function QuickConfirmQueue({
   const visibleToday = todays.filter((e) => !receiptIds.has(e.id));
 
   return (
-    <div className="flex flex-col gap-3" data-testid="quick-queue">
+    // Nothing inside (no entry, no receipt, `empty={false}`): take no space.
+    <div className="flex flex-col gap-3 empty:hidden" data-testid="quick-queue">
       {receipts.length > 0 ? (
         <ul className="flex flex-col gap-2" data-testid="quick-receipts">
           {receipts.map((r) => (

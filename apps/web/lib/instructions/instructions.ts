@@ -209,7 +209,8 @@ export async function listManagedWorkers(): Promise<ManagedWorker[]> {
  * Workers ACTIVELY assigned to the given projects (the caller's managed
  * projects), through the same batched, RLS-scoped read the company home uses.
  * A direct hire is on a project, not on the roster, so the instructions picker
- * reads both (the project-scoped RPC admits exactly this pair). Empty on failure.
+ * reads both (the project-scoped RPC admits exactly this pair). A failed read
+ * reaches the existing page error boundary; it never looks like no workers.
  */
 export async function listProjectAssignedWorkers(projectIds: readonly string[]): Promise<ManagedWorker[]> {
   if (projectIds.length === 0) return [];
@@ -217,7 +218,7 @@ export async function listProjectAssignedWorkers(projectIds: readonly string[]):
   const rows = await readActiveAssignmentRowsForProjects(supabase, projectIds);
   const out = new Map<string, ManagedWorker>();
   for (const [projectId, res] of rows) {
-    if (res.error) continue;
+    if (res.error) throw new Error("instruction_recipients_unavailable");
     for (const r of (res.data ?? []) as Array<{
       worker?: { profile_id?: string | null; display_name?: string | null; profiles?: { full_name?: string | null } | null } | null;
     }>) {

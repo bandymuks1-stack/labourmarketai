@@ -200,6 +200,43 @@ export const ANON_SECDEF_ALLOWLIST: ReadonlyArray<AnonSecdefContract> = [
     residualRisk:
       "None identified beyond scraping of services the organization deliberately published.",
   },
+  // Owner-approved 2026-11-26, PR #3818: exact public personal-service
+  // contracts from the approved SQL, not a base-table access expansion.
+  {
+    name: "search_public_service_offerings_v1",
+    identityArgs:
+      "p_query text, p_country text, p_category text, p_limit integer, p_offset integer, p_offering_id uuid",
+    mutates: false,
+    publicCaller:
+      "Signed-out personal-service search at app/[locale]/(marketing)/services. Authors explicitly choose the public audience in the existing service-offering manager.",
+    authorization:
+      "Fixed eight-field projection: id, title, description, category_slug, location_country, remote, rate_text, created_at. Only public_search_enabled AND active AND unexpired rows; canonical synthetic labels and QA providers are excluded. No provider, contact, profile or organization fields. Existing offers remain private by default; base-table grants and RLS are unchanged.",
+    inputValidation:
+      "Typed arguments and literal case-insensitive substring matching. Query bounded to 120 characters, category to 80, country must have two letters; page size 1..7 and offset 0..594. Optional offering id is UUID-typed.",
+    abuseControls:
+      "No DB-level rate limit. Read-only with bounded returned rows and pagination; those bounds do not bound physical scan work. Public content can be scraped.",
+    definerJustification:
+      "The member-only service_offerings table stays closed to anon. DEFINER exposes only the author's explicitly selected public projection without widening its table grants or RLS.",
+    residualRisk:
+      "Authors can include contact information in public free text. The publication form explains the audience and asks authors to omit private contact details. Opt-out prevents future reads, not copies already downloaded.",
+  },
+  {
+    name: "get_public_service_offering_v1",
+    identityArgs: "p_id uuid",
+    mutates: false,
+    publicCaller:
+      "Signed-out personal-service detail at app/[locale]/(marketing)/services/[id]; contacting the provider uses the existing authenticated service-request action.",
+    authorization:
+      "Uses the same filtered eight-field projection as search_public_service_offerings_v1. Null, unpublished, inactive, expired or synthetic offerings return no row; no provider/contact/profile/organization fields are selected.",
+    inputValidation:
+      "UUID-typed offering id; null returns no row and an eligible id returns at most one public offering.",
+    abuseControls:
+      "No DB-level rate limit. Read-only, at most one row, with the same author-selected publication boundary as the public search reader.",
+    definerJustification:
+      "The member-only base table is not granted to anon. This narrow DEFINER wrapper retains the search reader's publication and projection restrictions for one id.",
+    residualRisk:
+      "The same author-supplied free-text and downloaded-copy risks as the public search contract apply. Opt-out stops future reads without retracting existing copies.",
+  },
   {
     name: "submit_company_need_public_v1",
     identityArgs:
