@@ -169,8 +169,8 @@ describe("the save control cannot become an application", () => {
     const board = read(BOARD);
     expect(board).toContain("listSavedPublicVacancyIds");
     expect(board).toContain("listPublicVacancyPreviewsByIds");
-    // Member-only, and invisible when the read did not succeed.
-    expect(board).toContain("mySaved.available && (");
+    // Member-only; its own error state retains navigation without exposing data.
+    expect(board).toContain("(mySaved.available || showSaved) && (");
     // No anonymous cost: the whole block is behind the session-cookie fast path.
     expect(board).toContain("const signedIn = await hasSessionCookie();");
   });
