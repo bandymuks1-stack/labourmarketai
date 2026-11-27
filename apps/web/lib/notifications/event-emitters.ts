@@ -1137,26 +1137,28 @@ async function readWorkflowInstanceLite(
  *  and after a step handover. */
 export async function emitWorkflowStepPendingNotifications(
   instanceId: string,
-): Promise<void> {
+): Promise<boolean> {
   try {
     const admin = createAdminClient();
     const instance = await readWorkflowInstanceLite(admin, instanceId);
-    if (!instance || instance.currentStepOrder === null) return;
+    if (!instance) return false;
+    if (instance.currentStepOrder === null) return true;
 
-    const { data: stepData } = await asWorkflowClient(admin)
+    const { data: stepData, error: stepError } = await asWorkflowClient(admin)
       .from("workflow_instance_steps")
       .select("id, status")
       .eq("instance_id", instance.id)
       .eq("step_order", instance.currentStepOrder)
       .maybeSingle();
     const step = stepData as { id?: string; status?: string } | null;
-    if (!step?.id) return;
-    if (step.status !== "active" && step.status !== "escalated") return;
+    if (stepError || !step?.id) return false;
+    if (step.status !== "active" && step.status !== "escalated") return true;
 
-    const { data: slotData } = await asWorkflowClient(admin)
+    const { data: slotData, error: slotError } = await asWorkflowClient(admin)
       .from("workflow_instance_approvers")
       .select("approver_profile_id, delegated_to_profile_id, decision")
       .eq("instance_step_id", step.id);
+    if (slotError || !slotData?.length) return false;
     const recipients = new Set<string>();
     for (const raw of (slotData ?? []) as {
       approver_profile_id?: string;
@@ -1167,15 +1169,18 @@ export async function emitWorkflowStepPendingNotifications(
       if (raw.approver_profile_id) recipients.add(raw.approver_profile_id);
       if (raw.delegated_to_profile_id) recipients.add(raw.delegated_to_profile_id);
     }
+    let complete = true;
     for (const recipientProfileId of recipients) {
-      await deliver(admin, {
+      const outcome = await deliver(admin, {
         recipientProfileId,
         eventType: "workflow_step_pending",
         entityType: "workflow_instance",
         entityId: instance.id,
         metadata: {},
       });
+      if (!["written", "duplicate", "suppressed_preference"].includes(outcome)) complete = false;
     }
+    return complete;
   } catch (err) {
     // Emission is an enhancement; the domain write already succeeded.
     notDelivered(
@@ -1183,6 +1188,7 @@ export async function emitWorkflowStepPendingNotifications(
       "threw",
       err instanceof Error ? err.message.slice(0, 200) : undefined,
     );
+    return false;
   }
 }
 

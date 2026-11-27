@@ -5949,9 +5949,36 @@
       "not_authorized": "Det må du ikke.",
       "not_found": "Timeseddel ikke fundet.",
       "limit_reached": "For mange åbne timesedler — indsend eller ryd op i de eksisterende først.",
-      "error": "Noget gik galt. Intet blev gemt."
+      "error": "Noget gik galt. Intet blev gemt.",
+      "schedule_saved": "Tidsplanen er gemt."
     },
-    "taskAmbiguous": "{count} opgaver tilknyttet — timer ikke henført til én"
+    "taskAmbiguous": "{count} opgaver tilknyttet — timer ikke henført til én",
+    "schedule": {
+      "title": "Automatiske timesedler",
+      "consent": "Send mit registrerede arbejde fra den foregående dag, syv dage eller kalendermåned til det valgte godkendelsesforløb. Arbejde godkendes ikke automatisk.",
+      "enabled": "Aktiveret",
+      "frequency": "Hyppighed",
+      "daily": "Dagligt",
+      "weekly": "Ugentligt",
+      "monthly": "Månedligt · den 1.",
+      "weekday": "Ugentlig indsendelsesdag",
+      "time": "Indsendelsestid",
+      "zone": "Tidszone",
+      "recipients": "Godkendelsesmodtagere",
+      "selectTemplate": "Vælg godkendelsesskabelon",
+      "save": "Gem",
+      "next": "Næste indsendelse: {date} ({zone})",
+      "manageRecipients": "Administrer godkendelsesmodtagere",
+      "outcome": {
+        "submitted": "Indsendt til godkendelse.",
+        "already_submitted": "Denne periode er allerede indsendt.",
+        "empty": "Intet registreret arbejde i perioden.",
+        "overlap": "Sat på pause: perioden overlapper en eksisterende timeseddel.",
+        "not_allowed": "Sat på pause: adgangen til organisationen er ophørt.",
+        "no_template": "Sat på pause: godkendelsesskabelonen er utilgængelig.",
+        "error": "Indsendelsen mislykkedes; der forsøges igen."
+      }
+    }
   },
   "requests": {
     "title": "Anmodninger",

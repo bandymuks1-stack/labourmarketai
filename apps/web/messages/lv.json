@@ -5949,9 +5949,36 @@
       "not_authorized": "[EN] You are not allowed to do this.",
       "not_found": "[EN] Timesheet not found.",
       "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
-      "error": "[EN] Something went wrong. Nothing was saved."
+      "error": "[EN] Something went wrong. Nothing was saved.",
+      "schedule_saved": "Atskaišu grafiks saglabāts."
     },
-    "taskAmbiguous": "saistīti {count} uzdevumi — stundas nav attiecinātas uz vienu"
+    "taskAmbiguous": "saistīti {count} uzdevumi — stundas nav attiecinātas uz vienu",
+    "schedule": {
+      "title": "Automātiskas darba laika atskaites",
+      "consent": "Iesniegt manu reģistrēto darbu par iepriekšējo dienu, septiņām dienām vai kalendāro mēnesi izvēlētajai apstiprināšanas plūsmai. Darbs netiek apstiprināts automātiski.",
+      "enabled": "Ieslēgts",
+      "frequency": "Biežums",
+      "daily": "Katru dienu",
+      "weekly": "Katru nedēļu",
+      "monthly": "Katru mēnesi · 1. datumā",
+      "weekday": "Iknedēļas iesniegšanas diena",
+      "time": "Iesniegšanas laiks",
+      "zone": "Laika josla",
+      "recipients": "Apstiprināšanas saņēmēji",
+      "selectTemplate": "Izvēlieties apstiprināšanas veidni",
+      "save": "Saglabāt",
+      "next": "Nākamā iesniegšana: {date} ({zone})",
+      "manageRecipients": "Pārvaldīt apstiprināšanas saņēmējus",
+      "outcome": {
+        "submitted": "Iesniegts apstiprināšanai.",
+        "already_submitted": "Šis periods jau ir iesniegts.",
+        "empty": "Šajā periodā nav reģistrēta darba.",
+        "overlap": "Apturēts: periods pārklājas ar esošu atskaiti.",
+        "not_allowed": "Apturēts: piekļuve organizācijai vairs nav pieejama.",
+        "no_template": "Apturēts: apstiprināšanas veidne nav pieejama.",
+        "error": "Iesniegšana neizdevās; mēģinājums tiks atkārtots."
+      }
+    }
   },
   "requests": {
     "title": "Pieprasījumi",
