@@ -296,6 +296,9 @@ describe("the three real-use goals reach their handler in every active locale", 
     ["hitta jobb", "find-work"],
     ["post a need", "need-workers"],
     ["publish a vacancy", "need-workers"],
+    ["create a new job ad", "need-workers"],
+    ["I want to post a job ad for 3 welders", "need-workers"],
+    ["I want to publish a new vacancy", "need-workers"],
     ["I need 3 welders", "need-workers"],
     ["reikia 3 suvirintojų", "need-workers"],
     ["нужны 3 сварщика", "need-workers"],
@@ -315,7 +318,7 @@ describe("the three real-use goals reach their handler in every active locale", 
     expect(classifyIntent(phrase).intent).toBe(intent);
   });
 
-  it('"post my work" is not a need: the object must be a need or a vacancy', () => {
-    expect(classifyIntent("post my work").intent).not.toBe("need-workers");
+  it.each(["post my work", "submit my work report", "find a new job ad"])('"%s" does not publish a need', (phrase) => {
+    expect(classifyIntent(phrase).intent).not.toBe("need-workers");
   });
 });

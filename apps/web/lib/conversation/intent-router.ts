@@ -3173,7 +3173,9 @@ const RULES: IntentRule[] = [
       // employer names the ACT, not the people. It measured `unknown`. The
       // object is a need / vacancy / job ad — never "work" or "a job" alone,
       // which is the person's own search (find-work).
-      p("\\b(post|publish|create|add|place|submit)\\s+(?:(?:a|an|my|our|the|new)\\s+){0,2}(need|vacancy|job\\s+(?:ad|advert|posting|listing))\\b", 5),
+      // Explicit publication outranks the generic "new job" (15) and
+      // first-person "I want ... job" (10) search readings.
+      p("\\b(post|publish|create|add|place|submit)\\s+(?:(?:a|an|my|our|the|new)\\s+){0,2}(need|vacancy|job\\s+(?:ad|advert|posting|listing))\\b", 18),
       // SOMEBODY, WITHOUT NAMING A TRADE — in the other four locales. The
       // line above has covered Lithuanian since the demand path was built;
       // "we need people in rotterdam" measured `unknown` on 2026-09-08, as
