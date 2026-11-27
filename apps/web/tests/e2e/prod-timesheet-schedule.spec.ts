@@ -38,10 +38,11 @@ test("worker chooses a delivery time; the existing cron submits journal hours to
   const workerToken = bearerOf("worker"), ownerToken = bearerOf("owner"), otherToken = bearerOf("manager");
   const worker = await self(workerToken), owner = await self(ownerToken);
   await self(otherToken);
-  const orgs = await rows("/rest/v1/organizations?select=id,name&name=like.QA-SYNTHETIC%20Alfa*", ownerToken);
+  const orgs = (await rows(`/rest/v1/organizations?select=id,display_name,legal_name&owner_profile_id=eq.${owner}`, ownerToken))
+    .filter((row) => String(row.display_name ?? row.legal_name).startsWith("QA-SYNTHETIC Alfa"));
   expect(orgs).toHaveLength(1);
   const org = String(orgs[0].id);
-  expect(String(orgs[0].name).startsWith("QA-SYNTHETIC Alfa")).toBe(true);
+  expect(String(orgs[0].display_name ?? orgs[0].legal_name).startsWith("QA-SYNTHETIC Alfa")).toBe(true);
   const workers = await rows(`/rest/v1/workers?select=id&profile_id=eq.${worker}`, workerToken);
   expect(workers).toHaveLength(1);
   const workerId = String(workers[0].id);
