@@ -21,7 +21,26 @@ const NAV_STRIPS = [
   "components/app/historical/historical-workspace.tsx",
   "components/app/player-card/player-card-modes.tsx",
   "components/app/conversation/chat/my-space-row.tsx",
+  // Carousel spec N11 (finding M3): the marketplace's group tabs, domain
+  // chips and actor filter, and scouting's filter chips, wrap.
+  "components/app/marketplace-listings-section.tsx",
+  "app/[locale]/dashboard/company/scouting/page.tsx",
 ];
+
+// N11 (Codex review on #3719): once a row wraps instead of scrolling, an item
+// that cannot shrink below its label overflows a narrow phone, and the page
+// hides sideways overflow, so the label is cut off. Each item is capped at the
+// row's width and its label wraps inside it.
+describe("a wrapped filter or tab never holds an item wider than the row", () => {
+  it("the scouting filter chips and the marketplace tabs are capped at the row's width", () => {
+    const scouting = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    expect(scouting).not.toMatch(/shrink-0 whitespace-nowrap/);
+    expect(scouting.match(/\)\} max-w-full`/g)?.length).toBeGreaterThanOrEqual(3);
+    const listings = read("components/app/marketplace-listings-section.tsx");
+    expect(listings).not.toMatch(/inline-flex min-h-11 shrink-0 items-center rounded-full/);
+    expect(listings.match(/inline-flex min-h-11 max-w-full items-center rounded-full/g)).toHaveLength(3);
+  });
+});
 
 describe("navigation strips wrap instead of scrolling sideways", () => {
   for (const rel of NAV_STRIPS) {

@@ -12,8 +12,10 @@ import {
   type CompanyWorkHistoryLoad,
 } from "@/lib/organization-evidence/company-work-history-read";
 import { isPeriodRecord, type PlaceGroup } from "@/lib/organization-evidence/company-work-history";
+import { isImportPlaceholderText, workDescription } from "@/lib/organization-evidence/import-placeholder-text";
 import type { OrganizationProjects } from "@/lib/organization-evidence/organization-projects";
 import type { OrganizationJournal } from "@/lib/organization-evidence/organization-journal";
+import type { WorkForClient } from "@/lib/organization-evidence/work-for-client";
 import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 import { OpenWorkspaceButton } from "@/components/app/organization/open-workspace-button";
 import { getWorkspaceContext } from "@/lib/company/active-organization";
@@ -110,6 +112,8 @@ export async function CompanyWorkHistory({
         {/* A company with no imported history can still have real projects
             and journal work. */}
         <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
+        <WorkForClientBlock work={load.forClient} unreadable={load.partnerWorkUnreadable} t={t} locale={locale} />
+        <ClientsBlock clients={load.clients} t={t} />
         <OrganizationProjectsBlock projects={load.projects} t={t} />
       </section>
     );
@@ -118,7 +122,6 @@ export async function CompanyWorkHistory({
   const placed = history.places.filter((p) => p.kind !== "none");
   const none = history.places.find((p) => p.kind === "none");
   const maxHours = Math.max(1, ...placed.map((p) => p.dayHours));
-  const periodLabel = span(history.firstDate, history.lastDate, locale);
 
   return (
     <section
@@ -155,23 +158,25 @@ export async function CompanyWorkHistory({
         organizationId={load.organizationId}
         organizationName={organizationName}
         identity={load.identity}
+        clients={load.clients}
+        performedAsSubcontractor={load.performedAsSubcontractor}
         locale={locale}
       />
 
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-        <Stat concept="object" value={String(placed.length)} label={t("stats.places")} />
-        <Stat concept="person" value={String(history.peopleCount)} label={t("stats.people")} />
-        <Stat concept="time" value={`${nf(history.dayHours)} h`} label={t("stats.dayHours")} />
-        <Stat concept="calendar" value={periodLabel ?? "—"} label={t("stats.period")} />
-      </div>
+      {/* ONE set of totals (owner P0 2026-11-24): the overview above is the
+          figure; no second stat row with a different scope beside it. */}
+
+      <ClientsBlock clients={load.clients} t={t} />
+
+      <WorkForClientBlock work={load.forClient} unreadable={load.partnerWorkUnreadable} t={t} locale={locale} />
 
       <OrganizationJournalBlock journal={load.journal} t={t} locale={locale} />
 
       <OrganizationProjectsBlock projects={load.projects} t={t} />
 
-      <ul id="company-work-history-places" className="grid scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
+      <ul id="company-work-history-places" className="grid grid-cols-1 scroll-mt-20 gap-3 md:grid-cols-2" data-testid="company-work-history-places">
         {placed.map((p) => (
-          <li key={p.key}>
+          <li key={p.key} className="min-w-0">
             <PlaceTile p={p} t={t} locale={locale} maxHours={maxHours} organizationId={organizationId} />
           </li>
         ))}
@@ -180,11 +185,6 @@ export async function CompanyWorkHistory({
       {none ? (
         <p className="text-sm text-text-muted" data-testid="company-work-history-noplace">
           {t("noPlace", { count: none.records.length, hours: nf(none.dayHours) })}
-        </p>
-      ) : null}
-      {history.periodHours > 0 ? (
-        <p className="text-sm text-text-muted" data-testid="company-work-history-period">
-          {t("periodAside", { hours: nf(history.periodHours) })}
         </p>
       ) : null}
 
@@ -231,7 +231,7 @@ function OrganizationJournalBlock({
       aria-label={t("journal.title")}
     >
       <h3 className="font-display text-lg font-semibold text-text-primary">{t("journal.title")}</h3>
-      <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
         <Stat concept="time" value={`${nf(journal.hours)} h`} label={t("journal.hours")} />
         <Stat concept="time" value={`${nf(journal.confirmedHours)} h`} label={t("journal.confirmed")} />
         <Stat concept="person" value={String(journal.people)} label={t("journal.people")} />
@@ -240,6 +240,80 @@ function OrganizationJournalBlock({
       <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-journal-basis">
         {t("journal.basis", { entries: journal.entries })}
       </p>
+    </section>
+  );
+}
+
+/** WORK PARTNERS DID FOR THIS ORGANIZATION (decision 0033): records in their
+ *  books naming it as client, as one aggregate. No person, place or partner
+ *  name; never added to the organization's own work. */
+function WorkForClientBlock({
+  work,
+  unreadable,
+  t,
+  locale,
+}: {
+  work: WorkForClient | null;
+  /** The partners' books could not be read: UNKNOWN, never "none" (SEP-7). */
+  unreadable: boolean;
+  t: Awaited<ReturnType<typeof getTranslations>>;
+  locale: string;
+}) {
+  const note = unreadable ? (
+    <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-for-client-unreadable">
+      {t("forClient.unreadable")}
+    </p>
+  ) : null;
+  if (!work) return note;
+  const when = span(work.firstDate, work.lastDate, locale);
+  return (
+    <section
+      className="flex flex-col gap-2"
+      data-testid="company-work-history-for-client"
+      data-records={work.records}
+      data-confirmed={work.confirmed}
+      aria-label={t("forClient.title")}
+    >
+      <h3 className="font-display text-lg font-semibold text-text-primary">{t("forClient.title")}</h3>
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4">
+        <Stat concept="time" value={`${nf(work.hours)} h`} label={t("stats.hours")} />
+        <Stat concept="calendar" value={when ?? "—"} label={t("stats.period")} />
+        <Stat concept="object" value={String(work.confirmed)} label={t("forClient.confirmed")} />
+        <Stat concept="object" value={String(work.unconfirmed)} label={t("forClient.unconfirmed")} />
+      </div>
+      <p className="text-meta leading-relaxed text-text-muted" data-testid="company-work-history-for-client-basis">
+        {t("forClient.basis", { count: work.records })}
+      </p>
+      {note}
+    </section>
+  );
+}
+
+/** WHO THIS ORGANIZATION WORKED FOR: the clients its own records name. */
+function ClientsBlock({
+  clients,
+  t,
+}: {
+  clients: Extract<CompanyWorkHistoryLoad, { kind: "ready" }>["clients"];
+  t: Awaited<ReturnType<typeof getTranslations>>;
+}) {
+  if (clients.length === 0) return null;
+  return (
+    <section className="flex flex-col gap-2" data-testid="company-work-history-clients" aria-label={t("clients.title")}>
+      <h3 className="font-display text-lg font-semibold text-text-primary">{t("clients.title")}</h3>
+      <ul className="flex flex-col gap-1">
+        {clients.map((c) => (
+          <li
+            key={c.organizationId}
+            className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm"
+            data-testid="company-work-history-client"
+            data-records={c.records}
+          >
+            <span className="font-medium text-text-primary">{c.name ?? t("clients.unnamed")}</span>
+            <span className="tabular-nums text-text-secondary">{t("clients.records", { count: c.records })}</span>
+          </li>
+        ))}
+      </ul>
     </section>
   );
 }
@@ -263,12 +337,12 @@ function OrganizationProjectsBlock({
           {t("projects.counts", { running: projects.running, completed: projects.completed })}
         </p>
       </header>
-      <ul className="grid gap-2 sm:grid-cols-2">
+      <ul className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         {projects.items.map((p) => (
-          <li key={p.id}>
+          <li key={p.id} className="min-w-0">
             <Link
               href={`/dashboard/projects/${p.id}` as "/dashboard"}
-              className="flex min-h-11 items-center justify-between gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-2.5 transition-colors hover:border-brand-blue"
+              className="flex min-h-11 min-w-0 items-center justify-between gap-3 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-2.5 transition-colors hover:border-brand-blue"
               data-testid="company-work-history-project"
               data-project={p.id}
             >
@@ -320,13 +394,13 @@ function PlaceTile({
 }) {
   const hours = p.dayHours;
   const when = span(p.firstDate, p.lastDate, locale);
-  const latest = p.records.find((r) => r.text);
+  const latest = p.records.map((r) => workDescription(r.text)).find((d) => d !== null) ?? null;
   return (
     <Link
       href={placeHref(p.key, organizationId) as "/dashboard"}
       data-testid="company-work-history-place"
       data-place={p.key}
-      className="group flex h-full flex-col gap-3 rounded-card border border-ink-600 bg-ink-800/40 p-4 transition-colors hover:border-brand-blue"
+      className="group flex h-full min-w-0 flex-col gap-3 rounded-card border border-ink-600 bg-ink-800/40 p-4 transition-colors hover:border-brand-blue"
     >
       <span className="flex items-start justify-between gap-3">
         <span className="flex min-w-0 items-center gap-2">
@@ -356,7 +430,7 @@ function PlaceTile({
         ) : null}
       </span>
       {latest ? (
-        <span className="line-clamp-2 text-sm leading-relaxed text-text-secondary">{latest.text}</span>
+        <span className="line-clamp-2 break-words text-sm leading-relaxed text-text-secondary">{latest}</span>
       ) : null}
       <span className="mt-auto text-meta font-semibold text-brand-blue">{t("open")} →</span>
     </Link>
@@ -424,7 +498,7 @@ export async function CompanyPlaceHistory({
         ) : null}
       </header>
 
-      <div className="grid gap-2 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
         <Stat concept="time" value={`${nf(place.dayHours)} h`} label={t("stats.dayHours")} />
         <Stat concept="person" value={String(place.people.length)} label={t("stats.people")} />
         <Stat concept="calendar" value={when ?? "—"} label={t("stats.period")} />
@@ -436,7 +510,7 @@ export async function CompanyPlaceHistory({
       ) : null}
 
       <Card compact data-testid="company-place-facts">
-        <dl className="grid gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
+        <dl className="grid grid-cols-1 gap-x-6 gap-y-2 text-sm sm:grid-cols-3">
           {(
             [
               ["customer", false],
@@ -496,7 +570,7 @@ export async function CompanyPlaceHistory({
                     that cannot open. */}
                 {load.ownPeople[pp.id] && cardsOpen ? (
                   <Link
-                    href={`/dashboard/company/people/${pp.id}` as "/dashboard"}
+                    href={`/dashboard/company/people/${pp.id}${organizationId ? `?org=${encodeURIComponent(organizationId)}` : ""}` as "/dashboard"}
                     data-testid="company-place-person-history-link"
                     data-linked={load.linkedWorkers[pp.id] ? "confirmed" : "no"}
                   >
@@ -528,13 +602,17 @@ export async function CompanyPlaceHistory({
                 <li
                   key={r.id}
                   data-testid="company-place-entry"
-                  className="grid gap-x-4 gap-y-1 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3 sm:grid-cols-[8rem_1fr_auto]"
+                  className="grid grid-cols-1 gap-x-4 gap-y-1 rounded-card border border-ink-600 bg-ink-800/40 px-4 py-3 sm:grid-cols-[8rem_1fr_auto]"
                 >
                   <span className="font-mono text-meta text-text-muted">{recordWhen(r, locale) ?? "—"}</span>
                   <span className="flex min-w-0 flex-col gap-0.5">
                     <span className="text-sm font-medium text-text-primary">{r.personName ?? "—"}</span>
-                    {r.text ? (
+                    {workDescription(r.text) ? (
                       <span className="text-sm leading-relaxed text-text-secondary">{r.text}</span>
+                    ) : isImportPlaceholderText(r.text) ? (
+                      <span className="text-meta text-text-muted" data-testid="company-place-entry-no-description">
+                        {t("descriptionNotInSource")}
+                      </span>
                     ) : null}
                   </span>
                   <span className="font-mono text-sm text-text-primary">

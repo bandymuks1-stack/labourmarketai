@@ -5,6 +5,17 @@ import { contextPanel } from "./prod-context-panel";
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
 
 import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures";
+import { mapClaimLabelsToCatalogSlugs } from "../../lib/profile/claim-catalog-promotion";
+
+/** The profile's block that holds a section (decision 0034: one block per screen, `?tab=`). */
+function profileTabOf(hash: string): string {
+  if (hash === "profile-edit") return "edit";
+  if (hash === "capabilities" || hash === "candidate-skills") return "skills";
+  if (hash === "profile-about") return "about";
+  if (hash === "cv-languages" || hash === "cv-education" || hash === "cv-achievements") return "background";
+  return "details";
+}
+
 
 /**
  * PRODUCTION PROFILE · LIVING CV · HISTORY — owner areas 1 / 3 / 15: the
@@ -20,12 +31,14 @@ import { makeDocx, makeUnicodePdf } from "../../lib/cv/__fixtures__/cv-fixtures"
  *   owner    owns "QA-SYNTHETIC Alfa" — the company history page and report
  *   (no session) — the password-reset page, render-only (never submitted)
  *
- * WRITES. Every row this walk adds carries `QA-SYNTHETIC <run id>` and is
+ * WRITES. Free-label rows this walk adds carry `QA-SYNTHETIC <run id>` and are
  * removed again in `afterAll`, which runs even after a red step; every value
  * it CHANGES (summary, work card, languages) is read first and put back.
  * Nothing names, reaches or notifies a real person or company: the history
  * rows are self-declared (organization null, no confirmation request), the
- * CV file is generated in memory and only previewed, never confirmed.
+ * CV file is generated in memory; explicitly confirmed rows are removed.
+ * P-6 also confirms one previously absent deterministic skill claim on worker2
+ * only, verifies it is self-declared, then removes exactly that new claim.
  *
  * READS. The read steps log states, booleans and counts only — never a
  * figure, a name or a date; the walk log is a public artefact.
@@ -92,7 +105,7 @@ async function profileAt(page: Page, hash: string): Promise<Locator> {
       return false;
     }
   })();
-  await page.goto(`/lt/dashboard/profile#${hash}`);
+  await page.goto(`/lt/dashboard/profile?tab=${profileTabOf(hash)}#${hash}`);
   if (already) await page.reload();
   const main = inMain(page);
   await expect(main.locator(`#${hash}`).first()).toBeVisible({ timeout: 30_000 });
@@ -105,12 +118,18 @@ async function pick(page: Page, scope: Locator, testId: string, option: string):
   await page.getByRole("option", { name: option, exact: true }).first().click();
 }
 
-async function livingCv(page: Page): Promise<Locator> {
-  await page.goto("/lt/cv");
+async function livingCv(
+  page: Page,
+  block: "experience" | "documents" | "projects" = "experience",
+): Promise<Locator> {
+  await page.goto(`/lt/cv?tab=${block}`);
   // The Living CV's own <main> (added for runs 40086140120 / 40153545718,
   // which found none). By role, so a hidden streaming copy never counts.
   const main = inMain(page);
   await expect(main.locator("h1").first()).toBeVisible({ timeout: 30_000 });
+  const tab = main.getByTestId(`cv-tab-${block}`);
+  await expect(tab).toBeVisible();
+  await expect(tab).toHaveAttribute("aria-current", "page");
   return main;
 }
 
@@ -136,6 +155,7 @@ const addedEducation: string[] = [];
 const addedAchievements: string[] = [];
 let addedProfession = "";
 let addedClaim = "";
+let addedImportClaim = "";
 
 /** The own-profession list sits in the profile's manual stage. */
 async function ownProfessions(page: Page): Promise<Locator> {
@@ -236,7 +256,7 @@ async function openWorkCard(page: Page): Promise<Locator> {
   // The persistence check needs a FRESH document. Going to the same URL and
   // hash again is a same-document fragment navigation: nothing reloads, the
   // editor stays open, and the toggle then CLOSED it (run 39970719710).
-  const again = page.url().includes("/dashboard/profile#cv-availability");
+  const again = page.url().includes("/dashboard/profile?tab=details#cv-availability");
   let main = await profileAt(page, "cv-availability");
   if (again) {
     await page.reload();
@@ -346,10 +366,22 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   // The conversation's import, not the profile's: the profile path also
   // replaces the private profile text and may call the AI structurer. This one
   // parses locally (unpdf / mammoth) and stores nothing until a confirm.
-  // ASCII-only synthetic lines; the company is invented for this run.
+  // Select a previously absent claim; never remove a pre-existing QA claim.
+  const baseline = await profileAt(page, "capabilities");
+  const candidates = ["Motyvavimas", "Verslo optimizavimas"];
+  const absent: string[] = [];
+  for (const label of candidates) {
+    if (await baseline.getByTestId("capability-profile-claim").filter({ hasText: label }).count() === 0) absent.push(label);
+  }
+  expect(absent.length, "one synthetic test claim is absent before the walk").toBeGreaterThan(0);
+  const importedClaim = absent[0]!;
+  // This case tests a claim only; no extra worker_skills need restoring.
+  expect(mapClaimLabelsToCatalogSlugs([importedClaim]).size).toBe(0);
+  // Synthetic lines; the company is invented for this run.
   const company = `UAB QASYNTHETIC${RUN.replace(/[^0-9a-z]/gi, "").toUpperCase()}`;
   const lines = [
     "QA Synthetic Worker",
+    `Įgūdžiai: ${importedClaim}`,
     `2019-2023 ${company}, plyteliu klojejas`,
     "QA Synthetic profesine mokykla, statybos programa 2015-2019",
     "Anglu kalba B2",
@@ -383,11 +415,15 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   await importCv();
   const job = inMain(page).getByTestId("cv-import-item-wh-0").last();
   await expect(job).toContainText(company, { timeout: 30_000 });
+  const claims = inMain(page).getByTestId("conversation-cv-skill-claims").last();
+  await expect(claims.getByText(importedClaim, { exact: true })).toBeVisible();
+  await expect(inMain(page).getByTestId("conversation-cv-skill-apply").last()).toBeDisabled();
   const items = await page.locator('[data-testid^="cv-import-item-"]').count();
   console.info(`[cv-import] proposal items=${items}`);
   // Negative control: a proposal is not a save.
   const cv = await livingCv(page);
   await expect(cv.getByText(company)).toHaveCount(0);
+  await expect(cv.getByTestId("cv-skills").getByText(importedClaim, { exact: true }), "reading a CV does not save its skill").toHaveCount(0);
 
   // UF-3: the person corrects the proposal before saving; what they typed is what
   // is stored and what the Living CV reads, as their own statement. The row is
@@ -395,6 +431,10 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   const corrected = `${TAG} pataisyta CV eilute`;
   await importCv();
   await expect(job).toContainText(company, { timeout: 30_000 });
+  await claims.getByRole("listitem").filter({ hasText: importedClaim }).getByRole("button", { name: "Pridėti", exact: true }).click();
+  addedImportClaim = importedClaim;
+  await inMain(page).getByTestId("conversation-cv-skill-apply").last().click();
+  await expect(inMain(page).getByTestId("conversation-cv-skill-applied").last()).toBeVisible({ timeout: 30_000 });
   await inMain(page).getByTestId("cv-import-edit-wh-0").last().click();
   await inMain(page).getByTestId("cv-import-field-wh-0-title").last().fill(corrected);
   await inMain(page).getByTestId("cv-import-field-wh-0-start").last().fill("2019-03");
@@ -403,6 +443,8 @@ test("P-6 (2.3). a CV file is read into a reviewable proposal and nothing is sav
   await inMain(page).getByTestId("cv-import-confirm-wh-0").last().click();
   await expect(inMain(page).getByTestId("cv-import-saved-wh-0").last()).toBeVisible({ timeout: 30_000 });
   const after = await livingCv(page);
+  await expect(after.getByTestId("cv-tier-declared").filter({ hasText: importedClaim }), "the confirmed claim reaches Living CV as self-declared").toBeVisible({ timeout: 30_000 });
+  console.info("[cv-import] skill preview, explicit save, and declared CV readback PASS");
   const saved = after.getByTestId("cv-history-node").filter({ hasText: corrected });
   await expect(saved, "the corrected row is on the Living CV, once").toHaveCount(1, { timeout: 60_000 });
   await expect(saved, "as stated by the person").toHaveAttribute("data-standing", "stated");
@@ -575,7 +617,7 @@ test("P-9 (2.7). an education row is added and shows on the Living CV", async ({
   if (!(await row.isVisible())) throw new Error(`education not saved: ${await section.getByTestId("worker-education-error").innerText()}`);
   await expect(section.getByTestId("worker-education-self-stated"), "the profile says education is self-stated").toBeVisible();
 
-  const cv = await livingCv(page);
+  const cv = await livingCv(page, "documents");
   await expect(cv.getByTestId("cv-education-row").filter({ hasText: SCHOOL })).toBeVisible({ timeout: 30_000 });
   await ctx.close();
 });
@@ -617,12 +659,13 @@ test("P-10 (2.8). a declared certificate and an achievement are added and the Li
   await addAchievement(page, CERTIFICATE, "Nurodytas sertifikatas");
   await addAchievement(page, ACHIEVEMENT, "Pasiekimas");
 
-  const cv = await livingCv(page);
+  const cv = await livingCv(page, "documents");
   const cert = cv.getByTestId("cv-declared-certificate-row").filter({ hasText: CERTIFICATE });
   await expect(cert, "a declared certificate sits with the certificates").toBeVisible({ timeout: 30_000 });
   await expect(cert.getByTestId("cv-declared-certificate-label"), "…and says it was listed by the worker").toBeVisible();
+  const projects = await livingCv(page, "projects");
   await expect(
-    cv.locator('[data-testid="cv-achievement-row"][data-standing="declared"]', { hasText: ACHIEVEMENT }),
+    projects.locator('[data-testid="cv-achievement-row"][data-standing="declared"]', { hasText: ACHIEVEMENT }),
     "an achievement the app never confirmed stays declared",
   ).toBeVisible();
   await ctx.close();
@@ -763,7 +806,14 @@ test("P-15 (2.24). the experience records about the worker open, with the right 
   const result = inMain(page).getByTestId("experiences-result");
   const unavailable = inMain(page).getByTestId("experiences-result-unavailable").first();
   const error = inMain(page).getByTestId("experiences-result-error");
-  await expect(result.or(unavailable).or(error).first()).toBeVisible({ timeout: 45_000 });
+  try {
+    await expect(result.or(unavailable).or(error).first()).toBeVisible({ timeout: 45_000 });
+  } catch (e) {
+    // Say whether the phone's sheet was open: a closed sheet hides a rendered result.
+    const toggle = page.getByTestId("context-panel-toggle").filter({ visible: true }).first();
+    const sheet = (await toggle.count()) ? `aria-expanded=${await toggle.getAttribute("aria-expanded")}` : "no sheet button";
+    throw new Error(`${(e as Error).message}\n[P-15] context panel: ${sheet}`);
+  }
   if (await error.isVisible()) throw new Error("experience records did not load");
   if (!(await result.isVisible())) throw new Error("experience records report themselves unavailable");
   await expect(result.getByTestId("experiences-about-me")).toBeVisible();
@@ -1191,6 +1241,15 @@ test.afterAll(async ({ browser }) => {
         if (!addedProfession) return "nothing to remove";
         await removeOwnProfession(page);
         return "removed";
+      },
+    },
+    {
+      what: "imported skill claim",
+      run: async (page) => {
+        if (!addedImportClaim) return "nothing to remove";
+        const main = await profileAt(page, "capabilities");
+        const rows = main.getByTestId("capability-profile-claim").filter({ hasText: addedImportClaim });
+        return `removed=${await removeRows(rows, '[data-testid="capability-profile-claim-remove"]')}`;
       },
     },
     {

@@ -386,7 +386,7 @@ test("K-2. a welder (another trade) records a day of work; same honest evidence 
 
 test("K-3. the Living CV shows the skills as recorded work, with their basis", async ({ browser }) => {
   const tiler = await as(browser, TILER);
-  await tiler.page.goto(`${BASE}/en/cv`);
+  await tiler.page.goto(`${BASE}/en/cv?tab=experience`);
   // The Living CV lists each skill ONCE, in its skills section (owner P0
   // 2026-11-23: the hero no longer repeats them).
   const skills = tiler.page.getByTestId("cv-skills");
@@ -479,7 +479,7 @@ test("K-6. the work, not the title, points at the professions it fits — on the
   await expect(directions.getByTestId("wi-direction-tiler"), "tiler is named from the journal evidence").toBeVisible();
   // The same derivation reaches the Living CV's career horizon (the person's
   // own view; labelled derived, never printed).
-  await tiler.page.goto(`${BASE}/en/cv`);
+  await tiler.page.goto(`${BASE}/en/cv?tab=experience`);
   const journey = tiler.page.getByTestId("cv-journey").first();
   await expect(journey).toBeVisible({ timeout: 60_000 });
   await expect(journey, "the Living CV horizon names the fitting profession").toContainText("Tiler");
@@ -585,7 +585,7 @@ test("K-7. the tiler disputes a wrong reading ('flooring'); it is withdrawn, the
   expect((await workerSkills(state.tilerWorker)).get("flooring")?.source).toBe("self_declared");
 
   // The Living CV follows: flooring is no longer shown as recorded work.
-  await page.goto(`${BASE}/en/cv`);
+  await page.goto(`${BASE}/en/cv?tab=experience`);
   const cvSkills = page.getByTestId("cv-skills");
   await expect(cvSkills).toBeVisible({ timeout: 60_000 });
   const recorded = cvSkills.getByTestId("cv-tier-evidence");

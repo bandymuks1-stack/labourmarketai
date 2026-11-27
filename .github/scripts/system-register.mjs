@@ -417,8 +417,12 @@ async function fetchDeploys(owner, name, refresh) {
     if (!fresh || r.workflow_runs.length < 100) break;
   }
   // A successful run can still skip shipping (never deploy backwards): read the ship step, and
-  // the deployed sha from the artifact name (a manual dispatch may deploy another sha).
-  const todo = Object.values(cache.runs).filter((x) => x.status === "completed" && x.conclusion === "success" && x.shipped === undefined);
+  // the deployed sha from the artifact name (a manual dispatch may deploy another sha). A run
+  // whose post-deploy checks failed is red but DID ship (one deploy queue, 2026-11-24): the
+  // ship step decides, not the run's conclusion.
+  const todo = Object.values(cache.runs).filter(
+    (x) => x.status === "completed" && (x.conclusion === "success" || x.conclusion === "failure") && x.shipped === undefined,
+  );
   await pool(todo, 6, async (x) => {
     const jobs = await gh(["api", `repos/${owner}/${name}/actions/runs/${x.run}/jobs`]);
     const step = jobs.jobs.flatMap((j) => j.steps ?? []).find((st) => SHIP_STEP.test(st.name));

@@ -8,6 +8,7 @@ import { readHistoricalOrgNames } from "@/lib/company/historical-org-names";
 import type { EvidenceRecordView } from "./import-core";
 import {
   buildHistoryContext,
+  recordProjectId,
   type HistoryContext,
   type HistoryContextInput,
 } from "./professional-history-context";
@@ -33,15 +34,44 @@ function db(c: SupabaseClient): any {
 
 export interface HistoryLookups {
   readonly workObjects: ReadonlyMap<string, string>;
+  /** Work object id → the project it belongs to (`work_objects.project_id`),
+   *  for records whose own `project_id` is empty: the project link through
+   *  the work object (`recordProjectId`). An object without a project, or one
+   *  the caller's RLS hides, is absent. */
+  readonly workObjectProjects: ReadonlyMap<string, string>;
   readonly projects: ReadonlyMap<string, string>;
   readonly organizations: ReadonlyMap<string, string>;
 }
 
 export const EMPTY_HISTORY_LOOKUPS: HistoryLookups = {
   workObjects: new Map(),
+  workObjectProjects: new Map(),
   projects: new Map(),
   organizations: new Map(),
 };
+
+/** Work objects' names and project links — one chunked read, the caller's RLS. */
+async function workObjectFacts(
+  supabase: SupabaseClient,
+  ids: readonly string[],
+): Promise<{ names: Map<string, string>; projects: Map<string, string> }> {
+  const names = new Map<string, string>();
+  const projects = new Map<string, string>();
+  const unique = [...new Set(ids)].filter(Boolean);
+  for (let i = 0; i < unique.length; i += CHUNK) {
+    const res = await db(supabase)
+      .from("work_objects")
+      .select("id, name, project_id")
+      .in("id", unique.slice(i, i + CHUNK));
+    if (res.error || !Array.isArray(res.data)) continue;
+    for (const r of res.data as Record<string, unknown>[]) {
+      const id = r.id as string;
+      if (typeof r.name === "string" && r.name.trim()) names.set(id, r.name.trim());
+      if (typeof r.project_id === "string" && r.project_id) projects.set(id, r.project_id);
+    }
+  }
+  return { names, projects };
+}
 
 async function names(
   supabase: SupabaseClient,
@@ -74,17 +104,21 @@ export async function readHistoryLookups(
     readonly organizationIds: readonly string[];
   },
 ): Promise<HistoryLookups> {
-  const [workObjects, projects, organizations] = await Promise.all([
-    names(supabase, "work_objects", "id, name", ids.workObjectIds, (r) =>
-      typeof r.name === "string" && r.name.trim() ? r.name.trim() : null,
-    ),
-    names(supabase, "projects", "id, title", ids.projectIds, (r) =>
-      typeof r.title === "string" && r.title.trim() ? r.title.trim() : null,
-    ),
+  // Work objects first: a record without its own project link names the
+  // project through its work object, so those projects are named too.
+  const [objects, organizations] = await Promise.all([
+    workObjectFacts(supabase, ids.workObjectIds),
     names(supabase, "organizations", "id, display_name, legal_name", ids.organizationIds, (r) =>
       orgDisplayName(r.display_name as string | null, r.legal_name as string | null),
     ),
   ]);
+  const projects = await names(
+    supabase,
+    "projects",
+    "id, title",
+    [...ids.projectIds, ...objects.projects.values()],
+    (r) => (typeof r.title === "string" && r.title.trim() ? r.title.trim() : null),
+  );
   // An organization the caller's RLS hides (a person who CLAIMED their
   // roster row, with no engagement there) still names itself on that
   // person's own records — names only, through the worked-organization read.
@@ -96,7 +130,7 @@ export async function readHistoryLookups(
       if (name) organizations.set(id, name);
     }
   }
-  return { workObjects, projects, organizations };
+  return { workObjects: objects.names, workObjectProjects: objects.projects, projects, organizations };
 }
 
 /** The ids a batch of context inputs needs resolved. */
@@ -124,10 +158,13 @@ export function contextWithLookups(
   raw: Omit<HistoryContextInput, "workObjectName" | "projectName" | "organizationNames">,
   lookups: HistoryLookups,
 ): HistoryContext {
+  // The record's own project, else its work object's (read-time, never written).
+  const projectId = recordProjectId(raw, lookups.workObjectProjects);
   return buildHistoryContext({
     ...raw,
+    projectId,
     workObjectName: raw.workObjectId ? (lookups.workObjects.get(raw.workObjectId) ?? null) : null,
-    projectName: raw.projectId ? (lookups.projects.get(raw.projectId) ?? null) : null,
+    projectName: projectId ? (lookups.projects.get(projectId) ?? null) : null,
     organizationNames: lookups.organizations,
   });
 }

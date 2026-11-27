@@ -70,7 +70,7 @@ async function statusOf(): Promise<string | null> {
 
 async function editor(page: Page): Promise<{ form: Locator; openAfter: number }> {
   const started = Date.now();
-  await page.goto("/en/dashboard/profile#cv-availability", { waitUntil: "commit" });
+  await page.goto("/en/dashboard/profile?tab=details#cv-availability", { waitUntil: "commit" });
   const main = inMain(page);
   await expect(main.getByTestId("profile-work-card-editor")).toBeVisible({ timeout: 120_000 });
   const toggle = main.getByTestId("work-card-editor-toggle");

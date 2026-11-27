@@ -105,7 +105,7 @@ const ROWS: Record<Kind, { hash: string; row: string }> = {
 /** The stored rows' text from a real load of the profile: a same-page hash change re-reads nothing. */
 async function rowsFromFreshLoad(page: Page, kind: Kind): Promise<Locator> {
   await page.goto("about:blank");
-  await page.goto(`/lt/dashboard/profile#${ROWS[kind].hash}`);
+  await page.goto(`/lt/dashboard/profile?tab=background#${ROWS[kind].hash}`);
   const main = inMain(page);
   await expect(main.locator(`#${ROWS[kind].hash}`).first()).toBeVisible({ timeout: 30_000 });
   const rows = main.getByTestId(ROWS[kind].row).filter({ hasText: ANY_RUN });

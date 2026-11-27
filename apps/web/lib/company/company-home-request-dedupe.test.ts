@@ -467,10 +467,19 @@ describe("one /dashboard/company render reads each shared fact ONCE", () => {
     // The gated reviewable set: decisions count + brief queue (+ every
     // project's readiness pulse on the panel path) (was 4).
     expect(rpcCount("reviewable_journal_entry_ids")).toBe(1);
-    // Teams: the partners strip + the workforce read behind the conflicts
-    // count (was 2 probes + 2 team lists).
+    // Teams: the partners strip + the workforce read share one active list
+    // and one disbanded-history list, even when there are no active brigades.
     expect(rpcCount("get_team_capability_summary_v1")).toBe(1);
-    expect(fromCount("organizations", '"organization_type","team"')).toBe(1);
+    const teamReads = log.filter(
+      (c) => c.kind === "from" && c.name === "organizations" && c.ops.includes('eq(["organization_type","team"])'),
+    );
+    expect(teamReads).toHaveLength(2);
+    expect(teamReads.filter((c) => c.ops.includes('is(["archived_at",null])'))).toHaveLength(1);
+    expect(teamReads.filter((c) => c.ops.includes('not(["archived_at","is",null])'))).toHaveLength(1);
+    for (const read of teamReads) {
+      expect(read.ops).toContain(`eq(["owner_profile_id","${USER}"])`);
+      expect(read.ops).toContain("limit([20])");
+    }
     // Agency bridge: chat starter + opening brief + bell (was 3 / 3 / 2).
     expect(rpcCount("list_shared_requests_for_agency_v1")).toBe(1);
     expect(rpcCount("list_agency_offer_progress_v1")).toBe(1);

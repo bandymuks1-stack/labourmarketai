@@ -59,7 +59,7 @@ for (const size of SIZES) {
     // details disclosure, which opens when the hash names a section inside it
     // (the same address the opportunities page links to); at 390 px the bare
     // page keeps it folded.
-    await page.goto(`${BASE}/en/dashboard/profile#work-card-editor-section`);
+    await page.goto(`${BASE}/en/dashboard/profile?tab=details#work-card-editor-section`);
     const toggle = page.getByTestId("work-card-editor-toggle").filter({ visible: true }).first();
     await expect(toggle, "P-1: the work card can be edited").toBeVisible({ timeout: 60_000 });
     await toggle.click();
@@ -144,7 +144,7 @@ for (const size of SIZES) {
     await page.screenshot({ path: join(OUT, `pay-services-${size.label}.png`) });
 
     // The listings page: the listing form opens on "add"; the price is labelled "Price".
-    await page.goto(`${BASE}/en/dashboard/listings`);
+    await page.goto(`${BASE}/en/dashboard/listings?tab=mine`);
     await expect(main.getByTestId("listing-add"), "P-3: listings can be added").toBeVisible({ timeout: 60_000 });
     const price = main.getByLabel("Price", { exact: true }).filter({ visible: true }).first();
     await expect(async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
@@ -8,18 +8,9 @@ import { CvInputPanel } from "@/components/app/cv-input-panel";
 import { DetectedSuggestionCard, type SuggestionStatus } from "@/components/app/detected-suggestion-card";
 import { DetectedSuggestionList } from "@/components/app/detected-suggestion-list";
 import { TextFirstComposer } from "@/components/app/text-first-composer";
-import { extractProfileSkillClaims } from "@/lib/profile/skill-claim-extractor";
-import { saveProfileSkillClaimsAction } from "@/lib/profile/profile-skill-claims-actions";
-import {
-  promoteConfirmedClaimsAction,
-  type PromoteClaimsResult,
-} from "@/lib/profile/claim-catalog-promotion-actions";
-import { aiCvStructuringSuggestions } from "@/lib/profile/cv-ai-structuring-actions";
-import {
-  parseCvSections,
-  type CvSectionProposals,
-} from "@/lib/cv/structured-parse";
+import type { PromoteClaimsResult } from "@/lib/profile/claim-catalog-promotion-actions";
 import { CvImportSectionReview } from "@/components/app/cv-import-section-review";
+import { useCvImportProposals } from "@/components/app/use-cv-import-proposals";
 import { useLocale } from "next-intl";
 import { saveWorkerProfileText } from "@/lib/worker/profile-text-actions";
 import { setPrimaryProfessionBySlug } from "@/lib/worker/actions";
@@ -71,20 +62,6 @@ function TextSaveIndicator({
     </p>
   );
 }
-
-/** Per-suggestion view state — the parser proposes, the user disposes. */
-type Item = {
-  key: string;
-  status: SuggestionStatus;
-  /** Normalized label — UNIQUE key column for `profile_skill_claims`. */
-  value: string;
-  /** Human form shown in the chip. */
-  label: string;
-  /** Canonical-journey P6: true when the label came from the (owner-gated)
-   *  AI structuring enhancement — the chip carries an explicit AI hint and
-   *  goes through the SAME per-chip human confirm as every other chip. */
-  aiOrigin?: boolean;
-};
 
 /**
  * Text-first / CV-first onboarding for the worker profile.
@@ -180,6 +157,9 @@ export function ProfileTextFirstFlow({
   }, []);
 
   const [text, setText] = useState(initialText);
+  // Restored narrative may originate in a CV; unknown provenance stays local.
+  const textSource = useRef<"profile_text" | "cv_document">(initialText.trim() ? "cv_document" : "profile_text");
+  const importRun = useRef(0);
   // What the person typed on /worker-intake before they had an account
   // (owner P0 2026-11-15, F2): placed in the composer, never sent or saved
   // for them. Only when they have no profile text of their own yet.
@@ -204,26 +184,20 @@ export function ProfileTextFirstFlow({
     "idle" | "saving" | "saved" | "error"
   >(initialText.trim().length > 0 ? "saved" : "idle");
   const [hasExtracted, setHasExtracted] = useState(false);
-  const [selfDeclared, setSelfDeclared] = useState<Item[]>([]);
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
   // Canonical-journey P2 (living CV): the catalogued-promotion outcome of the
   // last apply — drives the honest "what changed in your profile" delta line.
   const [promotion, setPromotion] = useState<PromoteClaimsResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  // Full CV System v1 (M2 wiring): STRUCTURED section proposals from the same
-  // text — deterministic parser always-on, AI sections only when the runtime
-  // is live (same single agent run as the skill suggestions). Everything in
-  // the review panel needs its own explicit per-item confirm.
-  const [sectionProposals, setSectionProposals] =
-    useState<CvSectionProposals | null>(null);
-  const [aiSectionProposals, setAiSectionProposals] =
-    useState<CvSectionProposals | null>(null);
-
-  const savedClaimSet = useMemo(
-    () => new Set(savedClaimNormalizedLabels),
-    [savedClaimNormalizedLabels],
-  );
+  // THE ONE CV-import proposal state (CV-18 / G-10), shared with the
+  // conversation's CV upload: skill claims (deterministic + the optional
+  // AI run, labelled) and STRUCTURED section proposals (Full CV System v1)
+  // from the same text. Everything needs its own explicit per-item confirm.
+  const cvProposals = useCvImportProposals({ locale, savedClaimNormalizedLabels });
+  const selfDeclared = cvProposals.claims;
+  const sectionProposals = cvProposals.sections;
+  const aiSectionProposals = cvProposals.aiSections;
 
   // Counts the user actually needs to reason about save-state. The
   // visible UI uses these directly so the bottom save button cannot
@@ -244,7 +218,9 @@ export function ProfileTextFirstFlow({
     (s) => s.status === "saved",
   ).length;
 
-  function analyse(raw: string) {
+  function analyse(raw: string, source: "profile_text" | "cv_document" = textSource.current) {
+    textSource.current = source;
+    importRun.current += 1;
     setError(null);
     setApplied(false);
     setPromotion(null);
@@ -271,48 +247,19 @@ export function ProfileTextFirstFlow({
 
     // RC6 error containment (F6 production finding: this action produced a
     // client-side exception that replaced the whole app with the Next error
-    // shell). The extraction step is fully guarded: on ANY throw the user
-    // keeps their text (state + the save above), sees an inline retryable
-    // error, and the app never unmounts.
-    let extracted: ReturnType<typeof extractProfileSkillClaims>;
-    try {
-      extracted = extractProfileSkillClaims(raw);
-    } catch (e) {
-      console.error("[profile-text-first] extraction failed:", e);
+    // shell). The extraction step is fully guarded inside the shared
+    // proposal state: on a skill-reading throw the user keeps their text
+    // (state + the save above), sees an inline retryable error, and the app
+    // never unmounts. Chips the user has ALREADY saved stay in the list,
+    // marked `already_saved`, so they see why they are not actionable.
+    const proposed = cvProposals.propose(raw, source);
+    if (proposed.status !== "ok") {
       setError(t("extractErrorLabel"));
       return; // stay on the compose stage — nothing is lost
     }
 
     setHasExtracted(true);
 
-    // Structured SECTION proposals (Full CV System v1) — deterministic,
-    // guarded like the skill extraction: a parser throw degrades to the
-    // chips-only review, never an error shell.
-    try {
-      setSectionProposals(parseCvSections(raw));
-    } catch (e) {
-      console.error("[profile-text-first] section parse failed:", e);
-      setSectionProposals(null);
-    }
-    setAiSectionProposals(null);
-
-    // Single extractor → single bucket. Chips the user has ALREADY
-    // saved (server-side `profile_skill_claims`) are kept in the list
-    // BUT marked with `already_saved` status so the user sees *why*
-    // they aren't actionable (rather than silently disappearing — the
-    // prior PR #48 behavior, which broke save-state clarity). New
-    // suggestions still carry `pending` status with the standard
-    // select / discard actions.
-    setSelfDeclared(
-      extracted.map((c, i) => ({
-        key: `claim-${i}-${c.normalizedLabel}`,
-        status: savedClaimSet.has(c.normalizedLabel)
-          ? "already_saved"
-          : "pending",
-        value: c.normalizedLabel,
-        label: c.label,
-      })),
-    );
     // FAST PATH: which catalogue professions does the text name? A proposal
     // the person confirms — never a silent assignment. Only while the person
     // has no primary profession yet; a declared direction is never overridden.
@@ -324,56 +271,22 @@ export function ProfileTextFirstFlow({
         setProfessionProposals([]);
       }
     }
+    // Canonical-journey P6 — the OPTIONAL, owner-gated AI enhancement of the
+    // SAME review list runs inside `propose` (labelled AI chips, identical
+    // human confirm; disabled/unavailable adds nothing, no fake AI badge).
     setStage("review");
-
-    // Canonical-journey P6 — OPTIONAL, owner-gated AI enhancement of the
-    // SAME review list. Deterministic chips above are the always-on path;
-    // when the AI runtime is enabled, extra labelled suggestions append as
-    // ordinary pending chips (explicit AI hint, identical human confirm).
-    // Disabled/unavailable → `off` → nothing extra, no fake AI badge.
-    void aiCvStructuringSuggestions(raw, locale)
-      .then((res) => {
-        if (res.status !== "ok") return;
-        // Same single agent run also carries structured section candidates
-        // (labelled AI, identical per-item confirm in the review panel).
-        setAiSectionProposals(res.sections);
-        setSelfDeclared((prev) => {
-          const seen = new Set(prev.map((it) => it.value));
-          const extras: Item[] = [];
-          for (const [i, label] of res.skillLabels.entries()) {
-            const norm = label.trim().toLowerCase();
-            if (!norm || seen.has(norm) || savedClaimSet.has(norm)) continue;
-            seen.add(norm);
-            extras.push({
-              key: `ai-${i}-${norm}`,
-              status: "pending",
-              value: norm,
-              label: label.trim(),
-              aiOrigin: true,
-            });
-          }
-          return extras.length > 0 ? [...prev, ...extras] : prev;
-        });
-      })
-      .catch(() => {
-        // Best-effort enhancement — silence is the honest degraded state.
-      });
   }
 
   function toggle(key: string, next: SuggestionStatus) {
-    setSelfDeclared((prev) =>
-      prev.map((it) => (it.key === key ? { ...it, status: next } : it)),
-    );
+    cvProposals.toggle(key, next);
   }
 
   async function applyConfirmed() {
+    const id = importRun.current;
     setApplying(true);
     setError(null);
     try {
-      const confirmedClaims = selfDeclared
-        .filter((it) => it.status === "confirmed")
-        .map((it) => it.label.trim())
-        .filter((l) => l.length > 0);
+      const confirmedClaims = cvProposals.confirmedLabels;
       if (confirmedClaims.length === 0) {
         // Defensive — the bottom save button is disabled in this case
         // so the call should not happen. Bail rather than no-op.
@@ -389,17 +302,21 @@ export function ProfileTextFirstFlow({
       // like any other apply failure.
       if (chosenProfession && !hasPrimaryProfession && !professionSet) {
         const ok = await setPrimaryProfessionBySlug(chosenProfession);
+        if (id !== importRun.current) return;
         if (ok) setProfessionSet(true);
       }
 
-      await saveProfileSkillClaimsAction(confirmedClaims);
+      // The confirmed chips MOVE from `confirmed` → `saved` inside the
+      // shared state once the save succeeded (SAVE-STATE LIFECYCLE below).
+      const saved = await cvProposals.saveConfirmed(confirmedClaims);
+      if (id !== importRun.current) return;
 
       // Pilot telemetry — fire-and-forget. We send a count of confirmed
       // skill claims (number, not labels) so the admin can see funnel
       // throughput without the labels themselves leaking into telemetry.
       recordEvent("profile_text_saved");
       recordEvent("profile_skill_suggestion_confirmed", {
-        skill_count: confirmedClaims.length,
+        skill_count: saved.length,
       });
 
       // SAVE-STATE LIFECYCLE (feat/cc/profile-save-state-and-idea-extraction):
@@ -409,12 +326,9 @@ export function ProfileTextFirstFlow({
       // to the unified `Mano gebėjimai` surface below. router.refresh()
       // re-fetches the page so `CapabilityProfileSection` shows the new
       // chips in the canonical area without a full reload.
-      setSelfDeclared((prev) =>
-        prev.map((it) =>
-          it.status === "confirmed" ? { ...it, status: "saved" } : it,
-        ),
-      );
-      setApplied(true);
+      const complete = saved.length === confirmedClaims.length;
+      setApplied(complete);
+      if (!complete) setError(t("applyErrorLabel"));
       router.refresh();
 
       // Living CV (canonical-journey P2): the SAME user confirmation is
@@ -424,22 +338,19 @@ export function ProfileTextFirstFlow({
       // rows). Best-effort AFTER the primary save+refresh: a promotion
       // failure never fails the save; a success refreshes once more so
       // the capability section shows the promoted rows.
-      try {
-        const promo = await promoteConfirmedClaimsAction(confirmedClaims);
-        setPromotion(promo);
-        if (promo.promoted > 0) router.refresh();
-      } catch (e) {
-        console.error("[profile-text-first] promotion failed:", e);
-        setPromotion(null);
-      }
+      const promo = saved.length > 0 ? await cvProposals.promote(saved) : null;
+      if (id !== importRun.current) return;
+      setPromotion(promo);
+      if (promo && promo.promoted > 0) router.refresh();
       // Activation funnel (P0-A) — canonical profile-saved signal. Fired
       // after the save+refresh so the save→refresh path stays tight.
       trackFunnel(FUNNEL_EVENTS.profileSaved, {
         surface: "profile",
-        success: true,
+        success: complete,
       });
     } catch (e) {
       console.error("[profile-text-first] apply failed:", e);
+      if (id !== importRun.current) return;
       setError(t("applyErrorLabel"));
       // Failed attempt ≠ abandoned attempt (audit F-T5).
       trackFunnel(FUNNEL_EVENTS.profileSaved, {
@@ -498,7 +409,7 @@ export function ProfileTextFirstFlow({
         <CvInputPanel
           onPasteSubmit={(v) => {
             setPasted(v);
-            analyse(v);
+            analyse(v, "cv_document");
           }}
         />
         {manualSlot && (
@@ -534,6 +445,7 @@ export function ProfileTextFirstFlow({
           <button
             type="button"
             onClick={() => {
+              importRun.current += 1;
               // Defensive reset on back-navigation: the user may have
               // saved earlier and we don't want a stale success toast
               // re-appearing if they tap submit again with no

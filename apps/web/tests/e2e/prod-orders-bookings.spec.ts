@@ -6,7 +6,7 @@ import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 import { proveActionTiles } from "./action-tile-proof";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
-import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { needLinks, requestIdOf, submitSyntheticNeed } from "./prod-need-post";
 
 /**
  * PRODUCTION ORDERS, BOOKINGS, EXECUTION — owner area 12 (registry rows 5.13,
@@ -88,15 +88,6 @@ async function useWorkspace(page: Page, orgName: string): Promise<void> {
 /** ISO day `days` from today (UTC) — booking and trip dates in the future. */
 function dayFromToday(days: number): string {
   return new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
-}
-
-/** The scouting need links of the active workspace, by visible title. */
-function needLinks(page: Page, text: string): Locator {
-  return page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: text });
-}
-
-function requestIdOf(href: string | null): string {
-  return /request=([0-9a-f-]{36})/.exec(href ?? "")?.[1] ?? "";
 }
 
 /** One booking row on /dashboard/bookings, found by this run's note. */
@@ -190,22 +181,10 @@ async function firstFreeDay(from: number): Promise<string> {
 }
 
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
-  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
-  await page.getByTestId("demand-role").fill(NEED_ROLE);
   // Name a trade: a need nothing can be recognised in is "not structured" on
   // scouting (lib/scouting/scouting.ts runScoutingCore), which renders no
   // candidates at all — not even the hand-raiser O-3 looks for.
-  await page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production booking walk, 1 mūrininkas.`);
-  await page.getByTestId("demand-next").click();
-  const size = page.getByTestId("demand-team-size");
-  if (await size.isVisible().catch(() => false)) await size.fill("1");
-  await chooseDemandCountryIfEmpty(page);
-  await page.getByTestId("demand-next").click();
-  await page.getByTestId("demand-create").click();
-  const done = page.getByTestId("demand-done");
-  const limit = page.getByTestId("demand-open-need-limit");
-  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
-  return (await limit.isVisible()) ? "limit" : "done";
+  return submitSyntheticNeed(page, NEED_ROLE, `${NOTE}: synthetic need for the production booking walk, 1 mūrininkas.`);
 }
 
 test("O-1 (5.13). Gama posts this run's need through the demand intake", async ({ browser }) => {
@@ -683,7 +662,8 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
   test.skip(slot === null, "no synthetic identity holds the customer role (owner decision: provision one)");
 
   const { ctx, page } = await as(browser, slot!);
-  await page.goto("/lt/dashboard/buyer");
+  // The new-request form is its own block (decision 0034, `?tab=new`).
+  await page.goto("/lt/dashboard/buyer?tab=new");
   const form = page.getByTestId("buyer-requests-form");
   await expect(form, "the customer setup is complete enough to file requests").toBeVisible({ timeout: 30_000 });
   await page.getByTestId("buyer-requests-field-title").fill(`${NOTE} užsakymas`);
