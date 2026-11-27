@@ -743,6 +743,9 @@ export const SCOPED_OWNER_WAIVERS = [
       // unchanged; `product-gate.mjs` is not touched.
       3448,
       3181,
+      // OWNER APPROVAL 2026-11-27: "Leidžiu įtraukti tik #3327".
+      // Only this PR binding is added; all other waiver constraints stay unchanged.
+      3327,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.
