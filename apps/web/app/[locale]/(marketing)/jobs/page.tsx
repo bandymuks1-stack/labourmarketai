@@ -586,7 +586,7 @@ export default async function JobsPage({
     if (!f) return null;
     const country = f.country ? (regionName?.of(f.country.toUpperCase()) ?? f.country) : null;
     const place = [f.city ?? f.region, country].filter(Boolean).join(", ") || null;
-    return { employer: f.employerName, place };
+    return { employer: f.employerName, place, attributionCode: f.attributionCode, hasApplicationUrl: Boolean(f.applicationUrl) };
   };
   const lockedFactsLabel = user ? undefined : LOCKED_FACTS[active];
 

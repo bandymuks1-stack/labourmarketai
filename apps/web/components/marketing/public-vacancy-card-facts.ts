@@ -79,3 +79,26 @@ export function publicVacancyCardFacts(
     publishedDay: utcDayKey(vacancy.publishedAt),
   };
 }
+
+/** Names come only from the recorded publisher, never from language or country. */
+export function vacancySourceName(attributionCode: string | null | undefined): string | null {
+  switch (attributionCode) {
+    case "vacancySources.attribution.nav": return "NAV";
+    case "vacancySources.attribution.arbetsformedlingen": return "Arbetsförmedlingen";
+    default: return null;
+  }
+}
+
+const ORIGIN_LABELS = {
+  lt: { external_unchecked: "Šioje platformoje nekandidatuojama", external: "Išorinis šaltinis", platform_internal: "Kandidatavimas platformoje", source_original: "Kandidatavimas išorinėje svetainėje", unavailable: "Kandidatavimo nuoroda nepateikta" },
+  en: { external_unchecked: "No on-platform application", external: "External source", platform_internal: "Apply on this platform", source_original: "Apply on an external website", unavailable: "Application link not provided" },
+  de: { external_unchecked: "Keine Bewerbung auf dieser Plattform", external: "Externe Quelle", platform_internal: "Bewerbung auf dieser Plattform", source_original: "Bewerbung auf externer Website", unavailable: "Kein Bewerbungslink angegeben" },
+  nl: { external_unchecked: "Geen sollicitatie op dit platform", external: "Externe bron", platform_internal: "Solliciteren op dit platform", source_original: "Solliciteren op externe website", unavailable: "Geen sollicitatielink opgegeven" },
+  pl: { external_unchecked: "Brak aplikowania na platformie", external: "Źródło zewnętrzne", platform_internal: "Aplikowanie na platformie", source_original: "Aplikowanie w zewnętrznym serwisie", unavailable: "Nie podano linku do aplikowania" },
+  ru: { external_unchecked: "Отклик на платформе недоступен", external: "Внешний источник", platform_internal: "Отклик на платформе", source_original: "Отклик на внешнем сайте", unavailable: "Ссылка для отклика не указана" },
+  sv: { external_unchecked: "Ansökan sker inte på plattformen", external: "Extern källa", platform_internal: "Ansök på plattformen", source_original: "Ansök på extern webbplats", unavailable: "Ansökningslänk saknas" },
+} as const;
+
+export function vacancyOriginLabels(locale: string): (typeof ORIGIN_LABELS)[keyof typeof ORIGIN_LABELS] {
+  return ORIGIN_LABELS[locale as keyof typeof ORIGIN_LABELS] ?? ORIGIN_LABELS.en;
+}
