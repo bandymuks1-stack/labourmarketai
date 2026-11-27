@@ -276,3 +276,36 @@ describe("reference codes never add duration to the journal or Living CV", () =>
     expect(deriveIntakeWorkTime("Painted 3.5h", TODAY).fragments[0]?.timeValue).toBe(3.5);
   });
 });
+
+describe("a comma-separated duration stays with its one named activity", () => {
+  it.each([
+    ["Kochte täglich frische Gerichte, 3 hours", "cooking"],
+    ["Kochte täglich frische Gerichte, 3 Stunden.", "cooking"],
+    ["Cooked fresh meals, 3 hours", "cooking"],
+  ])("keeps the work and its duration together: %s", (text, skill) => {
+    const t = deriveIntakeWorkTime(text, TODAY);
+    expect(t.fragments).toHaveLength(1);
+    expect(t.fragments[0]).toMatchObject({
+      rawPhrase: text.replace(/\.$/, ""), timeValue: 3, timeUnit: "hours",
+      activitySlug: skill, selected: false, source: "ai_extracted",
+    });
+    expect(deriveEntryWorkTime({ entryId: "e", createdAt: TODAY, metrics: toMetrics(t.fragmentsJson) }).totalHours).toBe(3);
+  });
+
+  it.each([
+    "Cooked fresh meals. 3 hours",
+    "Cooked fresh meals; 3 hours",
+    "Cooked fresh meals, drove a truck, 3 hours",
+    "Cooked fresh meals, 3 hours driving",
+  ])("does not assign another clause's hours to cooking: %s", (text) => {
+    expect(deriveIntakeWorkTime(text, TODAY).fragments.every((f) => f.activitySlug !== "cooking")).toBe(true);
+  });
+
+  it("does not merge an already timed item or count a break as work", () => {
+    const text = "Cooked fresh meals 2 hours, 3 hours";
+    const t = deriveIntakeWorkTime(text, TODAY);
+    expect(t.fragments.map((f) => f.timeValue)).toEqual([2, 3]);
+    expect(t.fragments[1]?.activitySlug).toBeNull();
+    expect(deriveIntakeWorkTime("Cooked fresh meals, 30 min break", TODAY).fragments).toHaveLength(0);
+  });
+});

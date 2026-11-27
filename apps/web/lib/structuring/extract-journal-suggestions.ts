@@ -524,14 +524,31 @@ function splitFragments(text: string): { parts: string[]; headerCount: number } 
   const colonAt = protectedText.search(ITEMISING_COLON_RX);
   const header = colonAt > 0 ? protectedText.slice(0, colonAt) : "";
   const body = colonAt > 0 ? protectedText.slice(colonAt + 1) : protectedText;
-  const toParts = (chunk: string): string[] =>
-    chunk
+  const toParts = (chunk: string): string[] => {
+    const parts = chunk
       .split(/[.;!?\n|,]+/)
       // A protected abbreviation dot left LAST in its part ("Mūrijau sieną
       // 5 val. | klojau…") is trailing punctuation again — dropped, so the
       // persisted phrase reads exactly as it did before the protection.
       .map((s) => restoreProtected(s).trim().replace(/[.]+$/, ""))
       .filter((s) => s.length > 0);
+    // One activity followed by a comma and its duration is one work item.
+    // Keep the person's phrase intact. Never bridge sentences, join several
+    // activities, or add a duration to an item that already has one.
+    const content = chunk.trim().replace(/[.!?]+$/, "");
+    if (
+      parts.length === 2 &&
+      /^[^.;!?\n|,]+,[^.;!?\n|,]+$/.test(content) &&
+      detectFragmentTime(parts[0]!.toLowerCase()) === null &&
+      isTimeOnlyFragment(parts[1]!) &&
+      detectFragmentTime(parts[1]!.toLowerCase()) !== null &&
+      !describesWhereOnly(parts[0]!) &&
+      recognizeSkills(workPartOf(parts[0]!), RECOGNITION_LIMIT).filter(
+        (skill) => skill.via === "exact" || skill.via === "synonym",
+      ).length === 1
+    ) return [restoreProtected(content).replace(/[.]+$/, "")];
+    return parts;
+  };
   const headerParts = header ? toParts(header) : [];
   return { parts: [...headerParts, ...toParts(body)], headerCount: headerParts.length };
 }
