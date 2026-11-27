@@ -15,6 +15,7 @@
  */
 import { conceptTerms } from "./concept-resolution/term-sources";
 import { foldText, boundedEditDistance } from "./normalize";
+import { classifySkillSlug } from "@/lib/skills/skill-groups";
 
 export type SkillConfidence = "high" | "medium" | "low";
 export type SkillMatchVia = "exact" | "synonym" | "fuzzy";
@@ -248,19 +249,27 @@ export function isWarehousePlaceOnlyContext(
  * stems ("suvirin…", "plytel…") and wrong for two- and three-letter
  * abbreviations: the welding synonym "tig" sits inside Dutch "bevestiging"
  * (fastening), "vochtig" (damp), "voorzichtig" (careful), "regelmatige",
- * "handmatige" — production stored 70+ "welding" signals from Dutch
- * construction timesheets that way. A SYNONYM of this length (an
+ * "handmatige", so Dutch construction timesheets read as welding. A SYNONYM of this length (an
  * abbreviation: "tig", "mig") matches only as a whole word. Short EXACT stems
  * ("daz…" for dažiau) are deliberate prefixes and keep matching inside words.
  */
 const WHOLE_WORD_MAX_LEN = 3;
 
 /**
+ * Single words that are a different word inside another language's
+ * compound: DE "kochte" (cooked) sits inside NL "aangekochte" / "gekochte"
+ * (bought). Matched only as a whole word, so the German verb keeps working
+ * on its own ("Kochte täglich frische Gerichte") and the Dutch purchase never
+ * reads as cooking (Codex P2 on #3774).
+ */
+const WHOLE_WORD_TERMS: ReadonlySet<string> = new Set(["kochte"].map((t) => foldText(t).trim()));
+
+/**
  * A KITCHEN NAMED ON CONSTRUCTION WORK IS THE ROOM, NOT COOKING (owner P0
  * 2026-11-24, decision 0023: fix the wrong label, never disable inference).
  * "Dirbau virtuvėje" stays cooking — the owner's mandatory phrase lists pin it
  * for hospitality. But production showed "Maisto gaminimas" on almost every
- * place card of a Dutch construction worker: "keuken" ×53 and its compounds
+ * place card of a Dutch construction worker: "keuken" and its compounds
  * (keukenkasten, keukenvloer, keukenmontage…) are the room being tiled, fitted
  * or plastered. A cooking reading whose ONLY evidence is a kitchen place word
  * is dropped when another, non-hospitality trade explains the text, or when the
@@ -329,7 +338,11 @@ export function recognizeSkills(
 
   for (const t of TERMS) {
     if (!folded.includes(t.term)) continue;
-    if (t.via === "synonym" && t.len <= WHOLE_WORD_MAX_LEN && !foldedTokens.includes(t.term)) continue;
+    if (
+      ((t.via === "synonym" && t.len <= WHOLE_WORD_MAX_LEN) || WHOLE_WORD_TERMS.has(t.term)) &&
+      !foldedTokens.includes(t.term)
+    )
+      continue;
     (matchedTerms.get(t.slug) ?? matchedTerms.set(t.slug, new Set()).get(t.slug)!).add(t.term);
     const prior = best.get(t.slug);
     const better =
@@ -370,16 +383,6 @@ export function recognizeSkills(
     }
   }
 
-  // Kitchen-place guard (see isKitchenPlaceOnlyCooking).
-  if (best.has("cooking")) {
-    const firmOthers = [...best.entries()]
-      .filter(([slug, b]) => slug !== "cooking" && b.via !== "fuzzy")
-      .map(([slug]) => slug);
-    if (isKitchenPlaceOnlyCooking(folded, matchedTerms.get("cooking") ?? [], firmOthers)) {
-      best.delete("cooking");
-    }
-  }
-
   // Cleaning-context guard: drop a flooring suggestion that exists only because
   // a floor was named in a washing/cleaning context (e.g. "ploviau grindis").
   if (best.has("flooring") && isCleaningFloorContext(folded)) {
@@ -397,9 +400,36 @@ export function recognizeSkills(
   // magazynowej").
   // Only a FIRM other trade explains the work — a low-confidence fuzzy hit
   // ("pakket" ≈ "parket") never takes a warehouse worker's skill away.
-  const firm = [...best.entries()].filter(([, b]) => b.via !== "fuzzy").map(([slug]) => slug);
+  // A cooking reading resting only on a kitchen PLACE word is itself a place,
+  // not a trade, so it never removes warehouse work ("Stored kitchen supplies
+  // in the warehouse"); the kitchen guard below then judges it (Codex P2 on
+  // #3798: no circular suppression).
+  const cookingTerms = [...(matchedTerms.get("cooking") ?? [])];
+  const placeOnlyCooking =
+    best.has("cooking") && cookingTerms.length > 0 && cookingTerms.every((t) => KITCHEN_PLACE_TERMS.has(t));
+  const firm = [...best.entries()]
+    .filter(([slug, b]) => b.via !== "fuzzy" && !(slug === "cooking" && placeOnlyCooking))
+    .map(([slug]) => slug);
   if (best.has("warehouse-operations") && isWarehousePlaceOnlyContext(folded, firm)) {
     best.delete("warehouse-operations");
+  }
+
+  // Kitchen-place guard (see isKitchenPlaceOnlyCooking). It runs AFTER the
+  // other context guards, so a reading they removed (flooring dropped by the
+  // cleaning guard) never counts as a competing trade, and only a skill that
+  // establishes a trade counts — not a transferable one like teamwork
+  // (Codex P2 on #3774).
+  if (best.has("cooking")) {
+    const firmOthers = [...best.entries()]
+      .filter(([slug, b]) => slug !== "cooking" && b.via !== "fuzzy")
+      .map(([slug]) => slug)
+      .filter((slug) => {
+        const group = classifySkillSlug(slug);
+        return group === "specific" || group === "profession";
+      });
+    if (isKitchenPlaceOnlyCooking(folded, matchedTerms.get("cooking") ?? [], firmOthers)) {
+      best.delete("cooking");
+    }
   }
 
   const list: RecognizedSkill[] = [...best.entries()].map(([slug, b]) => ({
