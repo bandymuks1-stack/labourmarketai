@@ -223,3 +223,53 @@ test("C-10. (b) the switch action opens the person's CV, then the walk returns t
     await back.close();
   }
 });
+
+test("C-11. publication phrases open the existing need form with the original words", async ({ browser }) => {
+  for (const phrase of ["post a need", "create a new job ad", "I want to post a job ad for 3 welders"]) {
+    const { page, close } = await open(browser);
+    try {
+      await page.getByTestId("composer-input").fill(phrase);
+      await page.getByTestId("composer-send").click();
+      const form = page.getByTestId("inline-action-form-company.create-demand").last();
+      await expect(form, `${phrase}: opens demand intake, not job search`).toBeVisible({ timeout: 45_000 });
+      await expect(form.locator("textarea").first(), "the form belongs to this request").toHaveValue(phrase);
+      await fits(page, "publication phrase");
+      // No submit or confirmation: the existing published-need journey is unchanged.
+    } finally {
+      await close();
+    }
+  }
+});
+
+test("C-12. Dutch and German job-search phrases reach the worker's opportunities", async ({ browser }) => {
+  const ctx = await browser.newContext({ storageState: state("worker2"), locale: "lt-LT" });
+  try {
+    const page = await ctx.newPage();
+    await page.goto("/lt/dashboard");
+    const chip = page.getByTestId("workspace-chip").first();
+    await expect(chip).toBeVisible({ timeout: 30_000 });
+    if (!(await chip.innerText()).includes("Asmeninė erdvė")) {
+      await chip.getByRole("button").first().click();
+      await page.getByTestId("workspace-chip-menu").locator('[data-testid^="workspace-option-"]', { hasText: "Asmeninė erdvė" }).first().click();
+      await expect(chip).toContainText("Asmeninė erdvė", { timeout: 30_000 });
+      await page.goto("/lt/dashboard");
+    }
+    for (const phrase of ["werk zoeken", "Arbeit finden"]) {
+      // Reset the existing result panel: the previous search cannot satisfy this request.
+      await page.goto("/lt/dashboard?result=calendar");
+      await expect(page.getByTestId("composer-input")).toBeVisible({ timeout: 30_000 });
+      await expect(page.getByTestId("opportunities-view")).toHaveCount(0);
+      const replies = page.getByTestId("msg-assistant");
+      const before = await replies.count();
+      await page.getByTestId("composer-input").fill(phrase);
+      await page.getByTestId("composer-send").click();
+      await expect.poll(() => replies.count(), { timeout: 45_000 }).toBeGreaterThan(before);
+      await expect(page.getByTestId("opportunities-view").first()).toBeVisible({ timeout: 45_000 });
+      await expect(replies.last()).not.toContainText(/Nesupratau|Ką tiksliai norėtum|Galiu padėti su /);
+      await expect(page.getByTestId("inline-action-form-company.create-demand")).toHaveCount(0);
+      await fits(page, "worker job search");
+    }
+  } finally {
+    await ctx.close();
+  }
+});
