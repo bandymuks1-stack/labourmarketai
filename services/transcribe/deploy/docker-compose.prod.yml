@@ -1,0 +1,50 @@
+# Production stack for ONE always-on Linux VM (any KVM VPS, Oracle Always Free
+# ARM, an already-paid host with spare capacity). Caddy terminates TLS with an
+# automatic Let's Encrypt certificate; the transcription container is NOT
+# published on the host at all (only Caddy's 80/443 are).
+#
+#   cd services/transcribe/deploy && sh bootstrap.sh && docker compose -f docker-compose.prod.yml up -d --build
+services:
+  transcribe:
+    build:
+      context: ..
+      args:
+        WHISPER_MODEL: ${WHISPER_MODEL:-small}
+    image: lmai-transcribe:latest
+    restart: unless-stopped
+    environment:
+      TRANSCRIBE_TOKEN: ${TRANSCRIBE_TOKEN:?run bootstrap.sh first}
+      ALLOWED_ORIGINS: ${ALLOWED_ORIGINS:-https://labourmarket.ai}
+      MAX_DURATION_SECONDS: ${MAX_DURATION_SECONDS:-600}
+      WHISPER_THREADS: ${WHISPER_THREADS:-2}
+      WHISPER_TIMEOUT_MS: ${WHISPER_TIMEOUT_MS:-300000}
+      RATE_LIMIT_PER_MINUTE: ${RATE_LIMIT_PER_MINUTE:-10}
+      IDEMPOTENCY_CACHE_TTL_SECONDS: ${IDEMPOTENCY_CACHE_TTL_SECONDS:-600}
+    expose:
+      - "8085"
+    deploy:
+      resources:
+        limits:
+          memory: ${TRANSCRIBE_MEMORY:-3g}
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    depends_on:
+      - transcribe
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      TRANSCRIBE_HOSTNAME: ${TRANSCRIBE_HOSTNAME:?set the public hostname in .env}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  caddy_data:
+  caddy_config:
