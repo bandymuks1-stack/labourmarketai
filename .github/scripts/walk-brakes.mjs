@@ -19,6 +19,11 @@
 //             within 5 min of the last one ending (the blue/green switch runs
 //             two servers on one origin: run 39978076973 got Cloudflare 522s
 //             and 45 s timeouts during deploys). NOT bypassable.
+//             Inside a deploy-vps.yml run (the post-deploy checks, called with
+//             WALK_BRAKE_OWN_DEPLOY_RUN = that run's id): its own run is not
+//             "another deploy", runs waiting in the `deploy-vps` group cannot
+//             start before it ends, and the quiet period counts from its own
+//             `deploy` job's end.
 //   errors    refuse when the last 2 walks that reached production both failed
 //             in their FIRST step or with infrastructure / 5xx errors, and the
 //             latest of them ended < 60 min ago (circuit breaker: after the
@@ -60,6 +65,8 @@ export const THRESHOLDS = Object.freeze({
    *  (blue/green switch: two Next servers on one origin; run 39978076973 got
    *  Cloudflare 522s and 45 s timeouts during deploys). */
   deployQuietMinutes: 5,
+  /** How often `deploy --wait` re-reads the deploy runs while it waits. */
+  deployWaitPollMs: 30_000,
   /** The error brake looks at this many latest walks that reached production. */
   errorLookback: 2,
   /** …and trips only while the latest of them ended less than this long ago. */
@@ -117,12 +124,39 @@ export function judgeHealthSamples(samples, t = THRESHOLDS) {
 const DEPLOY_ACTIVE = new Set(["in_progress", "queued", "waiting", "requested", "pending"]);
 
 /**
+ * Did a finished deploy-vps.yml run actually touch production? Only when its `deploy` job's
+ * "Ship + activate" step ran (any outcome but skipped: a failed or cancelled ship may still have
+ * switched builds). A run cancelled while pending (GitHub keeps one pending run per concurrency
+ * group, so every merge burst cancels several), a run whose gate refused or was skipped, a
+ * docs-only run and a never-backwards skip all shipped nothing and hold no quiet period
+ * (deploy run 45472560135: eleven such cancelled runs kept restarting the 5-minute window).
+ * @param {readonly { name: string, conclusion?: string | null, steps?: readonly { name: string, conclusion?: string | null }[] }[]} jobs
+ */
+export function runShippedFromJobs(jobs) {
+  // filter=all includes every attempt; any attempt may have switched production.
+  return (jobs ?? []).some((job) => job.name === "deploy" &&
+    (job.steps ?? []).some((step) => /^Ship \+ activate/.test(step.name) &&
+      step.conclusion !== "skipped" && step.conclusion != null));
+}
+
+/**
  * The deploy brake: `runs` = the latest deploy-vps.yml runs ({ id, status,
  * updated_at }). Refuse while one is running or queued, or within
  * `deployQuietMinutes` of the latest one ending.
  * @returns {{ refuse: boolean, reason: string }}
  */
-export function judgeDeployBrake(runs, now = new Date(), t = THRESHOLDS) {
+export function judgeDeployBrake(runs, now = new Date(), t = THRESHOLDS, own = null) {
+  if (own) {
+    // Called from the checks of deploy-vps.yml run `own.id`. That run holds the `deploy-vps`
+    // concurrency group, so a run WAITING in it cannot start before this one ends; another run
+    // IN PROGRESS would be outside the queue and still refuses.
+    if (!Number.isFinite(Date.parse(own.deployEndedAt ?? ""))) {
+      return { refuse: true, reason: `the end of this run's own deploy job (run ${own.id}) is unreadable` };
+    }
+    runs = runs
+      .filter((r) => r.id !== own.id && (r.status === "completed" || r.status === "in_progress"))
+      .concat([{ id: own.id, status: "completed", updated_at: own.deployEndedAt }]);
+  }
   const active = runs.filter((r) => DEPLOY_ACTIVE.has(r.status));
   // A finished run whose deploy job was skipped shipped nothing (docs only, or Quality Gates failed).
   runs = runs.filter((r) => !r.deploySkipped);
@@ -375,23 +409,167 @@ async function cmdHealth() {
   say(`health brake: clear (${THRESHOLDS.healthSamples}/${THRESHOLDS.healthSamples} samples within thresholds)`);
 }
 
-async function cmdDeploy() {
-  const runs = (ghJson(`repos/${REPO}/actions/workflows/deploy-vps.yml/runs?per_page=10`).workflow_runs ?? []).map(
+/**
+ * Run lists are ordered by creation, not by a rerun's completion. Pending runs
+ * can also hide a recent ship beyond the first page. Environment deployments
+ * belong to individual job executions, including reruns, so their newest
+ * verified deploy job supplies the quiet-period clock without a lifetime scan.
+ * `production-vps` is also used by the read-only vps-status workflow. Only that
+ * known job or a proven skipped ship may be ignored. Missing or ambiguous
+ * execution identity refuses the walk; incomplete ship steps keep its quiet period.
+ * At most 5 active-run reads + 1 deployment page + 3 reads per 50 candidates.
+ * @param {(path: string) => any} api Injected GitHub JSON reader (no writes).
+ */
+export function readStandaloneDeployVerdict(api, repo, now = new Date(), t = THRESHOLDS) {
+  const blocked = (reason) => ({ refuse: true, reason });
+  const scanLimit = 50;
+  const prefix = `repos/${repo}`;
+  try {
+    if (!/^[\w.-]+\/[\w.-]+$/.test(repo) || !Number.isFinite(now.getTime())) {
+      return blocked("the deploy evidence context is invalid");
+    }
+    for (const status of DEPLOY_ACTIVE) {
+      const response = api(`${prefix}/actions/workflows/deploy-vps.yml/runs?status=${status}&per_page=1`);
+      if (!Number.isSafeInteger(response?.total_count) || response.total_count < 0 ||
+          !Array.isArray(response.workflow_runs) || response.workflow_runs.length !== Math.min(1, response.total_count)) {
+        return blocked("the active deploy runs could not be verified");
+      }
+      if (response.total_count > 0) return blocked(`a production deploy is ${status}`);
+    }
+    const deployments = api(`${prefix}/deployments?environment=production-vps&per_page=${scanLimit}`);
+    if (!Array.isArray(deployments) || deployments.length === 0 || deployments.length > scanLimit) {
+      return blocked("the production-vps deployment history is unavailable");
+    }
+    // Refuse malformed ordering rather than treating a stale object as newest.
+    let previousCreated = now.getTime();
+    for (const deployment of deployments) {
+      const created = Date.parse(deployment?.created_at ?? "");
+      if (!Number.isSafeInteger(deployment?.id) || deployment.id <= 0 || deployment.environment !== "production-vps" ||
+          !Number.isFinite(created) || created > previousCreated) {
+        return blocked("the production-vps deployment history is malformed");
+      }
+      previousCreated = created;
+    }
+    for (const deployment of deployments) {
+      const statuses = api(`${prefix}/deployments/${deployment.id}/statuses?per_page=1`);
+      if (!Array.isArray(statuses) || statuses.length !== 1 ||
+          !["success", "failure", "error", "inactive"].includes(statuses[0]?.state)) {
+        return blocked("the latest production-vps deployment status is missing or not terminal");
+      }
+      const url = new URL(statuses[0].log_url);
+      const parts = url.pathname.split("/");
+      if (url.protocol !== "https:" || url.host !== "github.com" || url.username || url.password ||
+          url.search || url.hash || parts.length !== 8 ||
+          `${parts[1]}/${parts[2]}`.toLowerCase() !== repo.toLowerCase() ||
+          parts[3] !== "actions" || parts[4] !== "runs" || parts[6] !== "job" ||
+          !/^\d+$/.test(parts[5]) || !/^\d+$/.test(parts[7])) {
+        return blocked("the production-vps deployment has no trusted run/job link");
+      }
+      const runId = Number(parts[5]);
+      const jobId = Number(parts[7]);
+      if (!Number.isSafeInteger(runId) || runId <= 0 || !Number.isSafeInteger(jobId) || jobId <= 0) {
+        return blocked("the production-vps deployment run/job identity is invalid");
+      }
+      const job = api(`${prefix}/actions/jobs/${jobId}`);
+      const run = api(`${prefix}/actions/runs/${runId}`);
+      if (job?.id !== jobId || job.run_id !== runId || run?.id !== runId) {
+        return blocked("the production-vps deployment run/job identity does not match");
+      }
+      const ended = Date.parse(job.completed_at ?? "");
+      if (job.status !== "completed" || run.status !== "completed" ||
+          !["success", "failure", "cancelled", "skipped", "timed_out", "neutral", "action_required", "startup_failure", "stale"].includes(job.conclusion) ||
+          !Number.isFinite(ended) || ended < Date.parse(deployment.created_at) || ended > now.getTime()) {
+        return blocked("the production-vps job completion could not be verified");
+      }
+      if (run.path === ".github/workflows/vps-status.yml" && job.name === "status") continue;
+      if (run.path !== ".github/workflows/deploy-vps.yml" || job.name !== "deploy") {
+        return blocked("the production-vps deployment came from an unknown workflow or job");
+      }
+      // A never-backwards skip creates an environment record but never ships.
+      // Only known ship-step conclusions can prove that: absent/incomplete
+      // steps keep the conservative quiet period from this job's completion.
+      const shipSteps = Array.isArray(job.steps) && job.steps.every((step) => typeof step?.name === "string")
+        ? job.steps.filter((step) => /^Ship \+ activate/.test(step.name))
+        : [];
+      if (shipSteps.length > 0 && shipSteps.every((step) => step.conclusion != null) &&
+          !runShippedFromJobs([{ name: job.name, steps: shipSteps }])) continue;
+      // The deploy queue serializes these jobs. The first verified deploy
+      // object is the newest deploy execution; other environment jobs cannot
+      // supply its clock. Even a failed/cancelled ship may have switched builds.
+      return judgeDeployBrake([{ id: runId, status: "completed", updated_at: job.completed_at }], now, t);
+    }
+    return blocked(deployments.length === scanLimit
+      ? "the production-vps deployment scan limit was reached before a deploy could be verified"
+      : "no deploy job was found in the production-vps deployment history");
+  } catch {
+    return blocked("the production-vps deployment evidence could not be read");
+  }
+}
+
+/** Injected reads and clock let the complete brake be exercised without GitHub. */
+export function readDeployVerdict({ api = ghJson, repo = REPO, now = new Date(), ownId = Number(process.env.WALK_BRAKE_OWN_DEPLOY_RUN ?? 0) } = {}) {
+  const runs = (api(`repos/${repo}/actions/workflows/deploy-vps.yml/runs?per_page=10`).workflow_runs ?? []).map(
     (r) => ({ id: r.id, status: r.status, updated_at: r.updated_at }),
   );
   // Only runs that could still hold the quiet period need their jobs read. Unreadable counts as a deploy.
   for (const r of runs) {
-    if (r.status !== "completed" || Date.now() - Date.parse(r.updated_at) >= THRESHOLDS.deployQuietMinutes * 60_000) continue;
+    if (r.status !== "completed" || now.getTime() - Date.parse(r.updated_at) >= THRESHOLDS.deployQuietMinutes * 60_000) continue;
     try {
-      const jobs = ghJson(`repos/${REPO}/actions/runs/${r.id}/jobs`).jobs ?? [];
-      r.deploySkipped = jobs.find((j) => j.name === "deploy")?.conclusion === "skipped";
+      const response = api(`repos/${repo}/actions/runs/${r.id}/jobs?filter=all&per_page=100`);
+      const jobs = response.jobs;
+      // An incomplete or malformed response cannot prove that no attempt shipped.
+      // Keep the quiet period rather than making additional calls on every poll.
+      if (!Array.isArray(jobs) || !Number.isInteger(response.total_count) || response.total_count !== jobs.length) {
+        throw new Error("incomplete deploy-job list");
+      }
+      r.deploySkipped = !runShippedFromJobs(jobs);
     } catch {
       r.deploySkipped = false;
     }
   }
-  const verdict = judgeDeployBrake(runs);
-  if (verdict.refuse) refuse(verdict.reason);
+  // Inside a deploy-vps.yml run: that run and the end of its own `deploy` job.
+  let own = null;
+  if (ownId) {
+    let deployEndedAt = null;
+    try {
+      const jobs = api(`repos/${repo}/actions/runs/${ownId}/jobs?per_page=100`).jobs ?? [];
+      const job = jobs.find((j) => j.name === "deploy" && j.status === "completed" && j.conclusion === "success");
+      deployEndedAt = job?.completed_at ?? null;
+    } catch {
+      deployEndedAt = null;
+    }
+    own = { id: ownId, deployEndedAt };
+  }
+  const verdict = judgeDeployBrake(runs, now, THRESHOLDS, own);
+  return verdict.refuse || own ? verdict : readStandaloneDeployVerdict(api, repo, now);
+}
+
+/**
+ * The deploy brake. `deploy` judges once. `deploy --wait <minutes>` WAITS for the
+ * quiet period instead of refusing at once (owner P0 2026-11-24: frequent deploys
+ * refused walk after walk, and a refused walk is lost). The rule is unchanged —
+ * no walk while a deploy runs or within `deployQuietMinutes` of one ending; it
+ * still refuses when production is not quiet within the bound (at most 30 min).
+ */
+async function cmdDeploy() {
+  const waitMin = deployWaitMinutes(process.argv);
+  const until = Date.now() + waitMin * 60_000;
+  let verdict = readDeployVerdict();
+  while (verdict.refuse && Date.now() + THRESHOLDS.deployWaitPollMs <= until) {
+    say(`deploy brake: waiting (${verdict.reason})`);
+    await sleep(THRESHOLDS.deployWaitPollMs);
+    verdict = readDeployVerdict();
+  }
+  if (verdict.refuse) refuse(waitMin > 0 ? `${verdict.reason} (still not quiet after waiting ${waitMin} min)` : verdict.reason);
   say(`deploy brake: clear (${verdict.reason})`);
+}
+
+/** `--wait <minutes>` from the arguments, bounded to 0..30; absent = 0 (judge once). */
+export function deployWaitMinutes(argv) {
+  const at = argv.indexOf("--wait");
+  if (at === -1) return 0;
+  const n = Number(argv[at + 1]);
+  return Number.isFinite(n) ? Math.max(0, Math.min(30, n)) : 0;
 }
 
 async function cmdErrors() {

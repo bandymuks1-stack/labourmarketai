@@ -187,8 +187,9 @@ describe("5. a profession outside both catalogues still reaches the form, honest
     expect(handler).toMatch(/openForm\("worker\.add-work-history", undefined, undefined, \{ title: stated\.label \}\)/);
     // Nothing is persisted from the sentence itself.
     expect(handler).not.toMatch(/dispatch|execute|\.from\(/);
-    // An unreadable sentence degrades to the honest menu, never to a guess.
-    expect(handler).toMatch(/if \(!stated\) \{\s*assistant\(fallbackText, starterChips\);/);
+    // An unreadable sentence asks ONE question, never a guess and never the
+    // generic menu (owner order 2026-11-24, decision 0034 rule 3).
+    expect(handler).toMatch(/if \(!stated\) \{\s*askToClarify\(t\("professionAsk"\)\);/);
   });
 
   it("'esu buhalteris, ieškau darbo' reads the profession BEFORE the search runs (G-A1)", () => {

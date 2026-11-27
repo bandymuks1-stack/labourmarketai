@@ -1,6 +1,7 @@
 import type { FormState, WorkerFormSpec } from "@/lib/conversation/worker-forms";
 import { OPPORTUNITY_TYPES } from "@/lib/demand/structured-demand-v2";
 import { resolveCountryCode } from "@/lib/location/country-model";
+import { PROJECT_CITY_MAX, PROJECT_TITLE_MAX } from "@/lib/projects/project-title-limits";
 
 /**
  * Declarative inline-form specs for the EMPLOYER-side conversation actions
@@ -296,14 +297,14 @@ export const AGENCY_FORMS: readonly WorkerFormSpec[] = [
         labelKey: "conversation.forms.fields.projectTitle",
         placeholderKey: "conversation.forms.fields.projectTitlePlaceholder",
         required: true,
-        maxLength: 120,
+        maxLength: PROJECT_TITLE_MAX,
       },
       {
         name: "city",
         kind: "text",
         labelKey: "conversation.forms.fields.projectCity",
         placeholderKey: "conversation.forms.fields.projectCityPlaceholder",
-        maxLength: 120,
+        maxLength: PROJECT_CITY_MAX,
       },
     ],
     build: (st: FormState) => ({ title: s(st.title), city: s(st.city) || null }),

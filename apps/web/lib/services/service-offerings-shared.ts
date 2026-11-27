@@ -32,6 +32,8 @@ export interface ServiceOfferingRow {
   readonly status: ServiceOfferingStatus;
   /** Why a closed offering is closed (lifecycle contract); null otherwise. */
   readonly closedOutcome?: string | null;
+  /** Explicit public visitor audience; own-row reads always supply this flag. */
+  readonly publicSearchEnabled?: boolean;
   readonly createdAt: string;
   readonly updatedAt: string;
 }
@@ -42,6 +44,8 @@ export type ServiceOfferingListResult =
       rows: ServiceOfferingRow[];
       /** The closed state is stored (lifecycle migration applied). */
       closedSupported?: boolean;
+      /** The owner-choice column is available; this does not claim public search uptime. */
+      publicSearchSupported?: boolean;
     }
   | { kind: "needs-migration" }
   /** The read failed — never shown as "no offerings" (SEP-7, audit 2026-10-16). */
@@ -67,4 +71,6 @@ export interface ServiceOfferingInput {
   locationCountry?: string | null;
   remote?: boolean;
   rateText?: string | null;
+  /** Undefined preserves the existing choice; publication status is independent. */
+  publicSearchEnabled?: boolean;
 }

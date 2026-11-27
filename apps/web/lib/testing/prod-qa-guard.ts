@@ -122,6 +122,14 @@ export const PROD_QA_BUYER_EMAIL = "qa.buyer+act1@labourmarket.ai" as const;
  */
 export const PROD_QA_INVITED_EMAIL = "qa.invited@labourmarket.ai" as const;
 
+/**
+ * Coordinator order 2026-11-23 (owner-approved grant): ONE synthetic READ-ONLY account for the
+ * owner's de-identified Living CV screens (`prod-living-cv-screens`). The owner's side creates it
+ * and grants it a read-only membership in the two organizations; the walk only mints a session
+ * for it and never creates or changes it.
+ */
+export const PROD_QA_LIVING_CV_EMAIL = "qa.livingcv+read1@labourmarket.ai" as const;
+
 /** The owner-created identities — minted only if the owner has created them. */
 export const PROD_QA_FRESH_IDENTITIES: readonly string[] = [
   PROD_QA_FRESH_WORKER_EMAIL,
@@ -130,6 +138,7 @@ export const PROD_QA_FRESH_IDENTITIES: readonly string[] = [
   PROD_QA_FRESH_COMPANY_ACT1_EMAIL,
   PROD_QA_BUYER_EMAIL,
   PROD_QA_INVITED_EMAIL,
+  PROD_QA_LIVING_CV_EMAIL,
 ];
 
 /** Every allowlisted synthetic identity — equality-matched, never by prefix

@@ -156,9 +156,10 @@ export function WorkLifecycleGraph({
   const progress = last > 0 ? shown / last : 0;
   const current = stages[shown];
 
+  const hasFacts = stages.some((st) => Boolean(st.fact));
   return (
     <section
-      className="relative mx-auto max-w-container px-6 pt-10 sm:px-12"
+      className="relative mx-auto max-w-container px-6 pb-6 pt-10 sm:px-12"
       data-testid={testId}
       aria-label={title}
     >
@@ -235,7 +236,7 @@ export function WorkLifecycleGraph({
 
         {/* ── 2. THE RECORD — one record that accumulates ───────────────── */}
         <div
-          className={cn("mt-8 grid gap-6 rounded-xl border border-ink-600 bg-ink-800/50 p-4 sm:p-6", subject && "md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]")}
+          className={cn("mt-8 grid gap-6", hasFacts || subject ? "rounded-xl border border-ink-600 bg-ink-800/50 p-4 sm:p-6" : "", subject && "md:grid-cols-[minmax(0,13rem)_minmax(0,1fr)]")}
           data-testid={`${testId}-record`}
           aria-live="polite"
         >
@@ -264,6 +265,11 @@ export function WorkLifecycleGraph({
             {stages.map((s, i) => {
               const filled = i <= shown;
               const isCurrent = i === shown;
+              // Nothing recorded to show (the public pages): the rail above
+              // already names every stage, so the record holds the chosen
+              // stage only, not six rows that each say "not yet"
+              // (decisions 0032 and 0034).
+              if (!hasFacts && !isCurrent) return null;
               const Icon = ICONS[s.icon];
               return (
                 <li

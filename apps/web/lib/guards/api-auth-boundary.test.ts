@@ -158,6 +158,10 @@ const CLASSIFICATION: Record<
     class: "public",
     why: "The approved-partner referral door (universal invitation/referral network v1). Identity is the SOURCE'S OWN machine secret (lib/api/external-referral-auth.ts, one secret per registered source, constant-time compared, refused while unset) — not a user — so there is no cookie path and no bearer-user path. It stores exactly one canonical invitation per (source, reference) through a service_role-only SECURITY DEFINER function that re-checks consent and idempotency itself, and answers with the invitation id and a one-time link; it never reads or returns any existing worker.",
   },
+  "demand/just-saved/route.ts": {
+    class: "cookie-only",
+    why: "The need form's own question after its submit answer was lost (production run 45241051644): was this exact need just saved? A same-origin fetch from the signed-in page, read-only, own rows under RLS and the employer workspace gate, answering an id or null. An assistant over /api/mcp gets the submit's answer directly and has nothing to recover.",
+  },
   "mcp/route.ts": {
     class: "shared",
     why: "The MCP door for external clients (ChatGPT connector, future agents). Bearer is its primary transport by nature; it resolves identity through the one boundary and every tool call runs the caller's own RLS-scoped client via lib/capabilities.",

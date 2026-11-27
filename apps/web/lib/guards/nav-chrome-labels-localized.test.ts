@@ -26,7 +26,6 @@ const CHROME = [
   "components/app/dashboard-chrome.tsx",
   "components/app/account-menu.tsx",
   "components/app/header-search.tsx",
-  "components/app/page-quick-nav.tsx",
 ];
 
 /** A literal accessible name written as a word, e.g. aria-label="Loading". */

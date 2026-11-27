@@ -236,6 +236,25 @@ export function deriveHistoryProof(input: {
   };
 }
 
+/**
+ * THE PROJECT A RECORD BELONGS TO — the record's own link, else the project
+ * of the work object (site) it was recorded at (owner addendum 2026-11-23: a
+ * fact recorded once is used by every related function). An imported history
+ * can carry `project_id = NULL` on every record while each record's work
+ * object belongs to a project: the link exists THROUGH the work object, and
+ * every reader resolves it the same way. Read-time only: nothing is
+ * back-filled, and a work object without a project leaves the record without
+ * one (never guessed from a name or free text).
+ */
+export function recordProjectId(
+  record: { readonly projectId: string | null; readonly workObjectId: string | null },
+  projectOfObject: ReadonlyMap<string, string | null>,
+): string | null {
+  if (record.projectId) return record.projectId;
+  if (!record.workObjectId) return null;
+  return projectOfObject.get(record.workObjectId) ?? null;
+}
+
 export function buildHistoryContext(i: HistoryContextInput): HistoryContext {
   const projectName = clean(i.projectName);
   const project = i.projectId && projectName ? { id: i.projectId, name: projectName } : null;

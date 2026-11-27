@@ -14,7 +14,7 @@ import { emitServerFunnelEvent } from "@/lib/telemetry/server-funnel";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
 import { expressInterestAction } from "@/lib/opportunities/interest-actions";
 import { createJournalEntry } from "@/lib/journal/actions";
-import { intakeWorkTimeFields } from "@/lib/journal/intake-work-time";
+import { logWorkFields } from "@/lib/journal/log-work-fields";
 import type { JournalSkillPipelineResult } from "@/lib/journal/skill-pipeline";
 import { z } from "zod";
 
@@ -253,30 +253,11 @@ export const WORKER_EXECUTORS: {
   },
 });
 
-/** THE FormData mapping worker.log-work sends to the canonical save — one
- *  function, so the dispatcher's "already recorded" lookup compares exactly
- *  what the executor writes (every signed field). */
-export function logWorkFields(
-  locale: string,
-  input: z.infer<(typeof WORKER_ACTION_SCHEMAS)["worker.log-work"]>,
-): Record<string, string> {
-  return {
-    locale,
-    engagement_context_id: input.engagementContextId,
-    notes: input.notes,
-    work_date: input.workDate,
-    site_name: input.siteName ?? "",
-    project_id: input.projectId ?? "",
-    ...(input.voice
-      ? {
-          input_origin: "voice",
-          voice_language: input.voice.language,
-          voice_disclosure_version: input.voice.disclosureVersion,
-        }
-      : {}),
-    ...intakeWorkTimeFields(input.notes, input.workDate),
-  };
-}
+/** THE FormData mapping worker.log-work sends to the canonical save — the
+ *  ONE shared with the MCP `journal.confirm` (lib/journal/log-work-fields.ts),
+ *  so the dispatcher's "already recorded" lookup compares exactly what the
+ *  executor writes (every signed field). */
+export { logWorkFields };
 
 /** The chat's `worker.log-work` result for a recorded entry — the executor's
  *  own answer, and the dispatcher's "already recorded" answer to a retried

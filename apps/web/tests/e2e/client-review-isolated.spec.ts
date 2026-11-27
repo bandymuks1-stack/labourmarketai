@@ -684,7 +684,8 @@ test("CR-2. R accepts the desktop entry on a 390 px phone; it is stored as K's a
   await expect(panel, "W sees the client's acceptance").toHaveAttribute("data-phase", "accepted", { timeout: 60_000 });
   await expect(panel.getByTestId(`entry-review-accepted-${entry}`), "named as K's acceptance").toContainText(orgName(s.kOrg));
   await fitsTheScreen(w.page, "the worker's journal with the accepted entry");
-  await w.page.goto(`${BASE}/en/cv`);
+  // The count lives in the CV's Experience block (decision 0034).
+  await w.page.goto(`${BASE}/en/cv?tab=experience`);
   const counted = w.page.getByRole("main").getByTestId("cv-client-accepted-work").filter({ visible: true }).first();
   await expect(counted, "the Living CV counts work the client accepted, as its own fact").toBeVisible({ timeout: 60_000 });
   expect(Number(await counted.getAttribute("data-entries"))).toBeGreaterThanOrEqual(1);

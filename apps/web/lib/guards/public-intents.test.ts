@@ -79,6 +79,7 @@ describe("the six intents", () => {
       ["commercial", "/dashboard/commercial", true],
     ]);
     expect(links("contractors")).toEqual([
+      ["findServices", "/services", false],
       ["b2bEnquiry", "/#request=b2b", false],
       ["projectEnquiry", "/#request=project", false],
     ]);

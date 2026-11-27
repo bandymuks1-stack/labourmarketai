@@ -1,0 +1,41 @@
+-- @human-gate-approved (acknowledgement only: RED, NOT applied; owner approval of this exact SQL required)
+-- ============================================================================
+-- 20261123060000_revoke_bypassed_v1_doors_v1
+--
+-- SAFETY CLASS: RED (REVOKE only). ZERO rows change. No function body changes.
+--
+-- WHY (owner P0 #3679, duplication audit SEC-1/2/4, handed to Lane F by E).
+-- Three first versions of a write door stay EXECUTE for `authenticated`
+-- although a later version added a rule the first one lacks. A direct
+-- PostgREST call to the old name skips the rule. Production read 2026-11-23
+-- (has_function_privilege): all three are EXECUTE for authenticated, and
+-- their successors exist and are EXECUTE for authenticated.
+--
+--   respond_team_demand_offer_v1(uuid, text)
+--       v2 (20261020172000 / 20261020174000) adds "agree only to the terms
+--       version you saw" and then calls v1 as SECURITY DEFINER.
+--   set_work_task_status_v1(text, text)
+--       v2 (20260817151000, hardened 20261002141500) adds the transition and
+--       authority rules; v2 does not call v1.
+--   propose_booking_request(uuid, uuid, text, text, text, text, text)
+--       v3 (20260716121000) adds the database rate caps and then calls it as
+--       SECURITY DEFINER.
+--
+-- CHANGE: revoke EXECUTE from authenticated (public and anon already have
+-- none). The successors are SECURITY DEFINER and run as the function owner,
+-- so their internal calls keep working. The app calls each old name only as a
+-- fallback when its successor is MISSING (42883 / PGRST202):
+-- lib/company/team-offer.ts:228, lib/tasks/set-task-status-core.ts:54,
+-- lib/tasks/task-actions.ts:385, lib/booking/booking-actions.ts:275. The
+-- successors exist in production, so no live path reaches a revoked door.
+--
+-- NOT INCLUDED: accept_invitation_v1 / accept_invitation_by_id_v1 /
+-- decline_invitation_v1 (SEC-3) are already not EXECUTE for authenticated
+-- in production (read 2026-11-23).
+--
+-- Rollback: supabase/rollbacks/20261123060000_revoke_bypassed_v1_doors_v1.down.sql
+-- ============================================================================
+
+revoke execute on function public.respond_team_demand_offer_v1(uuid, text) from authenticated;
+revoke execute on function public.set_work_task_status_v1(text, text) from authenticated;
+revoke execute on function public.propose_booking_request(uuid, uuid, text, text, text, text, text) from authenticated;

@@ -1166,13 +1166,14 @@ test.describe("INTEGRATED FIXES", () => {
     const txt = await bodyText(page);
     await shot(page, "b9-history");
     save({ B9_HISTORY_SNIP: txt.slice(0, 800) });
-    // the page states the period aggregates as ONE separate figure per place (800 + 165 = 965 h period total) and says they are never added to single days
+    // The place still states its period aggregates as ONE figure (800 + 165 = 965 h period total).
     expect(txt).toMatch(/965 h period total/);
-    expect(txt).toMatch(/never added to single days/i);
     expect(txt).toMatch(/14\.5 h/);
-    // day hours of the org = this person's 14.5 + the G4 roster person's 8 h imported day (when G4 ran in this tag)
+    // ONE organization total, every hour once (decision 0025, #3773): every day record, plus the
+    // July period (no recorded day of this person inside it). The Jan-Jun period holds the March
+    // days, so it may summarise them and is NOT added.
     const g4 = (await rows<{ hours: number }>(`organization_evidence_records?organization_id=eq.${S.BO_ORG}&activity_date=not.is.null&select=hours`)).reduce((s2, r) => s2 + Number(r.hours), 0);
-    expect(txt).toMatch(new RegExp(`${g4} h\\s+Hours on single days`));
+    await expect(page.getByTestId("business-history-overview")).toHaveAttribute("data-hours", String(g4 + 165));
     // NEVER a figure that sums a day with a period (14.5 + 965 = 979.5; 8 + 800; ...) - on ANY section of the page, incl. 'Who performed this work?'
     for (const wrong of ["979.5", "979,5", "814.5", "814,5", "808", "973", "987.5", "987,5"]) expect(txt, `a summed figure ${wrong} must not appear`).not.toContain(wrong);
     // SQL truth for Part C

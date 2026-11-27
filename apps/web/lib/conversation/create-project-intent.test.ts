@@ -48,7 +48,9 @@ describe("create a project by sentence", () => {
     expect(schema.safeParse({ title: "Roterdamo sandėlis", city: "Roterdamas" }).success).toBe(true);
     expect(schema.safeParse({ title: "Roterdamo sandėlis" }).success).toBe(true);
     expect(schema.safeParse({ title: "R" }).success).toBe(false);
-    expect(schema.safeParse({ title: "x".repeat(121) }).success).toBe(false);
+    // The SAME bound as the canonical core and MCP (AI-1 sweep): 200.
+    expect(schema.safeParse({ title: "x".repeat(200) }).success).toBe(true);
+    expect(schema.safeParse({ title: "x".repeat(201) }).success).toBe(false);
   });
 
   it("the form is the same InlineActionForm (title required, city optional) and the city pre-fills from the sentence", () => {

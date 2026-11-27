@@ -68,9 +68,9 @@ export type RailCard = {
  *
  * A native horizontal scroller with scroll-snap, so a swipe is the browser's
  * own and the scroll position is never reset by a selection. On a phone the
- * cards are compact (icon on top, a two-line name), about three and a half
- * show, the right edge fades while there is more, and a dot indicator with
- * the word "swipe" sits under the rail. On a wide screen the cards share the
+ * cards are compact (icon on top, a name that wraps at word boundaries), about three
+ * show, the right edge fades while there is more, and a dot indicator sits
+ * under the rail (no word: decision 0032). On a wide screen the cards share the
  * row and carry their one-line description; arrow buttons appear only when
  * the content actually overflows, and never on touch widths.
  *
@@ -86,11 +86,8 @@ export function CardRail({
   label,
   cards,
   size = "regular",
-  phoneGrid = false,
-  phoneHiddenIds,
   activeId,
   onSelect,
-  swipeHint,
   prevLabel,
   nextLabel,
   testId,
@@ -100,19 +97,8 @@ export function CardRail({
   cards: readonly RailCard[];
   /** `compact`: the phone goal card (no description below `sm`). */
   size?: "compact" | "regular";
-  /** Cards left out below `sm` (shown elsewhere there, e.g. under "more
-   *  choices"). From `sm` up they are in the rail as usual. */
-  phoneHiddenIds?: readonly string[];
-  /**
-   * Below `sm`, lay the cards out as a three-column grid instead of a
-   * scroller, so a short list (the goals) is all on the first screen with no
-   * swipe. From `sm` up nothing changes. For a list of up to about nine
-   * cards; a long list (professions) stays a rail.
-   */
-  phoneGrid?: boolean | 2;
   activeId?: string | null;
   onSelect?: (card: RailCard) => void;
-  swipeHint: string;
   prevLabel: string;
   nextLabel: string;
   /** The rail's test id. Its parts are addressed inside it by
@@ -203,7 +189,7 @@ export function CardRail({
           data-more={!edge.end || undefined}
           className={cn(
             "min-w-0 flex-1 snap-x snap-mandatory gap-2 overflow-x-auto overscroll-x-contain py-1 [scrollbar-width:none] sm:gap-3 [&::-webkit-scrollbar]:hidden",
-            phoneGrid === 2 ? "grid grid-cols-2 sm:flex" : phoneGrid ? "grid grid-cols-3 sm:flex" : "flex",
+            "flex",
             // The right edge fades while there is more to the right.
             "data-[more]:[mask-image:linear-gradient(to_right,black_calc(100%-2.5rem),transparent)]",
           )}
@@ -216,12 +202,7 @@ export function CardRail({
                 key={card.id}
                 className={cn(
                   "relative shrink-0 snap-start",
-                  phoneHiddenIds?.includes(card.id) && "max-sm:hidden",
-                  compact
-                    ? cn(phoneGrid ? "w-auto" : "w-[5.75rem]", "sm:w-auto sm:min-w-40 sm:flex-1")
-                    : phoneGrid
-                      ? "w-auto sm:w-44"
-                      : "w-36 sm:w-44",
+                  compact ? "w-[6rem] min-w-min sm:w-auto sm:min-w-40 sm:flex-1" : "w-36 sm:w-44",
                 )}
               >
                 <CardLink
@@ -233,7 +214,7 @@ export function CardRail({
                   onKeyDown={(e) => onKey(e, index)}
                   className={cn(
                     "flex h-full flex-col gap-2 rounded-xl border p-3 outline-none transition-[transform,border-color,background-color] duration-200 hover:-translate-y-0.5 focus-visible:ring-2 focus-visible:ring-brand-blue motion-reduce:transition-none motion-reduce:hover:translate-y-0",
-                    compact ? "min-h-[6.5rem] items-center text-center sm:items-start sm:p-4 sm:text-left" : "min-h-[7.5rem] sm:p-4",
+                    compact ? "min-h-[6.5rem] items-center text-center max-sm:px-2 sm:items-start sm:p-4 sm:text-left" : "min-h-[7.5rem] sm:p-4",
                     active
                       ? "border-brand-blue bg-ink-800"
                       : "border-ink-600 bg-ink-800/50 hover:border-ink-500",
@@ -251,7 +232,15 @@ export function CardRail({
                     <Icon className="size-5" />
                   </span>
                   <span className="flex min-w-0 flex-col gap-0.5">
-                    <span className="line-clamp-3 hyphens-auto text-sm font-semibold leading-snug text-text-primary [overflow-wrap:anywhere]">
+                    {/* Compact cards grow to fit their longest word. Keep
+                        the full goal name at natural word boundaries instead
+                        of splitting or clipping translated labels. */}
+                    <span
+                      className={cn(
+                        "text-sm font-semibold leading-snug text-text-primary",
+                        compact ? "whitespace-normal break-normal hyphens-none" : "line-clamp-3 hyphens-auto [overflow-wrap:anywhere]",
+                      )}
+                    >
                       {card.label}
                     </span>
                     {card.description && (
@@ -312,7 +301,7 @@ export function CardRail({
         <p
           aria-hidden
           data-rail-part="hint"
-          className="flex items-center gap-2 text-xs text-text-muted md:hidden"
+          className="flex items-center md:hidden"
         >
           <span className="flex items-center gap-1">
             {Array.from({ length: edge.pages }, (_, i) => (
@@ -325,7 +314,6 @@ export function CardRail({
               />
             ))}
           </span>
-          {swipeHint}
         </p>
       )}
     </div>

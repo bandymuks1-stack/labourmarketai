@@ -226,6 +226,10 @@ describe("1. exactly one migration owns work_tasks — the human-gated D2 pair",
         // authorization guards made fail-closed. No table/column/policy/signature change;
         // pinned separately by null-safe-authorization-guards.test.ts.
         if (f.startsWith("20261002141500_work_task_authz_null_safe_v1")) continue;
+        // 20261123060000 — REVOKE only: takes EXECUTE on the old set_work_task_status_v1 from
+        // authenticated (v2 holds the rules). Defines, alters and writes nothing; pinned as
+        // revoke-only by revoke-bypassed-v1-doors.test.ts.
+        if (f.startsWith("20261123060000_revoke_bypassed_v1_doors_v1")) continue;
         if (f.startsWith(D2) || f.startsWith(TRAIN_D) || f.startsWith(STAGE_SUBTASK)) continue;
         const src = withoutErasureRegistrySeed(readFileSync(join(abs, f), "utf8"));
         if (CONSUMERS.some((c) => f.startsWith(c))) {

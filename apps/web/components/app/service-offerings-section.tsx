@@ -46,6 +46,10 @@ export type ServiceOfferingsLabels = {
   formCountryLabel: string;
   formCountryPlaceholder: string;
   formRemoteLabel: string;
+  formPublicLabel: string;
+  formPublicHint: string;
+  publicAudience: string;
+  memberAudience: string;
   formRateLabel: string;
   formRateHint: string;
   save: string;
@@ -67,6 +71,7 @@ type Draft = {
   locationCountry: string;
   remote: boolean;
   rateText: string;
+  publicSearchEnabled: boolean;
 };
 
 const EMPTY_DRAFT: Draft = {
@@ -76,6 +81,7 @@ const EMPTY_DRAFT: Draft = {
   locationCountry: "",
   remote: false,
   rateText: "",
+  publicSearchEnabled: false,
 };
 
 /** Test ids the walk specs already use, one per contract action. Publish,
@@ -93,12 +99,15 @@ export function ServiceOfferingsSection({
   initialRows,
   needsMigration,
   closedSupported = false,
+  publicSearchSupported = false,
   labels,
 }: {
   initialRows: ServiceOfferingRow[];
   needsMigration: boolean;
   /** The closed state is stored (lifecycle migration applied). */
   closedSupported?: boolean;
+  /** Explicit public visibility is available only after its migration. */
+  publicSearchSupported?: boolean;
   labels: ServiceOfferingsLabels;
 }) {
   // The ONE lifecycle contract's view of an offering (lib/market-lifecycle).
@@ -135,6 +144,7 @@ export function ServiceOfferingsSection({
       locationCountry: row.locationCountry ?? "",
       remote: row.remote,
       rateText: row.rateText ?? "",
+      publicSearchEnabled: row.publicSearchEnabled === true,
     });
     setMode({ kind: "edit", id: row.id });
   }
@@ -171,6 +181,7 @@ export function ServiceOfferingsSection({
       locationCountry: draft.locationCountry,
       remote: draft.remote,
       rateText: draft.rateText,
+      ...(publicSearchSupported ? { publicSearchEnabled: draft.publicSearchEnabled } : {}),
     };
     startTransition(async () => {
       const result =
@@ -317,6 +328,25 @@ export function ServiceOfferingsSection({
                 />
                 {labels.formRemoteLabel}
               </label>
+              {publicSearchSupported ? (
+                <label className="flex min-h-11 items-start gap-3 text-sm text-text-primary">
+                  <input
+                    type="checkbox"
+                    checked={draft.publicSearchEnabled}
+                    onChange={(e) => setDraft({ ...draft, publicSearchEnabled: e.target.checked })}
+                    disabled={pending}
+                    aria-describedby="service-offering-public-hint"
+                    data-testid="service-offering-public-search"
+                    className="mt-1 h-4 w-4 shrink-0 accent-brand-blue"
+                  />
+                  <span>
+                    {labels.formPublicLabel}
+                    <span id="service-offering-public-hint" className="mt-1 block text-xs leading-relaxed text-text-secondary">
+                      {labels.formPublicHint}
+                    </span>
+                  </span>
+                </label>
+              ) : null}
               {error && (
                 <p className="text-xs text-state-danger" role="alert" data-testid="service-offering-error">
                   {error}
@@ -387,6 +417,11 @@ export function ServiceOfferingsSection({
                   {/* The contract's actions in words; permanent deletion is
                       data erasure, apart, behind the strong-tier confirmation
                       (refused for an offering that has requests). */}
+                  {publicSearchSupported && row.status === "active" ? (
+                    <p className="text-xs text-text-secondary" data-testid={"service-offering-audience-" + row.id}>
+                      {row.publicSearchEnabled === true ? labels.publicAudience : labels.memberAudience}
+                    </p>
+                  ) : null}
                   <MarketEntryActions
                     support={adapter.support}
                     facts={adapter.facts(row)}

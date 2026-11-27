@@ -64,11 +64,16 @@ describe("the text-first flow offers the direction, records it first, and never 
 
   it("records the chosen direction BEFORE saving claims and promoting, by slug through a server action", () => {
     const set = flow.indexOf("setPrimaryProfessionBySlug(chosenProfession)");
-    const save = flow.indexOf("saveProfileSkillClaimsAction(confirmedClaims)");
-    const promote = flow.indexOf("promoteConfirmedClaimsAction(confirmedClaims)");
+    const save = flow.indexOf("cvProposals.saveConfirmed(confirmedClaims)");
+    const promote = flow.indexOf("cvProposals.promote(saved)");
     expect(set).toBeGreaterThan(-1);
     expect(set).toBeLessThan(save);
     expect(save).toBeLessThan(promote);
+    // CV-18 / G-10: the save and the promotion run through the shared
+    // CV-import proposal state; each is exactly the named server action.
+    const hook = read("components", "app", "use-cv-import-proposals.ts");
+    expect(hook).toMatch(/const saveConfirmed = [\s\S]{0,300}await saveProfileSkillClaimsAction\(/);
+    expect(hook).toMatch(/const promote = [\s\S]{0,200}promoteConfirmedClaimsAction\(/);
     const action = read("lib", "worker", "actions.ts");
     expect(action).toMatch(/export async function setPrimaryProfessionBySlug\(slug: string\)/);
     // Resolved server-side against the ACTIVE catalogue; an unknown slug is a no-op.

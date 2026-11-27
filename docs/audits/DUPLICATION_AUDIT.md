@@ -88,7 +88,7 @@ Each entry names its source.
 | AI-10 | Private text-folding copies | CONFIRMED | MAIN | Import `foldText` |
 | AI-11 | `/match-preview` on the frozen fork | CONFIRMED | MAIN | Remove or re-point (owner) |
 | MSG-1 | MCP conversation readers | CONFIRMED | MAIN | MCP calls the web inbox and thread readers |
-| MSG-2 | Contact permission, web vs MCP | CONFIRMED | MAIN | One resolver; the web rule is the superset |
+| MSG-2 | Contact permission, two resolvers | CONFIRMED | MAIN | Security/permission-relevant; detail in the private record (Lane F) |
 | MSG-3 | Work-instruction messages | CONFIRMED (no notification) | MAIN | Call the shared notify helper after the RPC |
 | MSG-4 | Second message insert | CONFIRMED | MAIN | Keep (guard-pinned); later route through the core |
 | MSG-5 | Email sending | CONFIRMED | MAIN | Route raw SMTP callers through `sendTransactionalEmail` |
@@ -100,7 +100,7 @@ Each entry names its source.
 | HIRE-1 | Company → employee invitation | CONFIRMED | MAIN | Merge onto `invitations`, after HIRE-3 and HIRE-4 |
 | HIRE-2 | Agency → worker legacy invitation | CONFIRMED unreachable writer | UNUSED-OR-DUP | Remove the writer; keep accept until 0 pending rows |
 | HIRE-3 | Two acceptance chains | CONFIRMED | MAIN | Merge into `accept_invitation_apply_v2` |
-| HIRE-4 | Project staffing authority | SUSPECTED gap | MAIN | Read the employee engagement row (security-relevant) |
+| HIRE-4 | Project staffing authority | CONFIRMED | MAIN | Security/permission-relevant; detail in the private record (Lane F) |
 | HIRE-5 | Booking accept and employment shapes | CONFIRMED | MAIN | Booking accept also opens the engagement row |
 | HIRE-6 | Governance invitations (System C) | NOT A DUPLICATE | MAIN | Keep; the fold plan needs an owner decision |
 | HIRE-7 | Two writers of `team_assignments` | SUSPECTED | MAIN | A shared internal insert helper |
@@ -109,7 +109,7 @@ Each entry names its source.
 | ORG-1 | Two project-create forms | CONFIRMED (one write) | MAIN | One form, both follow-up doors |
 | ORG-2 | Two team-assign forms | CONFIRMED (one write) | MAIN | One component, two doors |
 | ORG-3 | Company offer panel on two doors | CONFIRMED | MAIN | Keep the Services mount |
-| ORG-4 | Needs list: three readers | CONFIRMED | MAIN | One workspace-scoped reader |
+| ORG-4 | Needs list: three readers | CONFIRMED | MAIN | One reader; its scope is security/permission-relevant (Lane F) |
 | ORG-5 | Need doors that bypass `NeedDoorLink` | CONFIRMED | MAIN | Route the empty states through the door |
 | ORG-6 | Two approvals cards, two counts | CONFIRMED | MAIN | One card, one view model |
 | ORG-7 | Review queue read three times | CONFIRMED (one hides failure) | MAIN | Shared reader; pass the unknown state through |
@@ -162,7 +162,7 @@ Each entry names its source.
 | DEAD-5 | Translation namespaces never referenced | CONFIRMED (3) / SUSPECTED (7) | MAIN | Remove with their guards |
 | DEAD-7 | One route, two label keys | CONFIRMED | MAIN | One key per route |
 | DEAD-6 | Literal dashboard links | NOT A DUPLICATE (0 dead) | MAIN | Keep; template literals unchecked |
-| BYP-1 | Voice transcription outside the AI egress gate | SUSPECTED | MAIN | Record it in the egress register |
+| BYP-1 | Voice transcription and the AI runtime | SUSPECTED | MAIN | Security/permission-relevant; detail in the private record (Lane F) |
 | SEC-1..5 | Security items | 4 open (RED PRs), 1 closed | | §11 |
 
 ## 3. Registers
@@ -571,18 +571,18 @@ Finding: CONFIRMED that the readers are separate; SUSPECTED that the missing tra
 | Risk | The MCP output shape and the toolset fingerprint change. |
 | Evidence | Code read; grep of `resolveViewerTexts`. |
 
-### MSG-2 · Two contact-permission resolvers give different answers
+### MSG-2 · Contact permission: two resolvers
 
-Finding: CONFIRMED. Class: MAIN. Source: Lane E sweep.
+Finding: CONFIRMED. Class: MAIN. Owner lane: F. Source: Lane E sweep.
 
 | Field | Content |
 |---|---|
-| Function | Deciding whether this caller may open a new direct thread with this person |
-| Implementations | Web: `lib/communication/contact-permission.ts:57` (`resolveContactPermission`). It counts the employer-owner and company-employs links.<br>MCP: `lib/communication/direct-conversation-core.ts:175` (`planDirectContact`). It counts only project, shared team and admin.<br>`callerIsAdmin` exists twice: `contact-permission.ts:131` and `direct-conversation-core.ts:159`. |
-| Usage | `getOrCreateDirectConversation` (`lib/communication/direct-conversation.ts:34`) has 4 callers: `request-worker-conversation.ts`, `contact-interested-worker.ts`, `chat-open-conversation.ts` and `open-conversation-action.ts`.<br>The MCP core has 1 caller: `messaging-capabilities.ts:388`. |
-| Problem | An employer can message their own employee on the web but is refused through MCP or the phone. The MCP rule is the narrower one. |
-| Proposal | One caller-explicit resolver in the core, which `resolveContactPermission` wraps. The web rule is canonical because it is the superset. |
-| Risk | This is a permission change, so it needs an authority review before it lands. |
+| Function | Deciding whether a caller may open a new direct thread with a person |
+| Implementations | `lib/communication/contact-permission.ts:57` and `lib/communication/direct-conversation-core.ts:175` |
+| Usage | `lib/communication/direct-conversation.ts:34` (4 callers) and `lib/capabilities/messaging-capabilities.ts:388` (1 caller) |
+| Problem | Security/permission-relevant; detail in the private record (Lane F). |
+| Proposal | Security/permission-relevant; detail in the private record (Lane F). |
+| Risk | Security/permission-relevant; detail in the private record (Lane F). |
 | Evidence | Both functions read. |
 
 ### MSG-3 · Work-instruction messages send no "new message" notification
@@ -723,7 +723,7 @@ Finding: CONFIRMED. Class: MAIN. Source: Lane E sweep.
 | Usage | Legacy, 2 callers:<br>- the form in `components/app/company-workers-section.tsx:206` (shown at `:332` and `:607` to people who may manage invitations), on `app/[locale]/dashboard/company/people/page.tsx:326`;<br>- the chat action `lib/conversation/company-executors.ts:361` (`company.invite-worker`, registered at `action-registry.ts:665`).<br>Canonical, 5 callers: `components/app/invite-panel.tsx:258`, `lib/company/team-brigade-actions.ts:142`, `lib/organization-evidence/roster-link-actions.ts:216`, `company-executors.ts:683` and `action-registry.ts:1022`.<br>The same People page also links to the canonical form (`people/page.tsx:391` → `/dashboard/network?invite=1&type=join_as_employee`, `lib/navigation/work-areas.ts:130`). |
 | Problem | One audience and one intent, but two stores and two kinds of delivery: the legacy path shows a share link to `/auth/signup` (`company-workers-section.tsx:310`), the canonical path sends a tokened email. They also produce two acceptance results (HIRE-3). The 2026-08-17 register planned to redirect the legacy writes; that has not happened. |
 | Proposal | Merge onto `invitations` and `createAndSendInvitations`: point the People-page form and `company.invite-worker` at `join_as_employee`. **Only after HIRE-3 and HIRE-4.** |
-| Risk | The legacy accept creates the `company_workers` row that project assignment depends on (HIRE-4). Redirecting the writes first would break staffing. |
+| Risk | The legacy accept creates the `company_workers` row that the roster and project staffing read (HIRE-3, HIRE-4). Redirecting the writes first would break staffing. |
 | Evidence | Grep of the RPC names and importers; migration bodies read. Lane C confirms this independently (A6: legacy accept at `20261003151000…:497`; the guard allowlist `consolidation-no-new-truth.test.ts:234-246` keeps the legacy writer frozen). Lane M listed the overlap as SUSPECTED (M-7); the acceptance read in HIRE-3 settles it. |
 
 ### HIRE-2 · The legacy agency → worker invitation can no longer be sent, but can still be accepted
@@ -751,21 +751,21 @@ Finding: CONFIRMED. Class: MAIN. Source: Lane E sweep.
 | Usage | Legacy UI: `components/app/worker-invitations.tsx` (from `components/app/world-state/context-panel.tsx`).<br>Canonical: `/invite/[token]` (`lib/invitations/invite-page-actions.ts:74`), `components/app/onboarding-wizard.tsx:501`, `lib/invitations/signup-accept-action.ts:86` and `components/app/conversation/worker-invitation-action.tsx`.<br>The chat handles both (`worker-executors.ts:207-223`). Onboarding reads both (`app/[locale]/onboarding/page.tsx:155` legacy, `:78` canonical). |
 | Problem | Whether a worker lands on the `company_workers` roster depends on which form the employer used. |
 | Proposal | Merge into `accept_invitation_apply_v2`. It must take over, or make unnecessary, the `company_workers` side effect before the legacy path is retired. |
-| Risk | The People roster (`company-workers.ts:100`) and `caller_manages_worker_by_roster` both read that row. |
+| Risk | The People roster (`company-workers.ts:100`) and project staffing (HIRE-4) both read that row. |
 | Evidence | Migration bodies read. |
 
-### HIRE-4 · Project staffing authority depends on the legacy roster
+### HIRE-4 · Project staffing authority
 
-Finding: CONFIRMED. Lane C re-checked the gate on `main`: it reads only the roster or a booking engagement. Class: MAIN. Sources: Lane E sweep and Lane C (A7).
+Finding: CONFIRMED (Lane C re-checked it on `main`). Class: MAIN. Owner lane: F, with an owner decision. Sources: Lane E sweep and Lane C (A7).
 
 | Field | Content |
 |---|---|
 | Function | Assigning one person to a project |
-| Implementations | `lib/projects/actions.ts:120/140` → `assign_worker_to_project` (`20261002142000_manager_assigns_roster_worker_on_managed_project_v1.sql:72-98`). Its authority comes from `caller_manages_worker_by_roster` (`20260808150000…`, which reads `company_workers`/`agency_workers`), a booking engagement, or a manager branch that joins `company_workers` (`:81-84`). |
+| Implementations | `lib/projects/actions.ts:120/140` → `assign_worker_to_project` (`20261002142000_manager_assigns_roster_worker_on_managed_project_v1.sql`) |
 | Usage | `components/app/project-assignment-manager.tsx:370/422` |
-| Problem | Each hire path lands the person in a different store, and the assignment gate reads only two of them (Lane C):<br>- booking accept → `company_worker_engagements` only;<br>- legacy invitation → roster plus engagement row;<br>- canonical invitation → engagement row only;<br>- team → the engagement row of a team organization.<br>The projects page builds two pick lists from the roster and from booking engagements (`app/[locale]/dashboard/projects/page.tsx:274-279`), and `lib/company/booked-people.ts:7-18` says "nothing bridges them". A worker who joined through a canonical `join_as_employee` invitation has an employee engagement row but no `company_workers` row. No path was found that lets a manager assign them by roster. This is the "three disjoint hire paths" gap of the 2026-08-17 register, §3, and it is still open. |
-| Proposal | No fifth store. Either accept a company membership plus an employee engagement row as a basis in `assign_worker_to_project`, or provision the roster or the engagement row on accept (the register's train L4). Owner decision. The 2026-08-17 rule stays: authorization consults `company_memberships`, never an engagement row alone. |
-| Risk | Widening an authorization check is security-relevant. It goes through the RED process. |
+| Problem | Security/permission-relevant; detail in the private record (Lane F). |
+| Proposal | Security/permission-relevant; detail in the private record (Lane F). |
+| Risk | Security/permission-relevant; detail in the private record (Lane F). |
 | Evidence | Migration bodies read. |
 
 ### HIRE-5 · Booking accept still records employment only in the booking ledger
@@ -884,19 +884,19 @@ Finding: CONFIRMED. Source: Lane M (M-3).
 | Risk | Low. |
 | Evidence | Guard `team-demand-offer.test.ts:199-205` pins Services only. |
 
-### ORG-4 · The organization's needs list has three readers, and the agency one sees only its own rows
+### ORG-4 · The organization's needs list has three readers
 
-Finding: CONFIRMED. Source: Lane M (M-4).
+Finding: CONFIRMED. Owner lane: F, with lane M. Source: Lane M (M-4).
 
 | Field | Content |
 |---|---|
 | Function | Listing the organization's needs |
-| Implementations | `listOwnCustomerRequests` (`lib/buyer/customer-requests.ts:147`, workspace-filtered at `:187`).<br>`listCompanyDemands` (`lib/scouting/scouting.ts:116`, workspace-filtered).<br>`listAgencyDemands` (`lib/agency/clients.ts`, about `:85-115`), filtered by `profile_id = user.id` only.<br>`EMPLOYER_DEMAND_KINDS` is copied in `company/page.tsx:49` and `company/needs/page.tsx:37`. |
-| Usage | `company/needs/page.tsx:121` (readback `:299`), `company/page.tsx:180` and `lib/reports/reports-hub.ts:255`; `company/scouting/page.tsx:190`, `lib/conversation/client-bridge.ts:41` and `lib/agency/bridge-read.ts:470`; `company/partners/page.tsx:147,175,335`. |
-| Problem | On `/partners`, "Your demands" and the client's share-a-request picker leave out the needs a colleague recorded, while the chat share path includes them. For an agency that is also a client, the same read runs twice in one render (`:147`, `:175`). |
-| Proposal | Fold the agency reader into the workspace-scoped one, keeping the `agency_client_id` column and the privacy filter. Read once per render (`cache()`). Move `EMPLOYER_DEMAND_KINDS` into one constant. |
-| Risk | Medium: the scope changes which rows are visible, and `agency_client_id` can only be linked on the agency's own rows. |
-| Evidence | Guards `needs-list-workspace.test.ts:16-22`, `agency-client-management.test.ts:74` and `privacy-rows-off-commercial-surfaces.test.ts:28`. Lane M re-checked the `profile_id` filter. |
+| Implementations | `listOwnCustomerRequests` (`lib/buyer/customer-requests.ts:147`), `listCompanyDemands` (`lib/scouting/scouting.ts:116`) and `listAgencyDemands` (`lib/agency/clients.ts`). `EMPLOYER_DEMAND_KINDS` is copied in `company/page.tsx:49` and `company/needs/page.tsx:37`. |
+| Usage | `company/needs/page.tsx:121`, `company/page.tsx:180`, `lib/reports/reports-hub.ts:255`; `company/scouting/page.tsx:190`, `lib/conversation/client-bridge.ts:41`, `lib/agency/bridge-read.ts:470`; `company/partners/page.tsx:147,175,335` |
+| Problem | Three readers of one list, and for an agency that is also a client the same read runs twice in one render. Which rows each reader returns: Security/permission-relevant; detail in the private record (Lane F). |
+| Proposal | One reader, read once per render (`cache()`); `EMPLOYER_DEMAND_KINDS` as one constant. The scope of that reader: Security/permission-relevant; detail in the private record (Lane F). |
+| Risk | Security/permission-relevant; detail in the private record (Lane F). |
+| Evidence | Lane M re-checked the readers by hand; the guards `needs-list-workspace.test.ts`, `agency-client-management.test.ts` and `privacy-rows-off-commercial-surfaces.test.ts`. |
 
 ### ORG-5 · "Describe a need" doors that bypass `NeedDoorLink`
 
@@ -1664,27 +1664,19 @@ Finding: NOT A DUPLICATE. Class: MAIN. Source: Lane E sweep.
 | Risk | Links built from template literals were not checked. |
 | Evidence | Script over the literal values. |
 
-### BYP-1 · Voice transcription sends audio out without the AI runtime's egress gate
+### BYP-1 · Voice transcription and the AI runtime
 
-Finding: SUSPECTED. Not a duplicate, but a second way personal data leaves the platform. Class: MAIN. Source: Lane E sweep.
+Finding: SUSPECTED. Not a duplicate. Class: MAIN. Owner lane: F (with the AI runtime owner). Source: Lane E sweep.
 
 | Field | Content |
 |---|---|
-| Function | Sending audio to a speech-to-text service |
-| Implementations | `lib/voice/transcribe-action.ts:23` (`VOICE_TRANSCRIBE_URL`), beside the documented single gate `runAiAgent` / `data-egress.ts` (`lib/ai/README.md`) |
-| Usage | None of the 11 `runAiAgent(` call sites covers voice. |
-| Problem | Audio leaves through a path outside the documented single gate. The production transcription host is open owner decision COM-6/COM-8. |
-| Proposal | Keep it, but record it in the egress register. |
-| Risk | None from documenting it. |
-| Evidence | Code read. Whether `no-direct-llm-client-call.test.ts` covers it was not checked. |
-
-**Bypasses, otherwise.** Lane B found none in the AI area on `main`:
-
-- no file outside `lib/ai` calls a provider host or SDK (grep for the OpenAI, Anthropic, Gemini, xAI, DeepL and Cloudflare AI hosts and their SDK imports: 0);
-- model work goes through `runAiAgent`, except AI-4;
-- every MCP tool runs through `runCapability`.
-
-The other bypass-shaped findings are listed under their areas: MSG-3, MSG-4, MSG-5, CV-1, CV-4, CV-10 and CV-14.
+| Function | Speech-to-text for the voice journal |
+| Implementations | `lib/voice/transcribe-action.ts:23`, beside `runAiAgent` / `data-egress.ts` (`lib/ai/README.md`) |
+| Usage | The voice journal. The production transcription host is open owner decision COM-6/COM-8. |
+| Problem | Security/permission-relevant; detail in the private record (Lane F). |
+| Proposal | Security/permission-relevant; detail in the private record (Lane F). |
+| Risk | Security/permission-relevant; detail in the private record (Lane F). |
+| Evidence | Code read. |
 
 ## 13. Earlier registers: superseded, with their current state
 
@@ -1705,7 +1697,7 @@ at the top; its section numbers stay valid.
 | §2 | No fourth invitation table | Still true. The guard allowlist (`consolidation-no-new-truth.test.ts:233-235`) still pins the two legacy writers. | — |
 | §3 | `company_worker_engagements` written only by booking accept | Still true (v3 and v4 only) | HIRE-5 |
 | §3 | Booking accept opens the engagement row (L4) | Not done. The name `respond_booking_request_v4`, which the register planned for L4, now belongs to the clash fork (SQL-5), so L4 needs another name or a merged v3 (Lane C). | HIRE-5, SQL-5 |
-| §3 | `company_workers` roster as a frozen read-only duplicate | No longer accurate: it still gets rows from the legacy accept, and project authority depends on it | HIRE-3, HIRE-4 |
+| §3 | `company_workers` roster as a frozen read-only duplicate | No longer accurate: it still gets rows from the legacy accept, and project staffing reads it (HIRE-4) | HIRE-3, HIRE-4 |
 | §3 | New since the register | Two more employment shapes: the `collaborator` engagement row from agency placement, and `team_assignments` | HIRE-5 |
 | §4 | Candidate stage derived, never stored | Still true. No migration matches `pipeline_stage\|candidate_stage\|pipeline_status`; `lib/pipeline/candidate-pipeline.ts` is imported by the scouting page, the employer workspace and `demand-journey-model.ts`. | — |
 | §5 | `candidate_skills` | Still true: 0 `.from("candidate_skills")`; only comments, the erasure map (`lib/privacy/personal-relations.ts:163`) and `capability-register.ts:401` | — |
