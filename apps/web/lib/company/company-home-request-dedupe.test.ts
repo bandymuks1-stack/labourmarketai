@@ -632,7 +632,11 @@ describe("the request-scoped readers keep their meaning", () => {
     expect(fromCount("worker_absence_scheduling")).toBe(3);
   });
 
-  it("a failed reviewable-set read is still UNKNOWN for the count and no queue for the brief", async () => {
+  // ORG-7 (SEP-7): the queue used to answer a failed read with `[]`, so its
+  // readers said "nothing to review". It now throws; every caller (the quick
+  // page, ConfirmPulse, the today view, the opening brief) catches and names
+  // the unknown state.
+  it("a failed reviewable-set read is UNKNOWN for the count and a failure, never an empty queue", async () => {
     const original = requestClient.rpc;
     requestClient.rpc = ((name: string) => {
       log.push({ kind: "rpc", name, ops: [], single: false });
@@ -642,7 +646,7 @@ describe("the request-scoped readers keep their meaning", () => {
       const { countReviewablePendingEntries } = await import("@/lib/journal/reviewable-count");
       const { fetchQuickReviewQueue } = await import("@/lib/journal/review-queue");
       expect(await countReviewablePendingEntries()).toBeNull();
-      expect(await fetchQuickReviewQueue()).toEqual([]);
+      await expect(fetchQuickReviewQueue()).rejects.toThrow("review_queue_unavailable:reviewable_ids");
       expect(rpcCount("reviewable_journal_entry_ids")).toBe(1);
     } finally {
       requestClient.rpc = original;
