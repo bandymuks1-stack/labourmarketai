@@ -122,7 +122,7 @@ independent work or launch of other features (owner order 2026-10-28).
 | Lane | Holder | Since | What |
 |---|---|---|---|
 | coordination (this file) | **Codex `01a211d7-be82-7663-9a36-3ddd8de1707e` — current coordinator** | 2026-11-25 | owner-directed takeover; existing PR integration, deployment follow-up and production verification; earlier coordinator records below are historical (§2c) |
-| migration (prod DB) | — free — | | last: `referral_send_address_guard_v1` (#2855) applied 2026-10-28 08:18Z, ledger `20261028081810`, by `local_8d793dee` on owner approval of #2855 at `35e749fc3`. Pending RED (needs its own approval): #2858 |
+| migration (prod DB) | — free — | 2026-11-27 | #3111 APPLIED, ledger `20261127202311`, source on main `9e2f2d0d2`; read-back passed and receipt recorded below/in APPLIED_LEDGER. Synthetic CV walk pending; no further apply needed. #3722 owner approved exact SQL, but apply waits for required checks, manual merge and a new lane claim. |
 | live sends (e-mail to real people) | reprocess: manual only, under `flock`; **do not run `resolve_reservations` until #2858 is applied** | 2026-10-28 09:00Z | partner intake mails live (each through the address lock since `ae60b244`). Ledger `invitation` since 10-26: 51 mails / 51 recipients, 0 duplicates; 15 rows `pending/not_sent` |
 | deploy | — serial via `deploy-vps.yml` — | | production = `0e5f4b3e0` (#2925), deployed 2026-11-02 06:26Z, healthy. Walks: sequential queue, ≥6 min after each deploy (brake e) |
 
@@ -154,15 +154,21 @@ independent work or launch of other features (owner order 2026-10-28).
 
 ### 2c. Current coordination — 2026-11-25
 
-**Continuation, owner instruction 2026-11-27:** Codex is the active executor;
-Claude Code is inactive and has no assigned work. Existing PR #3111 is being
-continued on `fix/cc/cv-rows-one-statement-once`: merge current main, preserve
-the SQL, review current compatibility, then obtain its specific owner approval
-before production apply. Existing #2642 is next: saved-jobs read/empty-state
-fix, with its own scoped waiver still required. Shared continuity instructions
-are in #3839; existing review, migration and deployment gates remain in force.
-The table below is the historical 2026-11-25 handover, not a current deployment
-or unfinished-work claim. Current PR receipts and live evidence supersede it.
+**Continuation, owner instruction 2026-11-27:** Codex is the only active executor;
+Claude Code is inactive. Shared continuity rules are on main via #3839.
+#3111 is merged and applied; never reapply it. Its synthetic production CV walk
+still needs a clear deployment/walk lane. #2642 resumes the existing saved-jobs
+fix: owner approved only its waiver-list/test addition; reviewed head
+`3863112d3` is pushed with CI running. Auto-merge is temporarily disabled to
+prevent a deployment during the CV walk; re-enable after that walk finishes.
+#3722 resumes the existing hire-to-journal relationship draft. Owner approved
+SQL SHA256 `1F1914C76C8B39698BCED8052C85EE6AE9FE4C835B4E06F4001F71BF1476B3C0`
+and rollback SHA256 `3D1BC41F2CC2D2E7BF70FC0925A01088C104178508B5F0A024003280A505B4E6`,
+including the RED marker, ready state, manual merge/apply and synthetic proof
+after mandatory checks. Local behavior and independent review passed; full
+Supabase/browser checks and production application remain outstanding. Continue
+these PRs; their current bodies carry exact heads and subsequent run receipts.
+No new audit or competing implementation is needed.
 
 Codex now holds coordination under the owner's current instruction. This supersedes
 older coordinator assignments, without deleting their work or history. The existing
