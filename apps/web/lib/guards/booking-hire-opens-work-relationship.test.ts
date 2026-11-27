@@ -45,7 +45,11 @@ describe("a direct hire opens the work relationship (HIRE-5)", () => {
     expect(UP).toMatch(/revoke all on function public\.booking_hire_open_relationship_v1\(\) from public, anon, authenticated;/);
     expect(UP).toMatch(/revoke all on function public\.booking_hire_close_relationship_v1\(\) from public, anon, authenticated;/);
     expect(RAW).toMatch(/@human-gate-approved/);
-    expect(DOWN.indexOf("lock table public.company_worker_engagements")).toBeLessThan(DOWN.indexOf("if exists (select 1 from public.audit_logs"));
+    const lockIndex = DOWN.indexOf("lock table public.company_worker_engagements");
+    const historyCheckIndex = DOWN.indexOf("if exists (select 1 from public.audit_logs");
+    expect(lockIndex).toBeGreaterThanOrEqual(0);
+    expect(historyCheckIndex).toBeGreaterThanOrEqual(0);
+    expect(lockIndex).toBeLessThan(historyCheckIndex);
     expect(DOWN).toMatch(/raise exception 'hires already opened work relationships/);
   });
 });
