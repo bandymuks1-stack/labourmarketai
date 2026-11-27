@@ -121,11 +121,50 @@ describe("computeProductMetrics", () => {
     expect(v("ai_runs_7d")).toBe(4);
     expect(v("ai_runs_runtime_disabled_7d")).toBe(2);
     expect(v("ai_runs_blocked_7d")).toBe(1);
+    // provider 'disabled' is vendorless (its own signal), cost_unpriced a technical failure.
+    expect(v("ai_outcome_vendorless_7d")).toBe(2);
+    expect(v("ai_outcome_price_missing_7d")).toBe(1);
+    expect(v("ai_runs_attempted_7d")).toBe(2);
+    expect(v("ai_technical_failures_7d")).toBe(1);
+    expect(v("ai_technical_failure_rate_pct_7d")).toBe(50);
+  });
+
+  it("counts route_reason-only vendor failures and never counts an egress refusal as one", async () => {
+    const vendor = (tail: string) => ({ provider: "gemini", schema_validation: "skipped", blocked_reason: null, route_reason: `preferred tier — vendor call failed: ${tail}` });
+    const s = await computeProductMetrics(
+      fakeClient(
+        { data: {}, error: null },
+        {
+          ai_runs: [
+            vendor("provider_error: gemini http 429 — RESOURCE_EXHAUSTED"),
+            vendor("timeout: policy latency ceiling 8000ms exceeded"),
+            { provider: "gemini", schema_validation: "passed", blocked_reason: null, route_reason: "preferred tier" },
+            { provider: "none", schema_validation: "skipped", blocked_reason: "egress_refused", route_reason: "preferred tier" },
+          ],
+        },
+      ),
+      NOW,
+    );
+    const v = (k: string) => s.metrics.find((m) => m.key === k)!.value;
+    expect(v("ai_outcome_rate_limit_7d")).toBe(1);
+    expect(v("ai_outcome_timeout_7d")).toBe(1);
+    expect(v("ai_outcome_privacy_refused_7d")).toBe(1);
+    expect(v("ai_runs_attempted_7d")).toBe(3);
+    expect(v("ai_technical_failures_7d")).toBe(2);
+  });
+
+  it("nothing attempted leaves the failure rate unknown, never 0 %", async () => {
+    const s = await computeProductMetrics(
+      fakeClient({ data: {}, error: null }, { ai_runs: [{ provider: "disabled", schema_validation: "skipped", blocked_reason: null }] }),
+      NOW,
+    );
+    expect(s.metrics.find((m) => m.key === "ai_technical_failure_rate_pct_7d")!.value).toBeNull();
   });
 
   it("an unreadable ai_runs leaves the disabled count UNKNOWN, not 0", async () => {
     const s = await computeProductMetrics(fakeClient({ data: {}, error: null }, { ai_runs: "error" }), NOW);
     expect(s.metrics.find((m) => m.key === "ai_runs_runtime_disabled_7d")!.value).toBeNull();
+    expect(s.metrics.find((m) => m.key === "ai_runs_attempted_7d")!.value).toBeNull();
   });
 
   it("vacancy lag takes each provider's freshest cursor", async () => {
@@ -195,9 +234,10 @@ describe("monitor signals", () => {
 
   it("a switched-off AI runtime is a breach, not silence (provider 'disabled' carries no blocked_reason)", () => {
     const at = (runs: number, off: number | null) =>
-      evaluateSignals(snap({ ai_runs_7d: runs, ai_runs_runtime_disabled_7d: off, ai_runs_failed_validation_7d: 0, ai_runs_blocked_7d: 0 }), { searchMedianMs: 700 });
+      evaluateSignals(snap({ ai_runs_7d: runs, ai_runs_runtime_disabled_7d: off, ai_runs_attempted_7d: runs - (off ?? 0), ai_technical_failures_7d: 0 }), { searchMedianMs: 700 });
     const st = (res: ReturnType<typeof evaluateSignals>, id: string) => res.find((r) => r.id === id)!;
-    // Every run unanswered: the old rule (failed validation + blocked) stays OK — the blind spot.
+    // Every run unanswered: provider 'disabled' is not attempted, so ai-failing stays OK —
+    // ai-runtime-disabled is the signal that names it.
     const allOff = at(40, 40);
     expect(st(allOff, "ai-failing").state).toBe("OK");
     expect(st(allOff, "ai-runtime-disabled").state).toBe("BREACH");
@@ -206,6 +246,19 @@ describe("monitor signals", () => {
     expect(st(at(25, 1), "ai-runtime-disabled").state).toBe("BREACH");
     expect(st(at(25, 0), "ai-runtime-disabled").state).toBe("OK");
     expect(st(at(25, null), "ai-runtime-disabled").state).toBe("UNKNOWN");
+  });
+
+  it("ai-failing is technical failures over attempted runs; intentional refusals never breach it", () => {
+    const at = (v: Record<string, unknown>) =>
+      evaluateSignals(snap(v), { searchMedianMs: 700 }).find((r) => r.id === "ai-failing")!;
+    // 40 egress refusals + 10 served: the old rule read 80 % blocked as a breach.
+    const refused = at({ ai_runs_7d: 50, ai_runs_attempted_7d: 10, ai_technical_failures_7d: 0, ai_outcome_privacy_refused_7d: 40 });
+    expect(refused.state).toBe("OK");
+    expect(refused.observed).toBe("10 attempted, 0 technical failures, 40 privacy refusals (intentional) (7 d)");
+    // Quota / timeout failures recorded only in route_reason now breach it.
+    expect(at({ ai_runs_attempted_7d: 10, ai_technical_failures_7d: 4 }).state).toBe("BREACH");
+    expect(at({ ai_runs_attempted_7d: 9, ai_technical_failures_7d: 9 }).state).toBe("OK");
+    expect(at({ ai_runs_attempted_7d: null, ai_technical_failures_7d: 0 }).state).toBe("UNKNOWN");
   });
 
   it("observed text is aggregate numbers only, and an unreadable source is itself a breach", () => {
