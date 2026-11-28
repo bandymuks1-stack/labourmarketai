@@ -305,17 +305,22 @@ it.each([null, "", "  "])("shows the localized card fallback for occupation %j",
   expect(html).not.toMatch(/<h2\b[^>]*lang=/);
 });
 
-it.each([false, true])("shows the publisher's public label for a stale profession (member: %s)", (member) => {
+it.each([
+  ["Specialistofficer", "teacher", "Teacher", false],
+  ["Specialistofficer", "driver", "Driver", true],
+  ["Systemadministratör", "office_administrator", "Office administrator", false],
+  ["Systemadministratör", "receptionist", "Receptionist", true],
+])("shows the publisher's label %s even when the stored slug is %s", (occupation, professionSlug, localizedName, member) => {
   const row = vacancy(1, {
-    occupation: "Specialistofficer",
-    professionSlug: "teacher",
+    occupation,
+    professionSlug,
     sourceLanguage: "sv",
     attributionCode: "vacancySources.attribution.arbetsformedlingen",
   });
   const html = renderToStaticMarkup(createElement(PublicVacancyCard, {
     vacancy: row,
     locale: "en",
-    headingFallback: "Teacher",
+    headingFallback: localizedName,
     genericTitle: PUBLIC_JOB_GENERIC_TITLE.en,
     memberFacts: member ? {
       employer: "Employer shown to member",
@@ -324,8 +329,8 @@ it.each([false, true])("shows the publisher's public label for a stale professio
       hasApplicationUrl: true,
     } : undefined,
   }));
-  expect(html).toMatch(/<h2\b[^>]*lang="sv"[^>]*>Specialistofficer<\/h2>/);
-  expect(html).not.toContain(">Teacher<");
+  expect(html.match(/<h2\b[^>]*lang="sv"[^>]*>([^<]+)<\/h2>/)?.[1]).toBe(occupation);
+  expect(html).not.toContain(`>${localizedName}<`);
   if (member) {
     expect(html).toContain("Apply on an external website");
   } else {

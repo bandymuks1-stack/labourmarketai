@@ -134,7 +134,10 @@ describe("legacy public vacancies with stale derived professions", () => {
     ["Hundtrimmare", "hairdresser", "Hairdresser", "Hundtrimmare"],
     ["Doktorand/Elektriker", "electrician", "Electrician", "Electrician"],
     ["Fjärrbilsförare", "driver", "Driver", "Driver"],
-    ["Specialistofficer", "driver", "Driver", "Driver"],
+    ["Specialistofficer", "driver", "Driver", "Specialistofficer"],
+    ["Systemadministratör", "office_administrator", "Office administrator", "Systemadministratör"],
+    ["Systemadministratör", "receptionist", "Receptionist", "Systemadministratör"],
+    ["Systemadministratör / Lagerarbetare", "warehouse_worker", "Warehouse worker", "Warehouse worker"],
   ])("uses the public name for %s with stored profession %s", (occupation, professionSlug, localizedName, expected) => {
     const vacancy = { ...preview, occupation, professionSlug, title: "Private publisher title" };
     const origin = "https://labourmarket.ai";

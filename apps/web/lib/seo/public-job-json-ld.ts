@@ -16,7 +16,7 @@
  * lib/guards/public-job-json-ld.test.ts pins the field set).
  */
 import type { ActiveLocale } from "@/lib/i18n/config";
-import { publisherOccupationConflictSlug } from "@/lib/vacancy-sources/publisher-occupation-conflicts";
+import { isPublisherOccupationOutsideCatalogue } from "@/lib/vacancy-sources/publisher-occupation-conflicts";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 
 /** Name shown when a public vacancy has neither a catalogue nor publisher label. */
@@ -49,19 +49,16 @@ function salaryOf(p: PublicVacancyPreview): Salary | null {
   return out;
 }
 
-type PublicOccupation = Pick<PublicVacancyPreview, "occupation" | "professionSlug">;
+type PublicOccupation = Pick<PublicVacancyPreview, "occupation">;
 
-/** Suppress the exact stale title inference in the presentation only. The
- * stored profession stays available to the existing search and ranking. */
+/** Use the publisher label for known outside occupations. The stored slug
+ * remains available to the existing search and ranking. */
 export function publicJobCatalogueName(
   vacancy: PublicOccupation,
   localizedName: string | null | undefined,
 ): string | null {
   if (localizedName == null) return null;
-  return vacancy.professionSlug !== null &&
-    publisherOccupationConflictSlug(vacancy.occupation) === vacancy.professionSlug
-    ? null
-    : localizedName;
+  return isPublisherOccupationOutsideCatalogue(vacancy.occupation) ? null : localizedName;
 }
 
 /** The signed-out heading uses the catalogue name or the public publisher

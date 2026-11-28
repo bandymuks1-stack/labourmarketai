@@ -25,7 +25,6 @@
 import {
   deriveNeedSkills,
   detectNeedProfession,
-  namesOccupationOutsideCatalogue,
   type NeedSkillSource,
   type RecognizedNeedSkill,
 } from "@/lib/market/need-skills";
@@ -34,7 +33,7 @@ import {
   type VacancyFieldOrigin,
 } from "./vacancy-contract";
 
-import { publisherOccupationConflictSlug } from "./publisher-occupation-conflicts";
+import { isPublisherOccupationOutsideCatalogue } from "./publisher-occupation-conflicts";
 
 export interface VacancyCategorizationInput {
   readonly titleRaw: string;
@@ -93,10 +92,7 @@ export function categorizeVacancy(
   //    receptionist). The publisher already said what the job is; a title
   //    guess would contradict it.
   const knownOutside =
-    fromOccupation === null &&
-    occupation.length > 0 &&
-    (publisherOccupationConflictSlug(occupation) !== null ||
-      namesOccupationOutsideCatalogue(occupation));
+    fromOccupation === null && isPublisherOccupationOutsideCatalogue(occupation);
   const fromTitle =
     fromOccupation ?? (!knownOutside && title.length > 0 ? detectNeedProfession(title) : null);
   const professionSlug = fromTitle;
