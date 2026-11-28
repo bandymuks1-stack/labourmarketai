@@ -26,6 +26,7 @@ on:
   # may later become required leaves unrelated PRs waiting on a status that
   # never reports, and a branches filter silently skips stacked PRs.
   pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 permissions:
   contents: read
@@ -36,6 +37,8 @@ concurrency:
 
 jobs:
   mobile:
+    # Not on a DRAFT pull request (runner load, 2026-11-24): it runs when the PR is marked ready.
+    if: github.event_name != 'pull_request' || github.event.pull_request.draft == false
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
