@@ -2,7 +2,11 @@ import { redirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
-import { getMyCommercial } from "@/lib/commercial/commercial";
+import { findOpenServiceRequestProposal, getMyCommercial } from "@/lib/commercial/commercial";
+import type { Proposal, ServiceRequestProposalContext } from "@/lib/commercial/commercial-model";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import { getAcceptedServiceRequestForProposal } from "@/lib/marketplace/service-requests";
 import { CommercialPanel } from "@/components/app/commercial-panel";
 import { AgreementsRegister } from "@/components/app/agreements-register";
 import { PageTitle } from "@/components/app/premium/page-title";
@@ -30,6 +34,7 @@ export default async function CommercialPage({
 }: {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{
+    serviceRequest?: string;
     agr?: string;
     agrType?: string;
     agrStatus?: string;
@@ -48,7 +53,27 @@ export default async function CommercialPage({
   } = await supabase.auth.getUser();
   if (!user) redirect(`/${locale}/auth/login?next=/${locale}/dashboard/commercial`);
 
-  const data = await getMyCommercial();
+  let serviceRequest: ServiceRequestProposalContext | undefined;
+  let focusedProposal: Proposal | undefined;
+  if (search.serviceRequest !== undefined) {
+    if (typeof search.serviceRequest !== "string") redirect(`/${locale}/dashboard/service-requests`);
+    const [workspace, request] = await Promise.all([
+      getWorkspaceContext(),
+      getAcceptedServiceRequestForProposal(search.serviceRequest),
+    ]);
+    if (workspace.activeWorkspaceId !== PERSONAL_WORKSPACE_ID || !request) {
+      redirect(`/${locale}/dashboard/service-requests`);
+    }
+    const linked = await findOpenServiceRequestProposal(supabase, user.id, request.id);
+    if (!linked) redirect(`/${locale}/dashboard/service-requests`);
+    focusedProposal = linked.proposal ?? undefined;
+    serviceRequest = {
+      requestId: request.id,
+      title: request.offeringTitle,
+      existingProposalId: focusedProposal?.id ?? null,
+    };
+  }
+  const data = await getMyCommercial(focusedProposal);
 
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
@@ -59,7 +84,7 @@ export default async function CommercialPage({
       {/* Mutual, neutral pre-agreement recommendation — advice to both
           parties, never a gate (decision 0021 extension, 2026-10-24). */}
       <CollaborationChecksNote context={{ dealKind: "b2b_contract" }} testId="commercial-collaboration-checks" />
-      <CommercialPanel data={data} />
+      <CommercialPanel key={serviceRequest?.requestId} data={data} serviceRequest={serviceRequest} />
       <AgreementsRegister locale={locale} searchParams={search} />
     </div>
   );
