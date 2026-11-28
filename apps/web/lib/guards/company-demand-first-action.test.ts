@@ -127,8 +127,9 @@ describe("the canonical demand intake lives on the company page (W3 7/8/25)", ()
 describe("scouting empty states are actionable (F-D2)", () => {
   it("no-demands state has a create-need CTA", () => {
     const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
-    expect(page).toMatch(/scouting-no-demands-cta/);
-    expect(page).toMatch(/noDemandsCta/);
+    // The CTA is the one need door (duplication audit ORG-5): same test id,
+    // the canonical "describe a need" label, a tracked click.
+    expect(page).toMatch(/<NeedDoorLink[^>]*surface="company_scouting_empty"[^>]*testId="scouting-no-demands-cta"/);
   });
 
   it("copy no longer tells the company to structure skills itself", () => {

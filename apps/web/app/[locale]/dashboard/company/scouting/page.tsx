@@ -5,6 +5,7 @@ import Link from "next/link";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
 import { EmployerContextNotice } from "@/components/app/employer-context-notice";
+import { NeedDoorLink } from "@/components/app/need-door-link";
 import {
   listCompanyDemands,
   runScouting,
@@ -525,13 +526,13 @@ export default async function CompanyScoutingPage({
       {demands.length === 0 ? (
         <div className="flex flex-col items-start gap-3 rounded-md border border-dashed border-ink-500 px-4 py-6">
           <p className="text-sm text-text-secondary">{t("noDemands")}</p>
-          <Link
-            href={`/${locale}/dashboard/company/needs#demand-intake`}
+          {/* The one need door: one address, one label, one tracked click
+              (duplication audit ORG-5). */}
+          <NeedDoorLink
+            surface="company_scouting_empty"
+            testId="scouting-no-demands-cta"
             className={buttonLinkClassName("secondary", "sm")}
-            data-testid="scouting-no-demands-cta"
-          >
-            {t("noDemandsCta")} →
-          </Link>
+          />
         </div>
       ) : (
         <nav className="flex flex-wrap gap-2" aria-label={t("pickDemand")}>
