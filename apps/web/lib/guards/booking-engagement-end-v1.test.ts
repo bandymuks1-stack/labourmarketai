@@ -1753,6 +1753,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-29: owner approved #2887 in chat (production apply, at dbd1363ef).
       // The worker reader projects the need's required skills as catalogue slugs.
       "20261029190000_worker_board_need_skill_slugs_v1.sql",
+      // 2026-11-28: owner approved the exact #2946 SQL pair for manual release — accepted service request → proposal link.
+      "20261102154500_service_request_proposal_link_v1.sql",
       // 2026-11-02: J-12 learner join requests (#2959) — RED draft, the marker is the
       // human-gate acknowledgement, NOT applied until the owner approves.
       "20261102160000_education_cohort_join_requests_v1.sql",

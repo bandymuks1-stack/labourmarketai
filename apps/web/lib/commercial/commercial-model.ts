@@ -9,6 +9,12 @@ export type ProposalStatus = (typeof PROPOSAL_STATUSES)[number];
 export const CONTRACT_STATUSES = ["draft", "active", "completed", "cancelled"] as const;
 export type ContractStatus = (typeof CONTRACT_STATUSES)[number];
 
+export interface ServiceRequestProposalContext {
+  readonly requestId: string;
+  readonly title: string | null;
+  readonly existingProposalId: string | null;
+}
+
 export interface Proposal {
   readonly id: string;
   readonly number: string | null;

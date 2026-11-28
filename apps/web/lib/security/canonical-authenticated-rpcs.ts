@@ -68,6 +68,7 @@ export const CANONICAL_APP_RPCS = [
   "create_invitation_v1",
   "create_journal_entry_full",
   "create_marketplace_listing_v1",
+  "create_proposal_from_service_request_v1",
   "create_proposal_v1",
   "create_work_task_v1",
   "current_profile_discoverability_consent",

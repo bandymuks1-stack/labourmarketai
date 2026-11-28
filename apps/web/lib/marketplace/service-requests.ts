@@ -400,3 +400,19 @@ export async function listOutgoingRequests(): Promise<OutgoingListResult> {
 export async function listIncomingRequests(): Promise<IncomingListResult> {
   return readIncomingOnce();
 }
+
+/** Only the accepting provider can use a request to prepare a proposal. */
+export async function getAcceptedServiceRequestForProposal(
+  requestId: string,
+): Promise<{ id: string; offeringTitle: string | null } | null> {
+  const ctx = await uid();
+  if (!ctx) return null;
+  const { data, error } = await asAny(ctx.supabase)
+    .from("service_offering_requests")
+    .select("id, service_offerings(title)")
+    .eq("id", requestId)
+    .eq("provider_id", ctx.userId)
+    .eq("status", "accepted")
+    .maybeSingle();
+  return error || !data ? null : { id: data.id, offeringTitle: offeringTitle(data) };
+}
