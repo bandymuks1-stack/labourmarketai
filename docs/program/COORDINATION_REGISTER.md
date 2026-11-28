@@ -170,7 +170,7 @@ and a manual release after required checks. Keep the human-gate label.
 Verify merged file digests and apply through Supabase MCP in the tested order:
 
 1. `20261128080150_booking_hire_interval_support_v1` (forward SHA-256
-   `7B53B906DBC0517B0091420BF23A02A4E9E7D919D628613FEBFBDA3B30D72562`).
+   `B0500FFAAFBD3711D984B7CF34AA9ED9E359AAA269618333BB56EE90FE8D6D7E`).
    Verify the migration ledger, access and installed functions.
 2. `20261025190000_booking_clash_acknowledged_marker_v1` (forward SHA-256
    `590634FAF18CDB6D188414BD0223B78B9C76AF3C657EFE084CF00B0AF85EFF8F`).

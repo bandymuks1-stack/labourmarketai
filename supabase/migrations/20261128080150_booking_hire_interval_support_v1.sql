@@ -1,5 +1,6 @@
 -- Private candidate. Requires independent review and owner approval before application.
 -- @human-gate-approved
+-- @plan-cache-proof: scripts/db-proof/plan-cache-probe.sql methodology, PostgreSQL 16.13, 60009 audit rows, 10 prepared calls per UUID case on one connection; worst auto 6.953 ms, force_generic_plan 1.126 ms.
 -- RED gate marker for submission to the owner. Apply only after the owner authorizes these exact bytes.
 -- Forward-only attribution in private append-only audit rows. The partial indexes
 -- cover only receipt kinds used by this rule. No historical rows are rewritten.
@@ -363,5 +364,8 @@ begin
   return expired_count;
 end;
 $function$;
+
+revoke all on function public.expire_stale_booking_requests_v1(integer) from public, anon;
+revoke all on function public.expire_stale_booking_requests_system_v1(integer) from public, anon, authenticated, service_role;
 
 commit;
