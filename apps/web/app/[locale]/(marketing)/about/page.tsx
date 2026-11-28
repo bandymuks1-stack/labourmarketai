@@ -62,6 +62,9 @@ export default async function AboutPage({
   const { locale } = await params;
   setRequestLocale(locale);
   const t = await getTranslations("about");
+  // Each section keeps its heading and lead in view; its body folds behind
+  // one label (coordinator decision 2026-11-22).
+  const moreLabel = (await getTranslations({ locale, namespace: "common.disclosure" }))("details");
   const legal = await getTranslations("legal");
   const audiences = t.raw("loops") as Audience[];
   const tones = ["cyan", "blue", "violet"] as const;
@@ -96,14 +99,14 @@ export default async function AboutPage({
           <p className="text-base leading-relaxed text-text-secondary">{t("hero.leadOrg")}</p>
         </div>
 
-        <nav className="flex flex-wrap gap-x-6 gap-y-2" aria-label={t("navLabel")}>
-          <Link href="/for-workers" className="text-sm font-semibold text-text-primary hover:text-brand-cyan">
+        <nav className="flex flex-wrap gap-x-6" aria-label={t("navLabel")}>
+          <Link href="/for-workers" className="inline-flex min-h-11 items-center text-sm font-semibold text-text-primary hover:text-brand-cyan">
             {t("links.workers")} →
           </Link>
-          <Link href="/for-companies" className="text-sm font-semibold text-text-primary hover:text-brand-cyan">
+          <Link href="/for-companies" className="inline-flex min-h-11 items-center text-sm font-semibold text-text-primary hover:text-brand-cyan">
             {t("links.companies")} →
           </Link>
-          <Link href="/for-agencies" className="text-sm font-semibold text-text-primary hover:text-brand-cyan">
+          <Link href="/for-agencies" className="inline-flex min-h-11 items-center text-sm font-semibold text-text-primary hover:text-brand-cyan">
             {t("links.agencies")} →
           </Link>
         </nav>
@@ -118,6 +121,7 @@ export default async function AboutPage({
       <div className="flex flex-col gap-14" data-testid="about-loops">
         {audiences.map((a, i) => (
           <AboutAudience
+            moreLabel={moreLabel}
             key={a.id}
             id={a.id}
             heading={a.heading}
@@ -132,6 +136,7 @@ export default async function AboutPage({
       </div>
 
       <AboutEvidenceGraph
+        moreLabel={moreLabel}
         heading={t("evidence.heading")}
         lead={t("evidence.lead")}
         chainLabel={t("evidence.chainLabel")}
@@ -142,6 +147,7 @@ export default async function AboutPage({
       />
 
       <AboutBeforeAfter
+        moreLabel={moreLabel}
         heading={t("afterHire.heading")}
         lead={t("afterHire.lead")}
         stages={t.raw("afterHire.stages") as string[]}
@@ -154,6 +160,7 @@ export default async function AboutPage({
       />
 
       <AboutTrustTiers
+        moreLabel={moreLabel}
         heading={t("trust.heading")}
         lead={t("trust.lead")}
         tiers={tiers}
@@ -162,6 +169,7 @@ export default async function AboutPage({
       />
 
       <AboutPrivacySplit
+        moreLabel={moreLabel}
         heading={t("privacy.heading")}
         lead={t("privacy.lead")}
         privateLabel={t("privacy.privateLabel")}
@@ -210,14 +218,14 @@ export default async function AboutPage({
           {t("data.heading")}
         </h2>
         <p className="mt-2 text-sm leading-relaxed text-text-secondary">{t("data.body")}</p>
-        <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2">
-          <Link href="/legal/privacy" className="text-sm text-text-secondary hover:text-text-primary">
+        <div className="mt-2 flex flex-wrap gap-x-6">
+          <Link href="/legal/privacy" className="inline-flex min-h-11 items-center text-sm text-text-secondary hover:text-text-primary">
             {legal("privacy.title")} →
           </Link>
-          <Link href="/legal/data-access" className="text-sm text-text-secondary hover:text-text-primary">
+          <Link href="/legal/data-access" className="inline-flex min-h-11 items-center text-sm text-text-secondary hover:text-text-primary">
             {legal("dataAccess.title")} →
           </Link>
-          <Link href="/legal/data-protection" className="text-sm text-text-secondary hover:text-text-primary">
+          <Link href="/legal/data-protection" className="inline-flex min-h-11 items-center text-sm text-text-secondary hover:text-text-primary">
             {legal("dataProtection.title")} →
           </Link>
         </div>

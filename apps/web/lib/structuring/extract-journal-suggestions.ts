@@ -12,6 +12,7 @@ import {
   extractProfileSkillClaims,
   type SkillClaimSuggestion,
 } from "@/lib/profile/skill-claim-extractor";
+import { digitizeWordNumbers, parseWordNumber } from "./word-numbers";
 
 /**
  * RULE-BASED suggestion extractor for a free-text work journal entry. This is
@@ -159,18 +160,27 @@ export const DAY_UNIT_SOURCES: readonly string[] = [
 const HOUR_UNIT_RX_SRC = HOUR_UNIT_SOURCES.join("|");
 const MINUTE_UNIT_RX_SRC = MINUTE_UNIT_SOURCES.join("|");
 const DAY_UNIT_RX_SRC = DAY_UNIT_SOURCES.join("|");
+// A duration starts at a number boundary. An alphanumeric reference such
+// as AB5h names no worked time; do not count its suffix as five hours.
 const DIGIT_HOURS_RX = new RegExp(
-  `(\\d+(?:[.,]\\d+)?)\\s*(?:${HOUR_UNIT_RX_SRC})`,
+  `(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${HOUR_UNIT_RX_SRC})`,
   "iu",
 );
 const DIGIT_MINUTES_RX = new RegExp(
-  `(\\d+(?:[.,]\\d+)?)\\s*(?:${MINUTE_UNIT_RX_SRC})`,
+  `(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${MINUTE_UNIT_RX_SRC})`,
   "iu",
 );
 const DIGIT_DAYS_RX = new RegExp(
-  `(\\d+(?:[.,]\\d+)?)\\s*(?:${DAY_UNIT_RX_SRC})`,
+  `(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${DAY_UNIT_RX_SRC})`,
   "iu",
 );
+/** The same readers for the text with written numbers turned into digits. The
+ *  unit must end there, at a non-letter: in "ten minste" (Dutch, "at least")
+ *  the English "ten" became 10, and the bare "min" then matched inside
+ *  "minste". A written number only counts before a whole unit word. */
+const WORD_HOURS_RX = new RegExp(`(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${HOUR_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
+const WORD_MINUTES_RX = new RegExp(`(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${MINUTE_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
+const WORD_DAYS_RX = new RegExp(`(?<![\\p{L}\\p{N}_])(?<!\\d[.,])(\\d+(?:[.,]\\d+)?)\\s*(?:${DAY_UNIT_RX_SRC})(?![\\p{L}])`, "iu");
 /** One whole lower-cased word that IS a duration unit ("valandas", "hours",
  *  "uur", "std", "h"). The word test of `isTimeToken`, and of the
  *  recognition-side fragmenter's meaningfulness rule, for the same lists. */
@@ -327,46 +337,6 @@ function findAllTimes(
   return out;
 }
 
-/** Lithuanian number-word lexicon (accusative case — the form used with
- *  durations: "dvi valandas", "penkiolika minučių"). Lowercase only. */
-const LT_NUMBER_WORDS: Record<string, number> = {
-  vieną: 1,
-  viena: 1,
-  vienas: 1,
-  dvi: 2,
-  trys: 3,
-  tris: 3,
-  keturias: 4,
-  keturi: 4,
-  penkias: 5,
-  penkis: 5,
-  šešias: 6,
-  šešis: 6,
-  septynias: 7,
-  septynis: 7,
-  aštuonias: 8,
-  aštuonis: 8,
-  devynias: 9,
-  devynis: 9,
-  dešimt: 10,
-  vienuolika: 11,
-  dvylika: 12,
-  trylika: 13,
-  keturiolika: 14,
-  penkiolika: 15,
-  šešiolika: 16,
-  septyniolika: 17,
-  aštuoniolika: 18,
-  devyniolika: 19,
-  dvidešimt: 20,
-};
-
-function numberWordKeysAlternation(): string {
-  return Object.keys(LT_NUMBER_WORDS)
-    .sort((a, b) => b.length - a.length)
-    .join("|");
-}
-
 /** Recognise a hours-as-words mention. Returns hours (may be fractional from
  *  "valandą su puse" = 1.5). */
 function detectHoursWord(f: string): number | null {
@@ -375,16 +345,6 @@ function detectHoursWord(f: string): number | null {
   // RU idioms: «полчаса» = 0.5h, «полтора часа» = 1.5h.
   if (/(?:^|[^\p{L}])полчаса(?=\s|[.,!?]|$)/u.test(f)) return 0.5;
   if (/(?:^|[^\p{L}])полтора\s+час[\p{L}]*(?=\s|[.,!?]|$)/u.test(f)) return 1.5;
-  const keys = numberWordKeysAlternation();
-  // Number-word + valand*
-  const m = new RegExp(
-    `(?:^|[^\\p{L}])(${keys})\\s+valand[\\p{L}]*(?=\\s|[.,!?]|$)`,
-    "u",
-  ).exec(f);
-  if (m) {
-    const v = LT_NUMBER_WORDS[m[1]];
-    if (v !== undefined) return v;
-  }
   // Bare valandą / valandos / valandų (= 1 hour) when no digit + no number-word.
   if (
     /(?:^|[^\d])valand[ąoų](?=\s|[.,!?]|$)/.test(f) &&
@@ -403,33 +363,6 @@ function detectHoursWord(f: string): number | null {
   return null;
 }
 
-/** Recognise a minutes-as-words mention. */
-function detectMinutesWord(f: string): number | null {
-  const keys = numberWordKeysAlternation();
-  const m = new RegExp(
-    `(?:^|[^\\p{L}])(${keys})\\s+(?:${MINUTE_UNIT_RX_SRC})(?=\\s|[.,!?]|$)`,
-    "u",
-  ).exec(f);
-  if (m) {
-    const v = LT_NUMBER_WORDS[m[1]];
-    if (v !== undefined) return v;
-  }
-  return null;
-}
-
-/** Recognise a days-as-words mention. */
-function detectDaysWord(f: string): number | null {
-  const keys = numberWordKeysAlternation();
-  const m = new RegExp(
-    `(?:^|[^\\p{L}])(${keys})\\s+dien[\\p{L}]*(?=\\s|[.,!?]|$)`,
-    "u",
-  ).exec(f);
-  if (m) {
-    const v = LT_NUMBER_WORDS[m[1]];
-    if (v !== undefined) return v;
-  }
-  return null;
-}
 
 /** Single-fragment duration parser. Handles:
  *    - bare digit forms ("3 valandas", "15 minučių"),
@@ -448,10 +381,14 @@ function detectFragmentTime(
   fragment: string,
 ): { value: number; unitSlug: "hours" | "minutes" | "days" } | null {
   const f = fragment.toLowerCase();
+  // Written numbers as digits, in every active locale ("dvi valandas",
+  // "two hours", "dwie godziny", "zwei Stunden"), read by the same digit
+  // readers. One lexicon, the chat preview's (DUPLICATION_AUDIT AI-9).
+  const d = digitizeWordNumbers(fragment).toLowerCase();
 
-  // Hours contribution (digit OR word OR special idiom).
+  // Hours contribution (digit OR written number OR special idiom).
   let hours: number | null = null;
-  const digitHourMatch = f.match(DIGIT_HOURS_RX);
+  const digitHourMatch = f.match(DIGIT_HOURS_RX) ?? d.match(WORD_HOURS_RX);
   if (digitHourMatch) hours = toNumber(digitHourMatch[1]);
   if (hours === null) hours = detectHoursWord(f);
 
@@ -468,17 +405,15 @@ function detectFragmentTime(
 
   // Minutes contribution.
   let minutes: number | null = null;
-  const digitMinMatch = f.match(DIGIT_MINUTES_RX);
+  const digitMinMatch = f.match(DIGIT_MINUTES_RX) ?? d.match(WORD_MINUTES_RX);
   if (digitMinMatch) minutes = toNumber(digitMinMatch[1]);
-  if (minutes === null) minutes = detectMinutesWord(f);
 
   // Days contribution (only used when no hours/minutes present — days don't
   // compound with sub-hour units in journal language).
   if (hours === null && minutes === null) {
     let days: number | null = null;
-    const digitDayMatch = f.match(DIGIT_DAYS_RX);
+    const digitDayMatch = f.match(DIGIT_DAYS_RX) ?? d.match(WORD_DAYS_RX);
     if (digitDayMatch) days = toNumber(digitDayMatch[1]);
-    if (days === null) days = detectDaysWord(f);
     if (days !== null) return { value: days, unitSlug: "days" };
   }
 
@@ -589,14 +524,31 @@ function splitFragments(text: string): { parts: string[]; headerCount: number } 
   const colonAt = protectedText.search(ITEMISING_COLON_RX);
   const header = colonAt > 0 ? protectedText.slice(0, colonAt) : "";
   const body = colonAt > 0 ? protectedText.slice(colonAt + 1) : protectedText;
-  const toParts = (chunk: string): string[] =>
-    chunk
+  const toParts = (chunk: string): string[] => {
+    const parts = chunk
       .split(/[.;!?\n|,]+/)
       // A protected abbreviation dot left LAST in its part ("Mūrijau sieną
       // 5 val. | klojau…") is trailing punctuation again — dropped, so the
       // persisted phrase reads exactly as it did before the protection.
       .map((s) => restoreProtected(s).trim().replace(/[.]+$/, ""))
       .filter((s) => s.length > 0);
+    // One activity followed by a comma and its duration is one work item.
+    // Keep the person's phrase intact. Never bridge sentences, join several
+    // activities, or add a duration to an item that already has one.
+    const content = chunk.trim().replace(/[.!?]+$/, "");
+    if (
+      parts.length === 2 &&
+      /^[^.;!?\n|,]+,[^.;!?\n|,]+$/.test(content) &&
+      detectFragmentTime(parts[0]!.toLowerCase()) === null &&
+      isTimeOnlyFragment(parts[1]!) &&
+      detectFragmentTime(parts[1]!.toLowerCase()) !== null &&
+      !describesWhereOnly(parts[0]!) &&
+      recognizeSkills(workPartOf(parts[0]!), RECOGNITION_LIMIT).filter(
+        (skill) => skill.via === "exact" || skill.via === "synonym",
+      ).length === 1
+    ) return [restoreProtected(content).replace(/[.]+$/, "")];
+    return parts;
+  };
   const headerParts = header ? toParts(header) : [];
   return { parts: [...headerParts, ...toParts(body)], headerCount: headerParts.length };
 }
@@ -618,7 +570,6 @@ function isTimeOnlyFragment(fragment: string): boolean {
     "полчаса",
     "полтора",
     "и",
-    ...Object.keys(LT_NUMBER_WORDS),
   ]);
   const words = fragment
     .toLowerCase()
@@ -639,6 +590,9 @@ function isTimeOnlyFragment(fragment: string): boolean {
 function isTimeToken(w: string, idiom: ReadonlySet<string>): boolean {
   if (/^\d+(?:[.,]\d+)?$/.test(w)) return true;
   if (isDurationUnitWord(w)) return true;
+  // A written number ("dvi", "two", "пять", "zwei") is part of a duration the
+  // same way a digit is: the shared lexicon (DUPLICATION_AUDIT AI-9).
+  if (parseWordNumber(w) !== null) return true;
   return idiom.has(w);
 }
 
@@ -647,7 +601,6 @@ const WHERE_IDIOM_TOKENS: ReadonlySet<string> = new Set([
   "puse",
   "с",
   "половиной",
-  ...Object.keys(LT_NUMBER_WORDS),
 ]);
 /** The bare work verb names no trade: "dirbau virtuvėje" is still only a
  *  place. First-person and plural past forms, lt/en/ru/nl/de. */
@@ -874,9 +827,23 @@ const INCLUDED_PART_RX =
 /** The same words OPENING a phrase: "iš jų dvi valandos …" (a figure in
  *  words has no digit to stand in front of). */
 const OPENS_WITH_INCLUDED_PART_RX = new RegExp(`^\\s*(?:${INCLUDED_PART_RX.source.replace(/^\(\?<!\\p\{L\}\)/, "")})`, "iu");
+/** Where a phrase's figure starts: its first digit, or its first written
+ *  number ("In total eight hours" → at "eight"). Every lead and head below is
+ *  read in front of the figure, and a figure in words has no digit
+ *  (DUPLICATION_AUDIT AI-9; review on #3720). -1 when there is none. */
+function figureStart(rawPhrase: string): number {
+  const digit = rawPhrase.search(/\d/);
+  for (const m of rawPhrase.matchAll(/\p{L}+/gu)) {
+    const at = m.index ?? -1;
+    if (digit >= 0 && at > digit) break;
+    if (parseWordNumber(m[0]) !== null) return at;
+  }
+  return digit;
+}
+
 /** True when a phrase introduces itself as part of the figure before it. */
 function opensAsIncludedPart(rawPhrase: string): boolean {
-  const digit = rawPhrase.search(/\d/);
+  const digit = figureStart(rawPhrase);
   return OPENS_WITH_INCLUDED_PART_RX.test(rawPhrase) || (digit > 0 && INCLUDED_PART_RX.test(rawPhrase.slice(0, digit)));
 }
 /** A part whose DURATION is written in brackets: "… koordinavimas (2 val. per
@@ -981,7 +948,7 @@ function sentenceStarts(text: string): number[] {
 }
 
 function numbersIn(text: string): number[] {
-  return [...text.matchAll(/\d+(?:[.,]\d+)?/g)].map((m) => Number(m[0].replace(",", ".")));
+  return [...digitizeWordNumbers(text).matchAll(/\d+(?:[.,]\d+)?/g)].map((m) => Number(m[0].replace(",", ".")));
 }
 
 /**
@@ -1061,7 +1028,7 @@ function containedTotal(
     // Said again AS the total: the cue or the total word stands right in front
     // of the figure ("tai įeina į 15 valandų", "kartu 15 valandų", "iš viso
     // 15 val."), not anywhere in the phrase ("4 val. kartu su kolega").
-    const digit = f.rawPhrase.search(/\d/);
+    const digit = figureStart(f.rawPhrase);
     const lead = digit > 0 ? f.rawPhrase.slice(0, digit) : "";
     // A block of the day is never the day said again: the part of the day is
     // read in front of THIS figure or in its own phrase ("vakare iš viso 4
@@ -1084,7 +1051,7 @@ function containedTotal(
   const totalSentence = sentenceText(total);
   const totalLabelled =
     /^[^:\n]{1,60}:\s*(?:\p{L}+\s+){0,2}\d/u.test(totalSentence.trim()) || RESTATED_TOTAL_LEAD_RX.test(
-      total.rawPhrase.slice(0, Math.max(0, total.rawPhrase.search(/\d/))),
+      total.rawPhrase.slice(0, Math.max(0, figureStart(total.rawPhrase))),
     );
   // An inclusion word speaks about the FIGURE before it only when nothing but
   // punctuation (or one referring word) stands between them: "Dirbau 15 val.,
@@ -1092,7 +1059,7 @@ function containedTotal(
   // of the 15; in "Dirbau 8 val. Vakare mokymai, iš jų 2 val. praktikos" the 2
   // hours are part of the training, on top of the 8.
   const speaksOfFigureBefore = (f: JournalFragmentSuggestion): boolean => {
-    const digit = f.rawPhrase.search(/\d/);
+    const digit = figureStart(f.rawPhrase);
     const head = digit > 0 ? f.rawPhrase.slice(0, digit) : f.rawPhrase;
     const hit = INCLUDED_PART_RX.exec(head);
     if (!hit) return false;

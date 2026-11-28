@@ -109,7 +109,7 @@ export async function listDiscoverableOfferings(
   let query = asAny(ctx.supabase)
     .from("service_offerings")
     .select(
-      "id, title, description, category_slug, location_country, remote, rate_text, provider_id, created_at",
+      "id, title, description, category_slug, location_country, remote, rate_text, created_at",
     )
     .eq("status", "active")
     .neq("provider_id", ctx.userId);
@@ -129,7 +129,6 @@ export async function listDiscoverableOfferings(
     locationCountry: (r.location_country as string | null) ?? null,
     remote: r.remote === true,
     rateText: (r.rate_text as string | null) ?? null,
-    providerId: String(r.provider_id ?? ""),
     createdAt: String(r.created_at ?? ""),
   }));
   // QA-labelled rows never reach real people (owner order 2026-10-01): discovery
@@ -400,4 +399,20 @@ export async function listOutgoingRequests(): Promise<OutgoingListResult> {
 /** Requests addressed to the caller's offerings (provider inbox). */
 export async function listIncomingRequests(): Promise<IncomingListResult> {
   return readIncomingOnce();
+}
+
+/** Only the accepting provider can use a request to prepare a proposal. */
+export async function getAcceptedServiceRequestForProposal(
+  requestId: string,
+): Promise<{ id: string; offeringTitle: string | null } | null> {
+  const ctx = await uid();
+  if (!ctx) return null;
+  const { data, error } = await asAny(ctx.supabase)
+    .from("service_offering_requests")
+    .select("id, service_offerings(title)")
+    .eq("id", requestId)
+    .eq("provider_id", ctx.userId)
+    .eq("status", "accepted")
+    .maybeSingle();
+  return error || !data ? null : { id: data.id, offeringTitle: offeringTitle(data) };
 }

@@ -133,7 +133,7 @@ describe("3b · honesty — a failed tasks read is NAMED, never \"nothing is mis
 
 describe("4 · accessibility — list equivalent, real buttons, state never by colour alone", () => {
   it("offers a list view of the same objects and a keyboard escape", () => {
-    expect(FIELD).toMatch(/data-testid="project-field-view-list"/);
+    expect(FIELD).toMatch(/(?:data-testid|testId)="project-field-view-list"/);
     expect(FIELD).toMatch(/function ListEquivalent\(/);
     expect(FIELD).toMatch(/data-testid="project-field-list"/);
     expect(FIELD).toMatch(/e\.key === "Escape"/);
@@ -149,7 +149,12 @@ describe("4 · accessibility — list equivalent, real buttons, state never by c
       expect(body).toMatch(/aria-label=/);
     }
     expect(FIELD).toMatch(/const OBJECT_BUTTON =\s*"[^"]*min-h-11/);
-    expect(FIELD).toMatch(/const CONTROL =\s*"[^"]*min-h-11/);
+    // The actions are the shared Button (#3503 pattern): each one carries the
+    // 44 px floor, and the view switch is the shared ToggleChip (min-h-11).
+    const actions = FIELD.split("<Button").slice(1);
+    expect(actions.length).toBeGreaterThan(0);
+    for (const a of actions) expect(a.slice(0, 400)).toMatch(/className="[^"]*min-h-11/);
+    expect(FIELD).toMatch(/<ToggleChip\b/);
   });
 
   it("edge colour is always paired with a text label and a symbol", () => {

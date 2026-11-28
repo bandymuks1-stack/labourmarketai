@@ -440,7 +440,16 @@
       "outcomeBlocked": "niepotwierdzone ({code})",
       "receipt": "Potwierdzono: {title}",
       "receiptSkills": "{count, plural, one {# umiejętność} few {# umiejętności} many {# umiejętności} other {# umiejętności}}",
-      "skillsUnavailable": "Nie udało się odczytać listy umiejętności — dotknięcie potwierdzi tylko sam wpis."
+      "skillsUnavailable": "Nie udało się odczytać listy umiejętności — dotknięcie potwierdzi tylko sam wpis.",
+      "projectFilterLabel": "Projekt",
+      "projectAll": "Wszystkie projekty ({n})",
+      "projectNone": "Bez projektu ({n})",
+      "projectUnnamed": "Projekt, nazwa niedostępna",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Pokaż",
+      "projectResult": "Pokazano {shown} z {total} wpisów",
+      "projectOnCard": "Projekt: {name}",
+      "noProjectOnCard": "Bez projektu"
     },
     "loadFailed": "Nie udało się wczytać kolejki do przeglądu. To nie znaczy, że nie ma nic do przejrzenia — proszę spróbować ponownie."
   },
@@ -599,6 +608,13 @@
     "dayEmpty": "Brak wpisów tego dnia.",
     "moreDays": "Pokazywany jest najnowszy dzień z wpisami. Jeszcze {count, plural, one {# dzień} few {# dni} many {# dni} other {# dnia}} z wpisami — proszę wybrać datę w kalendarzu.",
     "periodEmpty": "Brak wpisów w tym okresie."
+  },
+  "dayChoice": {
+    "today": "Dziś",
+    "yesterday": "Wczoraj",
+    "weekAgo": "Tydzień temu",
+    "calendar": "Kalendarz",
+    "earlier": "Wcześniejsze wpisy"
   },
   "spreadsheet": {
     "title": "Tryb arkusza — kilka wpisów naraz",

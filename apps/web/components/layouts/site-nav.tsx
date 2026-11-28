@@ -1,7 +1,9 @@
 import { getLocale, getTranslations } from "next-intl/server";
+import { MessageCircle } from "lucide-react";
 import { Link } from "@/lib/i18n/navigation";
 import { buttonLinkClassName } from "@/components/ui/Button";
 import { AuthCtaLink } from "@/components/layouts/auth-cta-link";
+import { HeaderAuthCtaLink } from "@/components/layouts/header-auth-cta-link";
 import { NavAuthCtas } from "@/components/layouts/nav-auth-ctas";
 import { MobileNavMenu } from "@/components/layouts/mobile-nav-menu";
 import { IntentMegaMenu } from "@/components/layouts/intent-mega-menu";
@@ -125,6 +127,20 @@ export async function SiteNav({
   // chat). A signed-out visitor is sent to the landing's question box instead
   // (`guestHref`, desktop bar); the phone menu marks it as a signed-in entry.
   const assistant = { href: ASSISTANT_HREF, guestHref: ASSISTANT_GUEST_HREF, label: tIntent("assistant") };
+  // The same entry as one icon, for the header between `md` and `lg` (N2).
+  // The conversation home is behind sign-in: never prefetched from here.
+  const assistantIcon = (href: string) => (
+    <Link
+      href={href as "/"}
+      prefetch={false}
+      aria-label={assistant.label}
+      title={assistant.label}
+      data-testid="header-assistant"
+      className="inline-flex size-11 items-center justify-center rounded-full border border-ink-500 text-text-primary transition-colors hover:border-brand-blue hover:text-brand-blue motion-reduce:transition-none"
+    >
+      <MessageCircle aria-hidden className="size-5 text-brand-blue" />
+    </Link>
+  );
 
   // ONE definition, rendered in exactly one place at any given width: in the
   // header from `sm` up, inside the disclosure below it. Sharing the fragment
@@ -134,23 +150,25 @@ export async function SiteNav({
   //   from `sm`    — Sign up beside it;
   //   below `sm`   — Sign up is the first thing in the menu.
   // Owner fix list 2026-11-12: on a phone neither was visible in the header.
+  // On the worker intake only, both carry the profile builder as `next`
+  // (HeaderAuthCtaLink), so what was typed there reaches the composer.
   const loginCta = (
-    <AuthCtaLink
+    <HeaderAuthCtaLink
       relPath={`/${locale}/auth/login`}
       className="flex min-h-11 items-center whitespace-nowrap rounded-control px-1 text-sm font-medium text-text-primary transition-colors hover:text-brand-blue sm:px-0 sm:font-normal sm:text-text-secondary sm:hover:text-text-primary"
     >
       {t("login")}
-    </AuthCtaLink>
+    </HeaderAuthCtaLink>
   );
   const signupCta = (
-    <AuthCtaLink
+    <HeaderAuthCtaLink
       relPath={`/${locale}/auth/signup`}
       className={buttonLinkClassName("primary", "sm")}
     >
       {/* Named for what it does (owner 2026-11-12): "Start now" did not say
           that it creates an account. */}
       {tIntent("signUp")}
-    </AuthCtaLink>
+    </HeaderAuthCtaLink>
   );
   const memberCta = (
     <AuthCtaLink
@@ -208,7 +226,7 @@ export async function SiteNav({
       <div className="mx-auto flex max-w-container items-center gap-2 px-3 py-3 sm:gap-6 sm:px-12 sm:py-4">
         <Link
           href="/"
-          className="flex shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
+          className="flex min-h-11 shrink-0 items-center gap-1.5 font-display text-sm font-bold tracking-tightest text-text-primary sm:gap-2 sm:text-lg"
         >
           {/* The mark is decorative here — the wordmark beside it already
               names the product, so announcing both would read it twice. */}
@@ -253,7 +271,17 @@ export async function SiteNav({
           <span className="hidden sm:inline-flex">
             <ThemeToggleIcon labels={themeLabels} />
           </span>
-          <LocaleSwitcher className="flex" compactBelowSm />
+          {/* THE ASSISTANT, VISIBLE BELOW lg (owner P0 2026-11-23: "AI asistentas
+              aiškiai matomas ir pasiekiamas"; CAROUSEL_NAVIGATION_SPEC N2).
+              From lg the intent bar carries it; between md and lg it sits here,
+              in the room the language code frees (measured: below md the row
+              has no room for it in German without pushing the menu off). Same destinations as the
+              bar: the conversation home signed in, the landing's question box
+              (`/#find`) signed out. */}
+          <span className="hidden md:inline-flex lg:hidden">
+            <NavAuthCtas guest={assistantIcon(ASSISTANT_GUEST_HREF)} member={assistantIcon(ASSISTANT_HREF)} />
+          </span>
+          <LocaleSwitcher className="flex" compactBelowSm compactBelowLg />
           {/* Beta foundation audit M1: below lg the primary links above are
               display:none, which used to leave a phone visitor with NO path to
               any marketing page from the header. The disclosure menu carries

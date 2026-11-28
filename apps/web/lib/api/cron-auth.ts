@@ -1,6 +1,6 @@
 import "server-only";
 
-import { timingSafeEqual } from "node:crypto";
+import { constantTimeEquals } from "./supply-feed-auth";
 
 /**
  * CRON AUTH (completion v1) — the one place a scheduled-job request proves it
@@ -28,8 +28,7 @@ export function authorizeCronRequest(request: Request): CronAuthResult {
   // Constant-time, like the sibling machine doors (`supply-feed-auth`,
   // `external-referral-auth`): a byte-by-byte `===` leaks how many leading
   // characters of the secret a probe got right.
-  const expected = Buffer.from(`Bearer ${secret}`);
-  const given = Buffer.from(header);
-  if (expected.length !== given.length) return "unauthorized";
-  return timingSafeEqual(expected, given) ? "ok" : "unauthorized";
+  // Padded compare (the same as `supply-feed-auth`'s constantTimeEquals): an
+  // early return on a length mismatch would still reveal the secret's length.
+  return constantTimeEquals(`Bearer ${secret}`, header) ? "ok" : "unauthorized";
 }

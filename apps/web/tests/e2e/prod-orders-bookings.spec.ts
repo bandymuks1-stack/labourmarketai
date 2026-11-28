@@ -2,10 +2,12 @@ import { existsSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { test, expect, type Browser, type BrowserContext, type Locator, type Page } from "./prod-walk";
+import { closeOpenSyntheticNeedsOrFail } from "./prod-synthetic-needs";
 import { proveActionTiles } from "./action-tile-proof";
+import { answerNoProjectIfAsked } from "./worklog-context";
 
 import { bearerOf, qaApi } from "./prod-qa-api";
-import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { needLinks, requestIdOf, submitSyntheticNeed } from "./prod-need-post";
 
 /**
  * PRODUCTION ORDERS, BOOKINGS, EXECUTION — owner area 12 (registry rows 5.13,
@@ -17,6 +19,13 @@ import { chooseDemandCountryIfEmpty } from "./demand-country";
  *                    worker accepts on the phone; both see it accepted, the
  *                    company opens the conversation, the worker sees it in the
  *                    plan. The need is closed at the end.
+ *   5.13 Hire      — the accept's engagement is visible to both sides after a
+ *                    reload: Gama finds the booked person on its people page
+ *                    and in its engagements; the worker, in Personal space,
+ *                    sees the engagement with Gama; Alfa sees neither (O-9..O-11).
+ *                    HIRE-5: ends only this synthetic pair's former hire first, preserving
+ *                    its history; the new acceptance must create a new hire. Its work
+ *                    relationship then carries a journal entry, company confirmation and CV.
  *   6.9  Finance   — the owner records an expense for the workspace company,
  *                    finds it in the CSV export, then cancels it.
  *   6.7  Procurement — the owner files an inquiry for the ACTIVE workspace,
@@ -83,15 +92,6 @@ function dayFromToday(days: number): string {
   return new Date(Date.now() + days * 86_400_000).toISOString().slice(0, 10);
 }
 
-/** The scouting need links of the active workspace, by visible title. */
-function needLinks(page: Page, text: string): Locator {
-  return page.locator('a[href*="/dashboard/company/scouting?request="]', { hasText: text });
-}
-
-function requestIdOf(href: string | null): string {
-  return /request=([0-9a-f-]{36})/.exec(href ?? "")?.[1] ?? "";
-}
-
 /** One booking row on /dashboard/bookings, found by this run's note. */
 function bookingRow(page: Page, direction: "incoming" | "outgoing"): Locator {
   return page
@@ -128,6 +128,10 @@ async function closeNeed(page: Page, requestId: string): Promise<"closed" | "alr
 }
 
 let workerId = "";
+let workerProfileId = "";
+let hiringCompanyId = "";
+let hiringOrganizationId = "";
+const priorRelationshipIds = new Set<string>();
 let requestId = "";
 let bookingId = "";
 
@@ -158,6 +162,52 @@ test("O-0. the worker's own worker id (own row, own token)", async () => {
   const rows = (await res.json()) as { id: string }[];
   expect(rows.length, "exactly one own worker row").toBe(1);
   workerId = rows[0].id;
+  workerProfileId = sub;
+});
+
+// A long-lived active booking would make record_booking_engagement return the old
+// row, so it could not exercise the newly installed hire trigger. The ordinary UI
+// ends only the allowlisted worker's QA-SYNTHETIC Gama hire. Nothing is erased.
+test("O-0a (HIRE-5). end this synthetic pair's former hire, keeping its history", async ({ browser }) => {
+  const response = await qaApi(
+    `/rest/v1/company_worker_engagements?select=id,companies(display_name,legal_name)&worker_id=eq.${workerId}&status=eq.active`,
+    bearerOf("manager"),
+  );
+  expect(response.status).toBe(200);
+  const rows = (await response.json()) as { id: string; companies: { display_name: string | null; legal_name: string | null } | null }[];
+  const own = rows.filter((r) => [r.companies?.display_name, r.companies?.legal_name].some((n) => (n ?? "").includes(GAMA)));
+  expect(own.length, "at most one active hire for the synthetic pair").toBeLessThanOrEqual(1);
+  const orgResponse = await qaApi(`/rest/v1/organizations?select=id,legacy_company_id,display_name&display_name=like.${encodeURIComponent(GAMA + "%")}`, bearerOf("manager"));
+  expect(orgResponse.status).toBe(200);
+  const orgs = (await orgResponse.json()) as { id: string; legacy_company_id: string; display_name: string }[];
+  expect(orgs).toHaveLength(1);
+  expect(orgs[0]!.display_name).toContain(GAMA);
+  hiringOrganizationId = orgs[0]!.id;
+  hiringCompanyId = orgs[0]!.legacy_company_id;
+  if (own.length > 0) {
+    const id = own[0]!.id;
+    expect(id).toMatch(/^[0-9a-f-]{36}$/);
+    const { ctx, page } = await as(browser, "manager");
+    try {
+      await useWorkspace(page, GAMA);
+      await page.goto("/lt/dashboard?result=engagements");
+      const card = page.getByTestId(`engagement-${id}`).filter({ visible: true }).first();
+      await expect(card).toBeVisible({ timeout: 60_000 });
+      await card.getByTestId(`engagement-end-${id}`).click();
+      await card.getByTestId(`engagement-end-confirm-${id}`).click();
+      await expect(card.getByTestId(`engagement-status-${id}`)).toHaveAttribute("data-status", "ended", { timeout: 30_000 });
+      const retained = await qaApi(`/rest/v1/company_worker_engagements?select=id,status&id=eq.${id}`, bearerOf("worker"));
+      expect(retained.status).toBe(200);
+      expect(await retained.json(), "the former hire remains history").toEqual([{ id, status: "ended" }]);
+    } finally { await ctx.close(); }
+  }
+  const before = await qaApi(`/rest/v1/engagement_contexts?select=id,status&profile_id=eq.${workerProfileId}&organization_id=eq.${hiringOrganizationId}`, bearerOf("worker"));
+  expect(before.status).toBe(200);
+  const relationships = (await before.json()) as { id: string; status: string }[];
+  // Never end an independently owned relationship to make a test pass.
+  // If another fixture added one, this creation proof must stop honestly.
+  expect(relationships.filter((r) => r.status === "active"), "no active relationship before the new acceptance").toHaveLength(0);
+  for (const row of relationships) priorRelationshipIds.add(row.id);
 });
 
 /**
@@ -182,23 +232,29 @@ async function firstFreeDay(from: number): Promise<string> {
   throw new Error("no free day in a year of accepted bookings");
 }
 
+// #2795 uses a previous synthetic Gama booking as an immutable overlap witness.
+// It changes only this run's new booking, through the existing worker controls.
+let overlapBookingId = "";
+let acceptedBookingDay = "";
+async function knownSyntheticOverlapDay(): Promise<string> {
+  const manager = JSON.parse(Buffer.from(bearerOf("manager").split(".")[1], "base64url").toString("utf8")).sub as string;
+  const res = await qaApi(
+    `/rest/v1/booking_requests?select=id,start_date,note&status=eq.accepted&worker_id=eq.${encodeURIComponent(workerId)}&owner_id=eq.${encodeURIComponent(manager)}&start_date=gte.${dayFromToday(0)}&order=start_date.asc&limit=100`,
+    bearerOf("worker"),
+  );
+  expect(res.ok, "own existing synthetic bookings can be read").toBe(true);
+  const rows = (await res.json()) as { id: string; start_date: string; note: string | null }[];
+  const prior = rows.find((row) => row.note?.startsWith("QA-SYNTHETIC") && row.id !== bookingId);
+  expect(prior, "a prior synthetic Gama booking is required to prove acknowledged overlap").toBeDefined();
+  overlapBookingId = prior!.id;
+  return prior!.start_date;
+}
+
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
-  await page.goto("/lt/dashboard/company/needs?audience=need#demand-intake");
-  await page.getByTestId("demand-role").fill(NEED_ROLE);
   // Name a trade: a need nothing can be recognised in is "not structured" on
   // scouting (lib/scouting/scouting.ts runScoutingCore), which renders no
   // candidates at all — not even the hand-raiser O-3 looks for.
-  await page.getByTestId("demand-description").fill(`${NOTE}: synthetic need for the production booking walk, 1 mūrininkas.`);
-  await page.getByTestId("demand-next").click();
-  const size = page.getByTestId("demand-team-size");
-  if (await size.isVisible().catch(() => false)) await size.fill("1");
-  await chooseDemandCountryIfEmpty(page);
-  await page.getByTestId("demand-next").click();
-  await page.getByTestId("demand-create").click();
-  const done = page.getByTestId("demand-done");
-  const limit = page.getByTestId("demand-open-need-limit");
-  await expect(done.or(limit)).toBeVisible({ timeout: 30_000 });
-  return (await limit.isVisible()) ? "limit" : "done";
+  return submitSyntheticNeed(page, NEED_ROLE, `${NOTE}: synthetic need for the production booking walk, 1 mūrininkas.`);
 }
 
 test("O-1 (5.13). Gama posts this run's need through the demand intake", async ({ browser }) => {
@@ -303,8 +359,9 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
 
   // The company's own withdrawal may be undone with new dates (repeat actions).
   await withdrawn.getByTestId("propose-again-open").click();
-  // A free day for the proposal the worker will accept in O-5.
-  const outcome = await propose(withdrawn, await firstFreeDay(28));
+  // Deliberately overlap one retained synthetic booking; never alter that witness.
+  acceptedBookingDay = await knownSyntheticOverlapDay();
+  const outcome = await propose(withdrawn, acceptedBookingDay);
   expect(outcome, "the second proposal was sent").toBe("sent");
   await page.reload();
   await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "proposed", {
@@ -327,27 +384,20 @@ test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browse
   await row.getByTestId("booking-accept-confirm").click();
   const responded = row.getByTestId("booking-responded");
   const conflict = row.getByTestId("booking-conflict");
-  await expect(responded.or(conflict)).toBeVisible({ timeout: 30_000 });
-  if (await conflict.isVisible()) {
-    // An earlier run's accepted booking overlaps these dates. The product's
-    // own answer is one deliberate second action, recorded as such.
-    console.info("[bookings] accept met a date clash; the worker accepts knowingly");
-    await row.getByTestId("booking-accept-anyway").click();
-    // Run 40216243755: the database refused the acknowledged accept (the
-    // overlap constraint still held) and the UI re-showed the same conflict,
-    // so the button visibly did nothing. That refusal is now its own answer.
-    const notRecordable = row.getByTestId("booking-overlap-not-recordable");
-    await expect(responded.or(notRecordable)).toBeVisible({ timeout: 30_000 });
-    if (await notRecordable.isVisible()) {
-      // Honest, and not a loop: the acknowledgement control is gone.
-      await expect(row.getByTestId("booking-accept-anyway")).toHaveCount(0);
-      expect(
-        false,
-        "the acknowledged overlap could not be recorded: the clash-marker migration " +
-          "(20261025180000, RED) is not applied yet — the UI says so and offers decline",
-      ).toBe(true);
-    }
-  }
+  await expect(conflict, "ordinary acceptance must report the known clash").toBeVisible({ timeout: 30_000 });
+  await expect(responded).toHaveCount(0);
+  await row.getByTestId("booking-accept-anyway").click();
+  await expect(responded).toBeVisible({ timeout: 30_000 });
+  await expect(row.getByTestId("booking-clash-acknowledged")).toBeVisible();
+  const accepted = await qaApi(`/rest/v1/booking_requests?select=status,clash_acknowledged&id=eq.${bookingId}`, bearerOf("worker"));
+  expect(accepted.ok).toBe(true);
+  expect(await accepted.json()).toEqual([{ status: "accepted", clash_acknowledged: true }]);
+  const witness = await qaApi(`/rest/v1/booking_requests?select=status&id=eq.${overlapBookingId}`, bearerOf("worker"));
+  expect(witness.ok).toBe(true);
+  expect(await witness.json(), "prior booking remains accepted").toEqual([{ status: "accepted" }]);
+  const receipt = await qaApi(`/rest/v1/booking_request_events?select=id&booking_request_id=eq.${bookingId}&event_type=eq.clash_acknowledged&related_booking_request_id=eq.${overlapBookingId}`, bearerOf("worker"));
+  expect(receipt.ok).toBe(true);
+  expect(await receipt.json(), "one retained acknowledgement naming the known overlap").toHaveLength(1);
   await page.reload();
   // Run 40200190351: after this reload the row matched TWICE (identical
   // <li>s). Count where the copies live: a hidden streamed holder (#418
@@ -382,9 +432,165 @@ test("O-6 (5.13). Gama sees the acceptance and opens the conversation with the w
 
 test("O-7 (5.13). the accepted booking is in the worker's plan on its date", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
-  await page.goto(`/lt/dashboard/planning?view=agenda&source=booking&date=${dayFromToday(28)}`);
+  await page.goto(`/lt/dashboard/planning?view=agenda&source=booking&date=${acceptedBookingDay}`);
   await expect(page.getByTestId("planning-agenda")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId(`planning-item-booking:${bookingId}`)).toBeVisible({ timeout: 30_000 });
+  await ctx.close();
+});
+
+let engagementId = "";
+
+/** The engagements result, opened by its address: this engagement, active, after a reload. */
+async function engagementActive(page: Page, who: string, counterparty: string): Promise<void> {
+  await page.goto("/lt/dashboard?result=engagements");
+  for (const pass of ["first load", "reload"]) {
+    if (pass === "reload") await page.reload();
+    const status = page.getByTestId(`engagement-status-${engagementId}`).filter({ visible: true }).first();
+    await expect(status, `${who}, ${pass}: the engagement is listed`).toBeVisible({ timeout: 60_000 });
+    await expect(status).toHaveAttribute("data-status", "active");
+    await expect(page.getByTestId(`engagement-${engagementId}`).filter({ visible: true }).first()).toContainText(counterparty);
+  }
+}
+
+test("O-9 (5.13). Gama finds the booked worker on its people page and in its engagements", async ({ browser }) => {
+  // The accept (respond_booking_request_v4) makes or keeps ONE active engagement for the pair.
+  // Read with the manager's own token: RLS lets the owning company read only its own rows.
+  const res = await qaApi(
+    `/rest/v1/company_worker_engagements?select=id,status,company_id,source_booking_id,companies(display_name,legal_name)&worker_id=eq.${encodeURIComponent(workerId)}&status=eq.active`,
+    bearerOf("manager"),
+  );
+  expect(res.status, "the company's own engagements answered").toBe(200);
+  const rows = (await res.json()) as { id: string; company_id: string; source_booking_id: string; companies: { display_name: string | null; legal_name: string | null } | null }[];
+  const gama = rows.filter((r) => [r.companies?.display_name, r.companies?.legal_name].some((n) => (n ?? "").includes(GAMA)));
+  expect(gama.length, "exactly one active Gama engagement with the booked worker").toBe(1);
+  engagementId = gama[0]!.id;
+  expect(gama[0]!.company_id).toBe(hiringCompanyId);
+  expect(gama[0]!.source_booking_id, "this acceptance created the hire, not an earlier run").toBe(bookingId);
+
+  const { ctx, page } = await as(browser, "manager");
+  await useWorkspace(page, GAMA);
+  for (const pass of ["first load", "reload"]) {
+    if (pass === "reload") await page.reload();
+    const row = page.getByRole("main").getByTestId(`booked-person-${engagementId}`);
+    await expect(row, `${pass}: the booked worker is on Gama's people page`).toBeVisible({ timeout: 60_000 });
+  }
+  const name = (
+    await page.getByRole("main").getByTestId(`booked-person-${engagementId}`).getByTestId("identity-card-name").first().innerText()
+  ).trim();
+  expect(name.length, "the booked person is named").toBeGreaterThan(0);
+  await engagementActive(page, "Gama", name);
+  await ctx.close();
+});
+
+test("O-9a (HIRE-5). the new hire carries work to company confirmation and Living CV", async ({ browser }) => {
+  test.setTimeout(480_000);
+  const orgResponse = await qaApi(`/rest/v1/organizations?select=id,display_name&legacy_company_id=eq.${hiringCompanyId}`, bearerOf("manager"));
+  expect(orgResponse.status).toBe(200);
+  const orgs = (await orgResponse.json()) as { id: string; display_name: string }[];
+  expect(orgs).toHaveLength(1);
+  expect(orgs[0]!.display_name).toContain(GAMA);
+  const contexts = await qaApi(`/rest/v1/engagement_contexts?select=id,journal_review_enabled&profile_id=eq.${workerProfileId}&organization_id=eq.${orgs[0]!.id}&status=eq.active`, bearerOf("worker"));
+  expect(contexts.status).toBe(200);
+  const relationships = (await contexts.json()) as { id: string; journal_review_enabled: boolean }[];
+  expect(relationships, "the accepted hire is connected to one work relationship").toHaveLength(1);
+  const relationship = relationships[0]!;
+  expect(orgs[0]!.id).toBe(hiringOrganizationId);
+  expect(priorRelationshipIds.has(relationship.id), "the new acceptance opened a new interval").toBe(false);
+  const company = await as(browser, "manager");
+  const worker = await as(browser, "worker", true);
+  try {
+    await useWorkspace(company.page, GAMA);
+    if (!relationship.journal_review_enabled) {
+      const fold = company.page.getByRole("main").getByTestId("people-more").first();
+      await expect(fold).toBeAttached({ timeout: 60_000 });
+      if ((await fold.getAttribute("open")) === null) await fold.locator("summary").first().click();
+      await company.page.getByRole("main").getByTestId(`toggle-review-${relationship.id}`).click();
+      await expect.poll(async () => {
+        const res = await qaApi(`/rest/v1/engagement_contexts?select=journal_review_enabled&id=eq.${relationship.id}`, bearerOf("worker"));
+        expect(res.status).toBe(200);
+        return ((await res.json()) as { journal_review_enabled: boolean }[])[0]?.journal_review_enabled;
+      }, { timeout: 30_000 }).toBe(true);
+    }
+    await worker.page.goto("/lt/cv");
+    await expect(worker.page.getByTestId("cv-skills").filter({ visible: true })).toBeVisible({ timeout: 60_000 });
+    const confirmed = worker.page.getByTestId("cv-confirmed-work").filter({ visible: true });
+    const beforeConfirmed = (await confirmed.count()) ? Number(await confirmed.getAttribute("data-entries")) : 0;
+    await worker.page.goto("/lt/dashboard/work-in-numbers");
+    const journal = worker.page.getByTestId("wi-experience-journal").filter({ visible: true });
+    await expect(journal).toBeVisible({ timeout: 60_000 });
+    const beforeHours = Number(await journal.getAttribute("data-hours"));
+    const entryText = `QA-SYNTHETIC ${RUN} HIRE: šiandien 2 valandas mūrijau blokelių sieną`;
+    await worker.page.goto("/lt/dashboard/journal");
+    const main = worker.page.getByRole("main");
+    await main.getByTestId("journal-quick-record-text").fill(entryText);
+    await main.getByTestId("journal-quick-record-understand").click();
+    await expect(main.getByTestId("worklog-flow")).toBeVisible({ timeout: 60_000 });
+    const context = main.getByTestId("worklog-context");
+    await expect(context, "the worker can select the hiring company").toBeVisible();
+    await context.selectOption(relationship.id);
+    await answerNoProjectIfAsked(worker.page);
+    await main.getByTestId("worklog-save").click();
+    await main.getByTestId("worklog-confirm").click();
+    await expect(main.getByTestId("worklog-done")).toBeVisible({ timeout: 30_000 });
+    const stored = await qaApi(`/rest/v1/journal_entries?select=id,engagement_context_id&worker_id=eq.${workerId}&original_text=eq.${encodeURIComponent(entryText)}`, bearerOf("worker"));
+    expect(stored.status).toBe(200);
+    const entries = (await stored.json()) as { id: string; engagement_context_id: string }[];
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.engagement_context_id).toBe(relationship.id);
+    const entryId = entries[0]!.id;
+    await company.page.goto("/lt/dashboard/inbox");
+    const inbox = company.page.getByRole("main");
+    await expect(inbox.getByTestId(`inbox-entry-${entryId}`)).toBeVisible({ timeout: 60_000 });
+    await inbox.getByTestId(`journal-approve-entry-${entryId}`).click();
+    await expect.poll(async () => {
+      const res = await qaApi(`/rest/v1/journal_entry_confirmations?select=confirmation_scope&entry_id=eq.${entryId}`, bearerOf("worker"));
+      expect(res.status).toBe(200);
+      return ((await res.json()) as { confirmation_scope: { decision?: string } }[]).map((r) => r.confirmation_scope.decision);
+    }, { timeout: 30_000 }).toEqual(["approved"]);
+    await worker.page.goto("/lt/cv");
+    await expect(confirmed).toHaveAttribute("data-entries", String(beforeConfirmed + 1), { timeout: 60_000 });
+    await expect(worker.page.getByRole("main").first().getByTestId("cv-history-node").filter({ hasText: GAMA }).getByTestId("cv-history-recorded").first()).toBeVisible();
+    await worker.page.goto("/lt/dashboard/work-in-numbers");
+    await expect(journal, "the confirmed work counts once").toHaveAttribute("data-hours", String(beforeHours + 2), { timeout: 60_000 });
+    // The synthetic confirmed entry and its attributable history are retained.
+  } finally { await worker.ctx.close(); await company.ctx.close(); }
+});
+
+test("O-10 (5.13). the worker, in Personal space on the phone, sees the engagement with Gama", async ({ browser }) => {
+  const { ctx, page } = await as(browser, "worker", true);
+  // "Who do I work for" is read in Personal space: in an organization workspace the result is
+  // that organization's engagements (lib/engagements/engagements-result.ts).
+  await page.goto("/lt/dashboard");
+  const chip = page.getByTestId("workspace-chip").first();
+  if (await chip.isVisible({ timeout: 15_000 }).catch(() => false)) {
+    const personal = page.getByTestId("workspace-option-personal");
+    await chip.getByRole("button").first().click();
+    if ((await personal.getAttribute("aria-current")) !== "true") {
+      await personal.click();
+      await page.waitForLoadState("networkidle", { timeout: 20_000 }).catch(() => undefined);
+    } else {
+      await page.keyboard.press("Escape");
+    }
+  }
+  await engagementActive(page, "the worker", GAMA);
+  await ctx.close();
+});
+
+test("O-11 (5.13). Alfa sees neither the booked person nor the engagement", async ({ browser }) => {
+  const own = await qaApi(`/rest/v1/company_worker_engagements?select=id&id=eq.${encodeURIComponent(engagementId)}`, bearerOf("owner"));
+  expect(own.status, "Alfa's own read answered").toBe(200);
+  expect(await own.json(), "Alfa's own session reads no row of Gama's engagement").toEqual([]);
+  const { ctx, page } = await as(browser, "owner");
+  await useWorkspace(page, ALFA);
+  await page.reload();
+  await expect(page.getByRole("main").getByRole("heading").first()).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId(`booked-person-${engagementId}`), "Alfa's people page").toHaveCount(0);
+  await page.goto("/lt/dashboard?result=engagements");
+  await expect(
+    page.getByTestId("engagements-empty").or(page.getByTestId("engagements-list")).filter({ visible: true }).first(),
+    "Alfa's engagements answer",
+  ).toBeVisible({ timeout: 60_000 });
+  await expect(page.getByTestId(`engagement-${engagementId}`), "Alfa's engagements").toHaveCount(0);
   await ctx.close();
 });
 
@@ -596,11 +802,15 @@ test("B-1 (6.4). a customer saves a request draft on the buyer workspace", async
   test.skip(slot === null, "no synthetic identity holds the customer role (owner decision: provision one)");
 
   const { ctx, page } = await as(browser, slot!);
-  await page.goto("/lt/dashboard/buyer");
+  // The new-request form is its own block (decision 0034, `?tab=new`).
+  await page.goto("/lt/dashboard/buyer?tab=new");
   const form = page.getByTestId("buyer-requests-form");
   await expect(form, "the customer setup is complete enough to file requests").toBeVisible({ timeout: 30_000 });
   await page.getByTestId("buyer-requests-field-title").fill(`${NOTE} užsakymas`);
   await page.getByTestId("buyer-requests-field-need-summary").fill(`${NOTE}: plytelių klojimas vonios kambaryje`);
+  // The country is a required ISO choice since #3234; an unchosen select
+  // stops the submit in the browser and no result is ever shown.
+  await page.getByTestId("buyer-requests-field-country").selectOption("LT");
   await page.getByTestId("buyer-requests-status-draft").check();
   await page.getByTestId("buyer-requests-submit").click();
   await expect(page.getByTestId("buyer-requests-result")).toBeVisible({ timeout: 30_000 });
@@ -623,4 +833,12 @@ test("T-1 (#2828). the bookings related-door grid renders as action tiles", asyn
     "/lt/dashboard/bookings",
     { scopeTestId: "bookings-connections", primaries: 0, prepare: (page) => useWorkspace(page, GAMA) },
   );
+});
+
+// Owner order 2026-11-22: no synthetic need this walk posted — or an earlier
+// run left — stays open on the market, even when a step above failed
+// (tests/e2e/prod-synthetic-needs.ts; the workflow sweeps again in always()).
+test.afterAll(async () => {
+  test.setTimeout(120_000);
+  await closeOpenSyntheticNeedsOrFail("orders-bookings");
 });

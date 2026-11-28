@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "Taal van berichten",
+    "intro": "Werkberichten en instructies die in een andere taal zijn geschreven, worden voor u vertaald in deze taal getoond. Laat de interfacetaal staan, tenzij u een andere taal beter leest.",
+    "label": "Ik lees berichten in",
+    "sameAsInterface": "Zelfde als de interface",
+    "saved": "Opgeslagen.",
+    "error": "De wijziging kon niet worden opgeslagen en is teruggedraaid. Probeer het opnieuw.",
+    "unavailable": "Deze instelling is nog niet beschikbaar — berichten volgen tot die tijd de interfacetaal."
+  },
   "companyModel": {
     "today": {
       "goApprove": "Bekijken en goedkeuren",
@@ -51,8 +60,6 @@
   },
   "publicDemand": {
     "title": "Actuele marktvraag",
-    "subtitleAgency": "Wat de publieke markt nu vraagt — dezelfde pool die uw kandidaten op het bord zien.",
-    "subtitleInstitution": "Wat de publieke markt nu vraagt — de richtingen waar uw lerenden naartoe gaan.",
     "active": "{count} actuele vacatures",
     "employers": "{count} werkgevers",
     "filtered": "{profession}: {count} vacatures",
@@ -173,7 +180,43 @@
       "actionPhone": "Bellen",
       "actionWebsite": "Website van het bedrijf openen",
       "heroContact": "Hoe u contact opneemt",
-      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld."
+      "provenance": "Het bedrijf heeft deze pagina zelf ingevuld.",
+      "living": {
+        "activityTitle": "Werkregistraties per periode",
+        "eyebrow": "Levend cv",
+        "figures": {
+          "years": "periode gedekt door registraties (jaren)",
+          "hours": "geregistreerde uren",
+          "people": "{count, plural, one {persoon werkte hier} other {personen werkten hier}}",
+          "projects": "{count, plural, one {project} other {projecten}}",
+          "places": "{count, plural, one {werklocatie} other {werklocaties}}",
+          "team": "{count, plural, one {teamlid} other {teamleden}}"
+        },
+        "doTitle": "Competenties",
+        "team": "{count, plural, one {# persoon in het team} other {# personen in het team}}",
+        "experienceTitle": "Gewerkte uren",
+        "confirmedLabel": "Bevestigd",
+        "confirmedSource": "Vastgelegd door de werknemer, goedgekeurd door de organisatie",
+        "recordedLabel": "Eigen registraties",
+        "recordedSource": "Registraties van de organisatie, niet bevestigd door een andere partij",
+        "pending": "{hours} wachten op goedkeuring",
+        "hours": "{hours} u",
+        "running": "Lopend",
+        "completed": "Afgerond",
+        "clients": "Werk uitgevoerd voor: {names}",
+        "tabs": {
+          "overview": "Overzicht",
+          "projects": "Projecten",
+          "experience": "Ervaring",
+          "gallery": "Galerij",
+          "team": "Medewerkers"
+        },
+        "pendingLabel": "Wacht op goedkeuring",
+        "ringLabel": "{share}% van de journaaluren bevestigd",
+        "open": "Levend cv openen",
+        "clientsMore": "Werk uitgevoerd voor: {names} en nog {count}",
+        "currentTeamTitle": "Huidig team"
+      }
     }
   },
   "marketplaceListings": {
@@ -202,7 +245,6 @@
     "formLabelLabel": "Locatie",
     "formLabelPlaceholder": "Stad of regio",
     "formPriceLabel": "Prijs",
-    "formPricePlaceholder": "bijv. € 450/maand of in overleg",
     "priceHint": "Prijs is optioneel en beschrijvend. Er wordt hier geen betaling gedaan.",
     "save": "Opslaan",
     "saving": "Opslaan…",
@@ -1146,6 +1188,7 @@
     "calendar": "Kalender",
     "addEntry": "Invoer toevoegen",
     "details": "Persoonsgegevens",
+    "background": "Talen & opleiding",
     "improve": "Wat te verbeteren",
     "capabilities": "Vaardigheden & werkgeschiedenis",
     "fullRecordsInCv": "Alle werkregistraties",
@@ -1833,7 +1876,9 @@
       "errorName": "Voer een projectnaam in (minimaal 2 tekens).",
       "errorNoCompany": "Alleen een bedrijfsaccount kan een projectcontext aanmaken.",
       "errorNotAuthorized": "Projecten aanmaken is hier voorbehouden aan de eigenaar of beheerder van de organisatie. Vraag hen het project aan te maken of uw rol dat recht te geven.",
-      "error": "Aanmaken is niet gelukt. Probeer het opnieuw."
+      "error": "Aanmaken is niet gelukt. Probeer het opnieuw.",
+      "countryLabel": "Land",
+      "errorCountry": "Kies het land waar de projectlocatie ligt."
     },
     "needsTitle": "Aanvragen",
     "needsBody": "Dien een gestructureerde aanvraag in en volg de status.",
@@ -2073,7 +2118,6 @@
       "eyebrow": "BEDRIJFSWERKRUIMTE",
       "programs": {
         "title": "Opleidingen en cohorten",
-        "subtitle": "Wat u onderwijst, gericht op een richting op de arbeidsmarkt, en de groepen lerenden daarbinnen. Vraag toont actuele publieke vacatures voor die richting.",
         "empty": "Nog geen opleidingen. Voeg de eerste toe en richt die op de werkrichting waar ze toe leidt.",
         "addProgram": "Opleiding toevoegen",
         "noDirection": "Geen werkrichting ingesteld",
@@ -2209,7 +2253,7 @@
         },
         "noCompany": {
           "title": "Start uw bedrijfsprofiel",
-          "body": "U heeft nog geen bedrijfsprofiel. Maak er een aan — het is direct actief en bruikbaar, zonder te wachten op goedkeuring.",
+          "body": "U heeft nog geen bedrijfsprofiel. Maak er een aan: u kunt het meteen gebruiken. Werknemers zien uw vragen zodra uw bedrijf geverifieerd is.",
           "cta": "Bedrijf instellen"
         },
         "personalSpace": {
@@ -2244,7 +2288,7 @@
         "formTitle": "Bedrijfsprofielaanvraag",
         "formTitleCreate": "Bedrijfsprofiel aanmaken",
         "formTitleEdit": "Bedrijfsprofiel bewerken",
-        "formSubtitle": "Maak uw organisatieprofiel aan vanuit uw persoonlijke account. Het is direct actief en bruikbaar — zonder te wachten op goedkeuring. Verificatie is een sterkere, aparte vertrouwensstap.",
+        "formSubtitle": "Maak uw organisatieprofiel aan vanuit uw persoonlijke account. U kunt het meteen gebruiken: projecten, team, werkjournaal. Werknemers zien uw vragen zodra uw bedrijf geverifieerd is; vraag hieronder verificatie aan.",
         "existingHeading": "Bedrijfsprofiel",
         "legalName": "Officiële bedrijfsnaam",
         "legalNameHelp": "Verplicht. 2–200 tekens.",
@@ -2275,6 +2319,7 @@
         },
         "statusInvalidCountry": "Kies een land uit de lijst — andere waarden worden nog niet ondersteund.",
         "registrationCode": "Bedrijfs-/registratiecode",
+        "optionalDetails": "Registratie, contactgegevens en functie",
         "registrationCodeHelp": "Optioneel. Helpt om het bedrijf later te verifiëren.",
         "address": "Adres / locatie",
         "addressPlaceholder": "bijv. Hoofdstraat 1, Vilnius",
@@ -2298,7 +2343,7 @@
         "agencyConnectionPending": "Uitnodiging geaccepteerd. Een uitzendbureau wil een verbinding met uw bedrijf — maak eerst uw bedrijfsprofiel aan; het verbindingsverzoek wacht daarna op uw pagina Partners, waar u het met dit bedrijf bevestigt.",
         "legalLockedNotice": "Dit bedrijf is geverifieerd. De juridische gegevens (officiële naam, registratiecode, land en geregistreerd adres) zijn hier vergrendeld en kunnen niet worden overschreven — neem contact op met support om een juridische wijziging aan te vragen. U kunt contactgegevens, website, bedrijfstype en uw rol nog wel bijwerken.",
         "saveDraft": "Bedrijf opslaan",
-        "submitRequest": "Handmatige beoordeling aanvragen (optioneel)",
+        "submitRequest": "Verificatie aanvragen (werknemers zien uw vragen na verificatie)",
         "statusDraftSaved": "Bedrijf opgeslagen — het is nu actief en bruikbaar.",
         "statusSubmitted": "Handmatige beoordeling aangevraagd (optioneel). Uw bedrijf blijft intussen bruikbaar.",
         "statusNeedsMigration": "De actie kon niet worden voltooid. Probeer het opnieuw.",
@@ -2319,7 +2364,7 @@
           "draft": "Concept. Sla op om uw bedrijf te activeren — het wordt direct bruikbaar.",
           "active_unverified": "Nu actief en bruikbaar. Basale automatische controles geslaagd. Nog niet identiteitsgeverifieerd — dat is een aparte, sterkere stap. Uw geplaatste aanvragen worden pas na verificatie van uw bedrijf aan werknemers getoond.",
           "needs_checks": "Actief en bruikbaar, maar een basiscontrole vraagt aandacht (bijv. voeg uw land toe, of corrigeer een onjuiste code / website / e-mail). Uw geplaatste aanvragen worden pas na verificatie van uw bedrijf aan werknemers getoond.",
-          "pending_verification": "U heeft een optionele handmatige beoordeling aangevraagd. Uw bedrijf blijft volledig bruikbaar terwijl die wacht. Uw geplaatste aanvragen worden pas na verificatie van uw bedrijf aan werknemers getoond.",
+          "pending_verification": "U heeft verificatie aangevraagd. Uw bedrijf blijft volledig bruikbaar terwijl die wacht. Uw geplaatste aanvragen worden pas na verificatie van uw bedrijf aan werknemers getoond.",
           "unverified": "Niet geverifieerd. U kunt uw bedrijf gewoon blijven gebruiken. Uw geplaatste aanvragen worden pas na verificatie van uw bedrijf aan werknemers getoond.",
           "verified": "Geverifieerd — een sterkere vertrouwensstatus, alleen toegekend na een echte controle."
         },
@@ -2969,8 +3014,7 @@
           "label": "Hoeveel werknemers nodig"
         },
         "salary": {
-          "label": "Salaris (€)",
-          "placeholder": "Bijv. 2200"
+          "label": "Salaris (€)"
         },
         "countries": {
           "label": "Voorkeurslanden (ISO-codes)",
@@ -4266,6 +4310,9 @@
         "admin": "Beheerder"
       },
       "subcopy": "Eén profiel voor uw werkervaring en kansen — in de volgende stap geeft u aan waarvoor u komt.",
+      "inviteFrom": "{inviter} nodigt u uit om lid te worden van {organization}.",
+      "inviteTo": "U bent uitgenodigd om lid te worden van {organization}.",
+      "inviteNext": "Na het aanmelden wordt u lid van {organization}.",
       "google_label": "Doorgaan met Google",
       "google_redirecting": "Doorsturen...",
       "divider": "of",
@@ -4276,7 +4323,6 @@
       "confirm_password_label": "Bevestig wachtwoord",
       "submit_label": "Registreren",
       "signing": "Aanmaken...",
-      "disclaimer": "Uw feedback vormt het product — vertel ons wat werkt en wat er mist.",
       "has_account": "Heeft u al een account?",
       "login_link": "Inloggen",
       "error_generic": "Er is iets misgegaan. Probeer het zo opnieuw.",
@@ -4385,7 +4431,7 @@
           },
           "education": {
             "title": "Ik vertegenwoordig een onderwijsinstelling",
-            "desc": "Nodig lerenden uit, zie hun deelname en verbind ze met stages en banen."
+            "desc": "Nodig lerenden uit, voer programma's uit en volg hun stage en resultaten."
           }
         },
         "heading": "Begint u als persoon of als bedrijf?",
@@ -4634,7 +4680,6 @@
               "hoursPerWorker": "Uren per werknemer",
               "totalHours": "Totaal aantal uren (optionele overschrijving)",
               "rate": "Uur- / dagtarief",
-              "ratePlaceholder": "bijv. 20",
               "country": "Land / locatie",
               "materials": "Materialen",
               "equipment": "Apparatuur / gereedschap",
@@ -5078,7 +5123,15 @@
         "event_invitation_accepted": "Iemand heeft uw uitnodiging aangenomen",
         "event_weekly_digest_profile_completion": "Om u passende banen te tonen, bevestig welk werk u doet",
         "event_weekly_digest_journal": "Het weekoverzicht van uw werkjournaal is klaar",
-        "event_history_link_offered": "Een organisatie biedt aan uw geregistreerde werkgeschiedenis aan uw account te koppelen"
+        "event_history_link_offered": "Een organisatie biedt aan uw geregistreerde werkgeschiedenis aan uw account te koppelen",
+        "event_team_offer_received": "Een team heeft zich aangeboden voor uw vraag",
+        "event_team_offer_answered": "Er is gereageerd op het aanbod van uw team",
+        "event_team_offer_answered_accepted": "Het aanbod van uw team is geaccepteerd",
+        "event_team_offer_answered_declined": "Het aanbod van uw team is afgewezen",
+        "event_candidate_offer_received": "Een bureau heeft een kandidaat voorgesteld voor uw vraag",
+        "event_candidate_offer_answered": "Er is gereageerd op uw voorgestelde kandidaat",
+        "event_candidate_offer_answered_accepted": "Uw voorgestelde kandidaat is geaccepteerd",
+        "event_candidate_offer_answered_declined": "Uw voorgestelde kandidaat is afgewezen"
       },
       "label": "Mijn meldingen",
       "emptyTitle": "Er is nu niets dat uw aandacht nodig heeft.",
@@ -5816,9 +5869,9 @@
       "confirmedTitle": "Verwijdering bevestigd",
       "confirmedBody": "Het systeem verwijdert het account binnen enkele minuten en stuurt een bevestiging naar het e-mailadres van uw account. Moet iets worden beoordeeld, dan laten we het u weten.",
       "inReview": "Automatische verwijdering is gepauzeerd voor beoordeling: het account bevat gegevens die mogelijk wettelijk bewaard moeten blijven of die andere mensen betreffen. U ontvangt het besluit en de redenen binnen een maand per e-mail. Intussen wordt uw profiel niet getoond in zoekresultaten.",
-      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens 30 dagen na bevestiging onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
-      "confirmStepBodyWaiting": "Uw verzoek om uw account te verwijderen is ingediend. Bevestig het — het account blijft nog 30 dagen bestaan en in die tijd kunt u op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt u een bevestiging per e-mail.",
-      "confirmedBodyWaiting": "Het account wordt over 30 dagen verwijderd. Tot die tijd kunt u op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van uw account.",
+      "confirmLabelWaiting": "Ik begrijp dat het account en de gegevens uiterlijk 30 dagen na bevestiging, en uiterlijk een maand na mijn verzoek, onherroepelijk worden verwijderd, tenzij ik eerder annuleer.",
+      "confirmStepBodyWaiting": "Uw verzoek om uw account te verwijderen is ingediend. Bevestig het — het account blijft nog ten hoogste 30 dagen bestaan (nooit langer dan een maand na uw verzoek) en in die tijd kunt u op deze pagina annuleren. Daarna verwijdert het systeem het account automatisch en stuurt u een bevestiging per e-mail.",
+      "confirmedBodyWaiting": "Het account wordt binnen 30 dagen verwijderd, en uiterlijk een maand na uw verzoek. Tot die tijd kunt u op deze pagina annuleren. Na het verwijderen sturen we een bevestiging naar het e-mailadres van uw account.",
       "status": {
         "pending": "Uw verzoek om uw account te verwijderen is ingediend.",
         "pendingConfirmed": "Het verwijderen van uw account is bevestigd en ingepland.",
@@ -5826,7 +5879,7 @@
         "inProgress": "Uw account wordt al verwijderd — dit kan niet meer worden geannuleerd.",
         "done": "Het account is verwijderd.",
         "submittedAt": "Ingediend: {date}",
-        "scheduledAt": "Het account wordt verwijderd op {date} (na een wachttijd van 30 dagen).",
+        "scheduledAt": "Het account wordt verwijderd op {date}.",
         "cancelUntil": "Tot die tijd kunt u annuleren.",
         "loadError": "De status van het verwijderen van uw account kon niet worden geladen. Vernieuw de pagina en probeer het opnieuw."
       },
@@ -5977,6 +6030,8 @@
             "Stripe — betalingsverwerking voor betaalde platformdiensten. Wanneer een organisatie een betaling start, ontvangt Stripe het e-mailadres van de betalende gebruiker en een interne accountidentificatie; kaartgegevens worden ingevoerd op de eigen betaalpagina van Stripe en niet door het platform opgeslagen.",
             "Google, Facebook (Meta) en LinkedIn — alleen als je ervoor kiest met hen in te loggen, zoals hierboven beschreven.",
             "Google (Gemini API) — alleen zoals hieronder beschreven in het onderdeel over AI.",
+            "Cloudflare (Workers AI) — pas na activering: 1) om openbare, geaggregeerde arbeidsmarktstatistieken toe te lichten; 2) wanneer het platform een in de chat getypt verzoek niet zelf begrijpt, om voor te stellen welke bestaande platformactie ermee bedoeld wordt. Vóór verzending worden namen, contactgegevens, getallen en alle woorden die niet op een vaste lijst van actiewoorden staan verwijderd; een verzoek met gezondheids- of andere gevoelige informatie wordt helemaal niet verzonden. Cloudflare gebruikt deze inhoud niet om modellen te trainen en bewaart haar niet na het verzoek.",
+            "Mistral AI en Groq — pas na activering en alleen om openbare, geaggregeerde arbeidsmarktstatistieken toe te lichten. Er worden geen berichtteksten en geen persoonsgegevens naar hen gestuurd.",
             "De volledige lijst van infrastructuurleveranciers staat op de pagina „Gegevensbescherming”."
           ]
         },
@@ -6115,6 +6170,8 @@
             "Cloudflare — het netwerk vóór de website: domeinnaamdienst, versleuteling tijdens verzending, caching en bescherming tegen aanvallen. Elk verzoek aan de website loopt erdoorheen.",
             "GitHub — opslag van de broncode. Er worden daar geen gebruikersgegevens bewaard.",
             "Google (Gemini API) — AI-verwerking voor het vertalen van berichten en vacatures en voor het voorstellen waar een getypte chatzin om vraagt. Alleen de tekst die de taak nodig heeft, wordt verstuurd.",
+            "Cloudflare (Workers AI) — pas na activering: 1) om openbare, geaggregeerde arbeidsmarktstatistieken toe te lichten; 2) wanneer het platform een in de chat getypt verzoek niet zelf begrijpt, om voor te stellen welke bestaande platformactie ermee bedoeld wordt. Vóór verzending worden namen, contactgegevens, getallen en alle woorden die niet op een vaste lijst van actiewoorden staan verwijderd; een verzoek met gezondheids- of andere gevoelige informatie wordt helemaal niet verzonden. Cloudflare gebruikt deze inhoud niet om modellen te trainen en bewaart haar niet na het verzoek.",
+            "Mistral AI en Groq — pas na activering en alleen om openbare, geaggregeerde arbeidsmarktstatistieken toe te lichten. Er worden geen berichtteksten en geen persoonsgegevens naar hen gestuurd.",
             "Stripe — betalingsverwerking. Een klantrecord ontstaat alleen wanneer een organisatie een abonnementsbetaling start.",
             "Geen andere e-mail-, AI-, vertaal- of betalingsleverancier is actief. Wordt er een geactiveerd, dan wordt eerst deze lijst bijgewerkt."
           ]
@@ -6461,7 +6518,9 @@
       "cityLabel": "Stad (optioneel)",
       "cityPlaceholder": "bijv. Vilnius",
       "submit": "Project aanmaken",
-      "noCompany": "Maak eerst een bedrijfsprofiel aan."
+      "noCompany": "Maak eerst een bedrijfsprofiel aan.",
+      "countryLabel": "Land",
+      "errorCountry": "Kies het land waar de projectlocatie ligt."
     },
     "assign": {
       "title": "Een werknemer aan een project toewijzen",
@@ -6872,7 +6931,8 @@
         "noMembers": "Nu geen leden.",
         "unavailable": "De ploegen konden niet worden geladen. Probeer het opnieuw.",
         "manage": "Ploegen wijzigen"
-      }
+      },
+      "organizationLink": "Geschiedenis en projecten van de organisatie"
     },
     "workerView": {
       "eyebrow": "Mijn project",
@@ -7096,7 +7156,6 @@
   "learning": {
     "pageTitle": "Leren en beoordelen",
     "pageLead": "Suggesties op basis van echte werkactiviteit, bewaard zodat een persoon ze kan beoordelen. Niets hier wordt op zichzelf als bewezen behandeld.",
-    "title": "Beoordelingswachtrij",
     "lead": "Signalen worden suggesties, en een persoon beslist. Leren beslist nooit iets op zichzelf.",
     "notAvailable": "Momenteel niet beschikbaar.",
     "empty": "Nog niets om te beoordelen.",
@@ -7155,8 +7214,9 @@
       "countryPlaceholder": "bijv. LT",
       "remoteLabel": "Kan op afstand worden gedaan",
       "rateLabel": "Tarief (optioneel)",
-      "ratePlaceholder": "bijv. ca. 25 EUR/u, bespreekbaar",
-      "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief."
+      "rateHint": "Alleen vrije tekst — bijvoorbeeld een indicatief uurtarief.",
+      "publicLabel": "Deze persoonlijke dienst openbaar tonen",
+      "publicHint": "Als de dienst actief en niet verlopen is, zijn titel, beschrijving, categorie, land, uitvoering op afstand en tarief zichtbaar zonder inloggen. Vermeld geen privécontactgegevens. Vink uit en sla op om de openbare weergave uit te schakelen."
     },
     "save": "Opslaan",
     "saving": "Opslaan...",
@@ -7182,7 +7242,9 @@
     "linkToRequests": "Bekijk aanvragen voor uw diensten",
     "errorHasRequests": "Dit aanbod heeft aanvragen en kan daarom niet worden verwijderd – hun geschiedenis moet blijven. U kunt het pauzeren.",
     "removeQuestion": "Deze dienst definitief verwijderen? Dit kan niet ongedaan worden gemaakt. Wilt u hem alleen uit de zoekresultaten halen, pauzeer hem dan.",
-    "removeYes": "Ja, verwijderen"
+    "removeYes": "Ja, verwijderen",
+    "publicAudience": "Openbare zoekweergave gekozen",
+    "memberAudience": "Ingelogde leden gekozen"
   },
   "communication": {
     "origin": {
@@ -8826,13 +8888,32 @@
     "durationPendingUnnamed": "een organisatie",
     "durationPendingUndated": "data niet vastgelegd",
     "premium": {
+      "analytics": {
+        "evidenceTitle": "Verdeling van de uren",
+        "states": {
+          "actual": "Als werkelijk vastgelegd",
+          "reported": "Door de organisatie opgegeven",
+          "estimated": "Geschat",
+          "confirmed": "Ondersteund door een registratie van een andere partij"
+        },
+        "skillBasis": "Tijd uit het werkjournaal die aan afzonderlijke vaardigheden is toegerekend.",
+        "workTitle": "Werk en vaardigheden",
+        "attributedTime": "Aan deze vaardigheid toegewezen",
+        "confirmedTime": "Door de leidinggevende bevestigd: {hours}",
+        "activityLabel": "Fragment uit de registratie",
+        "contextLabel": "Werkcontext",
+        "mapTitle": "Vaardighedenkaart",
+        "workNodes": "Werk"
+      },
       "eyebrowFallback": "Levend cv",
       "facts": {
         "recorded": "vastgelegd in uw werkjournaal",
         "confirmed": "met registratie van een leidinggevende",
         "organization": "in registraties van organisaties",
         "experienceTotal": "beroepservaring in totaal",
-        "languages": "talen"
+        "languages": "talen",
+        "projects": "projecten",
+        "span": "eerste en laatste registratie"
       },
       "capEyebrow": "Vaardigheden",
       "capEyebrowHours": "{hours} u vastgelegd werk",
@@ -8950,7 +9031,15 @@
         "unknown": "Kon nu niet worden gelezen."
       }
     },
-    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer."
+    "educationSelfStated": "Opleiding zoals opgegeven door de werknemer.",
+    "blocks": {
+      "overview": "Overzicht",
+      "experience": "Ervaring",
+      "projects": "Projecten",
+      "photos": "Foto's",
+      "documents": "Documenten",
+      "reviews": "Beoordelingen"
+    }
   },
   "todayScreen": {
     "eyebrow": "Vandaag",
@@ -9435,6 +9524,27 @@
       "notStructured": "Automatische zoektocht {when}: de behoefte is nog te weinig beschreven om te matchen. Voeg vaardigheden of een beroep toe.",
       "failed": "Automatische zoektocht {when} kon niet worden afgerond. De lijst hieronder wordt nog steeds live berekend.",
       "capped": "Het aantal kandidaten is begrensd."
+    },
+    "history": {
+      "title": "Geschiedenis",
+      "decision": "Aangenomen: {names}",
+      "created": "Vraag aangemaakt",
+      "closed": "Vraag gesloten",
+      "closedFilled": "Vraag gesloten: ingevuld",
+      "closedWithdrawn": "Vraag gesloten: ingetrokken",
+      "event": {
+        "proposed": "Boeking voorgesteld aan {name}",
+        "accepted": "{name} heeft de boeking geaccepteerd",
+        "declined": "{name} heeft de boeking afgewezen",
+        "withdrawn": "Boeking aan {name} ingetrokken",
+        "expired": "Boeking aan {name} verlopen"
+      },
+      "actor": {
+        "you": "u",
+        "candidate": "kandidaat",
+        "automatic": "automatisch",
+        "other": "collega of beheerder"
+      }
     }
   },
   "planBoundary": {
@@ -9941,6 +10051,9 @@
       "invites": "Uitnodigings- en meldingsmails",
       "invitesOn": "aan",
       "invitesOff": "UIT – wordt apart ingeschakeld: INVITE_EMAIL_PROVIDER=smtp en één testverzending"
+    },
+    "alerts": {
+      "title": "Eigenaarsmeldingen en pushmeldingen"
     }
   },
   "adminMetrics": {
@@ -11090,11 +11203,11 @@
   },
   "about": {
     "metaTitle": "Wat is LabourMarket.ai",
-    "metaDescription": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Echt werk wordt professionele geschiedenis, bewijs en een levend cv.",
+    "metaDescription": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. In elke sector.",
     "navLabel": "Over LabourMarket.ai",
     "eyebrow": "Over het platform",
     "title": "Wat is LabourMarket.ai",
-    "lede": "LabourMarket.ai is een internationaal platform voor werk, specialisten en diensten. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
+    "lede": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. Het verbindt mensen, werkgevers, bureaus, teams, projecten, opleidingen en arbeidsmarktdiensten rond echt werk — van het eerste gesprek tot de volgende kans.",
     "hero": {
       "lead": "De professionele waarde van een persoon mag niet verdwijnen telkens wanneer die van werkgever wisselt. Echt werk kan blijvende professionele geschiedenis worden: wat de persoon deed, waar, wanneer, hoe lang, in welke rol, met welke vaardigheden en welk bewijs en welke bevestiging dat ondersteunt.",
       "leadOrg": "Voor organisaties bouwt datzelfde echte werk het overzicht op van wat het bedrijf werkelijk heeft gedaan: projecten, teams, uitgevoerd werk, uren, competenties en bewijs.",
@@ -12613,7 +12726,7 @@
       },
       "verify": {
         "title": "Bevestig uw e-mail om uitnodigingen te zien die ernaar zijn gestuurd",
-        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen. Al het andere in uw account werkt zoals het werkte; dit is alleen nodig om deze uitnodigingen te zien of te accepteren.",
+        "body": "Uitnodigingen die aan een e-mailadres zijn gericht, worden alleen getoond aan wie dat postvak kan openen.",
         "send": "Stuur me een eenmalige link",
         "sending": "Bezig met verzenden…",
         "sent": "We hebben een eenmalige link naar {email} gestuurd. Open hem op dit apparaat om af te ronden.",
@@ -12802,7 +12915,7 @@
         "invite_to_demand": "Een werkgever nodigde u uit voor een werkbehoefte"
       },
       "from": "Uitgenodigd door {name}",
-      "organization": "Bedrijf: {name}",
+      "organization": "Organisatie: {name}",
       "project": "Project: {name}",
       "role": "Voorgestelde rol: {role}",
       "accept": "Uitnodiging accepteren",
@@ -12831,10 +12944,9 @@
       "capacity": "Relatie: {capacity}",
       "capacityNotEmployment": "Dit is geen vacature-aanbod en schept geen dienstverband.",
       "selfStart": "Eigen account aanmaken",
-      "anonExplainer": "Registreer of log in om deze uitnodiging te beantwoorden. Uw account, profiel en werkgeschiedenis blijven van u — wie u uitnodigt legt alleen de verbinding.",
+      "anonExplainer": "Registreer of log in om deze uitnodiging te beantwoorden. Uw account, profiel en werkgeschiedenis blijven van u: aannemen legt alleen de verbinding, nooit een geverifieerde vaardigheid, dienstverband of toewijzing.",
       "register": "Registreren en doorgaan",
       "signIn": "Ik heb al een account",
-      "youOwnYourIdentity": "Uw professionele identiteit blijft van u. Een uitnodiging aannemen maakt op zichzelf geen geverifieerde vaardigheid, dienstverband of toewijzing aan.",
       "referredVia": "Doorverwezen via {source}",
       "campaign": "Uitnodiging: {label}",
       "seats": "{used} van {max} plaatsen bezet",
@@ -12903,6 +13015,7 @@
     "available": "Beschikbaar",
     "availableFrom": "Vanaf {date}",
     "experienceYears": "{n} jr ervaring",
+    "recordedExperienceHours": "Toegankelijke werkregistraties: {hours} u",
     "skillsTitle": "Vaardigheden",
     "skillsEmpty": "Geen vaardigheden die u mag zien.",
     "skillVerified": "Bevestigd door een managersvermelding",
@@ -13052,6 +13165,7 @@
     },
     "goToRoster": "Naar het team",
     "invalidLabel": "Controleer het e-mailadres — de uitnodiging is niet verzonden.",
+    "offerLimitLabel": "Te veel aanbiedingen. Probeer het later opnieuw.",
     "deliveryHeading": "Uitnodigingslink",
     "deliveryCreated": "Niet gemaild — e-mailbezorging is niet ingesteld. Kopieer de link en stuur die zelf naar de klant.",
     "deliverySent": "De uitnodigingsmail is verzonden. U kunt de link nog steeds kopiëren.",
@@ -14257,9 +14371,7 @@
         "preferredCountries": "Voorkeurslanden",
         "preferredCountriesPlaceholder": "Bijv. NL, DE",
         "salaryMin": "Loon vanaf (€)",
-        "salaryMinPlaceholder": "1500",
         "salaryMax": "Loon tot (€)",
-        "salaryMaxPlaceholder": "2500",
         "willingToRelocate": "Bereid te verhuizen?",
         "hasTransport": "Kunt u zelfstandig naar het werk komen?",
         "needsAccommodation": "Huisvesting nodig?",
@@ -14322,7 +14434,9 @@
         "supplyTeamSize": "Hoeveel mensen u heeft",
         "supplyLocation": "Waar zij kunnen werken",
         "demandCountry": "Land waar het werk plaatsvindt",
-        "demandCountryPlaceholder": "bijv. Zweden of SE"
+        "demandCountryPlaceholder": "bijv. Zweden of SE",
+        "projectCountry": "Land",
+        "projectCountryPlaceholder": "bijv. Zweden of SE"
       },
       "availability": {
         "available": "Beschikbaar",
@@ -14358,7 +14472,8 @@
         "errorStale": "Tijdens het controleren is er iets veranderd (bijvoorbeeld de actieve werkruimte). Er is niets opgeslagen — begin opnieuw.",
         "errorConflict": "Deze waarde verschilt al. Open geavanceerde modus om te vervangen.",
         "errorOpenNeedLimitUpgrade": "Het gratis plan van deze organisatie staat 1 actieve positie toe. Sluit er een, of activeer het plan Organisatie (€99/maand) in uw organisatieaccount.",
-        "errorOpenNeedLimitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op."
+        "errorOpenNeedLimitIndividual": "Deze organisatie heeft de limiet voor actieve posities van haar plan bereikt. Er is niets afgeschreven of gewijzigd. Neem contact met ons op.",
+        "errorCountryRequired": "Vul het land van de locatie in (naam of code, bijv. Zweden of SE)."
       },
       "urgency": {
         "flexible": "Flexibel",
@@ -14423,7 +14538,7 @@
       "navCalendar": "Agenda",
       "navProfile": "Profiel",
       "clarifyWorkLog": "Op welke dag en hoe lang heeft u gewerkt? Bijvoorbeeld: “Vandaag van 8 tot 17, 30 min pauze, ramen gemonteerd”.",
-      "calendarHint": "Uw plan vindt u in het tabblad “Agenda”. Hier kan ik helpen met werktijd vastleggen of aanbiedingen tonen.",
+      "calendarHint": "Uw plan vindt u in het tabblad “Agenda”.",
       "messagesHint": "Hier zijn uw berichten — de link hieronder opent ze.",
       "reminderBlocked": "Ik kan nog geen herinneringen sturen — daarvoor is geen mechanisme, dus ik maak geen nep-herinnering. Ik voeg het toe zodra het is ingeschakeld.",
       "switchContextPersonal": "persoonlijke ruimte",
@@ -14679,6 +14794,34 @@
       "findWorkInCompanyContext": "Werk zoeken is uw eigen handeling — in de bedrijfsruimte voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en vraag het opnieuw.",
       "findWorkInCompanyWhy": "Een persoon zoekt werk, geen bedrijf — ik antwoord vanuit uw persoonlijke ruimte.",
       "personalOnlyInCompany": "Dat is een persoonlijke actie — in een bedrijfsomgeving voer ik die niet uit. Schakel over naar uw persoonlijke ruimte en ga daar verder.",
+      "needsOrganization": "Dat gebeurt voor een organisatie, en geen van uw ruimtes kan dat nog.",
+      "readFailed": "Dat kon ik nu niet lezen — de fout ligt bij ons. Er is niets gewijzigd. Probeer het zo opnieuw.",
+      "taskStatusAsk": "Welke status moet de taak krijgen: gestart, klaar of geblokkeerd?",
+      "stageStatusAsk": "Welke status moet de fase krijgen: gestart, klaar of geblokkeerd?",
+      "chipStatusStarted": "Gestart",
+      "chipStatusDone": "Klaar",
+      "chipStatusBlocked": "Geblokkeerd",
+      "professionAsk": "Welk beroep of vak bedoelt u?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Uw cv staat in uw persoonlijke ruimte, niet in de organisatie.",
+          "journal": "Uw eigen werkdagboek staat in uw persoonlijke ruimte.",
+          "profile": "Uw profiel staat in uw persoonlijke ruimte.",
+          "calendar": "Uw eigen agenda staat in uw persoonlijke ruimte."
+        },
+        "open": {
+          "cv": "Overschakelen en mijn cv openen",
+          "journal": "Overschakelen en mijn dagboek openen",
+          "profile": "Overschakelen en mijn profiel openen",
+          "calendar": "Overschakelen en mijn agenda openen"
+        },
+        "askWhoseCv": "Uw eigen cv of dat van een kandidaat?",
+        "organizationHistory": "Het overzicht van de organisatie is haar werkgeschiedenis.",
+        "openOrganizationHistory": "Geschiedenis van de organisatie openen",
+        "organization": "Dit gebeurt in de ruimte van de organisatie: {name}.",
+        "switchTo": "Overschakelen naar {name} en doorgaan",
+        "whichOrganization": "Dit gebeurt in de ruimte van een organisatie. Welke?"
+      },
       "newJobsIntro": "Nieuwe vacatures die bij uw voorkeuren passen: {count}.",
       "newJobsAll": "Alle mogelijkheden",
       "newJobsNone": "De afgelopen dagen zijn er geen nieuwe vacatures verschenen die bij uw voorkeuren passen. Alle mogelijkheden vindt u op de pagina met mogelijkheden.",
@@ -14715,8 +14858,12 @@
           "chipHelpPeople": "Team en uitnodigingen",
           "chipHelpPlanning": "Planning openen",
           "chipHelpServices": "Mijn diensten",
-          "chipHelpJournal": "Werkjournaal"
-        }
+          "chipHelpJournal": "Werkjournaal",
+          "chipHelpSettings": "Instellingen",
+          "chipHelpPrivacy": "Privacy en uw gegevens"
+        },
+        "account": "Inloggen, e-mail, meldingen en weergave vindt u bij Instellingen.",
+        "privacy": "Bij Privacy en uw gegevens kunt u uw gegevens downloaden, zien wie uw profiel ziet en verwijdering van uw account aanvragen."
       },
       "interestInboxAmbiguous": "Dat kan twee dingen betekenen — wat wilt u zien?",
       "chipInterestOnMyNeeds": "Interesse in mijn aanvragen",
@@ -15934,8 +16081,7 @@
       "lasting": "Uw ervaring en kansen blijven bereikbaar — als u van baan, project of land wisselt."
     },
     "v3": {
-      "lead": "Voor werkenden, werkgevers en dienstverleners in alle beroepen en sectoren. Registreren en de basisplaatsing van een behoefte zijn gratis.",
-      "moreChoices": "Meer opties",
+      "lead": "LabourMarket.ai is een op een patent gebaseerd platform, ontwikkeld vanuit een uniek idee voor het organiseren en beheren van arbeidsrelaties. Registreren en de basisplaatsing van een behoefte zijn gratis.",
       "or": "of beschrijf het in uw eigen woorden",
       "needFree": "U kunt zonder registratie een aanvraag indienen. Indienen is gratis; de voorwaarden en de prijs van de diensten worden apart afgesproken.",
       "market": {
@@ -16915,9 +17061,36 @@
       "not_authorized": "U mag dit niet doen.",
       "not_found": "Urenstaat niet gevonden.",
       "limit_reached": "Te veel open urenstaten — dien eerst bestaande in of ruim ze op.",
-      "error": "Er is iets misgegaan. Er is niets opgeslagen."
+      "error": "Er is iets misgegaan. Er is niets opgeslagen.",
+      "schedule_saved": "Planning opgeslagen."
     },
-    "taskAmbiguous": "{count} taken gekoppeld — uren niet aan één toegewezen"
+    "taskAmbiguous": "{count} taken gekoppeld — uren niet aan één toegewezen",
+    "schedule": {
+      "title": "Automatische urenstaten",
+      "consent": "Dien mijn geregistreerde werk van de vorige dag, zeven dagen of kalendermaand in via de gekozen goedkeuringsprocedure. Werk wordt niet automatisch goedgekeurd.",
+      "enabled": "Ingeschakeld",
+      "frequency": "Frequentie",
+      "daily": "Dagelijks",
+      "weekly": "Wekelijks",
+      "monthly": "Maandelijks · op de 1e",
+      "weekday": "Wekelijkse indieningsdag",
+      "time": "Indieningstijd",
+      "zone": "Tijdzone",
+      "recipients": "Ontvangers voor goedkeuring",
+      "selectTemplate": "Selecteer een goedkeuringssjabloon",
+      "save": "Opslaan",
+      "next": "Volgende indiening: {date} ({zone})",
+      "manageRecipients": "Goedkeuringsontvangers beheren",
+      "outcome": {
+        "submitted": "Ingediend ter goedkeuring.",
+        "already_submitted": "Deze periode is al ingediend.",
+        "empty": "Geen geregistreerd werk in deze periode.",
+        "overlap": "Gepauzeerd: de periode overlapt een bestaande urenstaat.",
+        "not_allowed": "Gepauzeerd: toegang tot de organisatie is vervallen.",
+        "no_template": "Gepauzeerd: het goedkeuringssjabloon is niet beschikbaar.",
+        "error": "Indienen mislukt; er volgt een nieuwe poging."
+      }
+    }
   },
   "workObjects": {
     "title": "Objecten en locaties",
@@ -17481,9 +17654,10 @@
       "createProgram": "Cursus toevoegen",
       "noPrograms": "Nog geen cursussen.",
       "assigneePlaceholder": "E-mail van de persoon",
+      "assigneePick": "Persoon",
       "requiredByLabel": "Afronden vóór",
       "assign": "Vraag deze persoon",
-      "certificateFilePlaceholder": "Id van het certificaatbestand",
+      "certificateFileLabel": "Certificaatbestand",
       "issuedOnLabel": "Afgegeven op",
       "expiresOnLabel": "Geldig tot",
       "attachCertificate": "Certificaat opslaan",
@@ -18814,8 +18988,7 @@
         "invitationAccepted": "Uitnodiging geaccepteerd. Bevestig hieronder het verbindingsverzoek van het bureau met uw bedrijf."
       },
       "education": {
-        "title": "Opleiding en programma's",
-        "subtitle": "Programma's, lerenden en de marktvraag naar hun richtingen."
+        "title": "Opleiding en programma's"
       },
       "history": {
         "title": "Gegevens importeren en geschiedenis",
@@ -18892,7 +19065,8 @@
       "heading": "Uitnodigingen van organisaties",
       "explainer": "Bestuursuitnodigingen die aan u zijn gericht. Na acceptatie verschijnt de organisatie in uw werkruimtekiezer.",
       "accept": "Accepteren",
-      "decline": "Afwijzen"
+      "decline": "Afwijzen",
+      "invitedBy": "Uitgenodigd door {name}"
     },
     "members": {
       "heading": "Leden van de organisatie",
@@ -19272,7 +19446,8 @@
       "address": "Adres",
       "project": "Project (opdracht)",
       "notInSource": "Niet in de bron",
-      "linked": "Gekoppeld"
+      "linked": "Gekoppeld",
+      "openProject": "Project openen"
     },
     "whoWorked": "Wie hier werkte",
     "timeline": "Wat er is gedaan",
@@ -19352,8 +19527,43 @@
         "open": "Werkomgeving {name} openen",
         "opening": "Bezig met openen…",
         "error": "De werkomgeving kon niet worden geopend."
-      }
-    }
+      },
+      "structure": "Eerder werk werd uitgevoerd onder {names}.",
+      "structureLater": ", daarna ",
+      "structureForClient": "Eerder werk onder {names} voor opdrachtgever {client}.",
+      "structureAsSubcontractor": "Onderaannemer: {names} → opdrachtgever {client}."
+    },
+    "projects": {
+      "title": "Projecten op het platform",
+      "counts": "{running} lopend · {completed} afgerond",
+      "untitled": "Project zonder titel",
+      "running": "Lopend",
+      "completed": "Afgerond",
+      "all": "Alle {count} projecten"
+    },
+    "journal": {
+      "title": "Werk vastgelegd in het logboek",
+      "hours": "Vastgelegde uren",
+      "confirmed": "Door de organisatie bevestigde uren",
+      "people": "Mensen die werk vastlegden",
+      "period": "Vastgelegd",
+      "basis": "Uit {entries} logboekregels die mensen onder deze organisatie vastlegden. Apart geteld van de geïmporteerde geschiedenis hierboven en daar nooit bij opgeteld.",
+      "unavailable": "Het werk dat onder deze organisatie in het logboek is vastgelegd, kon nu niet worden gelezen."
+    },
+    "forClient": {
+      "title": "Werk van uw onderaannemers",
+      "confirmed": "Bevestigde registraties",
+      "unconfirmed": "Niet-bevestigde registraties",
+      "periodHours": "{hours} u opgegeven als periodetotaal, niet opgeteld bij losse dagen.",
+      "basis": "Uit {count, plural, one {# registratie} other {# registraties}} in de eigen administratie van uw onderaannemers. Apart geteld van uw eigen werk.",
+      "unreadable": "Het werk in de administratie van partners kon nu niet worden gelezen. Dat betekent niet dat er geen is."
+    },
+    "clients": {
+      "title": "Opdrachtgevers",
+      "unnamed": "Opdrachtgevende organisatie",
+      "records": "{count, plural, one {# registratie} other {# registraties}}"
+    },
+    "descriptionNotInSource": "Geen werkbeschrijving in de bron"
   },
   "workPlan": {
     "title": "Gepland werk",
@@ -19580,22 +19790,33 @@
     "heading": "Dit team aanbieden voor een vraag",
     "intro": "Bied het team als één eenheid aan voor één openstaande vraag van een geverifieerd bedrijf.",
     "privacy": "Het bedrijf ziet alleen feiten op teamniveau: omvang, vaardigheden, beschikbaarheid. Het aanbod noemt geen enkel lid en toont geen ledenprofiel. Leden verschijnen pas in een project nadat het bedrijf het team heeft geaccepteerd en daar heeft ingedeeld.",
+    "orgPrivacy": "Het bedrijf ziet de naam van uw bedrijf, uw bericht en uw voorwaarden. Er wordt niemand genoemd totdat u afspreekt wie het werk doet.",
     "tooSmall": "Een team kan alleen worden aangeboden met minstens 2 actieve leden.",
     "loading": "Laden…",
     "unavailable": "De openstaande vraag kon nu niet worden geladen.",
     "noDemand": "Er is nu geen openstaande vraag om een aanbod op te doen.",
     "demandLabel": "Vraag",
     "demandPlaceholder": "Kies een vraag",
+    "need": {
+      "people": "Mensen",
+      "start": "Aanvang",
+      "duration": "Duur",
+      "language": "Taal",
+      "skills": "Vaardigheden",
+      "tools": "Gereedschap"
+    },
     "alreadyOffered": "al aangeboden",
     "noteLabel": "Bericht aan het bedrijf (optioneel)",
     "notePlaceholder": "Bijvoorbeeld: ploeg van 3, kan over twee weken starten",
     "submit": "Team aanbieden",
+    "orgSubmit": "Ons bedrijf aanbieden",
     "submitting": "Aanbieden…",
     "sent": {
       "heading": "Uw aanbiedingen",
       "none": "Nog geen aanbiedingen.",
       "withdraw": "Intrekken",
-      "message": "Bericht aan de opdrachtgever"
+      "message": "Bericht aan de opdrachtgever",
+      "orgNext": "De opdrachtgever ging in principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
     },
     "status": {
       "offered": "Wacht op antwoord",
@@ -19668,8 +19889,14 @@
       },
       "blockers": "Het team als geheel voldoet niet aan: {list}",
       "missing": "Niet opgegeven: {list}",
+      "missingData": {
+        "need_not_structured": "de eisen van de behoefte",
+        "no_team_members": "actieve leden",
+        "team_skills_not_stated": "de vaardigheden van het team"
+      },
       "noNeedStructure": "Deze vraag is nog niet gestructureerd, dus het team kan er niet mee worden vergeleken.",
       "note": "Bericht van het team",
+      "noteCompany": "Bericht van het bedrijf",
       "accept": "In principe akkoord",
       "decline": "Afwijzen",
       "noProjects": "U heeft nog geen open project om het team aan toe te wijzen.",
@@ -19688,8 +19915,9 @@
       },
       "createProject": "Project aanmaken",
       "message": "Bericht aan het team",
+      "messageCompany": "Bericht aan het bedrijf",
       "kindOrganization": "Bedrijfsaanbod",
-      "orgNext": "In principe akkoord (geen contract). Spreek de details en de mensen die het werk doen af in het gesprek."
+      "orgNext": "In principe akkoord (geen contract). Het werk starten vanuit een bedrijfsaanbod via het platform is nog niet beschikbaar: spreek de details en de mensen die het werk doen af in het gesprek."
     },
     "orgHeading": "Ons bedrijf aanbieden voor een open behoefte",
     "orgIntro": "Bied uw bedrijf zelf aan — uw mensen, uw dienst of als onderaannemer — voor één open behoefte. Eerst een ploeg aanmaken is niet nodig.",
@@ -19711,7 +19939,6 @@
       },
       "capacity": "Mensen",
       "rate": "Tarief",
-      "ratePlaceholder": "bijv. 32 €/u of vaste prijs",
       "period": "Periode",
       "start": "Begin",
       "end": "Einde",
@@ -19826,7 +20053,7 @@
     },
     "noHours": "Records zonder opgegeven uren: {count}. Onbekende uren tellen niet als nul.",
     "undated": "Records zonder opgegeven datum: {count}. Ze blijven in de geschiedenis hieronder.",
-    "periodApart": "{hours} u van het totaal zijn periodetotalen, apart gehouden en nooit verdeeld over dagen of maanden.",
+    "periodApart": "Daarnaast: {hours} u opgegeven als periodetotalen — niet meegeteld in de uren hierboven en nooit verdeeld over dagen of maanden.",
     "noWorkObject": "Records die niet aan een bij het platform bekend project of bekende plek zijn gekoppeld: {count}. Ze blijven in deze geschiedenis onder hun bronlabel.",
     "places": {
       "title": "Per project of plek",
@@ -20684,8 +20911,10 @@
       "partnerWithUs": "Word partner",
       "forAgencies": "Zo werkt het voor bureaus",
       "setUpAgency": "Bureau registreren",
+      "setUpInstitution": "Voor opleidingsinstellingen",
       "b2bEnquiry": "Aanvraag zakelijke diensten (B2B)",
-      "projectEnquiry": "Aanvraag individueel project"
+      "projectEnquiry": "Aanvraag individueel project",
+      "findServices": "Persoonlijke diensten zoeken"
     },
     "assistant": "Vraag de assistent",
     "start": {
@@ -20705,5 +20934,36 @@
       "fullList": "Volledige lijst"
     },
     "more": "Meer"
+  },
+  "publicServices": {
+    "title": "Persoonlijke diensten zoeken",
+    "lead": "Diensten die door personen openbaar zijn gepubliceerd.",
+    "search": "Zoeken",
+    "query": "Dienst of trefwoord",
+    "country": "Land",
+    "category": "Categorie",
+    "clear": "Filters wissen",
+    "unavailable": "Diensten zoeken is niet beschikbaar",
+    "unavailableHint": "Probeer het later opnieuw.",
+    "retry": "Opnieuw proberen",
+    "emptyFiltered": "Geen diensten gevonden met deze filters",
+    "empty": "Er zijn nog geen persoonlijke diensten openbaar gepubliceerd",
+    "results": "Diensten",
+    "remote": "Op afstand",
+    "pagination": "Zoekpagina’s",
+    "previous": "Vorige",
+    "next": "Volgende",
+    "page": "Pagina {page}",
+    "refine": "Verfijn uw zoekopdracht om relevantere diensten te vinden.",
+    "back": "Alle diensten",
+    "delivery": "Uitvoering",
+    "rate": "Tarief",
+    "personalService": "Persoonlijke dienst",
+    "signInToRequest": "Inloggen om aan te vragen",
+    "manage": "Deze dienst beheren",
+    "contactUnavailable": "Aanvragen is niet beschikbaar. Probeer het later opnieuw.",
+    "notFound": "Dienst niet gevonden",
+    "notFoundHint": "Deze dienst is niet meer openbaar beschikbaar.",
+    "allCountries": "Alle landen"
   }
 }

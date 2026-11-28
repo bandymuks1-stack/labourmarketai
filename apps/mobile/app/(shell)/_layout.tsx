@@ -85,6 +85,9 @@ export default function ShellLayout() {
         name="correct-entry"
         options={{ href: null, title: t("journal.correct.title") }}
       />
+      <Tabs.Screen name="add-work" options={{ href: null, title: t("cv.work.title") }} />
+      <Tabs.Screen name="add-language" options={{ href: null, title: t("cv.language.title") }} />
+      <Tabs.Screen name="add-education" options={{ href: null, title: t("cv.education.title") }} />
       {/* Two more STATIONS reached from Today, for the same reason: */}
       <Tabs.Screen
         name="opportunities"
@@ -100,6 +103,15 @@ export default function ShellLayout() {
       />
       <Tabs.Screen name="jobs" options={{ href: null, title: t("jobs.title") }} />
       <Tabs.Screen name="need" options={{ href: null, title: t("need.title") }} />
+      <Tabs.Screen name="candidates" options={{ href: null, title: t("candidates.title") }} />
+      <Tabs.Screen name="agency-offers" options={{ href: null, title: t("agencyOffers.title") }} />
+      <Tabs.Screen name="education" options={{ href: null, title: t("education.title") }} />
+      <Tabs.Screen name="agency" options={{ href: null, title: t("agency.title") }} />
+      <Tabs.Screen name="invite-worker" options={{ href: null, title: t("inviteWorker.title") }} />
+      <Tabs.Screen name="absences" options={{ href: null, title: t("absences.title") }} />
+      <Tabs.Screen name="sent-proposals" options={{ href: null, title: t("sentProposals.title") }} />
+      <Tabs.Screen name="agencies" options={{ href: null, title: t("clientBridge.title") }} />
+      <Tabs.Screen name="review" options={{ href: null, title: t("review.title") }} />
       <Tabs.Screen
         name="messages"
         options={{ href: null, title: t("messages.title") }}

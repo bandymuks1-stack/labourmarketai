@@ -19,6 +19,8 @@ import {
   type StoredSession,
 } from "@labourmarket/client-core";
 
+import { clearAllDrafts } from "./drafts";
+
 import { sessionStore } from "./secure-session-store";
 import { supabase } from "./supabase";
 
@@ -304,6 +306,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // this device even if the server call fails — the reverse order can trap
       // them in the app.
       await clearStoredSession(sessionStore);
+      // An explicit sign-out leaves no unsent words on this device.
+      clearAllDrafts();
       setState({ status: "signed_out" });
       if (supabase !== null) {
         await supabase.auth.signOut({ scope: "local" }).catch(() => undefined);

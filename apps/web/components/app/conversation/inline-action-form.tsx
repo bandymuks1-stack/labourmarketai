@@ -43,6 +43,8 @@ const REFUSAL_KEYS: Readonly<Record<string, string>> = {
   // workspace was switched while the form was open) — nothing was saved.
   stale_confirmation: "conversation.forms.ui.errorStale",
   workspace_changed: "conversation.forms.ui.errorStale",
+  // A place was given without a country the server can resolve.
+  country_required: "conversation.forms.ui.errorCountryRequired",
 };
 function refusalMessageKey(code: string): string | null {
   return Object.prototype.hasOwnProperty.call(REFUSAL_KEYS, code) ? REFUSAL_KEYS[code] : null;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { SAVE_TIMEOUT_MS } from "@/lib/async/with-timeout";
 import { useRouter } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { countryOptionsForLocale } from "@/lib/location/country-options";
@@ -89,9 +90,14 @@ export function DemandRequestButton({
   intent,
   stepTitles,
   repeatRequestId = null,
+  hasOwnPreviousRequest = null,
   usage = null,
   organizationId = null,
 }: {
+  /** Whether the caller already has a request of this direction to copy
+   *  from (read by the page). False hides "Fill from my last request";
+   *  null (unknown) keeps it. */
+  hasOwnPreviousRequest?: boolean | null;
   intent: "hire_workers" | "partner";
   /** The organization this page was rendered for. Sent with the submit so a
    *  workspace switched meanwhile (another tab) REFUSES instead of posting
@@ -188,6 +194,10 @@ export function DemandRequestButton({
   const [state, setState] = useState<"idle" | "sending" | "done" | "error" | "needsMigration" | "limitUpgrade" | "limitIndividual" | "workspaceChanged">(
     "idle",
   );
+  // The need this form just saved, so its next step opens THAT need's
+  // candidates. Without it the scouting room picks a need by its own rule (most
+  // offers or hands raised first), which can be an older need.
+  const [savedRequestId, setSavedRequestId] = useState<string | null>(null);
   // Advanced structured clusters (structured_v2, PR 2) — optional; empty
   // stays an honest "not stated" and the request submits exactly as before.
   const tsd = useTranslations("structuredDemand");
@@ -423,8 +433,55 @@ export function DemandRequestButton({
       return;
     }
     setState("sending");
+    const sentAt = new Date().toISOString();
+    // ONE outcome per send: the answer, or the watchdog below, whichever
+    // settles first; the other then does nothing.
+    let settled = false;
+    // WAS IT SAVED? — a plain request to /api/demand/just-saved, never a
+    // server action: server actions share the router's one queue, and a lost or
+    // stuck answer can strand an action queued behind it (CI run 45365699921).
+    const askSaved = (): Promise<string | null> =>
+      fetch("/api/demand/just-saved", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "same-origin",
+        cache: "no-store",
+        body: JSON.stringify({ intent, role, description, sentAt }),
+        signal: AbortSignal.timeout(SAVE_TIMEOUT_MS),
+      })
+        .then((r) => (r.ok ? (r.json() as Promise<{ id?: unknown }>) : null))
+        .then((j) => (j && typeof j.id === "string" ? j.id : null))
+        .catch(() => null);
+    // A recovered outcome (the answer was lost or never came): the same steps
+    // the answer's own success path takes below.
+    const confirmSaved = async (id: string) => {
+      setSavedRequestId(id);
+      setState("done");
+      if (draftSource) {
+        await deleteDemandDraftAction(intent === "hire_workers" ? "company_request" : "agency_offer").catch(() => undefined);
+      }
+      router.refresh();
+    };
+    // THE ANSWER NEVER ARRIVES (production run 45241051644: saved, matched,
+    // and still no confirmation in 30 s). While the send is still pending, ask
+    // whether the need is saved; found → confirm it. Not found → keep waiting
+    // for the answer: a slow save is never called a failure early.
+    void (async () => {
+      for (const wait of [10_000, 8_000, 8_000, 8_000]) {
+        await new Promise((r) => setTimeout(r, wait));
+        if (settled) return;
+        const id = await askSaved();
+        if (settled) return;
+        if (id) {
+          settled = true;
+          await confirmSaved(id);
+          return;
+        }
+      }
+    })();
+    let res: Awaited<ReturnType<typeof submitDemandRequestAction>> | undefined;
     try {
-      const res = await submitDemandRequestAction(intent, {
+      res = await submitDemandRequestAction(intent, {
         role,
         description,
         location,
@@ -440,49 +497,63 @@ export function DemandRequestButton({
         estimate: estimateEngaged ? estimate : undefined,
         structuredV2: withTeam(advWire),
       }, { expectedOrganizationId: organizationId });
-      // The server is the rule (web, chat and MCP share it): a refused country
-      // sends the person back to the picker with the reason beside it.
-      if (!res.ok && res.code === "country_required") {
-        setState("idle");
-        setStep(2);
-        setShowCountryError(true);
-        return;
-      }
-      setState(
-        res.ok
-          ? "done"
-          : res.code === "workspace_changed"
-            ? "workspaceChanged"
-          : res.code === "needs_migration"
-            ? "needsMigration"
-            : res.code === "over_open_need_limit"
-              // Owner launch pricing 2026-09-05: the plan ceiling, said honestly —
-              // the €99 plan, or the individual plan above it. Nothing charged.
-              ? res.next === "individual_plan"
-                ? "limitIndividual"
-                : "limitUpgrade"
-              : "error",
-      );
-      // Canonical-journey P3: the submitted request supersedes the draft it
-      // was continued from — close the draft (draft→closed, guard-allowed)
-      // so exactly ONE canonical demand row remains. Best-effort: a failure
-      // leaves a stale draft behind (harmless), never blocks the submit.
-      if (res.ok && draftSource) {
-        try {
-          await deleteDemandDraftAction(
-            intent === "hire_workers" ? "company_request" : "agency_offer",
-          );
-        } catch {
-          /* stale draft is harmless; the submit already succeeded */
-        }
-      }
-      // Refresh server components so the read-back list below shows the new
-      // request immediately — it used to stay stale until a manual reload
-      // (audit PR4: "demand submit success is a dead end").
-      if (res.ok) router.refresh();
     } catch {
-      setState("error");
+      res = undefined;
     }
+    if (settled) return;
+    // THE ANSWER WAS LOST: the request failed in transit or came back
+    // unreadable, yet the need may be saved. Ask before saying "could not
+    // send" — a retry would post it twice.
+    if (!res || typeof res !== "object" || typeof res.ok !== "boolean") {
+      const savedId = await askSaved();
+      if (settled) return;
+      settled = true;
+      if (savedId) await confirmSaved(savedId);
+      else setState("error");
+      return;
+    }
+    settled = true;
+    // The server is the rule (web, chat and MCP share it): a refused country
+    // sends the person back to the picker with the reason beside it.
+    if (!res.ok && res.code === "country_required") {
+      setState("idle");
+      setStep(2);
+      setShowCountryError(true);
+      return;
+    }
+    setSavedRequestId(res.ok ? res.requestId : null);
+    setState(
+      res.ok
+        ? "done"
+        : res.code === "workspace_changed"
+          ? "workspaceChanged"
+        : res.code === "needs_migration"
+          ? "needsMigration"
+          : res.code === "over_open_need_limit"
+            // Owner launch pricing 2026-09-05: the plan ceiling, said honestly —
+            // the €99 plan, or the individual plan above it. Nothing charged.
+            ? res.next === "individual_plan"
+              ? "limitIndividual"
+              : "limitUpgrade"
+            : "error",
+    );
+    // Canonical-journey P3: the submitted request supersedes the draft it
+    // was continued from — close the draft (draft→closed, guard-allowed)
+    // so exactly ONE canonical demand row remains. Best-effort: a failure
+    // leaves a stale draft behind (harmless), never blocks the submit.
+    if (res.ok && draftSource) {
+      try {
+        await deleteDemandDraftAction(
+          intent === "hire_workers" ? "company_request" : "agency_offer",
+        );
+      } catch {
+        /* stale draft is harmless; the submit already succeeded */
+      }
+    }
+    // Refresh server components so the read-back list below shows the new
+    // request immediately — it used to stay stale until a manual reload
+    // (audit PR4: "demand submit success is a dead end").
+    if (res.ok) router.refresh();
   }
 
   const urgencyOptions: { value: DemandUrgency; label: string }[] = [
@@ -594,7 +665,11 @@ export function DemandRequestButton({
             organisation's own offers list, where the saved offer now stands. */}
         {intent === "hire_workers" ? (
           <Link
-            href={"/dashboard/company/scouting" as "/dashboard"}
+            href={
+              (savedRequestId
+                ? `/dashboard/company/scouting?request=${encodeURIComponent(savedRequestId)}`
+                : "/dashboard/company/scouting") as "/dashboard"
+            }
             className="w-fit text-sm font-medium text-brand-blue hover:underline"
             data-testid="demand-done-scouting-link"
           >
@@ -674,6 +749,7 @@ export function DemandRequestButton({
         <div className="flex flex-col gap-4">
           {/* Duplicate-and-edit — repeat action: copy the own last request
               into the form, then edit. Own data echoed back; nothing invented. */}
+          {hasOwnPreviousRequest === false ? null : (
           <div className="flex flex-wrap items-center gap-2">
             <Button
               type="button"
@@ -709,6 +785,7 @@ export function DemandRequestButton({
               </span>
             )}
           </div>
+          )}
           <label className="flex flex-col gap-1.5">
             <Label>{t(`${key}.roleLabel`)}</Label>
             <Input

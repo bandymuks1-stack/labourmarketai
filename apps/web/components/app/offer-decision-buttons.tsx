@@ -3,6 +3,7 @@
 import { useActionState } from "react";
 import { Check, X } from "lucide-react";
 
+import { Button } from "@/components/ui/Button";
 import { Link } from "@/lib/i18n/navigation";
 import {
   respondCandidateOfferAction,
@@ -63,26 +64,30 @@ export function OfferDecisionButtons({
         <form action={acceptAction}>
           <input type="hidden" name="offerId" value={offerId} readOnly />
           <input type="hidden" name="decision" value="accepted" readOnly />
-          <button
+          <Button
             type="submit"
+            variant="primary"
+            size="sm"
             disabled={pending}
-            className="min-h-11 sm:min-h-0 inline-flex items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90 disabled:opacity-60"
+            className="min-h-11"
             data-testid={`offer-accept-${offerId}`}
           >
             <Check className="h-3.5 w-3.5" aria-hidden /> {labels.accept}
-          </button>
+          </Button>
         </form>
         <form action={declineAction}>
           <input type="hidden" name="offerId" value={offerId} readOnly />
           <input type="hidden" name="decision" value="declined" readOnly />
-          <button
+          <Button
             type="submit"
+            variant="secondary"
+            size="sm"
             disabled={pending}
-            className="min-h-11 sm:min-h-0 inline-flex items-center gap-1.5 rounded-md border border-ink-500 px-3 py-1.5 text-xs font-semibold text-text-secondary transition-colors hover:border-text-muted disabled:opacity-60"
+            className="min-h-11"
             data-testid={`offer-decline-${offerId}`}
           >
             <X className="h-3.5 w-3.5" aria-hidden /> {labels.decline}
-          </button>
+          </Button>
         </form>
       </div>
       {state.status === "needs-migration" ? (

@@ -24,7 +24,8 @@ import { answerNoProjectIfAsked, chooseWorkContextIfAsked } from "./worklog-cont
  * The entry text carries the run id, so the walk finds exactly its own entry.
  */
 const RUN = process.env.GITHUB_RUN_ID ?? `local${Date.now().toString(36)}`;
-const ENTRY = `QA-SYNTHETIC ${RUN}: šiandien 6 valandas mūrijau blokelių sieną objekte`;
+// AB5h is a reference code, never five extra hours. Keep the real journal/CV path.
+const ENTRY = `QA-SYNTHETIC ${RUN} AB5h: šiandien 6 valandas mūrijau blokelių sieną objekte`;
 const state = (slot: string) => resolve(__dirname, `.storage-state.prod-qa.${slot}.json`);
 const ENABLED = process.env.PROD_QA_WALK === "1" && ["worker", "owner"].every((s) => existsSync(state(s)));
 test.skip(!ENABLED, "production walk: runs only in prod-qa-walk.yml with minted QA sessions");
@@ -96,6 +97,7 @@ test("1. the worker records the day's work in the journal", async ({ browser }) 
   const card = main.locator('[data-testid^="journal-entry-card-"]', { hasText: RUN }).first();
   await expect(card).toBeVisible({ timeout: 30_000 });
   entryId = (await card.getAttribute("data-testid"))!.replace("journal-entry-card-", "");
+  await expect(main.getByTestId(`journal-entry-duration-${entryId}`), "the saved duration excludes the reference code").toHaveText(/^6\s+val\.$/);
   // The worker's own declaration is recorded, and nobody has confirmed it.
   await expect(main.getByTestId(`journal-entry-status-${entryId}`).locator('li[data-step="approved"]')).toHaveCount(0);
   declared = await figures(page);
@@ -141,6 +143,32 @@ test("1b. the worker cannot write themselves in as the confirmer (EVID-2)", asyn
     },
   });
   expect(direct.ok, "the worker was accepted as the confirmer of their own entry").toBe(false);
+});
+
+test("1c. voice is offered in the journal and the chat alike, or in neither (COM-8, read-only)", async ({ browser }) => {
+  // Voice is an input door, never a feature of its own: when the
+  // transcription service is configured, the journal's voice page offers the
+  // recorder AND the chat composer shows the microphone; when it is not, both
+  // say so honestly (the journal names the state, the chat shows no
+  // microphone). One door must never claim what the other denies. Nothing is
+  // recorded or written here.
+  const { page, close } = await as(browser, "worker");
+  await page.goto("/lt/dashboard/journal/voice");
+  expect(new URL(page.url()).pathname, "the worker was sent away from the voice journal").toBe("/lt/dashboard/journal/voice");
+  const recorder = page.getByTestId("voice-recorder").filter({ visible: true });
+  const unavailable = page.getByTestId("voice-unavailable").filter({ visible: true });
+  await expect(recorder.or(unavailable).first()).toBeVisible({ timeout: 30_000 });
+  const journalOffers = await recorder.isVisible();
+
+  await page.goto("/lt/dashboard");
+  await expect(page.getByTestId("composer-input").filter({ visible: true }).first()).toBeVisible({ timeout: 30_000 });
+  // The composer asks the server once after mount; give it time to answer.
+  const mic = page.getByTestId("composer-voice").filter({ visible: true }).first();
+  const chatOffers = await mic.waitFor({ state: "visible", timeout: 15_000 }).then(() => true).catch(() => false);
+
+  test.info().annotations.push({ type: "evidence", description: `voice offered: journal=${journalOffers} chat=${chatOffers}` });
+  expect(chatOffers, "the journal and the chat disagree on whether voice is available").toBe(journalOffers);
+  await close();
 });
 
 test("2. the employer finds it in the review queue and approves it", async ({ browser }) => {

@@ -26,7 +26,7 @@
  * the day its route works, not before.
  */
 
-import { AGENCY_DOOR_NEXT } from "@/lib/marketing/public-doors";
+import { AGENCY_DOOR_NEXT, INSTITUTION_DOOR_NEXT } from "@/lib/marketing/public-doors";
 import { WORKER_PROFILE_DOOR_HREF, WORKER_PROFILE_DOOR_NEXT } from "@/lib/marketing/worker-profile-door";
 import { requestDoorHref } from "@/lib/staffing/request-door-link";
 
@@ -106,11 +106,12 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
   },
   {
     // The BUYER's goal (D1, variant A): someone who needs a service or a
-    // contractor. Its two actions open the matching form of the landing's
-    // "Submit a request" block — no account, no new form, no new route.
+    // contractor. Public personal services reuse the existing offering loop;
+    // both structured enquiry doors remain reachable.
     id: "contractors",
     iconKey: "fileSignature",
     links: [
+      { id: "findServices", href: "/services", account: false },
       { id: "b2bEnquiry", href: requestDoorHref("b2b"), account: false },
       { id: "projectEnquiry", href: requestDoorHref("project"), account: false },
     ],
@@ -124,6 +125,16 @@ export const PUBLIC_INTENTS: readonly PublicIntent[] = [
       // PARTNER_DOOR uses (a commercial relationship with the company behind
       // the product, not a workspace).
       { id: "partnerWithUs", href: requestDoorHref("partner"), account: false },
+      // THE EDUCATION INSTITUTION'S DOOR (owner 2026-11-19, UX gap I-6): the
+      // landing had no way in for a school or training provider. Inside this
+      // goal, not a seventh one: the organisation setup with the
+      // training_provider capability, through sign-up when signed out.
+      {
+        id: "setUpInstitution",
+        href: INSTITUTION_DOOR_NEXT,
+        account: true,
+        guestHref: `/auth/signup?next=${encodeURIComponent(INSTITUTION_DOOR_NEXT)}`,
+      },
     ],
   },
   {

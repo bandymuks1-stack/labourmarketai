@@ -1,5 +1,12 @@
 # Agent Operating Contract — labourmarket.ai
 
+> **Mandatory session continuity:** before starting or resuming work, follow
+> [AGENTS.md — Mandatory continuity between agents](AGENTS.md#mandatory-continuity-between-agents).
+> Recover the previous executor's work, continue the existing unfinished change,
+> verify current PR/production state, and leave a usable continuation receipt.
+> Do not assign work to or wait for an inactive agent. This is the same binding
+> rule for Claude Code, Codex and every other executor.
+
 > ⚡ **FIRST COMMAND — run this before any architectural or product change:**
 >
 > ```bash
@@ -75,6 +82,14 @@
 > (axiom A-13). Joks feature/UX/copy sprendimas negali produkto suvesti į
 > "tik job board / tik recruitment / tik CV / tik marketplace / tik ERP /
 > tik žurnalas / tik chatbot" struktūrą.
+
+## No second implementation (binding, owner P0 2026-11-23)
+
+Before building any new function, page, route, component, navigation, store, API/RPC, SQL
+function, table, agent tool or assistant, run the pre-build check in
+[`docs/AGENT_CHANGE_RULES.md`](docs/AGENT_CHANGE_RULES.md) and fill the PR template's
+"Reuse check". One owner per capability, one module, one change path. Reviewers block a PR
+without it.
 
 ## Auto-commit policy
 
@@ -194,6 +209,19 @@ repo setting *Allow auto-merge* must be ON, and branch protection on `main` must
 require both `quality` and `migration-safety` status checks. Until those are set,
 auto-merge is inert and Claude Code falls back to waiting for CI then merging.
 
+## Deploy freeze emergency — the owner only, in person (binding, owner P0 2026-11-24)
+
+`deploy-vps.yml` refuses every deploy while an issue labelled `deploy-freeze` is
+open (a post-deploy check genuinely failed). Its `emergency=true` dispatch goes
+through the freeze. The workflow can only check that the actor is the
+repository owner's GitHub ACCOUNT — and every agent session acts through that
+same account, so the check cannot tell an agent from the owner.
+
+Therefore: **agents never dispatch `deploy-vps.yml` with `emergency=true`, and
+never remove the `deploy-freeze` label or close a freeze issue to get a deploy
+through.** Only the owner does, in person. An agent that needs a deploy during a
+freeze reports the blocker and the fix PR to the owner and waits.
+
 ## Branch strategy
 
 - `main` — production branch, deployed to the VPS by `.github/workflows/deploy-vps.yml` after Quality Gates passes on `main`
@@ -250,6 +278,21 @@ function names, only information the user needs, and no new helper text without 
 legal, consent, security and essential action-consequence texts. The rule applies to every agent,
 every PR and every locale, and it never changes functionality. See
 `docs/DECISIONS/0032-no-interface-noise.md`.
+
+## Direct counterparty and responsibility chain (binding, decision 0033)
+
+This applies to every party: employers, workers, agencies, contractors, subcontractors, suppliers,
+service providers and other partners.
+- A client works only with its direct partner.
+- Each party sees only the data its own relationships and functions need.
+- Each party answers to its direct client for its own obligations and for the partners it brings in.
+- Other chain participants' identity and commercial terms are not disclosed, unless the law requires
+  it.
+- The whole chain is kept for internal audit, under access rights.
+
+The rule applies to LabourMarket.ai, Agentai OS and related projects. It is not a mandate to build or
+rework anything without a concrete need and the owner's permission. See
+`docs/DECISIONS/0033-direct-counterparty-and-responsibility-chain.md`.
 
 ## Internal validity rule (binding, owner P0 2026-10-22, all projects)
 

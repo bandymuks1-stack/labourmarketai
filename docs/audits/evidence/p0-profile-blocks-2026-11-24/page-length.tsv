@@ -1,0 +1,27 @@
+role	width	path	screens	overflow	final_url	open_details
+student	390	/dashboard/profile	4.45		/en/dashboard/profile	
+student	390	/dashboard/profile?tab=edit	1.24		/en/dashboard/profile?tab=edit	profile-edit
+student	390	/dashboard/profile?tab=details	3.78		/en/dashboard/profile?tab=details	cv-details
+student	390	/dashboard/profile?tab=background	3.07		/en/dashboard/profile?tab=background	cv-background
+student	390	/dashboard/profile?tab=skills	2.21		/en/dashboard/profile?tab=skills	capabilities
+student	390	/dashboard/profile?tab=about	1.60		/en/dashboard/profile?tab=about	profile-about
+student	1440	/dashboard/profile	3.40		/en/dashboard/profile	
+student	1440	/dashboard/profile?tab=edit	1.07		/en/dashboard/profile?tab=edit	profile-edit
+student	1440	/dashboard/profile?tab=details	2.34		/en/dashboard/profile?tab=details	cv-details
+student	1440	/dashboard/profile?tab=background	1.96		/en/dashboard/profile?tab=background	cv-background
+student	1440	/dashboard/profile?tab=skills	1.64		/en/dashboard/profile?tab=skills	capabilities
+student	1440	/dashboard/profile?tab=about	1.07		/en/dashboard/profile?tab=about	profile-about
+worker	390	/dashboard/profile	3.35		/en/dashboard/profile	
+worker	390	/dashboard/profile?tab=edit	1.24		/en/dashboard/profile?tab=edit	profile-edit
+worker	390	/dashboard/profile?tab=details	3.78		/en/dashboard/profile?tab=details	cv-details
+worker	390	/dashboard/profile?tab=background	2.97		/en/dashboard/profile?tab=background	cv-background
+worker	390	/dashboard/profile?tab=skills	2.21		/en/dashboard/profile?tab=skills	capabilities
+worker	390	/dashboard/profile?tab=about	1.60		/en/dashboard/profile?tab=about	profile-about
+worker	390	/dashboard/profile#cv-languages	2.97		/en/dashboard/profile?tab=background#cv-languages	cv-background
+worker	1440	/dashboard/profile	2.61		/en/dashboard/profile	
+worker	1440	/dashboard/profile?tab=edit	1.07		/en/dashboard/profile?tab=edit	profile-edit
+worker	1440	/dashboard/profile?tab=details	2.34		/en/dashboard/profile?tab=details	cv-details
+worker	1440	/dashboard/profile?tab=background	1.91		/en/dashboard/profile?tab=background	cv-background
+worker	1440	/dashboard/profile?tab=skills	1.64		/en/dashboard/profile?tab=skills	capabilities
+worker	1440	/dashboard/profile?tab=about	1.07		/en/dashboard/profile?tab=about	profile-about
+worker	1440	/dashboard/profile#cv-languages	1.91		/en/dashboard/profile?tab=background#cv-languages	cv-background

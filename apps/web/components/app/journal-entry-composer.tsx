@@ -1,5 +1,6 @@
 "use client";
 
+import { clearTabDraft, readTabDraft, writeTabDraft } from "@/lib/drafts/tab-draft";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   resolveEngagementContext,
@@ -106,6 +107,9 @@ import {
   type AssignedProject,
 } from "@/lib/journal/project-attribution";
 
+/** The tab-draft surface of the full journal composer (lib/drafts/tab-draft.ts). */
+const JOURNAL_COMPOSER_DRAFT = "journal-composer";
+
 export type JournalEngagement = {
   id: string;
   label: string;
@@ -206,6 +210,7 @@ export function JournalEntryComposer({
   directions,
   workerSkills,
   editingEntry,
+  draftOwner = null,
   defaultWorkDate = null,
   templates,
   onSaved,
@@ -234,6 +239,11 @@ export function JournalEntryComposer({
    *  `supersedeJournalEntry(editingEntry.id, …)` (RPC from migration 0018)
    *  instead of the create path. */
   editingEntry?: JournalEditingEntry | null;
+  /** The signed-in person in the workspace they act for
+   *  (`quickRecordDraftOwner`): the started entry is kept for this tab until
+   *  it is saved, so an error, a reload or a sign-in again loses nothing.
+   *  Not used while editing an existing entry. */
+  draftOwner?: string | null;
   /** The day the person already picked on the journal calendar. A NEW
    *  record starts on it instead of today; an edit keeps its saved day. */
   defaultWorkDate?: string | null;
@@ -304,6 +314,14 @@ export function JournalEntryComposer({
   // Hidden while editing — an edit continues the entry's own flow.
   const [mode, setMode] = useState<ComposerMode>("quick");
   const [text, setText] = useState(editingEntry?.originalText ?? "");
+  // THE STARTED ENTRY SURVIVES (owner P0 2026-11-22): restored once, for the
+  // same person and workspace, when this is a new entry.
+  const keepsDraft = !editingEntry && !!draftOwner;
+  useEffect(() => {
+    if (!keepsDraft || !draftOwner) return;
+    const kept = readTabDraft(JOURNAL_COMPOSER_DRAFT, draftOwner);
+    if (kept?.text) setText((now) => (now.trim() === "" ? kept.text : now));
+  }, [keepsDraft, draftOwner]);
   // Activation funnel (P0-A): fire once when the worker first types into a
   // NEW entry (skip edits of an existing entry, which start pre-filled).
   const journalStartedRef = useRef(Boolean(editingEntry));
@@ -1192,6 +1210,7 @@ export function JournalEntryComposer({
       formRef.current?.reset();
       setStage("compose");
       setText("");
+      clearTabDraft(JOURNAL_COMPOSER_DRAFT);
       setTimeValue("");
       setQtyValue("");
       setDirSlug("");
@@ -2081,6 +2100,7 @@ export function JournalEntryComposer({
             onChange={(e) => {
               noteJournalEntryStarted(e.target.value);
               setText(e.target.value);
+              if (keepsDraft && draftOwner) writeTabDraft(JOURNAL_COMPOSER_DRAFT, draftOwner, { text: e.target.value });
             }}
             rows={5}
             required
@@ -2149,6 +2169,21 @@ export function JournalEntryComposer({
               {t("organizeText")}
             </button>
           </div>
+        )}
+
+        {/* A refused save says why HERE too (R-3 walk, 2026-11-22): the
+            compose stage set the error but never drew it, so a direct save
+            that the server refused (a future day) or that a rule stopped
+            (no context chosen) looked like nothing happened. The SAME alert
+            the review stage shows; the text stays in the field. */}
+        {error && (
+          <p
+            className="rounded-md border border-state-danger/40 bg-state-danger/5 px-3 py-2 text-xs text-state-danger"
+            role="alert"
+            data-testid="journal-save-error"
+          >
+            {error}
+          </p>
         )}
 
         <details

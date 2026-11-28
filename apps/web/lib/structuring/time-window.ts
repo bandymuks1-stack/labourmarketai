@@ -11,6 +11,7 @@
  * anything it cannot read is `kind: "none"` — no defaulting, no guessing.
  * Weeks are Monday-based ISO weeks in UTC.
  */
+import { upcomingWeekdayIso, weekdayIndexOf } from "@/lib/conversation/availability-day";
 import { foldText } from "./normalize";
 import { parseWordNumber } from "./word-numbers";
 import { looksSwedish } from "./looks-swedish";
@@ -261,6 +262,25 @@ export function parseStartDate(text: string, todayIso: string): string | null {
       if (utc(todayIso).getUTCMonth() + 1 === month) return todayIso;
       return nextOccurrence(todayIso, month, 1);
     }
+  }
+  // A WEEKDAY with a "next" word — "from next Monday", "nuo kito
+  // pirmadienio", "kitą pirmadienį", "со следующего понедельника", "od
+  // przyszłego poniedziałku", "ab nächstem Montag", "vanaf volgende maandag",
+  // "från nästa måndag" (lane A, 2026-11-22: the start stayed empty). "next"
+  // means the one after today; the weekday stems are the availability
+  // reader's. A bare "from Monday" is still NOT a start: "nuo pirmadienio iki
+  // penktadienio" is a working week, not a first day.
+  const nextWord =
+    "(?:kit\\p{L}*|ateinant\\p{L}*|next|coming|следующ\\p{L}*|ближаиш\\p{L}*|przyszl\\p{L}*|nastepn\\p{L}*|najblizsz\\p{L}*|nachst\\p{L}*|kommend\\p{L}*|volgend\\p{L}*|aanstaand\\p{L}*|komend\\p{L}*" +
+    (swedish ? "|nasta|kommande" : "") +
+    ")";
+  const weekdayLead = new RegExp(
+    `(?:^|[^\\p{L}])(?:(?:${swedish ? SV_FROM_WORD : FROM_WORD})\\s+)?(${nextWord})\\s+([\\p{L}]+)`,
+    "gu",
+  );
+  for (const m of folded.matchAll(weekdayLead)) {
+    const dow = weekdayIndexOf(m[2], swedish);
+    if (dow !== null) return upcomingWeekdayIso(todayIso, dow, true);
   }
   // "rytoj" / "nuo rytojaus" / "tomorrow" / "завтра" / "morgen" / "jutro".
   if (

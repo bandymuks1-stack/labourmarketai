@@ -191,15 +191,17 @@ export function NotificationPreferencesSection({
                 <tr key={r.type} className="border-b border-ink-600/60 last:border-b-0">
                   <td className="py-2 pr-3 text-text-primary">{r.label}</td>
                   <td className="px-2 py-2 text-center">
-                    <input
-                      type="checkbox"
-                      className="size-4 accent-brand-blue"
-                      checked={cur.inApp}
-                      disabled={pending === `${r.type}:in_app`}
-                      onChange={() => toggle(r.type, "in_app")}
-                      aria-label={`${r.label} — ${labels.inAppHeader}`}
-                      data-testid={`notification-pref-${r.type}-in_app`}
-                    />
+                    <label className="inline-flex size-11 cursor-pointer items-center justify-center">
+                      <input
+                        type="checkbox"
+                        className="size-4 accent-brand-blue"
+                        checked={cur.inApp}
+                        disabled={pending === `${r.type}:in_app`}
+                        onChange={() => toggle(r.type, "in_app")}
+                        aria-label={`${r.label} — ${labels.inAppHeader}`}
+                        data-testid={`notification-pref-${r.type}-in_app`}
+                      />
+                    </label>
                   </td>
                   <td className="px-2 py-2 text-center">
                     {cur.email === null ? (
@@ -209,15 +211,17 @@ export function NotificationPreferencesSection({
                         —
                       </span>
                     ) : (
-                      <input
-                        type="checkbox"
-                        className="size-4 accent-brand-blue"
-                        checked={cur.email}
-                        disabled={pending === `${r.type}:email`}
-                        onChange={() => toggle(r.type, "email")}
-                        aria-label={`${r.label} — ${labels.emailHeader}`}
-                        data-testid={`notification-pref-${r.type}-email`}
-                      />
+                      <label className="inline-flex size-11 cursor-pointer items-center justify-center">
+                        <input
+                          type="checkbox"
+                          className="size-4 accent-brand-blue"
+                          checked={cur.email}
+                          disabled={pending === `${r.type}:email`}
+                          onChange={() => toggle(r.type, "email")}
+                          aria-label={`${r.label} — ${labels.emailHeader}`}
+                          data-testid={`notification-pref-${r.type}-email`}
+                        />
+                      </label>
                     )}
                   </td>
                 </tr>

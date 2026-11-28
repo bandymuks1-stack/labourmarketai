@@ -6,6 +6,7 @@ import { runAiAgent } from "@/lib/ai/run-agent-server";
 import { aiLocaleFor } from "@/lib/ai/runtime/types";
 import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { digitsPreserved } from "@/lib/translation/faithfulness";
 
 import type { StoredPublicVacancyV1, VacancyLocaleTranslationV1 } from "./vacancy-read";
 import { redactContactData, restoreRedactions } from "./vacancy-redaction";
@@ -110,24 +111,10 @@ export function needsVacancyTranslation(
   return source.length === 2 && source !== locale.toLowerCase().slice(0, 2);
 }
 
-/** Every run of digits in the original must survive the rendering — pay,
- *  dates, headcounts and hours are contractual facts. Order-insensitive so a
- *  reordered clause still passes; a LOST or CHANGED number does not. */
-export function digitsPreserved(original: string, rendered: string): boolean {
-  // A figure may be grouped with a space, a dot or a comma ("35 000",
-  // "1.234,50", "1 234.50"); the comparison is on the digits themselves.
-  const runs = (s: string) => (s.match(/\d+(?:[ .,]\d+)*/g) ?? []).map((r) => r.replace(/[ .,]/g, ""));
-  const want = runs(original);
-  if (want.length === 0) return true;
-  const have = new Map<string, number>();
-  for (const r of runs(rendered)) have.set(r, (have.get(r) ?? 0) + 1);
-  for (const r of want) {
-    const n = have.get(r) ?? 0;
-    if (n === 0) return false;
-    have.set(r, n - 1);
-  }
-  return true;
-}
+// The digit rule is shared with the message reader — ONE copy, in
+// `lib/translation/faithfulness.ts`. Re-exported so this module's callers
+// keep their import.
+export { digitsPreserved };
 
 /**
  * THE FREE PATH. Renderings that already exist, for the ads on this screen.

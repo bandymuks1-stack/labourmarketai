@@ -1,4 +1,13 @@
 {
+  "communicationLocale": {
+    "title": "[EN] Message language",
+    "intro": "[EN] Work messages and instructions written in another language are shown to you translated into this language. Leave it on the interface language unless you read another language better.",
+    "label": "[EN] I read messages in",
+    "sameAsInterface": "[EN] Same as the interface",
+    "saved": "[EN] Saved.",
+    "error": "[EN] The change could not be saved and was reverted. Please try again.",
+    "unavailable": "[EN] This setting is not available yet — messages follow the interface language until it is."
+  },
   "demandReadback": {
     "notVerifiedYet": "Teie ettevõte ei ole veel kinnitatud, seega siin esitatud vajadusi töötajatele enne kinnitamise lõppu ei näidata.",
     "notVerifiedHowTo": "Lisa registrikood ja taotle ülevaatust",
@@ -276,6 +285,14 @@
       "moreSection": {
         "title": "Üksikasjalik ülevaade",
         "hint": "Staatus, päringud ja lisakaardid"
+      },
+      "myZone": {
+        "actions": {
+          "recordWork": {
+            "title": "Salvesta töö",
+            "desc": "Entries build your profile and CV"
+          }
+        }
       }
     },
     "errors": {
@@ -378,7 +395,15 @@
         "event_journal_review_decided_changes_requested": "Sinu töölogi kande kohta on küsitud muudatusi",
         "event_weekly_digest_profile_completion": "Sobivate tööde näitamiseks kinnita, millist tööd sa teed",
         "event_weekly_digest_journal": "Sinu nädala tööpäeviku kokkuvõte on valmis",
-        "event_history_link_offered": "Organisatsioon pakub siduda sinu registreeritud tööajaloo sinu kontoga"
+        "event_history_link_offered": "Organisatsioon pakub siduda sinu registreeritud tööajaloo sinu kontoga",
+        "event_team_offer_received": "Meeskond pakkus end teie vajadusele",
+        "event_team_offer_answered": "Teie meeskonna pakkumisele vastati",
+        "event_team_offer_answered_accepted": "Teie meeskonna pakkumine võeti vastu",
+        "event_team_offer_answered_declined": "Teie meeskonna pakkumine lükati tagasi",
+        "event_candidate_offer_received": "Agentuur pakkus teie vajadusele kandidaadi",
+        "event_candidate_offer_answered": "Teie pakutud kandidaadile vastati",
+        "event_candidate_offer_answered_accepted": "Teie pakutud kandidaat võeti vastu",
+        "event_candidate_offer_answered_declined": "Teie pakutud kandidaat lükati tagasi"
       },
       "email": {
         "open": "Ava LabourMarket.ai-s:",
@@ -447,7 +472,7 @@
           },
           "education": {
             "title": "Esindan õppeasutust",
-            "desc": "Kutsu õppijaid, näe nende osalust ning ühenda nad praktika ja tööga."
+            "desc": "Kutsu õppijaid, vii läbi programme ning jälgi nende praktikat ja tulemusi."
           }
         },
         "agency": {
@@ -504,7 +529,6 @@
     },
     "signup": {
       "confirm_password_label": "[EN] Confirm password",
-      "disclaimer": "[EN] The platform is early-stage — more features ship in the coming weeks. Your feedback shapes it.",
       "divider": "[EN] or",
       "email_label": "[EN] Work email",
       "email_placeholder": "[EN] name@company.com",
@@ -531,6 +555,9 @@
       },
       "signing": "[EN] Creating...",
       "subcopy": "Üks profiil sinu töökogemuse ja võimaluste jaoks — järgmises sammus täpsustad, miks tulid.",
+      "inviteFrom": "{inviter} kutsub teid liituma organisatsiooniga {organization}.",
+      "inviteTo": "Teid kutsutakse liituma organisatsiooniga {organization}.",
+      "inviteNext": "Registreerudes liitute organisatsiooniga {organization}.",
       "submit_label": "[EN] Sign up",
       "resend_label": "Saada link uuesti",
       "resend_sent": "Uuesti saadetud. Kontrolli postkasti ja rämpsposti kausta.",
@@ -1781,7 +1808,67 @@
     "generatedAt": "Loodud",
     "verifyNote": "Kinnitusi saab kontrollida platvormil.",
     "notWorker": "CV eksport on saadaval töötaja profiilile — see koostatakse tööpäevikust ja kinnitatud oskustest.",
-    "claimFromJournal": "[EN] from work journal"
+    "claimFromJournal": "[EN] from work journal",
+    "blocks": {
+      "overview": "Ülevaade",
+      "experience": "Kogemus",
+      "projects": "Projektid",
+      "photos": "Fotod",
+      "documents": "Dokumendid",
+      "reviews": "Soovitused"
+    },
+    "premium": {
+      "analytics": {
+        "evidenceTitle": "Tundide jaotus",
+        "states": {
+          "actual": "Tegelikena registreeritud",
+          "reported": "Organisatsiooni esitatud",
+          "estimated": "Hinnangulised",
+          "confirmed": "Teise osapoole sissekandega toetatud"
+        },
+        "skillBasis": "Tööpäeviku aeg, mis on omistatud üksikutele oskustele.",
+        "workTitle": "Tööd ja oskused",
+        "attributedTime": "Selle oskusega seotud",
+        "confirmedTime": "Juhi kinnitatud: {hours}",
+        "activityLabel": "Kirje väljavõte",
+        "contextLabel": "Töö kontekst",
+        "mapTitle": "Oskuste kaart",
+        "workNodes": "Tööd"
+      },
+      "eyebrowFallback": "Elav CV",
+      "facts": {
+        "recorded": "recorded in your work journal",
+        "confirmed": "juhi kirjega",
+        "organization": "in organisation records",
+        "experienceTotal": "erialast kogemust kokku",
+        "languages": "keelt",
+        "projects": "projekti",
+        "span": "esimene ja viimane kirje"
+      },
+      "capEyebrow": "Capabilities",
+      "capEyebrowHours": "{hours} h of recorded work",
+      "capTitle": "What you *can do*",
+      "expEyebrow": "Experience",
+      "expTitle": "Where you have *worked*",
+      "evidence": {
+        "both": "{confirmed} h with a manager's record · {recorded} h recorded",
+        "recorded": "{hours} h recorded",
+        "shown": "Shown by your records",
+        "declared": "You say so; nothing shows it yet",
+        "involved": "Involved in {hours} h, not attributed to it alone"
+      },
+      "source": {
+        "own": "Your record",
+        "organization": "Organisation records"
+      },
+      "orgDayHours": "{hours} h on {count, plural, one {# record} other {# records}}",
+      "orgPeriodHours": "{hours} h stated as a period total",
+      "present": "now",
+      "more": "+ {count} more in the full register below",
+      "emptyCapabilities": "No skills on record yet. Skills you add — and the work that shows them — appear here.",
+      "emptyExperience": "No work history yet. Your journal and the records of organisations you worked for build this.",
+      "untitled": "Work without a name in the source"
+    }
   },
   "todayScreen": {
     "eyebrow": "[EN] Today",
@@ -1995,6 +2082,10 @@
           "source_unreadable": "Part of the calendar could not be read just now, so free days can't be confirmed."
         }
       }
+    },
+    "create": {
+      "countryLabel": "Riik",
+      "errorCountry": "Valige riik, kus projekti asukoht on."
     }
   },
   "projectOps": {
@@ -2043,7 +2134,8 @@
         "noMembers": "Praegu liikmeid pole.",
         "unavailable": "Meeskondi ei õnnestunud laadida. Proovige uuesti.",
         "manage": "Muuda meeskondi"
-      }
+      },
+      "organizationLink": "Organisatsiooni ajalugu ja projektid"
     },
     "workerView": {
       "eyebrow": "Minu projekt",
@@ -2914,6 +3006,7 @@
     "available": "Saadaval",
     "availableFrom": "Alates {date}",
     "experienceYears": "{n} a kogemust",
+    "recordedExperienceHours": "Nähtavates tööarvestuse kirjetes: {hours} h",
     "skillsTitle": "Oskused",
     "skillsEmpty": "Pole oskusi, mida sul on lubatud näha.",
     "skillVerified": "[EN] Confirmed by a manager's record",
@@ -3813,9 +3906,7 @@
         "preferredCountries": "[EN] Preferred countries",
         "preferredCountriesPlaceholder": "[EN] e.g. NL, DE",
         "salaryMin": "[EN] Salary from (€)",
-        "salaryMinPlaceholder": "[EN] 1500",
         "salaryMax": "[EN] Salary to (€)",
-        "salaryMaxPlaceholder": "[EN] 2500",
         "willingToRelocate": "[EN] Willing to relocate?",
         "hasTransport": "[EN] Can you get to work on your own?",
         "needsAccommodation": "[EN] Need accommodation?",
@@ -3875,7 +3966,9 @@
         "supplyTeamSize": "Kui palju inimesi sul on",
         "supplyLocation": "Kus nad saavad töötada",
         "demandCountry": "Riik, kus tööd tehakse",
-        "demandCountryPlaceholder": "nt Rootsi või SE"
+        "demandCountryPlaceholder": "nt Rootsi või SE",
+        "projectCountry": "Riik",
+        "projectCountryPlaceholder": "nt Rootsi või SE"
       },
       "availability": {
         "available": "[EN] Available",
@@ -3905,7 +3998,8 @@
         "errorNeedsMigration": "[EN] This isn't enabled yet. Please try later.",
         "errorConflict": "[EN] This value already differs. Open advanced mode to replace it.",
         "errorOpenNeedLimitUpgrade": "Selle organisatsiooni tasuta plaan lubab 1 aktiivse ametikoha. Sulge üks või aktiveeri plaan „Organisatsioon“ (99 €/kuu) organisatsiooni kontol.",
-        "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust."
+        "errorOpenNeedLimitIndividual": "See organisatsioon on saavutanud oma plaani aktiivsete ametikohtade piiri. Midagi ei võetud ega muudetud. Võta meiega ühendust.",
+        "errorCountryRequired": "Lisage asukoha riik (nimi või kood, nt Rootsi või SE)."
       },
       "urgency": {
         "flexible": "Paindlik",
@@ -3968,7 +4062,7 @@
       "navCalendar": "[EN] Calendar",
       "navProfile": "[EN] Profile",
       "clarifyWorkLog": "[EN] Which day and how long did you work? For example: “Today from 8 to 17, 30 min break, installed windows”.",
-      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab. Here I can help log work time or review offers.",
+      "calendarHint": "[EN] You'll find your plan in the “Calendar” tab.",
       "reminderBlocked": "[EN] I can't send reminders yet — there's no reminder mechanism in place, so I won't create a fake one. I'll add it when it's enabled.",
       "translateBlocked": "[EN] I don't have a real translation engine yet, so I won't fake a translation. You'll see the message in its original language; when translation is enabled I'll add both texts.",
       "writeEmployerHint": "[EN] You write to an employer from a specific need: show interest first, then the conversation opens.",
@@ -4074,6 +4168,34 @@
       "findWorkInCompanyContext": "Tööotsing on sinu enda tegevus — ettevõtte ruumis ma seda ei käivita. Lülitu oma isiklikku ruumi ja küsi uuesti.",
       "findWorkInCompanyWhy": "Tööd otsib inimene, mitte ettevõte — vastan sinu isiklikust ruumist.",
       "personalOnlyInCompany": "See on isiklik tegevus — ettevõtte ruumis ma seda ei tee. Lülitu isiklikku ruumi ja jätka seal.",
+      "needsOrganization": "Seda tehakse organisatsiooni jaoks ja ükski teie ruum ei saa seda veel teha.",
+      "readFailed": "Ma ei saanud seda praegu lugeda — viga on meie poolel. Midagi ei muudetud. Proovige hetke pärast uuesti.",
+      "taskStatusAsk": "Millise oleku ülesanne saab: alustatud, tehtud või blokeeritud?",
+      "stageStatusAsk": "Millise oleku etapp saab: alustatud, tehtud või blokeeritud?",
+      "chipStatusStarted": "Alustatud",
+      "chipStatusDone": "Tehtud",
+      "chipStatusBlocked": "Blokeeritud",
+      "professionAsk": "Millist ametit või oskust mõtlete?",
+      "crossSpace": {
+        "personal": {
+          "cv": "Teie CV on isiklikus ruumis, mitte organisatsioonis.",
+          "journal": "Teie enda tööpäevik on isiklikus ruumis.",
+          "profile": "Teie profiil on isiklikus ruumis.",
+          "calendar": "Teie enda kalender on isiklikus ruumis."
+        },
+        "open": {
+          "cv": "Lülita ümber ja ava minu CV",
+          "journal": "Lülita ümber ja ava minu päevik",
+          "profile": "Lülita ümber ja ava minu profiil",
+          "calendar": "Lülita ümber ja ava minu kalender"
+        },
+        "askWhoseCv": "Teie enda CV või kandidaadi oma?",
+        "organizationHistory": "Organisatsiooni kirje on tema tööajalugu.",
+        "openOrganizationHistory": "Ava organisatsiooni ajalugu",
+        "organization": "Seda tehakse organisatsiooni ruumis: {name}.",
+        "switchTo": "Lülita ümber: {name} ja jätka",
+        "whichOrganization": "Seda tehakse organisatsiooni ruumis. Millises?"
+      },
       "newJobsIntro": "Uusi sinu eelistustele sobivaid kuulutusi: {count}.",
       "newJobsAll": "Kõik võimalused",
       "newJobsNone": "Viimastel päevadel pole sinu eelistustele sobivaid uusi kuulutusi ilmunud. Kõik võimalused leiad võimaluste lehelt.",
@@ -4109,8 +4231,12 @@
           "chipHelpPeople": "Meeskond ja kutsed",
           "chipHelpPlanning": "Ava planeerimine",
           "chipHelpServices": "Minu teenused",
-          "chipHelpJournal": "Tööpäevik"
-        }
+          "chipHelpJournal": "Tööpäevik",
+          "chipHelpSettings": "Seaded",
+          "chipHelpPrivacy": "Privaatsus ja sinu andmed"
+        },
+        "account": "Sisselogimise, e-posti, teavituste ja välimuse leiad seadetest.",
+        "privacy": "Jaotises „Privaatsus ja sinu andmed“ saad oma andmed alla laadida, näha, kes sinu profiili näeb, ja taotleda konto kustutamist."
       },
       "interestInboxAmbiguous": "See võib tähendada kahte asja — mida soovid näha?",
       "chipInterestOnMyNeeds": "Huvi minu päringute vastu",
@@ -4798,8 +4924,7 @@
       "lasting": "Sinu kogemus ja võimalused jäävad alati kättesaadavaks — kui vahetad tööd, projekti või riiki."
     },
     "v3": {
-      "lead": "Töötajatele, tööandjatele ja teenusepakkujatele – kõigil kutsealadel ja kõigis sektorites. Registreerimine ja põhivajaduse avaldamine on tasuta.",
-      "moreChoices": "Rohkem valikuid",
+      "lead": "Registreerimine ja põhivajaduse avaldamine on tasuta.",
       "or": "või kirjeldage oma sõnadega",
       "needFree": "Päringu saate esitada registreerimata. Esitamine on tasuta; teenuse tingimused ja hind lepitakse kokku eraldi.",
       "market": {
@@ -5846,9 +5971,36 @@
       "not_authorized": "[EN] You are not allowed to do this.",
       "not_found": "[EN] Timesheet not found.",
       "limit_reached": "[EN] Too many open timesheets — submit or remove existing ones first.",
-      "error": "[EN] Something went wrong. Nothing was saved."
+      "error": "[EN] Something went wrong. Nothing was saved.",
+      "schedule_saved": "Aruannete ajakava salvestatud."
     },
-    "taskAmbiguous": "seotud {count} ülesannet — tunde ei omistata ühele"
+    "taskAmbiguous": "seotud {count} ülesannet — tunde ei omistata ühele",
+    "schedule": {
+      "title": "Automaatsed tööajaaruanded",
+      "consent": "Esita minu eelmise päeva, seitsme päeva või kalendrikuu registreeritud töö valitud kinnitusringile. Tööd ei kinnitata automaatselt.",
+      "enabled": "Lubatud",
+      "frequency": "Sagedus",
+      "daily": "Iga päev",
+      "weekly": "Iga nädal",
+      "monthly": "Iga kuu · 1. kuupäeval",
+      "weekday": "Iganädalase esitamise päev",
+      "time": "Esitamise aeg",
+      "zone": "Ajavöönd",
+      "recipients": "Kinnitamise saajad",
+      "selectTemplate": "Vali kinnitamise mall",
+      "save": "Salvesta",
+      "next": "Järgmine esitamine: {date} ({zone})",
+      "manageRecipients": "Halda kinnitamise saajaid",
+      "outcome": {
+        "submitted": "Esitatud kinnitamiseks.",
+        "already_submitted": "See periood on juba esitatud.",
+        "empty": "Sellel perioodil puudub registreeritud töö.",
+        "overlap": "Peatatud: periood kattub olemasoleva aruandega.",
+        "not_allowed": "Peatatud: juurdepääs organisatsioonile on lõppenud.",
+        "no_template": "Peatatud: kinnitamise mall pole saadaval.",
+        "error": "Esitamine ebaõnnestus; proovitakse uuesti."
+      }
+    }
   },
   "requests": {
     "title": "Taotlused",
@@ -6429,9 +6581,10 @@
       "createProgram": "[EN] Add course",
       "noPrograms": "[EN] No courses added yet.",
       "assigneePlaceholder": "[EN] Person's email",
+      "assigneePick": "Isik",
       "requiredByLabel": "[EN] Complete by",
       "assign": "[EN] Ask this person",
-      "certificateFilePlaceholder": "[EN] Certificate file id",
+      "certificateFileLabel": "[EN] Certificate file",
       "issuedOnLabel": "[EN] Issued on",
       "expiresOnLabel": "[EN] Valid until",
       "attachCertificate": "[EN] Save certificate",
@@ -6878,7 +7031,8 @@
         "exportReportHint": "[EN] Programmes, cohorts, learner counts and live demand — plus your learner outcomes. Counts that are not known are written as unknown, never as zero."
       },
       "setup": {
-        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company."
+        "agencyConnectionPending": "[EN] Invitation accepted. A staffing agency wants to connect with your company — create your company profile first; the connection request then waits on your Partners page, where you confirm it with this company.",
+        "optionalDetails": "Registreerimine, kontaktid ja roll"
       },
       "workers": {
         "invitationsManagedElsewhere": "Kutsete eest hoolitseb selle eest vastutav ettevõtte isik.",
@@ -6985,7 +7139,8 @@
       "heading": "Organisatsioonide kutsed",
       "explainer": "Sulle suunatud juhtimiskutsed. Vastuvõtmisel ilmub organisatsioon sinu tööruumide valijasse.",
       "accept": "Võta vastu",
-      "decline": "Lükka tagasi"
+      "decline": "Lükka tagasi",
+      "invitedBy": "Kutsuja: {name}"
     },
     "members": {
       "heading": "Organisatsiooni liikmed",
@@ -7080,7 +7235,8 @@
       "places": "Kohad",
       "people": "Inimesed",
       "hours": "Salvestatud tunnid",
-      "period": "Periood"
+      "period": "Periood",
+      "dayHours": "Tunnid üksikutel päevadel"
     },
     "place": "Koht",
     "noPlaceName": "Kohta pole märgitud",
@@ -7100,7 +7256,8 @@
       "address": "Aadress",
       "project": "Projekt",
       "notInSource": "Allikas puudub",
-      "linked": "Seotud"
+      "linked": "Seotud",
+      "openProject": "Ava projekt"
     },
     "whoWorked": "Kes siin töötas",
     "timeline": "Mida tehti",
@@ -7116,9 +7273,107 @@
       "progress": "{attributed} / {total} omistatud: {name}",
       "done": "Omistatud kirjeid: {count}; juba omistatud: {skipped}.",
       "refused": "Salvestamine ebaõnnestus. Midagi ei muudetud.",
-      "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}"
+      "person": "{hours} h, {count, plural, one {# kirje} other {# kirjet}}",
+      "personPeriod": "{hours} h perioodi kogusumma (üksikutele päevadele ei liideta)"
     },
-    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid."
+    "truncated": "Kirjeid on rohkem, kui üks vaade loeb. Näidatakse loetud {count}; summad hõlmavad ainult neid.",
+    "projects": {
+      "title": "Projektid platvormil",
+      "counts": "{running} käimas · {completed} lõpetatud",
+      "untitled": "Nimeta projekt",
+      "running": "Käimas",
+      "completed": "Lõpetatud",
+      "all": "Kõik {count} projekti"
+    },
+    "journal": {
+      "title": "Päevikusse kirja pandud töö",
+      "hours": "Kirja pandud tunnid",
+      "confirmed": "Organisatsiooni kinnitatud tunnid",
+      "people": "Tööd kirja pannud inimesed",
+      "period": "Kirja pandud",
+      "basis": "{entries} päevikukirjest, mille inimesed selle organisatsiooni all tegid. Loetakse eraldi ülaltoodud imporditud ajaloost ja sellele kunagi ei liideta.",
+      "unavailable": "Selle organisatsiooni all päevikusse kirja pandud tööd ei õnnestunud praegu lugeda."
+    },
+    "forClient": {
+      "title": "Teie alltöövõtjate töö",
+      "confirmed": "Kinnitatud kirjed",
+      "unconfirmed": "Kinnitamata kirjed",
+      "periodHours": "{hours} h on märgitud perioodi summana, üksikute päevade hulka lisamata.",
+      "basis": "{count, plural, one {# kirjest} other {# kirjest}} teie alltöövõtjate enda arvestuses. Loetud eraldi teie enda tööst.",
+      "unreadable": "Partnerite arvestuses olevat tööd ei õnnestunud praegu lugeda. See ei tähenda, et seda pole."
+    },
+    "clients": {
+      "title": "Tellijad",
+      "unnamed": "Tellija organisatsioon",
+      "records": "{count, plural, one {# kirje} other {# kirjet}}"
+    },
+    "periodShort": "{hours} h perioodi kogusumma",
+    "business": {
+      "unavailable": "Ettevõtte ajalugu ei õnnestunud praegu lugeda. Midagi pole kadunud — proovi hiljem uuesti.",
+      "eyebrow": "Ettevõtte ajalugu",
+      "title": "{name}: üks järjepidev ajalugu",
+      "subtitle": "Iga allpool olev arv loeb organisatsiooni enda salvestatud tööd ühe korra. Perioodid näitavad, mida on varasemate juriidiliste isikute kohta märgitud ja millel see märge põhineb.",
+      "titleHeld": "{name}: hoitavad töökirjed perioodide kaupa",
+      "subtitleHeld": "Varasema juriidilise isiku all tehtud töö kuulub sellele juriidilisele isikule ja inimestele, kes selle tegid. {name} hoiab neid kirjeid dokumenteeritud järjepidevusena; neid ei näidata kui ettevõtte {name} enda tööd.",
+      "headerOwn": "Ettevõtte {name} enda periood",
+      "headerEarlier": "Varasem juriidiline isik: {name}",
+      "headerUnstated": "Periood „{label}” — juriidiline isik märkimata",
+      "headerNotPlaced": "Kirjed, mis ei kuulu ühtegi märgitud perioodi",
+      "continuityNotSuccession": "Järjepidevus dokumenteeritud; õigusjärglust ei väideta.",
+      "totalsHeld": "Kõik ettevõtte {name} hoitavad kirjed kõigi perioodide lõikes, igaüks arvestatud üks kord — kõik ei ole ettevõtte {name} enda töö.",
+      "figures": "{records} kirjet · {hours} h · {people} inimest · {places} kohta",
+      "totals": {
+        "records": "Kirjed",
+        "hours": "Tunnid",
+        "people": "Inimesed",
+        "places": "Kohad",
+        "projects": "Projektid",
+        "span": "Ajavahemik"
+      },
+      "spanUnknown": "kuupäevi pole salvestatud",
+      "periodsTitle": "Ettevõtte perioodid",
+      "noPeriods": "Selle ettevõtte kohta pole veel ühtegi perioodi märgitud. Kui töö algas varasema juriidilise isiku all, saab selle salvestada märgitud perioodina — kirjed ise jäävad muutmata.",
+      "bounds": "{from} – {to}",
+      "notDocumented": "dokumenteerimata",
+      "boundsNotDocumented": "Kuupäevad dokumenteerimata",
+      "legalEntity": "Juriidiline isik tollal: {name}",
+      "relation": {
+        "not_asserted": "Ei ole märgitud sama juriidilise isikuna — üks järjepidev ettevõtte ajalugu.",
+        "same_entity": "Märgitud sama juriidilise isikuna.",
+        "renamed": "Märgitud sama juriidilise isikuna varasema nime all.",
+        "successor": "Märgitud õiguslikuks eelkäijaks.",
+        "sold_and_continued_by_new_entity": "Varasem juriidiline isik müüdi; tegevus jätkus uue juriidilise isiku kaudu.",
+        "other": "Muu dokumenteeritud seos juriidiliste isikute vahel."
+      },
+      "basis": {
+        "owner_statement": "Omaniku kinnitus",
+        "registry_extract": "Registriväljavõte",
+        "contract": "Leping",
+        "other_document": "Dokument"
+      },
+      "periodNoRecords": "Sellesse perioodi pole veel ühtegi kirjet paigutatud.",
+      "placedBy": "Paigutatud allika sildi {labels} järgi: {byLabel} kirjet; dokumenteeritud kuupäevade järgi: {byDate}.",
+      "notPlaced": "Märgitud perioodi paigutamata (allikal puudub perioodi silt): {figures} · {span}.",
+      "yearsTitle": "Töö aastate kaupa",
+      "undated": "{count, plural, one {# kirjel} other {# kirjel}} puudub kuupäev ja {count, plural, one {see on} other {need on}} arvestatud ainult kogusummades.",
+      "doorsLabel": "Ava samad kirjed",
+      "doors": {
+        "people": "Inimesed",
+        "projects": "Projektid",
+        "places": "Kohad"
+      },
+      "workspace": {
+        "note": "Avasid ettevõtte {name} ajaloo väljaspool selle tööruumi. Inimesed ja projektid avanevad aktiivses tööruumis.",
+        "open": "Ava tööruum {name}",
+        "opening": "Avamine…",
+        "error": "Tööruumi ei õnnestunud avada."
+      },
+      "structure": "Varasem töö tehti juriidilise isiku {names} all.",
+      "structureLater": ", hiljem ",
+      "structureForClient": "Varasem töö {names} kaudu tellijale {client}.",
+      "structureAsSubcontractor": "Alltöövõtja: {names} → tellija {client}."
+    },
+    "descriptionNotInSource": "Allikas puudub töö kirjeldus"
   },
   "workLifecycle": {
     "pending": "Veel mitte",
@@ -7320,7 +7575,7 @@
     },
     "noHours": "Kirjed, kus tunde pole märgitud: {count}. Teadmata tunde ei loeta nulliks.",
     "undated": "Kirjed ilma märgitud kuupäevata: {count}. Need jäävad allolevasse ajalukku.",
-    "periodApart": "{hours} t kogusummast on perioodisummad, hoitud eraldi ja mitte kunagi jaotatud päevadele ega kuudele.",
+    "periodApart": "Lisaks: {hours} t on antud perioodisummadena — need ei sisaldu ülaltoodud tundides ega jaotata kunagi päevadele ega kuudele.",
     "noWorkObject": "Kirjed, mis pole seotud platvormile tuntud projekti ega kohaga: {count}. Need jäävad sellesse ajalukku allika nime all.",
     "places": {
       "title": "Projekti või koha järgi",
@@ -7897,6 +8152,9 @@
       "invites": "Kutse- ja teavituskirjad",
       "invitesOn": "sees",
       "invitesOff": "VÄLJAS – lülitatakse eraldi sisse: INVITE_EMAIL_PROVIDER=smtp ja üks testsaatmine"
+    },
+    "alerts": {
+      "title": "Omaniku hoiatused ja tõuketeated"
     }
   },
   "historyDuplicates": {
@@ -8023,8 +8281,10 @@
       "partnerWithUs": "Hakka partneriks",
       "forAgencies": "Kuidas see agentuuridele toimib",
       "setUpAgency": "Registreeri agentuur",
+      "setUpInstitution": "Õppeasutustele",
       "b2bEnquiry": "Äriteenuste päring (B2B)",
-      "projectEnquiry": "Individuaalse projekti päring"
+      "projectEnquiry": "Individuaalse projekti päring",
+      "findServices": "Leia isiklikke teenuseid"
     },
     "assistant": "Küsi assistendilt",
     "start": {
@@ -8094,6 +8354,59 @@
       "auth": "[EN] Please sign in again.",
       "not_authorized": "[EN] You can only manage your own records.",
       "error": "[EN] Something went wrong. Please try again."
+    }
+  },
+  "publicServices": {
+    "title": "[EN] Find personal services",
+    "lead": "[EN] Services published by individuals.",
+    "search": "[EN] Search",
+    "query": "[EN] Service or keyword",
+    "country": "Riik",
+    "category": "[EN] Category",
+    "clear": "[EN] Clear filters",
+    "unavailable": "[EN] Service search is unavailable",
+    "unavailableHint": "[EN] Please try again later.",
+    "retry": "[EN] Try again",
+    "emptyFiltered": "[EN] No services match these filters",
+    "empty": "[EN] No personal services have been published publicly yet",
+    "results": "[EN] Services",
+    "remote": "[EN] Remote",
+    "pagination": "[EN] Search pages",
+    "previous": "[EN] Previous",
+    "next": "[EN] Next",
+    "page": "[EN] Page {page}",
+    "refine": "[EN] Narrow your search to see more relevant services.",
+    "back": "[EN] All services",
+    "delivery": "[EN] Delivery",
+    "rate": "[EN] Rate",
+    "personalService": "[EN] Personal service",
+    "signInToRequest": "[EN] Sign in to request",
+    "manage": "[EN] Manage this service",
+    "contactUnavailable": "[EN] The request action is unavailable. Please try again later.",
+    "notFound": "[EN] Service not found",
+    "notFoundHint": "[EN] This service is no longer publicly available.",
+    "allCountries": "Kõik riigid"
+  },
+  "serviceOfferings": {
+    "form": {
+      "publicLabel": "[EN] Show this personal service publicly",
+      "publicHint": "[EN] When active and unexpired, its title, description, category, country, remote option and rate are visible without signing in. Do not include private contact details. Uncheck and save to remove public visibility."
+    },
+    "publicAudience": "[EN] Public search selected",
+    "memberAudience": "[EN] Signed-in members selected"
+  },
+  "businessProfile": {
+    "team": {
+      "living": {
+        "activityTitle": "Töö sissekanded perioodide kaupa",
+        "currentTeamTitle": "Praegune meeskond"
+      }
+    }
+  },
+  "companyOps": {
+    "createProject": {
+      "countryLabel": "Riik",
+      "errorCountry": "Valige riik, kus projekti asukoht on."
     }
   }
 }

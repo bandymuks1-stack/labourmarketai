@@ -1,8 +1,9 @@
 import { expect, test, type Locator, type Page } from "@playwright/test";
+import { clickUntilVisible } from "./click-until-visible";
 
 import { PUBLIC_INTENTS, type PublicIntentLink } from "../../lib/navigation/public-intents";
 import { INSTITUTION_DOOR_NEXT } from "../../lib/marketing/public-doors";
-import { BASE, PASSWORD, isolatedStack } from "./isolated-web-a-helpers";
+import { BASE, PASSWORD, isolatedStack, lit, onboard, signUp, sql } from "./isolated-web-a-helpers";
 import { KNOWN_PUBLIC_PATH_FINDINGS, PUBLIC_PATH_CASES } from "./public-paths-cases";
 
 /**
@@ -271,7 +272,17 @@ async function workerIntake(page: Page): Promise<void> {
   await expect(page.getByTestId("worker-intake-result"), "the intake answers the visitor").toBeVisible({ timeout: 60_000 });
   expectNoAuth(seen, "the intake's answer");
 
-  await page.getByTestId("intake-bridge").locator("a").first().click();
+  // After the answer the form is reset; a field changed now is ADDED to what
+  // was kept, never a replacement for it (the earlier fields stay).
+  const languages = `Lithuanian, English ${RUN}`;
+  await page.getByRole("main").locator('input[name="languages"]').fill(languages);
+  await expect(page.getByRole("main").locator('input[name="full_name"]'), "the kept fields are put back").toHaveValue(name);
+
+  // Sign-up from the HEADER, not the intake's own link: on the intake it
+  // carries the profile builder as `next` too, so the typed text is bound.
+  const headerSignUp = page.locator('header [data-testid="header-auth"] a[href*="/auth/signup"]').first();
+  await expect(headerSignUp).toHaveAttribute("href", "/en/auth/signup?next=%2Fdashboard%2Fprofile");
+  await headerSignUp.click();
   await page.waitForURL(/\/en\/auth\/signup/, { timeout: 60_000 });
   await signUpHere(page, "intake");
   // The intake's sign-up returns to the profile builder (#3415): onboarding
@@ -285,9 +296,9 @@ async function workerIntake(page: Page): Promise<void> {
   await page.getByRole("option", { name: /Lithuania/ }).first().click();
   await page.getByTestId("onboarding-submit").click();
   await page.waitForURL(/\/en\/dashboard\/profile/, { timeout: 60_000 });
-  const composer = page.locator('[data-testid="profile-text-flow-compose"] textarea').first();
+  const composer = page.getByRole("main").locator('[data-testid="profile-text-flow-compose"] textarea').first();
   await expect(composer, "the typed intake survives sign-up, in the profile composer").toHaveValue(
-    new RegExp(`${name}[\\s\\S]*${note}`),
+    new RegExp(`${name}[\\s\\S]*${languages}[\\s\\S]*${note}`),
     { timeout: 30_000 },
   );
 }
@@ -372,4 +383,112 @@ PUBLIC_PATH_CASES.forEach((c, index) => {
     expect(run, `a runner for ${c.id}`).toBeDefined();
     await run!(page);
   });
+});
+
+/** A real offering, its author's audience choice and its existing request loop.
+ * All accounts and rows exist only in this spec's disposable local stack. */
+test("public service — author opt-in, anonymous result, login return, request and opt-out", async ({ page: owner, browser }) => {
+  test.setTimeout(240_000);
+  const providerAddress = address("service-provider");
+  const requesterAddress = address("service-requester");
+  const title = `Window fitting ${RUN}`;
+  const requesterContext = await browser.newContext();
+  const guestContext = await browser.newContext({ viewport: { width: 375, height: 812 } });
+  try {
+    await owner.setExtraHTTPHeaders({ "x-real-ip": "198.51.100.250" });
+    await signUp(owner, BASE, providerAddress);
+    await onboard(owner, "work", `Service provider ${RUN}`);
+    await owner.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+    await owner.goto(`${BASE}/en/dashboard/services`);
+    await clickUntilVisible(owner.getByTestId("service-offering-add"), owner.getByTestId("service-offering-title"), { what: "the service form" });
+    await expect(owner.getByTestId("service-offering-public-search"), "public audience requires an explicit choice").not.toBeChecked();
+    await owner.getByTestId("service-offering-title").fill(title);
+    await owner.getByTestId("service-offering-category").fill("installation");
+    await owner.getByTestId("service-offering-country").fill("LT");
+    await owner.getByTestId("service-offering-rate").fill("35 EUR/hour");
+    await owner.getByTestId("service-offering-save").click();
+    const row = owner.locator('[data-testid^="service-offering-row-"]', { hasText: title });
+    await expect(row).toBeVisible({ timeout: 30_000 });
+    const offeringId = (await row.getAttribute("data-testid"))!.replace("service-offering-row-", "");
+    const status = owner.getByTestId(`service-offering-status-${offeringId}`);
+    await expect(async () => {
+      if (!/active/i.test(await status.innerText())) await owner.getByTestId(`service-offering-toggle-${offeringId}`).click();
+      await expect(status).toHaveText(/active/i, { timeout: 10_000 });
+    }).toPass({ timeout: 45_000 });
+    const savedAudience = () => sql<{ enabled: boolean }>(
+      `select public_search_enabled as enabled from public.service_offerings where id = ${lit(offeringId)}`,
+    )[0]?.enabled;
+    expect(savedAudience(), "publishing to members must not silently publish to everyone").toBe(false);
+
+    const guest = await guestContext.newPage();
+    await guest.setExtraHTTPHeaders({ "x-real-ip": "198.51.100.251" });
+    const seen = track(guest);
+    const searchUrl = `${BASE}/en/services?q=${encodeURIComponent(title)}&country=LT&category=installation`;
+    const detailPath = `/en/services/${offeringId}`;
+    await guest.goto(searchUrl);
+    await expect(guest.getByTestId("public-services-empty")).toBeVisible({ timeout: 30_000 });
+    await guest.goto(`${BASE}${detailPath}`);
+    await expect(guest.getByTestId("public-service-detail")).toHaveCount(0);
+    await expect(guest.getByRole("main").getByRole("link", { name: "All services", exact: true })).toBeVisible();
+    expectNoAuth(seen, "the private offer stays unavailable without an auth redirect");
+
+    await clickUntilVisible(owner.getByTestId(`service-offering-edit-${offeringId}`), owner.getByTestId("service-offering-public-search"), { what: "the service audience choice" });
+    await owner.getByTestId("service-offering-public-search").check();
+    await owner.getByTestId("service-offering-save").click();
+    await expect(owner.getByTestId("service-offering-form")).toHaveCount(0, { timeout: 30_000 });
+    expect(savedAudience()).toBe(true);
+    await guest.goto(`${BASE}/en/services`);
+    await guest.locator('input[name="q"]').fill(title);
+    await guest.getByTestId("public-services-country").selectOption("LT");
+    await guest.locator('input[name="category"]').fill("installation");
+    await guest.locator('form button[type="submit"]').click();
+    await guest.waitForURL((u) => u.pathname === "/en/services"
+      && u.searchParams.get("q") === title && u.searchParams.get("country") === "LT"
+      && u.searchParams.get("category") === "installation", { timeout: 30_000 });
+    const result = guest.getByTestId("public-service-result").filter({ hasText: title });
+    await expect(result).toHaveCount(1, { timeout: 30_000 });
+    await expect(result).toContainText("Lithuania");
+    await expect(result).not.toContainText(providerAddress);
+    await result.getByRole("link", { name: title, exact: true }).click();
+    await expect(guest.getByTestId("public-service-detail")).toContainText(title, { timeout: 30_000 });
+    expectNoAuth(seen, "the actual service result and details");
+    await expect(guest.getByTestId("person-service-request")).toHaveCount(0);
+    await guest.getByTestId("public-service-login").click();
+    await guest.waitForURL(/\/en\/auth\/login/, { timeout: 30_000 });
+    expect(nextOf(guest.url())).toBe(`/services/${offeringId}`);
+
+    const requester = await requesterContext.newPage();
+    await requester.setExtraHTTPHeaders({ "x-real-ip": "198.51.100.252" });
+    await signUp(requester, BASE, requesterAddress);
+    await onboard(requester, "work", `Service requester ${RUN}`);
+    await requester.waitForURL(/\/en\/dashboard/, { timeout: 60_000 });
+    await guest.locator('input[name="email"]').fill(requesterAddress);
+    await guest.locator('input[name="password"]').fill(PASSWORD);
+    await guest.locator('form button[type="submit"]').first().click();
+    await guest.waitForURL((u) => u.pathname === detailPath, { timeout: 60_000 });
+    await guest.getByTestId("person-service-request").click();
+    await expect(guest.getByTestId("person-service-requested")).toBeVisible({ timeout: 30_000 });
+    const requests = sql<{ status: string }>(
+      `select r.status from public.service_offering_requests r join auth.users u on u.id = r.buyer_id
+       where r.offering_id = ${lit(offeringId)} and u.email = ${lit(requesterAddress)}`,
+    );
+    expect(requests, "the existing service-request loop records exactly one request").toEqual([{ status: "sent" }]);
+
+    await clickUntilVisible(owner.getByTestId(`service-offering-edit-${offeringId}`), owner.getByTestId("service-offering-public-search"), { what: "the service audience choice" });
+    await owner.getByTestId("service-offering-public-search").uncheck();
+    await owner.getByTestId("service-offering-save").click();
+    await expect(owner.getByTestId("service-offering-form")).toHaveCount(0, { timeout: 30_000 });
+    expect(savedAudience()).toBe(false);
+    await guestContext.clearCookies();
+    await guest.goto(searchUrl);
+    await expect(guest.getByTestId("public-services-empty")).toBeVisible({ timeout: 30_000 });
+    await guest.goto(`${BASE}${detailPath}`);
+    await expect(guest.getByTestId("public-service-detail")).toHaveCount(0);
+    await expect(guest.getByRole("main").getByRole("link", { name: "All services", exact: true })).toBeVisible();
+    expect(sql<{ count: number }>(`select count(*)::int as count from public.service_offering_requests where offering_id = ${lit(offeringId)}`)[0].count,
+      "opting out preserves the existing request").toBe(1);
+  } finally {
+    await requesterContext.close();
+    await guestContext.close();
+  }
 });

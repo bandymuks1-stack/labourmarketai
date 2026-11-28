@@ -2,12 +2,33 @@ import "server-only";
 
 import { createClient } from "@/lib/supabase/server";
 import { readProjectCanonicalMap } from "@/lib/projects/projects";
+import {
+  summarizeOrganizationProjects,
+  type OrganizationProjects,
+} from "@/lib/organization-evidence/organization-projects";
+import {
+  summarizeOrganizationJournal,
+  type OrganizationJournal,
+  type OrganizationJournalRow,
+} from "@/lib/organization-evidence/organization-journal";
+import {
+  JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
+  JOURNAL_ENTRY_METRICS_EMBED,
+} from "@/lib/journal/journal-list-core";
+import { viewerWorkToday } from "@/lib/time/viewer-day";
 import { withSessionWorkspacePointer, listWorkspaceMemberships } from "@/lib/company/active-organization";
 import type { DomainCaller } from "@/lib/domain/caller";
 import type { BusinessHistoryIdentity } from "./business-history-header";
-import { resolveEvidenceOrganization } from "./evidence-org-context";
+import { resolveHistoryReadOrganization } from "./history-read-grant";
 import { untypedClient } from "./evidence-store";
-import { listEvidenceRecords, listRecordIdsAttributedTo } from "./import-core";
+import { recordProjectId } from "./professional-history-context";
+import {
+  CLIENT_PARTY_ROLE,
+  listEvidenceRecords,
+  listRecordIdsAttributedTo,
+  PERFORMING_PARTY_ROLES,
+} from "./import-core";
+import { clientsOfRecords, summarizeWorkForClient, type WorkForClient } from "./work-for-client";
 import { listAllEvidenceRecords, readAllPages } from "./evidence-pagination";
 import {
   buildBusinessHistory,
@@ -17,6 +38,7 @@ import {
 } from "./business-history";
 import {
   buildCompanyWorkHistory,
+  placeKeyOf,
   type CompanyWorkHistory,
   type PlaceObjectFacts,
 } from "./company-work-history";
@@ -51,12 +73,34 @@ export type CompanyWorkHistoryLoad =
       readonly elsewhere: readonly { readonly id: string; readonly name: string; readonly count: number }[];
       /** Roster person id → linked worker id (only `linked` rows). */
       readonly linkedWorkers: Readonly<Record<string, string>>;
+      /** The organization's own projects on the platform (#3354: its track
+       *  record). Null when they could not be read — never shown as "none". */
+      readonly projects: OrganizationProjects | null;
+      /** Work its people recorded in the journal under THIS organization's
+       *  engagements (Lane G's contract, rule 2). A separate ledger from the
+       *  imported history, never added to it. Null when it could not be read
+       *  — never shown as "no hours". */
+      readonly journal: OrganizationJournal | null;
       /** This organization's own roster rows. A person on a record another
        *  organization attributes here belongs to THAT roster: their card is
        *  not this organization's to open. */
       readonly ownPeople: Readonly<Record<string, true>>;
       /** Records stored in ANOTHER organization's books that name this one as the performing company. */
       readonly attributedCount: number;
+      /** Work partners did FOR this organization (records in their books naming it as
+       *  `client`), as one aggregate with no names (decision 0033). Null: none, or
+       *  unreadable — it is never folded into this organization's own work. */
+      readonly forClient: WorkForClient | null;
+      /** The clients this organization's own records name, most records first. `name`
+       *  is null when the caller cannot read that organization (never guessed). */
+      readonly clients: readonly { readonly organizationId: string; readonly name: string | null; readonly records: number }[];
+      /** The organization's own records name IT as `subcontractor`: only then
+       *  may the page call it a subcontractor (a `client` party alone proves
+       *  only whom the work was for). */
+      readonly performedAsSubcontractor: boolean;
+      /** A read of the work stored in partners' books failed: the surface says so,
+       *  and an absent aggregate then means UNKNOWN, never "none" (SEP-7). */
+      readonly partnerWorkUnreadable: boolean;
       /** A safety ceiling was reached while reading: the totals cover only
        *  what was read and the surface MUST say so (never a silent cap). */
       readonly truncated: boolean;
@@ -73,6 +117,10 @@ export async function loadCompanyWorkHistory(
   /** An organization the caller names (`?org=`), checked against the caller's
    *  OWN memberships by `resolveEvidenceOrganization`; absent → the active one. */
   requestedOrganizationId: string | null = null,
+  /** How many projects the summary lists (its counts always cover all). The
+   *  history page keeps the default preview; the organization's Living CV
+   *  asks for its whole Projects block. */
+  options: { readonly projectLimit?: number } = {},
 ): Promise<CompanyWorkHistoryLoad> {
   const supabase = await createClient();
   const {
@@ -85,17 +133,15 @@ export async function loadCompanyWorkHistory(
     locale,
   });
 
-  const org = await resolveEvidenceOrganization(caller, requestedOrganizationId);
+  const org = await resolveHistoryReadOrganization(caller, requestedOrganizationId);
   if (!org.ok) {
-    return org.reason === "error" || org.reason === "needs-migration"
-      ? { kind: "unavailable" }
-      : { kind: "hidden" };
+    return org.reason === "unavailable" ? { kind: "unavailable" } : { kind: "hidden" };
   }
 
   // Every read is PAGED to the end (the server answers at most 1000 rows):
   // production holds 2,944 records for one organization, and a bare
   // `.limit(1000)` made every total on this page silently wrong.
-  const [recs, objs, people] = await Promise.all([
+  const [recs, objs, people, projectRows, journal] = await Promise.all([
     listAllEvidenceRecords(caller, { organizationId: org.organizationId }),
     readAllPages<{
       id: string;
@@ -126,8 +172,34 @@ export async function loadCompanyWorkHistory(
           .order("id", { ascending: true })
           .range(from, to),
     ),
+    // The organization's own projects on the platform — its track record
+    // (#3354). RLS decides what the caller reads; a duplicate project is a
+    // record fact, never counted twice. Unreadable -> no projects section.
+    readAllPages<{ id: string; title: string | null; city: string | null; status: string | null; created_at: string }>(
+      (from, to) =>
+        db(supabase)
+          .from("projects")
+          .select("id, title, city, status, created_at")
+          .eq("organization_id", org.organizationId)
+          .neq("record_state", "duplicate")
+          .order("id", { ascending: true })
+          .range(from, to),
+    ),
+    readOrganizationJournal(supabase, org.organizationId),
   ]);
   if (recs.kind !== "ok" || !objs || !people) return { kind: "unavailable" };
+  const projects = projectRows
+    ? summarizeOrganizationProjects(
+        projectRows.rows.map((r) => ({
+          id: r.id,
+          title: r.title,
+          city: r.city,
+          status: r.status,
+          createdAt: r.created_at,
+        })),
+        options.projectLimit,
+      )
+    : null;
 
   // A place on a fragment project (record_state = duplicate) belongs to the
   // canonical project it was merged into: periods count real projects and
@@ -153,25 +225,35 @@ export async function loadCompanyWorkHistory(
       linkedWorkers[p.id] = p.linked_worker_id;
   }
 
-  // Work stored in another organization's books but attributed HERE (a party
-  // row naming this organization). The records SELECT policy already admits
-  // them; they are read, never copied.
-  let attributed: readonly (typeof recs.records)[number][] = [];
-  const attributedIds = await listRecordIdsAttributedTo(caller, org.organizationId);
-  if (attributedIds.kind === "ok") {
-    const own = new Set(recs.records.map((r) => r.id));
-    const wanted = attributedIds.recordIds.filter((id) => !own.has(id));
+  // Work stored in another organization's books that names this one as a
+  // party. The records SELECT policy already admits them; they are read, never
+  // copied. Only a PERFORMING role makes it this organization's own work. A
+  // `client` row is work a partner did FOR this organization (decision 0033):
+  // it is summed apart, with no person, place or partner name.
+  const own = new Set(recs.records.map((r) => r.id));
+  const readElsewhere = async (roles: readonly string[]) => {
+    const ids = await listRecordIdsAttributedTo(caller, org.organizationId, roles);
+    if (ids.kind !== "ok") return null;
+    const wanted = ids.recordIds.filter((id) => !own.has(id));
     const found: (typeof recs.records)[number][] = [];
     for (let i = 0; i < wanted.length; i += ID_CHUNK) {
       const extra = await listEvidenceRecords(caller, {
         recordIds: wanted.slice(i, i + ID_CHUNK),
         limit: ID_CHUNK,
       });
-      if (extra.kind === "ok") found.push(...extra.records.filter((r) => r.organizationId !== org.organizationId));
+      if (extra.kind !== "ok") return null;
+      found.push(...extra.records.filter((r) => r.organizationId !== org.organizationId));
     }
-    attributed = found;
-  }
+    return found;
+  };
+  const [performedHere, doneForHere] = await Promise.all([
+    readElsewhere(PERFORMING_PARTY_ROLES),
+    readElsewhere([CLIENT_PARTY_ROLE]),
+  ]);
+  const attributed = performedHere ?? [];
+  const forClient = doneForHere ? summarizeWorkForClient(doneForHere) : null;
   const history = buildCompanyWorkHistory([...recs.records, ...attributed], objects);
+  const clients = await nameClients(supabase, clientsOfRecords(recs.records, org.organizationId));
 
   const [business, identity] = await Promise.all([
     readBusinessHistory(supabase, org.organizationId, recs.records, objects),
@@ -204,10 +286,99 @@ export async function loadCompanyWorkHistory(
     history,
     elsewhere,
     linkedWorkers,
+    projects,
+    journal,
     ownPeople,
     attributedCount: attributed.length,
+    forClient,
+    clients,
+    performedAsSubcontractor: recs.records.some((r) =>
+      r.parties.some((p) => p.role === "subcontractor" && p.organizationId === org.organizationId),
+    ),
+    partnerWorkUnreadable: performedHere === null || doneForHere === null,
     truncated: recs.truncated,
   };
+}
+
+/**
+ * The client organizations' names, under the caller's own RLS. A client the
+ * caller is not a member of is named by the label its records carry
+ * (`party_label`); with neither it stays unnamed (null), never guessed or widened.
+ */
+async function nameClients(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  clients: readonly { readonly organizationId: string; readonly records: number; readonly label: string | null }[],
+): Promise<{ organizationId: string; name: string | null; records: number }[]> {
+  if (clients.length === 0) return [];
+  const names = new Map<string, string>();
+  try {
+    const res = await db(supabase)
+      .from("organizations")
+      .select("id, legal_name, display_name")
+      .in("id", clients.map((c) => c.organizationId));
+    for (const o of (res.data ?? []) as { id: string; legal_name: string | null; display_name: string | null }[]) {
+      const name = (o.display_name ?? o.legal_name ?? "").trim();
+      if (name) names.set(o.id, name);
+    }
+  } catch {
+    /* unnamed, never guessed */
+  }
+  return clients.map((c) => ({
+    organizationId: c.organizationId,
+    records: c.records,
+    name: names.get(c.organizationId) ?? c.label,
+  }));
+}
+
+/**
+ * The organization's journal work, read the one way the contract allows: its
+ * engagements (`engagement_contexts.organization_id`), then the live entries
+ * on them (`journal_entries.engagement_context_id`). An engagement's status is
+ * not filtered: work recorded under a since-ended engagement still happened
+ * here. Ids, timestamps, review rows and metric rows only: never the entry
+ * text. RLS's org-manager branch decides what comes back; nothing widens it.
+ */
+async function readOrganizationJournal(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  organizationId: string,
+): Promise<OrganizationJournal | null> {
+  try {
+    const contexts = await readAllPages<{ id: string }>((from, to) =>
+      db(supabase)
+        .from("engagement_contexts")
+        .select("id")
+        .eq("organization_id", organizationId)
+        .order("id", { ascending: true })
+        .range(from, to),
+    );
+    if (!contexts) return null;
+    const ids = contexts.rows.map((r) => r.id);
+    const select = [
+      "id, worker_id, created_at, correction_of, engagement_context_id, subject:workers(profile_id)",
+      JOURNAL_ENTRY_CONFIRMATIONS_EMBED,
+      JOURNAL_ENTRY_METRICS_EMBED,
+    ].join(", ");
+    const rows: OrganizationJournalRow[] = [];
+    for (let i = 0; i < ids.length; i += ID_CHUNK) {
+      const chunk = ids.slice(i, i + ID_CHUNK);
+      const page = await readAllPages<OrganizationJournalRow>((from, to) =>
+        db(supabase)
+          .from("journal_entries")
+          .select(select)
+          .in("engagement_context_id", chunk)
+          .is("deleted_at", null)
+          .is("superseded_by", null)
+          .order("id", { ascending: true })
+          .range(from, to),
+      );
+      if (!page || page.truncated) return null;
+      rows.push(...page.rows);
+    }
+    const { todayIso, horizonIso } = await viewerWorkToday();
+    return summarizeOrganizationJournal(rows, todayIso, horizonIso);
+  } catch {
+    return null;
+  }
 }
 
 type PeriodRow = {
@@ -276,6 +447,7 @@ async function readBusinessHistory(
     periodStart: string | null;
     periodEnd: string | null;
     hours: number | null;
+    contextLabel: string | null;
     withdrawn: boolean;
     superseded: boolean;
   }[],
@@ -329,12 +501,15 @@ async function readBusinessHistory(
         id: r.id,
         personId: r.personId,
         workObjectId: r.workObjectId,
-        projectId: r.projectId ?? (r.workObjectId ? (projectOfObject.get(r.workObjectId) ?? null) : null),
+        projectId: recordProjectId(r, projectOfObject),
         activityDate: r.activityDate,
         periodStart: r.periodStart,
         periodEnd: r.periodEnd,
         hours: r.hours,
         sourceLabel: labelOf.get(r.id) ?? null,
+        // The place exactly as the place list groups it: one meaning of
+        // "place" on the whole page (owner P0 2026-11-24).
+        placeKey: placeKeyOf(r),
       })),
     statements,
   );

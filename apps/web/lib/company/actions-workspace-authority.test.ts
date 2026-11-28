@@ -146,6 +146,7 @@ describe("workspace selection decides the write target (A vs B)", () => {
     expect(insertProjectMock).toHaveBeenCalledWith(expect.anything(), COMPANY_A, {
       title: "Statyba A",
       city: null,
+      country: null,
     });
 
     requireEmployerCompanyMock.mockResolvedValue(okContext(COMPANY_B));
@@ -153,6 +154,7 @@ describe("workspace selection decides the write target (A vs B)", () => {
     expect(insertProjectMock).toHaveBeenLastCalledWith(expect.anything(), COMPANY_B, {
       title: "Statyba B",
       city: null,
+      country: null,
     });
   });
 });

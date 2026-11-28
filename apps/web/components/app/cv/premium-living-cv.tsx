@@ -1,180 +1,123 @@
 import type { ReactNode } from "react";
 
-import { Accented, EvidenceBar, Eyebrow, LevelMark, RegionHead, Stamp, type EvidenceLevel } from "@/components/app/premium/grammar";
+import { PersonPortrait } from "@/components/app/identity/person-portrait";
 
 /**
- * THE LIVING CV — a working life as a reader asks about it (frozen premium
- * design class 4e695e261, ported as grammar onto canonical data):
- *
- *   WHO (identity moment) → WHAT they can do → WHERE and with whom they did it
- *
- * Every line appears only when there is something true to say; a thin CV is
- * thin, never padded. Evidence is a quiet property of each line (a mark, a
- * bar and the same numbers in words), never a table of its own. Leadership of
- * an organization is rendered by the page beside this, never as hours here.
- *
- * Pure and i18n-agnostic: the page passes resolved strings.
+ * Living CV identity and canonical facts, before the detailed sections.
+ * The owner's 2026-11-25 correction makes both identities inherit the page
+ * theme. Gold marks identity; it does not create a second colour environment.
+ * All figures and labels are resolved by the page's existing canonical reader.
+ * Skills and work records remain in their own addressed blocks, once each.
  */
+export function LivingCvIdentityFrame({ children, testId }: { readonly children: ReactNode; readonly testId: string }) {
+  return (
+    <div
+      className="living-cv-identity-frame mx-auto w-full max-w-[12rem] self-start rounded-2xl border border-brand-blue/35 bg-ink-800 p-2 text-text-primary shadow-sm"
+      data-testid={testId}
+    >
+      {children}
+    </div>
+  );
+}
 
-export type PremiumCvFact = { readonly value: string; readonly label: string };
+export type PremiumCvFact = { readonly value: string; readonly label: string; readonly testid?: string };
 
-export type PremiumCvCapability = {
-  readonly key: string;
-  readonly label: string;
-  readonly level: EvidenceLevel;
-  /** Hours the person's records attribute to the skill; null = none recorded. */
-  readonly hours: number | null;
-  readonly confirmedHours: number;
-  /** Already-localised "12 h confirmed · 40 h recorded" (also the bar's label). */
-  readonly evidenceText: string;
-};
-
-export type PremiumCvExperience = {
-  readonly key: string;
-  /** Formatted "06/2025 – 11/2025" / "03/2024 – now"; null when undated. */
-  readonly period: string | null;
-  readonly title: string;
-  readonly subtitle: string | null;
-  /** "800 h stated as a period total · organisation records", already localised. */
-  readonly detail: string | null;
-  /** Where the line comes from, already localised ("Your record", "Organisation records"). */
-  readonly source: string;
-  readonly level: EvidenceLevel;
-  readonly current: boolean;
-};
+/** ISO-3166 alpha-2 to the stated country's flag, or null. */
+function flagOf(countryCode: string | null): string | null {
+  const c = (countryCode ?? "").trim().toUpperCase();
+  if (!/^[A-Z]{2}$/.test(c)) return null;
+  return String.fromCodePoint(...[...c].map((ch) => 0x1f1e6 + ch.charCodeAt(0) - 65));
+}
 
 export function PremiumLivingCv({
   name,
   eyebrow,
   summary,
   facts,
-  capabilities,
-  capabilitiesHead,
-  experience,
-  experienceHead,
-  hiddenCapabilities,
-  moreLabel,
-  emptyCapabilities,
-  emptyExperience,
-  leadership,
-  formatHours = (h) => `${Math.round(h)} h`,
+  portraitUrl = null,
+  initials = "",
+  countryCode = null,
+  countryName = null,
+  languages = [],
+  actions,
 }: {
   readonly name: string;
   readonly eyebrow: string;
   readonly summary: string | null;
   readonly facts: readonly PremiumCvFact[];
-  readonly capabilities: readonly PremiumCvCapability[];
-  readonly capabilitiesHead: { readonly eyebrow: string; readonly title: string };
-  readonly experience: readonly PremiumCvExperience[];
-  readonly experienceHead: { readonly eyebrow: string; readonly title: string };
-  readonly hiddenCapabilities: number;
-  readonly moreLabel: string;
-  readonly emptyCapabilities: string;
-  readonly emptyExperience: string;
-  /** The page's "organizations you lead" region, when there is one. */
-  readonly leadership?: ReactNode;
-  /** Whole hours in the reader's unit ("8 ч" in RU, "8 val." in LT). */
-  readonly formatHours?: (hours: number) => string;
+  readonly portraitUrl?: string | null;
+  readonly initials?: string;
+  readonly countryCode?: string | null;
+  readonly countryName?: string | null;
+  readonly languages?: readonly string[];
+  readonly actions?: ReactNode;
 }) {
-  // Exactly ONE accent word (the grammar's rule): the last word of the name.
-  const parts = name.trim().split(/\s+/);
-  const last = parts.length > 1 ? parts[parts.length - 1] : null;
-  const lead = last ? parts.slice(0, -1).join(" ") : name;
+  const flag = flagOf(countryCode);
+  const factGridColumns = facts.length === 2
+    ? "grid-cols-2"
+    : "grid-cols-[repeat(auto-fit,minmax(min(100%,8rem),1fr))]";
   return (
-    <article className="flex flex-col gap-14 print:hidden" data-testid="premium-living-cv">
-      {/* THE IDENTITY MOMENT — who this is, before anything is listed. */}
+    <article className="print:hidden" data-testid="premium-living-cv">
       <section
-        className="relative isolate overflow-hidden rounded-[32px] p-6 shadow-[inset_0_0_0_1px_rgb(var(--c-text-primary)/0.10)] md:p-12"
+        className="grid min-w-0 grid-cols-[6.5rem_minmax(0,1fr)] items-start gap-x-4 gap-y-5 rounded-2xl border border-ink-600 bg-ink-800 p-4 sm:gap-x-6 sm:p-6 md:grid-cols-[12rem_minmax(0,1fr)]"
         data-testid="premium-cv-identity"
       >
-        <div
-          aria-hidden
-          className="absolute inset-0 -z-10 bg-[radial-gradient(120%_90%_at_100%_0%,rgb(var(--c-brand-orange)/0.10),transparent_55%)]"
-        />
-        <Eyebrow>{eyebrow}</Eyebrow>
-        <h1 className="mt-3 font-display text-[clamp(2.4rem,7vw,5rem)] font-semibold leading-[0.95] tracking-[-0.05em] text-text-primary">
-          {last ? <Accented text={`${lead} *${last}*`} /> : lead}
-        </h1>
-        {summary ? <p className="mt-5 max-w-[56ch] text-[1.05rem] leading-relaxed text-text-secondary">{summary}</p> : null}
+        <div className="min-w-0 md:row-span-3">
+          <LivingCvIdentityFrame testId="premium-cv-card">
+            <div className="flex min-w-0 flex-col items-center gap-2 rounded-xl bg-ink-700/40 py-2 md:gap-3 md:py-4">
+              <PersonPortrait
+                name={name}
+                avatarUrl={portraitUrl}
+                initials={initials}
+                width="clamp(76px, 14vw, 144px)"
+                className="max-w-full"
+                testids={{ photo: "premium-cv-photo", monogram: "premium-cv-monogram" }}
+              />
+              <p aria-hidden="true" className="sr-only" data-testid="premium-cv-card-name">{name}</p>
+              <p aria-hidden="true" className="sr-only" data-testid="premium-cv-card-profession">{eyebrow}</p>
+              {flag ? (
+                <span className="text-xl leading-none text-text-primary" role="img" aria-label={countryName ?? countryCode ?? undefined} data-testid="premium-cv-card-flag">
+                  {flag}
+                </span>
+              ) : null}
+            </div>
+          </LivingCvIdentityFrame>
+        </div>
+
+        <div className="flex min-w-0 flex-col gap-3 md:col-start-2">
+          <div className="flex min-w-0 flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+            <div className="min-w-0">
+              <h1 className="break-words font-display text-[clamp(1.5rem,3.5vw,2.5rem)] font-semibold leading-tight tracking-tight text-text-primary" data-testid="premium-cv-name">{name}</h1>
+              <p className="mt-1 text-sm leading-relaxed text-text-secondary sm:text-base" data-testid="premium-cv-professions">{eyebrow}</p>
+            </div>
+          </div>
+          {languages.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5" data-testid="premium-cv-languages">
+              {languages.map((l) => (
+                <span key={l} className="inline-flex min-h-7 items-center rounded-md border border-ink-600 bg-ink-700/40 px-2 text-meta font-medium text-text-secondary">{l}</span>
+              ))}
+            </div>
+          ) : null}
+        </div>
+
+        <div className="col-span-2 flex min-w-0 flex-col gap-4 md:col-span-1 md:col-start-2">
+          {summary ? <p className="max-w-[72ch] text-sm leading-relaxed text-text-secondary">{summary}</p> : null}
+          {actions ? (
+            <div className="flex flex-wrap gap-2 max-sm:[&>*]:flex-1" data-testid="premium-cv-actions">{actions}</div>
+          ) : null}
+        </div>
+
         {facts.length > 0 ? (
-          <dl className="mt-8 flex flex-wrap gap-x-10 gap-y-4" data-testid="premium-cv-facts">
+          <dl className={["col-span-2 grid min-w-0", factGridColumns, "gap-3 border-t border-ink-600 pt-4 md:col-span-1 md:col-start-2 sm:gap-5"].join(" ")} data-testid="premium-cv-facts">
             {facts.map((f) => (
-              <div key={f.label} className="flex flex-col">
-                <dd className="order-1 font-display text-[1.6rem] font-semibold leading-none tabular-nums text-text-primary">{f.value}</dd>
-                <dt className="order-2 mt-1.5 text-meta text-text-muted">{f.label}</dt>
+              <div key={f.label} className="flex min-w-0 flex-col gap-1.5" data-testid={f.testid}>
+                <dd className="order-1 min-w-0 whitespace-normal break-words font-display text-[clamp(1.25rem,3vw,2rem)] font-semibold leading-tight tracking-tight tabular-nums text-text-primary">{f.value}</dd>
+                <dt className="order-2 text-meta leading-relaxed text-text-muted">{f.label}</dt>
               </div>
             ))}
           </dl>
         ) : null}
       </section>
-
-      {/* WHAT THEY CAN DO */}
-      <section className="flex flex-col gap-4" data-testid="premium-cv-capabilities">
-        <RegionHead eyebrow={capabilitiesHead.eyebrow} title={capabilitiesHead.title} className="mb-2" />
-        {capabilities.length === 0 ? (
-          <p className="text-sm text-text-secondary">{emptyCapabilities}</p>
-        ) : (
-          <ul className="flex flex-col">
-            {capabilities.map((c) => (
-              <li
-                key={c.key}
-                data-level={c.level}
-                className="grid grid-cols-[1fr_auto] items-center gap-x-6 gap-y-1 border-t border-text-primary/10 py-3.5 first:border-t-0 sm:grid-cols-[1fr_5.5rem_12rem_4.5rem]"
-              >
-                <span className="flex items-center gap-3 text-[1rem] font-medium text-text-primary">
-                  <LevelMark level={c.level} />
-                  {c.label}
-                </span>
-                <span className="max-sm:hidden">
-                  <EvidenceBar
-                    confirmed={c.confirmedHours}
-                    recorded={Math.max((c.hours ?? 0) - c.confirmedHours, 0)}
-                    width={80}
-                    label={c.evidenceText}
-                  />
-                </span>
-                <span className="text-meta text-text-muted max-sm:order-3 max-sm:col-span-2">{c.evidenceText}</span>
-                <span className="text-right font-display text-[1rem] font-semibold tabular-nums text-text-secondary">
-                  {c.hours !== null && c.hours > 0 ? formatHours(c.hours) : "—"}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
-        {hiddenCapabilities > 0 ? <p className="text-support text-text-muted">{moreLabel}</p> : null}
-      </section>
-
-      {/* WHERE AND WITH WHOM */}
-      <section className="flex flex-col gap-4" data-testid="premium-cv-experience">
-        <RegionHead eyebrow={experienceHead.eyebrow} title={experienceHead.title} className="mb-2" />
-        {experience.length === 0 ? (
-          <p className="text-sm text-text-secondary">{emptyExperience}</p>
-        ) : (
-          <ol className="flex flex-col">
-            {experience.map((e) => (
-              <li
-                key={e.key}
-                data-level={e.level}
-                className={`grid grid-cols-1 gap-x-6 gap-y-1.5 border-t border-text-primary/10 py-5 first:border-t-0 ${e.period ? "md:grid-cols-[9.5rem_1fr]" : ""}`}
-                data-testid="premium-cv-experience-row"
-              >
-                {e.period ? <Stamp className="pt-1">{e.period}</Stamp> : null}
-                <div className="flex min-w-0 flex-col gap-1">
-                  <p className="flex items-center gap-2.5 text-[1.02rem] font-medium leading-snug text-text-primary">
-                    <LevelMark level={e.level} />
-                    {e.title}
-                  </p>
-                  {e.subtitle ? <p className="text-support text-text-secondary">{e.subtitle}</p> : null}
-                  {e.detail ? <p className="text-meta text-text-muted">{e.detail}</p> : null}
-                  <Stamp className="!text-[0.66rem]">{e.source}</Stamp>
-                </div>
-              </li>
-            ))}
-          </ol>
-        )}
-      </section>
-
-      {leadership}
     </article>
   );
 }

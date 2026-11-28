@@ -58,7 +58,7 @@ const jobIdOf = (href: string | null): string => (href?.match(/\/jobs\/([0-9a-f-
 
 /** The board answered: its count line, not the honest "did not answer" line (a failure here). */
 async function boardAnswered(page: Page): Promise<void> {
-  const count = page.locator('main p[role="status"]:not([data-testid])').first();
+  const count = page.getByTestId("public-jobs-count");
   const unavailable = page.getByTestId("public-jobs-unavailable");
   await expect(count.or(unavailable)).toBeVisible({ timeout: 60_000 });
   expect(await unavailable.isVisible(), "the job board answered in time").toBe(false);

@@ -1,3 +1,4 @@
+import { OrganizationDoorsServer } from "@/components/app/organization/organization-doors-server";
 import { redirect } from "next/navigation";
 import { setRequestLocale, getTranslations } from "next-intl/server";
 import { TelemetryView } from "@/components/app/telemetry-view";
@@ -29,6 +30,9 @@ import {
 } from "@/lib/marketplace/service-requests-shared";
 import { listOwnServiceOfferings } from "@/lib/services/service-offerings";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import { supportsServiceRequestProposals } from "@/lib/commercial/commercial";
 import {
   MarketplaceLoopSection,
   type MarketplaceLabels,
@@ -80,6 +84,7 @@ export default async function ServiceRequestsPage({
   const category = normalizeDiscoveryCategory(sp.category);
 
   const t = await getTranslations("marketplace");
+  const tDoors = await getTranslations("organizationDoors");
   // The caller's OWN offerings are read alongside the loop (RLS-scoped, own
   // rows only) so the provider inbox's empty state can tell the truth: no
   // active service → no request can arrive; N active → nobody asked yet.
@@ -90,6 +95,14 @@ export default async function ServiceRequestsPage({
     listOwnServiceOfferings(),
     resolveEmployerCompanyContext(),
   ]);
+  let proposalCta: string | null = null;
+  if (inc.kind === "ok" && inc.rows.some((request) => request.status === "accepted")) {
+    const workspace = await getWorkspaceContext();
+    if (workspace.activeWorkspaceId === PERSONAL_WORKSPACE_ID && await supportsServiceRequestProposals(supabase)) {
+      const commercial = await getTranslations("commercial");
+      proposalCta = commercial("proposalsTitle");
+    }
+  }
   const isCompany = employer.kind === "ok";
   const needsMigration =
     disc.kind === "needs-migration" ||
@@ -104,6 +117,10 @@ export default async function ServiceRequestsPage({
     category: category ?? "",
     active: country !== null || category !== null,
   };
+  // ONE "manage the services you offer" link on the page (owner P0 2026-11-24,
+  // decision 0032): the empty discover list carries it when it shows; else the
+  // empty incoming list when you have no active service; else the quiet line.
+  const discoverCarriesServicesLink = discoverable.length === 0 && !filter.active;
 
   const labels: MarketplaceLabels = {
     notAvailable: t("notAvailable"),
@@ -131,7 +148,7 @@ export default async function ServiceRequestsPage({
       ownActive === 0
         ? t("incomingEmptyNoActive")
         : t("incomingEmptyHasActive", { count: ownActive }),
-    incomingEmptyCta: ownActive === 0 ? t("linkToServices") : null,
+    incomingEmptyCta: ownActive === 0 && !discoverCarriesServicesLink ? t("linkToServices") : null,
     filterCountry: t("filterCountry"),
     filterCategory: t("filterCategory"),
     filterApply: t("filterApply"),
@@ -142,6 +159,7 @@ export default async function ServiceRequestsPage({
     decline: t("decline"),
     withdraw: t("withdraw"),
     messageCta: t("messageCta"),
+    proposalCta,
     errorGeneric: t("errorGeneric"),
     duplicate: t("duplicate"),
     requesterMessage: t("requesterMessage"),
@@ -165,6 +183,10 @@ export default async function ServiceRequestsPage({
 
   return (
     <div className="flex flex-col gap-4" data-testid="service-requests-page">
+      {/* The marketplace is one of the organization's doors: the strip stays
+          in view here too (carousel spec N7a). Nothing renders outside an
+          organization context. */}
+      <OrganizationDoorsServer ariaLabel={tDoors("label")} />
       <TelemetryView
         event={FUNNEL_EVENTS.marketplaceOrOpportunitiesViewed}
         metadata={{ surface: "service_requests" }}
@@ -193,14 +215,16 @@ export default async function ServiceRequestsPage({
       />
       {/* Cross-link to the other half of the loop — manage / activate the
           services that make you discoverable here. Quiet, secondary affordance. */}
-      <Link
-        href={"/dashboard/services" as "/dashboard"}
-        data-testid="requests-to-services-link"
-        className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
-      >
-        {t("linkToServices")}
-        <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-      </Link>
+      {!discoverCarriesServicesLink && ownActive > 0 ? (
+        <Link
+          href={"/dashboard/services" as "/dashboard"}
+          data-testid="requests-to-services-link"
+          className="inline-flex w-fit items-center gap-1.5 text-xs font-medium text-text-muted transition-colors hover:text-brand-blue"
+        >
+          {t("linkToServices")}
+          <ArrowRight className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+        </Link>
+      ) : null}
 
       {/* Marketplace connections (§8.4): a request is not a dead end — it links
           onward to matching (find the right people), planning (bookings live

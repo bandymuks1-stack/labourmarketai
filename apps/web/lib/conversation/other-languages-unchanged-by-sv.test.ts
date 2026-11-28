@@ -170,7 +170,157 @@ const NOT_EUROS_IS_NOT_PREFILLED: readonly Intended[] = [
   ...otherCurrency("Salary 3000 CHF", "chf"),
 ];
 
-const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED];
+/**
+ * (c) A PERSON'S OWN BOOKINGS REACH THE OFFERS ANSWER IN EVERY LANGUAGE.
+ *
+ * main's `offers` intent knew only the English singular `booking` (the word
+ * boundary refused "bookings") and the Swedish `bokning`, so "Show my
+ * bookings", "Meine Buchungen" or "moje rezerwacje" got the AI-off reply.
+ * Catalog sentences that name bookings now route there too.
+ */
+const BOOKINGS_ARE_OFFERS: readonly Intended[] = [
+  {
+    sentence:
+      "Buchungen und Projektzuweisungen konnten nicht gelesen werden, daher kann jemand, der als frei angezeigt wird, bereits verplant sein.",
+    reader: "route",
+    now: ["offers", 2],
+  },
+  { sentence: "Znika, gdy otworzysz stronę rezerwacji.", reader: "route", now: ["offers", 2] },
+];
+
+/**
+ * (d) ACCOUNT QUESTIONS OPEN THE SETTINGS PAGE (owner 2026-11-19).
+ *
+ * The chat had no answer for account and privacy questions ("Delete my
+ * account", "Change my password"): they got the AI-off reply. Two help
+ * topics now open the existing settings and privacy pages. One catalog
+ * sentence about resetting a password now routes to the settings door.
+ */
+const ACCOUNT_QUESTIONS_OPEN_SETTINGS: readonly Intended[] = [
+  { sentence: "Password reset", reader: "route", now: ["product-help", 16] },
+  { sentence: "Password reset", reader: "helpTopic", now: "account" },
+];
+
+/**
+ * (e) FILLING IN A WORK RECORD IS THE JOURNAL ACTION (owner P1 2026-11-21).
+ *
+ * "Noriu užpildyti darbo ataskaitas" reached `figures` on the bare report
+ * noun and the chat answered with the organisation's figures and exports. A
+ * FILL verb bound to a work-record noun now routes to `log-work` at 12, in
+ * every language (intent-router.ts, FILL_VERB_SOURCE). Sentences that were
+ * already `log-work` only score higher; the two that were `figures` describe
+ * work the person did (filling Excel reports), which is a journal entry, not a
+ * figures read — and with the log-work goal of the fixture they continue it.
+ */
+const FILL_IS_THE_JOURNAL: readonly Intended[] = [
+  { sentence: "pildyk žurnalą", reader: "route", now: ["log-work", 14] },
+  { sentence: "fill in my work journal", reader: "route", now: ["log-work", 14] },
+  { sentence: "Tagebuch ausfüllen", reader: "route", now: ["log-work", 14] },
+  { sentence: "uzpildyk darbo zurnala", reader: "route", now: ["log-work", 14] },
+  { sentence: "You fill it in here, in the Work journal.", reader: "route", now: ["log-work", 14] },
+  ...[
+    "Tvarkiau sandėlio likučius, pildžiau Excel ataskaitą ir ruošiau sąskaitas",
+    "Excel ataskaitų pildymas",
+  ].flatMap((sentence): Intended[] => [
+    { sentence, reader: "route", now: ["log-work", 12] },
+    { sentence, reader: "journalRequest", now: true },
+    { sentence, reader: "turn", now: "follow-up" },
+  ]),
+];
+
+/**
+ * (f) OFFERING A TEAM IS THE TEAM-OFFER FLOW (owner P1 2026-11-22). Two
+ * catalog lines about offering a team reached the incoming-`offers` list on
+ * the bare "offer"; an OFFER verb bound to a TEAM noun now opens the ONE
+ * team-offer form (`offer-team`).
+ */
+const OFFERING_A_TEAM: readonly Intended[] = [
+  { sentence: "Not authorized to offer this team", reader: "route", now: ["offer-team", 12] },
+  { sentence: "received offer parsing - team-level facts only", reader: "route", now: ["offer-team", 12] },
+];
+
+/**
+ * (g) A DUTCH HEADCOUNT WITH THE SINGULAR "HEB" IS A NEED (chat path check
+ * 2026-11-19). "Ik heb 3 timmermannen nodig" — I need 3 carpenters — measured
+ * `unknown`: the verb-final `nodig` rule took the plural `hebben` only. It now
+ * opens the demand intake, as its plural form already did.
+ */
+const DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED: readonly Intended[] = [
+  { sentence: "Ik heb 3 timmermannen nodig", reader: "route", now: ["need-workers", 10] },
+  { sentence: "Ik heb 3 timmermannen nodig", reader: "turn", now: "new-goal" },
+];
+
+/**
+ * (h) A HEADCOUNT WRITTEN IN WORDS, OR WITH A PERSON NOUN THE READER DID NOT
+ * KNOW, IS THE SAME HEADCOUNT (owner P1 2026-11-22: "мне нужны пять рабочих").
+ * Number words become digits before the headcount is read ("dviejų" → 2,
+ * "eleven" → 11), and "рабочих" / "Mitarbeiter" / "werknemers" / "строител…"
+ * count people as "работник…" already did. The route did not change except
+ * by score, or from `unknown` to the demand it is.
+ */
+const WORD_NUMBER_HEADCOUNT: readonly Intended[] = [
+  { sentence: "Eleven workers needed", reader: "headcount", now: { total: 11, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Eleven workers needed", reader: "need", now: [null, null, 11, null, null] },
+  { sentence: "Create a programme for eleven people", reader: "headcount", now: { total: 11, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Create a programme for eleven people", reader: "need", now: [null, null, 11, null, null] },
+  { sentence: "Personal 5 Mitarbeiter", reader: "headcount", now: { total: 5, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Personal 5 Mitarbeiter", reader: "need", now: [null, null, 5, null, null] },
+  { sentence: "Reikia dviejų santechnikų kitai savaitei Vilniuje", reader: "headcount", now: { total: 2, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Reikia dviejų santechnikų kitai savaitei Vilniuje", reader: "need", now: ["plumber", "LT", 2, null, null] },
+  { sentence: "Reikia dviejų suvirintojų Nyderlanduose kitą savaitę", reader: "headcount", now: { total: 2, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Reikia dviejų suvirintojų Nyderlanduose kitą savaitę", reader: "need", now: ["welder", "NL", 2, "this_week", null] },
+  { sentence: "Мы кадровое агентство, можем предложить 30 рабочих", reader: "headcount", now: { total: 30, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Мы кадровое агентство, можем предложить 30 рабочих", reader: "need", now: [null, null, 30, null, null] },
+  { sentence: "one worker_input row per accepted slug", reader: "headcount", now: { total: 1, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "one worker_input row per accepted slug", reader: "need", now: [null, null, 1, null, null] },
+  { sentence: "В этой организации один человек, поэтому владелец утверждает собственные запросы.", reader: "headcount", now: { total: 1, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "В этой организации один человек, поэтому владелец утверждает собственные запросы.", reader: "need", now: [null, null, 1, null, null] },
+  { sentence: "Нужны 12 монтажников строительных лесов в Роттердаме с 5 октября.", reader: "route", now: ["need-workers", 14] },
+  { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "route", now: ["need-workers", 4] },
+  { sentence: "Bekijk werknemers die bij je vraag passen.", reader: "turn", now: "new-goal" },
+  // "ludzi" counts people in the need form's digit reader too, and the value
+  // reader counts "30 рабочих" as the headcount it is.
+  { sentence: "Mamy budowę w Umeå, potrzeba 3 ludzi", reader: "headcount", now: { total: 3, teams: null, perTeam: null, basis: "count", clarification: null } },
+  { sentence: "Mamy budowę w Umeå, potrzeba 3 ludzi", reader: "need", now: [null, null, 3, null, null] },
+  { sentence: "Мы кадровое агентство, можем предложить 30 рабочих", reader: "value", now: [null, null, 30, null, null, null, null, null] },
+];
+
+/**
+ * (i) MARKETS, POLISH TRADES AND THE DAY BEFORE YESTERDAY, IN EVERY LANGUAGE
+ * (entity-recognition audit 2026-11-22, entity-recognition-7-locales.test.ts).
+ *
+ * A market named in German, Dutch or Polish ("in Schweden", "in Zweden", "w
+ * Szwecji") resolved no country: the needles held only the LT/EN/RU names.
+ * The Polish need verbs had no Polish trade to bind to, so "Potrzebuję 4
+ * murarzy" was `unknown` and "Szukamy spawacza, 40 godzin tygodniowo" (we are
+ * hiring a welder) was read as a work log. "Eergisteren" / "позавчера" now
+ * count as a day for the day + duration rule, as "užvakar" already did.
+ */
+const ENTITIES_IN_EVERY_LANGUAGE: readonly Intended[] = [
+  { sentence: "Arbeit in Schweden", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Werk in Zweden", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Praca w Szwecji", reader: "need", now: [null, "SE", null, null, null] },
+  { sentence: "Potrzebuję 4 murarzy w Malmö", reader: "route", now: ["need-workers", 6] },
+  { sentence: "Potrzebuję 4 murarzy w Malmö", reader: "turn", now: "new-goal" },
+  { sentence: "Szukamy spawacza, 40 godzin tygodniowo", reader: "route", now: ["need-workers", 6] },
+  { sentence: "Szukamy spawacza, 40 godzin tygodniowo", reader: "turn", now: "new-goal" },
+  { sentence: "Eergisteren 8 uur gewerkt.", reader: "route", now: ["log-work", 7] },
+  { sentence: "Позавчера работал 8 часов.", reader: "route", now: ["log-work", 7] },
+];
+
+/**
+ * (j) A WRITTEN NUMBER IS A DURATION IN EVERY LANGUAGE (DUPLICATION_AUDIT AI-9).
+ *
+ * The journal's duration reader knew only Lithuanian number words, so "два
+ * дня" carried no time while "2 дня" carried two days. It now reads written
+ * numbers through the shared lexicon (`word-numbers.ts`) and the same digit
+ * readers.
+ */
+const WRITTEN_NUMBER_DURATIONS: readonly Intended[] = [
+  { sentence: "свободен два дня", reader: "journalTime", now: { value: 2, unitSlug: "days" } },
+];
+
+const INTENDED: readonly Intended[] = [...BLOCKED_IS_NOT_DONE, ...NOT_EUROS_IS_NOT_PREFILLED, ...ACCOUNT_QUESTIONS_OPEN_SETTINGS, ...BOOKINGS_ARE_OFFERS, ...FILL_IS_THE_JOURNAL, ...OFFERING_A_TEAM, ...DUTCH_SINGULAR_HEADCOUNT_IS_A_NEED, ...WORD_NUMBER_HEADCOUNT, ...ENTITIES_IN_EVERY_LANGUAGE, ...WRITTEN_NUMBER_DURATIONS];
 
 /**
  * (c) A SENTENCE THAT STATES NO STATE WRITES NONE (review finding 4).

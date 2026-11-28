@@ -47,6 +47,8 @@ function asAny(c: SupabaseClient): any {
 
 /** Same ceiling the institution side uses; the function clamps to 100. */
 const DEMAND_LIMIT = 100;
+/** At most this many of the person's own live cohorts are read, newest first. */
+const COHORT_LIMIT = 20;
 
 type CohortMembershipRow = {
   cohort_id: string;
@@ -96,7 +98,13 @@ async function readOwnCohorts(
     )
     .eq("profile_id", profileId)
     .eq("status", "active")
-    .limit(20);
+    // Newest membership first, with a stable tiebreak. Without an order the
+    // limit kept an ARBITRARY 20: a learner in 21 live cohorts lost one at
+    // random, and in production the one dropped was the cohort they had just
+    // joined (prod-qa-walk learning-practice L-5, run 45240106971).
+    .order("added_at", { ascending: false })
+    .order("cohort_id", { ascending: true })
+    .limit(COHORT_LIMIT);
   if (res.error) return [];
   const rows = (res.data ?? []) as CohortMembershipRow[];
   const live = rows.filter(

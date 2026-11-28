@@ -363,7 +363,9 @@ async function readTemplateStates(
  * One bounded, RLS-scoped pass building everything the timesheets section
  * renders. Never throws; never fabricates.
  */
-export async function getTimesheetsOverview(): Promise<TimesheetsOverviewResult> {
+export async function getTimesheetsOverview(
+  { syncDecisions = true }: { syncDecisions?: boolean } = {},
+): Promise<TimesheetsOverviewResult> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -405,7 +407,9 @@ export async function getTimesheetsOverview(): Promise<TimesheetsOverviewResult>
   // synced through the gated RPC (which only copies the engine outcome) and
   // re-read. Bounded to the visible page; failures degrade silently — the
   // UI still shows the engine timeline, so nothing is hidden.
+  // Read-only consumers retain both recorded states without synchronizing a document.
   const stale = sheets.filter((s) => {
+    if (!syncDecisions) return false;
     if (s.status !== "submitted") return false;
     const wf = workflows.get(s.id);
     return wf !== undefined && wf.instanceStatus !== "pending";

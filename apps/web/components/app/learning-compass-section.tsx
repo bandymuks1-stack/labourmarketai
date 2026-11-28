@@ -66,6 +66,45 @@ export async function LearningCompassSection({
           </ExplainMore>
         </header>
 
+        {/* The next step comes first so it is on the phone's first screen
+            (UX_GAPS 2026-11-18 ST-1). */}
+        <div className="flex flex-col gap-1" data-testid="compass-next">
+          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("next")}</h3>
+          {/* Every step is a door, not a sentence: each links to the exact
+              section (same page anchor or route) where the person does it. */}
+          <ol className="flex list-decimal flex-col pl-5 text-xs text-text-primary">
+            {nextSteps.map((step) => (
+              <li key={step} data-testid={`compass-step-${step}`}>
+                <Link href={STEP_HREF[step]} className="inline-flex min-h-11 items-center hover:underline">
+                  {t(`step_${step}`)} →
+                </Link>
+              </li>
+            ))}
+          </ol>
+          <div className="mt-1 flex flex-wrap gap-2">
+            <Link href="/dashboard/journal" className="rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90">
+              {t("openJournal")}
+            </Link>
+          </div>
+          {/* The student's own door to practice places (owner 2026-11-14,
+              group 4: a dedicated internship discovery path). It is the ONE
+              board narrowed by the type the employer stated — the same
+              filters, the same interest button and the same conversation
+              with the employer — never a second listing engine. */}
+          <div className="flex flex-wrap gap-x-4">
+            <Link
+              href="/dashboard/opportunities?opportunityType=internship"
+              className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline"
+              data-testid="compass-open-internships"
+            >
+              {t("openInternships")} →
+            </Link>
+            <Link href="/dashboard/opportunities" className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline" data-testid="compass-open-board">
+              {t("openBoard")} →
+            </Link>
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <div className="flex flex-col gap-1" data-testid="compass-becoming">
             <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("becoming")}</h3>
@@ -183,23 +222,6 @@ export async function LearningCompassSection({
               ))}
             </ul>
           )}
-          {/* The student's own door to practice places (owner 2026-11-14,
-              group 4: a dedicated internship discovery path). It is the ONE
-              board narrowed by the type the employer stated — the same
-              filters, the same interest button and the same conversation
-              with the employer — never a second listing engine. */}
-          <div className="flex flex-wrap gap-x-4">
-            <Link
-              href="/dashboard/opportunities?opportunityType=internship"
-              className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline"
-              data-testid="compass-open-internships"
-            >
-              {t("openInternships")} →
-            </Link>
-            <Link href="/dashboard/opportunities" className="inline-flex min-h-11 items-center text-xs font-medium text-text-primary underline-offset-4 hover:underline" data-testid="compass-open-board">
-              {t("openBoard")} →
-            </Link>
-          </div>
         </div>
 
         <div className="flex flex-col gap-1" data-testid="compass-missing">
@@ -351,26 +373,6 @@ export async function LearningCompassSection({
             )}
           </div>
         ) : null}
-
-        <div className="flex flex-col gap-1" data-testid="compass-next">
-          <h3 className="font-mono text-meta uppercase tracking-label text-text-muted">{t("next")}</h3>
-          {/* Every step is a door, not a sentence: each links to the exact
-              section (same page anchor or route) where the person does it. */}
-          <ol className="flex list-decimal flex-col gap-1 pl-5 text-xs text-text-primary">
-            {nextSteps.map((step) => (
-              <li key={step} data-testid={`compass-step-${step}`}>
-                <Link href={STEP_HREF[step]} className="hover:underline">
-                  {t(`step_${step}`)} →
-                </Link>
-              </li>
-            ))}
-          </ol>
-          <div className="mt-1 flex flex-wrap gap-2">
-            <Link href="/dashboard/journal" className="rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90">
-              {t("openJournal")}
-            </Link>
-          </div>
-        </div>
       </section>
     </Card>
   );

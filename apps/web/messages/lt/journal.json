@@ -440,7 +440,16 @@
       "outcomeBlocked": "nepatvirtinta ({code})",
       "receipt": "Patvirtinta: {title}",
       "receiptSkills": "{count, plural, one {# įgūdis} few {# įgūdžiai} other {# įgūdžių}}",
-      "skillsUnavailable": "Įgūdžių sąrašo nepavyko nuskaityti — palietimas patvirtins tik patį įrašą."
+      "skillsUnavailable": "Įgūdžių sąrašo nepavyko nuskaityti — palietimas patvirtins tik patį įrašą.",
+      "projectFilterLabel": "Projektas",
+      "projectAll": "Visi projektai ({n})",
+      "projectNone": "Be projekto ({n})",
+      "projectUnnamed": "Projektas, pavadinimas nematomas",
+      "projectOption": "{name} ({n})",
+      "projectShow": "Rodyti",
+      "projectResult": "Rodoma {shown} iš {total} įrašų",
+      "projectOnCard": "Projektas: {name}",
+      "noProjectOnCard": "Be projekto"
     },
     "loadFailed": "Peržiūros eilės nepavyko įkelti. Tai nereiškia, kad peržiūrėti nėra ko — pabandykite dar kartą."
   },
@@ -599,6 +608,13 @@
     "dayEmpty": "Šią dieną įrašų nėra.",
     "moreDays": "Rodoma naujausia diena su įrašais. Dar {count, plural, one {# diena} few {# dienos} other {# dienų}} su įrašais — pasirinkite datą kalendoriuje.",
     "periodEmpty": "Šiuo laikotarpiu įrašų nėra."
+  },
+  "dayChoice": {
+    "today": "Šiandien",
+    "yesterday": "Vakar",
+    "weekAgo": "Prieš savaitę",
+    "calendar": "Kalendorius",
+    "earlier": "Ankstesni įrašai"
   },
   "spreadsheet": {
     "title": "Lentelės režimas — keli įrašai iš karto",
