@@ -410,6 +410,7 @@ function ExperienceCard({
     <div
       className="flex flex-col gap-2 rounded-md border border-border-subtle bg-surface-1/40 p-3"
       data-testid={testId}
+      data-experience-id={row.id}
       data-sentiment={row.sentiment}
       data-moderation={row.moderationStatus}
       data-dispute={row.disputeStatus}
