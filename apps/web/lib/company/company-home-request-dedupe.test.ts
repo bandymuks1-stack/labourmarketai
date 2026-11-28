@@ -600,12 +600,33 @@ describe("the request-scoped readers keep their meaning", () => {
   });
 
   it("each caller gets its own copy of the shared capability list", async () => {
-    const { readOrganizationCapabilities } = await import("@/lib/organizations/capability-read");
+    const { readOrganizationCapabilities, readOrganizationCapabilitiesState } = await import("@/lib/organizations/capability-read");
     const a = await readOrganizationCapabilities(ORG);
     const b = await readOrganizationCapabilities(ORG);
+    const state = await readOrganizationCapabilitiesState(ORG);
     expect(a).toEqual(["workforce_provider", "employer"]);
     expect(a).not.toBe(b);
+    expect(state).toEqual({ kind: "ok", capabilities: a });
+    if (state.kind === "ok") expect(state.capabilities).not.toBe(a);
     expect(fromCount("organization_roles")).toBe(1);
+  });
+
+  it("distinguishes a successful capability read of zero roles from a failed read", async () => {
+    const { readOrganizationCapabilities, readOrganizationCapabilitiesState } = await import("@/lib/organizations/capability-read");
+    TABLE_ROWS.organization_roles = [];
+    expect(await readOrganizationCapabilitiesState(ORG)).toEqual({ kind: "ok", capabilities: [] });
+
+    const read = requestClient.from;
+    const failed = vi.spyOn(requestClient, "from").mockImplementation((table) => table === "organization_roles"
+      ? { select: () => ({ eq: async () => ({ data: null, error: { code: "57014" } }) }) } as never
+      : read(table));
+    try {
+      expect(await readOrganizationCapabilitiesState("other-org")).toEqual({ kind: "unavailable" });
+      expect(await readOrganizationCapabilities("other-org")).toEqual([]);
+      expect(failed).toHaveBeenCalledTimes(1);
+    } finally {
+      failed.mockRestore();
+    }
   });
 
   it("team members are shared per CLIENT: another client (another identity) reads for itself", async () => {

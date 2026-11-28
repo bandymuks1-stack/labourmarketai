@@ -6,7 +6,7 @@ import { requireRoleOrRedirect } from "@/lib/auth/require-role";
 import { resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
-import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
+import { readOrganizationCapabilitiesState } from "@/lib/organizations/capability-read";
 import { EmployerContextNotice } from "@/components/app/employer-context-notice";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import {
@@ -508,21 +508,24 @@ export default async function CompanyScoutingPage({
   const [emptyDemandCompany, emptyDemandCapabilities] = demands.length === 0
     ? await Promise.all([
         getAccessibleCompanyById(employerContext.companyId),
-        readOrganizationCapabilities(employerContext.organizationId),
+        readOrganizationCapabilitiesState(employerContext.organizationId),
       ])
-    : [null, []] as const;
+    : [null, null] as const;
   // Only staffing-type companies default to the offer intake. A dual-role
   // company can choose the hiring form; an agency-only workspace works from
   // the needs its clients share in Clients and partners.
   const emptyDemandAudience =
-    emptyDemandCompany?.kind === "ok" && emptyDemandCompany.row
+    emptyDemandCompany?.kind === "ok" && emptyDemandCompany.row && emptyDemandCapabilities?.kind === "ok"
       ? resolveNeedsAudience({
           companyType: emptyDemandCompany.row.companyType,
-          capabilities: emptyDemandCapabilities,
+          capabilities: emptyDemandCapabilities.capabilities,
         })
       : null;
   const tPartners = emptyDemandAudience?.audience === "offer" && !emptyDemandAudience.canChoose
     ? await getTranslations("organizationDoors.pages.partners")
+    : null;
+  const tOrganization = demands.length === 0 && !emptyDemandAudience
+    ? await getTranslations("organizationDoors")
     : null;
 
   return (
@@ -559,6 +562,14 @@ export default async function CompanyScoutingPage({
                 {tPartners("title")}
               </Link>
             </>
+          ) : tOrganization ? (
+            <Link
+              href={`/${locale}/dashboard/company/needs`}
+              className={buttonLinkClassName("secondary", "sm")}
+              data-testid="scouting-no-demands-needs"
+            >
+              {tOrganization("needs")}
+            </Link>
           ) : (
             <>
               <p className="text-sm text-text-secondary">{t("noDemands")}</p>

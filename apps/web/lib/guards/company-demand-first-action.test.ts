@@ -135,7 +135,14 @@ describe("scouting empty states are actionable (F-D2)", () => {
   it("the empty state opens hiring for dual staffing companies and shared client needs for agency-only workspaces", () => {
     const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
     expect(page).toMatch(/emptyDemandAudience\?\.audience === "offer" && !emptyDemandAudience\.canChoose/);
-    expect(page).toMatch(/\{tPartners \? \([\s\S]*?href=\{`\/\$\{locale\}\/dashboard\/company\/partners`\}[\s\S]*?data-testid="scouting-no-demands-partners"[\s\S]*?\) : \([\s\S]*?<NeedDoorLink[^>]*forceNeedAudience=\{emptyDemandAudience\?\.audience === "offer"\}/);
+    expect(page).toMatch(/\{tPartners \? \([\s\S]*?href=\{`\/\$\{locale\}\/dashboard\/company\/partners`\}[\s\S]*?data-testid="scouting-no-demands-partners"/);
+    expect(page).toMatch(/<NeedDoorLink[^>]*forceNeedAudience=\{emptyDemandAudience\?\.audience === "offer"\}/);
+  });
+
+  it("unknown company or capability reads offer the neutral Needs link", () => {
+    const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    expect(page).toMatch(/emptyDemandCompany\?\.kind === "ok" && emptyDemandCompany\.row && emptyDemandCapabilities\?\.kind === "ok"/);
+    expect(page).toMatch(/\) : tOrganization \? \(\s*<Link[^>]*href=\{`\/\$\{locale\}\/dashboard\/company\/needs`\}[^>]*data-testid="scouting-no-demands-needs"/);
   });
 
   it("copy no longer tells the company to structure skills itself", () => {

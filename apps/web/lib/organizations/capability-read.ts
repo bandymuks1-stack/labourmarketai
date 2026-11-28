@@ -28,16 +28,27 @@ function asAny<T>(c: T): any {
   return c;
 }
 
+type OrganizationCapabilitiesState =
+  | { kind: "ok"; capabilities: readonly string[] }
+  | { kind: "unavailable" };
+
+/** Use when routing depends on whether a capability is absent or unreadable. */
+export async function readOrganizationCapabilitiesState(
+  organizationId: string,
+): Promise<OrganizationCapabilitiesState> {
+  if (!organizationId) return { kind: "unavailable" };
+  const state = await readOrganizationCapabilitiesOnce(organizationId);
+  return state.kind === "ok" ? { kind: "ok", capabilities: [...state.capabilities] } : state;
+}
+
 /** Empty on ANY missing state — an absent table, no session or no rows all
  *  read the same honest nothing, never an error surface on a page whose real
  *  subject is something else. */
 export async function readOrganizationCapabilities(
   organizationId: string,
 ): Promise<readonly string[]> {
-  if (!organizationId) return [];
-  // A fresh array per caller: the request-shared read is never handed out
-  // for a caller to change in place.
-  return [...(await readOrganizationCapabilitiesOnce(organizationId))];
+  const state = await readOrganizationCapabilitiesState(organizationId);
+  return state.kind === "ok" ? state.capabilities : [];
 }
 
 /**
@@ -51,18 +62,19 @@ export async function readOrganizationCapabilities(
  */
 const readOrganizationCapabilitiesOnce = cache(async function readOrganizationCapabilitiesOnce(
   organizationId: string,
-): Promise<readonly string[]> {
+): Promise<OrganizationCapabilitiesState> {
   try {
     const supabase = await createClient();
     const { data, error } = await asAny(supabase)
       .from("organization_roles")
       .select("role_slug")
       .eq("organization_id", organizationId);
-    if (error || !Array.isArray(data)) return [];
-    return data
-      .map((r: { role_slug?: string }) => String(r.role_slug ?? ""))
-      .filter(Boolean);
+    if (error || !Array.isArray(data)) return { kind: "unavailable" };
+    return {
+      kind: "ok",
+      capabilities: data.map((r: { role_slug?: string }) => String(r.role_slug ?? "")).filter(Boolean),
+    };
   } catch {
-    return [];
+    return { kind: "unavailable" };
   }
 });
