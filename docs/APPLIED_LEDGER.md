@@ -2874,3 +2874,8 @@ versions never match file prefixes by construction, so a push would re-run every
 - Read-back: both approved function bodies and enabled triggers match; existing table access and agency lifecycle function definitions are unchanged; no new security advisory. No historical hires were backfilled.
 - Existing production orders-bookings walk `46112666336` is pending. Its synthetic hire → journal → company confirmation → Living CV chain must pass before claiming the user journey verified.
 - Rollback: `supabase/rollbacks/20261123113700_booking_hire_opens_work_relationship_v1.down.sql`, SHA256 `3D1BC41F2CC2D2E7BF70FC0925A01088C104178508B5F0A024003280A505B4E6`. Locks before checking and refuses after this mechanism has recorded history; then use a history-preserving forward fix.
+
+## 2026-11-28 — #3301 reply moderation
+
+- Applied `20261128142955_experience_reply_moderation_atomic_v1.sql` through Supabase MCP. The production ledger records `experience_reply_moderation_atomic_v1` under version `20261128152916`. The owner-approved SHA-256 is `B888E48138DAF775ED3CE8DC92273EE4EED4A86B36A6E9B90C1C3356E61E883A`.
+- Read-back confirmed the approved function body and preserved execution privileges. The rollback is `20261128142955_experience_reply_moderation_atomic_v1.down.sql`, SHA-256 `9AE890B9B4BE0979CE8A88CBDC3F4CCE4AFD690DBEF1B82438C269CA5AE9B599`.
