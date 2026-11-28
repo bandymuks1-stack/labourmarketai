@@ -4,6 +4,7 @@ import { createElement, type ReactNode } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 
+import { PUBLIC_JOB_GENERIC_TITLE } from "@/lib/seo/public-job-json-ld";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import type { LiveMarketVacancySample } from "@/lib/market/live-market-landing";
 
@@ -292,4 +293,14 @@ describe("job origin is recorded provenance, not a language guess", () => {
     expect(html).toContain("Application link not provided");
     expect(html).not.toContain("Apply on this platform");
   });
+});
+
+it.each([null, "", "  "])("shows the localized card fallback for occupation %j", (occupation) => {
+  const html = renderToStaticMarkup(createElement(PublicVacancyCard, {
+    vacancy: vacancy(1, { professionSlug: null, occupation, sourceLanguage: "sv" }),
+    locale: "lt",
+    genericTitle: PUBLIC_JOB_GENERIC_TITLE.lt,
+  }));
+  expect(html).toMatch(/<h2\b[^>]*>Darbo pasiūlymas<\/h2>/);
+  expect(html).not.toMatch(/<h2\b[^>]*lang=/);
 });

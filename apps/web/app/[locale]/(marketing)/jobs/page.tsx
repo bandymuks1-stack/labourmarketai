@@ -37,7 +37,7 @@ import {
   listPublicVacancyPreviewsByIds,
 } from "@/lib/vacancy-store/vacancy-read";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { buildJobsListJsonLd } from "@/lib/seo/public-job-json-ld";
+import { buildJobsListJsonLd, PUBLIC_JOB_GENERIC_TITLE } from "@/lib/seo/public-job-json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import {
   PUBLIC_VACANCY_PROFESSION_SLUGS,
@@ -132,18 +132,6 @@ const INTRO: L = {
  *  promises the employer, location and apply route "after you sign in" — said to
  *  a signed-in worker it is a false instruction (the board never reads it as
  *  such, but the sentence did). They get the same facts, one tap away. */
-/** Position name when the preview carries no occupation label (structured
- *  data only); the same generic noun the detail page uses for its heading. */
-const GENERIC_TITLE: L = {
-  en: "Job opening",
-  lt: "Darbo pasiūlymas",
-  ru: "Вакансия",
-  nl: "Vacature",
-  de: "Stellenangebot",
-  pl: "Oferta pracy",
-  sv: "Ledigt jobb",
-};
-
 const INTRO_MEMBER: L = {
   en: "Live vacancies imported from official public employment sources. Open a vacancy to see the employer, the location and how to apply.",
   lt: "Gyvos darbo vietos iš oficialių viešų užimtumo šaltinių. Atidaryk skelbimą — pamatysi darbdavį, vietovę ir kaip kandidatuoti.",
@@ -655,7 +643,7 @@ export default async function JobsPage({
                 description: professionCopy?.description ?? INTRO[active],
                 path: professionCopy ? pageHref(1) : undefined,
                 previews: result.vacancies,
-                genericTitle: GENERIC_TITLE[active],
+                genericTitle: PUBLIC_JOB_GENERIC_TITLE[active],
                 localizedName: (vacancy) => localizedProfessionName(vacancy.professionSlug),
               }),
             ),
@@ -805,7 +793,7 @@ export default async function JobsPage({
                     vacancy={v}
                     locale={active}
                     headingFallback={localizedProfessionName(v.professionSlug) ?? undefined}
-                    genericTitle={GENERIC_TITLE[active]}
+                    genericTitle={PUBLIC_JOB_GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     memberFacts={cardFacts(v.id)}
                     lockedFactsLabel={lockedFactsLabel}
@@ -885,7 +873,7 @@ export default async function JobsPage({
                     vacancy={v}
                     locale={active}
                     headingFallback={localizedProfessionName(v.professionSlug) ?? undefined}
-                    genericTitle={GENERIC_TITLE[active]}
+                    genericTitle={PUBLIC_JOB_GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     memberFacts={cardFacts(v.id)}
                     lockedFactsLabel={lockedFactsLabel}

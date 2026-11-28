@@ -34,6 +34,15 @@ import {
   type VacancyFieldOrigin,
 } from "./vacancy-contract";
 
+// These exact publisher occupation labels describe jobs outside the catalogue.
+const PUBLISHER_OCCUPATIONS_OUTSIDE_CATALOGUE = new Set([
+  "affärsutvecklare",
+  "bilrekonditionerare",
+  "doktorand",
+  "hundtrimmare",
+  "specialistofficer",
+]);
+
 export interface VacancyCategorizationInput {
   readonly titleRaw: string;
   readonly descriptionRaw: string;
@@ -91,7 +100,10 @@ export function categorizeVacancy(
   //    receptionist). The publisher already said what the job is; a title
   //    guess would contradict it.
   const knownOutside =
-    fromOccupation === null && occupation.length > 0 && namesOccupationOutsideCatalogue(occupation);
+    fromOccupation === null &&
+    occupation.length > 0 &&
+    (PUBLISHER_OCCUPATIONS_OUTSIDE_CATALOGUE.has(occupation.toLocaleLowerCase("sv").normalize("NFC")) ||
+      namesOccupationOutsideCatalogue(occupation));
   const fromTitle =
     fromOccupation ?? (!knownOutside && title.length > 0 ? detectNeedProfession(title) : null);
   const professionSlug = fromTitle;

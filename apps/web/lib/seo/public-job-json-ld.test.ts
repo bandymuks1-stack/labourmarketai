@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
-import { buildJobDetailJsonLd, buildJobsListJsonLd } from "./public-job-json-ld";
+import { buildJobDetailJsonLd, buildJobsListJsonLd, PUBLIC_JOB_GENERIC_TITLE } from "./public-job-json-ld";
 
 /**
  * K3 — anonymous JSON-LD for the public job pages must carry ONLY what the
@@ -74,25 +74,38 @@ describe("public headings in job structured data", () => {
   it.each([
     ["en", "Warehouse worker", "Job opening"],
     ["lt", "Sandėlio darbuotojas", "Darbo pasiūlymas"],
-  ])("uses the same %s heading on the list and detail", (locale, localizedName, genericTitle) => {
+  ] as const)("uses the same %s heading on the list and detail", (locale, localizedName, fallback) => {
+    const genericTitle = PUBLIC_JOB_GENERIC_TITLE[locale];
+    expect(genericTitle).toBe(fallback);
     const origin = "https://labourmarket.ai";
     const description = "Open positions.";
     const vacancy = { ...preview, occupation: "Lagerarbetare", professionSlug: "warehouse_worker", title: "Private publisher title" };
     const outsideCatalogue = { ...vacancy, id: "a0191a16-0000-4000-8000-000000000002", occupation: "Specialistofficer", professionSlug: null };
-    const noOccupation = { ...outsideCatalogue, id: "a0191a16-0000-4000-8000-000000000003", occupation: null };
+    const missing = [null, "", "   "].map((occupation, index) => ({
+      ...outsideCatalogue,
+      id: `a0191a16-0000-4000-8000-00000000000${index + 3}`,
+      occupation,
+    }));
     const list = buildJobsListJsonLd({
       origin,
       locale,
       description,
       name: "Jobs",
       genericTitle,
-      previews: [vacancy, outsideCatalogue, noOccupation],
+      previews: [vacancy, outsideCatalogue, ...missing],
       localizedName: (row) => row.professionSlug === "warehouse_worker" ? localizedName : null,
     });
     const items = (list.mainEntity as { itemListElement: { name: string }[] }).itemListElement;
-    expect(items.map(({ name }) => name)).toEqual([localizedName, "Specialistofficer", genericTitle]);
+    expect(items.map(({ name }) => name)).toEqual([
+      localizedName, "Specialistofficer", genericTitle, genericTitle, genericTitle,
+    ]);
 
-    for (const [row, heading] of [[vacancy, localizedName], [outsideCatalogue, "Specialistofficer"], [noOccupation, genericTitle]] as const) {
+    const publicNames = [
+      [vacancy, localizedName],
+      [outsideCatalogue, "Specialistofficer"],
+      ...missing.map((row) => [row, genericTitle] as const),
+    ] as const;
+    for (const [row, heading] of publicNames) {
       const detail = buildJobDetailJsonLd({
         origin, locale, description, preview: row, genericTitle,
         localizedName: row.professionSlug ? localizedName : null,

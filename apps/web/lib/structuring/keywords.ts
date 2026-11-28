@@ -2022,11 +2022,7 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
     slug: "plumber",
     needles: ["santechn", "сантехник", "rörmokare", "vvs-montör"],
   },
-  {
-    slug: "electrician",
-    needles: ["elektros", "elektrik", "elektrine instaliac", "elektrinė instaliac", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"],
-    notWhen: ["doktorand"],
-  },
+  { slug: "electrician", needles: ["elektros", "elektrik", "elektrine instaliac", "elektrinė instaliac", "elektromontaz", "elektromontaž", "elektrotechn", "электрик", "электромонтаж", "электропровод", "электрощит", "электроустанов", "электрическ", "электросет"] },
   {
     slug: "carpenter",
     needles: [
@@ -2201,7 +2197,6 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
       "mjukvaruutvecklare",
       "programmerare",
     ],
-    notWhen: ["affärsutvecklare"],
   },
   {
     slug: "office_administrator",
@@ -2265,7 +2260,6 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
       "lärare",
       "fritidspedagog",
     ],
-    notWhen: ["specialistofficer"],
   },
   {
     slug: "caregiver",
@@ -2282,7 +2276,6 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
       "barnvakt",
       "stödassistent",
     ],
-    notWhen: ["bilrekonditionerare"],
   },
   {
     slug: "furniture_assembler",
@@ -2392,7 +2385,6 @@ export const PROFESSION_HINTS_LT: { slug: string; needles: string[]; notWhen?: s
   {
     slug: "hairdresser",
     needles: ["kirpej", "kirpėj", "hairdresser", "парикмахер", "frisör"],
-    notWhen: ["hundtrimmare"],
   },
   { slug: "barber", needles: ["barzdaskut", "barber", "барбер"] },
   {

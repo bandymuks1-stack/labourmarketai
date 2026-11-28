@@ -208,15 +208,12 @@ export function PublicVacancyCard({
   // is then the localized profession, or the source occupation label. When the
   // occupation had to become the heading, repeating it as the subline below
   // would say the same thing twice, so it is suppressed there.
-  const heading =
-    vacancy.title ?? headingFallback ?? vacancy.occupation ?? genericTitle ?? "—";
+  const occupation = vacancy.occupation?.trim() || null;
+  const heading = vacancy.title ?? headingFallback ?? occupation ?? genericTitle ?? "—";
   // The generic noun is OUR text in the reader's language, never the publisher's.
   const headingIsPublisherText =
-    vacancy.title !== null || (!headingFallback && vacancy.occupation !== null);
-  const occupationSubline =
-    vacancy.occupation && heading !== vacancy.occupation
-      ? vacancy.occupation
-      : null;
+    vacancy.title !== null || (!headingFallback && occupation !== null);
+  const occupationSubline = occupation !== heading ? occupation : null;
 
   return (
     <Link

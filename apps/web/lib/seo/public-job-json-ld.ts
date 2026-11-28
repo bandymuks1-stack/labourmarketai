@@ -15,7 +15,19 @@
  * field to leak here by construction (the guard in
  * lib/guards/public-job-json-ld.test.ts pins the field set).
  */
+import type { ActiveLocale } from "@/lib/i18n/config";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
+
+/** Name shown when a public vacancy has neither a catalogue nor publisher label. */
+export const PUBLIC_JOB_GENERIC_TITLE: Record<ActiveLocale, string> = {
+  en: "Job opening",
+  lt: "Darbo pasiūlymas",
+  ru: "Вакансия",
+  nl: "Vacature",
+  de: "Stellenangebot",
+  pl: "Oferta pracy",
+  sv: "Ledigt jobb",
+};
 
 type Salary = {
   readonly "@type": "MonetaryAmount";
@@ -43,7 +55,7 @@ export function publicJobName(
   localizedName: string | null | undefined,
   genericTitle: string,
 ): string {
-  return localizedName ?? occupation ?? genericTitle;
+  return localizedName ?? (occupation?.trim() || genericTitle);
 }
 
 export function buildJobsListJsonLd(input: {

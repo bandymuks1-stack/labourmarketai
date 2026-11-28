@@ -117,10 +117,12 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
     // 2026-10-10: the anonymous heading names the occupation in the reader's
     // language when the catalogue knows it (the board card's rule); the
     // member-only raw title still only ever comes from the member read.
-    expect(page).toContain("publicJobName(preview.occupation, localizedProfession, GENERIC_TITLE[active])");
+    expect(page).toContain("publicOccupation = preview.occupation?.trim() || null");
+    expect(page).toMatch(/publicTitle = publicJobName\(\s*publicOccupation,\s*localizedProfession,\s*PUBLIC_JOB_GENERIC_TITLE\[active\]/);
     expect(page).toContain("member?.titleRaw ?? publicTitle");
     const structuredData = page.match(/buildJobDetailJsonLd\(\{([\s\S]*?)\}\)/)?.[1];
     expect(structuredData).toContain("localizedName: localizedProfession");
+    expect(structuredData).toContain("genericTitle: PUBLIC_JOB_GENERIC_TITLE[active]");
     expect(structuredData).not.toMatch(/member|titleRaw/);
   });
 
@@ -130,6 +132,8 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
       "utf8",
     );
     expect(page).toContain("localizedName: (vacancy) => localizedProfessionName(vacancy.professionSlug)");
+    expect(page).toContain("genericTitle: PUBLIC_JOB_GENERIC_TITLE[active]");
+    expect(page.match(/genericTitle=\{PUBLIC_JOB_GENERIC_TITLE\[active\]\}/g)).toHaveLength(2);
     expect(page.match(/headingFallback=\{localizedProfessionName\(v\.professionSlug\) \?\? undefined\}/g)).toHaveLength(2);
   });
 
@@ -138,7 +142,8 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
       join(ROOT, "apps", "web", "components", "marketing", "public-vacancy-card.tsx"),
       "utf8",
     );
-    expect(card).toContain("vacancy.title ?? headingFallback ?? vacancy.occupation");
+    expect(card).toContain("occupation = vacancy.occupation?.trim() || null");
+    expect(card).toContain("vacancy.title ?? headingFallback ?? occupation ?? genericTitle");
   });
 
   it("anonymous TS contract declares title as nullable (member-only data)", () => {
