@@ -45,10 +45,12 @@ function render(loc: string, defaultIntents: string[] = []) {
 }
 
 describe("onboarding first screen — contexts, not an episode of searching", () => {
-  it("lt: the owner's exact heading, explanation, note and six cards in order, then Tęsti", () => {
+  it("lt: the owner's exact heading, note and six cards in order, then Tęsti; no product paragraph", () => {
     const html = render("lt");
     expect(html).toContain(">Pradėkime</h1>");
-    expect(html).toContain(
+    // Owner 2026-11-24: the step is the choice. The product paragraph is no
+    // longer printed here (the texts are cut to concrete actions).
+    expect(html).not.toContain(
       "LabourMarket.ai padeda kaupti profesinę istoriją, valdyti dabartinį darbą ir atrasti naujas galimybes.",
     );
     // Owner 2026-10-14: the worker environment said "tu"; owner 2026-11-15:

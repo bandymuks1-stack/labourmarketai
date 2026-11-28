@@ -38,7 +38,7 @@ export async function PrePaymentPlanBoundary() {
 
   return (
     <section
-      className="mx-auto max-w-container px-6 pb-20 sm:px-12"
+      className="mx-auto max-w-container px-6 pb-6 sm:px-12"
       data-testid="plan-boundary"
     >
       <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">

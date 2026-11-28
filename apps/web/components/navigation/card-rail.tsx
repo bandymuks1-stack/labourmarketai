@@ -217,7 +217,7 @@ export function CardRail({
                     compact ? "min-h-[6.5rem] items-center text-center max-sm:px-2 sm:items-start sm:p-4 sm:text-left" : "min-h-[7.5rem] sm:p-4",
                     active
                       ? "border-brand-blue bg-ink-800"
-                      : "border-ink-600 bg-ink-800/50 hover:border-ink-500",
+                      : "border-ink-600 bg-ink-800/50 hover:border-brand-blue/50",
                   )}
                 >
                   {/* The tile is the photo slot: a fixed square, so a licensed
@@ -226,7 +226,9 @@ export function CardRail({
                     aria-hidden
                     className={cn(
                       "flex size-10 shrink-0 items-center justify-center rounded-lg",
-                      active ? "bg-brand-blue/15 text-brand-blue" : "bg-ink-700/70 text-text-secondary",
+                      // The accent marks every goal (the reference's gold on dark);
+                      // the chosen one is stronger.
+                      active ? "bg-brand-blue/20 text-brand-blue" : "bg-brand-blue/10 text-brand-blue",
                     )}
                   >
                     <Icon className="size-5" />

@@ -589,15 +589,6 @@ export function OnboardingWizard({
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.intentHeading")}
           </h1>
-          {/* What the product is FOR, in one line, before any choice — the
-              same for a worker, a company, an agency and a school (owner
-              correction 2026-09-26: a daily work system, not a search). */}
-          <p
-            className="text-sm leading-relaxed text-text-secondary"
-            data-testid="onboarding-lead"
-          >
-            {t("rolePicker.intentLead")}
-          </p>
           {/*
            * Doctrine §5.5 — no person fits in one category — still holds, and
            * the multi-select promise is still stated BEFORE anything is
@@ -664,11 +655,8 @@ export function OnboardingWizard({
           )}
         </header>
 
-        {/* UX gap SH-2 (2026-11-18): the hint is in the flow above the cards,
-            not in the fixed phone bar, where it made the bar 116 px high and
-            pushed the cards below the first screen. A premature tap is still
-            explained by the bar's `error_role_required` refusal. The hint has its
-            own sentence (`role_step_hint`) and goes with the first pick. */}
+        {/* The one instruction of the step (UX gap SH-2): why Continue is not
+            active yet. It goes with the first pick. */}
         {!error && intents.size === 0 && (
           <p className="text-xs leading-relaxed text-text-muted" data-testid="onboarding-continue-hint">
             {t("role_step_hint")}
@@ -720,9 +708,6 @@ export function OnboardingWizard({
                       <span className="font-display text-sm font-semibold text-text-primary">
                         {t(`rolePicker.intent.${intent}.title`)}
                       </span>
-                    </span>
-                    <span className="text-xs leading-relaxed text-text-muted">
-                      {t(`rolePicker.intent.${intent}.desc`)}
                     </span>
                   </span>
                 </button>

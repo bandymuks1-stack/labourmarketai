@@ -1,3 +1,4 @@
+import { ChevronDown } from "lucide-react";
 import type { Metadata } from "next";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { buildPageMetadataFor } from "@/lib/seo/metadata";
@@ -133,22 +134,26 @@ export default async function PricingPage({
           where the offers belong (a separate /services page is the obvious
           home). Pinned by lib/guards/pricing-page-beta-honesty.test.ts. */}
 
-      <section className="mx-auto max-w-container px-6 pb-20 sm:px-12">
-        <h2 className="font-display text-2xl font-bold tracking-tightest text-text-primary">
+      <section className="mx-auto max-w-container px-6 pb-16 pt-10 sm:px-12" data-testid="pricing-faq">
+        <h2 className="font-display text-xl font-bold tracking-tightest text-text-primary">
           {t("faqTitle")}
         </h2>
-        <dl className="mt-6 grid gap-6 md:grid-cols-2">
+        {/* A question is its own line; the answer opens on a tap and stays in
+            the document (owner 2026-11-24, decisions 0032 / 0034). */}
+        <div className="mt-4 divide-y divide-ink-600/60 border-y border-ink-600/60">
           {faq.map((item) => (
-            <div key={item.q} className="card-border p-6">
-              <dt className="font-display text-base font-semibold text-text-primary">
-                {item.q}
-              </dt>
-              <dd className="mt-2 text-sm leading-relaxed text-text-secondary">
-                {item.a}
-              </dd>
-            </div>
+            <details key={item.q} className="group">
+              <summary className="flex min-h-11 cursor-pointer list-none items-center justify-between gap-4 py-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue [&::-webkit-details-marker]:hidden">
+                <span className="font-display text-base font-semibold text-text-primary">{item.q}</span>
+                <ChevronDown
+                  aria-hidden
+                  className="size-4 shrink-0 text-text-muted transition-transform group-open:rotate-180 motion-reduce:transition-none"
+                />
+              </summary>
+              <p className="max-w-3xl pb-4 text-sm leading-relaxed text-text-secondary">{item.a}</p>
+            </details>
           ))}
-        </dl>
+        </div>
         {faqLd ? (
           <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: jsonLdScript(faqLd) }} />
         ) : null}
