@@ -1732,6 +1732,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // 2026-10-27: owner approved #2841 in chat (apply + merge). Two service_role-only
       // SECURITY DEFINER functions that rotate one unsent partner referral token; ledger
       // 20261027193124.
+      // 2026-11-27: owner approved exact #2795 payload; manual RED release only.
+      "20261025190000_booking_clash_acknowledged_marker_v1.sql",
       "20261027120000_reissue_external_referral_v1.sql",
       // 2026-10-28: owner approved #2843 in chat (apply + merge). Read-only service_role
       // candidate list that flags already-mailed addresses; ledger 20261028044705.
@@ -1858,6 +1860,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // Erasure integration: 54F50FEC6C8284A5110A87C572E1BC0DECC12FF379971C8A4C05B3B5DDEF9165.
       "20261127163000_timesheet_schedules_v1.sql",
       "20261127180000_timesheet_schedule_privacy_v1.sql",
+      // Exact owner-approved booking protection, applied before the overlap marker.
+      "20261128080150_booking_hire_interval_support_v1.sql",
     ]);
   });
 

@@ -232,6 +232,24 @@ async function firstFreeDay(from: number): Promise<string> {
   throw new Error("no free day in a year of accepted bookings");
 }
 
+// #2795 uses a previous synthetic Gama booking as an immutable overlap witness.
+// It changes only this run's new booking, through the existing worker controls.
+let overlapBookingId = "";
+let acceptedBookingDay = "";
+async function knownSyntheticOverlapDay(): Promise<string> {
+  const manager = JSON.parse(Buffer.from(bearerOf("manager").split(".")[1], "base64url").toString("utf8")).sub as string;
+  const res = await qaApi(
+    `/rest/v1/booking_requests?select=id,start_date,note&status=eq.accepted&worker_id=eq.${encodeURIComponent(workerId)}&owner_id=eq.${encodeURIComponent(manager)}&start_date=gte.${dayFromToday(0)}&order=start_date.asc&limit=100`,
+    bearerOf("worker"),
+  );
+  expect(res.ok, "own existing synthetic bookings can be read").toBe(true);
+  const rows = (await res.json()) as { id: string; start_date: string; note: string | null }[];
+  const prior = rows.find((row) => row.note?.startsWith("QA-SYNTHETIC") && row.id !== bookingId);
+  expect(prior, "a prior synthetic Gama booking is required to prove acknowledged overlap").toBeDefined();
+  overlapBookingId = prior!.id;
+  return prior!.start_date;
+}
+
 async function submitNeed(page: Page): Promise<"done" | "limit"> {
   // Name a trade: a need nothing can be recognised in is "not structured" on
   // scouting (lib/scouting/scouting.ts runScoutingCore), which renders no
@@ -341,8 +359,9 @@ test("O-4 (5.13). Gama sees the proposal, withdraws it, and proposes new dates",
 
   // The company's own withdrawal may be undone with new dates (repeat actions).
   await withdrawn.getByTestId("propose-again-open").click();
-  // A free day for the proposal the worker will accept in O-5.
-  const outcome = await propose(withdrawn, await firstFreeDay(28));
+  // Deliberately overlap one retained synthetic booking; never alter that witness.
+  acceptedBookingDay = await knownSyntheticOverlapDay();
+  const outcome = await propose(withdrawn, acceptedBookingDay);
   expect(outcome, "the second proposal was sent").toBe("sent");
   await page.reload();
   await expect(bookingById(page, bookingId)).toHaveAttribute("data-status", "proposed", {
@@ -365,27 +384,20 @@ test("O-5 (5.13). the worker accepts the proposal on the phone", async ({ browse
   await row.getByTestId("booking-accept-confirm").click();
   const responded = row.getByTestId("booking-responded");
   const conflict = row.getByTestId("booking-conflict");
-  await expect(responded.or(conflict)).toBeVisible({ timeout: 30_000 });
-  if (await conflict.isVisible()) {
-    // An earlier run's accepted booking overlaps these dates. The product's
-    // own answer is one deliberate second action, recorded as such.
-    console.info("[bookings] accept met a date clash; the worker accepts knowingly");
-    await row.getByTestId("booking-accept-anyway").click();
-    // Run 40216243755: the database refused the acknowledged accept (the
-    // overlap constraint still held) and the UI re-showed the same conflict,
-    // so the button visibly did nothing. That refusal is now its own answer.
-    const notRecordable = row.getByTestId("booking-overlap-not-recordable");
-    await expect(responded.or(notRecordable)).toBeVisible({ timeout: 30_000 });
-    if (await notRecordable.isVisible()) {
-      // Honest, and not a loop: the acknowledgement control is gone.
-      await expect(row.getByTestId("booking-accept-anyway")).toHaveCount(0);
-      expect(
-        false,
-        "the acknowledged overlap could not be recorded: the clash-marker migration " +
-          "(20261025180000, RED) is not applied yet — the UI says so and offers decline",
-      ).toBe(true);
-    }
-  }
+  await expect(conflict, "ordinary acceptance must report the known clash").toBeVisible({ timeout: 30_000 });
+  await expect(responded).toHaveCount(0);
+  await row.getByTestId("booking-accept-anyway").click();
+  await expect(responded).toBeVisible({ timeout: 30_000 });
+  await expect(row.getByTestId("booking-clash-acknowledged")).toBeVisible();
+  const accepted = await qaApi(`/rest/v1/booking_requests?select=status,clash_acknowledged&id=eq.${bookingId}`, bearerOf("worker"));
+  expect(accepted.ok).toBe(true);
+  expect(await accepted.json()).toEqual([{ status: "accepted", clash_acknowledged: true }]);
+  const witness = await qaApi(`/rest/v1/booking_requests?select=status&id=eq.${overlapBookingId}`, bearerOf("worker"));
+  expect(witness.ok).toBe(true);
+  expect(await witness.json(), "prior booking remains accepted").toEqual([{ status: "accepted" }]);
+  const receipt = await qaApi(`/rest/v1/booking_request_events?select=id&booking_request_id=eq.${bookingId}&event_type=eq.clash_acknowledged&related_booking_request_id=eq.${overlapBookingId}`, bearerOf("worker"));
+  expect(receipt.ok).toBe(true);
+  expect(await receipt.json(), "one retained acknowledgement naming the known overlap").toHaveLength(1);
   await page.reload();
   // Run 40200190351: after this reload the row matched TWICE (identical
   // <li>s). Count where the copies live: a hidden streamed holder (#418
@@ -420,7 +432,7 @@ test("O-6 (5.13). Gama sees the acceptance and opens the conversation with the w
 
 test("O-7 (5.13). the accepted booking is in the worker's plan on its date", async ({ browser }) => {
   const { ctx, page } = await as(browser, "worker");
-  await page.goto(`/lt/dashboard/planning?view=agenda&source=booking&date=${dayFromToday(28)}`);
+  await page.goto(`/lt/dashboard/planning?view=agenda&source=booking&date=${acceptedBookingDay}`);
   await expect(page.getByTestId("planning-agenda")).toBeVisible({ timeout: 30_000 });
   await expect(page.getByTestId(`planning-item-booking:${bookingId}`)).toBeVisible({ timeout: 30_000 });
   await ctx.close();
