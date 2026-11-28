@@ -20,7 +20,12 @@ import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
 import { jobPageDescription } from "@/lib/seo/job-page-description";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { buildJobDetailJsonLd, PUBLIC_JOB_GENERIC_TITLE, publicJobName } from "@/lib/seo/public-job-json-ld";
+import {
+  buildJobDetailJsonLd,
+  PUBLIC_JOB_GENERIC_TITLE,
+  publicJobCatalogueName,
+  publicJobName,
+} from "@/lib/seo/public-job-json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { TrackedCta } from "@/components/app/tracked-cta";
@@ -112,7 +117,7 @@ export async function generateMetadata({
   // registry the board card heads with), else the publisher's own label.
   // Nothing is machine-translated.
   const title = publicJobName(
-    preview.occupation,
+    preview,
     await localizedProfessionName(active, preview.professionSlug),
     PUBLIC_JOB_GENERIC_TITLE[active],
   );
@@ -746,10 +751,13 @@ export default async function JobDetailPage({
   )
     ? (preview.sourceLanguage as string)
     : undefined;
-  const localizedProfession = await localizedProfessionName(active, preview.professionSlug);
+  const localizedProfession = publicJobCatalogueName(
+    preview,
+    await localizedProfessionName(active, preview.professionSlug),
+  );
   const publicOccupation = preview.occupation?.trim() || null;
   const publicTitle = publicJobName(
-    publicOccupation,
+    preview,
     localizedProfession,
     PUBLIC_JOB_GENERIC_TITLE[active],
   );

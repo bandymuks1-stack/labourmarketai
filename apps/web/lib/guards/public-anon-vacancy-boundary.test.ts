@@ -106,7 +106,7 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
       page.indexOf("export default"),
     );
     expect(metadataSection).not.toContain("preview.title");
-    expect(metadataSection).toContain("preview.occupation");
+    expect(metadataSection).toMatch(/publicJobName\(\s*preview,/);
   });
 
   it("anonymous detail heading is the occupation, member heading the real title", () => {
@@ -118,7 +118,8 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
     // language when the catalogue knows it (the board card's rule); the
     // member-only raw title still only ever comes from the member read.
     expect(page).toContain("publicOccupation = preview.occupation?.trim() || null");
-    expect(page).toMatch(/publicTitle = publicJobName\(\s*publicOccupation,\s*localizedProfession,\s*PUBLIC_JOB_GENERIC_TITLE\[active\]/);
+    expect(page).toMatch(/localizedProfession = publicJobCatalogueName\(\s*preview,/);
+    expect(page).toMatch(/publicTitle = publicJobName\(\s*preview,\s*localizedProfession,\s*PUBLIC_JOB_GENERIC_TITLE\[active\]/);
     expect(page).toContain("member?.titleRaw ?? publicTitle");
     const structuredData = page.match(/buildJobDetailJsonLd\(\{([\s\S]*?)\}\)/)?.[1];
     expect(structuredData).toContain("localizedName: localizedProfession");
@@ -143,7 +144,8 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
       "utf8",
     );
     expect(card).toContain("occupation = vacancy.occupation?.trim() || null");
-    expect(card).toContain("vacancy.title ?? headingFallback ?? occupation ?? genericTitle");
+    expect(card).toContain("publicJobCatalogueName(vacancy, headingFallback)");
+    expect(card).toContain("vacancy.title ?? localizedProfession ?? occupation ?? genericTitle");
   });
 
   it("anonymous TS contract declares title as nullable (member-only data)", () => {

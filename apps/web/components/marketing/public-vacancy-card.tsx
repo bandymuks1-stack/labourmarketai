@@ -5,6 +5,7 @@ import type { ActiveLocale } from "@/lib/i18n/config";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 import { formatUtcDate } from "@/lib/time/display";
 import { PlaceTimeStamp } from "@/components/app/work-world/primitives";
+import { publicJobCatalogueName } from "@/lib/seo/public-job-json-ld";
 import { vacancyPayLabel } from "@/lib/vacancy-store/vacancy-pay-label";
 
 /**
@@ -209,10 +210,11 @@ export function PublicVacancyCard({
   // occupation had to become the heading, repeating it as the subline below
   // would say the same thing twice, so it is suppressed there.
   const occupation = vacancy.occupation?.trim() || null;
-  const heading = vacancy.title ?? headingFallback ?? occupation ?? genericTitle ?? "—";
+  const localizedProfession = publicJobCatalogueName(vacancy, headingFallback);
+  const heading = vacancy.title ?? localizedProfession ?? occupation ?? genericTitle ?? "—";
   // The generic noun is OUR text in the reader's language, never the publisher's.
   const headingIsPublisherText =
-    vacancy.title !== null || (!headingFallback && occupation !== null);
+    vacancy.title !== null || (!localizedProfession && occupation !== null);
   const occupationSubline = occupation !== heading ? occupation : null;
 
   return (

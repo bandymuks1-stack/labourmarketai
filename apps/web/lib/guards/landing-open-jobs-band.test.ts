@@ -304,3 +304,32 @@ it.each([null, "", "  "])("shows the localized card fallback for occupation %j",
   expect(html).toMatch(/<h2\b[^>]*>Darbo pasiūlymas<\/h2>/);
   expect(html).not.toMatch(/<h2\b[^>]*lang=/);
 });
+
+it.each([false, true])("shows the publisher's public label for a stale profession (member: %s)", (member) => {
+  const row = vacancy(1, {
+    occupation: "Specialistofficer",
+    professionSlug: "teacher",
+    sourceLanguage: "sv",
+    attributionCode: "vacancySources.attribution.arbetsformedlingen",
+  });
+  const html = renderToStaticMarkup(createElement(PublicVacancyCard, {
+    vacancy: row,
+    locale: "en",
+    headingFallback: "Teacher",
+    genericTitle: PUBLIC_JOB_GENERIC_TITLE.en,
+    memberFacts: member ? {
+      employer: "Employer shown to member",
+      place: null,
+      attributionCode: row.attributionCode,
+      hasApplicationUrl: true,
+    } : undefined,
+  }));
+  expect(html).toMatch(/<h2\b[^>]*lang="sv"[^>]*>Specialistofficer<\/h2>/);
+  expect(html).not.toContain(">Teacher<");
+  if (member) {
+    expect(html).toContain("Apply on an external website");
+  } else {
+    expect(html).toContain("No on-platform application");
+    expect(html).not.toContain("Employer shown to member");
+  }
+});

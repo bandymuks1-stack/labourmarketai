@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
 
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
-import { buildJobDetailJsonLd, buildJobsListJsonLd, PUBLIC_JOB_GENERIC_TITLE } from "./public-job-json-ld";
+import {
+  buildJobDetailJsonLd,
+  buildJobsListJsonLd,
+  PUBLIC_JOB_GENERIC_TITLE,
+  publicJobName,
+} from "./public-job-json-ld";
 
 /**
  * K3 — anonymous JSON-LD for the public job pages must carry ONLY what the
@@ -117,5 +122,33 @@ describe("public headings in job structured data", () => {
     }
     expect(JSON.stringify(list)).not.toContain("Private publisher title");
     expect(JSON.stringify(list)).not.toMatch(FORBIDDEN);
+  });
+});
+
+describe("legacy public vacancies with stale derived professions", () => {
+  it.each([
+    ["Specialistofficer", "teacher", "Teacher", "Specialistofficer"],
+    [" Affärsutvecklare ", "software_developer", "Software developer", "Affärsutvecklare"],
+    ["Bilrekonditionerare", "caregiver", "Caregiver", "Bilrekonditionerare"],
+    ["Doktorand", "electrician", "Electrician", "Doktorand"],
+    ["Hundtrimmare", "hairdresser", "Hairdresser", "Hundtrimmare"],
+    ["Doktorand/Elektriker", "electrician", "Electrician", "Electrician"],
+    ["Fjärrbilsförare", "driver", "Driver", "Driver"],
+    ["Specialistofficer", "driver", "Driver", "Driver"],
+  ])("uses the public name for %s with stored profession %s", (occupation, professionSlug, localizedName, expected) => {
+    const vacancy = { ...preview, occupation, professionSlug, title: "Private publisher title" };
+    const origin = "https://labourmarket.ai";
+    const locale = "en";
+    const genericTitle = PUBLIC_JOB_GENERIC_TITLE[locale];
+    expect(publicJobName(vacancy, localizedName, genericTitle)).toBe(expected);
+
+    const detail = buildJobDetailJsonLd({ origin, locale, description: "d", preview: vacancy, genericTitle, localizedName });
+    const list = buildJobsListJsonLd({ origin, locale, name: "Jobs", description: "d", previews: [vacancy], genericTitle, localizedName: () => localizedName });
+    expect(detail.name).toBe(expected);
+    expect(detail.about).toMatchObject({ name: expected });
+    expect(list.mainEntity).toMatchObject({ itemListElement: [{ name: expected }] });
+    expect(JSON.stringify({ detail, list })).not.toContain("Private publisher title");
+    expect(JSON.stringify({ detail, list })).not.toMatch(FORBIDDEN);
+    expect(vacancy.professionSlug).toBe(professionSlug);
   });
 });

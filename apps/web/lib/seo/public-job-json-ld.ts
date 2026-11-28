@@ -16,6 +16,7 @@
  * lib/guards/public-job-json-ld.test.ts pins the field set).
  */
 import type { ActiveLocale } from "@/lib/i18n/config";
+import { publisherOccupationConflictSlug } from "@/lib/vacancy-sources/publisher-occupation-conflicts";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
 
 /** Name shown when a public vacancy has neither a catalogue nor publisher label. */
@@ -48,14 +49,29 @@ function salaryOf(p: PublicVacancyPreview): Salary | null {
   return out;
 }
 
-/** The signed-out heading uses only the localized catalogue name or the
- *  public publisher occupation, with a generic heading when both are absent. */
+type PublicOccupation = Pick<PublicVacancyPreview, "occupation" | "professionSlug">;
+
+/** Suppress the exact stale title inference in the presentation only. The
+ * stored profession stays available to the existing search and ranking. */
+export function publicJobCatalogueName(
+  vacancy: PublicOccupation,
+  localizedName: string | null | undefined,
+): string | null {
+  if (localizedName == null) return null;
+  return vacancy.professionSlug !== null &&
+    publisherOccupationConflictSlug(vacancy.occupation) === vacancy.professionSlug
+    ? null
+    : localizedName;
+}
+
+/** The signed-out heading uses the catalogue name or the public publisher
+ * occupation, with a generic heading when both are absent. */
 export function publicJobName(
-  occupation: PublicVacancyPreview["occupation"],
+  vacancy: PublicOccupation,
   localizedName: string | null | undefined,
   genericTitle: string,
 ): string {
-  return localizedName ?? (occupation?.trim() || genericTitle);
+  return publicJobCatalogueName(vacancy, localizedName) ?? (vacancy.occupation?.trim() || genericTitle);
 }
 
 export function buildJobsListJsonLd(input: {
@@ -87,7 +103,7 @@ export function buildJobsListJsonLd(input: {
           "@type": "ListItem",
           position: i + 1,
           url: `${base}/${p.id}`,
-          name: publicJobName(p.occupation, input.localizedName?.(p), input.genericTitle),
+          name: publicJobName(p, input.localizedName?.(p), input.genericTitle),
         };
         return item;
       }),
@@ -104,7 +120,7 @@ export function buildJobDetailJsonLd(input: {
   readonly localizedName?: string | null;
 }): Record<string, unknown> {
   const p = input.preview;
-  const name = publicJobName(p.occupation, input.localizedName, input.genericTitle);
+  const name = publicJobName(p, input.localizedName, input.genericTitle);
   const url = `${input.origin.replace(/\/$/, "")}/${input.locale}/jobs/${p.id}`;
   const about: Record<string, unknown> = {
     "@type": "Occupation",
