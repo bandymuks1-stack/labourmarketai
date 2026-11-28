@@ -190,12 +190,12 @@ describe("RED-2 — safe fallback and authority, with the gate open", () => {
 
   it("the payload that leaves is the minimal one: body (bounded), target locale, fixed context, source language — no ids, no names", async () => {
     runAiAgent.mockResolvedValue({ status: "needs_review", reason: "x" });
-    const long = { id: "m9", body: "ы".repeat(9000), original_language: "uk" };
-    await resolveViewerTexts([long], "de", "viewer-11");
+    const atLimit = { id: "m9", body: "ы".repeat(8000), original_language: "uk" };
+    await resolveViewerTexts([atLimit], "de", "viewer-11");
     const [agent, input, opts] = runAiAgent.mock.calls[0] as [string, Record<string, unknown>, Record<string, unknown>];
     expect(agent).toBe("translation_copy");
     expect(Object.keys(input).sort()).toEqual(["canonicalMessage", "context", "locale"]);
-    expect((input.canonicalMessage as string).length).toBe(8000);
+    expect(input.canonicalMessage).toBe(atLimit.body);
     expect(input.locale).toBe("de");
     // the context names source and target in words (codes alone left a Dutch
     // or Georgian target ambiguous under the runtime's en/lt/ru prompt hint)
@@ -334,4 +334,41 @@ describe("an unfaithful rendering is never shown", () => {
     await resolveViewerTexts([pay], "en", "viewer-f2");
     expect(runAiAgent).toHaveBeenCalledTimes(2);
   });
+
+  it.each([
+    ["Mokame 1.234,50 EUR.", "We pay 1 234.50 EUR.", "translated"],
+    ["Mokame 1 234,50 EUR.", "We pay 1,234.50 EUR.", "translated"],
+    ["Mokame 1.234,50 EUR.", "We pay 1,234.51 EUR.", "original"],
+    ["Mokame 1.234,50 EUR.", "We pay 123450 EUR.", "original"],
+  ])("preserves the value when formatting changes: %s", async (body, rendering, kind) => {
+    const message = { id: "grouped-amount", body, original_language: "lt" };
+    runAiAgent.mockResolvedValueOnce(ok(rendering));
+    const out = await resolveViewerTexts([message], "en", "viewer-grouped");
+    expect(out.get(message.id)).toMatchObject({
+      kind,
+      text: kind === "translated" ? rendering : body,
+      original: body,
+      unavailable: kind === "translated" ? null : "failed",
+    });
+  });
+});
+
+
+
+
+
+describe("a source longer than the provider input limit", () => {
+  const readable = "Rytoj pradedame darbą.";
+  const atLimit = readable.padEnd(8000, "a");
+  const tooLong = atLimit + " 18 EUR.";
+
+  it("returns the whole original without dispatching a truncated input", async () => {
+    const message = { id: "long", body: tooLong, original_language: "lt" };
+    const out = await resolveViewerTexts([message], "en", "viewer-long");
+    expect(out.get("long")).toMatchObject({
+      kind: "original", state: "original_foreign", unavailable: "not_attempted", text: tooLong, provider: null,
+    });
+    expect(runAiAgent).not.toHaveBeenCalled();
+  });
+
 });

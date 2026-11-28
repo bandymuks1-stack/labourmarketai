@@ -1,18 +1,7 @@
 /**
- * TRANSLATION FAITHFULNESS — the ONE check a machine rendering must pass
- * before a reader sees it instead of the original.
- *
- * Shared by every reader that shows a provider's rendering: the vacancy
- * reader (`lib/vacancy-store/vacancy-translation-read.ts`) and the message
- * reader (`lib/communication/translation-read.ts`). Pure: no IO, no provider,
- * no locale table of its own. A rendering that fails is never "fixed" here —
- * the caller refuses it and the reader keeps the author's own words.
- *
- * Two rules, both order-insensitive so a reordered clause still passes:
- *   1. every digit run of the original survives ({@link digitsPreserved});
- *   2. every LOCKED TERM of the original is still represented
- *      ({@link lockedTermsPreserved}) — money units and contract words, where
- *      a dropped or swapped word changes what was agreed.
+ * Checks for translated vacancies and messages. Vacancies use the original
+ * digit check, while messages also preserve numeric structure and locked terms.
+ * Readers retain the original when the applicable check fails.
  */
 
 /** Every run of digits in the original must survive the rendering — pay,
@@ -75,15 +64,15 @@ export const LOCKED_TERM_GROUPS: readonly LockedTermGroup[] = [
   {
     id: "contract",
     words: [
-      "contract(?:s|en)?", // en, nl
+      "contract(?:s|en)?", "agreement(?:s)?", // en, nl
       "overeenkomst(?:en)?", // nl
       "kontrakt(?:en|et|er|erne|erna|y|u|em|ów|a|e)?", // sv, no, da, pl, de
-      "avtal(?:et|en|ets)?", // sv
+      "avtal(?:et|en|ets)?", "avtal(?:e|en|er)", "aftal(?:e|en|er)", // sv, no, da
       "umow(?:a|y|ie|ę|ą|om|ami|ach)", // pl
       "vertrag(?:s|es)?",
-      "verträge(?:n)?", // de
+      "verträge(?:n)?", "vereinbarung(?:en)?", // de
       "sutart(?:is|ies|į|imi|yje|ys|ims)",
-      "sutarč(?:iai|ių)", // lt
+      "sutarč(?:iai|ių)", "susitarim(?:as|o|ui|ą|u|e|ai|ų|ams|us|ais|uose)", // lt
       "līgum(?:s|a|u|i|iem|am|ā)", // lv
       "leping(?:u|ut|us|ud|ute)?", // et
       "договор(?:а|у|ом|е|ы|ов)?",
@@ -95,12 +84,14 @@ export const LOCKED_TERM_GROUPS: readonly LockedTermGroup[] = [
   },
 ];
 
-// Whole word: not glued to a letter or digit on either side.
-const word = (alternatives: readonly string[]) => `(?<![\\p{L}\\p{N}])(?:${alternatives.join("|")})(?![\\p{L}\\p{N}])`;
+function word(alternatives: readonly string[], adjacentDigits = false): string {
+  const boundary = adjacentDigits ? "\\p{L}\\p{M}" : "\\p{L}\\p{M}\\p{N}";
+  return `(?<![${boundary}])(?:${alternatives.join("|")})(?![${boundary}])`;
+}
 
 const matchers = LOCKED_TERM_GROUPS.map((g) => {
   const tests: RegExp[] = [];
-  if (g.codes?.length) tests.push(new RegExp(word(g.codes), "u"));
+  if (g.codes?.length) tests.push(new RegExp(word(g.codes, true), "u"));
   if (g.words?.length) tests.push(new RegExp(word(g.words), "iu"));
   const marks = g.marks ?? [];
   return {
@@ -120,7 +111,54 @@ export function lockedTermsPreserved(original: string, rendered: string): boolea
   return matchers.every((m) => !m.present(original) || m.present(rendered));
 }
 
+const currencyGroups = LOCKED_TERM_GROUPS.filter((group) => group.id !== "contract");
+const currencyForms = currencyGroups.flatMap((group) => [
+  ...(group.codes ?? []),
+  ...(group.words ?? []),
+  ...(group.marks ?? []),
+]);
+const currencyBefore = new RegExp(`(?<![\\p{L}\\p{M}])(?:${currencyForms.join("|")})\\s*$`, "iu");
+const currencyAfter = new RegExp(`^\\s*(?:${currencyForms.join("|")})(?![\\p{L}\\p{M}])`, "iu");
+
+function normalizeNumber(token: string): string {
+  const compact = token.replace(/^\u2212/, "-").replace(/[ \u00a0\u202f]/g, "");
+  // A different decimal separator disambiguates the groups of three.
+  return compact
+    .replace(/^([+-]?\d{1,3}(?:\.\d{3})+),(\d{1,2})$/, (_token, whole: string, fraction: string) => whole.replaceAll(".", "") + "." + fraction)
+    .replace(/^([+-]?\d{1,3}(?:,\d{3})+)\.(\d{1,2})$/, (_token, whole: string, fraction: string) => whole.replaceAll(",", "") + "." + fraction)
+    .replace(/^([+-]?\d+),(\d{1,2})$/, "$1.$2");
+}
+
+function numericFacts(text: string) {
+  const facts = { date: [] as string[], time: [] as string[], amount: [] as string[], other: [] as string[] };
+  for (const match of text.matchAll(/[+\-\u2212]?\d+(?:[.,:/-]\d+|[ \u00a0\u202f]\d{3}(?!\d))*/g)) {
+    const [token] = match;
+    if (/^\d{4}[-/.]\d{1,2}[-/.]\d{1,2}$/.test(token)) {
+      facts.date.push(token);
+    } else if (/^\d{1,2}:\d{2}$/.test(token)) {
+      facts.time.push(token.replace(/^0(\d:\d{2})$/, "$1"));
+    } else {
+      const number = normalizeNumber(token);
+      const start = match.index;
+      const end = start + token.length;
+      const hasCurrency = currencyBefore.test(text.slice(0, start)) || currencyAfter.test(text.slice(end));
+      (hasCurrency ? facts.amount : facts.other).push(number);
+    }
+  }
+  return facts;
+}
+
+/** Allow different kinds of facts to reorder. Within each kind, keep the sequence. */
+function messageNumbersPreserved(original: string, rendered: string): boolean {
+  const source = numericFacts(original);
+  const translation = numericFacts(rendered);
+  return (["date", "time", "amount", "other"] as const).every((kind) =>
+    source[kind].length === translation[kind].length &&
+    source[kind].every((value, index) => value === translation[kind][index]),
+  );
+}
+
 /** Both rules. The one question a reader asks before showing a rendering. */
 export function renderingIsFaithful(original: string, rendered: string): boolean {
-  return digitsPreserved(original, rendered) && lockedTermsPreserved(original, rendered);
+  return messageNumbersPreserved(original, rendered) && lockedTermsPreserved(original, rendered);
 }

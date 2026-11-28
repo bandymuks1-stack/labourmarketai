@@ -60,3 +60,31 @@ describe("renderingIsFaithful = digits AND locked terms", () => {
     expect(renderingIsFaithful(source, "3 welders, €18,50/h, from 2026-12-01")).toBe(false);
   });
 });
+
+describe("faithfulness of work message facts", () => {
+  it.each([
+    ["Mokame 35 000 EUR.", "We pay 35\u00a0000 EUR."],
+    ["Mokame 35 000 EUR.", "We pay 35\u202f000 EUR."],
+    ["Pradedame 07:00.", "We start at 7:00."],
+    ["Sutartis parengta.", "The agreement is ready."],
+    ["The contract is ready.", "Parengėme susitarimą."],
+    ["Avtalen er klar.", "The contract is ready."],
+    ["Aftalen er klar.", "The agreement is ready."],
+    ["Die Vereinbarung ist fertig.", "The agreement is ready."],
+    [
+      "3 darbuotojai, mokame 18,50 EUR, sutartis nuo 2026-12-01.",
+      "Contract from 2026-12-01. We pay €18.50 for 3 workers.",
+    ],
+  ])("accepts faithful formatting or wording: %s", (original, rendering) => {
+    expect(renderingIsFaithful(original, rendering)).toBe(true);
+  });
+
+  it.each([
+    ["Mokame 18,50 EUR per valandą.", "We pay 1850 EUR per hour."],
+    ["Sutartis nuo 2026-12-01.", "Contract from 2026-01-12."],
+    ["Pirmadienį nuo 7, antradienį nuo 8.", "Monday from 8, Tuesday from 7."],
+    ["Mokame 18EUR per valandą.", "We pay 18 PLN per hour."],
+  ])("rejects a change to the original facts: %s", (original, rendering) => {
+    expect(renderingIsFaithful(original, rendering)).toBe(false);
+  });
+});

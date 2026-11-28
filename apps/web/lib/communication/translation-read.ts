@@ -43,12 +43,10 @@ import {
  * re-opened on the same instance costs nothing. Doctrine §2 keeps the
  * translation OUT of the database: it is a rendering, not a record.
  *
- * WHAT IS CHECKED BEFORE A RENDERING IS SHOWN. The same faithfulness rule the
- * vacancy reader applies (`lib/translation/faithfulness.ts`): every number of
- * the original — hours, pay, dates, addresses — and every locked term (money
- * units, contract words) must still be there. A rendering that loses or
- * changes one is refused as `failed` and the reader sees the ORIGINAL, never
- * a partially wrong translation; it is not cached.
+ * Messages past the provider's input limit are shown in full as originals.
+ * Before showing a translation, check its numeric sequence and selected
+ * currency and contract terms. If the check fails, show the original with
+ * a failed translation state and keep the rejected text out of the cache.
  *
  * AUTHORITY is unchanged: the caller passes messages it already read under
  * the conversation's RLS (participants only); this module reads nothing.
@@ -187,6 +185,7 @@ export function isTransientProviderRefusal(reason: string, detail: string | unde
 }
 
 const TRANSIENT_RETRY_DELAY_MS = 1200;
+const MAX_SOURCE_LENGTH = 8000;
 
 /** Answers that will repeat for every message of this read — a refusal, not a failure. */
 const REFUSAL_REASONS: ReadonlySet<string> = new Set([
@@ -209,12 +208,10 @@ async function translateOnce(
     if (!(await aiTaskServableNow("translate_message"))) {
       return { ok: false, reason: "declined" };
     }
-    // The text the provider sees — and the text the rendering is checked against.
-    const source = m.body.slice(0, 8000);
     const outcome = await runAiAgent(
       "translation_copy",
       {
-        canonicalMessage: source,
+        canonicalMessage: m.body,
         locale: viewerLocale,
         context: translationContext(viewerLocale, m.original_language),
       },
@@ -251,7 +248,7 @@ async function translateOnce(
     if (!value) return { ok: false, reason: "failed" };
     // A lost or changed number, or a dropped money unit / contract word, is
     // not a translation of what was agreed: the original stands.
-    if (!renderingIsFaithful(source, value.text)) return { ok: false, reason: "failed" };
+    if (!renderingIsFaithful(m.body, value.text)) return { ok: false, reason: "failed" };
     remember(key, value);
     return { ok: true, value };
   } catch {
@@ -286,6 +283,7 @@ export async function resolveViewerTexts(
   const candidates = messages.filter(
     (m) =>
       m.author_id !== viewerId &&
+      m.body.length <= MAX_SOURCE_LENGTH &&
       needsTranslation({ body: m.body, originalLanguage: m.original_language ?? null, viewerLocale }),
   );
   // Newest first: the tail of the thread is what the reader is looking at.
