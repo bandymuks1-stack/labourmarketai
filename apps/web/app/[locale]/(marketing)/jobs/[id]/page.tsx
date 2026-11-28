@@ -20,7 +20,7 @@ import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
 import { jobPageDescription } from "@/lib/seo/job-page-description";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { buildJobDetailJsonLd } from "@/lib/seo/public-job-json-ld";
+import { buildJobDetailJsonLd, publicJobName } from "@/lib/seo/public-job-json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { TrackedCta } from "@/components/app/tracked-cta";
@@ -111,10 +111,11 @@ export async function generateMetadata({
   // in the READER'S language when the catalogue knows the profession (the
   // registry the board card heads with), else the publisher's own label.
   // Nothing is machine-translated.
-  const title =
-    (await localizedProfessionName(active, preview.professionSlug)) ??
-    preview.occupation ??
-    GENERIC_TITLE[active];
+  const title = publicJobName(
+    preview.occupation,
+    await localizedProfessionName(active, preview.professionSlug),
+    GENERIC_TITLE[active],
+  );
 
   // The ONE public-page metadata builder: brand suffix, canonical, the SAME
   // hreflang variants the jobs sitemap declares (`hreflangAlternates` inside
@@ -757,11 +758,12 @@ export default async function JobDetailPage({
     ? (preview.sourceLanguage as string)
     : undefined;
   const localizedProfession = await localizedProfessionName(active, preview.professionSlug);
+  const publicTitle = publicJobName(preview.occupation, localizedProfession, GENERIC_TITLE[active]);
   const factChips = vacancyFactChips(preview, active);
   // The same per-ad description as the <meta> (anonymous facts only).
   const pageDescription = jobPageDescription({
     locale: active,
-    title: localizedProfession ?? preview.occupation ?? GENERIC_TITLE[active],
+    title: publicTitle,
     chips: factChips,
     published: preview.publishedAt ? published : null,
   });
@@ -784,6 +786,7 @@ export default async function JobDetailPage({
               description: pageDescription,
               preview,
               genericTitle: GENERIC_TITLE[active],
+              localizedName: localizedProfession,
             }),
           ),
         }}
@@ -870,7 +873,7 @@ export default async function JobDetailPage({
         lang={member?.titleRaw || !localizedProfession ? sourceLang : undefined}
         className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl"
       >
-        {member?.titleRaw ?? localizedProfession ?? preview.occupation ?? GENERIC_TITLE[active]}
+        {member?.titleRaw ?? publicTitle}
       </h1>
 
       {/* The publisher's own occupation words, kept and marked as theirs

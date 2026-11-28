@@ -36,11 +36,14 @@ function salaryOf(p: PublicVacancyPreview): Salary | null {
   return out;
 }
 
-/** The public name of a position: the ESCO occupation label the preview
- *  carries. The publisher's free-text title is NEVER used (it embeds the
- *  employer and the workplace — null on the anonymous path anyway). */
-function positionName(p: PublicVacancyPreview, fallback: string): string {
-  return p.occupation?.trim() || fallback;
+/** The signed-out heading uses only the localized catalogue name or the
+ *  public publisher occupation, with a generic heading when both are absent. */
+export function publicJobName(
+  occupation: PublicVacancyPreview["occupation"],
+  localizedName: string | null | undefined,
+  genericTitle: string,
+): string {
+  return localizedName ?? occupation ?? genericTitle;
 }
 
 export function buildJobsListJsonLd(input: {
@@ -50,6 +53,7 @@ export function buildJobsListJsonLd(input: {
   readonly description: string;
   readonly previews: readonly PublicVacancyPreview[];
   readonly genericTitle: string;
+  readonly localizedName?: (preview: PublicVacancyPreview) => string | null;
   /** The listing's own path after the locale when it is not the board itself,
    *  e.g. `/jobs?profession=welder`. Item URLs never depend on it. */
   readonly path?: string;
@@ -71,7 +75,7 @@ export function buildJobsListJsonLd(input: {
           "@type": "ListItem",
           position: i + 1,
           url: `${base}/${p.id}`,
-          name: positionName(p, input.genericTitle),
+          name: publicJobName(p.occupation, input.localizedName?.(p), input.genericTitle),
         };
         return item;
       }),
@@ -85,19 +89,21 @@ export function buildJobDetailJsonLd(input: {
   readonly description: string;
   readonly preview: PublicVacancyPreview;
   readonly genericTitle: string;
+  readonly localizedName?: string | null;
 }): Record<string, unknown> {
   const p = input.preview;
+  const name = publicJobName(p.occupation, input.localizedName, input.genericTitle);
   const url = `${input.origin.replace(/\/$/, "")}/${input.locale}/jobs/${p.id}`;
   const about: Record<string, unknown> = {
     "@type": "Occupation",
-    name: positionName(p, input.genericTitle),
+    name,
   };
   const salary = salaryOf(p);
   if (salary) about.estimatedSalary = salary;
   const page: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: positionName(p, input.genericTitle),
+    name,
     description: input.description,
     url,
     inLanguage: input.locale,

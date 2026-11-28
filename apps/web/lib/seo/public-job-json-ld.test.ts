@@ -69,3 +69,40 @@ describe("public job JSON-LD (K3)", () => {
     expect((ld.about as { estimatedSalary?: unknown }).estimatedSalary).toBeUndefined();
   });
 });
+
+describe("public headings in job structured data", () => {
+  it.each([
+    ["en", "Warehouse worker", "Job opening"],
+    ["lt", "Sandėlio darbuotojas", "Darbo pasiūlymas"],
+  ])("uses the same %s heading on the list and detail", (locale, localizedName, genericTitle) => {
+    const origin = "https://labourmarket.ai";
+    const description = "Open positions.";
+    const vacancy = { ...preview, occupation: "Lagerarbetare", professionSlug: "warehouse_worker", title: "Private publisher title" };
+    const outsideCatalogue = { ...vacancy, id: "a0191a16-0000-4000-8000-000000000002", occupation: "Specialistofficer", professionSlug: null };
+    const noOccupation = { ...outsideCatalogue, id: "a0191a16-0000-4000-8000-000000000003", occupation: null };
+    const list = buildJobsListJsonLd({
+      origin,
+      locale,
+      description,
+      name: "Jobs",
+      genericTitle,
+      previews: [vacancy, outsideCatalogue, noOccupation],
+      localizedName: (row) => row.professionSlug === "warehouse_worker" ? localizedName : null,
+    });
+    const items = (list.mainEntity as { itemListElement: { name: string }[] }).itemListElement;
+    expect(items.map(({ name }) => name)).toEqual([localizedName, "Specialistofficer", genericTitle]);
+
+    for (const [row, heading] of [[vacancy, localizedName], [outsideCatalogue, "Specialistofficer"], [noOccupation, genericTitle]] as const) {
+      const detail = buildJobDetailJsonLd({
+        origin, locale, description, preview: row, genericTitle,
+        localizedName: row.professionSlug ? localizedName : null,
+      });
+      expect(detail.name).toBe(heading);
+      expect(detail.about).toMatchObject({ name: heading });
+      expect(JSON.stringify(detail)).not.toContain("Private publisher title");
+      expect(JSON.stringify(detail)).not.toMatch(FORBIDDEN);
+    }
+    expect(JSON.stringify(list)).not.toContain("Private publisher title");
+    expect(JSON.stringify(list)).not.toMatch(FORBIDDEN);
+  });
+});

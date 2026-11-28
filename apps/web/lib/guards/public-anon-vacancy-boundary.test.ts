@@ -117,9 +117,20 @@ describe("anonymous public-vacancy boundary (owner directive 2026-08-24)", () =>
     // 2026-10-10: the anonymous heading names the occupation in the reader's
     // language when the catalogue knows it (the board card's rule); the
     // member-only raw title still only ever comes from the member read.
-    expect(page).toContain(
-      "member?.titleRaw ?? localizedProfession ?? preview.occupation",
+    expect(page).toContain("publicJobName(preview.occupation, localizedProfession, GENERIC_TITLE[active])");
+    expect(page).toContain("member?.titleRaw ?? publicTitle");
+    const structuredData = page.match(/buildJobDetailJsonLd\(\{([\s\S]*?)\}\)/)?.[1];
+    expect(structuredData).toContain("localizedName: localizedProfession");
+    expect(structuredData).not.toMatch(/member|titleRaw/);
+  });
+
+  it("the jobs list and card use the same localized public profession", () => {
+    const page = readFileSync(
+      join(ROOT, "apps", "web", "app", "[locale]", "(marketing)", "jobs", "page.tsx"),
+      "utf8",
     );
+    expect(page).toContain("localizedName: (vacancy) => localizedProfessionName(vacancy.professionSlug)");
+    expect(page.match(/headingFallback=\{localizedProfessionName\(v\.professionSlug\) \?\? undefined\}/g)).toHaveLength(2);
   });
 
   it("card heading falls back when the anonymous title is NULL", () => {

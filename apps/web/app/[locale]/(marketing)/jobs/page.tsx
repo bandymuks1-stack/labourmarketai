@@ -463,8 +463,9 @@ export default async function JobsPage({
   // ads carry a slug the categorizer derived, so this is how a worker searches
   // Swedish supply in Lithuanian without knowing a word of Swedish.
   const tProfession = await getTranslations("professions");
-  const professionName = (slug: string): string =>
-    tProfession.has(slug as never) ? tProfession(slug as never) : slug;
+  const localizedProfessionName = (slug: string | null): string | null =>
+    slug && tProfession.has(slug as never) ? tProfession(slug as never) : null;
+  const professionName = (slug: string): string => localizedProfessionName(slug) ?? slug;
   // THE AD'S OWN LANGUAGE, named only when it is not the reader's — the SAME
   // condition and the SAME copy `/jobs/[id]` already uses, so the board and the
   // detail page say one thing (owner §6, 2026-09-27). Nothing is translated and
@@ -655,6 +656,7 @@ export default async function JobsPage({
                 path: professionCopy ? pageHref(1) : undefined,
                 previews: result.vacancies,
                 genericTitle: GENERIC_TITLE[active],
+                localizedName: (vacancy) => localizedProfessionName(vacancy.professionSlug),
               }),
             ),
           }}
@@ -802,9 +804,7 @@ export default async function JobsPage({
                   <PublicVacancyCard
                     vacancy={v}
                     locale={active}
-                    headingFallback={
-                      v.professionSlug ? professionName(v.professionSlug) : undefined
-                    }
+                    headingFallback={localizedProfessionName(v.professionSlug) ?? undefined}
                     genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     memberFacts={cardFacts(v.id)}
@@ -884,9 +884,7 @@ export default async function JobsPage({
                   <PublicVacancyCard
                     vacancy={v}
                     locale={active}
-                    headingFallback={
-                      v.professionSlug ? professionName(v.professionSlug) : undefined
-                    }
+                    headingFallback={localizedProfessionName(v.professionSlug) ?? undefined}
                     genericTitle={GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     memberFacts={cardFacts(v.id)}
