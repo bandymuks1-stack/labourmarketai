@@ -37,7 +37,7 @@ import {
   listPublicVacancyPreviewsByIds,
 } from "@/lib/vacancy-store/vacancy-read";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { buildJobsListJsonLd } from "@/lib/seo/public-job-json-ld";
+import { buildJobsListJsonLd, PUBLIC_JOB_GENERIC_TITLE } from "@/lib/seo/public-job-json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import {
   PUBLIC_VACANCY_PROFESSION_SLUGS,
@@ -132,18 +132,6 @@ const INTRO: L = {
  *  promises the employer, location and apply route "after you sign in" — said to
  *  a signed-in worker it is a false instruction (the board never reads it as
  *  such, but the sentence did). They get the same facts, one tap away. */
-/** Position name when the preview carries no occupation label (structured
- *  data only); the same generic noun the detail page uses for its heading. */
-const GENERIC_TITLE: L = {
-  en: "Job opening",
-  lt: "Darbo pasiūlymas",
-  ru: "Вакансия",
-  nl: "Vacature",
-  de: "Stellenangebot",
-  pl: "Oferta pracy",
-  sv: "Ledigt jobb",
-};
-
 const INTRO_MEMBER: L = {
   en: "Live vacancies imported from official public employment sources. Open a vacancy to see the employer, the location and how to apply.",
   lt: "Gyvos darbo vietos iš oficialių viešų užimtumo šaltinių. Atidaryk skelbimą — pamatysi darbdavį, vietovę ir kaip kandidatuoti.",
@@ -463,8 +451,9 @@ export default async function JobsPage({
   // ads carry a slug the categorizer derived, so this is how a worker searches
   // Swedish supply in Lithuanian without knowing a word of Swedish.
   const tProfession = await getTranslations("professions");
-  const professionName = (slug: string): string =>
-    tProfession.has(slug as never) ? tProfession(slug as never) : slug;
+  const localizedProfessionName = (slug: string | null): string | null =>
+    slug && tProfession.has(slug as never) ? tProfession(slug as never) : null;
+  const professionName = (slug: string): string => localizedProfessionName(slug) ?? slug;
   // THE AD'S OWN LANGUAGE, named only when it is not the reader's — the SAME
   // condition and the SAME copy `/jobs/[id]` already uses, so the board and the
   // detail page say one thing (owner §6, 2026-09-27). Nothing is translated and
@@ -654,7 +643,8 @@ export default async function JobsPage({
                 description: professionCopy?.description ?? INTRO[active],
                 path: professionCopy ? pageHref(1) : undefined,
                 previews: result.vacancies,
-                genericTitle: GENERIC_TITLE[active],
+                genericTitle: PUBLIC_JOB_GENERIC_TITLE[active],
+                localizedName: (vacancy) => localizedProfessionName(vacancy.professionSlug),
               }),
             ),
           }}
@@ -802,10 +792,8 @@ export default async function JobsPage({
                   <PublicVacancyCard
                     vacancy={v}
                     locale={active}
-                    headingFallback={
-                      v.professionSlug ? professionName(v.professionSlug) : undefined
-                    }
-                    genericTitle={GENERIC_TITLE[active]}
+                    headingFallback={localizedProfessionName(v.professionSlug) ?? undefined}
+                    genericTitle={PUBLIC_JOB_GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     memberFacts={cardFacts(v.id)}
                     lockedFactsLabel={lockedFactsLabel}
@@ -884,10 +872,8 @@ export default async function JobsPage({
                   <PublicVacancyCard
                     vacancy={v}
                     locale={active}
-                    headingFallback={
-                      v.professionSlug ? professionName(v.professionSlug) : undefined
-                    }
-                    genericTitle={GENERIC_TITLE[active]}
+                    headingFallback={localizedProfessionName(v.professionSlug) ?? undefined}
+                    genericTitle={PUBLIC_JOB_GENERIC_TITLE[active]}
                     sourceLanguageLabel={sourceLanguageLabel(v.sourceLanguage)}
                     memberFacts={cardFacts(v.id)}
                     lockedFactsLabel={lockedFactsLabel}

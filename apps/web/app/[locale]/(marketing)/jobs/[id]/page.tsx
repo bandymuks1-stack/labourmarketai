@@ -20,7 +20,12 @@ import { SaveVacancyButton } from "@/components/marketing/save-vacancy-button";
 import { formatUtcDate } from "@/lib/time/display";
 import { jobPageDescription } from "@/lib/seo/job-page-description";
 import { jsonLdScript } from "@/lib/seo/json-ld";
-import { buildJobDetailJsonLd } from "@/lib/seo/public-job-json-ld";
+import {
+  buildJobDetailJsonLd,
+  PUBLIC_JOB_GENERIC_TITLE,
+  publicJobCatalogueName,
+  publicJobName,
+} from "@/lib/seo/public-job-json-ld";
 import { MARKETING_ORIGIN } from "@/lib/domain/canonical";
 import { TelemetryView } from "@/components/app/telemetry-view";
 import { TrackedCta } from "@/components/app/tracked-cta";
@@ -111,10 +116,11 @@ export async function generateMetadata({
   // in the READER'S language when the catalogue knows the profession (the
   // registry the board card heads with), else the publisher's own label.
   // Nothing is machine-translated.
-  const title =
-    (await localizedProfessionName(active, preview.professionSlug)) ??
-    preview.occupation ??
-    GENERIC_TITLE[active];
+  const title = publicJobName(
+    preview,
+    await localizedProfessionName(active, preview.professionSlug),
+    PUBLIC_JOB_GENERIC_TITLE[active],
+  );
 
   // The ONE public-page metadata builder: brand suffix, canonical, the SAME
   // hreflang variants the jobs sitemap declares (`hreflangAlternates` inside
@@ -148,17 +154,6 @@ async function localizedProfessionName(
 }
 
 type L = Record<ActiveLocale, string>;
-
-/** Metadata/heading fallback when even the occupation label is missing. */
-const GENERIC_TITLE: L = {
-  en: "Open vacancy",
-  lt: "Laisva darbo vieta",
-  ru: "Открытая вакансия",
-  nl: "Openstaande vacature",
-  de: "Offene Stelle",
-  pl: "Otwarta oferta pracy",
-  sv: "Ledigt jobb",
-};
 
 /** Anonymous source line. Deliberately generic: naming the source employment
  *  service identifies the country (owner directive 2026-08-24). Members see
@@ -756,12 +751,21 @@ export default async function JobDetailPage({
   )
     ? (preview.sourceLanguage as string)
     : undefined;
-  const localizedProfession = await localizedProfessionName(active, preview.professionSlug);
+  const localizedProfession = publicJobCatalogueName(
+    preview,
+    await localizedProfessionName(active, preview.professionSlug),
+  );
+  const publicOccupation = preview.occupation?.trim() || null;
+  const publicTitle = publicJobName(
+    preview,
+    localizedProfession,
+    PUBLIC_JOB_GENERIC_TITLE[active],
+  );
   const factChips = vacancyFactChips(preview, active);
   // The same per-ad description as the <meta> (anonymous facts only).
   const pageDescription = jobPageDescription({
     locale: active,
-    title: localizedProfession ?? preview.occupation ?? GENERIC_TITLE[active],
+    title: publicTitle,
     chips: factChips,
     published: preview.publishedAt ? published : null,
   });
@@ -783,7 +787,8 @@ export default async function JobDetailPage({
               locale: active,
               description: pageDescription,
               preview,
-              genericTitle: GENERIC_TITLE[active],
+              genericTitle: PUBLIC_JOB_GENERIC_TITLE[active],
+              localizedName: localizedProfession,
             }),
           ),
         }}
@@ -867,18 +872,18 @@ export default async function JobDetailPage({
           the catalogue knows the profession, exactly as the board card heads.
           `lang` follows whose words the heading is. */}
       <h1
-        lang={member?.titleRaw || !localizedProfession ? sourceLang : undefined}
+        lang={member?.titleRaw || (!localizedProfession && publicOccupation) ? sourceLang : undefined}
         className="mt-4 text-2xl font-semibold tracking-tight sm:text-3xl"
       >
-        {member?.titleRaw ?? localizedProfession ?? preview.occupation ?? GENERIC_TITLE[active]}
+        {member?.titleRaw ?? publicTitle}
       </h1>
 
       {/* The publisher's own occupation words, kept and marked as theirs
           whenever the heading is something else. */}
-      {preview.occupation &&
-        (member?.titleRaw || (localizedProfession && localizedProfession !== preview.occupation)) && (
+      {publicOccupation &&
+        (member?.titleRaw || (localizedProfession && localizedProfession !== publicOccupation)) && (
           <p lang={sourceLang} className="mt-2 text-base text-text-muted">
-            {preview.occupation}
+            {publicOccupation}
           </p>
         )}
 

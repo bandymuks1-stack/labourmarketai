@@ -1,6 +1,38 @@
-import { describe, expect, it } from "vitest";
+import { createElement, type AnchorHTMLAttributes } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { describe, expect, it, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import professions from "@/messages/lt/professions.json";
+import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
+
+const readers = vi.hoisted(() => ({ preview: vi.fn(), session: vi.fn(), member: vi.fn() }));
+vi.mock("@/lib/vacancy-store/public-vacancy-preview", () => ({ getPublicVacancyPreview: readers.preview }));
+vi.mock("@/lib/vacancy-store/vacancy-read", () => ({ getPublicVacancyById: readers.member }));
+vi.mock("@/lib/supabase/session-cookie", () => ({ hasSessionCookie: readers.session }));
+vi.mock("@/lib/supabase/server", () => ({
+  createClient: async () => ({ auth: { getUser: async () => ({ data: { user: { id: "member" } } }) } }),
+}));
+vi.mock("@/lib/opportunities/public-job-reading", () => ({ readPublicJobForMember: async () => null }));
+vi.mock("@/lib/opportunities/saved-opportunities", () => ({ resolveOwnWorkerId: async () => null }));
+vi.mock("next-intl/server", () => ({
+  setRequestLocale: vi.fn(),
+  getTranslations: async ({ namespace }: { namespace?: string }) => {
+    const labels: Record<string, string> = namespace === "professions" ? professions : {};
+    return Object.assign((key: string) => labels[key] ?? key, { has: (key: string) => key in labels });
+  },
+}));
+vi.mock("@/lib/i18n/navigation", () => ({
+  Link: (props: AnchorHTMLAttributes<HTMLAnchorElement>) => createElement("a", props),
+}));
+vi.mock("@/components/app/telemetry-view", () => ({ TelemetryView: () => null }));
+vi.mock("@/components/app/tracked-cta", () => ({ TrackedCta: () => null }));
+vi.mock("@/components/app/vacancy-translate-control", () => ({ VacancyTranslateControl: () => null }));
+vi.mock("@/components/app/vacancy-interest-button", () => ({ VacancyInterestButton: () => null }));
+vi.mock("@/components/marketing/save-vacancy-button", () => ({ SaveVacancyButton: () => null }));
+
+import JobDetailPage from "@/app/[locale]/(marketing)/jobs/[id]/page";
+import { PublicVacancyCard } from "@/components/marketing/public-vacancy-card";
 
 /**
  * A FOREIGN AD NAMES ITS LANGUAGE, AND NEVER COMPETES WITH THE LOCALIZED TITLE.
@@ -50,12 +82,56 @@ const CALLERS = [
 describe("public vacancy card — the localized name is primary", () => {
   const card = read(CARD);
 
-  it("the localized profession outranks the publisher's occupation in the heading", () => {
-    // `title` is NULL on the anonymous path, so the order that matters is
-    // headingFallback (localized) BEFORE occupation (the source words).
-    expect(card).toMatch(
-      /vacancy\.title \?\? headingFallback \?\? vacancy\.occupation/,
-    );
+  const preview: PublicVacancyPreview = {
+    id: "00000000-0000-4000-8000-000000000001", title: null,
+    professionSlug: "warehouse_worker", occupation: "Lagerarbetare", sourceLanguage: "sv",
+    employmentForm: null, workingTime: null, positions: null, compensationCurrency: null,
+    compensationMin: null, compensationMax: null, attributionCode: null, publishedAt: null,
+  };
+  const params = Promise.resolve({ locale: "lt", id: preview.id });
+
+  it.each([
+    ["Lagerarbetare", "warehouse_worker", "sv", "Sandėlio darbuotojas", undefined],
+    ["Specialistofficer", "driver", "sv", "Specialistofficer", "sv"],
+    ["Doktorand/Elektriker", "electrician", "sv", professions.electrician, undefined],
+    ["Specialistofficer", "driver", "invalid_language", "Specialistofficer", undefined],
+    ["   ", null, "sv", "Darbo pasiūlymas", undefined],
+  ] as const)("renders %j with stored profession %s and language %s on the card and detail", async (
+    occupation, professionSlug, sourceLanguage, expectedName, expectedLang,
+  ) => {
+    const vacancy = { ...preview, professionSlug, occupation, sourceLanguage };
+    readers.preview.mockResolvedValue(vacancy);
+    readers.session.mockResolvedValue(false);
+    const cardHtml = renderToStaticMarkup(createElement(PublicVacancyCard, {
+      vacancy, locale: "lt", headingFallback: professionSlug ? professions[professionSlug] : undefined,
+      genericTitle: "Darbo pasiūlymas", sourceLanguageLabel: "Skelbimo kalba",
+    }));
+    const detailHtml = renderToStaticMarkup(await JobDetailPage({ params }));
+    const headings = [
+      cardHtml.match(/<h2\b([^>]*)>([^<]+)<\/h2>/),
+      detailHtml.match(/<h1\b([^>]*)>([^<]+)<\/h1>/),
+    ];
+    for (const heading of headings) {
+      expect(heading?.[2]).toBe(expectedName);
+      expect(heading?.[1].match(/\slang="([^"]+)"/)?.[1]).toBe(expectedLang);
+    }
+    if (professionSlug === "warehouse_worker") {
+      expect(cardHtml).toMatch(/<span\b[^>]*lang="sv"[^>]*>Lagerarbetare<\/span>/);
+      expect(detailHtml).toMatch(/<p\b[^>]*lang="sv"[^>]*>Lagerarbetare<\/p>/);
+    }
+  });
+
+  it("marks the member title, source occupation and description as publisher text", async () => {
+    readers.preview.mockResolvedValue(preview);
+    readers.session.mockResolvedValue(true);
+    readers.member.mockResolvedValue({ status: "ok", vacancy: {
+      titleRaw: "Lagerarbete på kvällstid", descriptionRaw: "Plocka varor från hyllorna.",
+      employer: { name: null }, location: { city: null, region: null, country: null },
+    } });
+    const html = renderToStaticMarkup(await JobDetailPage({ params }));
+    expect(html).toMatch(/<h1\b[^>]*lang="sv"[^>]*>Lagerarbete på kvällstid<\/h1>/);
+    expect(html).toMatch(/<p\b[^>]*lang="sv"[^>]*>Lagerarbetare<\/p>/);
+    expect(html).toMatch(/<p\b[^>]*lang="sv"[^>]*>Plocka varor från hyllorna\.<\/p>/);
   });
 
   it("the source occupation is never a BARE line when the language is named", () => {

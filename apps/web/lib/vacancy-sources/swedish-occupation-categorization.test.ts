@@ -130,3 +130,36 @@ describe("description-text pollution stays fixed", () => {
     expect(r.origin).toBe("derived");
   });
 });
+
+describe("publisher occupations outside the catalogue", () => {
+  it.each([
+    ["  sPeCiAlIsToFfIcEr  ", "Militär lärare sjösäkerhet"],
+    ["Affärsutvecklare", "Business Developer"],
+    ["Affa\u0308rsutvecklare", "Business Developer"],
+    ["Doktorand", "Doktorand i energi- och miljöteknik med inriktning elektroteknik"],
+    ["Doktorand", "Doktorand inom elektrisk teknik / Elektriker"],
+    ["Bilrekonditionerare", "Bil rekondare / Bil vårdare"],
+    ["Hundtrimmare", "Är du vår nya hundfrisör?"],
+  ])("does not overwrite %s based on the title %s", (occupationRaw, titleRaw) => {
+    const result = categorizeVacancy({ titleRaw, descriptionRaw: "", occupationRaw });
+    expect(result).toMatchObject({ professionSlug: null, origin: "derived" });
+  });
+
+  it.each([
+    ["Fjärrbilsförare", "C-chaufför", "driver"],
+    ["Fullstack-utvecklare", "AI-Driven Full-Stack Developer", "software_developer"],
+    ["Danspedagog", "Danslärare", "teacher"],
+    ["Doktorand / projektstöd", "Elektriker", "electrician"],
+  ])("keeps title inference for an unmapped %s label", (occupationRaw, titleRaw, professionSlug) => {
+    const result = categorizeVacancy({ titleRaw, descriptionRaw: "", occupationRaw });
+    expect(result).toMatchObject({ professionSlug, origin: "derived" });
+  });
+
+  it.each([
+    ["Lagerarbetare", "Business Developer", "warehouse_worker"],
+    ["Doktorand/Elektriker", "Danslärare", "electrician"],
+  ])("keeps a recognized publisher label %s ahead of the title", (occupationRaw, titleRaw, professionSlug) => {
+    const result = categorizeVacancy({ titleRaw, descriptionRaw: "", occupationRaw });
+    expect(result).toMatchObject({ professionSlug, origin: "publisher" });
+  });
+});

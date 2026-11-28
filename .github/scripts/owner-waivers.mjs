@@ -748,6 +748,8 @@ export const SCOPED_OWNER_WAIVERS = [
       3327,
       // Owner 2026-11-27: "Leidžiu įtraukti tik #2642". All other scope stays unchanged.
       2642,
+      // Owner approval 2026-11-28 is scoped to #2403 and public job title consistency.
+      2403,
     ],
     // Empty for the same reason as the record above: the waiver must live IN
     // the branch whose CI honours it, so writing the head SHA down changes it.

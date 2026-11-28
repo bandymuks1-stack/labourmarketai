@@ -59,3 +59,8 @@ describe("extractProfileSuggestions: washing a floor is never floor-laying (#23 
     expect(extractProfileSuggestions("tampiau šiukšles ir tvarkiau").skillSlugs).toEqual([]);
   });
 });
+
+it("recognizes a worker’s occupation alongside another person’s occupation", () => {
+  const suggestions = extractProfileSuggestions("Jag är elektriker. Min partner är doktorand.");
+  expect(suggestions.professionSlugs).toContain("electrician");
+});

@@ -15,7 +15,20 @@
  * field to leak here by construction (the guard in
  * lib/guards/public-job-json-ld.test.ts pins the field set).
  */
+import type { ActiveLocale } from "@/lib/i18n/config";
+import { isPublisherOccupationOutsideCatalogue } from "@/lib/vacancy-sources/publisher-occupation-conflicts";
 import type { PublicVacancyPreview } from "@/lib/vacancy-store/public-vacancy-preview";
+
+/** Name shown when a public vacancy has neither a catalogue nor publisher label. */
+export const PUBLIC_JOB_GENERIC_TITLE: Record<ActiveLocale, string> = {
+  en: "Job opening",
+  lt: "Darbo pasiūlymas",
+  ru: "Вакансия",
+  nl: "Vacature",
+  de: "Stellenangebot",
+  pl: "Oferta pracy",
+  sv: "Ledigt jobb",
+};
 
 type Salary = {
   readonly "@type": "MonetaryAmount";
@@ -36,11 +49,26 @@ function salaryOf(p: PublicVacancyPreview): Salary | null {
   return out;
 }
 
-/** The public name of a position: the ESCO occupation label the preview
- *  carries. The publisher's free-text title is NEVER used (it embeds the
- *  employer and the workplace — null on the anonymous path anyway). */
-function positionName(p: PublicVacancyPreview, fallback: string): string {
-  return p.occupation?.trim() || fallback;
+type PublicOccupation = Pick<PublicVacancyPreview, "occupation">;
+
+/** Use the publisher label for known outside occupations. The stored slug
+ * remains available to the existing search and ranking. */
+export function publicJobCatalogueName(
+  vacancy: PublicOccupation,
+  localizedName: string | null | undefined,
+): string | null {
+  if (localizedName == null) return null;
+  return isPublisherOccupationOutsideCatalogue(vacancy.occupation) ? null : localizedName;
+}
+
+/** The signed-out heading uses the catalogue name or the public publisher
+ * occupation, with a generic heading when both are absent. */
+export function publicJobName(
+  vacancy: PublicOccupation,
+  localizedName: string | null | undefined,
+  genericTitle: string,
+): string {
+  return publicJobCatalogueName(vacancy, localizedName) ?? (vacancy.occupation?.trim() || genericTitle);
 }
 
 export function buildJobsListJsonLd(input: {
@@ -50,6 +78,7 @@ export function buildJobsListJsonLd(input: {
   readonly description: string;
   readonly previews: readonly PublicVacancyPreview[];
   readonly genericTitle: string;
+  readonly localizedName?: (preview: PublicVacancyPreview) => string | null;
   /** The listing's own path after the locale when it is not the board itself,
    *  e.g. `/jobs?profession=welder`. Item URLs never depend on it. */
   readonly path?: string;
@@ -71,7 +100,7 @@ export function buildJobsListJsonLd(input: {
           "@type": "ListItem",
           position: i + 1,
           url: `${base}/${p.id}`,
-          name: positionName(p, input.genericTitle),
+          name: publicJobName(p, input.localizedName?.(p), input.genericTitle),
         };
         return item;
       }),
@@ -85,19 +114,21 @@ export function buildJobDetailJsonLd(input: {
   readonly description: string;
   readonly preview: PublicVacancyPreview;
   readonly genericTitle: string;
+  readonly localizedName?: string | null;
 }): Record<string, unknown> {
   const p = input.preview;
+  const name = publicJobName(p, input.localizedName, input.genericTitle);
   const url = `${input.origin.replace(/\/$/, "")}/${input.locale}/jobs/${p.id}`;
   const about: Record<string, unknown> = {
     "@type": "Occupation",
-    name: positionName(p, input.genericTitle),
+    name,
   };
   const salary = salaryOf(p);
   if (salary) about.estimatedSalary = salary;
   const page: Record<string, unknown> = {
     "@context": "https://schema.org",
     "@type": "WebPage",
-    name: positionName(p, input.genericTitle),
+    name,
     description: input.description,
     url,
     inLanguage: input.locale,
