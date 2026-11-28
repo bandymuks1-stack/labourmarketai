@@ -44,6 +44,7 @@ on:
           - rota-repeat
           # Explicit owner-authorised scheduled-report proof; synthetic accounts only.
           - timesheet-schedule
+          - service-request-proposal
           - marketplace
           - agency-chain
           - learning-practice
@@ -575,6 +576,7 @@ jobs:
             calendar-planning) SPEC=tests/e2e/prod-calendar-planning.spec.ts ;;
             rota-repeat) SPEC=tests/e2e/prod-rota-repeat.spec.ts ;;
             timesheet-schedule) SPEC=tests/e2e/prod-timesheet-schedule.spec.ts ;;
+            service-request-proposal) SPEC=tests/e2e/prod-service-request-proposal.spec.ts ;;
             marketplace) SPEC=tests/e2e/prod-marketplace.spec.ts ;;
             agency-chain) SPEC=tests/e2e/prod-agency-chain.spec.ts ;;
             learning-practice) SPEC=tests/e2e/prod-learning-practice.spec.ts ;;
