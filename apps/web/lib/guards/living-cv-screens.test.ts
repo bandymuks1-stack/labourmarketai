@@ -90,6 +90,9 @@ describe("the walk is read-only and prints no names", () => {
     expect(spec).not.toMatch(/workspace-chip|workspace-option|"\/dashboard\/company\/people"\)/);
     // A page the grant was not served (redirect, hidden) is a FAIL without an image.
     expect(spec).toMatch(/redirected: the page was not served to the grant/);
+    // An "unavailable" read under the same root is not a screen either.
+    expect(spec).toMatch(/\[data-testid="company-person"\]\[data-state="unavailable"\]/);
+    expect(spec).toMatch(/company-work-history-unavailable/);
   });
 
   it("loads no stored photos or documents", () => {

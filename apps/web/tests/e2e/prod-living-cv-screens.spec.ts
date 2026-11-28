@@ -145,6 +145,11 @@ async function served(page: Page, path: string, rootTestId: string): Promise<voi
   if (!(await page.getByTestId(rootTestId).first().isVisible({ timeout: 30_000 }).catch(() => false))) {
     throw new Error("the page rendered without its content: hidden from the grant");
   }
+  // A read that failed renders its own "unavailable" state under the same root: not a screen.
+  const unavailable = page.locator(
+    '[data-testid="company-person"][data-state="unavailable"], [data-testid="company-work-history-unavailable"], [data-testid="company-person-unavailable"]',
+  );
+  if ((await unavailable.count()) > 0) throw new Error("the page rendered without its content: the read was unavailable");
 }
 
 /** Person names on the people list and the company history, and links to people's pages. */
