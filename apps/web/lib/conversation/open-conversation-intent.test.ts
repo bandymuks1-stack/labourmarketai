@@ -50,7 +50,9 @@ describe("'write to / open a conversation with <person>' opens the one conversat
 describe("the chat has no message logic of its own", () => {
   it("resolves who through the conversation door, opens through it, and only navigates", () => {
     expect(CHAT).toMatch(/from "@\/lib\/communication\/chat-open-conversation"/);
-    expect(CHAT).toMatch(/findConversationPeople\(sentence\)/);
+    // The sentence itself, plus (2026-11-22) whether it named nobody, so the
+    // door lists the person's own counterparts to choose from.
+    expect(CHAT).toMatch(/findConversationPeople\(sentence, \{ listWhenUnnamed: isBareContactRequest\(sentence\) \}\)/);
     expect(CHAT).toMatch(/openConversationWith\(\{/);
     const block = CHAT.slice(
       CHAT.indexOf("const openConversationTarget = useCallback("),

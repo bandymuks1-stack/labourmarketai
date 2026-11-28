@@ -106,6 +106,13 @@ export interface AiEgressGrant {
    * perdavimą į Gemini". A code comment saying "paid tier" is not that proof.
    */
   readonly requiresPaidTierConfirmation?: boolean;
+  /**
+   * OWNER DECISION 2026-11-22: a free tier whose CURRENT terms were read
+   * first-hand (no training, no retention) may be granted above
+   * `MAX_GRANTABLE_FOR_FREE_TIER` for the tasks of THIS grant only. The record
+   * names the terms read and when. Absent = the free-tier cap applies as before.
+   */
+  readonly freeTierTermsVerified?: { readonly terms: string; readonly readOn: string };
 }
 
 /** The owner's deployment-level confirmation that the Gemini key is on the
@@ -166,6 +173,32 @@ export const AI_EGRESS_GRANTS: readonly AiEgressGrant[] = [
       "Owner approval 2026-09-17 (RED-2 TRANSLATE_MESSAGE EGRESS, option 1 Gemini only): render an already-authorized message into the viewer's locale; existing approved Gemini runtime, paid tier; least-privilege by task; DeepL deferred; revocable by deleting this row",
     grantedOn: "2026-09-17",
   },
+  {
+    // OWNER DECISION 2026-11-22 — "CLOUDFLARE WORKERS AI": ONE unclear typed
+    // sentence may leave for Cloudflare Workers AI so that it proposes ONE
+    // existing intent id. Conditions, all enforced in code:
+    //   - the sentence is redacted first (lib/conversation/intent-sentence-
+    //     redaction.ts: names, contacts, ids, numbers → opaque tokens) and is
+    //     NOT sent when it cannot be cleaned safely;
+    //   - no CV, journal, message history, names, contacts, ids or org data
+    //     (the task policy's allowedFields: sentence, locale, identity, intents);
+    //   - the audit row records metadata only (`inputSource` label, no text);
+    //   - the model proposes; the product re-validates and every write stays
+    //     prepare → confirm;
+    //   - AI_DAILY_RUN_BUDGET (200) and the free Neurons allocation cap it;
+    //   - off at once: AI_CLOUDFLARE_ENABLED=false, or delete this row.
+    provider: "cloudflare",
+    maxSensitivity: "SENSITIVE_FREE_TEXT",
+    tasks: ["propose_conversation_intent"],
+    freeTierTermsVerified: {
+      terms:
+        "Workers AI: Cloudflare does not use Customer Content to train AI models; inputs and outputs are not retained after the request (developers.cloudflare.com/workers-ai/platform/data-usage/); no AI Gateway logging is used",
+      readOn: "2026-10-25",
+    },
+    basis:
+      "Owner decision 2026-11-22 (CLOUDFLARE WORKERS AI): one redacted unclear sentence → one existing intent proposal; no training, no retention; metadata-only audit; 200 runs/day; least-privilege by task; revocable by deleting this row",
+    grantedOn: "2026-11-22",
+  },
 ];
 
 /**
@@ -221,9 +254,12 @@ export function maxPermittedSensitivity(
   const grant = egressGrantFor(profile.id, grants, task);
   let ceiling: AiDataSensitivity = grant ? grant.maxSensitivity : "PUBLIC";
 
-  // A free tier's ceiling is capped regardless of what the grant claims.
+  // A free tier's ceiling is capped regardless of what the grant claims —
+  // unless the grant itself records the owner's terms verification for its
+  // own tasks (owner decision 2026-11-22).
   if (
     profile.costClass === "free_tier" &&
+    !grant?.freeTierTermsVerified &&
     SENSITIVITY_RANK[ceiling] > SENSITIVITY_RANK[MAX_GRANTABLE_FOR_FREE_TIER]
   ) {
     ceiling = MAX_GRANTABLE_FOR_FREE_TIER;

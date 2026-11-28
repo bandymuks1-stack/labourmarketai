@@ -139,7 +139,10 @@ export function HeaderSearch({
           // (z-50), dropdown menus (z-60). Inside the header its z was
           // trapped by the backdrop-blur stacking context and the right
           // panel stayed bright over it in production.
-          className="fixed inset-0 z-toast flex items-start justify-center bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
+          // overflow-y-auto: on a phone on its side (320 px high) or at 200 %
+          // text the dialog is taller than the screen; it scrolls inside the
+          // backdrop instead of running past the bottom (sweep 2026-11-21).
+          className="fixed inset-0 z-toast flex items-start justify-center overflow-y-auto overscroll-contain bg-ink-900/70 p-4 pt-[10vh] backdrop-blur-sm"
           role="presentation"
           onClick={(e) => {
             if (e.target === e.currentTarget) setOpen(false);
@@ -158,7 +161,7 @@ export function HeaderSearch({
               onClick={() => setOpen(false)}
               aria-label={t("closeLabel")}
               data-testid="header-search-close"
-              className="absolute right-2 top-2 z-10 inline-flex h-8 w-8 items-center justify-center rounded-md text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
+              className="absolute right-1 top-1 z-10 inline-flex size-11 items-center justify-center rounded-md text-text-muted transition-colors hover:text-text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue"
             >
               <X aria-hidden className="h-4 w-4" />
             </button>

@@ -1,48 +1,15 @@
 -- @human-gate-approved
--- The marker above is the human-gate ACKNOWLEDGEMENT, not an approval. NO OWNER APPROVAL OF THIS SQL
--- EXISTS YET. Draft PR + needs-human-gate. NOT applied. Apply only via Supabase MCP apply_migration.
--- 20261102154500_service_request_proposal_link_v1
---
--- RED tier (needs-human-gate): one nullable column, one index and one new
--- SECURITY DEFINER function with its grants. NOT applied — production apply
--- requires the owner's approval naming this migration (decision RED-1, J-13).
--- No existing policy, function, row or constraint changes.
---
--- WHY (J-13, owner directive 2026-11-02): a provider who ACCEPTS a service
--- request (service_offering_requests, register 6.1) has no way to turn it
--- into an offer. The commercial records that already exist (register 6.6:
--- public.proposals → public.contracts.proposal_id) are linked to the buyer
--- workspace's customer_requests only, so the accepted service request and
--- the offer made for it are two unconnected facts.
---
--- WHAT — the smallest link, reusing the ONE proposal/contract system:
---   * proposals.service_offering_request_id (nullable, FK, on delete set null)
---     — the service request a proposal answers. A contract made from that
---     proposal (create_contract_v1, p_proposal_id — unchanged) reaches the
---     request through contracts.proposal_id, so contracts get no new column.
---   * create_proposal_from_service_request_v1(request, title, amount, scope,
---     exclusions, validity) — the provider's door: refuses unless the caller
---     is that request's provider AND the request is 'accepted'. It writes a
---     DRAFT proposal owned by the caller, exactly as create_proposal_v1 does
---     (same caps, same defaults), plus the link. Nothing is sent, nobody is
---     notified, no payment.
---   * One proposal per request while it is open: a second call returns the
---     existing non-withdrawn/non-rejected proposal's id instead of a duplicate.
---
--- WHAT IT DOES NOT DO (kept for later owner decisions):
---   * the buyer does NOT see the proposal — proposals_select stays
---     owner-only; showing an offer to the buyer is a separate RLS decision;
---   * no automatic proposal on accept; respond_service_offering_request is
---     unchanged.
---
--- Rollback: supabase/rollbacks/20261102154500_service_request_proposal_link_v1.down.sql
--- (drops the function, the index, then the column — the column drop refuses
--- while any proposal carries a link, so no linked record is silently erased).
---   drop function if exists public.create_proposal_from_service_request_v1(uuid, text, bigint, text, text, date);
---   drop index if exists public.proposals_one_open_per_service_request;
---   drop index if exists public.proposals_service_offering_request_idx;
---   alter table public.proposals drop column if exists service_offering_request_id;
--- Apply via Supabase MCP apply_migration only.
+-- Proposed for owner approval; apply only after explicit authorization of these exact bytes.
+-- RED / needs-human-gate. Draft for #2946. Explicit owner approval of this exact SQL
+-- is required before marking approved, merging for release, or applying.
+-- @plan-cache-proof: scripts/db-proof/plan-cache-probe.sql via service-request-proposal-link-v1.plan.sql, auto + force_generic_plan.
+-- 10 calls per UUID case, 20000 synthetic proposals on PostgreSQL 16.13.
+-- Reference run pg16-plan-reference.log (2026-11-28): worst lookup 1.8 ms, worst full reopen RPC 9.365 ms (local only).
+-- A signed-in provider can explicitly create or reopen an offer for their
+-- accepted personal service request. The offer belongs to the provider profile.
+-- Closed offers remain in history. An explicit retry can create a replacement.
+-- Deletion of a request retains its proposal with a NULL source (existing erasure semantics).
+-- Rollback refuses to remove a populated link. Apply and rollback are transactional.
 
 begin;
 
@@ -73,11 +40,10 @@ create or replace function public.create_proposal_from_service_request_v1(
 ) returns uuid
 language plpgsql
 security definer
-set search_path = public, pg_temp
+set search_path = pg_catalog, pg_temp
 as $$
 declare
   v_uid      uuid := auth.uid();
-  v_provider uuid;
   v_status   text;
   v_id       uuid;
 begin
@@ -91,11 +57,12 @@ begin
     raise exception 'invalid amount' using errcode = '22023';
   end if;
 
-  select provider_id, status into v_provider, v_status
+  select status into v_status
     from public.service_offering_requests
    where id = p_request_id
-   for update; -- row lock: two concurrent calls serialize, so the open-proposal check below cannot be raced into a duplicate
-  if v_provider is null or v_provider <> v_uid then
+     and provider_id = v_uid
+   for update;
+  if not found then
     -- Same answer for "no such request" and "not yours": no existence oracle.
     raise exception 'request not found' using errcode = '42501';
   end if;
@@ -123,7 +90,7 @@ begin
 end $$;
 
 revoke all on function public.create_proposal_from_service_request_v1(uuid, text, bigint, text, text, date)
-  from public, anon;
+  from public, anon, service_role;
 grant execute on function public.create_proposal_from_service_request_v1(uuid, text, bigint, text, text, date)
   to authenticated;
 

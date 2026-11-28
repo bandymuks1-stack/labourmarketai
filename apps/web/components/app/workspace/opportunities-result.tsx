@@ -1,5 +1,9 @@
 "use client";
 
+import { Badge } from "@/components/ui/Badge";
+import { LmLogo } from "@/components/ui/lm-logo";
+import { vacancyOriginLabels } from "@/components/marketing/public-vacancy-card-facts";
+
 import { useCallback, useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
@@ -379,6 +383,10 @@ function MatchRow({
         )}
       </span>
 
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-text-secondary" data-testid="job-origin" data-origin="platform">
+        <Badge tone="neutral" className="gap-1.5 font-sans normal-case tracking-normal"><LmLogo className="h-4 w-4 shrink-0" title="" />LabourMarket.ai</Badge>
+        <span>{vacancyOriginLabels(locale).platform_internal}</span>
+      </div>
       {place && <span className="text-meta text-text-muted">{place}</span>}
 
       {/* §19 canonical basis — counts WITH the confirmed share, together,
@@ -415,6 +423,7 @@ function MatchRow({
  * beside every row; a readback row is only ever a STRONG or POSSIBLE fit.
  */
 function ExternalRow({ row }: { row: OpportunitiesResultExternalRow }) {
+  const origin = vacancyOriginLabels(useLocale());
   const tOpp = useTranslations("opportunities");
   const tFind = useTranslations("conversation.findWork");
   return (
@@ -438,6 +447,10 @@ function ExternalRow({ row }: { row: OpportunitiesResultExternalRow }) {
         {" · "}
         {tOpp("external.publishedOn", { date: row.publishedAt })}
       </span>
+      <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-meta text-text-secondary" data-testid="job-origin" data-origin="external">
+        <Badge tone="neutral" className="font-sans normal-case tracking-normal">{row.sourceName ?? origin.external}</Badge>
+        <span>{row.originalUrl ? origin.source_original : origin.unavailable}</span>
+      </div>
       <span className="text-meta text-text-muted">{row.attributionText}</span>
       {row.originalUrl ? (
         /* Owner decision (V8 addendum §4): inform → confirm → open. Still an

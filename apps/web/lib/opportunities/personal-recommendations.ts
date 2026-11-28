@@ -11,7 +11,7 @@ import type { OpportunityCard } from "@/lib/opportunities/load-worker-opportunit
  *
  *   - only RELEVANT opportunities qualify: the engine's `strong` or `possible`
  *     verdict. Weak / insufficient-data cards never fill a slot "to reach 3";
- *   - ranking: verdict, then the strength of the evidence behind the matched
+ *   - ranking: verdict, then direct platform needs, then the strength of the evidence behind the matched
  *     skills (manager-confirmed work, then the person's journal, then
  *     organization history), then place fit, then freshness;
  *   - the same ad listed twice (same title, employer and city) counts once;
@@ -31,6 +31,8 @@ export type PersonalWhy =
 
 export type PersonalOpportunity = {
   readonly kind: "demand" | "vacancy";
+  readonly attributionCode: string | null;
+  readonly applicationRoute: "platform_internal" | "source_original" | "unavailable";
   readonly key: string;
   /** The id the detail route takes (demand id / vacancy id). */
   readonly id: string;
@@ -110,6 +112,8 @@ export function fromDemand(card: OpportunityCard): Ranked | null {
   const n = card.need;
   return {
     kind: "demand",
+    attributionCode: null,
+    applicationRoute: "platform_internal",
     key: `d:${n.id}`,
     id: n.id,
     title: "",
@@ -138,6 +142,8 @@ export function fromVacancy(card: ExternalOpportunityCardV1): Ranked | null {
   const hasPay = v.payMin !== null || v.payMax !== null;
   return {
     kind: "vacancy",
+    attributionCode: v.provenance.attributionCode,
+    applicationRoute: v.provenance.applicationRoute,
     key: `v:${card.key}`,
     id: card.vacancyId,
     title: v.title,
@@ -177,6 +183,7 @@ export function selectPersonalOpportunities(
   all.sort(
     (a, b) =>
       (a.status === "strong" ? 0 : 1) - (b.status === "strong" ? 0 : 1) ||
+      (a.kind === "demand" ? 0 : 1) - (b.kind === "demand" ? 0 : 1) ||
       b.evidence - a.evidence ||
       b.placeFit - a.placeFit ||
       (b.publishedAt ?? "").localeCompare(a.publishedAt ?? "") ||

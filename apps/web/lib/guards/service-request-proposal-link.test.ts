@@ -32,19 +32,19 @@ describe("service request → proposal link (RED-1)", () => {
 
   it("lets only the request's provider, on an accepted request, write a DRAFT proposal it owns", () => {
     expect(fn).toMatch(/v_uid\s+uuid := auth\.uid\(\);/);
-    expect(fn).toMatch(/if v_provider is null or v_provider <> v_uid then/);
+    expect(fn).toMatch(/and provider_id = v_uid\s+for update;[\s\S]+if not found then/);
     expect(fn).toMatch(/if v_status <> 'accepted' then/);
     expect(fn).toMatch(/insert into public\.proposals \(owner_id, service_offering_request_id, title,/);
     expect(fn).toMatch(/values \(v_uid, p_request_id,/);
     // Status is the column default ('draft'): nothing is sent from here.
     expect(fn).not.toMatch(/'sent'\s*\)|status\s*=\s*'sent'|sent_at/);
-    expect(fn).toMatch(/set search_path = public, pg_temp/);
+    expect(fn).toMatch(/set search_path = pg_catalog, pg_temp/);
   });
 
   it("locks the request row so two concurrent calls cannot both insert", () => {
     // `for share` let two callers pass the open-proposal check together (PG16
     // proof: scripts/db-proof/service-request-proposal-link-v1.sh, 2 rows).
-    expect(fn).toMatch(/from public\.service_offering_requests\s+where id = p_request_id\s+for update;/);
+    expect(fn).toMatch(/from public\.service_offering_requests\s+where id = p_request_id\s+and provider_id = v_uid\s+for update;/);
     expect(fn).not.toMatch(/for share/);
     expect(existsSync(resolve(ROOT, "scripts/db-proof/service-request-proposal-link-v1.sh"))).toBe(true);
   });
@@ -61,7 +61,7 @@ describe("service request → proposal link (RED-1)", () => {
   });
 
   it("is callable by signed-in users only", () => {
-    expect(up).toMatch(/revoke all on function public\.create_proposal_from_service_request_v1\(uuid, text, bigint, text, text, date\)\s+from public, anon;/);
+    expect(up).toMatch(/revoke all on function public\.create_proposal_from_service_request_v1\(uuid, text, bigint, text, text, date\)\s+from public, anon, service_role;/);
     expect(up).toMatch(/grant execute on function public\.create_proposal_from_service_request_v1\(uuid, text, bigint, text, text, date\)\s+to authenticated;/);
   });
 
@@ -71,6 +71,7 @@ describe("service request → proposal link (RED-1)", () => {
     expect(down).toMatch(/if v_linked then\s+raise exception/);
     // Re-runnable: the linked-row check only runs while the column exists.
     expect(down).toMatch(/information_schema\.columns[\s\S]+column_name = 'service_offering_request_id'/);
+    expect(down).toMatch(/lock table public\.proposals in access exclusive mode;\s+do \$\$/);
     expect(down.indexOf("raise exception")).toBeLessThan(down.indexOf("drop column"));
   });
 });

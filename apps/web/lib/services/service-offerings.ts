@@ -34,7 +34,7 @@ import { transition, type EntryAction } from "@/lib/market-lifecycle/contract";
 // PostgREST: table absent → 42P01 (undefined_table) / PGRST205 (not in schema
 // cache); 42883 / PGRST202 cover an absent function (none here, but kept for
 // parity with the booking actions classifier).
-const ABSENT = new Set(["42P01", "42883", "PGRST202", "PGRST204", "PGRST205"]);
+const ABSENT = new Set(["42P01", "42703", "42883", "PGRST202", "PGRST204", "PGRST205"]);
 
 const MAX_TITLE = 120;
 const MAX_DESC = 2000;
@@ -57,9 +57,9 @@ function isAbsent(error: { code?: string } | null): boolean {
   return !!error?.code && ABSENT.has(error.code);
 }
 
-/** `closed_outcome` not there yet: the lifecycle migration is unapplied. */
+/** Optional rollout column not there yet: its migration is unapplied. */
 function isMissingColumn(error: { code?: string } | null): boolean {
-  return error?.code === "42703";
+  return error?.code === "42703" || error?.code === "PGRST204";
 }
 
 const OWN_COLUMNS =
@@ -118,6 +118,7 @@ function validate(
         location_country: string | null;
         remote: boolean;
         rate_text: string | null;
+        public_search_enabled?: boolean;
       };
     }
   | { ok: false; field: string } {
@@ -126,6 +127,9 @@ function validate(
   const country = clean(input.locationCountry, 2)?.toUpperCase() ?? null;
   if (country !== null && !COUNTRY_RE.test(country)) {
     return { ok: false, field: "locationCountry" };
+  }
+  if (input.publicSearchEnabled !== undefined && typeof input.publicSearchEnabled !== "boolean") {
+    return { ok: false, field: "publicSearchEnabled" };
   }
   return {
     ok: true,
@@ -136,6 +140,7 @@ function validate(
       location_country: country,
       remote: input.remote === true,
       rate_text: clean(input.rateText, MAX_RATE),
+      ...(input.publicSearchEnabled === undefined ? {} : { public_search_enabled: input.publicSearchEnabled }),
     },
   };
 }
@@ -149,18 +154,32 @@ export async function listOwnServiceOfferings(): Promise<ServiceOfferingListResu
   if (!user) return { kind: "not-authed" };
 
   let closedSupported = true;
-  let { data, error } = await asAny(supabase)
-    .from("service_offerings")
-    .select(`${OWN_COLUMNS}, closed_outcome`)
-    .eq("provider_id", user.id)
-    .order("created_at", { ascending: false });
-  if (error && isMissingColumn(error)) {
-    closedSupported = false;
+  let publicSearchSupported = true;
+  // Each optional column can be absent independently. At most three reads:
+  // the combined shape, one remaining optional shape, then the base shape.
+  let data: Record<string, unknown>[] | null = null;
+  let error: { code?: string; message?: string } | null = null;
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    const columns = [
+      OWN_COLUMNS,
+      ...(closedSupported ? ["closed_outcome"] : []),
+      ...(publicSearchSupported ? ["public_search_enabled"] : []),
+    ].join(", ");
     ({ data, error } = await asAny(supabase)
       .from("service_offerings")
-      .select(OWN_COLUMNS)
+      .select(columns)
       .eq("provider_id", user.id)
       .order("created_at", { ascending: false }));
+    if (!error || !isMissingColumn(error)) break;
+    if (publicSearchSupported && error.message?.includes("public_search_enabled")) {
+      publicSearchSupported = false;
+    } else if (closedSupported && error.message?.includes("closed_outcome")) {
+      closedSupported = false;
+    } else {
+      // An unspecified missing column cannot establish either optional feature.
+      closedSupported = false;
+      publicSearchSupported = false;
+    }
   }
   if (error) {
     if (isAbsent(error)) return { kind: "needs-migration" };
@@ -180,10 +199,39 @@ export async function listOwnServiceOfferings(): Promise<ServiceOfferingListResu
     rateText: (r.rate_text as string | null) ?? null,
     status: (r.status as ServiceOfferingStatus) ?? "draft",
     closedOutcome: (r.closed_outcome as string | null | undefined) ?? null,
+    publicSearchEnabled: publicSearchSupported && r.public_search_enabled === true,
     createdAt: String(r.created_at ?? ""),
     updatedAt: String(r.updated_at ?? ""),
   }));
-  return { kind: "ok", rows, closedSupported };
+  return { kind: "ok", rows, closedSupported, publicSearchSupported };
+}
+
+/**
+ * Authenticated, exact-row ownership check for the public detail contact CTA.
+ * No provider identity leaves this function, and a read failure cannot enable
+ * a self-request. Public list/detail readers do not call this auth check.
+ */
+export async function readServiceOfferingOwnership(
+  id: string,
+): Promise<"own" | "not-own" | "not-authed" | "unavailable"> {
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)) return "unavailable";
+  try {
+    const supabase = await createClient();
+    const { data: { user }, error: authError } = await supabase.auth.getUser();
+    if (authError) return "unavailable";
+    if (!user) return "not-authed";
+    const { data, error } = await asAny(supabase)
+      .from("service_offerings")
+      .select("id")
+      .eq("id", id)
+      .eq("provider_id", user.id)
+      .maybeSingle();
+    if (error) return "unavailable";
+    if (data === null) return "not-own";
+    return typeof data?.id === "string" && data.id.toLowerCase() === id.toLowerCase() ? "own" : "unavailable";
+  } catch {
+    return "unavailable";
+  }
 }
 
 /**

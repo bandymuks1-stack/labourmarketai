@@ -159,8 +159,11 @@ describe("canonical demand funnel — action CTAs route to /company-need only", 
     // the employer path is the landing's door registry, which the starting
     // contexts band renders. The ACTION goes to /company-need; the
     // educational page stays only as its "learn more".
-    const landing = landingTreeSource(APP_ROOT, 2);
-    expect(landing).toContain("StartingContextsBand");
+    // Landing V3 (owner, 2026-11-13) removed the starting-contexts band from
+    // the page (it was a second role choice); the employer's ACTION is now the
+    // goal "Find workers", whose first action is the same /company-need.
+    const intents = read("lib/navigation/public-intents.ts");
+    expect(intents).toMatch(/id: "workers",[\s\S]*?\{ id: "companyNeed", href: "\/company-need", account: false \}/);
     const doors = read("lib/marketing/public-doors.ts");
     const employer = /\{\s*key:\s*"employer"[^}]*\}/.exec(doors)?.[0] ?? "";
     expect(employer).toMatch(/href:\s*"\/company-need"/);
@@ -176,10 +179,13 @@ describe("canonical demand funnel — action CTAs route to /company-need only", 
     const hero = read("components/marketing/page-hero.tsx");
     expect(hero).toContain('ctaKind === "companyNeed"');
     // The one route, optionally with the form's own bounded prefill query
-    // (an employer market page preselects its country) — never another path.
+    // (an employer market page preselects its country) and the button's own
+    // id (`from=`, company-need-prefill.ts) — never another path.
     expect(hero).toContain(
-      'href={ctaNeedQuery ? `/company-need?${ctaNeedQuery}` : "/company-need"}',
+      'href={`/company-need?${[ctaNeedQuery, `from=${ctaSource}`].filter(Boolean).join("&")}`}',
     );
+    const companyNeedHrefs = hero.match(/href=\{`\/[a-z-]+\?/g) ?? [];
+    expect(companyNeedHrefs).toEqual(["href={`/company-need?"]);
   });
 });
 

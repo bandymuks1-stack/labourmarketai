@@ -14,6 +14,8 @@ import { InstitutionProgramsSection } from "@/components/app/institution-program
 import { InstitutionRecognitionSection } from "@/components/app/institution-recognition-section";
 import { PublicDemandSection } from "@/components/app/public-demand-section";
 import { PageTitle } from "@/components/app/premium/page-title";
+import { learnerInviteHref } from "@/lib/navigation/work-areas";
+import { Link } from "@/lib/i18n/navigation";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
@@ -37,6 +39,7 @@ export default async function CompanyEducationPage({
   setRequestLocale(locale);
   await requireRoleOrRedirect(locale, "company");
   const t = await getTranslations("organizationDoors.pages.education");
+  const tLearners = await getTranslations("roleDashboards.company.learners");
 
   const employerCtx = await resolveEmployerCompanyContext();
   // READ access (any governance role the resolver accepted).
@@ -65,7 +68,18 @@ export default async function CompanyEducationPage({
     <div className="flex flex-col gap-6" data-testid="company-education">
       <header className="flex flex-col gap-1">
         <PageTitle>{t("title")}</PageTitle>
-        <p className="text-sm text-text-secondary">{t("subtitle")}</p>
+        {/* The page's one primary action, under its title: a deep link into
+            the ONE invitation panel with type, organisation and relationship
+            pre-selected (`join_organization` + `student`). Here, not inside the
+            learners card, so it is on a phone's first screen under the door
+            chips (UX_GAPS I-3). */}
+        <Link
+          href={learnerInviteHref(capabilityOrgId) as "/dashboard/network"}
+          className="mt-2 inline-flex min-h-11 w-fit items-center gap-1.5 rounded-md bg-gradient-cta px-3 py-1.5 text-xs font-semibold text-text-on-brand transition-opacity hover:opacity-90"
+          data-testid="institution-learners-invite"
+        >
+          {tLearners("invite")} →
+        </Link>
       </header>
       <InstitutionLearnersSection organizationId={capabilityOrgId} />
       <InstitutionProgramsSection organizationId={capabilityOrgId} />

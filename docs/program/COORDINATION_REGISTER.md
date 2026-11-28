@@ -121,8 +121,8 @@ independent work or launch of other features (owner order 2026-10-28).
 
 | Lane | Holder | Since | What |
 |---|---|---|---|
-| coordination (this file) | **session `local_8d793dee` "LabourMarket.ai projekto koordinavimas" — the ONE main coordinator** | 2026-10-28 06:37Z (owner order: single control centre) | keeps §2–§5 current, integrates PRs into `main`, owns deploy follow-up. Earlier holders `…16CYcDu` / `…AygGqFo3` / cloud `…hnVKqGvExp` handed over (§2b) and become executors only on this coordinator's assignment |
-| migration (prod DB) | — free — | | last: `referral_send_address_guard_v1` (#2855) applied 2026-10-28 08:18Z, ledger `20261028081810`, by `local_8d793dee` on owner approval of #2855 at `35e749fc3`. Pending RED (needs its own approval): #2858 |
+| coordination (this file) | **Codex `01a211d7-be82-7663-9a36-3ddd8de1707e` — current coordinator** | 2026-11-25 | owner-directed takeover; existing PR integration, deployment follow-up and production verification; earlier coordinator records below are historical (§2c) |
+| migration (prod DB) | **Codex `01a211d7-be82-7663-9a36-3ddd8de1707e`** | 2026-11-27 | #3722 owner-approved SQL; all checks passed, manually merged as `384f999fb`. Exact merged hashes verified. APPLIED as ledger `20261128053149`; read-back passed. Lane held only until the receipt push; never reapply. #3111 already applied and verified; never reapply. |
 | live sends (e-mail to real people) | reprocess: manual only, under `flock`; **do not run `resolve_reservations` until #2858 is applied** | 2026-10-28 09:00Z | partner intake mails live (each through the address lock since `ae60b244`). Ledger `invitation` since 10-26: 51 mails / 51 recipients, 0 duplicates; 15 rows `pending/not_sent` |
 | deploy | — serial via `deploy-vps.yml` — | | production = `0e5f4b3e0` (#2925), deployed 2026-11-02 06:26Z, healthy. Walks: sequential queue, ≥6 min after each deploy (brake e) |
 
@@ -152,9 +152,62 @@ independent work or launch of other features (owner order 2026-10-28).
 
 ---
 
-## 3. Work register — snapshot 2026-11-02 ~13:10Z
+### 2c. Current coordination — 2026-11-25
 
-Owner order 2026-11-02 ("vieningas koordinavimas"): `local_8d793dee` stays the ONE coordinator; every
+**Continuation, 2026-11-28:** Codex remains the only active executor; Claude Code
+is inactive. Shared continuity rules are on main via #3839. #3111 is applied and
+production-verified by Chrome walk `46067486489`; never reapply.
+#2642 is deployed. Production jobs-search walk `46118634337` on build
+`8758a581` passed the worker's save, retrieve and remove flow. The focused test
+selector shipped in #3840. #3722 was deployed and applied through Supabase MCP
+as `booking_hire_opens_work_relationship_v1` (ledger `20261128053149`).
+Production orders-bookings walk `46112666336` passed the hire, journal approval
+and Living CV checks. Do not reapply #3722.
+
+#2795 continues on branch `fix/cc/booking-clash-marker-red` in the existing
+`codex-history-reader-20261126` worktree. The owner approved both SQL pairs
+and a manual release after required checks. Keep the human-gate label.
+Verify merged file digests and apply through Supabase MCP in the tested order:
+
+1. `20261128080150_booking_hire_interval_support_v1` (forward SHA-256
+   `B0500FFAAFBD3711D984B7CF34AA9ED9E359AAA269618333BB56EE90FE8D6D7E`).
+   Verify the migration ledger, access and installed functions.
+2. `20261025190000_booking_clash_acknowledged_marker_v1` (forward SHA-256
+   `590634FAF18CDB6D188414BD0223B78B9C76AF3C657EFE084CF00B0AF85EFF8F`).
+   Verify the marker and overlap constraint. Run the orders-bookings production
+   walk with synthetic users. Check continuity across both booking closures.
+
+Check the production ledger and live state before retrying either SQL call.
+Current PR receipts record deployment and verification outcomes.
+
+The 2026-11-25 table below is historical evidence, not the current deployment
+or unfinished-work status. Use the continuation above and the current PR bodies.
+
+Codex now holds coordination under the owner's current instruction. This supersedes
+older coordinator assignments, without deleting their work or history. The existing
+completion roadmap and #3265 remain the shared queue; no second register is created.
+The immediate priority is the coherent, reliable new-client journey through the
+existing core product. Production Chrome evidence is required for visual acceptance;
+remaining agreed functions stay in the same roadmap for subsequent stages.
+
+| Item | State | Evidence / next step |
+|---|---|---|
+| Verified deployed build | DEPLOYED; partial runtime checks PASS | `880dd76fd50c9de3686dbfad2f4e4fb48dd1b499`; deployment 45618256211; lt/en first-visitor and synthetic signed-in smoke passed; full commercial/visual acceptance pending |
+| #3811 | IN_PROGRESS | retry handling corrected; additional deployment-history boundary fix under independent review before merge |
+| #3813 | MERGED | `077dd6c3cc7386bfb06298b524cb7ef58c352000`; production queue verification pending |
+| #3815 | DEPLOYED | `880dd76fd50c9de3686dbfad2f4e4fb48dd1b499`; production notification walk pending |
+| #3782 | MERGED | `0b1f712671ab01e85b8fd6eb8420530d51d3152a`; production visual acceptance pending |
+| #3817 | IN_PROGRESS | brigade history regression and affected production checks; CI request-count regressions must be corrected before merge |
+| worker-records-exports | FAIL (saved-search step) | 45522721334: both CSV export checks passed; English saved-search strip failed; final isolation step did not run |
+
+GREEN integration uses the existing required checks. RED gates, deploy-freeze,
+free-use decision #3594, the one-walk rule and production resource caps remain in
+force. A local desktop process alone is not evidence of an active project executor;
+no unverified process has been stopped. Production claims require run/build evidence.
+
+## 3. Work register — historical snapshot 2026-11-02 ~13:10Z
+
+Historical owner order 2026-11-02 (superseded for coordinator identity by §2c): `local_8d793dee` was the ONE coordinator; every
 active session and window works from THIS file. No second coordination register, no new overall audit.
 
 ### 3.0 Rules for every executor (binding)

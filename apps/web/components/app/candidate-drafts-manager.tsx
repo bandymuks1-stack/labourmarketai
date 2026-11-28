@@ -126,7 +126,8 @@ function CreateForm({ labels }: { labels: CandidateDraftsLabels }) {
     });
   };
 
-  const field = "rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary";
+  // Phones: a field is a full 44px target and 16px text (no zoom on focus).
+  const field = "rounded-md border border-ink-600 bg-ink-800/40 px-2 py-1.5 text-sm text-text-primary max-sm:min-h-11 max-sm:text-base";
 
   return (
     <section className="card-border flex flex-col gap-3 p-4" data-testid="candidate-draft-create">
@@ -268,19 +269,26 @@ export function CandidateDraftsManager({
   drafts,
   labels,
   needsMigration,
+  honestyInPageFold = false,
 }: {
   drafts: CandidateDraft[];
   labels: CandidateDraftsLabels;
   needsMigration: boolean;
+  /** The page's own "How this works" fold carries the honesty note
+   *  (`CompanyActionNextActions` `extra`), so this one is not drawn: a page
+   *  never shows two identical folds (duplication audit ORG-8). */
+  honestyInPageFold?: boolean;
 }) {
   return (
     <div className="flex flex-col gap-6" data-testid="candidate-drafts-manager">
       <header className="flex flex-col gap-1">
         <PageTitle>{labels.title}</PageTitle>
         <p className="text-sm leading-relaxed text-text-secondary">{labels.intro}</p>
-        <Explain summary={labels.howItWorks}>
-          <p data-testid="candidate-drafts-honesty">{labels.honestyNote}</p>
-        </Explain>
+        {honestyInPageFold ? null : (
+          <Explain summary={labels.howItWorks}>
+            <p data-testid="candidate-drafts-honesty">{labels.honestyNote}</p>
+          </Explain>
+        )}
       </header>
 
       {needsMigration ? (

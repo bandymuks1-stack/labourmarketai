@@ -43,6 +43,8 @@ const REFUSAL_KEYS: Readonly<Record<string, string>> = {
   // workspace was switched while the form was open) — nothing was saved.
   stale_confirmation: "conversation.forms.ui.errorStale",
   workspace_changed: "conversation.forms.ui.errorStale",
+  // A place was given without a country the server can resolve.
+  country_required: "conversation.forms.ui.errorCountryRequired",
 };
 function refusalMessageKey(code: string): string | null {
   return Object.prototype.hasOwnProperty.call(REFUSAL_KEYS, code) ? REFUSAL_KEYS[code] : null;
@@ -187,6 +189,8 @@ export function InlineActionForm({
                     ? t("conversation.forms.ui.errorOpenNeedLimitUpgrade")
                     : res.code === "over_open_need_limit_individual"
                       ? t("conversation.forms.ui.errorOpenNeedLimitIndividual")
+                      : res.code === "country_required"
+                        ? t("auth.dashboard.wow.demand.form.countryRequired")
                       : t(refusalMessageKey(res.code) ?? "conversation.forms.ui.errorGeneric");
         setPhase({ kind: "error", message });
       }

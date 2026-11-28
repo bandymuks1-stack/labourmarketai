@@ -121,6 +121,8 @@ export function assembleWorkIntelligence(input: {
    *  on their own entry is not a confirmation (review-status.ts); without it
    *  the result is the plain latest decision, as before. */
   subjectProfileId?: string | null;
+  /** Source excerpts are opt-in; default false keeps every non-CV projection aggregate-only. */
+  includeSkillSamples?: boolean;
 }): WorkIntelligence {
   const entries: WorkIntelligenceEntry[] = input.entries.map((e) => ({
     entryId: e.id,
@@ -157,6 +159,7 @@ export function assembleWorkIntelligence(input: {
     focus: input.focus,
     focusRange: input.focusRange ?? null,
     coverage: input.coverage,
+    includeSkillSamples: input.includeSkillSamples,
     organizationRecords: input.organizationRecords ?? null,
     organizationPeriodRecords: input.organizationPeriodRecords ?? null,
     organizationPendingRecords: input.organizationPendingRecords ?? null,
@@ -414,7 +417,7 @@ export async function workIntelligenceToday(): Promise<WorkToday> {
 export async function loadWorkIntelligence(
   caller: DomainCaller,
   workerId: string,
-  opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null } = {},
+  opts: { focus?: WorkPeriodKey; focusRange?: WorkRange | null; includeSkillSamples?: boolean } = {},
 ): Promise<WorkIntelligence | null> {
   const [entriesRead, linkRead, skillsRead, organizationLedger, subjectRead] = await Promise.all([
     listJournalEntries(caller, { workerId }),
@@ -433,6 +436,17 @@ export async function loadWorkIntelligence(
     // (decision 0028 J-2.3, audit 2026-11-03).
     caller.supabase.from("workers").select("profile_id").eq("id", workerId).limit(1),
   ]);
+  if (!entriesRead.ok || !linkRead.ok || skillsRead.error || subjectRead.error) {
+    // Which read failed, by code only (no ids, no values): an UNKNOWN reading
+    // is shown to the person as "could not be read", so the cause must be
+    // findable in the server log (UX gap W-1, 2026-11-18).
+    console.error("[work-intelligence] read failed:", {
+      entries: entriesRead.ok ? "ok" : entriesRead.code,
+      links: linkRead.ok ? "ok" : "error",
+      skills: skillsRead.error ? (skillsRead.error.code ?? "error") : "ok",
+      subject: subjectRead.error ? (subjectRead.error.code ?? "error") : "ok",
+    });
+  }
   if (!entriesRead.ok || !linkRead.ok || skillsRead.error || subjectRead.error) return null;
   const subjectProfileId =
     ((subjectRead.data ?? []) as { profile_id: string | null }[])[0]?.profile_id ?? null;
@@ -474,6 +488,10 @@ export async function loadWorkIntelligence(
     organizationPeriodRecords: organizationLedger?.periodRecords ?? null,
     organizationPendingRecords: organizationLedger?.pendingRecords ?? null,
     subjectProfileId,
+    // A caller flag alone is not authority: samples are emitted only when the
+    // authenticated reader is the subject of this reading. Manager/team reads
+    // remain aggregates even for entries visible under their organization scope.
+    includeSkillSamples: opts.includeSkillSamples === true && subjectProfileId === caller.userId,
   });
 }
 
@@ -526,7 +544,10 @@ export async function loadOwnWorkIntelligence(
   if (!user) return null;
   const caller: DomainCaller = { supabase, userId: user.id };
   const worker = await readWorkerCoreRow(caller);
-  if (!worker.ok || !worker.value) return null;
+  if (!worker.ok || !worker.value) {
+    console.error("[work-intelligence] own worker row:", worker.ok ? "absent" : "unreadable");
+    return null;
+  }
   return loadWorkIntelligence(caller, worker.value.id, opts);
 }
 

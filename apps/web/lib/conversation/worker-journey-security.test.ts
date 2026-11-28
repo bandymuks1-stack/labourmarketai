@@ -86,6 +86,9 @@ describe("company executors delegate only — canonical modules, no DB access (P
       "@/lib/demand/demand-drafts-actions", // §17 canonical intake (draft)
       "@/lib/demand/demand-lifecycle-actions", // §19 confirm + close/reopen
       "@/lib/demand/demand-lifecycle", // result TYPE only
+      // The ONE pure mapper to structured_v2 (no IO), shared with the MCP
+      // confirm so the two doors cannot drift apart (F7 / AI-2).
+      "@/lib/demand/structured-demand-v2",
       "@/lib/scouting/scouting-actions",
       "@/lib/communication/request-worker-conversation",
       "@/lib/booking/booking-actions",

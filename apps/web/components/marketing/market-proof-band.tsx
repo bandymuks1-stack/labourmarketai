@@ -1,6 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import type { LiveMarketLandingSnapshot } from "@/lib/market/live-market-landing";
-import { Reveal } from "@/components/marketing/reveal";
+import { Reveal } from "@/components/marketing/lazy-motion";
 import { Card } from "@/components/ui/Card";
 
 /**

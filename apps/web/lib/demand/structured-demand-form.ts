@@ -22,6 +22,24 @@ import {
   type RequirementTier,
   type StructuredDemandV2,
 } from "./structured-demand-v2";
+import { getCountryMeta } from "@/lib/location/country-model";
+
+/** The pay currencies the need form offers (ISO 4217). One list: the form's
+ *  picker and the country default both read it. */
+export const DEMAND_CURRENCY_OPTIONS = ["EUR", "PLN", "SEK", "NOK", "DKK"] as const;
+
+/**
+ * The pay currency a need in this country starts with: the country's own
+ * currency when the form offers it (SE → SEK, NO → NOK, DK → DKK, PL → PLN,
+ * euro countries → EUR), otherwise null and the form keeps what it has. A
+ * Swedish company typed SEK amounts into a field that said EUR (Swedish
+ * employer audit 2026-11-11, M-1). A default the person sees and can change,
+ * never a conversion.
+ */
+export function defaultCurrencyForCountry(country: string | null | undefined): string | null {
+  const currency = country ? getCountryMeta(country)?.currency ?? null : null;
+  return currency && (DEMAND_CURRENCY_OPTIONS as readonly string[]).includes(currency) ? currency : null;
+}
 
 /** Wagon 4 tier-picker state: "" = not set (engine default stays). */
 export type RequirementPriorityState = Record<

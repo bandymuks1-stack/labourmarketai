@@ -1,3 +1,4 @@
+import { vacancySourceName } from "@/components/marketing/public-vacancy-card-facts";
 import "server-only";
 
 import { getTranslations } from "next-intl/server";
@@ -134,6 +135,7 @@ export async function projectExternalVacancies(
           ? c.view.provenance.applicationUrl
           : null,
       attributionText: tRoot(c.view.provenance.attributionCode as never),
+      sourceName: vacancySourceName(c.view.provenance.attributionCode),
       fitStatus: fit.status,
       band: fit.band,
       gapCodes: fit.why.gapCodes,

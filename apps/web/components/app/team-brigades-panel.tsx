@@ -5,7 +5,11 @@ import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Check, Copy } from "lucide-react";
 
+import { Explain } from "@/components/app/premium/grammar";
 import { Button } from "@/components/ui/Button";
+import { Input } from "@/components/ui/Input";
+import { Label } from "@/components/ui/Label";
+import { Select } from "@/components/ui/Select";
 import {
   createTeamAction,
   disbandTeamAction,
@@ -59,6 +63,7 @@ export function TeamBrigadesPanel({
   const router = useRouter();
   const expectedWorkspaceId = useDisplayedWorkspaceId();
   const t = useTranslations("teamBrigades");
+  const tDisclosure = useTranslations("common.disclosure");
   const tAssign = useTranslations("teamAssignment");
   const tSkill = useTranslations("skillNames");
   const [pending, startTransition] = useTransition();
@@ -164,10 +169,12 @@ export function TeamBrigadesPanel({
         <h2 className="font-display text-lg font-semibold text-text-primary">
           {t("title")}
         </h2>
-        <p className="text-sm text-text-secondary">{t("intro")}</p>
-        <p className="text-meta leading-relaxed text-text-muted">
-          {t("honestNote")}
-        </p>
+        {/* The explanation and its honest limits, one tap away (coordinator
+            decision 2026-11-22, item 5): every fact stays, behind ONE row. */}
+        <Explain summary={tDisclosure("details")} testId="team-brigades-explain">
+          <p>{t("intro")}</p>
+          <p>{t("honestNote")}</p>
+        </Explain>
       </header>
 
       {shownTeams.length === 0 ? (
@@ -417,9 +424,9 @@ export function TeamBrigadesPanel({
                     >
                       {t("addLabel")}
                     </label>
-                    <select
+                    <Select
                       id={`team-add-${team.id}`}
-                      className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-xs text-text-primary"
+                      className="min-w-0 sm:w-auto sm:max-w-xs"
                       value={selected[team.id] ?? ""}
                       onChange={(e) =>
                         setSelected((s) => ({ ...s, [team.id]: e.target.value }))
@@ -433,12 +440,12 @@ export function TeamBrigadesPanel({
                             : w.name}
                         </option>
                       ))}
-                    </select>
+                    </Select>
                     {askEmail[team.id] ? (
-                      <input
+                      <Input
                         type="email"
                         autoComplete="off"
-                        className="rounded-md border border-ink-500 bg-surface-1 px-2 py-1.5 text-sm text-text-primary"
+                        className="min-w-0 sm:w-auto sm:max-w-xs"
                         placeholder={t("emailPlaceholder")}
                         aria-label={t("emailPlaceholder")}
                         value={emails[team.id] ?? ""}
@@ -534,18 +541,16 @@ export function TeamBrigadesPanel({
       )}
 
       <div className="flex flex-wrap items-end gap-2 border-t border-ink-600 pt-3">
-        <div className="flex flex-col gap-1">
-          <label className="text-xs text-text-secondary" htmlFor="team-create-name">
-            {t("createLabel")}
-          </label>
-          <input
+        <div className="flex min-w-0 flex-col gap-1 max-sm:w-full">
+          <Label htmlFor="team-create-name">{t("createLabel")}</Label>
+          <Input
             id="team-create-name"
             type="text"
             maxLength={80}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder={t("createPlaceholder")}
-            className="rounded-md border border-ink-500 bg-ink-800 px-2 py-1 text-sm text-text-primary"
+            className="min-w-0 sm:w-auto sm:min-w-64 max-sm:min-h-11 max-sm:text-base"
             data-testid="team-create-name"
           />
         </div>
@@ -574,8 +579,11 @@ export function TeamBrigadesPanel({
           <p className="text-xs text-text-secondary">{t("inviteLinkNote")}</p>
           <div className="flex flex-wrap items-center gap-2">
             <code className="max-w-full truncate rounded bg-ink-800 px-2 py-1 text-meta text-text-primary">{link.url}</code>
-            <button
+            <Button
               type="button"
+              variant="secondary"
+              size="sm"
+              className="min-h-11"
               data-testid="team-invite-copy-link"
               onClick={() => {
                 void navigator.clipboard?.writeText(link.url).then(
@@ -583,11 +591,10 @@ export function TeamBrigadesPanel({
                   () => setCopied(false),
                 );
               }}
-              className="inline-flex min-h-11 sm:min-h-9 items-center gap-1 rounded border border-ink-500 px-2 text-meta text-text-secondary hover:border-brand-blue hover:text-text-primary"
             >
               {copied ? <Check className="h-3 w-3" aria-hidden /> : <Copy className="h-3 w-3" aria-hidden />}
               {copied ? t("inviteLinkCopied") : t("inviteLinkCopy")}
-            </button>
+            </Button>
           </div>
         </div>
       )}

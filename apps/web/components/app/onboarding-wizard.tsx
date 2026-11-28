@@ -1,8 +1,9 @@
 "use client";
 
-import { type ReactNode, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
+import { type CSSProperties, type FocusEvent, type ReactNode, useEffect, useId, useMemo, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Button } from "@/components/ui/Button";
+import { AUTH_INPUT_CLASS } from "@/components/app/auth-field-class";
 import { completeOnboarding, type Role } from "@/lib/auth/actions";
 import { cn } from "@/lib/utils";
 import { RoleIcon } from "@/components/app/role-icon";
@@ -19,6 +20,7 @@ import { PROFESSION_SLUGS } from "@/lib/taxonomy/profession-skills";
 import { acceptInvitationAfterSignup } from "@/lib/invitations/signup-accept-action";
 import { REVIEW_NOTICE_VERSION } from "@/lib/operations/auto-review-model";
 import { StaffReviewNotice } from "@/components/app/staff-review-notice";
+import { Fold } from "@/components/app/premium/grammar";
 import {
   SELF_DECLARED_PROFESSION_MAX_LENGTH,
   normalizeSelfDeclaredProfession,
@@ -545,12 +547,44 @@ export function OnboardingWizard({
     });
   }
 
-  const inputCls =
-    "w-full rounded-md border border-ink-500 bg-ink-800 px-3 py-2.5 text-sm text-text-primary outline-none placeholder:text-text-muted focus:border-brand-blue";
+
+  // THE PHONE ACTION BAR TAKES THE ROOM IT ACTUALLY NEEDS. The bar is fixed to the
+  // bottom of the screen on a phone, and the step reserves space under its content so
+  // nothing ends there. A fixed guess (128 / 144 px) was too small once the bar held a
+  // multi-line refusal above two stacked buttons at 360 px. The step now reserves the
+  // bar's measured height, kept current as the bar grows and shrinks; the guess is only
+  // the value before the first measurement.
+  const [actionBar, setActionBar] = useState<HTMLDivElement | null>(null);
+  const [barHeight, setBarHeight] = useState<number | null>(null);
+  useEffect(() => {
+    if (!actionBar || typeof ResizeObserver === "undefined") return;
+    const measure = () => setBarHeight(Math.ceil(actionBar.getBoundingClientRect().height));
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(actionBar);
+    return () => observer.disconnect();
+  }, [actionBar]);
+  const barReserve = barHeight === null ? undefined : ({ "--onboarding-bar": `${barHeight + 16}px` } as CSSProperties);
+
+  // A FIELD THAT TAKES FOCUS IS NOT LEFT UNDER THE BAR. A browser scrolls a focused
+  // field to the edge of the screen, not above something drawn over it, so tabbing
+  // down the profile on a phone could put the caret behind the bar. When focus lands
+  // on something the fixed bar covers, the page moves it to the middle of the screen.
+  const keepFocusClearOfBar = (event: FocusEvent<HTMLElement>) => {
+    if (!actionBar || getComputedStyle(actionBar).position !== "fixed") return;
+    const target = event.target as HTMLElement;
+    if (actionBar.contains(target)) return;
+    // Keyboard focus only. A tap or a click focuses what it lands on as well, and moving the
+    // page between the press and the release makes the browser drop the click: the card a
+    // person tapped would not be chosen (isolated walk P-1, 2026-11-14).
+    if (!target.matches(":focus-visible")) return;
+    const barTop = actionBar.getBoundingClientRect().top;
+    if (target.getBoundingClientRect().bottom > barTop - 8) target.scrollIntoView({ block: "center" });
+  };
 
   if (step === 1) {
     return (
-      <div className="flex flex-col gap-6">
+      <div className="flex flex-col gap-6 pb-[var(--onboarding-bar,8rem)] sm:pb-0" style={barReserve} onFocus={keepFocusClearOfBar} data-testid="onboarding-step-role">
         <header className="flex flex-col gap-3">
           <h1 className="font-display text-3xl font-bold tracking-tightest text-text-primary">
             {t("rolePicker.intentHeading")}
@@ -630,6 +664,17 @@ export function OnboardingWizard({
           )}
         </header>
 
+        {/* UX gap SH-2 (2026-11-18): the hint is in the flow above the cards,
+            not in the fixed phone bar, where it made the bar 116 px high and
+            pushed the cards below the first screen. A premature tap is still
+            explained by the bar's `error_role_required` refusal. The hint has its
+            own sentence (`role_step_hint`) and goes with the first pick. */}
+        {!error && intents.size === 0 && (
+          <p className="text-xs leading-relaxed text-text-muted" data-testid="onboarding-continue-hint">
+            {t("role_step_hint")}
+          </p>
+        )}
+
         {/* Desktop: all six cards share ONE height — the tallest card's —
             across all three rows (`sm:auto-rows-fr` makes every implicit
             row as tall as the tallest, `sm:h-full` makes each card fill its
@@ -686,32 +731,51 @@ export function OnboardingWizard({
           })}
         </ul>
 
-        <Button
-          type="button"
-          disabled={intents.size === 0}
-          data-testid="onboarding-intents-continue"
-          onClick={() => {
-            // Per-step drop-off signal (Pilot Onboarding and Measurement
-            // v1): the role step is DONE the moment the user advances.
-            // Bounded metadata only — a coarse step label + the intent set.
-            trackFunnel(FUNNEL_EVENTS.onboardingStepRoleCompleted, {
-              step: "role",
-              intent: intentList.join(","),
-            });
-            setStep(2);
-          }}
-          className="w-full rounded-xl sm:w-auto sm:self-start"
-        >
-          {t("rolePicker.continue")}
-        </Button>
-        {error && (
-          <p className="text-xs text-state-danger" role="alert">
-            {error}
-          </p>
-        )}
+        {/* ON A PHONE THE WAY FORWARD STAYS ON SCREEN. Six cards in one column
+            put this button 1.7–2.1 screens down (measured 2026-11-13, 360×560
+            and 390×664), and choosing a card showed only a tick: nothing said
+            a button existed below. The bar is FIXED to the bottom of the
+            screen while the cards scroll under it (`sticky` cannot do this
+            here: `html` and `body` both clip overflow, which makes the body
+            the scroll container and leaves a sticky child at the end of the
+            page). The step reserves the bar's height below its content, so
+            nothing ends up underneath it. From `sm` up it is the ordinary
+            in-flow button it always was. Solid background, no blur. */}
+        <div className="fixed inset-x-0 bottom-0 z-10 flex flex-col gap-2 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0" data-testid="onboarding-action-bar" ref={setActionBar}>
+          {error && (
+            <p className="text-xs text-state-danger" role="alert">
+              {error}
+            </p>
+          )}
+          <Button
+            type="button"
+            disabled={intents.size === 0}
+            data-testid="onboarding-intents-continue"
+            onClick={() => {
+              // Per-step drop-off signal (Pilot Onboarding and Measurement
+              // v1): the role step is DONE the moment the user advances.
+              // Bounded metadata only — a coarse step label + the intent set.
+              trackFunnel(FUNNEL_EVENTS.onboardingStepRoleCompleted, {
+                step: "role",
+                intent: intentList.join(","),
+              });
+              setStep(2);
+            }}
+            className="min-h-11 w-full rounded-xl sm:w-auto sm:self-start"
+          >
+            {t("rolePicker.continue")}
+          </Button>
+        </div>
       </div>
     );
   }
+
+  // A person joining through a staff invitation must MEET the review notice
+  // before they can accept: submitting records that it was shown. The notice
+  // sits right above the submit, in the page flow, so for them the button
+  // stays in the flow too — fixing it to the screen would let them submit
+  // with the notice still below the fold.
+  const reviewNoticeShown = Boolean(invitationToken && invitationReviewNotice);
 
   return (
     <form
@@ -719,7 +783,9 @@ export function OnboardingWizard({
         e.preventDefault();
         submit();
       }}
-      className="flex flex-col gap-5"
+      className={cn("flex flex-col gap-5", !reviewNoticeShown && "pb-[var(--onboarding-bar,9rem)] sm:pb-0")}
+      style={reviewNoticeShown ? undefined : barReserve}
+      onFocus={keepFocusClearOfBar}
       noValidate
     >
       <header>
@@ -742,7 +808,7 @@ export function OnboardingWizard({
           autoComplete="name"
           aria-invalid={fieldError === "name" ? true : undefined}
           aria-describedby={fieldError === "name" ? nameErrorId : undefined}
-          className={fieldError === "name" ? inputCls.replace("border-ink-500", "border-state-danger") : inputCls}
+          className={AUTH_INPUT_CLASS}
           data-testid="onboarding-display-name"
         />
         {fieldError === "name" ? (
@@ -838,7 +904,7 @@ export function OnboardingWizard({
               minLength={2}
               maxLength={200}
               data-testid="onboarding-institution"
-              className={inputCls}
+              className={AUTH_INPUT_CLASS}
             />
           </label>
           <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
@@ -849,7 +915,7 @@ export function OnboardingWizard({
               onChange={(e) => setProgramOrField(e.target.value)}
               maxLength={200}
               data-testid="onboarding-program"
-              className={inputCls}
+              className={AUTH_INPUT_CLASS}
             />
           </label>
           <label className="flex flex-col gap-1.5 text-xs text-text-secondary">
@@ -859,7 +925,7 @@ export function OnboardingWizard({
               value={educationTypeSlug}
               onChange={(e) => setEducationTypeSlug(e.target.value)}
               data-testid="onboarding-education-type"
-              className={inputCls}
+              className={AUTH_INPUT_CLASS}
             >
               {educationTypeOptions.map((o) => (
                 <option key={o.slug} value={o.slug}>
@@ -923,7 +989,7 @@ export function OnboardingWizard({
               answers. The registry offers matches as the person types; whatever
               they write can be added exactly as written, matched or not. */}
           <div className="flex flex-col gap-1.5">
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 sm:flex-nowrap">
               <input
                 type="text"
                 value={professionDraft}
@@ -940,7 +1006,7 @@ export function OnboardingWizard({
                 aria-label={t("profession_label")}
                 maxLength={SELF_DECLARED_PROFESSION_MAX_LENGTH}
                 data-testid="onboarding-profession-input"
-                className={inputCls}
+                className={`${AUTH_INPUT_CLASS} basis-full sm:basis-0 sm:flex-1`}
               />
               <Button
                 type="button"
@@ -983,17 +1049,13 @@ export function OnboardingWizard({
         <div data-testid="onboarding-employer-visibility">{employerVisibility}</div>
       ) : null}
 
-      {/* Landing→profile continuity (DESIGN.md): honestly preview the real
-          profile the user builds next, so the first post-CTA screen does not
-          feel weaker than the premium landing. Concept labels only — no fake
-          data, nothing auto-verified. */}
-      <div
-        className="card-border flex flex-col gap-3 p-4"
-        data-testid="onboarding-next-steps"
-      >
-        <p className="font-mono text-meta uppercase tracking-label text-text-muted">
-          {t(`${nextStepsKey}.eyebrow`)}
-        </p>
+      {/* Landing→profile continuity (DESIGN.md): the real profile the user
+          builds next, as concept labels only (no fake data, nothing
+          auto-verified). Folded by default (owner 2026-11-22, decision 0032):
+          four numbered lines and a note sat between the fields and Finish on
+          every phone; the title alone says what is next, and the steps stay
+          one tap away. */}
+      <Fold title={t(`${nextStepsKey}.eyebrow`)} testId="onboarding-next-steps">
         <ul className="flex flex-col gap-2">
           {(["s1", "s2", "s3", "s4"] as const).map((k, i) => (
             <li
@@ -1010,37 +1072,54 @@ export function OnboardingWizard({
         <p className="text-xs leading-relaxed text-text-muted">
           {t(`${nextStepsKey}.note`)}
         </p>
-      </div>
-
-      {error && (
-        <p className="text-xs text-state-danger" role="alert">
-          {error}
-        </p>
-      )}
+      </Fold>
 
       {invitationToken && invitationReviewNotice ? (
         <StaffReviewNotice text={invitationReviewNotice} testId="onboarding-review-notice" />
       ) : null}
 
-      <div className="flex flex-col items-stretch gap-3 sm:flex-row sm:items-center">
-        <Button
-          type="submit"
-          disabled={pending}
-          data-testid="onboarding-submit"
-          className="w-full rounded-xl sm:w-auto"
-        >
-          {pending ? t("saving") : t("step2.continue")}
-        </Button>
-        {!skipRoleStep && (
-          <button
-            type="button"
-            onClick={() => setStep(1)}
-            disabled={pending}
-            className="text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
-          >
-            {t("back")}
-          </button>
+      {/* The submit stays on screen on a phone (it sat 2.7–3.4 screens down,
+          below fields that are mostly optional), and a refusal is said right
+          above it instead of somewhere down the page. Same bar as step 1 —
+          except for an invited staff member, who keeps the in-flow button
+          directly under the review notice (see reviewNoticeShown). */}
+      <div
+        ref={setActionBar}
+        className={cn(
+          "flex flex-col gap-2",
+          !reviewNoticeShown &&
+            "fixed inset-x-0 bottom-0 z-10 border-t border-ink-600 bg-ink-900 px-6 pb-[max(0.75rem,env(safe-area-inset-bottom))] pt-3 sm:static sm:border-0 sm:bg-transparent sm:p-0",
         )}
+        data-testid="onboarding-action-bar"
+      >
+        {error && (
+          <p className="text-xs text-state-danger" role="alert">
+            {error}
+          </p>
+        )}
+        {/* One row on a phone too (UX_GAPS ST-4): stacked, Back under Finish
+            made the fixed bar 125 px. The submit stays first in the DOM (focus
+            order); row-reverse shows Back on its left. */}
+        <div className="flex flex-row-reverse items-center gap-3 sm:flex-row">
+          <Button
+            type="submit"
+            disabled={pending}
+            data-testid="onboarding-submit"
+            className="min-h-11 flex-1 rounded-xl sm:w-auto sm:flex-none"
+          >
+            {pending ? t("saving") : t("step2.continue")}
+          </Button>
+          {!skipRoleStep && (
+            <button
+              type="button"
+              onClick={() => setStep(1)}
+              disabled={pending}
+              className="min-h-11 px-2 text-xs text-text-muted hover:text-text-secondary disabled:opacity-60"
+            >
+              {t("back")}
+            </button>
+          )}
+        </div>
       </div>
     </form>
   );

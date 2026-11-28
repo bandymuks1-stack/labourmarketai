@@ -98,7 +98,7 @@ export function NotificationPanel() {
               onClick={close}
               aria-label={t("close")}
               data-testid="notification-panel-close"
-              className="rounded-md border border-ink-500 px-2 py-0.5 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
+              className="inline-flex size-11 items-center justify-center rounded-md border border-ink-500 font-mono text-meta uppercase tracking-label text-text-secondary hover:border-brand-blue hover:text-text-primary"
             >
               ✕
             </button>
@@ -350,7 +350,7 @@ function NotificationsBody({
                     type="button"
                     onClick={() => switchRole(n.role)}
                     data-testid="notification-switch-role"
-                    className="mx-3 mb-3 inline-flex items-center rounded-sm border border-brand-blue/40 px-2 py-1 font-mono text-meta uppercase tracking-label text-brand-blue hover:border-brand-blue"
+                    className="mx-3 mb-3 inline-flex min-h-11 items-center rounded-sm border border-brand-blue/40 px-3 font-mono text-meta uppercase tracking-label text-brand-blue hover:border-brand-blue"
                   >
                     {switchRoleLabel(n.role)}
                   </button>

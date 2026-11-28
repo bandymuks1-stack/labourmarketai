@@ -4,6 +4,7 @@ import { Link } from "@/lib/i18n/navigation";
 import { PersonIdentityCard } from "@/components/app/identity/person-identity-card";
 import { personMonogram } from "@/lib/visual/avatar-monogram";
 import type { BookedPeopleResult } from "@/lib/company/booked-people";
+import { WORKER_INVITE_HREF } from "@/lib/navigation/work-areas";
 
 /**
  * BOOKED PEOPLE — the GREEN half of R-2 on the employer's people page.
@@ -101,7 +102,7 @@ export async function BookedPeopleSection({
                     {t("notReviewableState")}
                   </p>
                   <Link
-                    href={"/dashboard/network?type=join_as_employee" as "/dashboard"}
+                    href={WORKER_INVITE_HREF as "/dashboard"}
                     className="w-fit text-sm font-medium text-brand-blue underline-offset-2 hover:underline"
                     data-testid="booked-person-invite-link"
                   >

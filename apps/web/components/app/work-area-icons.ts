@@ -7,6 +7,7 @@ import {
   Compass,
   FolderKanban,
   Gauge,
+  GraduationCap,
   Handshake,
   History,
   IdCard,
@@ -49,4 +50,5 @@ export const WORK_AREA_ICONS: Record<WorkAreaIconKey, LucideIcon> = {
   activity: Activity,
   barChart: BarChart3,
   history: History,
+  education: GraduationCap,
 };

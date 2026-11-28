@@ -50,7 +50,7 @@ export function HistoryBlock({
         {!open && (
           <button
             type="button"
-            className="shrink-0 rounded-lg border border-ink-600 px-3 py-1.5 text-support text-text-primary hover:bg-ink-700"
+            className="inline-flex min-h-11 shrink-0 items-center rounded-lg border border-ink-600 px-3 py-1.5 text-support text-text-primary hover:bg-ink-700"
             onClick={() => setOpen(true)}
           >
             {labels.show}

@@ -1,4 +1,5 @@
 import { setRequestLocale, getTranslations } from "next-intl/server";
+import { BusinessHistoryOverview } from "@/components/app/organization/business-history-overview";
 
 import { Link } from "@/lib/i18n/navigation";
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
@@ -24,6 +25,17 @@ import {
 } from "@/components/app/company-next-actions";
 import { CompanyReadinessSummary } from "@/components/app/company-readiness-summary";
 import { OrganizationCapabilitiesCard } from "@/components/app/organization-capabilities-card";
+import {
+  CompanyTeamProfile,
+  OrganizationLivingEntry,
+  type CompanyTeamTranslate,
+} from "@/components/app/company-team-profile";
+import {
+  ORGANIZATION_LIVING_TABS,
+  organizationLivingTab,
+  type OrganizationLivingTab,
+} from "@/lib/company/team-profile-model";
+import { loadOrganizationLivingCv } from "@/lib/company/organization-living-cv";
 import { BusinessPublicProfilePanel } from "@/components/app/business-public-profile-panel";
 import { OrgTier1Warning } from "@/components/app/org-tier1-warning";
 import { HelpRequestPanel } from "@/components/app/help-request-panel";
@@ -34,6 +46,8 @@ import { PageTitle } from "@/components/app/premium/page-title";
 import { Fold } from "@/components/app/premium/grammar";
 import { DetailsHashOpener } from "@/components/app/details-hash-opener";
 import { dashboardPageMetadata } from "@/lib/navigation/dashboard-metadata";
+import { isSafeReturnPath } from "@/lib/auth/redirect";
+import { PageBack } from "@/components/app/premium/page-back";
 
 // The document title names this page (WCAG 2.4.2) — lib/navigation/dashboard-metadata.ts.
 export const generateMetadata = dashboardPageMetadata("/dashboard/company/settings");
@@ -61,13 +75,27 @@ export const generateMetadata = dashboardPageMetadata("/dashboard/company/settin
  */
 export default async function CompanySettingsPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ locale: string }>;
+  /** A started action that sent the person here to declare a capability
+   *  first (`need`), and the action itself to return to (`next`). */
+  searchParams?: Promise<{ need?: string; next?: string; cv?: string }>;
 }) {
   const { locale } = await params;
   setRequestLocale(locale);
   const userId = await requireRoleOrRedirect(locale, "company");
   const t = await getTranslations("organizationDoors.pages.settings");
+  // RETURN TO THE ACTION (owner 2026-11-22): the student invite needs the
+  // `training_provider` capability first, so it sends the person here with
+  // `need` and `next` (the invite itself). Under the capability card a link
+  // takes them back to that invite. Both are validated: `need` is the one
+  // known slug, `next` an internal path.
+  const sp = (await searchParams) ?? {};
+  const returnTo =
+    sp.need === "training_provider" && typeof sp.next === "string" && isSafeReturnPath(sp.next)
+      ? sp.next
+      : null;
   const tDisclosure = await getTranslations("common.disclosure");
   const tCompany = await getTranslations("roleDashboards.company");
   const tNotes = await getTranslations("featureNotes");
@@ -137,6 +165,44 @@ export default async function CompanySettingsPage({
     orgContext.organizations.find((o) => o.legacyCompanyId === companyRow.id)?.id ??
     // Only a GOVERNED active organization — never an employee-only one.
     governedActiveOrganizationId(orgContext);
+  // THE ORGANIZATION'S LIVING CV (owner P0 2026-11-24): the business
+  // profile's own view in its member form, from the organization's records.
+  // It is its own block at its own address (`?cv=<tab>`, decision 0034);
+  // Settings carries only the way in. Null when this person may not read
+  // the history: the page is then plain Settings.
+  const cvTab = organizationLivingTab(sp.cv);
+  const tRoot = (await getTranslations()) as unknown as CompanyTeamTranslate;
+  const livingCv =
+    cvTab && capabilityOrgId
+      ? await loadOrganizationLivingCv(locale, capabilityOrgId, companyRow.country)
+      : null;
+  if (cvTab && livingCv) {
+    const tabHref = Object.fromEntries(
+      ORGANIZATION_LIVING_TABS.map((k) => [k, `/${locale}/dashboard/company/settings?cv=${k}`]),
+    ) as Record<OrganizationLivingTab, string>;
+    return (
+      <div className="flex min-w-0 flex-col gap-4" data-testid="company-settings-living-cv">
+        <PageBack href="/dashboard/company/settings">{t("title")}</PageBack>
+        <CompanyTeamProfile
+          view={livingCv}
+          t={tRoot}
+          member={{
+            locale,
+            tab: cvTab,
+            tabHref,
+            history: cvTab === "experience" && livingCv.living?.historyDetail ? (
+              <BusinessHistoryOverview
+                {...livingCv.living.historyDetail}
+                locale={locale}
+                compact
+                placesHref={`/${locale}/dashboard/company/history?org=${livingCv.living.historyDetail.organizationId}#company-work-history-places`}
+              />
+            ) : undefined,
+          }}
+        />
+      </div>
+    );
+  }
   const [declaredCapabilities, orgMembers] = await Promise.all([
     capabilityOrgId ? readOrganizationCapabilities(capabilityOrgId) : [],
     getOrgMembersData("company", companyRow.id),
@@ -171,6 +237,14 @@ export default async function CompanySettingsPage({
         </div>
       </header>
 
+      {capabilityOrgId ? (
+        <OrganizationLivingEntry
+          name={companyRow.legalName ?? companyRow.displayName ?? t("title")}
+          href={`/${locale}/dashboard/company/settings?cv=overview`}
+          t={tRoot}
+        />
+      ) : null}
+
       {/* Honest data-driven status (name, verification status, what to fix). */}
       <CompanyNextActions company={companyRow} />
 
@@ -201,6 +275,11 @@ export default async function CompanySettingsPage({
               organizationId={capabilityOrgId}
               declared={declaredCapabilities}
             />
+            {returnTo ? (
+              <PageBack href={returnTo} className="mt-4" data-testid="settings-return-to-action">
+                {tCompany("learners.invite")}
+              </PageBack>
+            ) : null}
           </div>
         ) : null}
 

@@ -477,6 +477,7 @@ test.describe("INTEGRATED PRODUCT CHAIN", () => {
       const form = own.getByTestId("project-create");
       await form.locator('input[name="title"]').fill(title);
       await form.locator('input[name="city"]').fill("Vilnius");
+      await form.getByTestId("project-create-country").selectOption("LT");
       await form.locator('button[type="submit"]').click();
       await expect.poll(async () => (await rows(`projects?title=eq.${encodeURIComponent(title)}&select=id`)).length, { timeout: 120_000 }).toBe(1);
       const p = await rows<{ id: string; organization_id: string; status: string }>(`projects?title=eq.${encodeURIComponent(title)}&select=id,organization_id,status`);

@@ -1,4 +1,7 @@
 import { expect, test, type Browser, type Page } from "@playwright/test";
+import { chooseDemandCountryIfEmpty } from "./demand-country";
+import { collectPageErrors, expectRenderedOnce } from "./render-once";
+import { onboardInvited } from "./isolated-web-a-helpers";
 
 /**
  * AGENCY ROLES AND PERMISSIONS, end to end, on a THROWAWAY LOCAL Supabase
@@ -253,7 +256,7 @@ test("A-2. the owner invites a person by link; they register through it and acce
   if (await confirm.count()) await confirm.fill(PASSWORD);
   await page.locator('form button[type="submit"]').click();
   await page.waitForURL(/\/en\/(onboarding|invite|dashboard)/, { timeout: 60_000 });
-  if (/\/onboarding/.test(page.url())) await onboard(page, "work", MEMBER_NAME);
+  if (/\/onboarding/.test(page.url())) await onboardInvited(page, MEMBER_NAME);
   await page.waitForURL(/\/en\/(dashboard|invite)/, { timeout: 60_000 });
   if (/\/invite\//.test(page.url())) {
     const accept = page.getByTestId("invite-accept");
@@ -297,9 +300,18 @@ test("A-2. the owner invites a person by link; they register through it and acce
   });
 
   // The owner gives that person a LIMITED governance seat: member.
+  // R on #3523 (P3): after load, a hidden server copy of this page stayed in
+  // the DOM (`div[hidden][id^="S:"]`, the form outside <main>). The page must
+  // settle into one copy and raise no client error.
+  const settingsErrors: string[] = [];
+  owner.page.on("pageerror", (e) => settingsErrors.push(String(e.message).slice(0, 300)));
   await owner.page.goto(`${BASE}/en/dashboard/company/settings#organization-members`);
   const form = owner.page.getByTestId("org-members-invite-form");
   await expect(form, "the owner administers members").toBeVisible({ timeout: 30_000 });
+  await expect(owner.page.locator('div[hidden][id^="S:"]'), "no leftover hidden copy of the settings page").toHaveCount(0, {
+    timeout: 15_000,
+  });
+  expect(settingsErrors, "the settings page raises no client error").toEqual([]);
   await form.getByTestId("org-members-invite-email").fill(MEMBER);
   await form.getByTestId("org-members-invite-role").selectOption("member");
   await form.getByTestId("org-members-invite-submit").click();
@@ -382,10 +394,15 @@ test("A-3. the member is refused owner-only surfaces; the owner administers role
   // The owner CAN administer members: they raise the seat to manager.
   const owner = await as(browser, OWNER);
   await owner.page.goto(`${BASE}/en/dashboard/company/settings#organization-members`);
-  await expect(owner.page.getByTestId("org-members-invite-form")).toBeVisible({ timeout: 30_000 });
-  await owner.page.getByTestId(`org-member-role-select-${state.membershipId}`).selectOption("manager");
-  await owner.page.getByTestId(`org-member-role-save-${state.membershipId}`).click();
-  await expect(owner.page.getByTestId("org-members-row-result")).toBeVisible({ timeout: 30_000 });
+  // Scoped to <main>, like J-DEC (#3487): while the page streams in, React
+  // can hold a second, server-rendered copy of the form outside it (an
+  // unhydrated <form method="POST">), and a whole-page strict locator then
+  // resolves to 2 elements (signup-isolated run 44414625487).
+  const ownerMain = owner.page.getByRole("main");
+  await expect(ownerMain.getByTestId("org-members-invite-form")).toBeVisible({ timeout: 30_000 });
+  await ownerMain.getByTestId(`org-member-role-select-${state.membershipId}`).selectOption("manager");
+  await ownerMain.getByTestId(`org-member-role-save-${state.membershipId}`).click();
+  await expect(ownerMain.getByTestId("org-members-row-result")).toBeVisible({ timeout: 30_000 });
   await expect
     .poll(
       async () =>
@@ -424,6 +441,7 @@ test("A-4. another organization sees none of the agency's people or needs", asyn
   await main.getByTestId("demand-next").click();
   const size = main.getByTestId("demand-team-size");
   if (await size.isVisible().catch(() => false)) await size.fill("3");
+  await chooseDemandCountryIfEmpty(owner.page);
   await main.getByTestId("demand-next").click();
   await main.getByTestId("demand-create").click();
   await expect(main.getByTestId("demand-done")).toBeVisible({ timeout: 30_000 });
@@ -504,4 +522,32 @@ test("A-5. the agency sees the person linked to it and never an unlinked worker"
     `engagement_contexts?profile_id=eq.${state.memberId}&organization_id=eq.${state.orgId}&select=id`,
   );
   expect(linked.length, "the control: it reads its own person's engagement").toBeGreaterThan(0);
+});
+
+// ── A-6 ─────────────────────────────────────────────────────────────────────
+
+test("A-6. each dashboard section renders exactly once, on repeated full loads at phone and desktop width", async ({ browser }) => {
+  // The intermittent duplicate (a section found twice, once outside <main>)
+  // has hit these walks since 2026-11-01 on several pages; this repeats the
+  // full loads that produced it and, on a duplicate, reports where the second
+  // copy lives and what the console said (tests/e2e/render-once.ts).
+  test.setTimeout(20 * 60_000);
+  const PAGES: ReadonlyArray<readonly [string, string]> = [
+    ["/en/dashboard/documents", "documents-page"],
+    ["/en/dashboard/company/people", "company-people"],
+    ["/en/dashboard/account", "account-notification-preferences"],
+  ];
+  for (const viewport of [{ width: 390, height: 844 }, { width: 1280, height: 800 }]) {
+    const ctx = await browser.newContext({ viewport });
+    const page = await ctx.newPage();
+    const errors = collectPageErrors(page);
+    await signIn(page, OWNER);
+    for (let round = 1; round <= 20; round++) {
+      for (const [path, testId] of PAGES) {
+        await page.goto(`${BASE}${path}`);
+        await expectRenderedOnce(page, testId, errors, `${viewport.width}px round ${round} ${path}`);
+      }
+    }
+    await ctx.close();
+  }
 });

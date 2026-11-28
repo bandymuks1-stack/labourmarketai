@@ -107,6 +107,8 @@ import {
   runCapability,
 } from "./registry";
 import { getConversationAction } from "@/lib/conversation/action-registry";
+import { structuredV2FromDeclaredDemand } from "@/lib/demand/structured-demand-v2";
+import { logWorkFields } from "@/lib/journal/log-work-fields";
 import { CONVERSATION_ACTION_BRIDGE_CAPABILITIES, OVERWRITES, SENDS_EMAIL } from "./conversation-action-bridge";
 import type { CapabilityCaller } from "./contract";
 
@@ -1502,6 +1504,38 @@ describe("journal draft → confirm", () => {
     }
   });
 
+  it("AI-3: a dictated entry keeps its voice provenance through MCP — the ONE mapping the chat sends", async () => {
+    coreWrite.mockClear();
+    const voice = { language: "lt", disclosureVersion: "2026-09-01" };
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), { ...DRAFT, voice });
+    expect(drafted.ok).toBe(true);
+    if (drafted.ok) expect(drafted.data?.preview).toMatchObject({ inputOrigin: "voice" });
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      voice,
+      confirmationToken: token,
+    });
+    expect(confirmed).toMatchObject({ ok: true });
+    const sent = (coreWrite.mock.calls[0] as unknown[]).find((a) => a instanceof FormData) as FormData;
+    const fields = Object.fromEntries(sent.entries());
+    expect(fields).toEqual(logWorkFields(fields.locale as string, { ...DRAFT, voice }) as Record<string, string>);
+    expect(fields).toMatchObject({ input_origin: "voice", voice_language: "lt", voice_disclosure_version: "2026-09-01" });
+  });
+
+  it("AI-3: a confirm cannot add a voice label the draft never carried", async () => {
+    coreWrite.mockClear();
+    const drafted = await runCapability("journal.create_draft", caller(journalState("h0")), DRAFT);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const r = await runCapability("journal.confirm", caller(journalState("h0")), {
+      ...DRAFT,
+      voice: { language: "lt", disclosureVersion: "2026-09-01" },
+      confirmationToken: token,
+    });
+    expect(r.ok).toBe(false);
+    expect(coreWrite).not.toHaveBeenCalled();
+  });
+
   it("a resolved draft's token confirms — the OMITTED id round-trips through the preview", async () => {
     coreWrite.mockClear();
     const { engagementContextId: _omitted, ...withoutContext } = DRAFT;
@@ -2112,6 +2146,111 @@ describe("demand draft → confirm (G4 wagon 3)", () => {
         country: "LT",
       });
       expect(typeof r.data?.confirmationToken).toBe("string");
+    }
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a draft WITHOUT a country returns missing: [\"country\"] and NO token (Swedish employer audit CL-1)", async () => {
+    demandSubmit.mockClear();
+    for (const country of [undefined, null, "XX"]) {
+      const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country });
+      expect(r).toMatchObject({ ok: false, code: "country_required", missing: ["country"] });
+      expect(JSON.stringify(r)).not.toContain("confirmationToken");
+    }
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("a country NAME (any supported language) or a lower-case code is resolved to ISO — the phone types names", async () => {
+    for (const typed of ["Sweden", "Švedija", "se"]) {
+      const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country: typed });
+      expect(r.ok, typed).toBe(true);
+      if (r.ok) expect(r.data?.preview, typed).toMatchObject({ country: "SE" });
+    }
+  });
+
+  it("a name the resolver does not know is refused as country_required — never a guessed market", async () => {
+    demandSubmit.mockClear();
+    const r = await runCapability("demand.create_draft", caller({}), { ...DRAFT, country: "Atlantis" });
+    expect(r).toMatchObject({ ok: false, code: "country_required", missing: ["country"] });
+    expect(JSON.stringify(r)).not.toContain("confirmationToken");
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("confirming with the SAME typed name spends the token and submits the resolved code", async () => {
+    demandSubmit.mockClear();
+    const typed = { ...DRAFT, country: "Sweden" };
+    const drafted = await runCapability("demand.create_draft", caller({}), typed);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), { ...typed, confirmationToken: token });
+    expect(confirmed.ok).toBe(true);
+    expect(demandSubmit).toHaveBeenCalledTimes(1);
+    const [, , , fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
+    expect(fieldsArg).toMatchObject({ country: "SE" });
+  });
+
+  it.each([
+    { startDate: "2026-12-10", endDate: "2026-12-01" },
+    { startDate: "2026-02-30", endDate: "2026-03-01" },
+    { startDate: "2026-12-01", endDate: "2026-13-01" },
+  ])("invalid dates are refused before a token or a write: %j", async (dates) => {
+    demandSubmit.mockClear();
+    const input = { ...DRAFT, ...dates, teamCount: 1, perTeamSize: 3 };
+    const draft = await runCapability("demand.create_draft", caller({}), input);
+    expect(draft.ok).toBe(false);
+    expect(JSON.stringify(draft)).not.toContain("confirmationToken");
+    const confirm = await runCapability("demand.create_confirm", caller({}), {
+      ...input, confirmationToken: "invalid-date-proof-token",
+    });
+    expect(confirm.ok).toBe(false);
+    expect(demandSubmit).not.toHaveBeenCalled();
+  });
+
+  it("F7 / AI-2: confirm keeps the start and end day and the team split, through the ONE mapper the chat uses", async () => {
+    demandSubmit.mockClear();
+    const stated = {
+      ...DRAFT,
+      teamSize: 12,
+      startDate: "2026-12-01",
+      endDate: "2027-02-28",
+      teamCount: 3,
+      perTeamSize: 4,
+      opportunityType: "temporary_assignment" as const,
+    };
+    const drafted = await runCapability("demand.create_draft", caller({}), stated);
+    expect(drafted.ok).toBe(true);
+    if (drafted.ok) {
+      expect(drafted.data?.preview).toMatchObject({
+        startDate: "2026-12-01",
+        endDate: "2027-02-28",
+        teamCount: 3,
+        perTeamSize: 4,
+      });
+    }
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    const confirmed = await runCapability("demand.create_confirm", caller({}), { ...stated, confirmationToken: token });
+    expect(confirmed.ok).toBe(true);
+    const [, , , fieldsArg] = demandSubmit.mock.calls[0] as unknown[];
+    // Byte-identical to what the chat executor sends for the same input.
+    expect((fieldsArg as { structuredV2: unknown }).structuredV2).toEqual(structuredV2FromDeclaredDemand(stated));
+    expect((fieldsArg as { structuredV2: unknown }).structuredV2).toEqual({
+      opportunity_type: "temporary_assignment",
+      team: { count: 3, per_team: 4 },
+      time: { start_earliest: "2026-12-01", end_date: "2027-02-28" },
+    });
+  });
+
+  it("F7: the token binds the dates and the team split — a confirm cannot change them", async () => {
+    demandSubmit.mockClear();
+    const stated = { ...DRAFT, startDate: "2026-12-01", teamCount: 1, perTeamSize: 3 };
+    const drafted = await runCapability("demand.create_draft", caller({}), stated);
+    const token = drafted.ok ? (drafted.data?.confirmationToken as string) : "";
+    for (const changed of [
+      { ...stated, startDate: "2027-01-01" },
+      { ...stated, endDate: "2027-03-01" },
+      { ...stated, teamCount: 3, perTeamSize: 1 },
+    ]) {
+      const r = await runCapability("demand.create_confirm", caller({}), { ...changed, confirmationToken: token });
+      expect(r).toMatchObject({ ok: false, code: "confirmation_rejected" });
     }
     expect(demandSubmit).not.toHaveBeenCalled();
   });

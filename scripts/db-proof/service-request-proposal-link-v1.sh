@@ -6,7 +6,7 @@
 #   initdb -D $DIR/data -U postgres --auth=trust -E UTF8
 #   pg_ctl -D $DIR/data -o "-p 54301 -c listen_addresses=127.0.0.1" -l $DIR/pg.log start
 #   PGPROOF_HOST=127.0.0.1 PGPROOF_PORT=54301 bash scripts/db-proof/service-request-proposal-link-v1.sh
-# Uses database `srpl` (dropped and rebuilt). Refuses non-local hosts.
+# Requires a fresh database name `srpl` (refuses an existing one). Refuses non-local hosts.
 set -uo pipefail
 export PGCLIENTENCODING=UTF8
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; REPO="$(cd "$HERE/../.." && pwd)"
@@ -19,7 +19,7 @@ PGPROOF_HOST=${PGPROOF_HOST:-127.0.0.1}; PGPROOF_PORT=${PGPROOF_PORT:-54301}
 case "$PGPROOF_HOST" in 127.0.0.1|localhost|/*) ;; *) echo "refusing non-local host"; exit 2;; esac
 ADMINP="psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d postgres -tA -q"
 PSQL="psql -h $PGPROOF_HOST -p $PGPROOF_PORT -U postgres -d srpl -tA -q"
-$ADMINP -c "drop database if exists srpl" -c "create database srpl" >/dev/null 2>&1
+$ADMINP -v ON_ERROR_STOP=1 -c "create database srpl" || { echo "A fresh scratch database is required"; exit 1; }
 $PSQL -v ON_ERROR_STOP=1 -f "$HERE/service-request-proposal-link-v1.prelude.sql" >/dev/null 2>"$LFD/err" || { echo "BASELINE FAILED: prelude"; cat "$LFD/err"; exit 1; }
 for b in $BASE; do
   $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$b.sql" >/dev/null 2>"$LFD/err" || { echo "BASELINE FAILED: $b"; cat "$LFD/err"; exit 1; }
@@ -56,6 +56,8 @@ mkid() { as "$1" "select public.create_proposal_from_service_request_v1('$2', 'O
 premd5() { q "select string_agg(proname||':'||md5(replace(prosrc, chr(13), ''))||':'||coalesce(proacl::text,'-'), ',' order by proname, oid) from pg_proc where pronamespace='public'::regnamespace and proname <> 'create_proposal_from_service_request_v1';"; }
 polmd5() { q "select md5(string_agg(tablename||policyname||cmd||coalesce(qual,'')||coalesce(with_check,'')||roles::text, ',' order by tablename, policyname)) from pg_policies where schemaname='public';"; }
 colmd5() { q "select md5(string_agg(table_name||column_name||data_type||is_nullable, ',' order by table_name, ordinal_position)) from information_schema.columns where table_schema='public';"; }
+# Match the explicit anon/authenticated EXECUTE defaults of a clean Supabase local reset.
+$PSQL -v ON_ERROR_STOP=1 -c "alter default privileges in schema public grant execute on functions to anon, authenticated, service_role;" || exit 1
 reset_state
 F0="$(premd5)"; P0="$(polmd5)"; C0="$(colmd5)"
 echo "BEFORE — no link exists"
@@ -67,7 +69,8 @@ $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.sql" >/dev/null 2>&1 && { echo "  PASS  
 check "every pre-existing function body and ACL unchanged" "$F0" "$(premd5)"
 check "every policy unchanged (none added, altered or dropped)" "$P0" "$(polmd5)"
 check "exactly one overload" "1" "$(q "select count(*) from pg_proc where proname='create_proposal_from_service_request_v1';")"
-check "ACL authenticated only, SECURITY DEFINER, pinned search_path" "1" "$(q "select count(*) from pg_proc where proname='create_proposal_from_service_request_v1' and prosecdef and proacl::text ~ 'authenticated=X' and proacl::text !~ 'anon=' and proacl::text !~ '(^|[{,])=X' and proconfig::text ~ 'search_path=public, pg_temp';")"
+check "ACL authenticated only, SECURITY DEFINER, pinned search_path" "1" "$(q "select count(*) from pg_proc where proname='create_proposal_from_service_request_v1' and prosecdef and proacl::text ~ 'authenticated=X' and proacl::text !~ 'anon=' and proacl::text !~ '(^|[{,])=X' and proconfig::text ~ 'search_path=pg_catalog, pg_temp';")"
+check "effective EXECUTE for anon, authenticated, service_role with explicit local defaults" "false:true:false" "$(q "select has_function_privilege('anon', oid, 'EXECUTE')::text||':'||has_function_privilege('authenticated', oid, 'EXECUTE')::text||':'||has_function_privilege('service_role', oid, 'EXECUTE')::text from pg_proc where oid='public.create_proposal_from_service_request_v1(uuid,text,bigint,text,text,date)'::regprocedure;")"
 check "link column is nullable uuid" "uuid:YES" "$(q "select data_type||':'||is_nullable from information_schema.columns where table_name='proposals' and column_name='service_offering_request_id';")"
 echo "AFTER — provider-only, accepted-only, draft, no duplicate"
 check "anon cannot execute" "permission denied" "$(mk anon $RA)"
@@ -75,6 +78,8 @@ check "no auth.uid() refused" "Not authenticated" "$(mk none $RA)"
 check "buyer refused (same answer as a missing request)" "request not found" "$(mk $BU $RA)"
 check "another provider refused" "request not found" "$(mk $P2 $RA)"
 check "unrelated person refused" "request not found" "$(mk $UX $RA)"
+q "update public.profiles set active_role='admin' where id='$UX';" >/dev/null
+check "a non-provider administrator cannot create or reopen the proposal" "request not found" "$(mk $UX $RA)"
 check "missing request: same answer (no existence oracle)" "request not found" "$(mk $PR $RN)"
 check "request still 'sent' refused" "request not accepted" "$(mk $PR $RS)"
 check "declined request refused" "request not accepted" "$(mk $PR $RD)"
@@ -84,10 +89,14 @@ check "nothing written by any refusal" "0" "$(q "select count(*) from public.pro
 check "provider of the accepted request: created" "ok" "$(mk $PR $RA)"
 ID1="$(q "select id from public.proposals;")"
 check "the row is a DRAFT owned by the provider, linked, EUR, amount kept" "draft:$PR:$RA:EUR:150000" "$(q "select status||':'||owner_id||':'||service_offering_request_id||':'||currency||':'||amount_cents from public.proposals where id='$ID1';")"
+check "creating the draft makes no contract" "0" "$(q "select count(*) from public.contracts;")"
+check "the draft has no send or acceptance timestamps" "t" "$(q "select sent_at is null and accepted_at is null from public.proposals where id='$ID1';")"
 check "second call returns the SAME proposal (no duplicate)" "$ID1" "$(mkid $PR $RA)"
 check "still one proposal" "1" "$(q "select count(*) from public.proposals;")"
 check "provider reads their proposal (RLS, unchanged)" "1" "$(as $PR "select count(*) from public.proposals;")"
 check "buyer does NOT see the proposal (RLS, unchanged)" "0" "$(as $BU "select count(*) from public.proposals;")"
+check "the existing RLS still permits an administrator to read" "1" "$(as $UX "select count(*) from public.proposals;")"
+check "an administrator cannot reopen the provider's draft" "request not found" "$(mk $UX $RA)"
 check "the request itself is untouched" "accepted" "$(q "select status from public.service_offering_requests where id='$RA';")"
 check "existing door still works without a link (create_proposal_v1)" "t" "$(as $PR "select public.create_proposal_v1('Plain offer', 100) is not null;")"
 check "plain proposal carries no link" "1" "$(q "select count(*) from public.proposals where service_offering_request_id is null;")"
@@ -109,6 +118,34 @@ check "two CONCURRENT calls still make one proposal (row lock)" "1" "$(q "select
 reset_state; mk $PR $RA >/dev/null
 $PSQL -c "delete from public.service_offering_requests where id='$RA';" >/dev/null
 check "deleting the request keeps the proposal and clears the link (on delete set null)" "1:0" "$(q "select count(*)||':'||count(service_offering_request_id) from public.proposals;")"
+echo "ROLLBACK with an uncommitted link and missing indexes"
+reset_state
+$PSQL -v ON_ERROR_STOP=1 -c "drop index public.proposals_one_open_per_service_request, public.proposals_service_offering_request_idx" || exit 1
+# Hold the synthetic writer open on a pipe, then wait for the actual rollback lock.
+coproc LINK_WRITER { PGAPPNAME=srpl_writer $PSQL -v ON_ERROR_STOP=1 -f - > "$LFD/writer-out" 2>"$LFD/writer-err"; }
+writer_pid=$LINK_WRITER_PID
+writer_fd=${LINK_WRITER[1]}
+printf '%s\n' "set role authenticated; set request.jwt.claim.sub='$PR'; begin; select public.create_proposal_from_service_request_v1('$RA','Draft',0);" >&"$writer_fd"
+wait_for_query() {
+  local i
+  for i in {1..100}; do
+    if [ "$(q "$1")" = "t" ]; then return 0; fi
+    sleep 0.05
+  done
+  return 1
+}
+wait_for_query "select exists (select 1 from pg_stat_activity where application_name='srpl_writer' and state='idle in transaction');" || { echo "scratch writer failed to hold the link"; exit 1; }
+PGAPPNAME=srpl_rollback $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.down.sql" >"$LFD/rollback-out" 2>"$LFD/rollback-err" &
+rollback_pid=$!
+wait_for_query "select exists (select 1 from pg_locks l join pg_stat_activity a using (pid) where l.relation='public.proposals'::regclass and l.mode='AccessExclusiveLock' and not l.granted and a.application_name='srpl_rollback');"
+lock_seen=$?
+printf '%s\n' "commit;" '\q' >&"$writer_fd"
+wait "$writer_pid" || { cat "$LFD/writer-err"; exit 1; }
+wait "$rollback_pid"; rollback_rc=$?
+check "rollback queued behind the live writer even without either index" "0" "$lock_seen"
+check "rollback refused after the writer committed the link" "refused" "$([ "$rollback_rc" -ne 0 ] && grep -q 'refusing to drop the link column' "$LFD/rollback-err" && echo refused || echo ran)"
+check "the just-committed proposal link survived" "1" "$(q "select count(*) from public.proposals where service_offering_request_id='$RA';")"
+$PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.sql" > /dev/null || exit 1
 echo "ROLLBACK"
 reset_state; mk $PR $RA >/dev/null
 $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.down.sql" >/dev/null 2>"$LFD/err"; RC=$?
@@ -123,5 +160,6 @@ check "rollback leaves every policy as before" "$P0" "$(polmd5)"
 check "the unlinked proposal survived the rollback" "1" "$(q "select count(*) from public.proposals;")"
 check "the door is gone" "does not exist" "$(mk $PR $RA)"
 $PSQL -v ON_ERROR_STOP=1 -f "$LFD/$NAME.sql" >/dev/null 2>&1; check "forward re-applies after rollback" "ok" "$(mk $PR $RA)"
+$PSQL -v ON_ERROR_STOP=1 -f "$HERE/service-request-proposal-link-v1.plan.sql" || exit 1
 echo; echo "RESULT: $pass passed, $fail failed"
 [ "$fail" -eq 0 ]
