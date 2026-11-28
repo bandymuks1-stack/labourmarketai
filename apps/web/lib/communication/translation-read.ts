@@ -5,6 +5,7 @@ import { aiLocaleFor } from "@/lib/ai/runtime/types";
 import { aiTaskServableNow } from "@/lib/ai/egress-precheck-server";
 import { communicationLanguageNames, isCommunicationLocale } from "@/lib/i18n/config";
 import { rateLimit } from "@/lib/security/rate-limit";
+import { renderingIsFaithful } from "@/lib/translation/faithfulness";
 
 import {
   needsTranslation,
@@ -41,6 +42,11 @@ import {
  * in-process cache keyed by message id + body + target locale means a thread
  * re-opened on the same instance costs nothing. Doctrine §2 keeps the
  * translation OUT of the database: it is a rendering, not a record.
+ *
+ * Messages past the provider's input limit are shown in full as originals.
+ * Before showing a translation, check its numeric sequence and selected
+ * currency and contract terms. If the check fails, show the original with
+ * a failed translation state and keep the rejected text out of the cache.
  *
  * AUTHORITY is unchanged: the caller passes messages it already read under
  * the conversation's RLS (participants only); this module reads nothing.
@@ -179,6 +185,7 @@ export function isTransientProviderRefusal(reason: string, detail: string | unde
 }
 
 const TRANSIENT_RETRY_DELAY_MS = 1200;
+const MAX_SOURCE_LENGTH = 8000;
 
 /** Answers that will repeat for every message of this read — a refusal, not a failure. */
 const REFUSAL_REASONS: ReadonlySet<string> = new Set([
@@ -204,7 +211,7 @@ async function translateOnce(
     const outcome = await runAiAgent(
       "translation_copy",
       {
-        canonicalMessage: m.body.slice(0, 8000),
+        canonicalMessage: m.body,
         locale: viewerLocale,
         context: translationContext(viewerLocale, m.original_language),
       },
@@ -239,6 +246,9 @@ async function translateOnce(
         ? { text: text.trim(), provider: outcome.provider }
         : null;
     if (!value) return { ok: false, reason: "failed" };
+    // A lost or changed number, or a dropped money unit / contract word, is
+    // not a translation of what was agreed: the original stands.
+    if (!renderingIsFaithful(m.body, value.text)) return { ok: false, reason: "failed" };
     remember(key, value);
     return { ok: true, value };
   } catch {
@@ -273,6 +283,7 @@ export async function resolveViewerTexts(
   const candidates = messages.filter(
     (m) =>
       m.author_id !== viewerId &&
+      m.body.length <= MAX_SOURCE_LENGTH &&
       needsTranslation({ body: m.body, originalLanguage: m.original_language ?? null, viewerLocale }),
   );
   // Newest first: the tail of the thread is what the reader is looking at.
