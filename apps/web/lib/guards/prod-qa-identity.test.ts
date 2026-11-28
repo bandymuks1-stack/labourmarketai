@@ -360,6 +360,9 @@ describe("the production path is a SCRIPT, never a reachable surface", () => {
       // Another guard TEST (never shipped): keeps the service-role key off the
       // browser walk (R2 P3-1 on #3303). Names the key-reading scripts as text.
       "lib/guards/prod-walk-service-key-scope.test.ts",
+      // Another guard TEST (never shipped): pins the Living CV screens account's provisioning
+      // (created past onboarding, onboarded_at only). Reads the script as text.
+      "lib/guards/living-cv-screens.test.ts",
     ]);
     const offenders: string[] = [];
     for (const dir of ["app", "components", "lib"]) {

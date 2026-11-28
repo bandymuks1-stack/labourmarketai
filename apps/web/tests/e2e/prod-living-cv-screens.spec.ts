@@ -92,13 +92,40 @@ test.setTimeout(15 * 60_000);
 
 let step = "start";
 
-/** Run `fn`; any failure is reported as the step name only, never the page's text or a URL. */
+/**
+ * The cause of a failure as ONE fixed category from the walk's own vocabulary. Never the error's
+ * text: a Playwright error can carry a URL (with ids) or page text.
+ */
+const CAUSES = [
+  "redirected to onboarding",
+  "redirected",
+  "content hidden",
+  "read unavailable",
+  "grants unreadable",
+  "roster unreadable",
+  "no main",
+  "page did not open",
+  "timeout",
+  "other",
+] as const;
+function causeOf(e: unknown): (typeof CAUSES)[number] {
+  const m = e instanceof Error ? e.message : "";
+  if (m.startsWith("redirected: onboarding")) return "redirected to onboarding";
+  if (m.startsWith("redirected: ")) return "redirected";
+  if (m.startsWith("the page rendered without its content: the read was unavailable")) return "read unavailable";
+  if (m.startsWith("the page rendered without its content")) return "content hidden";
+  if (m === "grants unreadable" || m === "roster unreadable" || m === "no main" || m === "page did not open") return m;
+  if (e instanceof Error && e.name === "TimeoutError") return "timeout";
+  return "other";
+}
+
+/** Run `fn`; a failure is reported as the step name and one fixed cause, never page text or a URL. */
 async function at<T>(name: string, fn: () => Promise<T>): Promise<T> {
   step = name;
   try {
     return await fn();
-  } catch {
-    throw new Error(`living-cv-screens failed at: ${name}`);
+  } catch (e) {
+    throw new Error(`living-cv-screens failed at: ${name} (${causeOf(e)})`);
   }
 }
 
@@ -141,7 +168,9 @@ const personPath = (orgId: string, personId: string) =>
 async function served(page: Page, path: string, rootTestId: string): Promise<void> {
   await open(page, path);
   const want = path.split("?")[0]!;
-  if (!new URL(page.url()).pathname.endsWith(want)) throw new Error("redirected: the page was not served to the grant");
+  const landed = new URL(page.url()).pathname;
+  if (/\/onboarding(\/|$)/.test(landed)) throw new Error("redirected: onboarding (the account is not past onboarding)");
+  if (!landed.endsWith(want)) throw new Error("redirected: the page was not served to the grant");
   if (!(await page.getByTestId(rootTestId).first().isVisible({ timeout: 30_000 }).catch(() => false))) {
     throw new Error("the page rendered without its content: hidden from the grant");
   }
@@ -354,10 +383,8 @@ test("LCV. de-identified Living CV screens at 1440, 390 and 375 px", async ({ br
     try {
       results.push(await go());
     } catch (e) {
-      // Only the walk's own fixed messages are kept; anything else (a URL, a page text) is not.
-      const own = e instanceof Error && /^(page did not open|no main|redirected: |the page rendered without its content)/.test(e.message);
-      const why = own ? (e as Error).message : "the page did not open";
-      results.push({ screen, viewport, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: [`not generated: ${why} (${step})`] });
+      // One fixed cause from the walk's own vocabulary; never a URL or page text.
+      results.push({ screen, viewport, file: null, privacy: "FAIL", layout: "n/a", status: "FAIL", reasons: [`not generated: ${causeOf(e)} (${step})`] });
     }
   };
   for (const vp of VIEWPORTS) {
