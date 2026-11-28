@@ -157,25 +157,28 @@ independent work or launch of other features (owner order 2026-10-28).
 **Continuation, 2026-11-28:** Codex remains the only active executor; Claude Code
 is inactive. Shared continuity rules are on main via #3839. #3111 is applied and
 production-verified by Chrome walk `46067486489`; never reapply.
-#2642 is deployed (`46069365600`). Its separate walk `46071894952` failed at J-1
-because the test excluded the current `public-jobs-count` selector. Chrome
-confirmed the visible production count and cards; J-6 was never reached. The
-existing test selector is corrected in #2795; saved-job persistence is still
-NOT_VERIFIED until the focused walk passes.
-#3722 is manually merged as `384f999fb`, deployed (`46073832911`) and applied by
-Supabase MCP as `booking_hire_opens_work_relationship_v1`, ledger `20261128053149`.
-Exact approved hashes match main; both required gates, full isolated journeys,
-independent review and immediate read-back passed. Production orders-bookings
-walk `46112666336` is pending; never reapply this migration.
-#2795 continues branch `fix/cc/booking-clash-marker-red` in the existing
-`codex-history-reader-20261126` worktree. Owner approved forward SHA256
-`590634FAF18CDB6D188414BD0223B78B9C76AF3C657EFE084CF00B0AF85EFF8F` and rollback
-`E2F865C3C3A947FB8481CC91B22C68DCA0A2AFAAF1FBB015FE2577D10DCBD953`, annotation/test,
-ready state, manual merge/apply and synthetic verification after mandatory gates.
-Main #3722 is merged into this branch; both production proof additions are kept.
-Next: finish narrow combined review/checks, push the complete slice, then required
-CI, ready/manual merge, verify merged hashes and apply once via MCP. No auto-merge;
-keep needs-human-gate. Current PR bodies record exact heads and later outcomes.
+#2642 is deployed. Production jobs-search walk `46118634337` on build
+`8758a581` passed the worker's save, retrieve and remove flow. The focused test
+selector shipped in #3840. #3722 was deployed and applied through Supabase MCP
+as `booking_hire_opens_work_relationship_v1` (ledger `20261128053149`).
+Production orders-bookings walk `46112666336` passed the hire, journal approval
+and Living CV checks. Do not reapply #3722.
+
+#2795 continues on branch `fix/cc/booking-clash-marker-red` in the existing
+`codex-history-reader-20261126` worktree. The owner approved both SQL pairs
+and a manual release after required checks. Keep the human-gate label.
+Verify merged file digests and apply through Supabase MCP in the tested order:
+
+1. `20261128080150_booking_hire_interval_support_v1` (forward SHA-256
+   `7B53B906DBC0517B0091420BF23A02A4E9E7D919D628613FEBFBDA3B30D72562`).
+   Verify the migration ledger, access and installed functions.
+2. `20261025190000_booking_clash_acknowledged_marker_v1` (forward SHA-256
+   `590634FAF18CDB6D188414BD0223B78B9C76AF3C657EFE084CF00B0AF85EFF8F`).
+   Verify the marker and overlap constraint. Run the orders-bookings production
+   walk with synthetic users. Check continuity across both booking closures.
+
+Check the production ledger and live state before retrying either SQL call.
+Current PR receipts record deployment and verification outcomes.
 
 The 2026-11-25 table below is historical evidence, not the current deployment
 or unfinished-work status. Use the continuation above and the current PR bodies.

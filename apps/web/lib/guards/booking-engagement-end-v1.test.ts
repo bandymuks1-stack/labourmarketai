@@ -1860,6 +1860,8 @@ describe("the migration set is exactly what this slice declared", () => {
       // Erasure integration: 54F50FEC6C8284A5110A87C572E1BC0DECC12FF379971C8A4C05B3B5DDEF9165.
       "20261127163000_timesheet_schedules_v1.sql",
       "20261127180000_timesheet_schedule_privacy_v1.sql",
+      // Exact owner-approved booking protection, applied before the overlap marker.
+      "20261128080150_booking_hire_interval_support_v1.sql",
     ]);
   });
 
