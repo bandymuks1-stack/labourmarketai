@@ -23,6 +23,11 @@
 /** The ONE address of the canonical company demand intake. */
 export const NEED_DOOR_HREF = "/dashboard/company/needs#demand-intake" as const;
 
+/** Dual-role organizations can explicitly open the hiring form at this intake. */
+export function needDoorHref(forceNeedAudience: boolean): string {
+  return forceNeedAudience ? NEED_DOOR_HREF.replace("#", "?audience=need#") : NEED_DOOR_HREF;
+}
+
 /**
  * The doors into the intake. One value per door, so a funnel can be read per
  * door. Adding a door means adding its name here (the guard

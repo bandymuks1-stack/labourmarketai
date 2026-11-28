@@ -3,7 +3,10 @@ import { setRequestLocale, getTranslations } from "next-intl/server";
 import Link from "next/link";
 
 import { requireRoleOrRedirect } from "@/lib/auth/require-role";
+import { resolveNeedsAudience } from "@/lib/company/agency-capability";
+import { getAccessibleCompanyById } from "@/lib/company/company-setup";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { readOrganizationCapabilities } from "@/lib/organizations/capability-read";
 import { EmployerContextNotice } from "@/components/app/employer-context-notice";
 import { NeedDoorLink } from "@/components/app/need-door-link";
 import {
@@ -502,6 +505,26 @@ export default async function CompanyScoutingPage({
     </>
   );
 
+  const [emptyDemandCompany, emptyDemandCapabilities] = demands.length === 0
+    ? await Promise.all([
+        getAccessibleCompanyById(employerContext.companyId),
+        readOrganizationCapabilities(employerContext.organizationId),
+      ])
+    : [null, []] as const;
+  // Only staffing-type companies default to the offer intake. A dual-role
+  // company can choose the hiring form; an agency-only workspace works from
+  // the needs its clients share in Clients and partners.
+  const emptyDemandAudience =
+    emptyDemandCompany?.kind === "ok" && emptyDemandCompany.row
+      ? resolveNeedsAudience({
+          companyType: emptyDemandCompany.row.companyType,
+          capabilities: emptyDemandCapabilities,
+        })
+      : null;
+  const tPartners = emptyDemandAudience?.audience === "offer" && !emptyDemandAudience.canChoose
+    ? await getTranslations("organizationDoors.pages.partners")
+    : null;
+
   return (
     <div className="mx-auto flex w-full max-w-content flex-col gap-6">
       <header className="flex flex-col gap-1">
@@ -525,14 +548,28 @@ export default async function CompanyScoutingPage({
       {/* Demand picker */}
       {demands.length === 0 ? (
         <div className="flex flex-col items-start gap-3 rounded-md border border-dashed border-ink-500 px-4 py-6">
-          <p className="text-sm text-text-secondary">{t("noDemands")}</p>
-          {/* The one need door: one address, one label, one tracked click
-              (duplication audit ORG-5). */}
-          <NeedDoorLink
-            surface="company_scouting_empty"
-            testId="scouting-no-demands-cta"
-            className={buttonLinkClassName("secondary", "sm")}
-          />
+          {tPartners ? (
+            <>
+              <p className="text-sm text-text-secondary">{tPartners("subtitle")}</p>
+              <Link
+                href={`/${locale}/dashboard/company/partners`}
+                className={buttonLinkClassName("secondary", "sm")}
+                data-testid="scouting-no-demands-partners"
+              >
+                {tPartners("title")}
+              </Link>
+            </>
+          ) : (
+            <>
+              <p className="text-sm text-text-secondary">{t("noDemands")}</p>
+              <NeedDoorLink
+                surface="company_scouting_empty"
+                testId="scouting-no-demands-cta"
+                forceNeedAudience={emptyDemandAudience?.audience === "offer"}
+                className={buttonLinkClassName("secondary", "sm")}
+              />
+            </>
+          )}
         </div>
       ) : (
         <nav className="flex flex-wrap gap-2" aria-label={t("pickDemand")}>

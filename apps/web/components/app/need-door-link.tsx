@@ -6,14 +6,14 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/lib/i18n/navigation";
 import { trackFunnel } from "@/lib/telemetry/task";
 import { FUNNEL_EVENTS } from "@/lib/telemetry/funnel-events";
-import { NEED_DOOR_HREF, type NeedDoorSurface } from "@/lib/company/need-door";
+import { needDoorHref, type NeedDoorSurface } from "@/lib/company/need-door";
 
 /**
  * THE door into the company demand intake (activation audit 2026-10-26 §2).
  *
  * One component so the three things that drifted apart cannot drift again:
- *   - the ADDRESS is always `NEED_DOOR_HREF` (no hash into a section the
- *     current page does not hold);
+ *   - the ADDRESS always targets the canonical intake, with an explicit
+ *     request for its hiring form when a dual-role workspace needs it;
  *   - the CLICK always reports `company_demand_action_clicked` with the door's
  *     `surface` (fire-and-forget; navigation is never delayed);
  *   - the LABEL is always `roleDashboards.company.needDoor.label` — one
@@ -28,17 +28,19 @@ export function NeedDoorLink({
   className,
   testId,
   icon,
+  forceNeedAudience = false,
 }: {
   surface: NeedDoorSurface;
   className?: string;
   testId?: string;
   /** Optional leading icon (the home's action row carries one per action). */
   icon?: ReactNode;
+  forceNeedAudience?: boolean;
 }) {
   const t = useTranslations("roleDashboards.company.needDoor");
   return (
     <Link
-      href={NEED_DOOR_HREF as "/dashboard"}
+      href={needDoorHref(forceNeedAudience)}
       className={className}
       data-testid={testId}
       data-need-door={surface}

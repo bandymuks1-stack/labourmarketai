@@ -132,6 +132,12 @@ describe("scouting empty states are actionable (F-D2)", () => {
     expect(page).toMatch(/<NeedDoorLink[^>]*surface="company_scouting_empty"[^>]*testId="scouting-no-demands-cta"/);
   });
 
+  it("the empty state opens hiring for dual staffing companies and shared client needs for agency-only workspaces", () => {
+    const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    expect(page).toMatch(/emptyDemandAudience\?\.audience === "offer" && !emptyDemandAudience\.canChoose/);
+    expect(page).toMatch(/\{tPartners \? \([\s\S]*?href=\{`\/\$\{locale\}\/dashboard\/company\/partners`\}[\s\S]*?data-testid="scouting-no-demands-partners"[\s\S]*?\) : \([\s\S]*?<NeedDoorLink[^>]*forceNeedAudience=\{emptyDemandAudience\?\.audience === "offer"\}/);
+  });
+
   it("copy no longer tells the company to structure skills itself", () => {
     const en = JSON.parse(read("messages/en.json"));
     expect(en.scouting.notStructured).not.toMatch(
