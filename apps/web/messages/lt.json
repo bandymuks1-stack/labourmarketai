@@ -7093,6 +7093,7 @@
     "decline": "Atmesti",
     "withdraw": "Atšaukti",
     "messageCta": "Parašyti žinutę",
+    "acceptedNextNotYet": "Sąlygų suderinimas, darbo eigos sekimas ir darbo ataskaita paslaugų užklausoms dar neprieinami.",
     "errorGeneric": "Kažkas nepavyko. Bandykite dar kartą.",
     "duplicate": "Jau turite neuždarytą užklausą šiai paslaugai.",
     "requestAgain": "Pateikti užklausą iš naujo",

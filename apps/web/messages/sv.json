@@ -7093,6 +7093,7 @@
     "decline": "Avböj",
     "withdraw": "Dra tillbaka",
     "messageCta": "Skicka ett meddelande",
+    "acceptedNextNotYet": "Att komma överens om villkor, följa arbetet och en arbetsrapport finns ännu inte för tjänsteförfrågningar.",
     "errorGeneric": "Något gick fel. Försök igen.",
     "duplicate": "Du har redan en öppen förfrågan om den här tjänsten.",
     "requestAgain": "Skicka förfrågan igen",

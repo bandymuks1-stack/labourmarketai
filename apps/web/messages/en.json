@@ -7093,6 +7093,7 @@
     "decline": "Decline",
     "withdraw": "Withdraw",
     "messageCta": "Send a message",
+    "acceptedNextNotYet": "Agreeing terms, tracking the work and a work report are not available for service requests yet.",
     "errorGeneric": "Something went wrong. Please try again.",
     "duplicate": "You already have an open request for this service.",
     "requestAgain": "Request again",
