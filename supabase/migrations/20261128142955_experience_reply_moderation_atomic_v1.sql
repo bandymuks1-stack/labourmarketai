@@ -1,5 +1,5 @@
 -- Private draft for #3301. RED, needs-human-gate.
--- Private owner-review candidate. Owner approval and manual apply pending.
+-- Private owner-review candidate. Release only after exact-byte owner approval.
 -- @human-gate-approved
 -- Lock the reply before validating its prior state. The update and its audit event commit together.
 -- Serialize deployment with other changes to this RPC, including #3324.
@@ -45,10 +45,13 @@ begin
 end;
 $$;
 
+  revoke execute on function public.moderate_experience_response(uuid, text, text) from public, anon;
+
   if not exists (
     select 1 from pg_catalog.pg_proc p
      where p.oid = target
        and md5(p.prosrc) = 'b3c38b7f2df8d05b4b3159d3de200683'
+       and not pg_catalog.has_function_privilege('anon', p.oid, 'EXECUTE')
        and (to_jsonb(p) - 'prosrc') = prior_metadata
   ) then
     raise exception 'Reply moderation body or metadata verification failed.';
