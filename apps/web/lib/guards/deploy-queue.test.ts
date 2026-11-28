@@ -276,7 +276,7 @@ describe("a runner or clean-up failure is not a regression (R3 on #3762)", () =>
 });
 
 describe("the emergency path is described honestly (R3 blocker on #3762)", () => {
-  const POLICY = "## Deploy freeze emergency — the owner only, in person (binding, owner P0 2026-11-24)";
+  const POLICY = "## Deploy freeze emergency — the owner only, in person (binding — follows from owner P0 2026-11-24; owner to confirm)";
 
   it("AGENTS.md and CLAUDE.md bind agents never to dispatch an emergency or lift a freeze", () => {
     for (const f of ["AGENTS.md", "CLAUDE.md"]) {

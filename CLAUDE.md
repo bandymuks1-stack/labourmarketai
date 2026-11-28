@@ -209,7 +209,7 @@ repo setting *Allow auto-merge* must be ON, and branch protection on `main` must
 require both `quality` and `migration-safety` status checks. Until those are set,
 auto-merge is inert and Claude Code falls back to waiting for CI then merging.
 
-## Deploy freeze emergency — the owner only, in person (binding, owner P0 2026-11-24)
+## Deploy freeze emergency — the owner only, in person (binding — follows from owner P0 2026-11-24; owner to confirm)
 
 `deploy-vps.yml` refuses every deploy while an issue labelled `deploy-freeze` is
 open (a post-deploy check genuinely failed). Its `emergency=true` dispatch goes
