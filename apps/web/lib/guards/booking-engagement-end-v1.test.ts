@@ -1864,6 +1864,8 @@ describe("the migration set is exactly what this slice declared", () => {
       "20261127180000_timesheet_schedule_privacy_v1.sql",
       // Exact owner-approved booking protection, applied before the overlap marker.
       "20261128080150_booking_hire_interval_support_v1.sql",
+      // #3301 reply moderation. RED, separate owner gate and manual apply.
+      "20261128142955_experience_reply_moderation_atomic_v1.sql",
     ]);
   });
 

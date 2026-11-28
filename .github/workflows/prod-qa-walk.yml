@@ -72,6 +72,9 @@ on:
           - notifications-inapp
           - billing-test-mode
           - profile-cv-history
+          # #3301: two explicit dispatches with the owner's independent moderation between them.
+          - experience-dispute-prepare
+          - experience-dispute-verify
           - search-support-privacy
           - public-org-locales
           # Read-only admin console walk: the non-admin denial runs now; the admin part skips
@@ -435,6 +438,7 @@ jobs:
       E2E_NO_SERVER: "1"
       E2E_BASE_URL: https://labourmarket.ai
       PROD_QA_WALK: "1"
+      PROD_QA_EXPERIENCE_STAGE: ${{ github.event_name == 'workflow_dispatch' && (inputs.spec == 'experience-dispute-prepare' || inputs.spec == 'experience-dispute-verify') && inputs.spec || '' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -484,6 +488,15 @@ jobs:
             echo "::error::vars.PROD_QA_ANON_KEY is not set (the publishable anon key)"; exit 1
           fi
           cd apps/web
+          mint_existing() {
+            PROD_QA_IDENTITY="$1" PROD_QA_STORAGE_SLOT="$2" pnpm exec tsx scripts/prod-qa-mint-session.ts
+          }
+          if [ -n "$PROD_QA_EXPERIENCE_STAGE" ]; then
+            export PROD_QA_MINT_EXISTING_ONLY=1
+            mint_existing "qa.owner+multiw@labourmarket.ai" owner >/dev/null 2>&1
+            mint_existing "qa.worker+multiw@labourmarket.ai" worker >/dev/null 2>&1
+            exit 0
+          fi
           mint() {
             PROD_QA_PROVISION_IDENTITY="$1" pnpm exec tsx scripts/prod-qa-provision.ts --i-understand-production
             PROD_QA_IDENTITY="$1" PROD_QA_STORAGE_SLOT="$2" pnpm exec tsx scripts/prod-qa-mint-session.ts
@@ -495,9 +508,6 @@ jobs:
           mint "qa.agency+multiw@labourmarket.ai"  agency
           # The fresh pair: minted ONLY for the fresh-activation walk and WITHOUT the provision step —
           # the mint refuses an account the owner has not created, so a walk never creates one.
-          mint_existing() {
-            PROD_QA_IDENTITY="$1" PROD_QA_STORAGE_SLOT="$2" pnpm exec tsx scripts/prod-qa-mint-session.ts
-          }
           if [ "${{ needs.debounce.outputs.spec }}" = "fresh-activation" ]; then
             mint_existing "qa.freshworker+act2@labourmarket.ai"  freshworker
             mint_existing "qa.freshcompany+act2@labourmarket.ai" freshcompany
@@ -603,6 +613,7 @@ jobs:
             # Stripe TEST pilot walk: dispatch only after the owner arms test mode (lm-stripe-arm.sh test); never in the rotation.
             billing-test-mode) SPEC=tests/e2e/prod-billing-test-mode.spec.ts ;;
             profile-cv-history) SPEC=tests/e2e/prod-profile-cv-history.spec.ts ;;
+            experience-dispute-prepare|experience-dispute-verify) SPEC=tests/e2e/prod-experience-dispute.spec.ts ;;
             search-support-privacy) SPEC=tests/e2e/prod-search-support-privacy.spec.ts ;;
             public-org-locales) SPEC=tests/e2e/prod-public-org-locales.spec.ts ;;
             admin-console) SPEC=tests/e2e/prod-admin-console.spec.ts ;;
@@ -661,9 +672,26 @@ jobs:
           #     exit code is now captured, written to the summary and returned
           #     explicitly, whatever shell flags the runner adds.
           code=0
+          if [ -n "$PROD_QA_EXPERIENCE_STAGE" ]; then
+            # Page content can appear in Playwright failure diagnostics. Publish only counters and status.
+            # No raw report or list log is ever written into the artifact paths, including on cancellation.
+            pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=json 2>/dev/null | \
+              node -e '
+                const fs = require("node:fs");
+                const { stats } = JSON.parse(fs.readFileSync(0, "utf8"));
+                const counts = Object.fromEntries(["expected","unexpected","flaky","skipped"].map(k => [k,stats[k]]));
+                if (!Object.values(counts).every(v => Number.isSafeInteger(v) && v >= 0)) process.exit(1);
+                const passed = counts.expected === 1 && counts.unexpected + counts.flaky + counts.skipped === 0;
+                const suites = [{specs:[{tests:[{results:[{status:passed ? "passed" : "failed"}]}]}]}];
+                process.stdout.write(JSON.stringify({stats:counts,suites}));
+                if (!passed) process.exitCode = 1;
+              ' > "$GITHUB_WORKSPACE/prod-qa-result.json" 2>/dev/null || code=$?
+            echo "participant walk exit=$code" > "$GITHUB_WORKSPACE/prod-qa-walk.log"
+          else
           PLAYWRIGHT_JSON_OUTPUT_FILE="$GITHUB_WORKSPACE/prod-qa-result.json" \
             pnpm exec playwright test "$SPEC" --project=chromium --trace=off --reporter=list,json \
             > "$GITHUB_WORKSPACE/prod-qa-walk.log" 2>&1 || code=$?
+          fi
           # Counts only (no titles, no messages) into the run summary.
           node -e 'const s=JSON.parse(require("fs").readFileSync(process.argv[1],"utf8")).stats;console.log(`passed=${s.expected} failed=${s.unexpected} flaky=${s.flaky} skipped=${s.skipped}`)' \
             "$GITHUB_WORKSPACE/prod-qa-result.json" >> "$GITHUB_STEP_SUMMARY" 2>/dev/null \
@@ -787,7 +815,7 @@ jobs:
       # The minted sessions' OWN tokens and the product's close RPC only (no service role,
       # no delete); it needs the session files, so it stands before the revoke.
       - name: Close every open synthetic need (always)
-        if: always() && steps.mint.outcome == 'success'
+        if: always() && steps.mint.outcome == 'success' && env.PROD_QA_EXPERIENCE_STAGE == ''
         timeout-minutes: 3
         shell: bash
         run: |

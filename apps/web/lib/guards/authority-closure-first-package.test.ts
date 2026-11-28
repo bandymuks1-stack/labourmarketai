@@ -267,6 +267,8 @@ describe("the four migrations ship paired, gated and stated", () => {
       "20261127180000_timesheet_schedule_privacy_v1.sql",
       // Exact owner-approved booking protection, applied before the overlap marker.
       "20261128080150_booking_hire_interval_support_v1.sql",
+      // #3301 reply moderation is independent of the 2026-10-06 authority closure.
+      "20261128142955_experience_reply_moderation_atomic_v1.sql",
       // 2026-11-22 owner order: a privacy request is never shared with an agency (one SECURITY DEFINER body;
       // RED draft, needs-human-gate, NOT applied).
       "20261122180000_",
