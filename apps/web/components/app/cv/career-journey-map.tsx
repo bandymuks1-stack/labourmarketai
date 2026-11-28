@@ -156,7 +156,37 @@ export function CareerJourneyMap({
   const PH_TOP = 40 + journey.horizon.length * 44 + 30;
   const PH_SPAN = Math.max(journey.stations.length * 74, 240);
   const py = (day: number) => PH_TOP + (1 - day / span) * PH_SPAN;
-  const PH = PH_TOP + PH_SPAN + 40;
+  const phoneStations = journey.stations
+    .map((station) => ({ station, y: py((station.startDay + station.endDay) / 2) }))
+    .sort((a, b) => a.y - b.y);
+  const phoneYearLabelYs = years.map((year) => py(year.day) + 4).reverse();
+  const phoneMetaOffset = 14;
+  const phoneYearClearance = 22;
+  const phoneLabelY = new Map<string, number>();
+  let lastLabelY = -Infinity;
+  for (const { station, y } of phoneStations) {
+    // Leave room for the title and date between nearby stops. Only the
+    // labels move; each stop stays at its actual position on the time axis.
+    lastLabelY = Math.max(y, lastLabelY + 36);
+    // Estimate the title's reach before the SVG is laid out. Capitals and
+    // wide letters need extra room at the same font size.
+    const titleWidth = Array.from(clip(station.title, 26)).reduce((width, character) => {
+      const uppercase = character.toLowerCase() !== character;
+      return width + 8 + (uppercase ? 3 : 0) + (/[MWmw]/.test(character) ? 4 : 0);
+    }, 0);
+    const labelWidth = Math.max(titleWidth, (labels.stationMeta[station.key] ?? "").length * 7.2) + 12;
+    if (lastLabelY > y && labelX + labelWidth > PW - 36) {
+      // Keep moved text clear of the year scale when it can reach that column.
+      for (const yearY of phoneYearLabelYs) {
+        const distance = yearY - lastLabelY;
+        if (distance > -phoneYearClearance && distance < phoneMetaOffset + phoneYearClearance) {
+          lastLabelY = yearY + phoneYearClearance;
+        }
+      }
+    }
+    phoneLabelY.set(station.key, lastLabelY);
+  }
+  const PH = Math.max(PH_TOP + PH_SPAN, lastLabelY) + 40;
 
   return (
     <section
@@ -330,16 +360,20 @@ export function CareerJourneyMap({
           })}
           {journey.stations.map((s) => {
             const y = py((s.startDay + s.endDay) / 2);
+            const labelY = phoneLabelY.get(s.key) ?? y;
             const cols = s.lines.map((slug) => journey.lines.findIndex((l) => l.slug === slug)).filter((i) => i >= 0);
             const x0 = cols.length > 0 ? colX(Math.min(...cols)) - 11 : colX(0) - 11;
             const x1 = cols.length > 0 ? colX(Math.max(...cols)) + 11 : colX(0) + 11;
             return (
               <g key={s.key}>
+                {labelY > y ? (
+                  <line x1={x1} x2={labelX - 4} y1={y} y2={labelY - 5} className="stroke-ink-500" strokeWidth={1} strokeDasharray="2 3" />
+                ) : null}
                 <rect x={x0} y={y - 9} width={x1 - x0} height={18} rx={9} className={cn("fill-ink-900", s.current ? "stroke-brand-blue" : "stroke-text-primary")} strokeWidth={2.5} />
-                <text x={labelX} y={y - 1} className="fill-text-primary text-support font-semibold">
+                <text x={labelX} y={labelY - 1} className="fill-text-primary text-support font-semibold">
                   {clip(s.title, 26)}
                 </text>
-                <text x={labelX} y={y + 14} className="fill-text-muted font-mono text-meta">
+                <text x={labelX} y={labelY + phoneMetaOffset} className="fill-text-muted font-mono text-meta">
                   {labels.stationMeta[s.key] ?? ""}
                 </text>
               </g>
