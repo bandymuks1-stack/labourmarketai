@@ -2865,3 +2865,12 @@ versions never match file prefixes by construction, so a push would re-run every
 - Existing rows remain unchanged. The partial indexes exclude rows whose transaction timestamp precedes cutover; this is not whole-table historical deduplication.
 - Production verification: `cv-import-duplicates` run `46067486489` on build `9e2f2d0d`, real Chrome, PASS. Initial/repeated import, three two-tab races per record type and double-click each leave one education/certificate row after reload. Synthetic rows were removed and both UI/API cleanup checks passed. This verifies new imported education/certificate records; historical duplicates were not changed.
 - Rollback: `supabase/rollbacks/20261106090000_cv_rows_one_statement_once.down.sql` (reviewed and previously tested; restores the former RPC and drops only the new indexes).
+
+## 2026-11-28 — accepted hire reaches the work relationship (#3722)
+
+- APPLIED TO PROD: `20261123113700_booking_hire_opens_work_relationship_v1.sql`, SHA256 `1F1914C76C8B39698BCED8052C85EE6AE9FE4C835B4E06F4001F71BF1476B3C0`, from main `384f999fbb8310e46ad89b972d61e95885794c29`.
+- Owner approved this exact SQL, paired rollback, manual merge/application and synthetic verification. Both required gates and full isolated employer/agency/older-app checks passed on `e74f45e34eada7bd94e53563b0165cf4769c2c68`. Manual merge completed; deployment `46073832911` passed.
+- Supabase MCP applied name `booking_hire_opens_work_relationship_v1`, actual ledger version `20261128053149`. The earlier expired tool confirmation applied nothing; the ledger and absence of both functions were checked before the successful retry. Do not reapply by filename timestamp.
+- Read-back: both approved function bodies and enabled triggers match; existing table access and agency lifecycle function definitions are unchanged; no new security advisory. No historical hires were backfilled.
+- Existing production orders-bookings walk `46112666336` is pending. Its synthetic hire → journal → company confirmation → Living CV chain must pass before claiming the user journey verified.
+- Rollback: `supabase/rollbacks/20261123113700_booking_hire_opens_work_relationship_v1.down.sql`, SHA256 `3D1BC41F2CC2D2E7BF70FC0925A01088C104178508B5F0A024003280A505B4E6`. Locks before checking and refuses after this mechanism has recorded history; then use a history-preserving forward fix.

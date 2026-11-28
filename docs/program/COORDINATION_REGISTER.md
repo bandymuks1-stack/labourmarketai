@@ -122,7 +122,7 @@ independent work or launch of other features (owner order 2026-10-28).
 | Lane | Holder | Since | What |
 |---|---|---|---|
 | coordination (this file) | **Codex `01a211d7-be82-7663-9a36-3ddd8de1707e` — current coordinator** | 2026-11-25 | owner-directed takeover; existing PR integration, deployment follow-up and production verification; earlier coordinator records below are historical (§2c) |
-| migration (prod DB) | — free — | 2026-11-27 | #3111 APPLIED, ledger `20261127202311`, source on main `9e2f2d0d2`; read-back passed and receipt recorded below/in APPLIED_LEDGER. Synthetic CV walk `46067486489` passed on `9e2f2d0d`; no further apply needed. #3722 owner approved exact SQL, but apply waits for required checks, manual merge and a new lane claim. |
+| migration (prod DB) | **Codex `01a211d7-be82-7663-9a36-3ddd8de1707e`** | 2026-11-27 | #3722 owner-approved SQL; all checks passed, manually merged as `384f999fb`. Exact merged hashes verified. APPLIED as ledger `20261128053149`; read-back passed. Lane held only until the receipt push; never reapply. #3111 already applied and verified; never reapply. |
 | live sends (e-mail to real people) | reprocess: manual only, under `flock`; **do not run `resolve_reservations` until #2858 is applied** | 2026-10-28 09:00Z | partner intake mails live (each through the address lock since `ae60b244`). Ledger `invitation` since 10-26: 51 mails / 51 recipients, 0 duplicates; 15 rows `pending/not_sent` |
 | deploy | — serial via `deploy-vps.yml` — | | production = `0e5f4b3e0` (#2925), deployed 2026-11-02 06:26Z, healthy. Walks: sequential queue, ≥6 min after each deploy (brake e) |
 
@@ -154,20 +154,28 @@ independent work or launch of other features (owner order 2026-10-28).
 
 ### 2c. Current coordination — 2026-11-25
 
-**Continuation, owner instruction 2026-11-27:** Codex is the only active executor;
-Claude Code is inactive. Shared continuity rules are on main via #3839.
-#3111 is merged, applied and verified in production by the real-Chrome synthetic
-CV walk `46067486489` on `9e2f2d0d`; never reapply it. #2642 passed both required
-checks and merged as `056390460323ebd5eb56d5cd960872cf4abe1490`; deployment and
-the saved-jobs production flow are pending. The CV walk released the walk lane.
-#3722 resumes the existing hire-to-journal relationship draft. Owner approved
-SQL SHA256 `1F1914C76C8B39698BCED8052C85EE6AE9FE4C835B4E06F4001F71BF1476B3C0`
-and rollback SHA256 `3D1BC41F2CC2D2E7BF70FC0925A01088C104178508B5F0A024003280A505B4E6`,
-including the RED marker, ready state, manual merge/apply and synthetic proof
-after mandatory checks. Local behavior and independent review passed; full
-Supabase/browser checks and production application remain outstanding. Continue
-these PRs; their current bodies carry exact heads and subsequent run receipts.
-No new audit or competing implementation is needed.
+**Continuation, 2026-11-28:** Codex remains the only active executor; Claude Code
+is inactive. Shared continuity rules are on main via #3839. #3111 is applied and
+production-verified by Chrome walk `46067486489`; never reapply.
+#2642 is deployed (`46069365600`). Its separate walk `46071894952` failed at J-1
+because the test excluded the current `public-jobs-count` selector. Chrome
+confirmed the visible production count and cards; J-6 was never reached. The
+existing test selector is corrected in #2795; saved-job persistence is still
+NOT_VERIFIED until the focused walk passes.
+#3722 is manually merged as `384f999fb`, deployed (`46073832911`) and applied by
+Supabase MCP as `booking_hire_opens_work_relationship_v1`, ledger `20261128053149`.
+Exact approved hashes match main; both required gates, full isolated journeys,
+independent review and immediate read-back passed. Production orders-bookings
+walk `46112666336` is pending; never reapply this migration.
+#2795 continues branch `fix/cc/booking-clash-marker-red` in the existing
+`codex-history-reader-20261126` worktree. Owner approved forward SHA256
+`590634FAF18CDB6D188414BD0223B78B9C76AF3C657EFE084CF00B0AF85EFF8F` and rollback
+`E2F865C3C3A947FB8481CC91B22C68DCA0A2AFAAF1FBB015FE2577D10DCBD953`, annotation/test,
+ready state, manual merge/apply and synthetic verification after mandatory gates.
+Main #3722 is merged into this branch; both production proof additions are kept.
+Next: finish narrow combined review/checks, push the complete slice, then required
+CI, ready/manual merge, verify merged hashes and apply once via MCP. No auto-merge;
+keep needs-human-gate. Current PR bodies record exact heads and later outcomes.
 
 The 2026-11-25 table below is historical evidence, not the current deployment
 or unfinished-work status. Use the continuation above and the current PR bodies.
