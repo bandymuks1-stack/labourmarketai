@@ -30,7 +30,54 @@ function migMissing(code?: string): boolean {
   return code === RELATION_NOT_FOUND || code === UNDEFINED_COLUMN;
 }
 
-export async function getMyCommercial(): Promise<CommercialData> {
+type ProposalRow = {
+  id: string;
+  number: string | null;
+  title: string;
+  amount_cents: number | string;
+  status: string;
+  validity_until: string | null;
+};
+const PROPOSAL_FIELDS = "id, number, title, amount_cents, status, validity_until";
+
+function mapProposal(row: ProposalRow): Proposal {
+  return {
+    id: row.id,
+    number: row.number,
+    title: row.title,
+    amountCents: Number(row.amount_cents) || 0,
+    status: row.status as Proposal["status"],
+    validityUntil: row.validity_until,
+  };
+}
+
+export async function supportsServiceRequestProposals(supabase: SupabaseClient): Promise<boolean> {
+  // The link column and the conversion RPC are installed in the same migration.
+  // Check availability through the caller's own PostgREST client without reading rows.
+  const { error } = await asAny(supabase)
+    .from("proposals")
+    .select("service_offering_request_id")
+    .limit(0);
+  return !error;
+}
+
+export async function findOpenServiceRequestProposal(
+  supabase: SupabaseClient,
+  providerId: string,
+  requestId: string,
+): Promise<{ proposal: Proposal | null } | null> {
+  const { data, error } = await asAny(supabase)
+    .from("proposals")
+    .select(PROPOSAL_FIELDS)
+    .eq("owner_id", providerId)
+    .eq("service_offering_request_id", requestId)
+    .in("status", ["draft", "sent", "accepted"])
+    .maybeSingle();
+  if (error) return null;
+  return { proposal: data ? mapProposal(data as ProposalRow) : null };
+}
+
+export async function getMyCommercial(focusedProposal?: Proposal): Promise<CommercialData> {
   const supabase = await createClient();
   const {
     data: { user },
@@ -39,7 +86,7 @@ export async function getMyCommercial(): Promise<CommercialData> {
 
   const pRes = await asAny(supabase)
     .from("proposals")
-    .select("id, number, title, amount_cents, status, validity_until")
+    .select(PROPOSAL_FIELDS)
     .order("created_at", { ascending: false })
     .limit(200);
   if (pRes.error) {
@@ -47,17 +94,12 @@ export async function getMyCommercial(): Promise<CommercialData> {
     return { applied: true, proposals: [], contracts: [] };
   }
 
-  type PRow = { id: string; number: string | null; title: string; amount_cents: number | string; status: string; validity_until: string | null };
-  const proposals: Proposal[] = ((pRes.data ?? []) as PRow[])
+  const proposals = ((pRes.data ?? []) as ProposalRow[])
     .filter((r) => isProposalStatus(r.status))
-    .map((r) => ({
-      id: r.id,
-      number: r.number,
-      title: r.title,
-      amountCents: Number(r.amount_cents) || 0,
-      status: r.status as Proposal["status"],
-      validityUntil: r.validity_until,
-    }));
+    .map(mapProposal);
+  if (focusedProposal && !proposals.some((proposal) => proposal.id === focusedProposal.id)) {
+    proposals.unshift(focusedProposal);
+  }
 
   const cRes = await asAny(supabase)
     .from("contracts")

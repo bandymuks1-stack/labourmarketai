@@ -30,6 +30,9 @@ import {
 } from "@/lib/marketplace/service-requests-shared";
 import { listOwnServiceOfferings } from "@/lib/services/service-offerings";
 import { resolveEmployerCompanyContext } from "@/lib/company/employer-company-context";
+import { getWorkspaceContext } from "@/lib/company/active-organization";
+import { PERSONAL_WORKSPACE_ID } from "@/lib/company/organization-switch";
+import { supportsServiceRequestProposals } from "@/lib/commercial/commercial";
 import {
   MarketplaceLoopSection,
   type MarketplaceLabels,
@@ -92,6 +95,14 @@ export default async function ServiceRequestsPage({
     listOwnServiceOfferings(),
     resolveEmployerCompanyContext(),
   ]);
+  let proposalCta: string | null = null;
+  if (inc.kind === "ok" && inc.rows.some((request) => request.status === "accepted")) {
+    const workspace = await getWorkspaceContext();
+    if (workspace.activeWorkspaceId === PERSONAL_WORKSPACE_ID && await supportsServiceRequestProposals(supabase)) {
+      const commercial = await getTranslations("commercial");
+      proposalCta = commercial("proposalsTitle");
+    }
+  }
   const isCompany = employer.kind === "ok";
   const needsMigration =
     disc.kind === "needs-migration" ||
@@ -148,6 +159,7 @@ export default async function ServiceRequestsPage({
     decline: t("decline"),
     withdraw: t("withdraw"),
     messageCta: t("messageCta"),
+    proposalCta,
     errorGeneric: t("errorGeneric"),
     duplicate: t("duplicate"),
     requesterMessage: t("requesterMessage"),

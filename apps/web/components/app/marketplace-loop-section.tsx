@@ -4,6 +4,8 @@ import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Send, Check, X, Undo2, MessageSquare } from "lucide-react";
+import { Link } from "@/lib/i18n/navigation";
+import { buttonLinkClassName } from "@/components/ui/Button";
 import {
   requestServiceOffering,
   respondToRequest,
@@ -90,6 +92,7 @@ export type MarketplaceLabels = {
   /** Accepted rows are never a dead end — the next step is the conversation
    *  (audit PR4: "the loop dies at acceptance"). */
   messageCta: string;
+  proposalCta: string | null;
   errorGeneric: string;
   duplicate: string;
   requesterMessage: string;
@@ -692,7 +695,22 @@ export function MarketplaceLoopSection({
                   </div>
                 )}
                 {r.status === "accepted" && (
-                  <MessageCta requestId={r.id} testId="marketplace-incoming-message-cta" />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <MessageCta requestId={r.id} testId="marketplace-incoming-message-cta" />
+                    {labels.proposalCta ? (
+                      <Link
+                        href={{
+                          pathname: "/dashboard/commercial",
+                          query: { serviceRequest: r.id },
+                          hash: "proposals-panel",
+                        }}
+                        className={buttonLinkClassName("secondary", "sm")}
+                        data-testid="marketplace-incoming-proposal-cta"
+                      >
+                        {labels.proposalCta}
+                      </Link>
+                    ) : null}
+                  </div>
                 )}
               </li>
               );
