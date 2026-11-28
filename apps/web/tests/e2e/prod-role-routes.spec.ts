@@ -92,3 +92,148 @@ for (const actor of CAST) {
     expect(failures, failures.join("\n")).toEqual([]);
   });
 }
+
+const SCOUTING = "/lt/dashboard/company/scouting";
+const PRODUCTION_ORIGIN = "https://labourmarket.ai";
+const SCOUTING_TIMEOUT = 30_000;
+
+/** Keep authenticated Playwright call logs, DOM and actual URLs out of the public report. */
+async function scoutingCheck<T>(message: string, run: () => Promise<T>): Promise<T> {
+  try {
+    return await run();
+  } catch {
+    throw new Error(message);
+  }
+}
+
+async function inScoutingWorkspace(page: Page, workspace: string | RegExp, walk: () => Promise<void>) {
+  const chip = page.getByTestId("workspace-chip").getByRole("button");
+  const menu = page.getByTestId("workspace-chip-menu");
+  const options = menu.getByRole("button");
+  const openSwitcher = async () => {
+    await page.goto("/lt/dashboard", { waitUntil: "domcontentloaded", timeout: SCOUTING_TIMEOUT });
+    // A first click can precede hydration. Retry just the read-only menu open.
+    await expect(async () => {
+      if (!(await menu.isVisible())) await chip.click({ timeout: 3_000 });
+      await expect(menu).toBeVisible({ timeout: 3_000 });
+    }).toPass({ timeout: SCOUTING_TIMEOUT });
+  };
+  const titleOf = (title: string | RegExp) => options.and(menu.getByTitle(title, { exact: true }));
+
+  await scoutingCheck("QA fixture blocked: the workspace switcher did not open", openSwitcher);
+  const target = titleOf(workspace);
+  await scoutingCheck("QA fixture blocked: expected exactly one enrolled scouting workspace", async () => {
+    expect(await target.count()).toBe(1);
+  });
+  const alreadySelected = await scoutingCheck("QA fixture blocked: the enrolled workspace was unreadable", () =>
+    target.getAttribute("aria-current", { timeout: SCOUTING_TIMEOUT }),
+  );
+  if (alreadySelected === "true") {
+    await walk();
+    return;
+  }
+  const previous = await scoutingCheck("QA fixture blocked: the current workspace was unreadable", () =>
+    options.and(menu.locator('button[aria-current="true"]')).getAttribute("title", { timeout: SCOUTING_TIMEOUT }),
+  );
+  // A UI switch can persist on the QA identity. Switch only when the previous
+  // selection is a QA workspace or personal space and can safely be restored.
+  if (!previous || !/^(?:Asmeninė erdvė$|QA-SYNTHETIC )/.test(previous)) {
+    throw new Error("QA fixture blocked: the previous workspace is outside the restorable QA scope");
+  }
+
+  try {
+    await scoutingCheck("QA fixture blocked: the enrolled scouting workspace could not be selected", async () => {
+      await target.click({ timeout: SCOUTING_TIMEOUT });
+      await expect(chip).toHaveAttribute("title", workspace, { timeout: SCOUTING_TIMEOUT });
+      await expect(menu).toBeHidden({ timeout: SCOUTING_TIMEOUT });
+    });
+    await walk();
+  } finally {
+    await scoutingCheck("QA workspace restoration failed", async () => {
+      await openSwitcher();
+      const restore = titleOf(previous);
+      if ((await restore.getAttribute("aria-current", { timeout: SCOUTING_TIMEOUT })) !== "true") {
+        await restore.click({ timeout: SCOUTING_TIMEOUT });
+        await expect(chip).toHaveAttribute("title", previous, { timeout: SCOUTING_TIMEOUT });
+        await expect(menu).toBeHidden({ timeout: SCOUTING_TIMEOUT });
+      }
+    });
+  }
+}
+
+const scoutingTest = test.extend({ trace: "off", video: "off", screenshot: "off" });
+
+test.describe("scouting first action", () => {
+  scoutingTest("empty scouting opens the hiring form and the agency shared-needs view", async ({ browser, baseURL }) => {
+    test.setTimeout(360_000);
+    if (baseURL !== PRODUCTION_ORIGIN) {
+      throw new Error("The scouting production walk requires the canonical production origin");
+    }
+    const fixtures = [
+      { slot: "owner", workspace: /^QA-SYNTHETIC Beta(?: \(testinis subjektas\))?$/, door: "scouting-no-demands-cta" },
+      { slot: "agency", workspace: "QA-SYNTHETIC Agentūra", door: "scouting-no-demands-partners" },
+    ] as const;
+
+    for (const fixture of fixtures) {
+      await test.step(`${fixture.slot} opens the next working surface`, async () => {
+        if (!existsSync(state(fixture.slot))) {
+          throw new Error("QA fixture blocked: the existing QA session is missing");
+        }
+        const ctx = await scoutingCheck("QA fixture blocked: the existing QA session could not be opened", () =>
+          browser.newContext({ storageState: state(fixture.slot), locale: "lt-LT" }),
+        );
+        try {
+          const page = await scoutingCheck("The scouting browser page could not be opened", () => ctx.newPage());
+          await inScoutingWorkspace(page, fixture.workspace, async () => {
+            await scoutingCheck("The scouting page did not open in the selected QA workspace", async () => {
+              const res = await page.goto(SCOUTING, { waitUntil: "domcontentloaded", timeout: SCOUTING_TIMEOUT });
+              const url = new URL(page.url());
+              expect(res?.ok() && url.origin === PRODUCTION_ORIGIN && url.pathname === SCOUTING).toBe(true);
+            });
+            const main = page.getByRole("main");
+            const needRows = await scoutingCheck("The scouting need list could not be read", () =>
+              main.locator('nav a[href*="/dashboard/company/scouting?request="]').count(),
+            );
+            if (needRows > 0) {
+              throw new Error("QA fixture blocked: the scouting workspace now has needs");
+            }
+            const door = main.getByRole("link").and(main.getByTestId(fixture.door));
+            await scoutingCheck("The expected empty scouting action was missing or could not be clicked", async () => {
+              if (fixture.slot === "owner") {
+                await expect(door).toHaveAttribute("data-need-door", "company_scouting_empty", { timeout: SCOUTING_TIMEOUT });
+              }
+              await door.click({ timeout: SCOUTING_TIMEOUT });
+            });
+
+            if (fixture.slot === "owner") {
+              await scoutingCheck("The scouting action did not open the editable hiring form", async () => {
+                await page.waitForURL(
+                  (url) => url.origin === PRODUCTION_ORIGIN && url.pathname === "/lt/dashboard/company/needs" && url.hash === "#demand-intake",
+                  { waitUntil: "domcontentloaded", timeout: SCOUTING_TIMEOUT },
+                );
+                const intake = main.getByTestId("demand-intake-section");
+                const heading = intake.getByRole("heading", { name: "Ieškoti darbuotojo ar komandos", exact: true });
+                await expect(heading).toBeVisible({ timeout: SCOUTING_TIMEOUT });
+                const description = intake.getByTestId("demand-form").getByTestId("demand-description");
+                await expect(description).toBeVisible({ timeout: SCOUTING_TIMEOUT });
+                await expect(description).toBeEditable({ timeout: SCOUTING_TIMEOUT });
+              });
+            } else {
+              await scoutingCheck("The scouting action did not open the agency's shared-needs view", async () => {
+                await page.waitForURL(
+                  (url) => url.origin === PRODUCTION_ORIGIN && url.pathname === "/lt/dashboard/company/partners",
+                  { waitUntil: "domcontentloaded", timeout: SCOUTING_TIMEOUT },
+                );
+                const shared = main.getByTestId("company-partners").getByTestId("agency-bridge-shared");
+                const heading = shared.getByRole("heading", { name: "Jums pasidalinti poreikiai", exact: true });
+                await expect(heading).toBeVisible({ timeout: SCOUTING_TIMEOUT });
+              });
+            }
+          });
+        } finally {
+          await scoutingCheck("The scouting browser context could not be closed", () => ctx.close());
+        }
+      });
+    }
+  });
+});

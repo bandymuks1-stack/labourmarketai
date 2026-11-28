@@ -127,8 +127,22 @@ describe("the canonical demand intake lives on the company page (W3 7/8/25)", ()
 describe("scouting empty states are actionable (F-D2)", () => {
   it("no-demands state has a create-need CTA", () => {
     const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
-    expect(page).toMatch(/scouting-no-demands-cta/);
-    expect(page).toMatch(/noDemandsCta/);
+    // The CTA is the one need door (duplication audit ORG-5): same test id,
+    // the canonical "describe a need" label, a tracked click.
+    expect(page).toMatch(/<NeedDoorLink[^>]*surface="company_scouting_empty"[^>]*testId="scouting-no-demands-cta"/);
+  });
+
+  it("the empty state opens hiring for dual staffing companies and shared client needs for agency-only workspaces", () => {
+    const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    expect(page).toMatch(/emptyDemandAudience\?\.audience === "offer" && !emptyDemandAudience\.canChoose/);
+    expect(page).toMatch(/\{tPartners \? \([\s\S]*?href=\{`\/\$\{locale\}\/dashboard\/company\/partners`\}[\s\S]*?data-testid="scouting-no-demands-partners"/);
+    expect(page).toMatch(/<NeedDoorLink[^>]*forceNeedAudience=\{emptyDemandAudience\?\.audience === "offer"\}/);
+  });
+
+  it("unknown company or capability reads offer the neutral Needs link", () => {
+    const page = read("app/[locale]/dashboard/company/scouting/page.tsx");
+    expect(page).toMatch(/emptyDemandCompany\?\.kind === "ok" && emptyDemandCompany\.row && emptyDemandCapabilities\?\.kind === "ok"/);
+    expect(page).toMatch(/\) : tOrganization \? \(\s*<Link[^>]*href=\{`\/\$\{locale\}\/dashboard\/company\/needs`\}[^>]*data-testid="scouting-no-demands-needs"/);
   });
 
   it("copy no longer tells the company to structure skills itself", () => {

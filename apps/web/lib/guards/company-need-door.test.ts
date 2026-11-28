@@ -2,7 +2,8 @@ import { describe, expect, it } from "vitest";
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 
-import { NEED_DOOR_HREF, NEED_DOOR_SURFACES, isFirstNeed } from "@/lib/company/need-door";
+import { NEED_DOOR_HREF, NEED_DOOR_SURFACES, isFirstNeed, needDoorHref } from "@/lib/company/need-door";
+import { resolveNeedsAudience } from "@/lib/company/agency-capability";
 import { activeLocales } from "@/lib/i18n/config";
 
 /**
@@ -40,6 +41,7 @@ const SETTINGS_CARD = "components/app/company-next-actions.tsx";
 const SETUP = "components/app/company-setup-form.tsx";
 const NEEDS = "app/[locale]/dashboard/company/needs/page.tsx";
 const CANDIDATES = "components/app/workspace/candidates-result.tsx";
+const SCOUTING = "app/[locale]/dashboard/company/scouting/page.tsx";
 
 /** Which file carries each door. Every surface the registry names is here. */
 const DOOR_FILES: Record<(typeof NEED_DOOR_SURFACES)[number], string> = {
@@ -51,6 +53,7 @@ const DOOR_FILES: Record<(typeof NEED_DOOR_SURFACES)[number], string> = {
   company_needs_repeat: READBACK,
   company_settings: SETTINGS_CARD,
   company_setup: SETUP,
+  company_scouting_empty: SCOUTING,
 };
 
 function walk(dir: string, out: string[] = []): string[] {
@@ -69,13 +72,24 @@ const SOURCES = [...walk(join(WEB, "app")), ...walk(join(WEB, "components"))].ma
 describe("the need door: one address, one event, one label", () => {
   it("points at the canonical intake, which the Needs door actually holds", () => {
     expect(NEED_DOOR_HREF).toBe("/dashboard/company/needs#demand-intake");
+    expect(needDoorHref(false)).toBe(NEED_DOOR_HREF);
     expect(read(NEEDS)).toMatch(/id="demand-intake"/);
+  });
+
+  it("can open the hiring form at the same intake for a staffing company that also employs workers", () => {
+    const organization = { companyType: "staffing_agency", capabilities: ["employer"] };
+    const defaultIntake = resolveNeedsAudience(organization);
+    expect(defaultIntake).toEqual({ audience: "offer", canChoose: true });
+    const url = new URL(needDoorHref(defaultIntake.audience === "offer"), "https://example.test");
+    expect(`${url.pathname}${url.hash}`).toBe(NEED_DOOR_HREF);
+    expect(resolveNeedsAudience({ ...organization, requested: url.searchParams.get("audience") }).audience)
+      .toBe("need");
   });
 
   it("the shared door fires company_demand_action_clicked with its surface and renders the one label", () => {
     const src = strip(read(DOOR));
     expect(src).toMatch(/^"use client";/);
-    expect(src).toMatch(/href=\{NEED_DOOR_HREF as "\/dashboard"\}/);
+    expect(src).toMatch(/href=\{needDoorHref\(forceNeedAudience\)\}/);
     expect(src).toMatch(/trackFunnel\(FUNNEL_EVENTS\.companyDemandActionClicked, \{\s*surface,/);
     expect(src).toMatch(/useTranslations\("roleDashboards\.company\.needDoor"\)/);
     expect(src).toMatch(/\{t\("label"\)\}/);
